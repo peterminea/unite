@@ -8,7 +8,10 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
   <head>
-    <title>$Title$</title>
+    <title>UNITE - Underserved Needs in Times of Emergency</title>
+
+
+
   </head>
   <body>
   $END$
