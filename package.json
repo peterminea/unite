@@ -1,0 +1,20 @@
+{
+  "name": "UNITE",
+  "version": "0.0.1",
+  "description": "Government Procurement Platform",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongoose": "^5.9.9"
+  },
+  "engines": {
+    "node": "12.x"
+  },
+  "repository": {
+    "url": "https://glitch.com/edit/#!/unite-dev"
+  },
+  "license": "MIT"
+}
