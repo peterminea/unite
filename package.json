@@ -1,5 +1,5 @@
 {
-  "name": "UNITE",
+  "name": "unite",
   "version": "0.0.1",
   "description": "Government Procurement Platform",
   "main": "app.js",
@@ -8,7 +8,13 @@
   },
   "dependencies": {
     "express": "^4.17.1",
-    "mongoose": "^5.9.9"
+    "mongoose": "^5.9.9",
+    "ejs": "^3.1.2",
+    "express-session": "^1.17.1",
+    "bcryptjs": "^2.4.3",
+    "csurf": "^1.11.0",
+    "connect-mongodb-session": "^2.3.1",
+    "connect-flash": "^0.1.1"
   },
   "engines": {
     "node": "12.x"

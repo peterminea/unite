@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Supplier Dashboard - UNITE</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A cool thing made with Glitch">
+    <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+</head>
+  
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="/supplier">Supplier - UNITE</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/supplier">Dashboard <span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/supplier/requests">Bid Requests</a>
+          </li>
+        </ul>
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="/supplier/balance">Balance: €0&nbsp;&nbsp;</a>
+          </li>
+          <li class="nav-item active">
+            <a class="btn btn-primary" href="/supplier/profile">Profile</a>
+          </li>
+          <li class="nav-item" style="margin-left: 20px;">
+            <a class="btn btn-danger" href="?exit=true">Exit</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    
+    <div class="container">
+      <br><br>
+      <div class="card">
+        <h5 class="card-header">Welcome!</h5>
+        <div class="card-body">
+          <h5 class="card-title">Hello, <%= profile.companyName %></h5>
+          <p class="card-text">This is your profile page. To ensure you continue to appear in buyers’ search results, please keep your capabilities up-to-date.</p>
+        </div>
+      </div>
+      
+      <br><br>
+  
+      <div class="smooth-shadow profile-form">
+        <form>
+          <div class="form-group">
+            <label>Email address</label>
+            <input type="email" class="form-control" value="<%= profile.emailAddress %>">
+            <small class="text-muted form-text">Only companies' domains are allowed.</small>
+          </div>
+          <div class="form-group">
+            <label>Director's name</label>
+            <input type="text" class="form-control" value="<%= profile.directorsName %>">
+          </div>
+          <div class="form-group">
+            <label>Contact Name</label>
+            <input type="text" class="form-control" value="<%= profile.contactName %>">
+          </div>
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" class="form-control" value="<%= profile.title %>">
+          </div>
+          <div class="form-group">
+            <label>Company Registration No</label>
+            <input type="text" class="form-control" value="<%= profile.companyRegistrationNo %>">
+          </div>
+          <div class="form-group">
+            <label>Registration Company</label>
+            <input type="text" class="form-control" value="<%= profile.registrationCompany %>" required>
+          </div>
+          <div class="form-group">
+            <label>Company Address</label>
+            <input type="text" class="form-control" value="<%= profile.companyAddress %>" required>
+          </div>
+          <div class="form-group">
+            <label>Storage Location</label>
+            <input type="text" class="form-control" value="<%= profile.storageLocation %>">
+          </div>
+          <div class="form-group">
+            <label>Contact Mobile Number</label>
+            <input type="tel" class="form-control" value="<%= profile.contactMobileNumber %>">
+          </div>
+          <div class="form-group">
+            <label>Country</label>
+            <input type="text" class="form-control" value="<%= profile.country %>" required>
+          </div>
+          <div class="form-group">
+            <label>Industry</label>
+            <input type="text" class="form-control" value="<%= profile.industry %>" required>
+          </div>
+          <div class="form-group">
+            <label>Employee Numbers</label>
+            <input type="number" class="form-control" value="<%= profile.employeeNumbers %>" required>
+          </div>
+          <div class="form-group">
+            <label>Last Year Turnover</label>
+            <input type="money" class="form-control" value="<%= profile.lastYearTurnover %>" required>
+          </div>
+          <div class="form-group">
+            <label>Website</label>
+            <input type="text" class="form-control" value="<%= profile.website %>">
+          </div>
+          <div class="form-group">
+            <label>Facebook URL</label>
+            <input type="text" class="form-control" value="<%= profile.facebookURL %>">
+          </div>
+          <div class="form-group">
+            <label>Instagram URL</label>
+            <input type="text" class="form-control" value="<%= profile.instagramURL %>">
+          </div>
+          <div class="form-group">
+            <label>Twitter URL</label>
+            <input type="text" class="form-control" value="<%= profile.twitterURL %>">
+          </div>
+          <div class="form-group">
+            <label>LinkedIn URL</label>
+            <input type="text" class="form-control" value="<%= profile.linkedinURL %>">
+          </div>
+          <div class="form-group">
+            <label>Other Social Media URL</label>
+            <input type="text" class="form-control" value="<%= profile.otherSocialMediaURL %>" >
+          </div>
+          <div class="form-group">
+            <label>Other Social Media URL</label>
+            <input type="text" class="form-control" value="<%= profile.commodities %>" required>
+          </div>
+          <div class="form-group">
+            <label>Capability Description</label>
+            <input type="text" class="form-control" value="<%= profile.capabilityDescription %>" required>
+          </div>
+          <div class="form-group">
+            <label>Relevant Experience</label>
+            <input type="text" class="form-control" value="<%= profile.relevantExperience %>" required>
+          </div>
+          <div class="form-group">
+            <label>Supporting Information</label>
+            <input type="text" class="form-control" value="<%= profile.supportingInformation %>">
+          </div>
+<!-- Uploading files field section-->          
+        <form class="md-form">
+          <div class="form-group">
+            <div class="btn btn-primary btn-sm float-left">
+              <span>Certificates</span>
+              <input type="url">
+            </div>
+            <div class="file-path-wrapper">
+              <input class="file-path validate" type="text" placeholder="Upload your file">
+            </div>
+          </div>
+        </form>           
+
+        <form class="md-form">
+          <div class="form-group">
+            <div class="btn btn-primary btn-sm float-left">
+              <span>Anti-bribery policy</span>
+              <input type="url">
+            </div>
+            <div class="file-path-wrapper">
+              <input class="file-path validate" type="text" placeholder="Upload your file">
+            </div>
+          </div>
+        </form> 
+
+        <form class="md-form">
+          <div class="file-field">
+            <div class="btn btn-primary btn-sm float-left">
+              <span>Environment policy</span>
+              <input type="url">
+            </div>
+            <div class="file-path-wrapper">
+              <input class="file-path validate" type="text" placeholder="Upload your file">
+            </div>
+          </div>
+        </form> 
+
+        <form class="md-form">
+          <div class="form-group">
+            <div class="btn btn-primary btn-sm float-left">
+              <span>Quality management policy</span>
+              <input type="url">
+            </div>
+            <div class="file-path-wrapper">
+              <input class="file-path validate" type="text" placeholder="Upload your file">
+            </div>
+          </div>
+        </form>
+
+        <form class="md-form">
+          <div class="form-group">
+            <div class="btn btn-primary btn-sm float-left">
+              <span>Occupational Safety and Health</span>
+              <input type="url">
+            </div>
+            <div class="file-path-wrapper">
+              <input class="file-path validate" type="text" placeholder="Upload your file">
+            </div>
+          </div>
+        </form> 
+
+        <form class="md-form">
+          <div class="form-group">
+            <div class="btn btn-primary btn-sm float-left">
+              <span>Other relevant files</span>
+              <input type="url">
+            </div>
+            <div class="file-path-wrapper">
+              <input class="file-path validate" type="text" placeholder="Upload your file">
+            </div>
+          </div>
+        </form>
+<!--Mandatory check of agreements -->
+          <div class="form-group">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" <%= !profile.UNITETermsAndConditions ? "checked" : "" %> required>
+              <label class="form-check-label" for="invalidCheck2">
+                UNITE Terms And Conditions
+              </label>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" <%= profile.antibriberyAgreement ? "checked" : "" %> required>
+              <label class="form-check-label" for="invalidCheck2">
+                Antibribery Agreement
+              </label>
+            </div>
+          </div>
+          
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <button class="btn btn-primary" disabled>
+            Update
+          </button>
+        </form>
+      </div>
+    </div>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script></script>
+  </body>
+</html>
