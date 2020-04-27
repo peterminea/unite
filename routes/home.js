@@ -8,6 +8,9 @@ router.use(bodyParser.urlencoded({ extended: true }));
 const homeController = require("../controllers/home");
 
 router.get("/", homeController.getIndex);
-router.get("/about", homeController.getAbout);
+
+router.get("/login", homeController.getLogin);
+
+router.get("/callback", homeController.getCallback);
 
 module.exports = router;

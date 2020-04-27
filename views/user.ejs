@@ -1,0 +1,34 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="https://fonts.googleapis.com/css?family=ABeeZee&display=swap" rel="stylesheet">
+    <link href="/assets/css/user-style.css" rel="stylesheet">
+    <title<%= name %> | Profil Sayfasıx</title>
+</head>
+
+<body>
+    <main>
+        <h1>Profil Sayfası</h1>
+        <div class="profil">
+            <img src="https://cdn.discordapp.com/avatars/<%= id %>/<%= avatar %>.png?size=256 "/>
+        </div>
+        <h2>
+            <%=name%> kişisinin profil sayfasındasınız!</h2>
+        <p>
+            <%=name%>'nin ID'si :             <%=id %>
+        </p>
+        <p>
+            <%=name%> kişisinin email'i :             <%=email%>
+        </p> 
+       <p>
+            <%=name%> kişisinin katıldığı sunucular:             <%=guilds%>
+        </p>  
+    </main>
+</body>
+
+</html>
