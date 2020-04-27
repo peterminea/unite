@@ -161,7 +161,6 @@ exports.postSignUp = (req, res) => {
 }
 
 
-
 exports.getProfile = (req, res) => {
   res.render("buyer/profile", { profile: req });
 };

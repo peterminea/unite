@@ -80,19 +80,31 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Sign Up</h5>
+          <h5 class="modal-title" id="exampleModalLabel">Sign up</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
-          <p><b>Note: </b>There isn't buyer or supervisor registration currently. We're working to improve our security
-            level and settings.</p>
-          <p>Currently, you can only register as supplier. If you want to register as buyer or supervisor, you can
-            contact with us manually.</p>
+          <p><b>Note: </b>Registration page for supervisors is currently hidden. We're working to improve our security  level and settings.</p>
+          <p>At this time, you can register either as supplier or as buyer. If you want to register as supervisor, you can contact us directly.</p>
+          
+       <div> 
           <a href="supplier/sign-up">
-            <button class="btn btn-primary btn-block">Sign Up as Supplier</button>
+            <button class="btn btn-primary btn-block">Sign up as Supplier</button>
+          </a> 
+      </div>
+        <br>
+      <div>
+          <a href="buyer/sign-up">
+            <button class="btn btn-primary btn-block">Sign up as Buyer</button>
           </a>
+      </div>
+       <!--        
+        <a href="supervisor/sign-up">
+            <button style="visibility: hidden" class="btn btn-primary btn-block">Sign up as Supervisor</button>
+          </a>
+      -->
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
