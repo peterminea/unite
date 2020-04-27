@@ -44,6 +44,7 @@ const bidRequestSchema = new Schema({
   },
   status: {
     type: Number,
+    required: true,
     default: 0
   },
   price: {
@@ -61,17 +62,16 @@ const bidRequestSchema = new Schema({
 });
 
 /*
-Bid Request Status
+Bid Request Status Legend
 
--2 -> Buyer canceled the request
--1 -> Supplier canceled the request
+-2 -> Buyer cancelled the request
+-1 -> Supplier cancelled the request
 00 -> Buyer requested
 01 -> Supplier sent information
 02 -> Buyer sent information-request
 03 -> Buyer sent buy-requests
 04 -> Supplier sent "sending-done"
-05 -> Buyer submitted all process are successful
-
+05 -> Buyer completes the order, delivery process successful.
 */
 
 module.exports = mongoose.model('BidRequest', bidRequestSchema);

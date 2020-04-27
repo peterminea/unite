@@ -26,10 +26,6 @@ const supplierSchema = new Schema({
     type: String,
     required: true
   },
-  companyRegistrationNo:{
-    type: String,
-    required: true
-  },
   registrationCompany: {
     type: String,
     required: true
@@ -67,26 +63,6 @@ const supplierSchema = new Schema({
     required: true
   },
   website: {
-    type: String,
-    required: false
-  },
-  facebookURL: {
-    type: String,
-    required: false
-  },
-  instagramURL: {
-    type: String,
-    required: false
-  },
-  twitterURL: {
-    type: String,
-    required: false
-  },
-  linkedinURL: {
-    type: String,
-    required: false
-  },
-  otherSocialMediaURL: {
     type: String,
     required: false
   },

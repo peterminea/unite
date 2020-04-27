@@ -9,8 +9,11 @@ const flash = require("connect-flash");
 
 //Classes:
 const BidRequest = require("./models/bidRequest");
+const Buyer = require("./models/buyer");
+const Supplier = require("./models/supplier");
 const MONGODB_URI = "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";
 const app = express();
+app.use(bodyParser.urlencoded({ extended: true }));
 
 const store = new MongoDBStore({
   uri: MONGODB_URI,
@@ -107,12 +110,10 @@ mongoose
       qualification: "Basic qualification",
       address: "Casino Boulevard, Amsterdam",
       country: "Netherlands"
-    });*/
+    });
     
-//demoSupplier.save(); demoBuyer.save();
-    
-    
-  /*
+      //demoSupplier.save(); demoBuyer.save();
+  
       const demoGovernmentSupervisor = new Supervisor({
       organisationName: "European Parliament",
       contactName: "Van der Sagner, Galesio",
@@ -124,24 +125,32 @@ mongoose
       antibriberyAgreement: true
     });
     
-    demoGovernmentSupervisor.save();  
- 
+    demoGovernmentSupervisor.save();   
 */
-//requestName: "Refrigeration systems for food",
+   
+/*
+   const {ObjectId} = require('mongodb');
+   
    const demoBidRequest = new BidRequest({
-      itemDescription: "Medium-size refrigerators",
+      itemDescription: "Refrigerators",
       commodityList: "Zanussi, Bosch, Whirlpool",      
-      itemDescriptionLong: "Medium-size refrigerators for feeding homeless people",
+      itemDescriptionLong: "Medium-size refrigerators",
       itemDescriptionUrl: "https://www.demos.org",
-      amount: 90,
+      amount: 10,
       deliveryLocation: "Mariahilfestrasse 30, Vienna, Austria",
       deliveryRequirements: "Original papers",
-      complianceRequirements: "Certificate of authenticity",
+      complianceRequirements: "Certificate of authenticity",      
       complianceRequirementsUrl: "https://www.iso9001.net",
-      otherRequirements: "Fast delivery"
+      otherRequirements: "Fast delivery",
+      status: 1,
+      price: 5,
+      buyer: ObjectId("507f191e810c18729de860ea"),
+      supplier: ObjectId("507f191e810c17729de860ea")
     });
     
-    //demoBidRequest.save();    
+    demoBidRequest.save().then(result => {
+      console.log('Bid requested successfully!');      
+    }).catch(console.error);*/
   
     return null;
   })
