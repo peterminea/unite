@@ -39,9 +39,8 @@
     </script>
     <% } %>
 
-        <div class="sign-in-form smooth-shadow">
-  
-<form method="POST">
+    <div class="sign-in-form smooth-shadow">
+      <form method="POST">
         <h2>Sign up as Buyer</h2>
 
           <div class="form-group">
@@ -81,7 +80,7 @@
             <input type="text" class="form-control" name="country" required>
           </div>
 
-        <input type="hidden" name="_csrf" value="< % = csrfToken %>" />
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
         <button type="submit" class="btn btn-primary btn-block">Sign-up</button>
         <div class="form-group">
           <label class="text-muted form-text">
