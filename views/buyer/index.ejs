@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Supplier Dashboard - UNITE</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Another cool thing made with Glitch">
+  <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+</head>
+
+<body>
+  <% if (success && success.length > 0) { %>
+  <script>
+    swal({
+      title: "Required!",
+      text: "Bid requested successfully!",
+      icon: "success",
+    });
+  </script>
+  <% } %>
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="/buyer">Buyer - UNITE</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="/buyer">Dashboard <span class="sr-only">(current)</span></a>
+        </li>
+      </ul>
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="/buyer/balance">Balance: €0&nbsp;&nbsp;</a>
+        </li>
+        <li class="nav-item active">
+          <a class="btn btn-primary" href="/buyer/supplier">supplier</a>
+        </li>
+        <li class="nav-item" style="margin-left: 20px;">
+          <a class="btn btn-danger" href="?exit=true">Exit</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <br><br>
+    <div class="card">
+      <h5 class="card-header">Welcome!</h5>
+      <div class="card-body">
+        <h5 class="card-title">Hello, <%= buyer.organizationName %></h5>
+        <p class="card-text">You can send bid requests to suppliers from here.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <form class="my-2 my-lg-2" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <input class="form-control mr-sm-2" type="search" placeholder="Search Capabilites" aria-label="Search"
+        name="capabilityInput">
+    </form>
+
+    <div>
+      <% let i = 0; if (suppliers != null) { for (supplier of suppliers) { i++; %>
+      <div class="card mt-4">
+        <h5 class="card-header bg-dark text-white"><%= supplier.companyName %></h5>
+        <div class="card-body">
+          <h5 class="card-title">Contact Name</h5>
+          <p class="card-text">Capability Description.</p>
+          <button class="btn btn-primary ml-2" style="float: right;" data-target="#request_<%= i %>"
+            data-toggle="modal">Request a
+            Bid</button>
+          <button class="btn btn-dark" style="float: right;" data-target="#comp_<%= i %>"
+            data-toggle="modal">View</button>
+        </div>
+
+        <!-- View Button's Modal -->
+        <div class="modal fade" id="comp_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel"><%= supplier.companyName %></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <form>
+                  <div class="form-group">
+                    <label>Email address</label>
+                    <input type="email" class="form-control" readonly value="<%= supplier.emailAddress %>"> </div>
+                  <div class="form-group">
+                    <label>Director's name</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.directorsName %>">
+                  </div>
+                  <div class="form-group">
+                    <label>Contact Name</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.contactName %>">
+                  </div>
+                  <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.title %>">
+                  </div>
+                  <div class="form-group">
+                    <label>Company Registration No</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.companyRegistrationNo %>">
+                  </div>
+                  <div class="form-group">
+                    <label>Registration Company</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.registrationCompany %>"
+                      required>
+                  </div>
+                  <div class="form-group">
+                    <label>Company Address</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.companyAddress %>" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Storage Location</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.storageLocation %>">
+                  </div>
+                  <div class="form-group">
+                    <label>Contact Mobile Number</label>
+                    <input type="tel" class="form-control" readonly value="<%= supplier.contactMobileNumber %>">
+                  </div>
+                  <div class="form-group">
+                    <label>Country</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.country %>" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Industry</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.industry %>" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Employee Numbers</label>
+                    <input type="number" class="form-control" readonly value="<%= supplier.employeeNumbers %>" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Last Year Turnover</label>
+                    <input type="money" class="form-control" readonly value="<%= supplier.lastYearTurnover %>" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Website</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.website %>">
+                  </div>
+                  <div class="form-group">
+                    <label>Facebook URL</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.facebookURL %>">
+                  </div>
+                  <div class="form-group">
+                    <label>Instagram URL</label>
+                    <input type="text" class="form-control" readonly readonly value="<%= supplier.instagramURL %>">
+                  </div>
+                  <div class="form-group">
+                    <label>Twitter URL</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.twitterURL %>">
+                  </div>
+                  <div class="form-group">
+                    <label>LinkedIn URL</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.linkedinURL %>">
+                  </div>
+                  <div class="form-group">
+                    <label>Other Social Media URL</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.otherSocialMediaURL %>">
+                  </div>
+                  <div class="form-group">
+                    <label>Other Social Media URL</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.commodities %>" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Capability Description</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.capabilityDescription %>"
+                      required>
+                  </div>
+                  <div class="form-group">
+                    <label>Relevant Experience</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.relevantExperience %>"
+                      required>
+                  </div>
+                  <div class="form-group">
+                    <label>Supporting Information</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.supportingInformation %>">
+                  </div>
+
+                  <!-- Uploading files field section-->
+                  <div class="form-group">
+                    <label>Certificates</label>
+                    <input type="url" class="form-control" readonly>
+                  </div>
+                  <div class="form-group">
+                    <label>Anti-bribery policy</label>
+                    <input type="url" class="form-control" readonly>
+                  </div>
+                  <div class="form-group">
+                    <label>Environment policy</label>
+                    <input type="url" class="form-control" readonly>
+                  </div>
+                  <div class="form-group">
+                    <label>Quality management policy</label>
+                    <input type="url" class="form-control" readonly>
+                  </div>
+                  <div class="form-group">
+                    <label>Occupational Safety and Health</label>
+                    <input type="url" class="form-control" readonly>
+                  </div>
+                  <div class="form-group">
+                    <label>Other relevant files</label>
+                    <input type="url" class="form-control" readonly>
+                  </div>
+
+                  <!--Mandatory check of agreements -->
+                  <div class="form-group">
+                    <div class="form-check">
+                      <input required disabled class="form-check-input" type="checkbox"
+                        <%= !supplier.UNITETermsAndConditions ? "checked" : "" %>>
+                      <label class="form-check-label" for="invalidCheck2">
+                        UNITE Terms And Conditions
+                      </label>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <div class="form-check">
+                      <input required disabled class="form-check-input" type="checkbox"
+                        <%= supplier.antibriberyAgreement ? "checked" : "" %> readonly>
+                      <label class="form-check-label" for="invalidCheck2">
+                        Antibribery Agreement
+                      </label>
+                    </div>
+                  </div>
+
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button> </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Request Button's Modal -->
+        <div class="modal fade" id="request_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">New Bid Request</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <form method="POST">
+                <div class="modal-body">
+                  <div class="form-group">
+                    <label class="col-form-label">Supplier Company*</label>
+                    <input type="text" class="form-control" value="<%= supplier.companyName %>" readonly required>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Item Description (Short)<b>*</b></label>
+                    <input type="text" class="form-control" name="itemDescription" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Commodity List</label>
+                    <div class="input-group">
+                      <input type="text" class="form-control" placeholder="Add Commodity" id="commodityInput_<%= i %>">
+                      <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button" id="addCommodity_<%= i %>">Add</button>
+                      </div>
+                    </div>
+                    <br>
+                    <ul class="list-group" id="commodityList_<%= i %>">
+                    </ul>
+                    <input type="hidden" id="hiddenCommodityList_<%= i %>" name="commodityList" value="">
+                    <script>
+                      document.getElementById("addCommodity_<%= i %>").onclick = () => {
+                        if (document.getElementById("commodityInput_<%= i %>").value != "") {
+                          document.getElementById("commodityList_<%= i %>")
+                            .insertAdjacentHTML("beforeend",
+                              "<li class=\"list-group-item\">" + document.getElementById("commodityInput_<%= i %>").value + "</li>")
+                          document.getElementById("hiddenCommodityList_<%= i %>").value += document.getElementById("commodityInput_<%= i %>").value + ", "
+                        }
+                      }
+                    </script>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Item Description (Long)</label>
+                    <textarea class="form-control" name="longItemDescription" required></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Item Description URL (Long)</label>
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon3">http(s)://</span>
+                      </div>
+                      <input type="text" class="form-control" aria-describedby="basic-addon3" name="urlItemDescription">
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="col-form-label">Amount</label>
+                    <input type="text" class="form-control" id="recipient-name" name="amount" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Delivery Location</label>
+                    <textarea class="form-control" name="deliveryLocation" required></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Delivery Requirements</label>
+                    <textarea class="form-control" name="deliveryRequirements" required></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Compliance Requirements</label>
+                    <textarea class="form-control" name="complianceRequirements" required></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Compliance Requirements URL</label>
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon3">http(s)://</span>
+                      </div>
+                      <input type="text" class="form-control" name="complianceRequirementsURL"
+                        aria-describedby="basic-addon3">
+                    </div>
+                  </div>
+
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <input type="hidden" name="buyer" value="<%= buyer._id %>">
+                  <input type="hidden" name="supplier" value="<%= supplier._id %>">
+
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <button type="submit" class="btn btn-primary">Send message</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div> <% } }%>
+    </div>
+  </div>
+
+  <!-- Jquery, Popper, and Bootstrap inclusions-->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+</body>
+
+</html>
