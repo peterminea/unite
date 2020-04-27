@@ -82,7 +82,7 @@ exports.postSignUp = (req, res) => {
       || final_domain.includes("outlook.com") || final_domain.includes('yandex.com') || final_domain.includes('yahoo.com')
       || final_domain.includes("gmx")) {
       req.flash("error", "E-mail address has not a custom company domain.")
-      res.redirect("/supplier/sign-up");
+      res.redirect("/supervisor/sign-up");
     } else {
       if (req.password < 6) {
         req.flash("error", "Password must have 6 characters at least.")
@@ -102,8 +102,8 @@ exports.postSignUp = (req, res) => {
           qualityManagementPolicyUrl: req.body.qualityManagementPolicyUrl,
           occupationalSafetyAndHealthPolicyUrl: req.body.occupationalSafetyAndHealthPolicyUrl,
           otherRelevantFilesUrls: req.body.otherRelevantFilesUrls,
-          UNITETermsAndConditions: req.body.UNITETermsAndConditions,  
-          antibriberyAgreement: req.body.antibriberyAgreement      
+          UNITETermsAndConditions: true,
+          antibriberyAgreement: true
         });
 
         supervisor.save().then(doc => {
@@ -125,34 +125,6 @@ exports.getProfile = (req, res) => {
 
     res.render("supervisor/profile", { supervisor: supervisor });
   };
-
-exports.postProfile3 = (req, res) => {
-
-  const newSupervisor = new Supervisor({
-    _id: req.body._id,
-    organizationName: req.body.organizationName,
-    organizationUniteID: req.body.organizationUniteID,
-    contactName: req.body.contactName,
-    emailAddress: req.body.emailAddress,
-    password: req.body.password,
-    address: req.body.address,
-    country: req.body.country,    
-    certificatesUrls: req.body.certificatesUrls,
-    antibriberyPolicyUrl: req.body.antibriberyPolicyUrl,
-    environmentPolicyUrl: req.body.environmentPolicyUrl,
-    qualityManagementPolicyUrl: req.body.qualityManagementPolicyUrl,
-    occupationalSafetyAndHealthPolicyUrl: req.body.occupationalSafetyAndHealthPolicyUrl,
-    otherRelevantFilesUrls: req.body.otherRelevantFilesUrls,
-    UNITETermsAndConditions: req.body.UNITETermsAndConditions,  
-    antibriberyAgreement: req.body.antibriberyAgreement
-  });
-
-  return newSupervisor.save().then(result => {
-        req.flash('success', 'Supervisor details updated successfully!');
-        return res.redirect("/supervisor/profile");
-      }).catch(console.error);
-}
-
 
 exports.postProfile = (req, res) => {
   Supervisor.findOne({ _id: req.body._id }, (doc) => {
