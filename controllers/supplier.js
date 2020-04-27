@@ -13,7 +13,8 @@ exports.getIndex = (req, res) => {
 
     res.render("supplier/index", {
       supplier: supplier,
-      requestsCount: requestsCount
+      requestsCount: requestsCount,
+      successMessage: req.flash("success")
     });
   }).catch(console.error);
 };
@@ -60,6 +61,74 @@ exports.postSignIn = (req, res) => {
     });
   }
 };
+
+exports.getSignUp = (req, res) => {
+  if (!req.session.supplier)
+    return res.render("supplier/sign-up", {
+      errorMessage: req.flash("error")
+    });
+  else res.redirect("/supplier");
+};
+
+exports.postSignUp = (req, res) => {
+  if (req.body.emailAddress) {
+    const email = req.body.emailAddress;
+    const email_str_arr = email.split("@");
+    const domain_str_location = email_str_arr.length - 1;
+    const final_domain = email_str_arr[domain_str_location];
+
+    if (final_domain == 'gmail.com' || final_domain == 'hotmail.com'
+      || final_domain.includes("outlook.com") || final_domain.includes('yandex.com') || final_domain.includes('yahoo.com')
+      || final_domain.includes("gmx")) {
+      req.flash("error", "E-mail address has not a custom company domain.")
+      res.redirect("/supplier/sign-up");
+    } else {
+      if (req.password < 6) {
+        req.flash("error", "Password must have 6 characters at least.")
+        res.redirect("/supplier/sign-up");
+      } else {
+        const supplier = new Supplier({
+          companyName: req.body.companyName,
+          directorsName: req.body.directorsName,
+          contactName: req.body.contactName,
+          title: req.body.title,
+          emailAddress: req.body.emailAddress,
+          password: req.body.password,
+          registrationCompany: req.body.registrationCompany,
+          companyAddress: req.body.companyAddress,
+          storageLocation: req.body.storageLocation,
+          contactMobileNumber: req.body.contactMobileNumber,
+          country: req.body.country,
+          industry: req.body.industry,
+          employeeNumbers: req.body.employeeNumbers,
+          lastYearTurnover: req.body.lastYearTurnover,
+          website: req.body.website,
+          commodities: req.body.commodities,
+          capabilityDescription: req.body.capabilityDescription,
+          relevantExperience: req.body.relevantExperience,
+          supportingInformation: req.body.supportingInformation,
+          certificatesUrls: req.body.certificatesUrls,
+          antibriberyPolicyUrl: req.body.antibriberyPolicyUrl,
+          environmentPolicyUrl: req.body.environmentPolicyUrl,
+          qualityManagementPolicyUrl: req.body.qualityManagementPolicyUrl,
+          occupationalSafetyAndHealthPolicyUrl: req.body.occupationalSafetyAndHealthPolicyUrl,
+          otherRelevantFilesUrls: req.body.otherRelevantFilesUrls,
+          UNITETermsAndConditions: true,
+          antibriberyAgreement: true
+        });
+
+        supplier.save().then(doc => {
+          req.session.supplier = doc;
+          req.session.id = doc._id;
+          return req.session.save();
+        }).then(() => {
+          req.flash('success', 'Supplier signed up successfully!');
+          return res.redirect("/supplier");
+        }).catch(console.error);
+      }
+    }
+  }
+}
 
 exports.getProfile = (req, res) => {
   res.render("supplier/profile", { profile: req.session.supplier });
@@ -109,47 +178,42 @@ exports.postBidRequest = (req, res) => {
 
 
 exports.postProfile = (req, res) => {
+  Supplier.findOne({ _id: req.body._id }, (doc) => {
+    doc.companyName = req.body.companyName;
+    doc.directorsName = req.body.directorsName;
+    doc.contactName = req.body.contactName;
+    doc.title = req.body.title;
+    doc.emailAddress = req.body.emailAddress;
+    doc.password = req.body.password;
+    doc.companyRegistrationNo = req.body.companyRegistrationNo;
+    doc.registrationCompany = req.body.registrationCompany;
+    doc.balance = req.body.balance;
+    doc.companyAddress = req.body.companyAddress;
+    doc.storageLocation = req.body.storageLocation;
+    doc.contactMobileNumber = req.body.contactMobileNumber;
+    doc.country = req.body.country;
+    doc.industry = req.body.industry;
+    doc.employeeNumbers = req.body.employeeNumbers;
+    doc.lastYearTurnover = req.body.lastYearTurnover;
+    doc.website = req.body.website;
+    doc.commodities = req.body.commodities;
+    doc.capabilityDescription = req.body.capabilityDescription;
+    doc.relevantExperience = req.body.relevantExperience;
+    doc.supportingInformation = req.body.supportingInformation;
+    doc.certificatesUrls = req.body.certificatesUrls;
+    doc.antibriberyPolicyUrl = req.body.antibriberyPolicyUrl;
+    doc.environmentPolicyUrl = req.body.environmentPolicyUrl;
+    doc.qualityManagementPolicyUrl = req.body.qualityManagementPolicyUrl;
+    doc.occupationalSafetyAndHealthPolicyUrl = req.body.occupationalSafetyAndHealthPolicyUrl;
+    doc.otherRelevantFilesUrls = req.body.otherRelevantFilesUrls;
 
-  const newSupplier = new Supplier({
-    _id: req.body._id,
-    companyName: req.body.companyName,
-    directorsName: req.body.directorsName,
-    contactName: req.body.contactName,
-    title: req.body.title,
-    emailAddress: req.body.emailAddress,
-    password: req.body.password,
-    companyRegistrationNo: req.body.companyRegistrationNo,
-    registrationCompany: req.body.registrationCompany,
-    balance: req.body.balance,
-    companyAddress: req.body.companyAddress,
-    storageLocation: req.body.storageLocation,
-    contactMobileNumber: req.body.contactMobileNumber,
-    country: req.body.country,
-    industry: req.body.industry,
-    employeeNumbers: req.body.employeeNumbers,
-    lastYearTurnover: req.body.lastYearTurnover,
-    website: req.body.website,
-    facebookURL: req.body.facebookURL,
-    instagramURL: req.body.instagramURL,
-    twitterURL: req.body.twitterURL,
-    linkedinURL: req.body.linkedinURL,
-    otherSocialMediaURL: req.body.otherSocialMediaURL,
-    commodities: req.body.commodities,
-    capabilityDescription: req.body.capabilityDescription,
-    relevantExperience: req.body.relevantExperience,
-    supportingInformation: req.body.supportingInformation,
-    certificatesUrls: req.body.certificatesUrls,
-    antibriberyPolicyUrl: req.body.antibriberyPolicyUrl,
-    environmentPolicyUrl: req.body.environmentPolicyUrl,
-    qualityManagementPolicyUrl: req.body.qualityManagementPolicyUrl,
-    occupationalSafetyAndHealthPolicyUrl: req.body.occupationalSafetyAndHealthPolicyUrl,
-    otherRelevantFilesUrls: req.body.otherRelevantFilesUrls,
-    UNITETermsAndConditions: req.body.UNITETermsAndConditions,
-    antibriberyAgreement: req.body.antibriberyAgreement
-  });
-
-  return newSupplier.save().then(result => {
+    return doc.save();
+  }).then(doc => {
+    req.session.supplier = doc;
+    req.session.id = doc._id;
+    return req.session.save();
+  }).then(() => {
     req.flash('success', 'Supplier details updated successfully!');
-    return res.redirect("/supplier/profile");
+    return res.redirect("/supplier");
   }).catch(console.error);
 }

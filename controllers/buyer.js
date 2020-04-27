@@ -50,6 +50,8 @@ exports.postIndex = (req, res) => {
       complianceRequirements: req.body.complianceRequirements,
       complianceRequirementsUrl: req.body.complianceRequirementsUrl,
       otherRequirements: req.body.otherRequirements,
+      status: req.body.status,
+      price: req.body.price,
       buyer: req.body.buyer,
       supplier: req.body.supplier
     });

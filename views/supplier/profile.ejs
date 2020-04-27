@@ -54,7 +54,8 @@
       <br><br>
   
       <div class="smooth-shadow profile-form">
-        <form>
+        <form method="post">
+          <input type="hidden" name="_id" value="<%= profile._id %>">
           <div class="form-group">
             <label>Email address</label>
             <input type="email" class="form-control" value="<%= profile.emailAddress %>">
@@ -62,123 +63,123 @@
           </div>
           <div class="form-group">
             <label>Director's name</label>
-            <input type="text" class="form-control" value="<%= profile.directorsName %>">
+            <input type="text" class="form-control" name="directorsName" value="<%= profile.directorsName %>">
           </div>
           <div class="form-group">
             <label>Contact Name</label>
-            <input type="text" class="form-control" value="<%= profile.contactName %>">
+            <input type="text" class="form-control" name="contactName" value="<%= profile.contactName %>">
           </div>
           <div class="form-group">
             <label>Title</label>
-            <input type="text" class="form-control" value="<%= profile.title %>">
+            <input type="text" class="form-control" name="title" value="<%= profile.title %>">
           </div>
           <div class="form-group">
             <label>Company Registration No</label>
-            <input type="text" class="form-control" value="<%= profile.companyRegistrationNo %>">
+            <input type="text" class="form-control" name="companyRegistrationNo" value="<%= profile.companyRegistrationNo %>">
           </div>
           <div class="form-group">
             <label>Registration Company</label>
-            <input type="text" class="form-control" value="<%= profile.registrationCompany %>" required>
+            <input type="text" class="form-control" name="registrationCompany" value="<%= profile.registrationCompany %>" required>
           </div>
           <div class="form-group">
             <label>Company Address</label>
-            <input type="text" class="form-control" value="<%= profile.companyAddress %>" required>
+            <input type="text" class="form-control" name="companyAddress" value="<%= profile.companyAddress %>" required>
           </div>
           <div class="form-group">
             <label>Storage Location</label>
-            <input type="text" class="form-control" value="<%= profile.storageLocation %>">
+            <input type="text" class="form-control" name="storageLocation" value="<%= profile.storageLocation %>">
           </div>
           <div class="form-group">
             <label>Contact Mobile Number</label>
-            <input type="tel" class="form-control" value="<%= profile.contactMobileNumber %>">
+            <input type="tel" class="form-control" name="contactMobileNumber" value="<%= profile.contactMobileNumber %>">
           </div>
           <div class="form-group">
             <label>Country</label>
-            <input type="text" class="form-control" value="<%= profile.country %>" required>
+            <input type="text" class="form-control" name="country" value="<%= profile.country %>" required>
           </div>
           <div class="form-group">
             <label>Industry</label>
-            <input type="text" class="form-control" value="<%= profile.industry %>" required>
+            <input type="text" class="form-control" name="industry" value="<%= profile.industry %>" required>
           </div>
           <div class="form-group">
             <label>Employee Numbers</label>
-            <input type="number" class="form-control" value="<%= profile.employeeNumbers %>" required>
+            <input type="number" class="form-control" name="employeeNumbers" value="<%= profile.employeeNumbers %>" required>
           </div>
           <div class="form-group">
             <label>Last Year Turnover</label>
-            <input type="money" class="form-control" value="<%= profile.lastYearTurnover %>" required>
+            <input type="money" class="form-control" name="lastYearTurnover" value="<%= profile.lastYearTurnover %>" required>
           </div>
           <div class="form-group">
             <label>Website</label>
-            <input type="text" class="form-control" value="<%= profile.website %>">
+            <input type="text" class="form-control" name="website" value="<%= profile.website %>">
           </div>
           <div class="form-group">
             <label>Facebook URL</label>
-            <input type="text" class="form-control" value="<%= profile.facebookURL %>">
+            <input type="text" class="form-control" name="facebookURL" value="<%= profile.facebookURL %>">
           </div>
           <div class="form-group">
             <label>Instagram URL</label>
-            <input type="text" class="form-control" value="<%= profile.instagramURL %>">
+            <input type="text" class="form-control" name="instagramURL" value="<%= profile.instagramURL %>">
           </div>
           <div class="form-group">
             <label>Twitter URL</label>
-            <input type="text" class="form-control" value="<%= profile.twitterURL %>">
+            <input type="text" class="form-control" name="twitterURL" value="<%= profile.twitterURL %>">
           </div>
           <div class="form-group">
             <label>LinkedIn URL</label>
-            <input type="text" class="form-control" value="<%= profile.linkedinURL %>">
+            <input type="text" class="form-control" name="linkedinURL" value="<%= profile.linkedinURL %>">
           </div>
           <div class="form-group">
             <label>Other Social Media URL</label>
-            <input type="text" class="form-control" value="<%= profile.otherSocialMediaURL %>" >
+            <input type="text" class="form-control" name="otherSocialMediaURL" value="<%= profile.otherSocialMediaURL %>" >
           </div>
           <div class="form-group">
             <label>Commodities List</label>
-            <input type="text" class="form-control" value="<%= profile.commodities %>" required>
+            <input type="text" class="form-control" name="commodities" value="<%= profile.commodities %>" required>
           </div>
           <div class="form-group">
             <label>Capability Description</label>
-            <input type="text" class="form-control" value="<%= profile.capabilityDescription %>" required>
+            <input type="text" class="form-control" name="capabilityDescription" value="<%= profile.capabilityDescription %>" required>
           </div>
           <div class="form-group">
             <label>Relevant Experience</label>
-            <input type="text" class="form-control" value="<%= profile.relevantExperience %>" required>
+            <input type="text" class="form-control" name="relevantExperience" value="<%= profile.relevantExperience %>" required>
           </div>
           <div class="form-group">
             <label>Supporting Information</label>
-            <input type="text" class="form-control" value="<%= profile.supportingInformation %>">
+            <input type="text" class="form-control" name="supportingInformation" value="<%= profile.supportingInformation %>">
           </div>
           
 <!-- Uploading files field section-->
           <div class="form-group">
               <label>Certificates</label>
-              <input type="url" class="form-control">
+              <input type="url" name="certificatesUrl" class="form-control">
             </div> 
           <div class="form-group">
               <label>Anti-bribery policy</label>
-              <input type="url" class="form-control">
+              <input type="url" name="antibriberyPolicyUrl" class="form-control">
             </div>
           <div class="form-group">
               <label>Environment policy</label>
-              <input type="url" class="form-control">
+              <input type="url" name="environmentPolicyUrl" class="form-control">
             </div>
           <div class="form-group">
               <label>Quality management policy</label>
-              <input type="url" class="form-control">
+              <input type="url" name="qualityManagementPolicyUrl" class="form-control">
             </div>
           <div class="form-group">
               <label>Occupational Safety and Health</label>
-              <input type="url" class="form-control">
+              <input type="url" name="occupationalSafetyHealthUrl" class="form-control">
             </div>
           <div class="form-group">
               <label>Other relevant files</label>
-              <input type="url" class="form-control">
+              <input type="url" name="otherRelevantFilesUrl" class="form-control">
             </div>          
  
 <!--Mandatory check of agreements -->
           <div class="form-group">
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" <%= !profile.UNITETermsAndConditions ? "checked" : "" %> required>
+              <input class="form-check-input" type="checkbox" name="UNITETermsAndConditions" <%= !profile.UNITETermsAndConditions ? "checked" : "" %> required>
               <label class="form-check-label" for="invalidCheck2">
                 UNITE Terms And Conditions
               </label>
@@ -186,7 +187,7 @@
           </div>
           <div class="form-group">
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" <%= profile.antibriberyAgreement ? "checked" : "" %> required>
+              <input class="form-check-input" type="checkbox" name="antibriberyAgreement" <%= profile.antibriberyAgreement ? "checked" : "" %> required>
               <label class="form-check-label" for="invalidCheck2">
                 Antibribery Agreement
               </label>
@@ -194,7 +195,7 @@
           </div>
           
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-          <button id="updateData" class="btn btn-primary" disabled> Update</button>
+          <button id="updateData" class="btn btn-primary"> Update</button>
         </form>
       </div>
     </div>

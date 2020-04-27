@@ -15,7 +15,8 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-light bg-light" style="width: 100% !important;">
     <a class="navbar-brand" href="#">
-      <img src="https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2Funite%20(1).png?v=1587898738134" height="50">
+      <img src="https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2Funite%20(1).png?v=1587898738134"
+        height="50">
     </a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,12 +32,14 @@
           <a class="nav-link" href="/about">About</a>
         </li>
       </ul>
+      <button class="btn btn-primary" data-toggle="modal" data-target="#signUpModal">Sign up</button>
     </div>
   </nav>
 
   <div class="container text-center">
     <div class="text-center mx-auto" style="margin-bottom: -40px">
-      <img src="https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2Funite%20(1).png?v=1587898738134" height="200">
+      <img src="https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2Funite%20(1).png?v=1587898738134"
+        height="200">
     </div>
 
     <span class="font-16pt color-primary">
@@ -51,10 +54,13 @@
     <b class="mt-5 color-primary font-16pt">
       SAVING JOBS, SAVING LIVES
     </b>
+    <p class="mt-5">
+      <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#signUpModal">Sign Up</button>
+    </p>
   </div>
 
-  <div style="margin-top: 40px" title="Demo username: demo@email.com. Demo pasword: demopass" class="customer-form footer-buttons lg">
-    <!--<div style="display: inline-block; text-align: left">    </div>   -->
+  <div style="margin-top: 40px" title="Demo username: demo@email.com. Demo pasword: demopass"
+    class="customer-form footer-buttons lg">
     <div class="row">
       <div class="col-sm text-center">
         <a href="/supplier/sign-in">
@@ -65,6 +71,32 @@
         <a href="/buyer/sign-in">
           <button class="custom-button">Sign in as Buyer</button></a></li>
         </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="signUpModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Sign Up</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p><b>Note: </b>There isn't buyer and supervisor registration currently. We're working to improve our security
+            level and settings.</p>
+          <p>Currently, you can just register as supplier. If you want to register as buyer or supervisor. You can
+            contact with us manually.</p>
+          <a href="supplier/sign-up">
+            <button class="btn btn-primary btn-block">Sign Up as Supplier</button>
+          </a>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+        </div>
       </div>
     </div>
   </div>
