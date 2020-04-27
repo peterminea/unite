@@ -26,6 +26,14 @@ exports.getSignIn = (req, res) => {
     else res.redirect("/supervisor/");
 }
 
+exports.getSignUp = (req, res) => {
+  if (!req.session.supervisor)
+    return res.render("supervisor/sign-up", {
+      errorMessage: req.flash("error")
+    });
+  else res.redirect("/supervisor");
+};
+
 
 exports.postSignIn = (req, res) => {
     const email = req.body.email;
@@ -62,13 +70,63 @@ exports.postSignIn = (req, res) => {
     }
 };
 
+
+exports.postSignUp = (req, res) => {
+  if (req.body.emailAddress) {
+    const email = req.body.emailAddress;
+    const email_str_arr = email.split("@");
+    const domain_str_location = email_str_arr.length - 1;
+    const final_domain = email_str_arr[domain_str_location];
+
+    if (final_domain == 'gmail.com' || final_domain == 'hotmail.com'
+      || final_domain.includes("outlook.com") || final_domain.includes('yandex.com') || final_domain.includes('yahoo.com')
+      || final_domain.includes("gmx")) {
+      req.flash("error", "E-mail address has not a custom company domain.")
+      res.redirect("/supplier/sign-up");
+    } else {
+      if (req.password < 6) {
+        req.flash("error", "Password must have 6 characters at least.")
+        res.redirect("/supervisor/sign-up");
+      } else {
+        const supervisor = new Supervisor({
+          organizationName: req.body.organizationName,
+          organizationUniteID: req.body.organizationUniteID,
+          contactName: req.body.contactName,
+          emailAddress: req.body.emailAddress,
+          password: req.body.password,
+          address: req.body.address,
+          country: req.body.country,    
+          certificatesUrls: req.body.certificatesUrls,
+          antibriberyPolicyUrl: req.body.antibriberyPolicyUrl,
+          environmentPolicyUrl: req.body.environmentPolicyUrl,
+          qualityManagementPolicyUrl: req.body.qualityManagementPolicyUrl,
+          occupationalSafetyAndHealthPolicyUrl: req.body.occupationalSafetyAndHealthPolicyUrl,
+          otherRelevantFilesUrls: req.body.otherRelevantFilesUrls,
+          UNITETermsAndConditions: req.body.UNITETermsAndConditions,  
+          antibriberyAgreement: req.body.antibriberyAgreement      
+        });
+
+        supervisor.save().then(doc => {
+          req.session.supervisor = doc;
+          req.session.id = doc._id;
+          return req.session.save();
+        }).then(() => {
+          req.flash('success', 'Supervisor signed up successfully!');
+          return res.redirect("/supervisor");
+        }).catch(console.error);
+      }
+    }
+  }
+}
+
+
 exports.getProfile = (req, res) => {
     const supervisor = req.session.supervisor;
 
     res.render("supervisor/profile", { supervisor: supervisor });
   };
 
-exports.postProfile = (req, res) => {
+exports.postProfile3 = (req, res) => {
 
   const newSupervisor = new Supervisor({
     _id: req.body._id,
@@ -93,4 +151,34 @@ exports.postProfile = (req, res) => {
         req.flash('success', 'Supervisor details updated successfully!');
         return res.redirect("/supervisor/profile");
       }).catch(console.error);
+}
+
+
+exports.postProfile = (req, res) => {
+  Supervisor.findOne({ _id: req.body._id }, (doc) => {
+    doc.organizationName = req.body.organizationName;
+    doc.organizationUniteID = req.body.organizationUniteID;
+    doc.contactName = req.body.contactName;
+    doc.emailAddress = req.body.emailAddress;
+    doc.password = req.body.password;
+    doc.address = req.body.address;
+    doc.country = req.body.country;    
+    doc.certificatesUrls = req.body.certificatesUrls;
+    doc.antibriberyPolicyUrl = req.body.antibriberyPolicyUrl;
+    doc.environmentPolicyUrl = req.body.environmentPolicyUrl;
+    doc.qualityManagementPolicyUrl = req.body.qualityManagementPolicyUrl;
+    doc.occupationalSafetyAndHealthPolicyUrl = req.body.occupationalSafetyAndHealthPolicyUrl;
+    doc.otherRelevantFilesUrls = req.body.otherRelevantFilesUrls;
+    doc.UNITETermsAndConditions = req.body.UNITETermsAndConditions;
+    doc.antibriberyAgreement = req.body.antibriberyAgreement; 
+
+    return doc.save();
+  }).then(doc => {
+    req.session.supervisor = doc;
+    req.session.id = doc._id;
+    return req.session.save();
+  }).then(() => {
+    req.flash('success', 'Supervisor details updated successfully!');
+    return res.redirect("/supervisor");
+  }).catch(console.error);
 }
