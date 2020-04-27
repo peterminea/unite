@@ -27,7 +27,7 @@ const buyerSchema = new Schema({
     required: true
   },
   balance: {
-    type: Number,
+    type: Number,    
     default: 0
   },
   deptAgencyGroup: {

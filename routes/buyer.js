@@ -15,7 +15,7 @@ router.get("/sign-up", buyerController.getSignUp);
 router.get("/profile", isAuth, sessionExit, buyerController.getProfile);
 
 router.post("/", isAuth, buyerController.postIndex);
-router.post("/sign-up", buyerController.postSignUp);
 router.post("/sign-in", buyerController.postSignIn);
+router.post("/sign-up", buyerController.postSignUp);
 
 module.exports = router;
