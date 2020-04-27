@@ -1,5 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
 const Buyer = require("../models/buyer");
 const Supplier = require("../models/supplier");
@@ -134,6 +136,7 @@ exports.postSignUp = (req, res) => {
         req.flash("error", "Password must have 6 characters at least.")
         res.redirect("/buyer/sign-up");
       } else {        
+        console.log(new Schema.Types.ObjectId(req.body.organizationUniteID));
           const buyer = new Buyer({
             organizationName: req.body.organizationName,
             organizationUniteID: req.body.organizationUniteID,
