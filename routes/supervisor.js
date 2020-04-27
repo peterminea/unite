@@ -14,6 +14,7 @@ router.get("/", isAuth, sessionExit, supervisorController.getIndex);
 router.get("/sign-in", supervisorController.getSignIn);
 router.get("/sign-up", supervisorController.getSignUp);
 router.get("/profile", isAuth, sessionExit, supervisorController.getProfile);
+
 router.post("/sign-in", supervisorController.postSignIn);
 router.post("/sign-up", supervisorController.postSignUp);
 module.exports = router;
