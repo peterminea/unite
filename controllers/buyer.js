@@ -73,6 +73,14 @@ exports.getSignIn = (req, res) => {
   else res.redirect("/buyer/");
 };
 
+exports.getSignUp = (req, res) => {
+  if (!req.session.buyer)
+    return res.render("buyer/sign-up", {
+      errorMessage: req.flash("error")
+    });
+  else res.redirect("/buyer");
+};
+
 exports.postSignIn = (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -108,29 +116,77 @@ exports.postSignIn = (req, res) => {
   }
 };
 
+
+exports.postSignUp = (req, res) => {
+  if (req.body.emailAddress) {
+    const email = req.body.emailAddress;
+    const email_str_arr = email.split("@");
+    const domain_str_location = email_str_arr.length - 1;
+    const final_domain = email_str_arr[domain_str_location];
+
+    if (final_domain == 'gmail.com' || final_domain == 'hotmail.com'
+      || final_domain.includes("outlook.com") || final_domain.includes('yandex.com') || final_domain.includes('yahoo.com')
+      || final_domain.includes("gmx")) {
+      req.flash("error", "E-mail address has not a custom company domain.")
+      res.redirect("/buyer/sign-up");
+    } else {
+      if (req.password < 6) {
+        req.flash("error", "Password must have 6 characters at least.")
+        res.redirect("/buyer/sign-up");
+      } else {        
+          const buyer = new Buyer({
+            organizationName: req.body.organizationName,
+            organizationUniteID: req.body.organizationUniteID,
+            contactName: req.body.contactName,
+            emailAddress: req.body.emailAddress,
+            password: req.body.password,
+            address: req.body.address,
+            balance: req.body.balance,
+            deptAgencyGroup: req.body.deptAgencyGroup,
+            qualification: req.body.qualification,
+            country: req.body.country  
+        });
+
+          buyer.save().then(doc => {
+          req.session.buyer = doc;
+          req.session.id = doc._id;
+          return req.session.save();
+        }).then(() => {
+          req.flash('success', 'Buyer signed up successfully!');
+          return res.redirect("/buyer");
+        }).catch(console.error);
+      }
+    }
+  }
+}
+
+
+
 exports.getProfile = (req, res) => {
   res.render("buyer/profile", { profile: req });
 };
 
 
 exports.postProfile = (req, res) => {
-
-  const newBuyer = new Buyer({
-    _id: req.body._id,
-    organizationName: req.body.organizationName,
-    organizationUniteID: req.body.organizationUniteID,
-    contactName: req.body.contactName,
-    emailAddress: req.body.emailAddress,
-    password: req.body.password,
-    address: req.body.address,
-    balance: req.body.balance,
-    deptAgencyGroup: req.body.deptAgencyGroup,
-    qualification: req.body.qualification,
-    country: req.body.country  
-  });
-
-  return newBuyer.save().then(result => {
-        req.flash('success', 'Buyer details updated successfully!');
-        return res.redirect("/buyer/profile");
-      }).catch(console.error);
+  Buyer.findOne({ _id: req.body._id }, (doc) => {
+    doc.organizationName = req.body.organizationName;
+    doc.organizationUniteID = req.body.organizationUniteID;
+    doc.contactName = req.body.contactName;
+    doc.emailAddress = req.body.emailAddress;
+    doc.password = req.body.password;
+    doc.address = req.body.address;
+    doc.balance = req.body.balance;
+    doc.deptAgencyGroup = req.body.deptAgencyGroup;
+    doc.qualification = req.body.qualification;
+    doc.country = req.body.country;
+    
+    return doc.save();
+  }).then(doc => {
+    req.session.buyer = doc;
+    req.session.id = doc._id;
+    return req.session.save();
+  }).then(() => {
+    req.flash('success', 'Buyer details updated successfully!');
+    return res.redirect("/buyer");
+  }).catch(console.error);
 }

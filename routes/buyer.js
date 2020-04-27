@@ -11,9 +11,11 @@ const buyerController = require("../controllers/buyer");
 
 router.get("/", isAuth, sessionExit, buyerController.getIndex);
 router.get("/sign-in", buyerController.getSignIn);
+router.get("/sign-up", buyerController.getSignUp);
 router.get("/profile", isAuth, sessionExit, buyerController.getProfile);
 
 router.post("/", isAuth, buyerController.postIndex);
+router.post("/sign-up", buyerController.postSignUp);
 router.post("/sign-in", buyerController.postSignIn);
 
 module.exports = router;
