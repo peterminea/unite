@@ -1,5 +1,4 @@
 const bcrypt = require("bcryptjs");
-
 const Supplier = require("../models/supplier");
 const Buyer = require("../models/buyer");
 const BidRequest = require("../models/bidRequest");
@@ -8,15 +7,17 @@ const Message = require("../models/message");
 exports.getIndex = (req, res) => {
   const supplier = req.session.supplier;
 
-  BidRequest.find({ supplier: supplier._id }).then(requests => {
-    const requestsCount = requests.length;
+  BidRequest.find({ supplier: supplier._id })
+    .then(requests => {
+      const requestsCount = requests.length;
 
-    res.render("supplier/index", {
-      supplier: supplier,
-      requestsCount: requestsCount,
-      successMessage: req.flash("success")
-    });
-  }).catch(console.error);
+      res.render("supplier/index", {
+        supplier: supplier,
+        requestsCount: requestsCount,
+        successMessage: req.flash("success")
+      });
+    })
+    .catch(console.error);
 };
 
 exports.getSignIn = (req, res) => {
@@ -77,14 +78,19 @@ exports.postSignUp = (req, res) => {
     const domain_str_location = email_str_arr.length - 1;
     const final_domain = email_str_arr[domain_str_location];
 
-    if (final_domain == 'gmail.com' || final_domain == 'hotmail.com'
-      || final_domain.includes("outlook.com") || final_domain.includes('yandex.com') || final_domain.includes('yahoo.com')
-      || final_domain.includes("gmx")) {
-      req.flash("error", "E-mail address has not a custom company domain.")
+    if (
+      final_domain == "gmail.com" ||
+      final_domain == "hotmail.com" ||
+      final_domain.includes("outlook.com") ||
+      final_domain.includes("yandex.com") ||
+      final_domain.includes("yahoo.com") ||
+      final_domain.includes("gmx")
+    ) {
+      req.flash("error", "E-mail address has not a custom company domain.");
       res.redirect("/supplier/sign-up");
     } else {
       if (req.password < 6) {
-        req.flash("error", "Password must have 6 characters at least.")
+        req.flash("error", "Password must have 6 characters at least.");
         res.redirect("/supplier/sign-up");
       } else {
         const supplier = new Supplier({
@@ -111,24 +117,29 @@ exports.postSignUp = (req, res) => {
           antibriberyPolicyUrl: req.body.antibriberyPolicyUrl,
           environmentPolicyUrl: req.body.environmentPolicyUrl,
           qualityManagementPolicyUrl: req.body.qualityManagementPolicyUrl,
-          occupationalSafetyAndHealthPolicyUrl: req.body.occupationalSafetyAndHealthPolicyUrl,
+          occupationalSafetyAndHealthPolicyUrl:
+            req.body.occupationalSafetyAndHealthPolicyUrl,
           otherRelevantFilesUrls: req.body.otherRelevantFilesUrls,
           UNITETermsAndConditions: true,
           antibriberyAgreement: true
         });
 
-        supplier.save().then(doc => {
-          req.session.supplier = doc;
-          req.session.id = doc._id;
-          return req.session.save();
-        }).then(() => {
-          req.flash('success', 'Supplier signed up successfully!');
-          return res.redirect("/supplier");
-        }).catch(console.error);
+        supplier
+          .save()
+          .then(doc => {
+            req.session.supplier = doc;
+            req.session.id = doc._id;
+            return req.session.save();
+          })
+          .then(() => {
+            req.flash("success", "Supplier signed up successfully!");
+            return res.redirect("/supplier");
+          })
+          .catch(console.error);
       }
     }
   }
-}
+};
 
 exports.getProfile = (req, res) => {
   res.render("supplier/profile", { profile: req.session.supplier });
@@ -137,12 +148,14 @@ exports.getProfile = (req, res) => {
 exports.getBidRequests = (req, res) => {
   const supplier = req.session.supplier;
 
-  BidRequest.find({ supplier: supplier._id }).then(requests => {
-    res.render("supplier/bid-requests", {
-      supplier: supplier,
-      requests: requests
-    });
-  }).catch(console.error);
+  BidRequest.find({ supplier: supplier._id })
+    .then(requests => {
+      res.render("supplier/bid-requests", {
+        supplier: supplier,
+        requests: requests
+      });
+    })
+    .catch(console.error);
 };
 
 exports.getBidRequest = (req, res) => {
@@ -150,16 +163,19 @@ exports.getBidRequest = (req, res) => {
   let request;
   const id = req.params.id;
 
-  BidRequest.findOne({ _id: id }).then(_request => {
-    request = _request;
-    return Buyer.findOne({ _id: request.buyer });
-  }).then(buyer => {
-    res.render("supplier/bid-request", {
-      supplier: supplier,
-      request: request,
-      buyer: buyer
+  BidRequest.findOne({ _id: id })
+    .then(_request => {
+      request = _request;
+      return Buyer.findOne({ _id: request.buyer });
     })
-  }).catch(console.error);
+    .then(buyer => {
+      res.render("supplier/bid-request", {
+        supplier: supplier,
+        request: request,
+        buyer: buyer
+      });
+    })
+    .catch(console.error);
 };
 
 exports.postBidRequest = (req, res) => {
@@ -170,15 +186,17 @@ exports.postBidRequest = (req, res) => {
       message: req.body.message
     });
 
-    newMessage.save().then(result => {
-      res.render(req.originalUrl);
-    }).catch(console.error);
+    newMessage
+      .save()
+      .then(result => {
+        res.render(req.originalUrl);
+      })
+      .catch(console.error);
   }
 };
 
-
 exports.postProfile = (req, res) => {
-  Supplier.findOne({ _id: req.body._id }, (doc) => {
+  Supplier.findOne({ _id: req.body._id }, doc => {
     doc.companyName = req.body.companyName;
     doc.directorsName = req.body.directorsName;
     doc.contactName = req.body.contactName;
@@ -204,16 +222,20 @@ exports.postProfile = (req, res) => {
     doc.antibriberyPolicyUrl = req.body.antibriberyPolicyUrl;
     doc.environmentPolicyUrl = req.body.environmentPolicyUrl;
     doc.qualityManagementPolicyUrl = req.body.qualityManagementPolicyUrl;
-    doc.occupationalSafetyAndHealthPolicyUrl = req.body.occupationalSafetyAndHealthPolicyUrl;
+    doc.occupationalSafetyAndHealthPolicyUrl =
+      req.body.occupationalSafetyAndHealthPolicyUrl;
     doc.otherRelevantFilesUrls = req.body.otherRelevantFilesUrls;
 
     return doc.save();
-  }).then(doc => {
-    req.session.supplier = doc;
-    req.session.id = doc._id;
-    return req.session.save();
-  }).then(() => {
-    req.flash('success', 'Supplier details updated successfully!');
-    return res.redirect("/supplier");
-  }).catch(console.error);
-}
+  })
+    .then(doc => {
+      req.session.supplier = doc;
+      req.session.id = doc._id;
+      return req.session.save();
+    })
+    .then(() => {
+      req.flash("success", "Supplier details updated successfully!");
+      return res.redirect("/supplier");
+    })
+    .catch(console.error);
+};

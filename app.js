@@ -126,9 +126,7 @@ mongoose
     });
     
     demoGovernmentSupervisor.save();   
-*/
-   
-/*
+
    const {ObjectId} = require('mongodb');
    
    const demoBidRequest = new BidRequest({
