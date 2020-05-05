@@ -13,6 +13,22 @@ const Buyer = require("./models/buyer");
 const Supplier = require("./models/supplier");
 const MONGODB_URI = "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";
 const app = express();
+/*
+//For connecting the app to a subdomain:
+
+function checkHttps(req, res, next){
+  // protocol check, if http, redirect to https
+  
+  if(req.get('X-Forwarded-Proto').indexOf("https")!=-1){
+    return next()
+  } else {
+    res.redirect('https://' + req.hostname + req.url);
+  }
+}
+
+app.all('*', checkHttps);
+*/
+
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const store = new MongoDBStore({
