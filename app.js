@@ -29,7 +29,21 @@ function checkHttps(req, res, next){
 app.all('*', checkHttps);
 */
 
-app.use(bodyParser.urlencoded({ extended: true }));
+//We may need a port to listen on, for chat:
+/*
+var server = app.listen(4000, () => {
+ console.log('server is running on port', server.address().port);
+});
+
+
+var message = mongoose.model('message',{ name : String, message : String})
+
+*/
+
+
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
+
 
 const store = new MongoDBStore({
   uri: MONGODB_URI,
