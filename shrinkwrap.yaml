@@ -1,8 +1,10 @@
 dependencies:
   bcryptjs: 2.4.3
+  bluebird: 3.7.2
   connect-flash: 0.1.1
   connect-mongodb-session: 2.3.1
   csurf: 1.11.0
+  date-format-simple: 1.1.5
   ejs: 3.1.2
   express: 4.17.1
   express-session: 1.17.1
@@ -102,6 +104,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-MKiLiV+I1AA596t9w1sQJ8jkiSr5+ZKi0WKrYGUn6d1Fx+Ij4tIj+m2WMQSGczs5jZVxV339chE8iwk6F64wjA==
+  /bluebird/3.7.2:
+    dev: false
+    resolution:
+      integrity: sha512-XpNj6GDQzdfW+r2Wnn7xiSAd7TM3jzkxGXBGTtWKuSXv1xUV+azxAm8jdWZN06QTQk+2N2XB9jRDkvbmQmcRtg==
   /body-parser/1.19.0:
     dependencies:
       bytes: 3.1.0
@@ -246,6 +252,10 @@ packages:
       node: '>= 0.8.0'
     resolution:
       integrity: sha512-UCtehyEExKTxgiu8UHdGvHj4tnpE/Qctue03Giq5gPgMQ9cg/ciod5blZQ5a4uCEenNQjxyGuzygLdKUmee/bQ==
+  /date-format-simple/1.1.5:
+    dev: false
+    resolution:
+      integrity: sha512-q220TypgXomDGRSBlB6Aw+lWjGBJK94OhWrNs7QHFhzJV4W/R5ObFthyPFkQAgHfhZ9h6ewgHi5ZNaSXW3q44w==
   /debug/2.6.9:
     dependencies:
       ms: 2.0.0
@@ -1033,9 +1043,11 @@ shrinkwrapMinorVersion: 9
 shrinkwrapVersion: 3
 specifiers:
   bcryptjs: ^2.4.3
+  bluebird: ^3.7.2
   connect-flash: ^0.1.1
   connect-mongodb-session: ^2.3.1
   csurf: ^1.11.0
+  date-format-simple: ^1.1.5
   ejs: ^3.1.2
   express: ^4.17.1
   express-session: ^1.17.1
