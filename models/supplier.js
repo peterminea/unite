@@ -8,7 +8,7 @@ const supplierSchema = new Schema({
   },
   directorsName: {
     type: String,
-    required: false
+    required: true
   },
   contactName: {
     type: String,

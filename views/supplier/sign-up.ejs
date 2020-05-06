@@ -42,6 +42,11 @@
       <form method="POST">
         <h2>Sign up as Supplier</h2>
         <div class="form-group">
+          <label class="text-muted form-text">
+            Please fill in all the required (*) fields.
+          </label>
+        </div>
+        <div class="form-group">
           <label>Company Name*</label>
           <input type="text" class="form-control" name="companyName" required>
         </div>
@@ -56,7 +61,7 @@
             required>
         </div>
         <div class="form-group">
-          <label>Director's name</label>
+          <label>Director's name*</label>
           <input type="text" class="form-control" name="directorsName">
         </div>
         <div class="form-group">
@@ -162,10 +167,10 @@
         </div>
 
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-        <button type="submit" class="btn btn-primary btn-block">Sign-up</button>
+        <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
         <div class="form-group">
           <label class="text-muted form-text">
-            By clicking the "Sign-up" button,
+            By clicking the "Sign Up" button,
             you accept UNITE Terms And Conditions and
             Anti-bribery Agreement.
           </label>

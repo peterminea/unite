@@ -6,14 +6,33 @@ const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
 const flash = require("connect-flash");
+const dateTime = require("date-format-simple");
 
 //Classes:
 const BidRequest = require("./models/bidRequest");
 const Buyer = require("./models/buyer");
 const Supplier = require("./models/supplier");
+const Supervisor = require("./models/supervisor");
+const Message = require("./models/message");
+
 const MONGODB_URI = "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";
 const app = express();
-app.use(bodyParser.urlencoded({ extended: true }));
+/*
+//For connecting the app to a subdomain:
+
+function checkHttps(req, res, next){
+  // protocol check, if http, redirect to https
+  
+  if(req.get('X-Forwarded-Proto').indexOf("https")!=-1){
+    return next()
+  } else {
+    res.redirect('https://' + req.hostname + req.url);
+  }
+}
+
+app.all('*', checkHttps);
+*/
+
 
 const store = new MongoDBStore({
   uri: MONGODB_URI,
@@ -53,11 +72,62 @@ const homeRoutes = require("./routes/home");
 const supplierRoutes = require("./routes/supplier");
 const buyerRoutes = require("./routes/buyer");
 const supervisorRoutes = require("./routes/supervisor");
+const messageRoutes = require("./routes/message");
+const connect = require("./dbconnect");
 
 app.use("/", homeRoutes);
+app.use("/messages", messageRoutes);
 app.use("/supplier", supplierRoutes);
 app.use("/buyer", buyerRoutes);
 app.use("/supervisor", supervisorRoutes);
+
+
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
+const port = 5000;
+
+var server = app.listen(4000, () => {
+ console.log('server is running on port', server.address().port);
+});
+
+//Or this:
+http.listen(port, () => {
+  console.log("Running on Port: " + port);
+});
+
+io.on("connection", (socket)=>{
+    console.log("user connected");
+    socket.on("disconnect", ()=>{
+    console.log("Disconnected")
+})
+});
+
+  //Someone is typing:
+  io.on("typing", data => {
+    io.broadcast.emit("notifyTyping", {
+      user: data.user,
+      message: data.message
+    });
+  });
+
+  //When someone stops typing:
+  io.on("stopTyping", () => {
+    io.broadcast.emit("notifyStopTyping");
+  });
+
+  io.on("chat message", function(msg) {
+    console.log("message: " + msg);
+
+    //broadcast message to everyone in port:5000 except yourself.
+    io.broadcast.emit("received", { message: msg });
+
+    //save chat to the database
+    connect.then(db => {
+      console.log("connected correctly to the server");
+      let chatMessage = new Message({ message: msg, sender: "Anonymous" });
+      chatMessage.save();
+    });
+  });
 
 
 // Database configuration
