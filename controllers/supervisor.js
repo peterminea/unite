@@ -104,8 +104,7 @@ exports.postSignUp = (req, res) => {
           antibriberyPolicyUrl: req.body.antibriberyPolicyUrl,
           environmentPolicyUrl: req.body.environmentPolicyUrl,
           qualityManagementPolicyUrl: req.body.qualityManagementPolicyUrl,
-          occupationalSafetyAndHealthPolicyUrl:
-            req.body.occupationalSafetyAndHealthPolicyUrl,
+          occupationalSafetyAndHealthPolicyUrl: req.body.occupationalSafetyAndHealthPolicyUrl,
           otherRelevantFilesUrls: req.body.otherRelevantFilesUrls,
           UNITETermsAndConditions: true,
           antibriberyAgreement: true
@@ -129,13 +128,13 @@ exports.postSignUp = (req, res) => {
 };
 
 exports.getProfile = (req, res) => {
-  const supervisor = req.session.supervisor;
-
-  res.render("supervisor/profile", { supervisor: supervisor });
+  res.render("supervisor/profile", { profile: req.session.supervisor });
 };
 
 exports.postProfile = (req, res) => {
-  Supervisor.findOne({ _id: req.body._id }, doc => {
+  Supervisor.findOne({ _id: req.body._id }, (err, doc) => {
+    if (err) return console.error(err);
+    
     doc.organizationName = req.body.organizationName;
     doc.organizationUniteID = req.body.organizationUniteID;
     doc.contactName = req.body.contactName;
@@ -147,11 +146,10 @@ exports.postProfile = (req, res) => {
     doc.antibriberyPolicyUrl = req.body.antibriberyPolicyUrl;
     doc.environmentPolicyUrl = req.body.environmentPolicyUrl;
     doc.qualityManagementPolicyUrl = req.body.qualityManagementPolicyUrl;
-    doc.occupationalSafetyAndHealthPolicyUrl =
-      req.body.occupationalSafetyAndHealthPolicyUrl;
+    doc.occupationalSafetyAndHealthPolicyUrl = req.body.occupationalSafetyAndHealthPolicyUrl;
     doc.otherRelevantFilesUrls = req.body.otherRelevantFilesUrls;
-    doc.UNITETermsAndConditions = req.body.UNITETermsAndConditions;
-    doc.antibriberyAgreement = req.body.antibriberyAgreement;
+    doc.UNITETermsAndConditions = req.body.UNITETermsAndConditions == 'on'? true : false;
+    doc.antibriberyAgreement = req.body.antibriberyAgreement == 'on'? true : false;
 
     return doc.save();
   })

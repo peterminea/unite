@@ -14,7 +14,7 @@ const messageSchema = new Schema({
         type: String,
         required: true
     },
-  sender: {
+    sender: {
         type: String,
         required: true
     },

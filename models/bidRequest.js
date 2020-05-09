@@ -6,7 +6,7 @@ const bidRequestSchema = new Schema({
     type: String,
     required: true
   },
-  commodityList: {
+  productsServicesOffered: {
     type: String,
     required: true
   },

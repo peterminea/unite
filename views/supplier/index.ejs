@@ -10,6 +10,7 @@
   <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <script src="/https.js"></script>
 </head>
 
 <body>
@@ -59,7 +60,7 @@
       <h5 class="card-header">Welcome!</h5>
       <div class="card-body">
         <h5 class="card-title">Hello, <%= supplier.companyName %></h5>
-        <p class="card-text">This is your profile page. To ensure you continue to appear in buyers’ search results,
+        <p class="card-text">This is your profile page. To ensure you continue to appear in buyers' search results,
           please keep your capabilities up-to-date.</p>
         <a href="/supplier/profile" class="btn btn-primary">Edit your profile</a>
       </div>
@@ -72,8 +73,7 @@
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Balance: €<%= supplier.balance %></h5>
-            <p class="card-text">You can manage your balance and get withdraw from <a
-                href="/supplier/balance">Balance</a> page.</p>
+            <p class="card-text">You can manage your balance and get withdraw from <a href="/supplier/balance">Balance</a> page.</p>
             <a href="/supplier/balance" class="btn btn-primary">Go to balance</a>
           </div>
         </div>
@@ -81,16 +81,15 @@
       <div class="col-sm-6">
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title">Total Accepted Bid Request: <%= requestsCount %></h5>
-            <p class="card-text">If you want to increase your accepted bid requests number, you can edit your
-              capabilities on your profile.</p>
+            <h5 class="card-title">Accepted Bid Requests: <%= requestsCount %></h5>
+            <p class="card-text">If you want to increase your accepted bid requests number, you can edit your capabilities on your profile.</p>
             <a href="/supplier/profile" class="btn btn-primary">Go to profile</a>
           </div>
         </div>
       </div>
     </div>
   </div>
-
+  
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>

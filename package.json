@@ -18,7 +18,8 @@
     "socket.io": "^2.3.0",
     "http": "^0.0.0",
     "bluebird": "^3.7.2",
-    "date-format-simple": "^1.1.5"
+    "date-format-simple": "^1.1.5",
+    "ssl": "^1.0.0"
   },
   "engines": {
     "node": "12.x"

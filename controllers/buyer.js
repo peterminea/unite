@@ -175,11 +175,14 @@ exports.postSignUp = (req, res) => {
 };
 
 exports.getProfile = (req, res) => {
-  res.render("buyer/profile", { profile: req });
+  res.render("buyer/profile", { profile: req.session.buyer });
 };
 
 exports.postProfile = (req, res) => {
-  Buyer.findOne({ _id: req.body._id }, doc => {
+  Buyer.findOne({ _id: req.body._id }, (err, doc) => {
+    if (err) return console.error(err);
+    //if(!doc) doc = new Buyer();
+    
     doc.organizationName = req.body.organizationName;
     doc.organizationUniteID = req.body.organizationUniteID;
     doc.contactName = req.body.contactName;

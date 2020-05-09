@@ -10,6 +10,46 @@
   <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  <script src="/https.js"></script>
+  <script type="text/javascript">
+      $(document).ready(function(){
+        $("input").unbind('change').bind('change', function() {        
+          $('#updateProfile').removeAttr('disabled');
+        });
+      });
+    /*
+    function updateProfile() {
+      var count = 0;
+      $('input:required').each(function(i, e) {
+        if(!$(e).val() || "" == $(e).val()) count++;
+      });            
+      
+      var supervisor = //new Supplier
+        ({          
+          organizationName: $("#organizationName").val(),
+          organizationUniteID: $("#organizationUniteID").val(),
+          contactName: $("#contactName").val(),
+          emailAddress: $("#emailAddress").val(),
+          password: $("#password").val(),
+          address: $("#address").val(),
+          country: $("#country").val(),
+          certificatesUrls: $("#certificatesUrls").val(),
+          antibriberyPolicyUrl: $("#antibriberyPolicyUrl").val(),
+          environmentPolicyUrl: $("#environmentPolicyUrl").val(),
+          qualityManagementPolicyUrl: $("#qualityManagementPolicyUrl").val(),
+          occupationalSafetyAndHealthPolicyUrl: $("#occupationalSafetyAndHealthPolicyUrl").val(),
+          otherRelevantFilesUrls: $("#otherRelevantFilesUrls").val(),
+          UNITETermsAndConditions: true,
+          antibriberyAgreement: true
+      });
+      
+     if(count > 0) return false;
+    }*/
+    
+  </script>
 </head>
 
 <body>
@@ -40,69 +80,66 @@
   <div class="container">
     <div class="profile-form smooth-shadow mt-4 mb-4">
       <form method="POST">
+        <input type="hidden" id="password" value="<%= profile.password %>">
         <div class="form-group">
           <label for="organizationName">Organization name*</label>
           <input type="text" class="form-control" id="organizationName" aria-describedby="organizationName"
-            placeholder="organizationName" name="organizationName" required value="<%= supervisor.organizationName %>">
+            placeholder="organizationName" name="organizationName" required value="<%= profile.organizationName %>">
         </div>
         <div class="form-group">
             <label for="organizationUniteID">Organization UNITE ID*</label>
             <input type="text" class="form-control" id="organizationUniteID" aria-describedby="organizationUniteID" placeholder="organizationUniteID"
-                   name="organizationUniteID" required value="<%= supervisor.organizationUniteID %>">
+                   name="organizationUniteID" required value="<%= profile.organizationUniteID %>">
         </div>
         <div class="form-group">
           <label for="contactName">Contact name*</label>
-          <input type="text" class="form-control" id="contactName" aria-describedby="contactName"
-            placeholder="contactName" name="contactName" required value="<%= supervisor.contactName %>">
+          <input type="text" class="form-control" id="contactName" aria-describedby="contactName" placeholder="contactName" name="contactName" required value="<%= profile.contactName %>">
         </div>
 
         <div class="form-group">
-          <label for="exampleInputEmail1">Email address*</label>
-          <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
-            placeholder="Enter email" name="email" required value="supervisor.emailAddress">
+          <label for="exampleInputEmail">Email address*</label>
+          <input type="email" class="form-control" id="emailAddress" aria-describedby="emailHelp" placeholder="Enter email" name="email" required value="<%= profile.emailAddress %>">
         </div>
 
         <div class="form-group">
           <label for="address">Address*</label>
-          <input type="text" class="form-control" id="address" aria-describedby="address" placeholder="address"
-            name="address" required value="<%= supervisor.address %>">
+          <input type="text" class="form-control" id="address" aria-describedby="address" placeholder="address" name="address" required value="<%= profile.address %>">
         </div>
         <div class="form-group">
           <label for="country">Country*</label>
-          <input type="text" class="form-control" id="country" aria-describedby="country" placeholder="country"
-            name="country" required value="<%= supervisor.country %>">
-        </div>         
+          <input type="text" class="form-control" id="country" aria-describedby="country" placeholder="country" name="country" required value="<%= profile.country %>">
+        </div>
 
         <!-- Uploading files field section-->
         <div class="form-group">
           <label>Certificates</label>
-          <input type="url" class="form-control" value="<%= supervisor.certificatesUrls %>">
+          <input type="url" class="form-control" id="certificatesUrls" value="<%= profile.certificatesUrls %>">
         </div>
         <div class="form-group">
           <label>Anti-bribery policy</label>
-          <input type="url" class="form-control" value="<%= supervisor.antibriberyPolicyUrl %>">
+          <input type="url" class="form-control" id="antibriberyPolicyUrl" value="<%= profile.antibriberyPolicyUrl %>">
         </div>
         <div class="form-group">
           <label>Environment policy</label>
-          <input type="url" class="form-control" value="<%= supervisor.environmentPolicyUrl %>">
+          <input type="url" class="form-control" id="environmentPolicyUrl" value="<%= profile.environmentPolicyUrl %>">
         </div>
         <div class="form-group">
           <label>Quality management policy</label>
-          <input type="url" class="form-control" value="<%= supervisor.qualityManagementPolicyUrl%>">
+          <input type="url" class="form-control" id="qualityManagementPolicyUrl" value="<%= profile.qualityManagementPolicyUrl%>">
         </div>
         <div class="form-group">
           <label>Occupational Safety and Health</label>
-          <input type="url" class="form-control" value="<%= supervisor.occupationalSafetyAndHealthPolicyUrl %>">
+          <input type="url" class="form-control" id="occupationalSafetyAndHealthPolicyUrl" value="<%= profile.occupationalSafetyAndHealthPolicyUrl %>">
         </div>
         <div class="form-group">
           <label>Other relevant files</label>
-          <input type="url" class="form-control" value="<%= supervisor.otherRelevantFilesUrls %>">
+          <input type="url" class="form-control" id="otherRelevantFilesUrls" value="<%= profile.otherRelevantFilesUrls %>">
         </div>
 
-<!--Mandatory check of agreements -->
+        <!--Mandatory check of agreements -->
           <div class="form-group">
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" <%= !profile.UNITETermsAndConditions ? "checked" : "" %> required>
+              <input class="form-check-input" type="checkbox" id="uniteTermsAndConditions" <%= profile.UNITETermsAndConditions ? "checked" : "" %> required>
               <label class="form-check-label" for="invalidCheck2">
                 UNITE Terms And Conditions
               </label>
@@ -110,19 +147,20 @@
           </div>
           <div class="form-group">
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" <%= profile.antibriberyAgreement ? "checked" : "" %> required>
+              <input class="form-check-input" type="checkbox" id="antibriberyAgreement" <%= profile.antibriberyAgreement ? "checked" : "" %> required>
               <label class="form-check-label" for="invalidCheck2">
                 Antibribery Agreement
               </label>
             </div>
-          </div>        
+          </div>
         
         <br>
-        <button type="submit" class="btn btn-primary" disabled>Submit</button>
+       
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <button type="submit" disabled id="updateProfile" value="Update Profile" class="btn btn-primary btn-block btn-lg">Update Profile</button>
       </form>
     </div>
-  </div>
-
+  </div>  
 </body>
 
 </html>
