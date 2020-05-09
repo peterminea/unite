@@ -17,6 +17,10 @@ const supplierSchema = new Schema({
   title: {
     type: String,
     required: true
+  },  
+  companyRegistrationNo: {
+    type: String,
+    required: true
   },
   emailAddress: {
     type: String,
@@ -26,7 +30,7 @@ const supplierSchema = new Schema({
     type: String,
     required: true
   },
-  registrationCompany: {
+  registeredCountry: {
     type: String,
     required: true
   },
@@ -38,13 +42,13 @@ const supplierSchema = new Schema({
     type: String,
     required: true
   },
-  storageLocation: {
+  areaCovered: {
     type: String,
-    required: false
+    required: true
   },
   contactMobileNumber: {
     type: String,
-    required: false
+    required: true
   },
   country: {
     type: String,
@@ -66,7 +70,7 @@ const supplierSchema = new Schema({
     type: String,
     required: false
   },
-  commodities: {
+  productsServicesOffered: {
     type: String,
     required: true
   },
@@ -115,7 +119,7 @@ const supplierSchema = new Schema({
     required: true
   },
   antibriberyAgreement: {
-    type: Boolean, // Force to true with Popup
+    type: Boolean, // Force to true with popup
     required: true
   }
 });

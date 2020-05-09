@@ -10,6 +10,45 @@
   <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  <script src="/https.js"></script>
+  <script type="text/javascript">
+      $(document).ready(function(){
+        $("input").unbind('change').bind('change', function() {        
+          $('#updateProfile').removeAttr('disabled');
+        });
+      });
+/*
+    function updateProfile() {      
+      var count = 0;
+      $('input:required').each(function(i, e) {
+        if(!$(e).val() || "" == $(e).val()) count++;
+      });            
+      //const Supplier = require("../../models/supplier");
+   
+      //alert(count + ' fields must be completed. ' + supplier);
+      var buyer = //new Supplier
+        ({
+          organizationName: $("#organizationName").val(),
+          organizationUniteID: $("#organizationUniteID").val(),
+          contactName: $("#contactName").val(),
+          balance: $("#balance").val(),
+          emailAddress: $("#emailAddress").val(),
+          password: $("#password").val(),
+          departmentAgencyGroup: $("#departmentAgencyGroup").val(),
+          qualification: $("#qualification").val(),
+          address: $("#address").val(),
+          country: $("#country").val()
+      });
+      
+      alert('error ' + buyer);
+      if(count > 0) return false;      
+    }*/
+    
+</script>
+    
 </head>
 
 <body>
@@ -28,7 +67,7 @@
       </ul>
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link" href="/buyer/balance">Balance: €0&nbsp;&nbsp;</a>
+          <a class="nav-link" href="/buyer/balance">Balance: €<%= profile.balance %>&nbsp;</a>
         </li>
         <li class="nav-item active">
           <a class="btn btn-primary" href="/buyer/profile">Profile</a>
@@ -46,62 +85,57 @@
       <h5 class="card-header">Welcome!</h5>
       <div class="card-body">
         <h5 class="card-title">Hello, <%= profile.organizationName %></h5>
-        <p class="card-text">This is your profile page. To ensure you continue to appear in buyers’ search results,
-          please keep your capabilities up-to-date.</p>
+        <p class="card-text">This is your profile page. To ensure that you continue to appear in buyers' search results,  please keep your capabilities up-to-date.</p>
       </div>
     </div>
     <br><br>
     <div class="smooth-shadow profile-form">
       <form>
+        <input type="hidden" id="balance" value="<%= profile.balance %>">
+        
         <div class="row m-2">
           <div class="form-group mr-2">
             <label>Organization name*</label>
-            <input type="text" class="form-control" id="organizationName" value="<%= profile.organizationName %>" required>
+            <input type="text" class="form-control" id="organizationName" name="organizationName" value="<%= profile.organizationName %>" required>
           </div>
           <div class="form-group mr-2">
             <label>Organization UNITE ID*</label>
-            <input type="text" class="form-control" id="organizationUniteID" value="<%= profile.organizationUniteID %>" required>
+            <input type="text" class="form-control" id="organizationUniteID" name="organizationUniteID" value="<%= profile.organizationUniteID %>" required>
           </div>
           <div class="form-group mr-2">
             <label>Contact name*</label>
-            <input type="text" class="form-control" id="contactName" value="<%= profile.contactName %>" required>
+            <input type="text" class="form-control" id="contactName" name="contactName" value="<%= profile.contactName %>" required>
           </div>
           <div class="form-group">
             <label>Email address*</label>
-            <input type="email" class="form-control" id="emailAddress" value="<%= profile.emailAddress %>" required>
+            <input type="email" class="form-control" id="emailAddress" name="emailAddress" value="<%= profile.emailAddress %>" required>
           </div>
         </div>
 
         <div class="row m-2">
           <div class="form-group mr-2">
             <label>Department / Agency / Group</label>
-            <input type="text" class="form-control" id="departmentAgencyGroup" value="<%= profile.deptAgencyGroup %>">
+            <input type="text" class="form-control" id="departmentAgencyGroup" name="departmentAgencyGroup" value="<%= profile.deptAgencyGroup %>">
           </div>
           <div class="form-group mr-2">
             <label>Qualification / Experience</label>
-            <input type="text" class="form-control" id="qualification" value="<%= profile.qualification %>">
+            <input type="text" class="form-control" id="qualification" name="qualification" value="<%= profile.qualification %>">
           </div>
           <div class="form-group mr-2">
             <label>Address*</label>
-            <input type="text" class="form-control" id="contactName" value="<%= profile.address %>" required>
+            <input type="text" class="form-control" id="address" name="address" value="<%= profile.address %>" required>
           </div>
           <div class="form-group">
             <label>Country*</label>
-            <input type="text" class="form-control" id="country" value="<%= profile.country %>" required>
+            <input type="text" class="form-control" id="country" name="country" value="<%= profile.country %>" required>
           </div>
         </div>
 
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-        <button class="btn btn-primary" onclick="" disabled>
-          Update Details
-        </button>
+        <button type="submit" disabled id="updateProfile" value="Update Profile" class="btn btn-primary btn-block btn-lg">Update Profile</button>
       </form>
     </div>
   </div>
-
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
 </body>
 
 </html>

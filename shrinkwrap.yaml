@@ -11,6 +11,7 @@ dependencies:
   http: 0.0.0
   mongoose: 5.9.12
   socket.io: 2.3.0
+  ssl: 1.0.0
 packages:
   /accepts/1.3.7:
     dependencies:
@@ -934,6 +935,10 @@ packages:
     optional: true
     resolution:
       integrity: sha1-/0rm5oZWBWuks+eSqzM004JzyhE=
+  /ssl/1.0.0:
+    dev: false
+    resolution:
+      integrity: sha1-l3WCAUnW8ihZgCT/nZeEANNoSMA=
   /standard-error/1.1.0:
     dev: false
     resolution:
@@ -1054,3 +1059,4 @@ specifiers:
   http: ^0.0.0
   mongoose: ^5.9.12
   socket.io: ^2.3.0
+  ssl: ^1.0.0

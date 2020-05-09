@@ -98,18 +98,19 @@ exports.postSignUp = (req, res) => {
           directorsName: req.body.directorsName,
           contactName: req.body.contactName,
           title: req.body.title,
+          companyRegistrationNo: req.body.companyRegistrationNo,
           emailAddress: req.body.emailAddress,
           password: req.body.password,
-          registrationCompany: req.body.registrationCompany,
+          registeredCountry: req.body.registeredCountry,
           companyAddress: req.body.companyAddress,
-          storageLocation: req.body.storageLocation,
+          areaCovered: req.body.areaCovered,
           contactMobileNumber: req.body.contactMobileNumber,
           country: req.body.country,
           industry: req.body.industry,
           employeeNumbers: req.body.employeeNumbers,
           lastYearTurnover: req.body.lastYearTurnover,
           website: req.body.website,
-          commodities: req.body.commodities,
+          productsServicesOffered: req.body.productsServicesOffered,
           capabilityDescription: req.body.capabilityDescription,
           relevantExperience: req.body.relevantExperience,
           supportingInformation: req.body.supportingInformation,
@@ -117,9 +118,9 @@ exports.postSignUp = (req, res) => {
           antibriberyPolicyUrl: req.body.antibriberyPolicyUrl,
           environmentPolicyUrl: req.body.environmentPolicyUrl,
           qualityManagementPolicyUrl: req.body.qualityManagementPolicyUrl,
-          occupationalSafetyAndHealthPolicyUrl:
-            req.body.occupationalSafetyAndHealthPolicyUrl,
+          occupationalSafetyAndHealthPolicyUrl: req.body.occupationalSafetyAndHealthPolicyUrl,
           otherRelevantFilesUrls: req.body.otherRelevantFilesUrls,
+          balance: req.body.balance,
           UNITETermsAndConditions: true,
           antibriberyAgreement: true
         });
@@ -195,26 +196,29 @@ exports.postBidRequest = (req, res) => {
   }
 };
 
-exports.postProfile = (req, res) => {
-  Supplier.findOne({ _id: req.body._id }, doc => {
+exports.postProfile = (req, res) => {console.log(req.body);
+  Supplier.findOne({ _id: req.body._id }, (err, doc) => {
+    if (err) return console.error(err);
+    console.log(doc);
+    
     doc.companyName = req.body.companyName;
     doc.directorsName = req.body.directorsName;
     doc.contactName = req.body.contactName;
-    doc.title = req.body.title;
+    doc.title = req.body.title;    
     doc.emailAddress = req.body.emailAddress;
     doc.password = req.body.password;
     doc.companyRegistrationNo = req.body.companyRegistrationNo;
-    doc.registrationCompany = req.body.registrationCompany;
+    doc.registeredCountry = req.body.registeredCountry;
     doc.balance = req.body.balance;
     doc.companyAddress = req.body.companyAddress;
-    doc.storageLocation = req.body.storageLocation;
+    doc.areaCovered = req.body.areaCovered;
     doc.contactMobileNumber = req.body.contactMobileNumber;
     doc.country = req.body.country;
     doc.industry = req.body.industry;
     doc.employeeNumbers = req.body.employeeNumbers;
     doc.lastYearTurnover = req.body.lastYearTurnover;
     doc.website = req.body.website;
-    doc.commodities = req.body.commodities;
+    doc.productsServicesOffered = req.body.productsServicesOffered;
     doc.capabilityDescription = req.body.capabilityDescription;
     doc.relevantExperience = req.body.relevantExperience;
     doc.supportingInformation = req.body.supportingInformation;
@@ -222,9 +226,10 @@ exports.postProfile = (req, res) => {
     doc.antibriberyPolicyUrl = req.body.antibriberyPolicyUrl;
     doc.environmentPolicyUrl = req.body.environmentPolicyUrl;
     doc.qualityManagementPolicyUrl = req.body.qualityManagementPolicyUrl;
-    doc.occupationalSafetyAndHealthPolicyUrl =
-      req.body.occupationalSafetyAndHealthPolicyUrl;
+    doc.occupationalSafetyAndHealthPolicyUrl = req.body.occupationalSafetyAndHealthPolicyUrl;
     doc.otherRelevantFilesUrls = req.body.otherRelevantFilesUrls;
+    doc.UNITETermsAndConditions = req.body.UNITETermsAndConditions == 'on'? true : false;
+    doc.antibriberyAgreement = req.body.antibriberyAgreement == 'on'? true : false;
 
     return doc.save();
   })
