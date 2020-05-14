@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const connectdb = require("../dbconnect");
 const Message = require("../models/message");
+const chatController = require("../controllers/chat");
 const router = express.Router();
 
 router.route("/").get((req, res, next) => {
@@ -15,5 +16,7 @@ router.route("/").get((req, res, next) => {
     });
   });
 });
+
+router.get("/", /*isAuth, sessionExit,*/ chatController.getIndex);
 
 module.exports = router;
