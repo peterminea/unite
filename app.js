@@ -7,6 +7,8 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
 const flash = require("connect-flash");
 const dateTime = require("date-format-simple");
+const multer = require('multer');
+const fs = require('fs-extra');
 
 //Classes:
 const BidRequest = require("./models/bidRequest");
@@ -69,19 +71,22 @@ app.use((req, res, next) => {
 
 // Routes
 const homeRoutes = require("./routes/home");
+const bidRequestRoutes = require("./routes/bidRequest");
 const supplierRoutes = require("./routes/supplier");
 const buyerRoutes = require("./routes/buyer");
 const supervisorRoutes = require("./routes/supervisor");
-const messageRoutes = require("./routes/message");
-const connect = require("./dbconnect");
+const messageRoutes = require("./routes/chat");
 
 app.use("/", homeRoutes);
-app.use("/messages", messageRoutes);
+app.use("/bidRequest", bidRequestRoutes);
 app.use("/supplier", supplierRoutes);
 app.use("/buyer", buyerRoutes);
 app.use("/supervisor", supervisorRoutes);
+app.use("/chat", messageRoutes);
 
 
+//For chatting:
+const connect = require("./dbconnect");
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 const port = 5000;
@@ -129,6 +134,110 @@ io.on("connection", (socket)=>{
     });
   });
 
+
+//Upload files to DB:
+const MongoClient = require('mongodb').MongoClient;
+const ObjectId = require('mongodb').ObjectId;
+
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads')
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + '-' + Date.now())
+  }
+})
+
+var upload = multer({ storage: storage });
+var db;
+
+MongoClient.connect(MONGODB_URI, (err, client) => {
+  if (err)
+    return console.log(err);
+  
+  db = client.db('test');
+  app.listen(6000, () => {
+    console.log('listening on 6000');
+  });
+});
+/*
+app.get('/', function(req, res) {
+  res.sendFile(__dirname + '/index.ejs');
+});*/
+
+// upload single file
+
+app.post('/uploadfile', upload.single('singleFile'), (req, res, next) => {
+  const file = req.file;
+  
+  if (!file) {
+    const error = new Error('Please upload a file');
+    error.httpStatusCode = 400;
+    return next(error);
+  }
+ 
+   res.send(file);
+});
+
+//Uploading multiple files
+app.post('/uploadmultiple', upload.array('multipleFiles', 15), (req, res, next) => {
+  const files = req.files;
+  
+  if (!files) {
+    const error = new Error('Please choose files');
+    error.httpStatusCode = 400;
+    return next(error);
+  }
+
+    res.send(files);
+});
+
+/*
+app.post('/uploadphoto', upload.single('picture'), (req, res) => {
+  var img = fs.readFileSync(req.file.path);
+  var encode_image = img.toString('base64');
+ // Define a JSONobject for the image attributes for saving to database
+ 
+  var finalImg = {
+      contentType: req.file.mimetype,
+      image:  new Buffer(encode_image, 'base64')
+   };
+  
+  db.collection('mycollection').insertOne(finalImg, (err, result) => {
+  	console.log(result);
+    if (err) 
+      return console.log(err);
+
+    console.log('saved to database');
+    res.redirect('/');
+  });
+});
+
+
+  app.get('/photos', (req, res) => {
+  db.collection('mycollection').find().toArray((err, result) => {
+
+  const imgArray= result.map(element => element._id);
+	console.log(imgArray);
+
+   if (err) 
+     return console.log(err);
+   res.send(imgArray);  
+   
+  });
+});
+
+app.get('/photo/:id', (req, res) => {
+var filename = req.params.id;
+
+db.collection('mycollection').findOne({'_id': ObjectId(filename) }, (err, result) => {
+    if (err) 
+      return console.log(err);
+
+   res.contentType('image/jpeg');
+   res.send(result.image.buffer);   
+  });
+});*/
 
 // Database configuration
 mongoose

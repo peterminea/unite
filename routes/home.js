@@ -7,5 +7,7 @@ router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 router.get("/", homeController.getIndex);
 router.get("/about", homeController.getAbout);
+router.get("/antibriberyAgreement", homeController.getAntibriberyAgreement);
+router.get("/termsConditions", homeController.getTermsConditions);
 
 module.exports = router;

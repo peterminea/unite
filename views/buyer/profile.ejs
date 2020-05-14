@@ -14,6 +14,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
   <script src="/https.js"></script>
+  
   <script type="text/javascript">
       $(document).ready(function(){
         $("input").unbind('change').bind('change', function() {        
@@ -90,7 +91,7 @@
     </div>
     <br><br>
     <div class="smooth-shadow profile-form">
-      <form>
+      <form method="POST">
         <input type="hidden" id="balance" value="<%= profile.balance %>">
         
         <div class="row m-2">
@@ -111,7 +112,7 @@
             <input type="email" class="form-control" id="emailAddress" name="emailAddress" value="<%= profile.emailAddress %>" required>
           </div>
         </div>
-
+        <input type="hidden" id="isVerified" value="<%= profile.isVerified %>">
         <div class="row m-2">
           <div class="form-group mr-2">
             <label>Department / Agency / Group</label>
@@ -130,7 +131,7 @@
             <input type="text" class="form-control" id="country" name="country" value="<%= profile.country %>" required>
           </div>
         </div>
-
+        <br>
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
         <button type="submit" disabled id="updateProfile" value="Update Profile" class="btn btn-primary btn-block btn-lg">Update Profile</button>
       </form>

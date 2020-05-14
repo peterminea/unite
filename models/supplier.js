@@ -30,6 +30,10 @@ const supplierSchema = new Schema({
     type: String,
     required: true
   },
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
   registeredCountry: {
     type: String,
     required: true
@@ -85,8 +89,7 @@ const supplierSchema = new Schema({
   supportingInformation: {
     type: String,
     required: false
-  },
-  
+  },  
   // URL's going to download page. Supplier uploads a file and it will be converted to URL
   certificatesUrls: {
     type: String,
@@ -111,8 +114,7 @@ const supplierSchema = new Schema({
   otherRelevantFilesUrls:  {
     type: String,
     required: false
-  },
-  
+  },  
   // UNITE Agreements
   UNITETermsAndConditions: {
     type: Boolean, // Force to true with popup
