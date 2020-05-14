@@ -12,9 +12,12 @@ router.get("/", isAuth, sessionExit, buyerController.getIndex);
 router.get("/sign-in", buyerController.getSignIn);
 router.get("/sign-up", buyerController.getSignUp);
 router.get("/profile", isAuth, sessionExit, buyerController.getProfile);
+router.get("/balance", isAuth, sessionExit, buyerController.getBalance);
 
 router.post("/", isAuth, buyerController.postIndex);
 router.post("/sign-in", buyerController.postSignIn);
 router.post("/sign-up", buyerController.postSignUp);
+router.post('/confirmation', buyerController.postConfirmation);
+router.post('/resend', buyerController.postResendToken);
 
 module.exports = router;

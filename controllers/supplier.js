@@ -3,6 +3,8 @@ const Supplier = require("../models/supplier");
 const Buyer = require("../models/buyer");
 const BidRequest = require("../models/bidRequest");
 const Message = require("../models/message");
+const nodemailer = require('nodemailer');
+const Token = require('../models/supplierToken');
 
 exports.getIndex = (req, res) => {
   const supplier = req.session.supplier;
@@ -19,6 +21,74 @@ exports.getIndex = (req, res) => {
     })
     .catch(console.error);
 };
+
+exports.postConfirmation = function (req, res, next) {
+    req.assert('email', 'Email is not valid').isEmail();
+    req.assert('email', 'Email cannot be blank').notEmpty();
+    req.assert('token', 'Token cannot be blank').notEmpty();
+    req.sanitize('email').normalizeEmail({ remove_dots: false });
+ 
+    // Check for validation errors    
+    var errors = req.validationErrors();
+    if (errors) return res.status(400).send(errors);
+ 
+    // Find a matching token
+    Token.findOne({ token: req.body.token }, function (err, token) {
+        if (!token) return res.status(400).send({ type: 'not-verified', msg: 'We were unable to find a valid token. Your token may have expired.' });
+ 
+        // If we found a token, find a matching user
+        Supplier.findOne({ _id: token._userId, email: req.body.email }, function (err, user) {
+            if (!user) return res.status(400).send({ msg: 'We were unable to find a user for this token.' });
+            if (user.isVerified) return res.status(400).send({ type: 'already-verified', msg: 'This user has already been verified.' });
+ 
+            // Verify and save the user
+            user.isVerified = true;
+            user.save(function (err) {
+                if (err) { return res.status(500).send({ msg: err.message }); }
+                res.status(200).send("The account has been verified. Please log in.");
+            });
+        });
+    });
+};
+
+
+exports.postResendToken = function (req, res, next) {
+    req.assert('email', 'Email is not valid').isEmail();
+    req.assert('email', 'Email cannot be blank').notEmpty();
+    req.sanitize('email').normalizeEmail({ remove_dots: false });
+ 
+    // Check for validation errors    
+    var errors = req.validationErrors();
+    if (errors) return res.status(400).send(errors);
+ 
+    Supplier.findOne({ email: req.body.email }, function (err, user) {
+        if (!user) return res.status(400).send({ msg: 'We were unable to find a user with that email.' });
+        if (user.isVerified) return res.status(400).send({ msg: 'This account has already been verified. Please log in.' });
+ 
+        // Create a verification token, save it, and send email
+        var token = new Token({ _userId: user._id, token: crypto.randomBytes(16).toString('hex') });
+ 
+        // Save the token
+        token.save(function (err) {
+            if (err) { return res.status(500).send({ msg: err.message }); }
+ 
+            // Send the email
+            var transporter = nodemailer.createTransport({ service: 'Sendgrid', auth: { user: process.env.SENDGRID_USERNAME, pass: process.env.SENDGRID_PASSWORD } });
+            var mailOptions = {
+              from: 'no-reply@demo.net',
+              to: user.email,
+              subject: 'Account Verification Token',
+              text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/confirmation\/' + token.token + '.\n' };
+          
+            transporter.sendMail(mailOptions, function (err) {
+                if (err) { return res.status(500).send({ msg: err.message }); }
+                res.status(200).send('A verification email has been sent to ' + user.email + '.');
+            });
+        });
+ 
+    });
+};
+
 
 exports.getSignIn = (req, res) => {
   if (!req.session.supplier)
@@ -48,6 +118,8 @@ exports.postSignIn = (req, res) => {
           if (doMatch) {
             req.session.supplier = doc;
             req.session.id = doc._id;
+            // Make sure the user has been verified
+            if (!doc.isVerified) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
             return req.session.save();
           } else {
             req.flash("error", "Invalid e-mail address or password");
@@ -101,6 +173,7 @@ exports.postSignUp = (req, res) => {
           companyRegistrationNo: req.body.companyRegistrationNo,
           emailAddress: req.body.emailAddress,
           password: req.body.password,
+          isVerified: req.body.isVerified,
           registeredCountry: req.body.registeredCountry,
           companyAddress: req.body.companyAddress,
           areaCovered: req.body.areaCovered,
@@ -126,7 +199,30 @@ exports.postSignUp = (req, res) => {
         });
 
         supplier
-          .save()
+          .save(function (err) {
+            if (err) { return res.status(500).send({ msg: err.message }); }
+
+            // Create a verification token for this user
+            var token = new Token({ _userId: supplier._id, token: crypto.randomBytes(16).toString('hex') });
+
+            // Save the verification token
+            token.save(function (err) {
+                if (err) { return res.status(500).send({ msg: err.message }); }
+
+                // Send the email
+                var transporter = nodemailer.createTransport({ service: 'Sendgrid', auth: { user: process.env.SENDGRID_USERNAME, pass: process.env.SENDGRID_PASSWORD } });
+                var mailOptions = {
+                  from: 'no-reply@yourwebapplication.com',
+                  to: supplier.email, 
+                  subject: 'Account Verification Token', 
+                  text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/confirmation\/' + token.token + '.\n' };
+              
+                transporter.sendMail(mailOptions, function (err) {
+                    if (err) { return res.status(500).send({ msg: err.message }); }
+                    res.status(200).send('A verification email has been sent to ' + supplier.email + '.');
+                });
+            });
+          })
           .then(doc => {
             req.session.supplier = doc;
             req.session.id = doc._id;
@@ -141,6 +237,7 @@ exports.postSignUp = (req, res) => {
     }
   }
 };
+
 
 exports.getProfile = (req, res) => {
   res.render("supplier/profile", { profile: req.session.supplier });
@@ -158,6 +255,12 @@ exports.getBidRequests = (req, res) => {
     })
     .catch(console.error);
 };
+
+
+exports.getBalance = (req, res) => {
+  res.render("supplier/balance", { balance: req.session.supplier.balance });
+}
+
 
 exports.getBidRequest = (req, res) => {
   const supplier = req.session.supplier;
@@ -184,6 +287,7 @@ exports.postBidRequest = (req, res) => {
     const newMessage = new Message({
       to: req.body.to,
       from: req.body.from,
+      sender: req.body.sender,
       message: req.body.message
     });
 
@@ -196,17 +300,19 @@ exports.postBidRequest = (req, res) => {
   }
 };
 
-exports.postProfile = (req, res) => {console.log(req.body);
+exports.postProfile = (req, res) => {
+  console.log(req.body);
   Supplier.findOne({ _id: req.body._id }, (err, doc) => {
     if (err) return console.error(err);
     console.log(doc);
-    
+
     doc.companyName = req.body.companyName;
     doc.directorsName = req.body.directorsName;
     doc.contactName = req.body.contactName;
-    doc.title = req.body.title;    
+    doc.title = req.body.title;
     doc.emailAddress = req.body.emailAddress;
     doc.password = req.body.password;
+    doc.isVerified = req.body.isVerified;
     doc.companyRegistrationNo = req.body.companyRegistrationNo;
     doc.registeredCountry = req.body.registeredCountry;
     doc.balance = req.body.balance;
@@ -228,8 +334,8 @@ exports.postProfile = (req, res) => {console.log(req.body);
     doc.qualityManagementPolicyUrl = req.body.qualityManagementPolicyUrl;
     doc.occupationalSafetyAndHealthPolicyUrl = req.body.occupationalSafetyAndHealthPolicyUrl;
     doc.otherRelevantFilesUrls = req.body.otherRelevantFilesUrls;
-    doc.UNITETermsAndConditions = req.body.UNITETermsAndConditions == 'on'? true : false;
-    doc.antibriberyAgreement = req.body.antibriberyAgreement == 'on'? true : false;
+    doc.UNITETermsAndConditions = req.body.UNITETermsAndConditions == "on" ? true : false;
+    doc.antibriberyAgreement = req.body.antibriberyAgreement == "on" ? true : false;
 
     return doc.save();
   })

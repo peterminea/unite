@@ -10,7 +10,9 @@
   <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
   <script src="/https.js"></script>
 </head>
 
@@ -73,7 +75,12 @@
         <a href="/buyer/sign-in">
           <button class="custom-button">Sign in as Buyer</button></a></li>
         </a>
-      </div>
+      </div>  
+      <div class="col-sm text-center">
+        <a href="/supervisor/sign-in">
+          <button class="custom-button">Sign in as Supervisor</button></a></li>
+        </a>
+      </div>  
     </div>
   </div>
 
@@ -88,36 +95,32 @@
           </button>
         </div>
         <div class="modal-body">
-          <p><b>Note: </b>Registration page for supervisors is currently hidden. We're working to improve our security  level and settings.</p>
-          <p>At this time, you can register either as supplier or as buyer. If you want to register as supervisor, you can contact us directly.</p>
-          
+         <!-- <p><b>Note: </b>Registration page for supervisors is currently hidden. We're working to improve our security  level and settings.</p>
+          <p>At this time, you can register either as supplier or as buyer. If you want to register as supervisor, you can contact us directly.</p> -->          
        <div> 
           <a href="supplier/sign-up">
             <button class="btn btn-primary btn-block">Sign up as Supplier</button>
           </a> 
       </div>
-        <br>
+      <br>
       <div>
           <a href="buyer/sign-up">
             <button class="btn btn-primary btn-block">Sign up as Buyer</button>
           </a>
       </div>
-       <!--        
-        <a href="supervisor/sign-up">
-            <button style="visibility: hidden" class="btn btn-primary btn-block">Sign up as Supervisor</button>
-          </a>
-      -->
-        </div>
+      <br>
+      <div>
+      <a href="supervisor/sign-up">
+          <button class="btn btn-primary btn-block">Sign up as Supervisor</button>
+        </a>
+      </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-        </div>
+        </div>          
       </div>
     </div>
   </div>
-
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+</div>
 </body>
 
 </html>

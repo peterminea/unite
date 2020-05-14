@@ -5,3 +5,11 @@ exports.getIndex = (req, res) => {
 exports.getAbout = (req, res) => {
   res.render("about");
 }
+
+exports.getAntibriberyAgreement = (req, res) => {
+  res.render("antibriberyAgreement");
+};
+
+exports.getTermsConditions = (req, res) => {
+  res.render("termsConditions");
+}

@@ -22,6 +22,10 @@ const buyerSchema = new Schema({
     type: String,
     required: true
   },
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
   address: {
     type: String,
     required: true

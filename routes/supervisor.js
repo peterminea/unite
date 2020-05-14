@@ -13,5 +13,7 @@ router.get("/sign-up", supervisorController.getSignUp);
 router.get("/profile", isAuth, sessionExit, supervisorController.getProfile);
 router.post("/sign-in", supervisorController.postSignIn);
 router.post("/sign-up", supervisorController.postSignUp);
+router.post('/confirmation', supervisorController.postConfirmation);
+router.post('/resend', supervisorController.postResendToken);
 
 module.exports = router;
