@@ -16,56 +16,62 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
     
     <script type="text/javascript">
-      $(document).ready(function(){
-        $("input").unbind('change').bind('change', function() {        
+      $(document).ready(function() {
+        $("input").unbind('change').bind('change', function() {
           $('#updateProfile').removeAttr('disabled');
         });
-      });
-     /* 
-    function updateProfile() {
-      var count = 0;
-      $('input:required').each(function(i, e) {
-        if(!$(e).val() || "" == $(e).val()) count++;
-      });            
-      //const Supplier = require("../../models/supplier");
-   
-      //alert(count + ' fields must be completed. ' + Supplier);
-      var supplier = //new Supplier
-        ({
-          companyName: $("#companyName").val(),
-          directorsName: $("#directorsName").val(),
-          contactName: $("#contactName").val(),
-          title: $("#title").val(),
-          companyRegistrationNo: $("#companyRegistrationNo").val(),
-          emailAddress: $("#emailAddress").val(),
-          password: $("#password").val(),
-          registeredCountry: $("#registeredCountry").val(),
-          companyAddress: $("#companyAddress").val(),
-          areaCovered: $("#areaCovered").val(),
-          contactMobileNumber: $("#contactMobileNumber").val(),
-          country: $("#country").val(),
-          industry: $("#industry").val(),
-          employeeNumbers: $("#employeeNumbers").val(),
-          lastYearTurnover: $("#lastYearTurnover").val(),
-          website: $("#website").val(),
-          productsServicesOffered: $("#productsServicesOffered").val(),
-          capabilityDescription: $("#capabilityDescription").val(),
-          relevantExperience: $("#relevantExperience").val(),
-          supportingInformation: $("#supportingInformation").val(),
-          certificatesUrls: $("#certificatesUrls").val(),
-          antibriberyPolicyUrl: $("#antibriberyPolicyUrl").val(),
-          environmentPolicyUrl: $("#environmentPolicyUrl").val(),
-          qualityManagementPolicyUrl: $("#qualityManagementPolicyUrl").val(),
-          occupationalSafetyAndHealthPolicyUrl: $("#occupationalSafetyAndHealthPolicyUrl").val(),
-          otherRelevantFilesUrls: $("#otherRelevantFilesUrls").val(),
-          UNITETermsAndConditions: true,
-          antibriberyAgreement: true
-      });
-      
-      alert('error ' + supplier);
-      if(count > 0) return false;
-      
-    }*/
+        
+        $('input.fileupload')/*.unbind('change')*/.bind('change', function() {
+          $(this).val? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
+        });
+        
+        $('input[type="submit"].single').click(function() {          
+          var that = this;
+          var formData = new FormData();          
+          formData.append("file", this.file, this.getName());
+          formData.append("upload_file", true);
+          
+        $.ajax({
+          type: 'POST',
+          url: '/uploadfile',
+          async: true,
+          data: formData,
+          cache: false,
+          contentType: false,
+          processData: false
+        })
+        .done(function (data) {
+          // clear form
+          //$('input[name=name]').val('');
+         // $('input[name=age]').val('');
+         // alert(data);
+          });
+
+          //e.preventDefault();
+          });
+        
+        $('input[type="submit"].multiple').click(function() {          
+          var that = this;
+          var formData = new FormData();
+          // add assoc key values, this will be posts values
+          formData.append("file", this.file, this.getName());
+          formData.append("upload_file", true);
+          
+        $.ajax({
+          type: 'POST',
+          url: '/uploadmultiple',
+          async: true,
+          data: formData,
+          cache: false,
+          contentType: false,
+          processData: false
+        })
+        .done(function (data) {          
+          });
+
+          //e.preventDefault();
+          });
+        });
     </script>
     
 </head>
@@ -113,7 +119,7 @@
       <br><br>
   
       <div class="smooth-shadow profile-form">
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
           <input type="hidden" name="_id" value="<%= profile._id %>">          
           <input type="hidden" id="balance" name="balance" value="<%= profile.balance %>">
           <div class="form-group">
@@ -219,64 +225,49 @@
             <input type="text" class="form-control" id="supportingInformation" name="supportingInformation" value="<%= profile.supportingInformation %>">
           </div>
           
-<!-- Uploading files field section-->          
-          <!--
+        <!-- Uploading files field section-->
           <div class="form-group">
-            <form action="/uploadmultiple" enctype="multipart/form-data" method="POST">
-              <label>Certificates</label>
-              Select multiple files:
-              <input type="file" id="certificates" name="multipleFiles" multiple>
-              <input type="submit" value="Upload Files"/>
-            </form>
+              <label>Certificates</label>              
+              <input class="form-control fileupload" type="file" id="certificates" name="certificates" multiple>
+              <input class="form-control multiple" type="submit" disabled value="Upload Files"/>
           </div>
 
           <div class="form-group">
-            <form action="/uploadfile" enctype="multipart/form-data" method="POST">             
-               <label>Anti-bribery policy</label>
-               <input type="file" id="antibriberyPolicy" name="singleFile" />
-               <input type="submit" value="Upload File"/>
-            </form>
+               <label>Antibribery policy</label>
+               <input class="form-control fileupload" type="file" id="antibriberyPolicy" name="antibriberyPolicy" />
+               <input class="form-control single" type="submit" disabled value="Upload File"/>
           </div>
 
           <div class="form-group">
-            <form action="/uploadfile" enctype="multipart/form-data" method="POST">
                <label>Environment policy</label>
-               <input type="file" id="environmentPolicy" name="singleFile" />
-               <input type="submit" value="Upload File"/>
-            </form>
+               <input class="form-control fileupload" type="file" id="environmentPolicy" name="environmentPolicy" />
+               <input class="form-control single" type="submit" disabled value="Upload File"/>
           </div>
 
           <div class="form-group">
-            <form action="/uploadfile" enctype="multipart/form-data" method="POST"> 
                <label>Quality management policy</label>
-               <input type="file" id="qualityManagementPolicy" name="singleFile" />
-               <input type="submit" value="Upload File"/>
-            </form>
+               <input class="form-control fileupload" type="file" id="qualityManagementPolicy" name="qualityManagamentPolicy" />
+               <input class="form-control single" type="submit" disabled value="Upload File"/>
           </div>
 
           <div class="form-group">
-            <form action="/uploadfile" enctype="multipart/form-data" method="POST">
                <label>Occupational Safety and Health</label>
-               <input type="file" id="occupationalSafetyAndHealthPolicy" name="singleFile" />
-               <input type="submit" value="Upload File"/>
-            </form>
+               <input class="form-control fileupload" type="file" id="occupationalSafetyAndHealthPolicy" name="occupationalSafetyAndHealth" />
+               <input class="form-control single" type="submit" disabled value="Upload File"/>
           </div>
 
           <div class="form-group">
-            <form action="/uploadmultiple" enctype="multipart/form-data" method="POST">
-              <label>Other relevant files</label>
-              Select multiple files:
-              <input type="file" id="otherRelevantFiles" name="multipleFiles" multiple>
-              <input type="submit" value="Upload Files"/>
-            </form>
-          </div>          -->
+              <label>Other relevant files</label>              
+              <input class="form-control fileupload" type="file" id="otherRelevantFiles" name="otherFiles" multiple>
+              <input class="form-control multiple" type="submit" disabled value="Upload Files"/>
+          </div>
           
           <div class="form-group">
               <label>Certificates</label>
               <input type="url" id="certificatesUrl" name="certificatesUrl" class="form-control">
             </div> 
           <div class="form-group">
-              <label>Anti-bribery policy</label>
+              <label>Antibribery policy</label>
               <input type="url" id="antibriberyPolicyUrl" name="antibriberyPolicyUrl" class="form-control">
             </div>
           <div class="form-group">
@@ -294,9 +285,9 @@
           <div class="form-group">
               <label>Other relevant files</label>
               <input type="url" id="otherRelevantFilesUrls" name="otherRelevantFilesUrls" class="form-control">
-            </div>          
+            </div>       
  
-<!--Mandatory check of agreements -->
+        <!--Mandatory check of agreements -->
           <div class="form-group">
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="UNITETermsAndConditions" name="UNITETermsAndConditions" <%= profile.UNITETermsAndConditions ? "checked" : "" %> required>
@@ -309,12 +300,13 @@
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="antibriberyAgreement" name="antibriberyAgreement" <%= profile.antibriberyAgreement ? "checked" : "" %> required>
               <label class="form-check-label" for="invalidCheck2">
-                <a href="../antibriberyAgreement">Antibribery Agreement </a>
+                <a href="../antibriberyAgreement">Antibribery Agreement</a>
               </label>
             </div>
           </div>
           <br>
-          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
           <button type="submit" disabled id="updateProfile" value="Update Profile" class="btn btn-primary btn-block btn-lg">Update Profile</button>
         </form>
       </div>

@@ -9,6 +9,7 @@ const flash = require("connect-flash");
 const dateTime = require("date-format-simple");
 const multer = require('multer');
 const fs = require('fs-extra');
+const sortJson = require('sort-json');
 
 //Classes:
 const BidRequest = require("./models/bidRequest");
@@ -16,25 +17,11 @@ const Buyer = require("./models/buyer");
 const Supplier = require("./models/supplier");
 const Supervisor = require("./models/supervisor");
 const Message = require("./models/message");
+const Country = require("./models/country");
+const Industry = require("./models/industry");
 
 const MONGODB_URI = "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";
 const app = express();
-/*
-//For connecting the app to a subdomain:
-
-function checkHttps(req, res, next){
-  // protocol check, if http, redirect to https
-  
-  if(req.get('X-Forwarded-Proto').indexOf("https")!=-1){
-    return next()
-  } else {
-    res.redirect('https://' + req.hostname + req.url);
-  }
-}
-
-app.all('*', checkHttps);
-*/
-
 
 const store = new MongoDBStore({
   uri: MONGODB_URI,
@@ -62,6 +49,7 @@ app.use(
 const csrfProtection = csrf();
 
 app.use(csrfProtection);
+//app.use(csrf({ cookie: true }));
 app.use(flash());
 
 app.use((req, res, next) => {
@@ -89,6 +77,8 @@ app.use("/chat", messageRoutes);
 const connect = require("./dbconnect");
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var url = require('url');
+
 const port = 5000;
 
 var server = app.listen(4000, () => {
@@ -167,6 +157,41 @@ app.get('/', function(req, res) {
 
 // upload single file
 
+
+server.on('request', function (request, response, next) {
+  var currentRoute = url.format(request.url);
+  var currentMethod = request.method;
+  var requestBody = '';
+  
+   switch (currentRoute) {
+     case "/uploadfile":
+       const file = request.file;
+       console.log('Upload File');
+       
+        if (!file) {
+          const error = new Error('Please upload a file');
+          error.httpStatusCode = 400;
+          return next(error);
+        }
+       
+       response.send(file);       
+       break;
+    
+     case '/uploadmultiple':
+       const files = request.files;
+       
+        if (!files) {
+          const error = new Error('Please choose files');
+          error.httpStatusCode = 400;
+          return next(error);
+        }
+       
+       response.send(files);
+       break;   
+   }
+});
+
+
 app.post('/uploadfile', upload.single('singleFile'), (req, res, next) => {
   const file = req.file;
   
@@ -192,52 +217,6 @@ app.post('/uploadmultiple', upload.array('multipleFiles', 15), (req, res, next) 
     res.send(files);
 });
 
-/*
-app.post('/uploadphoto', upload.single('picture'), (req, res) => {
-  var img = fs.readFileSync(req.file.path);
-  var encode_image = img.toString('base64');
- // Define a JSONobject for the image attributes for saving to database
- 
-  var finalImg = {
-      contentType: req.file.mimetype,
-      image:  new Buffer(encode_image, 'base64')
-   };
-  
-  db.collection('mycollection').insertOne(finalImg, (err, result) => {
-  	console.log(result);
-    if (err) 
-      return console.log(err);
-
-    console.log('saved to database');
-    res.redirect('/');
-  });
-});
-
-
-  app.get('/photos', (req, res) => {
-  db.collection('mycollection').find().toArray((err, result) => {
-
-  const imgArray= result.map(element => element._id);
-	console.log(imgArray);
-
-   if (err) 
-     return console.log(err);
-   res.send(imgArray);  
-   
-  });
-});
-
-app.get('/photo/:id', (req, res) => {
-var filename = req.params.id;
-
-db.collection('mycollection').findOne({'_id': ObjectId(filename) }, (err, result) => {
-    if (err) 
-      return console.log(err);
-
-   res.contentType('image/jpeg');
-   res.send(result.image.buffer);   
-  });
-});*/
 
 // Database configuration
 mongoose
@@ -328,6 +307,37 @@ mongoose
     demoBidRequest.save().then(result => {
       console.log('Bid requested successfully!');      
     }).catch(console.error);*/
+  
+  //const options = { ignoreCase: true, reverse: true, depth: 1};
+  /*
+  let rawdata = fs.readFileSync('countries.json');  
+  let countries = JSON.parse(rawdata);
+  
+  rawdata = fs.readFileSync('industries.json');
+  let industries = JSON.parse(rawdata);
+  
+  rawdata = fs.readFileSync('industries_long.json');
+  let industriesLong = JSON.parse(rawdata);  
+  
+  for(var i = 0; i < countries.length; i++) {
+    const demoCountry = new Country({
+    name : countries[i]
+    });
+    //console.log(countries[i]);
+    //demoCountry.save();
+  }
+  
+  industries.sort();
+  //sortJson.overwrite('industries.json');
+  fs.writeFileSync('industries.json', JSON.stringify(industries));
+  
+  for(var i = 0; i < industries.length; i++) {
+    const demoIndustry = new Industry({
+    name : industries[i]
+    });
+    //console.log(industries[i]);
+    //demoIndustry.save();
+  }  */
   
     return null;
   })

@@ -20,36 +20,62 @@
         $("input").unbind('change').bind('change', function() {        
           $('#updateProfile').removeAttr('disabled');
         });
+        
+        $('input.fileupload')/*.unbind('change')*/.bind('change', function() {
+          $(this).val? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
+        });
       });
-    /*
-    function updateProfile() {
-      var count = 0;
-      $('input:required').each(function(i, e) {
-        if(!$(e).val() || "" == $(e).val()) count++;
-      });            
-      
-      var supervisor = //new Supervisor
-        ({          
-          organizationName: $("#organizationName").val(),
-          organizationUniteID: $("#organizationUniteID").val(),
-          contactName: $("#contactName").val(),
-          emailAddress: $("#emailAddress").val(),
-          password: $("#password").val(),
-          address: $("#address").val(),
-          country: $("#country").val(),
-          certificatesUrls: $("#certificatesUrls").val(),
-          antibriberyPolicyUrl: $("#antibriberyPolicyUrl").val(),
-          environmentPolicyUrl: $("#environmentPolicyUrl").val(),
-          qualityManagementPolicyUrl: $("#qualityManagementPolicyUrl").val(),
-          occupationalSafetyAndHealthPolicyUrl: $("#occupationalSafetyAndHealthPolicyUrl").val(),
-          otherRelevantFilesUrls: $("#otherRelevantFilesUrls").val(),
-          UNITETermsAndConditions: true,
-          antibriberyAgreement: true
-      });
-      
-     if(count > 0) return false;
-    }*/
-    
+        $('input[type="submit"].single').click(function() {          
+          var that = this;
+          var formData = new FormData();
+          // add assoc key values, this will be posts values
+          formData.append("file", this.file, this.getName());
+          formData.append("upload_file", true);
+          
+        $.ajax({
+          type: 'POST',
+          url: '/uploadfile',
+          async: true,
+          data: formData,
+          cache: false,
+          contentType: false,
+          processData: false
+        })
+        .done(function (data) {         
+         
+          });
+
+          //e.preventDefault();
+          });
+        
+        $('input[type="submit"].multiple').click(function() {          
+          var that = this;
+          var formData = new FormData();
+          // add assoc key values, this will be posts values
+          
+          var names = [];
+          for (var i = 0; i < $(this).get(0).files.length; ++i) {
+              names.push($(this).get(0).files[i].name);
+          }
+          //$("input[name=file]").val(names);
+          
+          formData.append("files", names);
+          formData.append("upload_file", true);
+          
+        $.ajax({
+          type: 'POST',
+          url: '/uploadmultiple',
+          async: true,
+          data: formData,
+          cache: false,
+          contentType: false,
+          processData: false
+        })
+        .done(function (data) {          
+          });
+
+          //e.preventDefault();
+          });
   </script>
 </head>
 
@@ -112,57 +138,42 @@
         </div>
 
         <!-- Uploading files field section-->  
-        <!--
-       <div class="form-group">
-          <form action="/uploadmultiple" enctype="multipart/form-data" method="POST">
-            <label>Certificates</label>
-            Select multiple files:
-            <input type="file" id="certificates" name="multipleFiles" multiple>
-            <input type="submit" value="Upload Files"/>
-          </form>
-        </div>
+          <div class="form-group">
+              <label>Certificates</label>              
+              <input class="form-control fileupload" type="file" id="certificates" name="certificates" multiple>
+              <input class="form-control multiple" type="submit" disabled value="Upload Files"/>
+          </div>
 
-        <div class="form-group">
-          <form action="/uploadfile" enctype="multipart/form-data" method="POST">             
-             <label>Anti-bribery policy</label>
-             <input type="file" id="antibriberyPolicy" name="singleFile" />
-             <input type="submit" value="Upload File"/>
-          </form>
-        </div>
-        
-        <div class="form-group">
-          <form action="/uploadfile" enctype="multipart/form-data" method="POST">
-             <label>Environment policy</label>
-             <input type="file" id="environmentPolicy" name="singleFile" />
-             <input type="submit" value="Upload File"/>
-          </form>
-        </div>
-        
-        <div class="form-group">
-          <form action="/uploadfile" enctype="multipart/form-data" method="POST"> 
-             <label>Quality management policy</label>
-             <input type="file" id="qualityManagementPolicy" name="singleFile" />
-             <input type="submit" value="Upload File"/>
-          </form>
-        </div>
-        
-        <div class="form-group">
-          <form action="/uploadfile" enctype="multipart/form-data" method="POST">
-             <label>Occupational Safety and Health</label>
-             <input type="file" id="occupationalSafetyAndHealthPolicy" name="singleFile" />
-             <input type="submit" value="Upload File"/>
-          </form>
-        </div>
-        
-        <div class="form-group">
-          <form action="/uploadmultiple" enctype="multipart/form-data" method="POST">
-            <label>Other relevant files</label>
-            Select multiple files:
-            <input type="file" id="otherRelevantFiles" name="multipleFiles" multiple>
-            <input type="submit" value="Upload Files"/>
-          </form>
-        </div>
--->
+          <div class="form-group">
+               <label>Antibribery policy</label>
+               <input class="form-control fileupload" type="file" id="antibriberyPolicy" name="antibriberyPolicy" />
+               <input class="form-control single" type="submit" disabled value="Upload File"/>
+          </div>
+
+          <div class="form-group">
+               <label>Environment policy</label>
+               <input class="form-control fileupload" type="file" id="environmentPolicy" name="environmentPolicy" />
+               <input class="form-control single" type="submit" disabled value="Upload File"/>
+          </div>
+
+          <div class="form-group">
+               <label>Quality management policy</label>
+               <input class="form-control fileupload" type="file" id="qualityManagementPolicy" name="qualityManagamentPolicy" />
+               <input class="form-control single" type="submit" disabled value="Upload File"/>
+          </div>
+
+          <div class="form-group">
+               <label>Occupational Safety and Health</label>
+               <input class="form-control fileupload" type="file" id="occupationalSafetyAndHealthPolicy" name="occupationalSafetyAndHealth" />
+               <input class="form-control single" type="submit" disabled value="Upload File"/>
+          </div>
+
+          <div class="form-group">
+              <label>Other relevant files</label>              
+              <input class="form-control fileupload" type="file" id="otherRelevantFiles" name="otherFiles" multiple>
+              <input class="form-control multiple" type="submit" disabled value="Upload Files"/>
+          </div>
+
         <div class="form-group">
           <label>Certificates</label>
           <input type="url" class="form-control" id="certificatesUrls" value="<%= profile.certificatesUrls %>">
@@ -206,7 +217,7 @@
             </div>
           </div>        
         <br>       
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" >
         <button type="submit" disabled id="updateProfile" value="Update Profile" class="btn btn-primary btn-block btn-lg">Update Profile</button>
       </form>
     </div>
