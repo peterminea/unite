@@ -12,4 +12,3 @@ exports.getIndex = (req, res) => {
     success: req.flash("success")
   });
 };
-

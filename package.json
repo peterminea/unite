@@ -28,7 +28,10 @@
     "fs-extra": "^9.0.0",
     "form-data": "^3.0.0",
     "url": "^0.11.0",
-    "sort-json": "^2.0.0"
+    "sort-json": "^2.0.0",
+    "jsonp": "^0.2.1",
+    "ajax-request": "^1.2.3",
+    "ajax": "^0.0.4"
   },
   "engines": {
     "node": "12.x"

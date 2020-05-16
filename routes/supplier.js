@@ -4,7 +4,6 @@ const router = express.Router();
 const isAuth = require("../middleware/is-auth-supplier");
 const sessionExit = require("../middleware/session-exit");
 const supplierController = require("../controllers/supplier");
-
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 

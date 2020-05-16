@@ -1,4 +1,6 @@
 dependencies:
+  ajax: 0.0.4
+  ajax-request: 1.2.3
   bcryptjs: 2.4.3
   bluebird: 3.7.2
   connect-flash: 0.1.1
@@ -12,6 +14,7 @@ dependencies:
   form-data: 3.0.0
   fs-extra: 9.0.0
   http: 0.0.0
+  jsonp: 0.2.1
   mongoose: 5.9.14
   multer: 1.4.2
   nodemailer: 6.4.6
@@ -39,6 +42,21 @@ packages:
     dev: false
     resolution:
       integrity: sha1-/ts5T58OAqqXaOcCvaI7UF+ufh8=
+  /ajax-request/1.2.3:
+    dependencies:
+      file-system: 2.2.2
+      utils-extend: 1.0.8
+    dev: false
+    resolution:
+      integrity: sha1-mfy+wdbSeS+F+pSVNTMr0U9fN5A=
+  /ajax/0.0.4:
+    dependencies:
+      underscore: 1.10.2
+    dev: false
+    engines:
+      node: '>=0.4.0'
+    resolution:
+      integrity: sha1-tvTOi9WQ9fS6Lc/eEd54nyCfJCM=
   /ansi-styles/3.2.1:
     dependencies:
       color-convert: 1.9.3
@@ -597,6 +615,19 @@ packages:
     dev: false
     resolution:
       integrity: sha512-fjquC59cD7CyW6urNXK0FBufkZcoiGG80wTuPujX590cB5Ttln20E2UB4S/WARVqhXffZl2LNgS+gQdPIIim/g==
+  /file-match/1.0.2:
+    dependencies:
+      utils-extend: 1.0.8
+    dev: false
+    resolution:
+      integrity: sha1-ycrSZdLIrfOoFHWw30dYWQafrvc=
+  /file-system/2.2.2:
+    dependencies:
+      file-match: 1.0.2
+      utils-extend: 1.0.8
+    dev: false
+    resolution:
+      integrity: sha1-fWWDPjojR9zZVqgTxncVPtPt2Yc=
   /filelist/1.0.1:
     dependencies:
       minimatch: 3.0.4
@@ -764,6 +795,12 @@ packages:
       graceful-fs: 4.2.4
     resolution:
       integrity: sha512-jR2b5v7d2vIOust+w3wtFKZIfpC2pnRmFAhAC/BuweZFQR8qZzxH1OyrQ10HmdVYiXWkYUqPVsz91cG7EL2FBg==
+  /jsonp/0.2.1:
+    dependencies:
+      debug: 2.6.9
+    dev: false
+    resolution:
+      integrity: sha1-pltPoPEL2nGaBUQep7lMVfPhW64=
   /kareem/2.3.1:
     dev: false
     resolution:
@@ -1376,6 +1413,10 @@ packages:
       node: '>= 0.8'
     resolution:
       integrity: sha512-KPHm4VL5dDXKz01UuEd88Df+KzynaohSL9fBh096KWAxSKZQDI2uBrVqtvRM4rwrIrRRKsdLNML/lnaaVSRioA==
+  /underscore/1.10.2:
+    dev: false
+    resolution:
+      integrity: sha512-N4P+Q/BuyuEKFJ43B9gYuOj4TQUHXX+j2FqguVOpjkssLUUrnJofCcBccJSCoeturDoZU6GorDTHSvUDlSQbTg==
   /universalify/1.0.0:
     dev: false
     engines:
@@ -1399,6 +1440,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-RQ1Nyfpw3nMnYvvS1KKJgUGaDM8=
+  /utils-extend/1.0.8:
+    dev: false
+    resolution:
+      integrity: sha1-zP17ZFQPjpDuIe7Fd2nQZRyril8=
   /utils-merge/1.0.1:
     dev: false
     engines:
@@ -1453,6 +1498,8 @@ registry: 'https://registry.npmjs.org/'
 shrinkwrapMinorVersion: 9
 shrinkwrapVersion: 3
 specifiers:
+  ajax: ^0.0.4
+  ajax-request: ^1.2.3
   bcryptjs: ^2.4.3
   bluebird: ^3.7.2
   connect-flash: ^0.1.1
@@ -1466,6 +1513,7 @@ specifiers:
   form-data: ^3.0.0
   fs-extra: ^9.0.0
   http: ^0.0.0
+  jsonp: ^0.2.1
   mongoose: ^5.9.13
   multer: ^1.4.2
   nodemailer: ^6.4.6
