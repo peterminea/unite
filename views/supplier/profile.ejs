@@ -1,323 +1,439 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Supplier Dashboard - UNITE</title>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="A cool thing made with Glitch">
-    <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
-    <link rel="stylesheet" href="/style.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-    <script src="/https.js"></script>    
-    <script src="/require.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-    
-    <script type="text/javascript">
-      $(document).ready(function(){
-        $("input").unbind('change').bind('change', function() {        
-          $('#updateProfile').removeAttr('disabled');
-        });
-      });
-     /* 
-    function updateProfile() {
-      var count = 0;
-      $('input:required').each(function(i, e) {
-        if(!$(e).val() || "" == $(e).val()) count++;
-      });            
-      //const Supplier = require("../../models/supplier");
-   
-      //alert(count + ' fields must be completed. ' + Supplier);
-      var supplier = //new Supplier
-        ({
-          companyName: $("#companyName").val(),
-          directorsName: $("#directorsName").val(),
-          contactName: $("#contactName").val(),
-          title: $("#title").val(),
-          companyRegistrationNo: $("#companyRegistrationNo").val(),
-          emailAddress: $("#emailAddress").val(),
-          password: $("#password").val(),
-          registeredCountry: $("#registeredCountry").val(),
-          companyAddress: $("#companyAddress").val(),
-          areaCovered: $("#areaCovered").val(),
-          contactMobileNumber: $("#contactMobileNumber").val(),
-          country: $("#country").val(),
-          industry: $("#industry").val(),
-          employeeNumbers: $("#employeeNumbers").val(),
-          lastYearTurnover: $("#lastYearTurnover").val(),
-          website: $("#website").val(),
-          productsServicesOffered: $("#productsServicesOffered").val(),
-          capabilityDescription: $("#capabilityDescription").val(),
-          relevantExperience: $("#relevantExperience").val(),
-          supportingInformation: $("#supportingInformation").val(),
-          certificatesUrls: $("#certificatesUrls").val(),
-          antibriberyPolicyUrl: $("#antibriberyPolicyUrl").val(),
-          environmentPolicyUrl: $("#environmentPolicyUrl").val(),
-          qualityManagementPolicyUrl: $("#qualityManagementPolicyUrl").val(),
-          occupationalSafetyAndHealthPolicyUrl: $("#occupationalSafetyAndHealthPolicyUrl").val(),
-          otherRelevantFilesUrls: $("#otherRelevantFilesUrls").val(),
-          UNITETermsAndConditions: true,
-          antibriberyAgreement: true
+
+<head>
+  <meta charset="utf-8">
+  <title>Supplier Dashboard - UNITE</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A cool thing made with Glitch">
+  <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  <script src="/https.js"></script>    
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+  <!--<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>  
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>
+-->
+  
+  
+  <script type="text/javascript">
+    $(document).ready(function () {
+      var token = $("input[name='_csrf']").val();
+      
+      $('#country')/*.autocomplete({
+        source: function (request, response) {//alert(JSON.stringify(request));
+         $.ajax({
+            url: "/countryAutocompleted",
+            type: "GET",
+            data: request,  // request is the value of search input
+            success: function (data) {
+              // Map response values to fiedl label and value
+               response($.map(data, function (el) {
+                  return {
+                     label: el.name,
+                     value: el._id
+                  };
+                  }));
+               }
+            });
+         },
+         
+         // The minimum number of characters a user must type before a search is performed.
+         minLength: 3,
+         // set an onFocus event to show the result on input field when result is focused
+         focus: function (event, ui) {
+            this.value = ui.item.label;
+            // Prevent other event from not being execute
+            event.preventDefault();
+         },
+         select: function (event, ui) {alert(1);
+            // Prevent value from being put in the input:
+            this.value = ui.item.label;
+            // Set the id to the next input hidden field
+            $(this).next("input").val(ui.item.value);
+            // Prevent other event from not being execute            
+            event.preventDefault();
+            // optional: submit the form after field has been filled up
+           // $('#quicksearch').submit();
+         }
+  }); */         
+      .autocomplete({
+        source: function(req, res) {        
+          $.ajax({
+            url: "/countryAutocomplete",
+            headers: { "X-CSRF-Token": token },
+            datatype: "jsonp",
+            type: "GET",
+            data: req,
+            async: true,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function(data) {
+              res(data);
+            },
+            error: function(err) {
+
+            },
+          });
+        },
+        minLength: 3,
+        select: function(event, ui) {
+          if(ui.item) {
+            $(this).val(ui.item.name);
+          }
+        }
       });
       
-      alert('error ' + supplier);
-      if(count > 0) return false;
       
-    }*/
-    </script>
-    
+      $("#industry").autocomplete({
+        source: function(req, res) {        
+          $.ajax({
+            url: "/industryAutocomplete",
+            headers: { "X-CSRF-Token": token },
+            datatype: "jsonp",
+            type: "GET",
+            data: req,
+            async: true,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function(data) {
+              res(data);
+            },
+            error: function(err) {
+
+            },
+          });
+        },
+        minLength: 3,
+        select: function(event, ui) {
+          if(ui.item) {
+            $(this).val(ui.item.name);
+          }
+        }
+      });
+      
+      $("input").unbind('change').bind('change', function () {
+        $('#updateProfile').removeAttr('disabled');
+      });
+
+      $('input.fileupload')/*.unbind('change')*/.bind('change', function () {
+        $(this).val ? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
+      });
+
+      $('input[type="submit"]').click(function (e) {
+        var input = $(this).prev('input');        
+        var formData = new FormData();
+        var isMultiple = $(this).hasClass('multiple')? true : false;
+        formData.append("_csrf", token);
+        formData.append("upload_file", true);
+        if(!isMultiple) {
+          formData.append('file', input[0].files[0]);
+        }
+        else {
+          $.each(input[0].files, function(i, file) {
+            formData.append('files['+i+']', file);
+          });
+        }
+        
+        $.ajax({
+          type: "POST",
+          url: isMultiple == true? "/uploadmultiple" : "/uploadfile",
+          headers: { "X-CSRF-Token": token },
+          async: true,
+          data: formData,
+          cache: false,
+          contentType: false,
+          processData: false
+        })
+          .done(function (data) {
+            // clear form
+            //$('input[name=name]').val('');
+            // $('input[name=age]').val('');
+            // alert(data);
+          });
+
+        e.preventDefault();
+      });
+    });     
+  </script>
+
 </head>
-  
-  <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <a class="navbar-brand" href="/supplier">Supplier - UNITE</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
 
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="/supplier">Dashboard <span class="sr-only">(current)</span></a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/supplier/bid-requests">Bid Requests</a>
-          </li>
-        </ul>
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link" href="/supplier/balance">Balance: €<%= profile.balance %>&nbsp;</a>
-          </li>
-          <li class="nav-item active">
-            <a class="btn btn-primary" href="/supplier/profile">Profile</a>
-          </li>
-          <li class="nav-item" style="margin-left: 20px;">
-            <a class="btn btn-danger" href="?exit=true">Exit</a>
-          </li>
-        </ul>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="/supplier">Supplier - UNITE</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/supplier">Dashboard <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/supplier/bid-requests">Bid Requests</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="/supplier/balance">Balance: €<%= profile.balance %>&nbsp;</a>
+        </li>
+        <li class="nav-item active">
+          <a class="btn btn-primary" href="/supplier/profile">Profile</a>
+        </li>
+        <li class="nav-item" style="margin-left: 20px;">
+          <a class="btn btn-danger" href="?exit=true">Exit</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <br><br>
+    <div class="card">
+      <h5 class="card-header">Welcome!</h5>
+      <div class="card-body">
+        <h5 class="card-title">Hello, <%= profile.companyName %></h5>
+        <p class="card-text">This is your profile page. To ensure you continue to appear in buyers' search results,
+          please keep your capabilities up-to-date.</p>
       </div>
-    </nav>
-    
-    <div class="container">
-      <br><br>
-      <div class="card">
-        <h5 class="card-header">Welcome!</h5>
-        <div class="card-body">
-          <h5 class="card-title">Hello, <%= profile.companyName %></h5>
-          <p class="card-text">This is your profile page. To ensure you continue to appear in buyers' search results, please keep your capabilities up-to-date.</p>
+    </div>
+
+    <br><br>
+
+    <div class="smooth-shadow profile-form">
+      <form method="post">
+        <input type="hidden" name="_id" value="<%= profile._id %>">
+        <input type="hidden" id="balance" name="balance" value="<%= profile.balance %>">
+        <div class="form-group">
+          <label>Company Name</label>
+          <input required type="text" id="companyName" name="companyName" class="form-control"
+            value="<%= profile.companyName %>">
         </div>
-      </div>
-      
-      <br><br>
-  
-      <div class="smooth-shadow profile-form">
-        <form method="post">
-          <input type="hidden" name="_id" value="<%= profile._id %>">          
-          <input type="hidden" id="balance" name="balance" value="<%= profile.balance %>">
-          <div class="form-group">
-            <label>Company Name</label>
-            <input required type="text" id="companyName" name="companyName" class="form-control" value="<%= profile.companyName %>">            
-          </div>
-          <div class="form-group">
-            <label>Email address</label>
-            <input required type="email" id="emailAddress" name="emailAddress" class="form-control" value="<%= profile.emailAddress %>">
-            <small class="text-muted form-text">Only companies' domains are allowed.</small>
-          </div>
-          <div class="form-group">
-            <label>Password</label>
-            <input required type="password" id="password" name="password" class="form-control" value="<%= profile.password %>">            
-          </div>
-          <input type="hidden" id="isVerified" value="<%= profile.isVerified %>">
-          <div class="form-group">
-            <label>Director's name</label>
-            <input type="text" class="form-control" id="directorsName" name="directorsName" value="<%= profile.directorsName %>">
-          </div>
-          <div class="form-group">
-            <label>Contact Name</label>
-            <input type="text" class="form-control" id="contactName" name="contactName" value="<%= profile.contactName %>">
-          </div>
-          <div class="form-group">
-            <label>Title</label>
-            <input required type="text" class="form-control" id="title" name="title" value="<%= profile.title %>">
-          </div>
-          <div class="form-group">
-            <label>Company Registration No</label>
-            <input type="text" class="form-control" id="companyRegistrationNo" name="companyRegistrationNo" value="<%= profile.companyRegistrationNo %>">
-          </div>
-          <div class="form-group">
-            <label>Registered Country*</label>
-            <input type="text" class="form-control" id="registeredCountry" name="registeredCountry" value="<%= profile.registeredCountry %>" required>
-          </div>
-          <div class="form-group">
-            <label>Company Address*</label>
-            <input type="text" class="form-control" id="companyAddress" name="companyAddress" value="<%= profile.companyAddress %>" required>
-          </div>
-          <div class="form-group">
-            <label>Area Covered*</label>
-            <input required type="text" class="form-control" id="areaCovered" name="areaCovered" value="<%= profile.areaCovered %>">
-          </div>
-          <div class="form-group">
-            <label>Contact Mobile Number*</label>
-            <input type="tel" class="form-control" id="contactMobileNumber" name="contactMobileNumber" value="<%= profile.contactMobileNumber %>" required>
-          </div>
-          <div class="form-group">
-            <label>Country*</label>
-            <input type="text" class="form-control" id="country" name="country" value="<%= profile.country %>" required>
-          </div>
-          <div class="form-group">
-            <label>Industry*</label>
-            <input type="text" class="form-control" id="industry" name="industry" value="<%= profile.industry %>" required>
-          </div>
-          <div class="form-group">
-            <label>Employee Numbers*</label>
-            <input type="number" class="form-control" id="employeeNumbers" name="employeeNumbers" value="<%= profile.employeeNumbers %>" required>
-          </div>
-          <div class="form-group">
-            <label>Last Year Turnover*</label>
-            <input type="money" class="form-control" id="lastYearTurnover" name="lastYearTurnover" value="<%= profile.lastYearTurnover %>" required>
-          </div>
-          <div class="form-group">
-            <label>Website</label>
-            <input type="text" class="form-control" id="website" name="website" value="<%= profile.website %>">
-          </div>
-          <div class="form-group">
-            <label>Facebook URL</label>
-            <input type="text" class="form-control" id="facebookURL" name="facebookURL" value="<%= profile.facebookURL %>">
-          </div>
-          <div class="form-group">
-            <label>Instagram URL</label>
-            <input type="text" class="form-control" id="instagramURL" name="instagramURL" value="<%= profile.instagramURL %>">
-          </div>
-          <div class="form-group">
-            <label>Twitter URL</label>
-            <input type="text" class="form-control" id="twitterURL" name="twitterURL" value="<%= profile.twitterURL %>">
-          </div>
-          <div class="form-group">
-            <label>LinkedIn URL</label>
-            <input type="text" class="form-control" id="linkedinURL" name="linkedinURL" value="<%= profile.linkedinURL %>">
-          </div>
-          <div class="form-group">
-            <label>Other Social Media URL</label>
-            <input type="text" class="form-control" id="otherSocialMediaURL" name="otherSocialMediaURL" value="<%= profile.otherSocialMediaURL %>" >
-          </div>
-          <div class="form-group">
-            <label>Products or Services Offered*</label>
-            <input type="text" class="form-control" id="productsServicesOffered" name="productsServicesOffered" value="<%= profile.productsServicesOffered %>" required>
-          </div>
-          <div class="form-group">
-            <label>Capability Description*</label>
-            <input type="text" class="form-control" id="capabilityDescription" name="capabilityDescription" value="<%= profile.capabilityDescription %>" required>
-          </div>
-          <div class="form-group">
-            <label>Relevant Experience*</label>
-            <input type="text" class="form-control" id="relevantExperience" name="relevantExperience" value="<%= profile.relevantExperience %>" required>
-          </div>
-          <div class="form-group">
-            <label>Supporting Information</label>
-            <input type="text" class="form-control" id="supportingInformation" name="supportingInformation" value="<%= profile.supportingInformation %>">
-          </div>
-          
-<!-- Uploading files field section-->          
-          <!--
-          <div class="form-group">
-            <form action="/uploadmultiple" enctype="multipart/form-data" method="POST">
-              <label>Certificates</label>
-              Select multiple files:
-              <input type="file" id="certificates" name="multipleFiles" multiple>
-              <input type="submit" value="Upload Files"/>
-            </form>
-          </div>
+        <div class="form-group">
+          <label>Email address</label>
+          <input required type="email" id="emailAddress" name="emailAddress" class="form-control"
+            value="<%= profile.emailAddress %>">
+          <small class="text-muted form-text">Only companies' domains are allowed.</small>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input required type="password" id="password" name="password" class="form-control"
+            value="<%= profile.password %>">
+        </div>
+        <input type="hidden" name="isVerified" id="isVerified" value="<%= profile.isVerified %>">
+        <div class="form-group">
+          <label>Director's name</label>
+          <input type="text" class="form-control" id="directorsName" name="directorsName"
+            value="<%= profile.directorsName %>">
+        </div>
+        <div class="form-group">
+          <label>Contact Name</label>
+          <input type="text" class="form-control" id="contactName" name="contactName"
+            value="<%= profile.contactName %>">
+        </div>
+        <div class="form-group">
+          <label>Title</label>
+          <input required type="text" class="form-control" id="title" name="title" value="<%= profile.title %>">
+        </div>
+        <div class="form-group">
+          <label>Company Registration No</label>
+          <input type="text" class="form-control" id="companyRegistrationNo" name="companyRegistrationNo"
+            value="<%= profile.companyRegistrationNo %>">
+        </div>
+        <div class="form-group">
+          <label>Registered Country*</label>
+          <input type="text" class="form-control country" id="registeredCountry" name="registeredCountry"
+            value="<%= profile.registeredCountry %>" required>
+        </div>
+        <div class="form-group">
+          <label>Company Address*</label>
+          <input type="text" class="form-control" id="companyAddress" name="companyAddress"
+            value="<%= profile.companyAddress %>" required>
+        </div>
+        <div class="form-group">
+          <label>Area Covered*</label>
+          <input required type="text" class="form-control" id="areaCovered" name="areaCovered"
+            value="<%= profile.areaCovered %>">
+        </div>
+        <div class="form-group">
+          <label>Contact Mobile Number*</label>
+          <input type="tel" class="form-control" id="contactMobileNumber" name="contactMobileNumber"
+            value="<%= profile.contactMobileNumber %>" required>
+        </div>
+        <div class="form-group">
+          <label>Country*</label>
+          <input type="text" class="form-control country" id="country" name="country" value="<%= profile.country %>" required>
+        </div>
+        <div class="form-group">
+          <label>Industry*</label>
+          <input type="text" class="form-control industry" id="industry" name="industry" value="<%= profile.industry %>"
+            required>
+        </div>
+        <div class="form-group">
+          <label>Employee Numbers*</label>
+          <input type="number" class="form-control" id="employeeNumbers" name="employeeNumbers"
+            value="<%= profile.employeeNumbers %>" required>
+        </div>
+        <div class="form-group">
+          <label>Last Year Turnover*</label>
+          <input type="money" class="form-control" id="lastYearTurnover" name="lastYearTurnover"
+            value="<%= profile.lastYearTurnover %>" required>
+        </div>
+        <div class="form-group">
+          <label>Website</label>
+          <input type="text" class="form-control" id="website" name="website" value="<%= profile.website %>">
+        </div>
+        <div class="form-group">
+          <label>Facebook URL</label>
+          <input type="text" class="form-control" id="facebookURL" name="facebookURL"
+            value="<%= profile.facebookURL %>">
+        </div>
+        <div class="form-group">
+          <label>Instagram URL</label>
+          <input type="text" class="form-control" id="instagramURL" name="instagramURL"
+            value="<%= profile.instagramURL %>">
+        </div>
+        <div class="form-group">
+          <label>Twitter URL</label>
+          <input type="text" class="form-control" id="twitterURL" name="twitterURL" value="<%= profile.twitterURL %>">
+        </div>
+        <div class="form-group">
+          <label>LinkedIn URL</label>
+          <input type="text" class="form-control" id="linkedinURL" name="linkedinURL"
+            value="<%= profile.linkedinURL %>">
+        </div>
+        <div class="form-group">
+          <label>Other Social Media URL</label>
+          <input type="text" class="form-control" id="otherSocialMediaURL" name="otherSocialMediaURL"
+            value="<%= profile.otherSocialMediaURL %>">
+        </div>
+        <div class="form-group">
+          <label>Products or Services Offered*</label>
+          <input type="text" class="form-control" id="productsServicesOffered" name="productsServicesOffered"
+            value="<%= profile.productsServicesOffered %>" required>
+        </div>
+        <div class="form-group">
+          <label>Capability Description*</label>
+          <input type="text" class="form-control" id="capabilityDescription" name="capabilityDescription"
+            value="<%= profile.capabilityDescription %>" required>
+        </div>
+        <div class="form-group">
+          <label>Relevant Experience*</label>
+          <input type="text" class="form-control" id="relevantExperience" name="relevantExperience"
+            value="<%= profile.relevantExperience %>" required>
+        </div>
+        <div class="form-group">
+          <label>Supporting Information</label>
+          <input type="text" class="form-control" id="supportingInformation" name="supportingInformation"
+            value="<%= profile.supportingInformation %>">
+        </div>
 
-          <div class="form-group">
-            <form action="/uploadfile" enctype="multipart/form-data" method="POST">             
-               <label>Anti-bribery policy</label>
-               <input type="file" id="antibriberyPolicy" name="singleFile" />
-               <input type="submit" value="Upload File"/>
-            </form>
+        <!-- Uploading files field section-->
+        <div class="form-group">
+          <label>Certificates</label>
+          <div class="form-control">
+            <input class="fileupload" type="file" id="certificates" name="certificates" multiple>
           </div>
+          <input class="form-control multiple btn btn-dark mt-2" type="submit" disabled value="Upload Files" />
+        </div>
 
-          <div class="form-group">
-            <form action="/uploadfile" enctype="multipart/form-data" method="POST">
-               <label>Environment policy</label>
-               <input type="file" id="environmentPolicy" name="singleFile" />
-               <input type="submit" value="Upload File"/>
-            </form>
-          </div>
+        <div class="form-group">
+          <label>Antibribery policy</label>
+          <input class="form-control fileupload" type="file" id="antibriberyPolicy" name="antibriberyPolicy" />
+          <input class="form-control single btn btn-dark mt-2" type="submit" disabled value="Upload File" />
+        </div>
 
-          <div class="form-group">
-            <form action="/uploadfile" enctype="multipart/form-data" method="POST"> 
-               <label>Quality management policy</label>
-               <input type="file" id="qualityManagementPolicy" name="singleFile" />
-               <input type="submit" value="Upload File"/>
-            </form>
-          </div>
+        <div class="form-group">
+          <label>Environment policy</label>
+          <input class="form-control fileupload" type="file" id="environmentPolicy" name="environmentPolicy" />
+          <input class="form-control single btn btn-dark mt-2" type="submit" disabled value="Upload File" />
+        </div>
 
-          <div class="form-group">
-            <form action="/uploadfile" enctype="multipart/form-data" method="POST">
-               <label>Occupational Safety and Health</label>
-               <input type="file" id="occupationalSafetyAndHealthPolicy" name="singleFile" />
-               <input type="submit" value="Upload File"/>
-            </form>
-          </div>
+        <div class="form-group">
+          <label>Quality management policy</label>
+          <input class="form-control fileupload" type="file" id="qualityManagementPolicy"
+            name="qualityManagamentPolicy" />
+          <input class="form-control single btn btn-dark mt-2" type="submit" disabled value="Upload File" />
+        </div>
 
-          <div class="form-group">
-            <form action="/uploadmultiple" enctype="multipart/form-data" method="POST">
-              <label>Other relevant files</label>
-              Select multiple files:
-              <input type="file" id="otherRelevantFiles" name="multipleFiles" multiple>
-              <input type="submit" value="Upload Files"/>
-            </form>
-          </div>          -->
-          
-          <div class="form-group">
-              <label>Certificates</label>
-              <input type="url" id="certificatesUrl" name="certificatesUrl" class="form-control">
-            </div> 
-          <div class="form-group">
-              <label>Anti-bribery policy</label>
-              <input type="url" id="antibriberyPolicyUrl" name="antibriberyPolicyUrl" class="form-control">
-            </div>
-          <div class="form-group">
-              <label>Environment policy</label>
-              <input type="url" id="environmentPolicyUrl" name="environmentPolicyUrl" class="form-control">
-            </div>
-          <div class="form-group">
-              <label>Quality management policy</label>
-              <input type="url" id="qualityManagementPolicyUrl" name="qualityManagementPolicyUrl" class="form-control">
-            </div>
-          <div class="form-group">
-              <label>Occupational Safety and Health</label>
-              <input type="url" id="occupationalSafetyAndHealthPolicyUrl" name="occupationalSafetyAndHealthPolicyUrl" class="form-control">
-            </div>
-          <div class="form-group">
-              <label>Other relevant files</label>
-              <input type="url" id="otherRelevantFilesUrls" name="otherRelevantFilesUrls" class="form-control">
-            </div>          
- 
-<!--Mandatory check of agreements -->
-          <div class="form-group">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="UNITETermsAndConditions" name="UNITETermsAndConditions" <%= profile.UNITETermsAndConditions ? "checked" : "" %> required>
-              <label class="form-check-label" for="invalidCheck2">
-                <a href="../termsConditions">UNITE Terms And Conditions</a>
-              </label>
-            </div>
+        <div class="form-group">
+          <label>Occupational Safety and Health</label>
+          <input class="form-control fileupload" type="file" id="occupationalSafetyAndHealthPolicy"
+            name="occupationalSafetyAndHealth" />
+          <input class="form-control single btn btn-dark mt-2" type="submit" disabled value="Upload File" />
+        </div>
+
+        <div class="form-group">
+          <label>Other relevant files</label>
+          <input class="form-control fileupload" type="file" id="otherRelevantFiles" name="otherFiles" multiple>
+          <input class="form-control multiple btn btn-dark mt-2" type="submit" disabled value="Upload Files" />
+        </div>
+
+        <div class="form-group">
+          <label>Certificates</label>
+          <input type="url" id="certificatesUrl" name="certificatesUrl" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Antibribery policy</label>
+          <input type="url" id="antibriberyPolicyUrl" name="antibriberyPolicyUrl" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Environment policy</label>
+          <input type="url" id="environmentPolicyUrl" name="environmentPolicyUrl" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Quality management policy</label>
+          <input type="url" id="qualityManagementPolicyUrl" name="qualityManagementPolicyUrl" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Occupational Safety and Health</label>
+          <input type="url" id="occupationalSafetyAndHealthPolicyUrl" name="occupationalSafetyAndHealthPolicyUrl"
+            class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Other relevant files</label>
+          <input type="url" id="otherRelevantFilesUrls" name="otherRelevantFilesUrls" class="form-control">
+        </div>
+
+        <!--Mandatory check of agreements -->
+        <div class="form-group">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="UNITETermsAndConditions" name="UNITETermsAndConditions"
+              <%= profile.UNITETermsAndConditions ? "checked" : "" %> required>
+            <label class="form-check-label" for="invalidCheck2">
+              <a href="../termsConditions">UNITE Terms And Conditions</a>
+            </label>
           </div>
-          <div class="form-group">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="antibriberyAgreement" name="antibriberyAgreement" <%= profile.antibriberyAgreement ? "checked" : "" %> required>
-              <label class="form-check-label" for="invalidCheck2">
-                <a href="../antibriberyAgreement">Antibribery Agreement </a>
-              </label>
-            </div>
+        </div>
+        <div class="form-group">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="antibriberyAgreement" name="antibriberyAgreement"
+              <%= profile.antibriberyAgreement ? "checked" : "" %> required>
+            <label class="form-check-label" for="invalidCheck2">
+              <a href="../antibriberyAgreement">Antibribery Agreement</a>
+            </label>
           </div>
-          <br>
-          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-          <button type="submit" disabled id="updateProfile" value="Update Profile" class="btn btn-primary btn-block btn-lg">Update Profile</button>
-        </form>
-      </div>
-    </div>    
-  </body>
+        </div>
+        <br>
+
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button type="submit" disabled id="updateProfile" value="Update Profile"
+          class="btn btn-primary btn-block btn-lg">Update Profile</button>
+      </form>
+    </div>
+  </div>
+</body>
+
 </html>

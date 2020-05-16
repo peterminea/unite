@@ -48,7 +48,7 @@
       </div>
       <div class="card-body">
         <h5 class="card-title">Hello, <%= supervisor.organizationName %>!</h5>
-        <p>With your unite id, new buyers can register on the website and begin to find suppliers.</p>
+        <p>With your UNITE ID, new buyers can register on the website and start searching for suppliers.</p>
         <div class="form-group">
           <label>Your Unique Unite ID</label>
           <input type="text" class="form-control" readonly value="<%= supervisor.organizationUniteID %>">
@@ -78,7 +78,7 @@
           <td scope="col"><%= buyer.contactName %></td>
           <td scope="col">€<%= buyer.balance %></td>
           <td scope="col">YES</td>
-          <td scope="col"><button class="btn btn-primary">Process</button></td>
+          <td scope="col"><button id="process" class="btn btn-primary">Process</button></td>
         </tr>
         <% i++; } %>
       </tbody>

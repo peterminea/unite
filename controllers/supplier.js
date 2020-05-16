@@ -305,7 +305,7 @@ exports.postProfile = (req, res) => {
   Supplier.findOne({ _id: req.body._id }, (err, doc) => {
     if (err) return console.error(err);
     console.log(doc);
-
+    
     doc.companyName = req.body.companyName;
     doc.directorsName = req.body.directorsName;
     doc.contactName = req.body.contactName;

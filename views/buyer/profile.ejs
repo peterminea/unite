@@ -21,32 +21,6 @@
           $('#updateProfile').removeAttr('disabled');
         });
       });
-/*
-    function updateProfile() {      
-      var count = 0;
-      $('input:required').each(function(i, e) {
-        if(!$(e).val() || "" == $(e).val()) count++;
-      });            
-      //const Supplier = require("../../models/supplier");
-   
-      //alert(count + ' fields must be completed. ' + supplier);
-      var buyer = //new Supplier
-        ({
-          organizationName: $("#organizationName").val(),
-          organizationUniteID: $("#organizationUniteID").val(),
-          contactName: $("#contactName").val(),
-          balance: $("#balance").val(),
-          emailAddress: $("#emailAddress").val(),
-          password: $("#password").val(),
-          departmentAgencyGroup: $("#departmentAgencyGroup").val(),
-          qualification: $("#qualification").val(),
-          address: $("#address").val(),
-          country: $("#country").val()
-      });
-      
-      alert('error ' + buyer);
-      if(count > 0) return false;      
-    }*/
     
 </script>
     
@@ -92,7 +66,7 @@
     <br><br>
     <div class="smooth-shadow profile-form">
       <form method="POST">
-        <input type="hidden" id="balance" value="<%= profile.balance %>">
+        <input type="hidden" name="balance" id="balance" value="<%= profile.balance %>">
         
         <div class="row m-2">
           <div class="form-group mr-2">
@@ -112,7 +86,7 @@
             <input type="email" class="form-control" id="emailAddress" name="emailAddress" value="<%= profile.emailAddress %>" required>
           </div>
         </div>
-        <input type="hidden" id="isVerified" value="<%= profile.isVerified %>">
+        <input type="hidden" name="isVerified" id="isVerified" value="<%= profile.isVerified %>">
         <div class="row m-2">
           <div class="form-group mr-2">
             <label>Department / Agency / Group</label>
