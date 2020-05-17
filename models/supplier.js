@@ -1,9 +1,11 @@
 const mongoose = require("mongoose");
+const passportLocalMongoose = require("passport-local-mongoose");
 const Schema = mongoose.Schema;
 
 const supplierSchema = new Schema({
   companyName: {
     type: String,
+    unique: true,
     required: true
   },
   directorsName: {
@@ -24,6 +26,7 @@ const supplierSchema = new Schema({
   },
   emailAddress: {
     type: String,
+    unique: true,
     required: true // Check @gmail.com or @hotmail.com. Ensure it is company domain
   },
   password: {
@@ -34,6 +37,15 @@ const supplierSchema = new Schema({
     type: Boolean,
     default: false
   },
+  resetPasswordToken: {
+    type: String,
+    required: false
+  },
+  resetPasswordExpires: {
+    type: Date,
+    required: false
+    //,    default: Date.now() + 43200000
+  },  
   registeredCountry: {
     type: String,
     required: true
@@ -67,7 +79,7 @@ const supplierSchema = new Schema({
     required: true
   },
   lastYearTurnover: {
-    type: Number, //Euro
+    type: Number,
     required: true
   },
   website: {
@@ -126,4 +138,5 @@ const supplierSchema = new Schema({
   }
 });
 
+supplierSchema.plugin(passportLocalMongoose);
 module.exports = mongoose.model('Supplier', supplierSchema);

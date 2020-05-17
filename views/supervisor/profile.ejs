@@ -10,13 +10,19 @@
   <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-  <script src="/https.js"></script>
+  <script src="/https.js"></script>    
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
   
   <script type="text/javascript">
-      $(document).ready(function(){
+      $(document).ready(function() {
+        
+        var token = $("input[name='_csrf']").val();
+        
         $("input").unbind('change').bind('change', function() {        
           $('#updateProfile').removeAttr('disabled');
         });
@@ -24,55 +30,66 @@
         $('input.fileupload')/*.unbind('change')*/.bind('change', function() {
           $(this).val? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
         });
-      });
-        $('input[type="submit"].single').click(function() {          
-          var that = this;
-          var formData = new FormData();
-          // add assoc key values, this will be posts values
-          formData.append("file", this.file, this.getName());
-          formData.append("upload_file", true);
-          
-        $.ajax({
-          type: 'POST',
-          url: '/uploadfile',
-          async: true,
-          data: formData,
-          cache: false,
-          contentType: false,
-          processData: false
-        })
-        .done(function (data) {         
-         
-          });
-
-          //e.preventDefault();
-          });
         
-        $('input[type="submit"].multiple').click(function() {          
-          var that = this;
-          var formData = new FormData();
-                   
-          var names = [];
-          for (var i = 0; i < $(this).get(0).files.length; ++i) {
-              names.push($(this).get(0).files[i].name);
+      $("#country").autocomplete({
+        source: function(req, res) {
+          $.ajax({
+            url: "/countryAutocomplete",
+            headers: { "X-CSRF-Token": token },
+            datatype: "jsonp",
+            type: "GET",
+            data: req,
+            async: true,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function(data) {
+              res(data);
+            },
+            error: function(err) {
+            console.log(err);
+            },
+          });
+        },
+        minLength: 3,
+        select: function(event, ui) {
+          if(ui.item) {
+            $(this).val(ui.item.name);
           }
-         
-          formData.append("files", names);
-          formData.append("upload_file", true);
-          
+        }
+      });        
+        
+      $('input[type="submit"]').click(function (e) {
+        var input = $(this).prev('input');        
+        var formData = new FormData();
+        var isMultiple = $(this).hasClass('multiple')? true : false;
+        formData.append("_csrf", token);
+        
+        formData.append("upload_file", true);
+        if(isMultiple == false) {
+          formData.append('file', input[0].files[0]);
+        } else {
+          $.each(input[0].files, function(i, file) {
+            formData.append('files['+i+']', file);
+          });
+        }
+        
         $.ajax({
-          type: 'POST',
-          url: '/uploadmultiple',
+          type: "POST",
+          url: isMultiple == true? "/uploadmultiple" : "/uploadfile",
+          headers: { "X-CSRF-Token": token },
           async: true,
           data: formData,
           cache: false,
           contentType: false,
           processData: false
         })
-        .done(function (data) {          
+          .done(function (data) {          
           });
 
-          });
+        e.preventDefault();
+      });
+  });
   </script>
 </head>
 
@@ -104,6 +121,7 @@
   <div class="container">
     <div class="profile-form smooth-shadow mt-4 mb-4">
       <form method="POST">
+        <input type="hidden" name="_id" value="<%= profile._id %>">
         <input type="hidden" id="password" value="<%= profile.password %>">
         <div class="form-group">
           <label for="organizationName">Organization name*</label>
@@ -112,26 +130,31 @@
         </div>
         <div class="form-group">
             <label for="organizationUniteID">Organization UNITE ID*</label>
-            <input type="text" class="form-control" id="organizationUniteID" aria-describedby="organizationUniteID" placeholder="organizationUniteID"
-                   name="organizationUniteID" required value="<%= profile.organizationUniteID %>">
+            <input type="text" required class="form-control" id="organizationUniteID" name="organizationUniteID" value="<%= profile.organizationUniteID %>">
         </div>
         <div class="form-group">
           <label for="contactName">Contact name*</label>
-          <input type="text" class="form-control" id="contactName" aria-describedby="contactName" placeholder="contactName" name="contactName" required value="<%= profile.contactName %>">
+          <input type="text" class="form-control" id="contactName" name="contactName" required value="<%= profile.contactName %>">
         </div>
 
         <div class="form-group">
           <label for="exampleInputEmail">Email address*</label>
-          <input type="email" class="form-control" id="emailAddress" aria-describedby="emailHelp" placeholder="Enter email" name="email" required value="<%= profile.emailAddress %>">
+          <input type="email" class="form-control" id="emailAddress" name="email" required value="<%= profile.emailAddress %>">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input required type="password" id="password" name="password" class="form-control"
+            value="<%= profile.password %>">
+          <a href="forgotPassword"><label>Forgot your password?</label></a>
         </div>
         <input type="hidden" name="isVerified" id="isVerified" value="<%= profile.isVerified %>">
         <div class="form-group">
           <label for="address">Address*</label>
-          <input type="text" class="form-control" id="address" aria-describedby="address" placeholder="address" name="address" required value="<%= profile.address %>">
+          <input type="text" class="form-control" id="address" name="address" required value="<%= profile.address %>">
         </div>
         <div class="form-group">
           <label for="country">Country*</label>
-          <input type="text" class="form-control" id="country" aria-describedby="country" placeholder="country" name="country" required value="<%= profile.country %>">
+          <input type="text" class="form-control country" id="country" name="country" required value="<%= profile.country %>">
         </div>
 
         <!-- Uploading files field section-->  

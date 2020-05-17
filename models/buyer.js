@@ -1,13 +1,16 @@
 const mongoose = require("mongoose");
+const passportLocalMongoose = require("passport-local-mongoose");
 const Schema = mongoose.Schema;
 
 const buyerSchema = new Schema({
   organizationName: {
     type: String,
+    unique: true,
     required: true
   },
   organizationUniteID: {
-    type: Schema.Types.ObjectId,
+    type: String,
+    unique: true,
     required: true
   },
   contactName: {
@@ -16,6 +19,7 @@ const buyerSchema = new Schema({
   },
   emailAddress: {
     type: String,
+    unique: true,
     required: true
   },
   password: {
@@ -25,6 +29,15 @@ const buyerSchema = new Schema({
   isVerified: {
     type: Boolean,
     default: false
+  },
+  resetPasswordToken: {
+    type: String,
+    required: false
+  },
+  resetPasswordExpires: {
+    type: Date,
+    required: false
+    //,  default: Date.now() + 43200000
   },
   address: {
     type: String,
@@ -48,4 +61,5 @@ const buyerSchema = new Schema({
   }
 });
 
+buyerSchema.plugin(passportLocalMongoose);
 module.exports = mongoose.model('Buyer', buyerSchema);

@@ -65,6 +65,7 @@ const buyerRoutes = require("./routes/buyer");
 const supervisorRoutes = require("./routes/supervisor");
 const messageRoutes = require("./routes/chat");
 const countryRoutes = require("./routes/countryAutocomplete");
+const industryRoutes = require("./routes/industryAutocomplete");
 
 //For chatting:
 const connect = require("./dbconnect");
@@ -79,6 +80,7 @@ app.use("/buyer", buyerRoutes);
 app.use("/supervisor", supervisorRoutes);
 app.use("/chat", messageRoutes);
 app.use("/countryAutocomplete", countryRoutes);
+app.use("/industryAutocomplete", industryRoutes);
 
 const port = 5000;
 var server = app.listen(4000, () => {
@@ -87,7 +89,7 @@ var server = app.listen(4000, () => {
 
 //Or this:
 http.listen(port, () => {
-  console.log("Running on Port: " + port);
+  //console.log("Running on Port: " + port);
 });
 
 io.on("connection", socket => {
@@ -119,7 +121,9 @@ io.on("chat message", function(msg) {
   //save chat to the database
   connect.then(db => {
     console.log("connected correctly to the server");
-    let chatMessage = new Message({ message: msg, sender: "Anonymous" });
+    let chatMessage = new Message({ 
+      message: msg, 
+      sender: "Anonymous" });
     chatMessage.save();
   });
 });
@@ -173,68 +177,6 @@ app.get('/countryAutocompleted', function(req, res) {
       }
    });
 });
-  
-  /*
-  .get("/countryAutocomplete", function(req, res) {
-  console.log('CAPOGRISI');
-  var regex = new RegExp(req.query["term"], 'i');
-  var countryFilter = Country.find({name: regex}, {'name': 1}).limit(15);
-  
-  countryFilter.exec(function(err, data) {
-    var result = [];
-    
-    if(!err) {
-      if(data && data.length && data.length > 0) {
-        data.forEach(item=>{
-          let obj = {
-            id: item._id,
-            name: item.name
-          };
-          
-          result.push(obj);          
-        });
-      }
-      
-      res.jsonp(result);
-    }
-  });
-  
-});*/
-
-// upload single file
-/*
-server.on("request", function(request, response, next) {alert(1992);
-  var currentRoute = url.format(request.url);
-  var currentMethod = request.method;
-  var requestBody = "";
-
-  switch (currentRoute) {
-    case "/uploadfile":
-      const file = request.file;
-      console.log("Upload File");
-
-      if (!file) {
-        const error = new Error("Please upload a file");
-        error.httpStatusCode = 400;
-        return next(error);
-      }
-
-      response.send(file);
-      break;
-
-    case "/uploadmultiple":
-      const files = request.files;
-
-      if (!files) {
-        const error = new Error("Please choose files");
-        error.httpStatusCode = 400;
-        return next(error);
-      }
-
-      response.send(files);
-      break;
-  }
-});*/
 
 app.post("/uploadfile", upload.single("singleFile"), (req, res, next) => {alert(1993);
   const file = req.file;

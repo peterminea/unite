@@ -5,10 +5,10 @@ const Country = require("../models/country");
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
-router.get("/countryAutocomplete", function(req, res) {//Not displaying the alert message
-  alert('CAPOGRISI');
+router.get("/countryAutocomplete", function(req, res) {//Not displaying the message
+  console.log('The test log.debug');
   var regex = new RegExp(req.query["term"], 'i');
-  var countryFilter = Country.find({name: regex}, {'name': 1}).limit(15);
+  var countryFilter = Country.find({name: regex}, {'name': 1}).sort({"name":-1}).limit(5);
   
   countryFilter.exec(function(err, data) {
     var result = [];

@@ -1,13 +1,16 @@
 const mongoose = require("mongoose");
+const passportLocalMongoose = require("passport-local-mongoose");
 const Schema = mongoose.Schema;
 
 const supervisorSchema = new Schema({
   organizationName: {
     type: String,
+    unique: true,
     required: true
   },
   organizationUniteID: {
-    type: Schema.Types.ObjectId,
+    type: String,
+    unique: true,
     required: true
   },
   contactName: {
@@ -16,6 +19,7 @@ const supervisorSchema = new Schema({
   },
   emailAddress: {
     type: String,
+    unique: true,
     required: true
   },
   password: {
@@ -26,6 +30,15 @@ const supervisorSchema = new Schema({
     type: Boolean,
     default: false
   },
+  resetPasswordToken: {
+    type: String,
+    required: false
+  },
+  resetPasswordExpires: {
+    type: Date,
+    required: false
+    //,    default: Date.now() + 43200000
+  },  
   address: {
     type: String,
     required: true
@@ -70,4 +83,5 @@ const supervisorSchema = new Schema({
   }
 });
 
+supervisorSchema.plugin(passportLocalMongoose);
 module.exports = mongoose.model('Supervisor', supervisorSchema);

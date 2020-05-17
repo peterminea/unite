@@ -10,11 +10,113 @@
   <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-  <script src="/https.js"></script>
+  <script src="/https.js"></script>    
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+    $(document).ready(function () {
+      var token = $("input[name='_csrf']").val();
+      
+      $('.country')      
+      .autocomplete({
+        source: function(req, res) {        
+          $.ajax({
+            url: "/countryAutocomplete",
+            headers: { "X-CSRF-Token": token },
+            datatype: "jsonp",
+            type: "GET",
+            data: req,
+            async: true,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function(data) {
+              res(data);
+            },
+            error: function(err) {
+
+            },
+          });
+        },
+        minLength: 3,
+        select: function(event, ui) {
+          if(ui.item) {
+            $(this).val(ui.item.name);
+          }
+        }
+      });      
+      
+      $("#industry").autocomplete({
+        source: function(req, res) {
+          $.ajax({
+            url: "/industryAutocomplete",
+            headers: { "X-CSRF-Token": token },
+            datatype: "jsonp",
+            type: "GET",
+            data: req,
+            async: true,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function(data) {
+              res(data);
+            },
+            error: function(err) {
+            console.log(err);
+            },
+          });
+        },
+        minLength: 3,
+        select: function(event, ui) {
+          if(ui.item) {
+            $(this).val(ui.item.name);
+          }
+        }
+      });    
+
+      $('input.fileupload').bind('change', function () {
+        $(this).val ? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
+      });
+
+      $('input[type="submit"]').click(function (e) {
+        var input = $(this).prev('input');        
+        var formData = new FormData();
+        var isMultiple = $(this).hasClass('multiple')? true : false;
+        formData.append("_csrf", token);
+        formData.append("upload_file", true);
+        if(isMultiple == false) {
+          formData.append('file', input[0].files[0]);
+        }
+        else {
+          $.each(input[0].files, function(i, file) {
+            formData.append('files['+i+']', file);
+          });
+        }
+        
+        $.ajax({
+          type: "POST",
+          url: isMultiple == true? "/uploadmultiple" : "/uploadfile",
+          headers: { "X-CSRF-Token": token },
+          async: true,
+          data: formData,
+          cache: false,
+          contentType: false,
+          processData: false
+        })
+          .done(function (data) {          
+          });
+
+        e.preventDefault();
+      });
+    });     
+  </script>
+  
+  
 </head>
 
 <body>
@@ -61,11 +163,11 @@
         </div>
         <div class="form-group">
           <label for="password">Password*</label>
-          <input type="password" class="form-control" id="password" placeholder="Password" name="password" required>
+          <input type="password" class="form-control" id="password" name="password" required>
         </div>
         <div class="form-group">
           <label>Director's name*</label>
-          <input type="text" class="form-control" name="directorsName">
+          <input type="text" class="form-control" name="directorsName" required>
         </div>
         <div class="form-group">
           <label>Contact Name*</label>
@@ -76,12 +178,12 @@
           <input type="text" class="form-control" name="title" required>
         </div>
         <div class="form-group">
-            <label>Company Registration No</label>
-            <input type="text" class="form-control" name="companyRegistrationNo">
+            <label>Company Registration No*</label>
+            <input type="text" class="form-control" name="companyRegistrationNo" required>
           </div>
         <div class="form-group">
           <label>Registered Country*</label>
-          <input type="text" class="form-control" name="registeredcountry" required>
+          <input type="text" class="form-control" name="registeredCountry" required>
         </div>
         <div class="form-group">
           <label>Company Address*</label>
@@ -97,11 +199,11 @@
         </div>
         <div class="form-group">
           <label>Country*</label>
-          <input type="text" class="form-control" name="country" required>
+          <input type="text" class="form-control" id="country" name="country" required>
         </div>
         <div class="form-group">
           <label>Industry*</label>
-          <input type="text" class="form-control" name="industry" required>
+          <input type="text" class="form-control" id="industry" name="industry" required>
         </div>
         <div class="form-group">
           <label>Employee Numbers*</label>
@@ -223,7 +325,7 @@
         <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
         <div class="form-group">
           <label class="text-muted form-text">
-            By clicking the "Sign-up" button, you accept <a href="../termsConditions">the UNITE Terms And Conditions</a> and <a href="../antibriberyAgreement">the Antibribery Agreement</a>.
+            By clicking the "Sign Up" button, you accept <a href="../termsConditions">the UNITE Terms And Conditions</a> and <a href="../antibriberyAgreement">the Antibribery Agreement</a>.
           </label>
         </div>
       </form>

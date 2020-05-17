@@ -7,7 +7,7 @@ router.use(bodyParser.urlencoded({ extended: true }));
 
 router.get("/industryAutocomplete", function(req, res) {
   var regex = new RegExp(req.query["term"], 'i');
-  var industryFilter = Industry.find({name: regex}, {'name': 1}).limit(15);
+  var industryFilter = Industry.find({name: regex}, {'name': 1}).sort({"name":-1}).limit(5);
   
   industryFilter.exec(function(err, data) {
     var result = [];
