@@ -17,17 +17,17 @@
   <script src="/https.js"></script>    
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
   integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.jquery.min.js"></script>
   <!--<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>  
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>
--->
-  
+--> 
   
   <script type="text/javascript">
     $(document).ready(function () {
       var token = $("input[name='_csrf']").val();
       
-      $('#country')/*.autocomplete({
+      $('.country')/*.autocomplete({
         source: function (request, response) {//alert(JSON.stringify(request));
          $.ajax({
             url: "/countryAutocompleted",
@@ -63,7 +63,7 @@
             // optional: submit the form after field has been filled up
            // $('#quicksearch').submit();
          }
-  }); */         
+  }); */
       .autocomplete({
         source: function(req, res) {        
           $.ajax({
@@ -92,9 +92,8 @@
         }
       });
       
-      
       $("#industry").autocomplete({
-        source: function(req, res) {        
+        source: function(req, res) {
           $.ajax({
             url: "/industryAutocomplete",
             headers: { "X-CSRF-Token": token },
@@ -109,7 +108,7 @@
               res(data);
             },
             error: function(err) {
-
+            console.log(err);
             },
           });
         },
@@ -135,7 +134,7 @@
         var isMultiple = $(this).hasClass('multiple')? true : false;
         formData.append("_csrf", token);
         formData.append("upload_file", true);
-        if(!isMultiple) {
+        if(isMultiple == false) {
           formData.append('file', input[0].files[0]);
         }
         else {
@@ -154,11 +153,7 @@
           contentType: false,
           processData: false
         })
-          .done(function (data) {
-            // clear form
-            //$('input[name=name]').val('');
-            // $('input[name=age]').val('');
-            // alert(data);
+          .done(function (data) {          
           });
 
         e.preventDefault();
@@ -231,17 +226,16 @@
           <label>Password</label>
           <input required type="password" id="password" name="password" class="form-control"
             value="<%= profile.password %>">
+          <a href="forgotPassword"><label>Forgot your password?</label></a>
         </div>
         <input type="hidden" name="isVerified" id="isVerified" value="<%= profile.isVerified %>">
         <div class="form-group">
           <label>Director's name</label>
-          <input type="text" class="form-control" id="directorsName" name="directorsName"
-            value="<%= profile.directorsName %>">
+          <input type="text" class="form-control" id="directorsName" name="directorsName" value="<%= profile.directorsName %>">
         </div>
         <div class="form-group">
           <label>Contact Name</label>
-          <input type="text" class="form-control" id="contactName" name="contactName"
-            value="<%= profile.contactName %>">
+          <input type="text" class="form-control" id="contactName" name="contactName" value="<%= profile.contactName %>">
         </div>
         <div class="form-group">
           <label>Title</label>
@@ -342,10 +336,8 @@
 
         <!-- Uploading files field section-->
         <div class="form-group">
-          <label>Certificates</label>
-          <div class="form-control">
-            <input class="fileupload" type="file" id="certificates" name="certificates" multiple>
-          </div>
+          <label>Certificates</label>          
+          <input class="fileupload" type="file" id="certificates" name="certificates" multiple>          
           <input class="form-control multiple btn btn-dark mt-2" type="submit" disabled value="Upload Files" />
         </div>
 
