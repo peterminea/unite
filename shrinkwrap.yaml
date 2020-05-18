@@ -1,4 +1,5 @@
 dependencies:
+  '@angular/core': 9.1.7
   ajax: 0.0.4
   ajax-request: 1.2.3
   assert: 2.0.0
@@ -8,6 +9,7 @@ dependencies:
   bluebird: 3.7.2
   connect-flash: 0.1.1
   connect-mongodb-session: 2.3.1
+  cookie-parser: 1.4.5
   crypto: 1.0.1
   csurf: 1.11.0
   date-format-simple: 1.1.5
@@ -32,6 +34,14 @@ dependencies:
   token: 0.1.0
   url: 0.11.0
 packages:
+  /@angular/core/9.1.7:
+    dev: false
+    peerDependencies:
+      rxjs: ^6.5.3
+      tslib: ^1.10.0
+      zone.js: ~0.10.3
+    resolution:
+      integrity: sha512-uJSZ+rdGL47gc3A+Fal1XwJYB4WWpYJrNifvoQ2nOs+X5Qu+j0HN6GXPJb4kixoNzjYCGxmLoirdT3xhNZFcfQ==
   /@types/node/14.0.1:
     dev: false
     resolution:
@@ -594,6 +604,15 @@ packages:
       node: '>= 0.6'
     resolution:
       integrity: sha512-hIP3EEPs8tB9AT1L+NUqtwOAps4mk2Zob89MWXMHjHWg9milF/j4osnnQLXBCBFBk/tvIG/tUc9mOUJiPBhPXA==
+  /cookie-parser/1.4.5:
+    dependencies:
+      cookie: 0.4.0
+      cookie-signature: 1.0.6
+    dev: false
+    engines:
+      node: '>= 0.8.0'
+    resolution:
+      integrity: sha512-f13bPUj/gG/5mDr+xLmSxxDsB9DQiTIfhJS/sqjrmfAWiAN+x2O4i/XguTL9yDZ+/IFDanJ+5x7hC4CXT9Tdzw==
   /cookie-signature/1.0.6:
     dev: false
     resolution:
@@ -2745,6 +2764,7 @@ registry: 'https://registry.npmjs.org/'
 shrinkwrapMinorVersion: 9
 shrinkwrapVersion: 3
 specifiers:
+  '@angular/core': ^9.1.7
   ajax: ^0.0.4
   ajax-request: ^1.2.3
   assert: ^2.0.0
@@ -2754,6 +2774,7 @@ specifiers:
   bluebird: ^3.7.2
   connect-flash: ^0.1.1
   connect-mongodb-session: ^2.3.1
+  cookie-parser: ^1.4.5
   crypto: ^1.0.1
   csurf: ^1.11.0
   date-format-simple: ^1.1.5

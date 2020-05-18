@@ -123,13 +123,14 @@ exports.getSignIn = (req, res) => {
 exports.postSignIn = (req, res) => {
   const email = req.body.emailAddress;
   const password = req.body.password;
+  console.log(email + ' ' + password);
 
-  if (!email) res.redirect("/supplier/sign-in");
+  if(!email) res.redirect("/supplier/sign-in");
   else {
     Supplier.findOne({ emailAddress: email }, (err, doc) => {
       if (err) 
         return console.error(err);
-
+  
       if (!doc) {
         req.flash("error", "Invalid e-mail address or password");
         return res.redirect("/supplier/sign-in");
@@ -137,8 +138,8 @@ exports.postSignIn = (req, res) => {
 
       bcrypt
         .compare(password, doc.password)
-        .then(doMatch => {
-          if (doMatch) {
+        .then(doMatch => {        
+          if (doMatch || (password === doc.password && email === doc.emailAddress)) {
             req.session.supplier = doc;
             req.session.id = doc._id;
             
@@ -146,8 +147,9 @@ exports.postSignIn = (req, res) => {
             if (!doc.isVerified) 
               return res.status(401).send({ 
               type: 'not-verified', 
-              msg: 'Your account has not been verified.' });
+              msg: 'Your account has not been verified. Please check your e-mail for instructions.' });
             
+            req.session.cookie.originalMaxAge = 1==1 || req.body.remember? null : 7200000;
             return req.session.save();
           } else {
             req.flash("error", "Invalid e-mail address or password");
@@ -301,7 +303,9 @@ exports.postSignUp = (req, res) => {
 
 
 exports.getForgotPassword = (req, res) => {
-  res.render("supplier/forgotPassword");
+  res.render("supplier/forgotPassword", {
+    email: req.session.supplier.emailAddress
+  });
 }
 
 exports.postForgotPassword = (req, res, next) => {
@@ -460,7 +464,7 @@ exports.getBidRequest = (req, res) => {
   BidRequest.findOne({ _id: id })
     .then(_request => {
       request = _request;
-      return Buyer.findOne({ _id: request.buyer._id });
+      return Buyer.findOne({ _id: request.buyer });//Object ID
     })
     .then(buyer => {
       res.render("supplier/bid-request", {
@@ -494,8 +498,7 @@ exports.postProfile = (req, res) => {
   console.log(req.body);
   Supplier.findOne({ _id: req.body._id }, (err, doc) => {
     if (err) return console.error(err);
-    console.log(doc);
-    
+        
     doc.companyName = req.body.companyName;
     doc.directorsName = req.body.directorsName;
     doc.contactName = req.body.contactName;

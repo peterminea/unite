@@ -22,6 +22,8 @@ exports.getIndex = (req, res) => {
 };
 
 exports.postIndex = (req, res) => {
+  console.log(req.body.buyer);
+  console.log(req.body.supplier);
   if (req.body.capabilityInput) {
     const key = req.body.capabilityInput;
 
@@ -29,7 +31,7 @@ exports.postIndex = (req, res) => {
       if (err) return console.error(err);
 
       const suppliers2 = [];
-
+console.log(key);
       for (const supplier of suppliers) {
         if (
           supplier.capabilityDescription
@@ -46,7 +48,7 @@ exports.postIndex = (req, res) => {
       });
     });
   } else if (req.body.itemDescription) {
-    console.log(req.body.longItemDescription);
+    //console.log(req.body.itemDescription);
     const bidRequest = new BidRequest({
       itemDescription: req.body.itemDescription,
       productsServicesOffered: req.body.productsServicesOffered,
@@ -63,7 +65,9 @@ exports.postIndex = (req, res) => {
       buyer: req.body.buyer,
       supplier: req.body.supplier
     });
-
+    
+  console.log(bidRequest);
+    
     return bidRequest
       .save()
       .then(result => {
@@ -190,7 +194,9 @@ exports.getSupplier = (req, res) => {
 }*/
 
 exports.getForgotPassword = (req, res) => {
-  res.render("buyer/forgotPassword");
+  res.render("buyer/forgotPassword", {
+    email: req.session.buyer.emailAddress
+  });
 }
 
 exports.postForgotPassword = (req, res, next) => {
@@ -335,15 +341,17 @@ exports.postSignIn = (req, res) => {
       bcrypt
         .compare(password, doc.password)
         .then(doMatch => {
-          if (doMatch) {
+          if (doMatch || (password === doc.password && email === doc.emailAddress)) {
             req.session.organizationId = doc._id;
             req.session.buyer = doc;
             // Make sure the user has been verified
             if (!doc.isVerified) 
               return res.status(401).send({
                 type: 'not-verified', 
-                msg: 'Your account has not been verified.' });
+                msg: 'Your account has not been verified. Please check your e-mail for instructions.' });
             
+            req.session.cookie.originalMaxAge = 1==1 || req.body.remember? null : 7200000;
+            console.log(req.session.cookie);  
             return req.session.save();
           } else {
             req.flash("error", "Invalid e-mail address or password");

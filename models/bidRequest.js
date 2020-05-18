@@ -49,7 +49,7 @@ const bidRequestSchema = new Schema({
   },
   price: {
     type: Number,
-    required: false
+    required: true
   },
   buyer: {
     type: Schema.Types.ObjectId, // Buyer's object id -> It will be generated from current session
