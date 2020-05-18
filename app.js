@@ -10,6 +10,7 @@ const dateTime = require("date-format-simple");
 const multer = require("multer");
 const fs = require("fs-extra");
 const sortJson = require("sort-json");
+const cookieParser = require('cookie-parser');
 
 //Classes:
 const BidRequest = require("./models/bidRequest");
@@ -42,6 +43,10 @@ app.use(
     secret: "26UNWwbu26FvXZTJQBkf45dLSV7gG9bx",
     resave: false,
     saveUninitialized: true,
+    cookie: { 
+      secure: true
+      //, maxAge: 7200000//2 hours in milliseconds
+    },
     store: store
   })
 );

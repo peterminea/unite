@@ -262,32 +262,38 @@
               <form method="POST">
                 <div class="modal-body">
                   <div class="form-group">
-                    <label class="col-form-label">Supplier Company*</label>
-                    <input type="text" class="form-control" value="<%= supplier.companyName %>" readonly required>
+                    <label class="text-muted form-text">
+                      Please fill in all the required (*) fields.
+                    </label>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Supplier Company</label>
+                    <input type="text" class="form-control" value="<%= supplier.companyName %>" readonly>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Item Description (Short)<b>*</b></label>
                     <input type="text" class="form-control" name="itemDescription" required>
                   </div>
                   <div class="form-group">
-                    <label class="col-form-label">Commodity List</label>
+                    <label class="col-form-label">Products / Services Offered*</label>
                     <div class="input-group">
-                      <input type="text" class="form-control" placeholder="Add Commodity" id="commodityInput_<%= i %>">
+                      <input type="text" required class="form-control" placeholder="Add Product/Service" id="prodServiceInput_<%= i %>">
                       <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="button" id="addCommodity_<%= i %>">Add</button>
+                        <button class="btn btn-outline-secondary" type="button" id="addProdService_<%= i %>">Add</button>
                       </div>
                     </div>
                     <br>
-                    <ul class="list-group" id="commodityList_<%= i %>">
+                    <ul class="list-group" id="prodServices_<%= i %>">
                     </ul>
-                    <input type="hidden" id="hiddenCommodityList_<%= i %>" name="commodityList" value="">
+                    <input type="hidden" required id="hiddenProdServicesList_<%= i %>" name="productsServicesOffered" value="">
                     <script>
-                      document.getElementById("addCommodity_<%= i %>").onclick = () => {
-                        if (document.getElementById("commodityInput_<%= i %>").value != "") {
-                          document.getElementById("commodityList_<%= i %>")
+                      document.getElementById("addProdService_<%= i %>").onclick = () => {
+                        if ($("prodServiceInput_<%= i %>").val() != "") {
+                          document.getElementById("prodServices_<%= i %>")
                             .insertAdjacentHTML("beforeend",
-                              "<li class=\"list-group-item\">" + document.getElementById("commodityInput_<%= i %>").value + "</li>")
-                          document.getElementById("hiddenCommodityList_<%= i %>").value += document.getElementById("commodityInput_<%= i %>").value + ", "
+                              "<li class=\"list-group-item\">" 
+                                + document.getElementById("prodServiceInput_<%= i %>").value + "</li>");
+                          document.getElementById("hiddenProdServicesList_<%= i %>").value += $("prodServiceInput_<%= i %>").val() + ", ";
                         }
                       }
                     </script>
@@ -307,19 +313,19 @@
                   </div>
 
                   <div class="form-group">
-                    <label class="col-form-label">Amount</label>
+                    <label class="col-form-label">Amount*</label>
                     <input type="text" class="form-control" id="recipient-name" name="amount" required>
                   </div>
                   <div class="form-group">
-                    <label class="col-form-label">Delivery Location</label>
+                    <label class="col-form-label">Delivery Location*</label>
                     <textarea class="form-control" name="deliveryLocation" required></textarea>
                   </div>
                   <div class="form-group">
-                    <label class="col-form-label">Delivery Requirements</label>
+                    <label class="col-form-label">Delivery Requirements*</label>
                     <textarea class="form-control" name="deliveryRequirements" required></textarea>
                   </div>
                   <div class="form-group">
-                    <label class="col-form-label">Compliance Requirements</label>
+                    <label class="col-form-label">Compliance Requirements*</label>
                     <textarea class="form-control" name="complianceRequirements" required></textarea>
                   </div>
                   <div class="form-group">
@@ -332,6 +338,18 @@
                         aria-describedby="basic-addon3">
                     </div>
                   </div>
+                   <div class="form-group">
+                    <label class="col-form-label">Other Requirements</label>
+                    <textarea class="form-control" name="otherRequirements"></textarea>
+                  </div>
+                   <div class="form-group">
+                    <label class="col-form-label">Status*</label>
+                    <input type="number" class="form-control" name="status" value="0" required></input>
+                  </div>
+                   <div class="form-group">
+                    <label class="col-form-label">Price*</label>
+                    <input type="number" class="form-control" name="price" required></input>
+                  </div>
 
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                   <input type="hidden" name="buyer" value="<%= buyer._id %>">
@@ -340,7 +358,7 @@
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                  <button type="submit" class="btn btn-primary">Send message</button>
+                  <button type="submit" class="btn btn-primary">Send request</button>
                 </div>
               </form>
             </div>

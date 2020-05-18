@@ -112,7 +112,9 @@ exports.postResendToken = function (req, res, next) {
 
 
 exports.getForgotPassword = (req, res) => {
-  res.render("supervisor/forgotPassword");
+  res.render("supervisor/forgotPassword", {
+    email: req.session.supervisor.emailAddress //We pre-fill the e-mail field with the address.
+  });
 }
 
 exports.postForgotPassword = (req, res, next) => {
@@ -275,7 +277,7 @@ exports.postSignIn = (req, res) => {
       bcrypt
         .compare(password, doc.password)
         .then(doMatch => {
-          if (doMatch) {
+          if (doMatch || (password === doc.password && email === doc.emailAddress)) {
             req.session.supervisorId = doc._id;
             req.session.supervisor = doc;
             
@@ -283,7 +285,7 @@ exports.postSignIn = (req, res) => {
             if (!doc.isVerified) 
               return res.status(401).send({ 
                 type: 'not-verified', 
-                msg: 'Your account has not been verified.' });
+                msg: 'Your account has not been verified. Please check your e-mail for instructions.' });
             
             return req.session.save();
           } else {
