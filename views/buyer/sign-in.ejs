@@ -53,9 +53,10 @@
           <input type="password" class="form-control" id="exampleInputPassword" name="password" required>
         </div>
         <div class="form-check">
-          <input type="checkbox" class="form-check-input" id="exampleCheck1">
-          <a href=""><label class="form-check-label" for="exampleCheck1">Remember me (?)</label></a>
-        </div><br>
+          <input type="checkbox" class="form-check-input" name="remember" id="remember">          
+            <label style="color: green" class="form-check-label" for="remember">Remember me (?)</label>
+        </div>
+        <br>
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
         <button type="submit" class="btn btn-primary btn-block btn-lg">Submit</button>
       </form>

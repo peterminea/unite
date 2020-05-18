@@ -53,7 +53,6 @@ app.use(
 //app.use(csrf({ cookie: true }));
 // Password Checking & Protecting
 const csrfProtection = csrf();
-
 app.use(csrfProtection);
 app.use(flash());
 

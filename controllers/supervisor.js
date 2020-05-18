@@ -263,6 +263,8 @@ exports.getSignUp = (req, res) => {
 exports.postSignIn = (req, res) => {
   const email = req.body.emailAddress;
   const password = req.body.password;
+  const rememberUser = req.body.remember;
+  console.log(rememberUser);
 
   if (!email) res.redirect("/supervisor/sign-in");
   else {
@@ -287,6 +289,7 @@ exports.postSignIn = (req, res) => {
                 type: 'not-verified', 
                 msg: 'Your account has not been verified. Please check your e-mail for instructions.' });
             
+            req.session.cookie.originalMaxAge = 1==1 || req.body.remember? null : 7200000;
             return req.session.save();
           } else {
             req.flash("error", "Invalid e-mail address or password");
