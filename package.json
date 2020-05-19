@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "express": "^4.17.1",
-    "mongoose": "^5.9.13",
+    "mongoose": "^5.9.15",
     "ejs": "^3.1.3",
     "express-session": "^1.17.1",
     "bcryptjs": "^2.4.3",
@@ -40,7 +40,10 @@
     "async": "^3.2.0",
     "passport-local-mongoose": "^6.0.0",
     "cookie-parser": "^1.4.5",
-    "@angular/core": "^9.1.7"
+    "@angular/core": "^9.1.7",
+    "cors": "^2.8.5",
+    "fetch": "^1.1.0",
+    "axios": "^0.19.2"
   },
   "engines": {
     "node": "12.x"

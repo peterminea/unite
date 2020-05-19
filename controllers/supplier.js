@@ -138,7 +138,7 @@ exports.postSignIn = (req, res) => {
 
       bcrypt
         .compare(password, doc.password)
-        .then(doMatch => {        
+        .then(doMatch => {
           if (doMatch || (password === doc.password && email === doc.emailAddress)) {
             req.session.supplier = doc;
             req.session.id = doc._id;

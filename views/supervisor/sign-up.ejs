@@ -18,41 +18,54 @@
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
   integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
   
-  <script type="text/javascript">
-      $(document).ready(function() {        
-        var token = $("input[name='_csrf']").val();
-        
-        $('input.fileupload')/*.unbind('change')*/.bind('change', function() {
+  <script type="text/javascript">        
+      $(document).ready(function () {
+      var token = $("input[name='_csrf']").val();
+   
+      $('input.fileupload')/*.unbind('change')*/.bind('change', function() {
           $(this).val? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
         });
         
-      $("#country").autocomplete({
-        source: function(req, res) {
+      $('#country')
+      .autocomplete({
+        source: function(req, res) {          
           $.ajax({
-            url: "/countryAutocomplete",
+            url: "/countryAutocomplete/",
             headers: { "X-CSRF-Token": token },
-            datatype: "jsonp",
+            datatype: 'jsonp',//"application/json",
             type: "GET",
             data: req,
             async: true,
             cache: false,
             contentType: false,
             processData: false,
-            success: function(data) {
-              res(data);
+            success: function(data) {          
+              //res(data);              
+              res($.map(data, function (el) {
+                  return {
+                     name: el.name
+                    , id: el.id
+                  };
+                  }));         
+              
             },
             error: function(err) {
-            console.log(err);
-            },
+
+            }
           });
         },
         minLength: 3,
+        focus: function (event, ui) {
+            this.value = ui.item.name;
+            event.preventDefault();
+         },
         select: function(event, ui) {
           if(ui.item) {
             $(this).val(ui.item.name);
+            event.preventDefault();
           }
         }
-      });        
+      });    
         
       $('input[type="submit"]').click(function (e) {
         var input = $(this).prev('input');        
@@ -69,9 +82,11 @@
           });
         }
         
+        var theUrl = isMultiple == true? "/uploadmultiple" : "/uploadfile";
+        
         $.ajax({
           type: "POST",
-          url: isMultiple == true? "/uploadmultiple" : "/uploadfile",
+          url: theUrl,
           headers: { "X-CSRF-Token": token },
           async: true,
           data: formData,
@@ -79,7 +94,7 @@
           contentType: false,
           processData: false
         })
-          .done(function (data) {          
+          .done(function (data) {
           });
 
         e.preventDefault();
