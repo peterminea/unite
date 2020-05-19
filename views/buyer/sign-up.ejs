@@ -21,37 +21,50 @@
   
   <script type="text/javascript">
       $(document).ready(function() {
-        var token = $("input[name='_csrf']").val();
+        
+      var token = $("input[name='_csrf']").val();       
+      
+      $('#country')
+      .autocomplete({
+        source: function(req, res) {          
+          $.ajax({
+            url: "/countryAutocomplete/",
+            headers: { "X-CSRF-Token": token },
+            datatype: 'jsonp',//"application/json",
+            type: "GET",
+            data: req,
+            async: true,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function(data) {          
+              //res(data);              
+              res($.map(data, function (el) {
+                  return {
+                     name: el.name
+                    , id: el.id
+                  };
+                  }));         
+              
+            },
+            error: function(err) {
 
-        $("#country").autocomplete({
-          source: function(req, res) {
-            $.ajax({
-              url: "/countryAutocomplete",
-              headers: { "X-CSRF-Token": token },
-              datatype: "jsonp",
-              type: "GET",
-              data: req,
-              async: true,
-              cache: false,
-              contentType: false,
-              processData: false,
-              success: function(data) {
-                res(data);
-              },
-              error: function(err) {
-              console.log(err);
-              },
-            });
-          },
-          minLength: 3,
-          select: function(event, ui) {
-            if(ui.item) {
-              $(this).val(ui.item.name);
             }
+          });
+        },
+        minLength: 3,
+        focus: function (event, ui) {
+            this.value = ui.item.name;
+            event.preventDefault();
+         },
+        select: function(event, ui) {
+          if(ui.item) {
+            $(this).val(ui.item.name);
+            event.preventDefault();
           }
-        });
+        }
       });
-    
+  });
 </script>  
   
 </head>  

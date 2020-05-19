@@ -20,42 +20,54 @@
   integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>  
   
   <script type="text/javascript">
-      $(document).ready(function() {
+      $(document).ready(function() {        
         var token = $("input[name='_csrf']").val();
         
         $("input").unbind('change').bind('change', function() {        
           $('#updateProfile').removeAttr('disabled');
         });
-        
-      $("#country").autocomplete({
-        source: function(req, res) {
+      
+      $('#country')
+      .autocomplete({
+        source: function(req, res) {          
           $.ajax({
-            url: "/countryAutocomplete",
+            url: "/countryAutocomplete/",
             headers: { "X-CSRF-Token": token },
-            datatype: "jsonp",
+            datatype: 'jsonp',//"application/json",
             type: "GET",
             data: req,
             async: true,
             cache: false,
             contentType: false,
             processData: false,
-            success: function(data) {
-              res(data);
+            success: function(data) {          
+              //res(data);              
+              res($.map(data, function (el) {
+                  return {
+                     name: el.name
+                    , id: el.id
+                  };
+                  }));         
+              
             },
             error: function(err) {
-            console.log(err);
-            },
+
+            }
           });
         },
         minLength: 3,
+        focus: function (event, ui) {
+            this.value = ui.item.name;
+            event.preventDefault();
+         },
         select: function(event, ui) {
           if(ui.item) {
             $(this).val(ui.item.name);
+            event.preventDefault();
           }
         }
-        });
-      });
-    
+      });    
+  });
 </script>
     
 </head>
