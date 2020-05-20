@@ -21,8 +21,10 @@ exports.create = (req, res) => {
   const remove = path.join(__dirname, '..', '..', 'public');
   const relPath = req.file.path.replace(remove, '');
   const newImage = new Image(req.body);
+  
   newImage.logEntryId = req.params.logEntryId;
   newImage.path = relPath;
+  
   newImage.save(function(err, image) {
     if(err) res.send(err);
     res.json(image);

@@ -58,6 +58,14 @@ const buyerSchema = new Schema({
   country: {
     type: String,
     required: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now()
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now()
   }
 });
 

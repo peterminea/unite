@@ -12,75 +12,63 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-  <script src="/https.js"></script>    
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
   integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  <script src="/https.js"></script>
   
   <script type="text/javascript">
       $(document).ready(function () {
-      var token = $("input[name='_csrf']").val();
-      
-      $('.country')/*.autocomplete({
-        source: function (request, response) {
-         $.ajax({
-            url: "/countryAutocompleted",
-            type: "GET",
-            data: request,  // request is the value of search input
-            success: function (data) {
-               response($.map(data, function (el) {
-                  return {
-                     name: el.name,
-                     id: el._id
-                  };
-                  }));
-               }
+      var token = $("input[name='_csrf']").val();      
+       
+      var autocomp = function(obj, data) {
+        $('ul.ui-autocomplete').not('div.container *').each(function(i, e) {                
+        if($(this).children('li').length) {
+          $(this).css({'height': '75px', 'text-align': 'left'});
+
+          $(this).find('li').each(function(index, element) {
+            var name = data[index].name;
+            $(element).css({'height': '15px'})
+              .find('div').css({'font-family': 'arial', 'font-size': '15px'}).text(name);
+            $(element).bind('click', function() {                      
+              obj.val(name);
+              $(this).parent('ul').hide();
+              });
             });
-         },
-         minLength: 3,
-         select: function (event, ui) {
-            this.value = ui.item.name;
-            // Set the id to the next input hidden field
-            $(this).next("input").val(ui.item.value);
-         }
-  }); */
-      .autocomplete({
-        source: function(req, res) {          
+          }
+        });
+      };
+      
+      $('.country').autocomplete({
+        source: function(req, res) {
+          var obj = $(this.element);
+        
           $.ajax({
             url: "/countryAutocomplete/",
             headers: { "X-CSRF-Token": token },
-            datatype: 'jsonp',//"application/json",
-            type: "GET",
+            datatype: 'jsonp',
+            type: "POST",
             data: req,
-            async: true,
-            cache: false,
-            contentType: false,
-            processData: false,
-            success: function(data) {          
-              //res(data);              
-              res($.map(data, function (el) {
-                  return {
-                     name: el.name
-                    , id: el.id
-                  };
-                  }));         
-              
+            success: function(data) {              
+              res(data);
+              autocomp(obj, data);
             },
             error: function(err) {
-
+              alert(err);
             }
           });
         },
         minLength: 3,
+        delay: 100,
         focus: function (event, ui) {
-            this.value = ui.item.name;
-            // Prevent other event from not being executed
+            if(!ui.item) return true;
+            $(this).name = ui.item.name;
             event.preventDefault();
          },
         select: function(event, ui) {
           if(ui.item) {
-            $(this).val(ui.item.name);
+            $(this.element).val(ui.item.name);
             event.preventDefault();
           }
         }
@@ -88,19 +76,17 @@
       
       $("#industry").autocomplete({
         source: function(req, res) {
+          var obj = $(this.element);
           
           $.ajax({
-            url: '/industryAutocomplete',//"/industryAutocomplete",
+            url: '/industryAutocomplete',
             headers: { "X-CSRF-Token": token },
-            datatype: 'jsonp',//"application/json",
-            type: "GET",
-            data: req,            
-            async: true,
-            cache: false,
-            contentType: false,
-            processData: false,
+            datatype: 'jsonp',
+            type: "POST",
+            data: req,
             success: function(data) {
               res(data);
+              autocomp(obj, data);
             },
             error: function(err) {
             console.log(err);
@@ -108,13 +94,19 @@
           });
         },
         minLength: 3,
+        delay: 10,
+        focus: function (event, ui) {
+            $(this).val() = ui.item.name;
+            event.preventDefault();
+         },
         select: function(event, ui) {
           if(ui.item) {
             $(this).val(ui.item.name);
+            event.preventDefault();
+            }
           }
-        }
-      });           
-
+      });
+    
       $('input.fileupload')/*.unbind('change')*/.bind('change', function () {
         $(this).val ? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
       });
@@ -149,13 +141,9 @@
           type: "POST",
           url: theUrl,
           headers: { "X-CSRF-Token": token },
-          async: true,
-          data: formData,
-          cache: false,
-          contentType: false,
-          processData: false
+          data: formData
         })
-          .done(function (data) {          
+          .done(function (data) {
           });
 
         e.preventDefault();
@@ -280,49 +268,52 @@
           <label>Supporting Information</label>
           <input type="text" class="form-control" name="supportingInformation">
         </div>
-
-          <div class="form-group">
-              <label>Certificates</label>              
-              <input class="form-control fileupload" type="file" id="certificates" name="certificates" multiple>
-              <input class="form-control multiple" type="submit" disabled value="Upload Files"/>
-          </div>
-
-          <div class="form-group">
-               <label>Antibribery policy</label>
-               <input class="form-control fileupload" type="file" id="antibriberyPolicy" name="antibriberyPolicy" />
-               <input class="form-control single" type="submit" disabled value="Upload File"/>
-          </div>
-
-          <div class="form-group">
-               <label>Environment policy</label>
-               <input class="form-control fileupload" type="file" id="environmentPolicy" name="environmentPolicy" />
-               <input class="form-control single" type="submit" disabled value="Upload File"/>
-          </div>
-
-          <div class="form-group">
-               <label>Quality management policy</label>
-               <input class="form-control fileupload" type="file" id="qualityManagementPolicy" name="qualityManagamentPolicy" />
-               <input class="form-control single" type="submit" disabled value="Upload File"/>
-          </div>
-
-          <div class="form-group">
-               <label>Occupational Safety and Health</label>
-               <input class="form-control fileupload" type="file" id="occupationalSafetyAndHealthPolicy" name="occupationalSafetyAndHealth" />
-               <input class="form-control single" type="submit" disabled value="Upload File"/>
-          </div>
-
-          <div class="form-group">
-              <label>Other relevant files</label>              
-              <input class="form-control fileupload" type="file" id="otherRelevantFiles" name="otherFiles" multiple>
-              <input class="form-control multiple" type="submit" disabled value="Upload Files"/>
-          </div>
-
+        
         <div class="form-group">
-          <label>Certificates</label>
-          <input type="url" class="form-control" name="certificatesUrls">
           <label class="text-muted form-text">
             You can upload your files to cloud services (e.g. Google Drive) and add the link to the folder here.
           </label>
+        </div>
+        
+        <div class="form-group">
+            <label>Certificates</label>              
+            <input class="form-control fileupload" type="file" id="certificates" name="certificates" multiple>
+            <input class="form-control multiple" type="submit" disabled value="Upload Files"/>
+        </div>
+
+        <div class="form-group">
+             <label>Antibribery policy</label>
+             <input class="form-control fileupload" type="file" id="antibriberyPolicy" name="antibriberyPolicy" />
+             <input class="form-control single" type="submit" disabled value="Upload File"/>
+        </div>
+
+        <div class="form-group">
+             <label>Environment policy</label>
+             <input class="form-control fileupload" type="file" id="environmentPolicy" name="environmentPolicy" />
+             <input class="form-control single" type="submit" disabled value="Upload File"/>
+        </div>
+
+        <div class="form-group">
+             <label>Quality management policy</label>
+             <input class="form-control fileupload" type="file" id="qualityManagementPolicy" name="qualityManagamentPolicy" />
+             <input class="form-control single" type="submit" disabled value="Upload File"/>
+        </div>
+
+        <div class="form-group">
+             <label>Occupational Safety and Health</label>
+             <input class="form-control fileupload" type="file" id="occupationalSafetyAndHealthPolicy" name="occupationalSafetyAndHealth" />
+             <input class="form-control single" type="submit" disabled value="Upload File"/>
+        </div>
+
+        <div class="form-group">
+            <label>Other relevant files</label>              
+            <input class="form-control fileupload" type="file" id="otherRelevantFiles" name="otherFiles" multiple>
+            <input class="form-control multiple" type="submit" disabled value="Upload Files"/>
+        </div>
+<!--
+        <div class="form-group">
+          <label>Certificates</label>
+          <input type="url" class="form-control" name="certificatesUrls">          
         </div>
         <div class="form-group">
           <label>Anti-bribery policy</label>
@@ -343,7 +334,7 @@
         <div class="form-group">
           <label>Other relevant files</label>
           <input type="url" class="form-control" name="otherRelevantFilesUrls">
-        </div>
+        </div> -->
 
         <!--Mandatory check of agreements -->
         <div class="form-group">

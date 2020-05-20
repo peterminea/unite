@@ -30,34 +30,34 @@
 
   <div class="container">
     <form method="POST">
-
+      <input type='hidden' name='createdAt' value="<%= request.createdAt %>">
       <div class="form-group">
         <label>Item description (short)</label>
-        <input type="text" class="form-control" id="itemDescriptionShort" required>
+        <input type="text" class="form-control" name="itemDescriptionShort" value="<%= request.itemDescription %>" required>
       </div>
       <div class="form-group">
-        <label>Commodity list</label>
+        <label>Products/Services Offered</label>
         <div class="dropdown">
-          <button class="btn btn-primary dropdown-toggle" type="button" id="commodityListButton" data-toggle="dropdown"
+          <button class="btn btn-primary dropdown-toggle" type="button" id="prodServicesButton" data-toggle="dropdown"
             aria-haspopup="true" aria-expanded="false">
             Dropdown button
           </button>
-          <div class="dropdown-menu" aria-labelledby="commodityListButton">
+          <div class="dropdown-menu" aria-labelledby="prodServicesButton">
             <a class="dropdown-item" href="#">First item</a>
             <a class="dropdown-item" href="#">Second item</a>
             <a class="dropdown-item" href="#">Something else here</a>
           </div>
         </div>
 
-        <input type="text" class="form-control" id="productsServicesOffered" required>
+      <input type="text" class="form-control" name="productsServicesOffered" value="<%= request.productsServicesOffered %>" required>
       </div>
       <div class="form-group">
         <label>Amount</label>
-        <input type="text" class="form-control" id="amount" required>
+        <input type="text" class="form-control" name="amount" value="<%= request.amount %>" required>
       </div>
       <div class="form-group">
         <label>Item description (long)</label>
-        <input type="text" class="form-control" id="itemDescriptionLong" required>
+        <input type="text" class="form-control" name="itemDescriptionLong" value="<%= request.itemDescriptionLong %>" required>
       </div>
       
       <div class="form-group">          
@@ -66,21 +66,21 @@
       </div>
       <div class="form-group">
         <label>Delivery location</label>
-        <input type="text" class="form-control" id="deliveryLocation">
+        <input type="text" class="form-control" name="deliveryLocation" value="<%= request.deliveryLocation %>" required>
       </div>
       <div class="form-group">
         <label>Delivery requirements</label>
-        <input type="text" class="form-control" id="deliveryRequirements" required>
+        <input type="text" class="form-control" name="deliveryRequirements" value="<%= request.deliveryRequirements %>" required>
       </div>
       <div class="form-group">
         <label>Compliance requirements</label>
-        <input type="text" class="form-control" id="complianceRequirements" required>
+        <input type="text" class="form-control" name="complianceRequirements" value="<%= request.complianceRequirements %>" required>
       </div>
       
       <div class="form-group">          
           <label>Long item description(file)</label>
           <input type="url">
-      </div>          
+      </div>
 
       <button type="submit" disabled id="updateDetails" value="updateDetails" class="btn btn-primary btn-block btn-lg">Update Bid Details</button>      
       <a href="chat/index">

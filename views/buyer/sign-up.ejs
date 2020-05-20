@@ -22,33 +22,42 @@
   <script type="text/javascript">
       $(document).ready(function() {
         
-      var token = $("input[name='_csrf']").val();       
-      
-      $('#country')
-      .autocomplete({
-        source: function(req, res) {          
+      var token = $("input[name='_csrf']").val();
+        
+        var autocomp = function(obj, data) {
+          $('ul.ui-autocomplete').not('div.container *').each(function(i, e) {                
+          if($(this).children('li').length) {
+            $(this).css({'height': '75px', 'text-align': 'left'});
+
+            $(this).find('li').each(function(index, element) {
+              var name = data[index].name;
+              $(element).css({'height': '15px'})
+                .find('div').css({'font-family': 'arial', 'font-size': '15px'}).text(name);
+              $(element).bind('click', function() {                      
+                obj.val(name);
+                $(this).parent('ul').hide();
+                });
+              });
+            }
+          });
+        };
+        
+      $('#country').autocomplete({
+        source: function(req, res) {
+          var obj = $(this.element);
+          
           $.ajax({
             url: "/countryAutocomplete/",
             headers: { "X-CSRF-Token": token },
             datatype: 'jsonp',//"application/json",
-            type: "GET",
+            type: "POST",
             data: req,
-            async: true,
-            cache: false,
-            contentType: false,
-            processData: false,
             success: function(data) {          
-              //res(data);              
-              res($.map(data, function (el) {
-                  return {
-                     name: el.name
-                    , id: el.id
-                  };
-                  }));         
-              
+              res(data);
+              autocomp(obj, data);
             },
             error: function(err) {
-
+              alert(err);
             }
           });
         },
@@ -71,7 +80,7 @@
   
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
-    <a class="navbar-brand" href="/">UNITE</a>
+    <a class="navbar-brand" href="/">Buyer - UNITE</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>

@@ -16,8 +16,7 @@
   integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-  <script src="/https.js"></script>
-  
+  <script src="/https.js"></script>  
   
   <!--
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
@@ -29,66 +28,66 @@
 -->   
   <script type="text/javascript">
       $(document).ready(function () {
-      var token = $("input[name='_csrf']").val();
-      
-      $('.country')/*.autocomplete({
-        source: function (request, response) {
-         $.ajax({
-            url: "/countryAutocompleted",
-            type: "GET",
-            data: request,  // request is the value of search input
-            success: function (data) {
-               response($.map(data, function (el) {
-                  return {
-                     name: el.name,
-                     id: el._id
-                  };
-                  }));
-               }
+      var token = $("input[name='_csrf']").val();      
+       
+      var autocomp = function(obj, data) {
+        $('ul.ui-autocomplete').not('div.container *').each(function(i, e) {                
+        if($(this).children('li').length) {
+          $(this).css({'height': '75px', 'text-align': 'left'});
+
+          $(this).find('li').each(function(index, element) {
+            var name = data[index].name;
+            $(element).css({'height': '15px'})
+              .find('div').css({'font-family': 'arial', 'font-size': '15px'}).text(name);
+            $(element).bind('click', function() {                      
+              obj.val(name);
+              $(this).parent('ul').hide();
+              });
             });
-         },
-         minLength: 3,
-         select: function (event, ui) {
-            this.value = ui.item.name;
-            // Set the id to the next input hidden field
-            $(this).next("input").val(ui.item.value);
-         }
-  }); */
-      .autocomplete({
-        source: function(req, res) {          
+          }
+        });
+      };
+      
+      $('.country').autocomplete({
+        source: function(req, res) {
+          var obj = $(this.element);
+        
           $.ajax({
             url: "/countryAutocomplete/",
             headers: { "X-CSRF-Token": token },
-            datatype: 'jsonp',//"application/json",
-            type: "GET",
-            data: req,
+            datatype: 'jsonp',//'application/json',
+            type: "POST",
+            data: req,/*
             async: true,
             cache: false,
             contentType: false,
-            processData: false,
-            success: function(data) {          
-              //res(data);              
+            processData: false,*/
+            success: function(data) {              
+              res(data);
+              autocomp(obj, data);              
+              /*
               res($.map(data, function (el) {
                   return {
                      name: el.name
                     , id: el.id
                   };
-                  }));         
-              
+                  }));*/
             },
             error: function(err) {
-
+              alert(err);
             }
           });
         },
         minLength: 3,
+        delay: 100,
         focus: function (event, ui) {
-            this.value = ui.item.name;
+            if(!ui.item) return true;
+            $(this).name = ui.item.name;
             event.preventDefault();
          },
         select: function(event, ui) {
           if(ui.item) {
-            $(this).val(ui.item.name);
+            $(this.element).val(ui.item.name);
             event.preventDefault();
           }
         }
@@ -96,19 +95,17 @@
       
       $("#industry").autocomplete({
         source: function(req, res) {
+          var obj = $(this.element);
           
           $.ajax({
             url: '/industryAutocomplete',//"/industryAutocomplete",
             headers: { "X-CSRF-Token": token },
             datatype: 'jsonp',//"application/json",
-            type: "GET",
-            data: req,            
-            async: true,
-            cache: false,
-            contentType: false,
-            processData: false,
+            type: "POST",
+            data: req,
             success: function(data) {
               res(data);
+              autocomp(obj, data);
             },
             error: function(err) {
             console.log(err);
@@ -116,11 +113,17 @@
           });
         },
         minLength: 3,
+        delay: 10,
+        focus: function (event, ui) {
+            $(this).val() = ui.item.name;
+            event.preventDefault();
+         },
         select: function(event, ui) {
           if(ui.item) {
             $(this).val(ui.item.name);
+            event.preventDefault();
+            }
           }
-        }
       });
       
       $("input").unbind('change').bind('change', function () {
@@ -161,13 +164,9 @@
           type: "POST",
           url: theUrl,
           headers: { "X-CSRF-Token": token },
-          async: true,
-          data: formData,
-          cache: false,
-          contentType: false,
-          processData: false
+          data: formData
         })
-          .done(function (data) {          
+          .done(function (data) {
           });
 
         e.preventDefault();
@@ -224,6 +223,8 @@
       <form method="post">
         <input type="hidden" name="_id" value="<%= profile._id %>">
         <input type="hidden" id="balance" name="balance" value="<%= profile.balance %>">
+        <input type="hidden" name="createdAt" id="createdAt" value="<%= profile.createdAt %>">
+        
         <div class="form-group">
           <label>Company Name</label>
           <input required type="text" id="companyName" name="companyName" class="form-control"
@@ -237,8 +238,7 @@
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input required type="password" id="password" name="password" class="form-control"
-            value="<%= profile.password %>">
+          <input required type="password" id="password" name="password" class="form-control" value="<%= profile.password %>">
           <a href="forgotPassword"><label>Forgot your password?</label></a>
         </div>
         <input type="hidden" name="isVerified" id="isVerified" value="<%= profile.isVerified %>">
@@ -299,54 +299,52 @@
         </div>
         <div class="form-group">
           <label>Website</label>
-          <input type="text" class="form-control" id="website" name="website" value="<%= profile.website %>">
+          <input type="url" class="form-control" id="website" name="website" value="<%= profile.website %>">
         </div>
         <div class="form-group">
           <label>Facebook URL</label>
-          <input type="text" class="form-control" id="facebookURL" name="facebookURL"
-            value="<%= profile.facebookURL %>">
+          <input type="url" class="form-control" id="facebookURL" name="facebookURL" value="<%= profile.facebookURL %>">
         </div>
         <div class="form-group">
           <label>Instagram URL</label>
-          <input type="text" class="form-control" id="instagramURL" name="instagramURL"
-            value="<%= profile.instagramURL %>">
+          <input type="url" class="form-control" id="instagramURL" name="instagramURL" value="<%= profile.instagramURL %>">
         </div>
         <div class="form-group">
           <label>Twitter URL</label>
-          <input type="text" class="form-control" id="twitterURL" name="twitterURL" value="<%= profile.twitterURL %>">
+          <input type="url" class="form-control" id="twitterURL" name="twitterURL" value="<%= profile.twitterURL %>">
         </div>
         <div class="form-group">
           <label>LinkedIn URL</label>
-          <input type="text" class="form-control" id="linkedinURL" name="linkedinURL"
-            value="<%= profile.linkedinURL %>">
+          <input type="url" class="form-control" id="linkedinURL" name="linkedinURL" value="<%= profile.linkedinURL %>">
         </div>
         <div class="form-group">
           <label>Other Social Media URL</label>
-          <input type="text" class="form-control" id="otherSocialMediaURL" name="otherSocialMediaURL"
-            value="<%= profile.otherSocialMediaURL %>">
+          <input type="url" class="form-control" id="otherSocialMediaURL" name="otherSocialMediaURL" value="<%= profile.otherSocialMediaURL %>">
         </div>
         <div class="form-group">
           <label>Products or Services Offered*</label>
-          <input type="text" class="form-control" id="productsServicesOffered" name="productsServicesOffered"
-            value="<%= profile.productsServicesOffered %>" required>
+          <input type="text" class="form-control" id="productsServicesOffered" name="productsServicesOffered" value="<%= profile.productsServicesOffered %>" required>
         </div>
         <div class="form-group">
           <label>Capability Description*</label>
-          <input type="text" class="form-control" id="capabilityDescription" name="capabilityDescription"
-            value="<%= profile.capabilityDescription %>" required>
+          <input type="text" class="form-control" id="capabilityDescription" name="capabilityDescription" value="<%= profile.capabilityDescription %>" required>
         </div>
         <div class="form-group">
           <label>Relevant Experience*</label>
-          <input type="text" class="form-control" id="relevantExperience" name="relevantExperience"
-            value="<%= profile.relevantExperience %>" required>
+          <input type="text" class="form-control" id="relevantExperience" name="relevantExperience" value="<%= profile.relevantExperience %>" required>
         </div>
         <div class="form-group">
           <label>Supporting Information</label>
-          <input type="text" class="form-control" id="supportingInformation" name="supportingInformation"
-            value="<%= profile.supportingInformation %>">
+          <input type="text" class="form-control" id="supportingInformation" name="supportingInformation" value="<%= profile.supportingInformation %>">
         </div>
 
-        <!-- Uploading files field section-->
+        <!-- Uploading files field section-->        
+        <div class="form-group">
+          <label class="text-muted form-text">
+            You can upload your files to cloud services (e.g. Google Drive) and add the link to the folder here.
+          </label>
+        </div>
+        
         <div class="form-group">
           <label>Certificates</label>          
           <input class="form-control fileupload" type="file" id="certificates" name="certificates" multiple>          
@@ -384,32 +382,31 @@
           <input class="form-control fileupload" type="file" id="otherRelevantFiles" name="otherFiles" multiple>
           <input class="form-control multiple btn btn-dark mt-2" type="submit" disabled value="Upload Files" />
         </div>
-
+<!--
         <div class="form-group">
           <label>Certificates</label>
-          <input type="url" id="certificatesUrl" name="certificatesUrl" class="form-control">
+          <input type="url" class="form-control" id="certificatesUrls" value="< %= profile.certificatesUrls %>">
         </div>
         <div class="form-group">
-          <label>Antibribery policy</label>
-          <input type="url" id="antibriberyPolicyUrl" name="antibriberyPolicyUrl" class="form-control">
+          <label>Anti-bribery policy</label>
+          <input type="url" class="form-control" id="antibriberyPolicyUrl" value="< %= profile.antibriberyPolicyUrl %>">
         </div>
         <div class="form-group">
           <label>Environment policy</label>
-          <input type="url" id="environmentPolicyUrl" name="environmentPolicyUrl" class="form-control">
+          <input type="url" class="form-control" id="environmentPolicyUrl" value="< %= profile.environmentPolicyUrl %>">
         </div>
         <div class="form-group">
           <label>Quality management policy</label>
-          <input type="url" id="qualityManagementPolicyUrl" name="qualityManagementPolicyUrl" class="form-control">
+          <input type="url" class="form-control" id="qualityManagementPolicyUrl" value="< %= profile.qualityManagementPolicyUrl%>">
         </div>
         <div class="form-group">
           <label>Occupational Safety and Health</label>
-          <input type="url" id="occupationalSafetyAndHealthPolicyUrl" name="occupationalSafetyAndHealthPolicyUrl"
-            class="form-control">
+          <input type="url" class="form-control" id="occupationalSafetyAndHealthPolicyUrl" value="< %= profile.occupationalSafetyAndHealthPolicyUrl %>">
         </div>
         <div class="form-group">
           <label>Other relevant files</label>
-          <input type="url" id="otherRelevantFilesUrls" name="otherRelevantFilesUrls" class="form-control">
-        </div>
+          <input type="url" class="form-control" id="otherRelevantFilesUrls" value="< %= profile.otherRelevantFilesUrls %>">
+        </div>-->
 
         <!--Mandatory check of agreements -->
         <div class="form-group">

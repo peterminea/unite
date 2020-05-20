@@ -4,6 +4,14 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const BidRequest = require("../models/bidRequest");
 
+exports.getIndex = (req, res) => {
+  res.render("bidRequest/index", {
+    request: req.session.request,
+    //suppliers: null,
+    success: req.flash("success")
+  });
+};
+
 exports.postIndex = (req, res) => {
       const bidRequest = new BidRequest({
       itemDescription: req.body.itemDescription,
@@ -18,6 +26,8 @@ exports.postIndex = (req, res) => {
       otherRequirements: req.body.otherRequirements,
       status: req.body.status,
       price: req.body.price,
+      createdAt: req.body.createdAt,
+      updatedAt: Date.now(),
       buyer: req.body.buyer,
       supplier: req.body.supplier
     });
