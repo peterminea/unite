@@ -23,8 +23,7 @@ const Message = require("./models/message");
 const Country = require("./models/country");
 const Industry = require("./models/industry");
 
-const MONGODB_URI =
-  "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";
+const MONGODB_URI = "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";//The DB url.
 const app = express();
 mongoose.Promise = global.Promise;
 
@@ -146,8 +145,79 @@ var storage = multer.diskStorage({
     callback(null, file.fieldname + '-' + Date.now())
   }
 });
+
+var extArray = ['.png', '.jpg', '.jpeg', '.gif', '.pdf', '.txt'];
  
-var upload = multer({ storage: storage });
+var upload = multer({
+  storage: storage,
+  fileFilter: function (req, file, callback) {
+    var ext = path.extname(file.originalname);
+    
+    for(var i in extArray) 
+      if(ext.toLowerCase() !== extArray[i].toLowerCase()) {
+        return callback(new Error('Extension forbidden!'));
+      }
+    
+    callback(null, true);
+  },
+  limits: {
+    fileSize: 1024 * 1024//1 MB
+  }
+});
+
+
+app.post("/uploadfile", upload.single("single"), (req, res, next) => { 
+  const file = req.file;
+  
+  if (!file) {
+    const error = new Error("Please upload a file");
+    error.httpStatusCode = 400;
+    return next(error);
+  }
+  console.log(file);
+  res.send(file);
+  return true;
+
+     /** When using the "single"
+      data come in "req.file" regardless of the attribute "name". **/
+  var tmp_path = req.file.path;
+
+  /** The original name of the uploaded file
+      stored in the variable "originalname". **/
+  var target_path = 'uploads/' + req.file.originalname;
+
+  /** A better way to copy the uploaded file. **/
+  var src = fs.createReadStream(tmp_path);
+  var dest = fs.createWriteStream(target_path);
+  src.pipe(dest);
+  src.on('end', function() {
+    //res.render('complete'); 
+  });
+  src.on('error', function(err) {
+    //res.render('error'); 
+  });
+});
+
+
+//Uploading multiple files
+app.post("/uploadmultiple",  upload.array("multiple", 12),   (req, res, next) => {
+    const files = req.files;
+    
+    if (!files) {
+      const error = new Error("Please choose files");
+      error.httpStatusCode = 400;
+      return next(error);
+    }
+  
+    console.log(files);
+    res.send(files);
+  }
+);
+
+//Alternate multiupload:
+app.post("/multipleupload", uploadController.multipleUpload);
+
+
 var db;
 
 MongoClient.connect(MONGODB_URI, (err, client) => {
@@ -159,16 +229,16 @@ MongoClient.connect(MONGODB_URI, (err, client) => {
   });
 });
 
+//Autocomplete fields:
 var country = Country.find({});
 var industry = Industry.find({});
 const jsonp = require('jsonp');
 
-app.get('/countryAutocomplete/', function(req, res, next) {  
-  var regex = new RegExp(req.query["term"], 'i');
-  var countryFilter = Country.find({name: regex}, {'name': 1}).sort({"name" : 1}).limit(5);//Positive sort is ascending.
-  console.log(regex);
+app.post('/countryAutocomplete/', function(req, res, next) {  
+  var regex = new RegExp(req.body.term, 'i');  
+  var countryFilter = Country.find({name: regex}, {'name': 1}).sort({"name" : 1}).limit(5);//Positive sort is ascending.  
   countryFilter.exec(function(err, data) {
-    var result = [];
+  var result = [];
     
     if(!err) {
       if(data && data.length && data.length > 0) {
@@ -181,21 +251,21 @@ app.get('/countryAutocomplete/', function(req, res, next) {
           result.push(obj);          
         });
       }
-      console.log(result);
+      
       res.jsonp(result);
-      //res.send(result, {
-        //    'Content-Type': 'application/json'
-         //}, 200);
+      
+      if(1==2)res.send(result, {
+            'Content-Type': 'application/json'
+         }, 100);
     }
   });
 });
 
-app.get('/industryAutocomplete', function(req, res, next) {
+app.post('/industryAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.query["term"], 'i');
-  var industryFilter = Industry.find({name: regex}, {'name': 1}).sort({"name" : 1}).limit(5);//Negative sort means descending.
-  
+  var industryFilter = Industry.find({name: regex}, {'name': 1}).sort({"name" : 1}).limit(5);//Negative sort means descending.  
   industryFilter.exec(function(err, data) {
-    var result = [];
+  var result = [];
     
     if(!err) {
       if(data && data.length && data.length > 0) {
@@ -208,7 +278,7 @@ app.get('/industryAutocomplete', function(req, res, next) {
           result.push(obj);          
         });
       }
-      console.log(result);
+      
       res.jsonp(result);     
     }
   });
@@ -244,55 +314,6 @@ app.get('/countryAutocompleted', function(req, res) {
    });
 });
 
-app.post("/uploadfile", upload.single("single"), (req, res, next) => { 
-  const file = req.file;
-  
-  if (!file) {
-    const error = new Error("Please upload a file");
-    error.httpStatusCode = 400;
-    return next(error);
-  }
-  console.log(file);
-  res.send(file);
-  return true;
-
-     /** When using the "single"
-      data come in "req.file" regardless of the attribute "name". **/
-  var tmp_path = req.file.path;
-
-  /** The original name of the uploaded file
-      stored in the variable "originalname". **/
-  var target_path = 'uploads/' + req.file.originalname;
-
-  /** A better way to copy the uploaded file. **/
-  var src = fs.createReadStream(tmp_path);
-  var dest = fs.createWriteStream(target_path);
-  src.pipe(dest);
-  src.on('end', function() {
-    //res.render('complete'); 
-  });
-  src.on('error', function(err) {
-    //res.render('error'); 
-  });  
-  
-});
-
-//Uploading multiple files
-app.post("/uploadmultiple",  upload.array("multiple", 12),   (req, res, next) => {
-    const files = req.files;
-    
-    if (!files) {
-      const error = new Error("Please choose files");
-      error.httpStatusCode = 400;
-      return next(error);
-    }
-    console.log(files + ' SCHWERIN');
-    res.send(files);
-  }
-);
-
-//Alternate multiupload:
-app.post("/multipleupload", uploadController.multipleUpload);
 
 // Database configuration
 mongoose

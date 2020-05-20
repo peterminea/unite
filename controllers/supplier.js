@@ -27,6 +27,21 @@ exports.getIndex = (req, res) => {
     .catch(console.error);
 };
 
+
+/*
+exports.getLogout = (req, res, next) => {
+  if (req.session) {    
+    req.session.destroy(function(err) {
+      if(err) {
+        return next(err);
+      } else {
+        return res.redirect('/');
+      }
+    });
+  }
+}*/
+
+
 exports.postConfirmation = function (req, res, next) {
     req.assert('email', 'Email is not valid').isEmail();
     req.assert('email', 'Email cannot be blank').notEmpty();
@@ -220,7 +235,9 @@ exports.postSignUp = (req, res) => {
           otherRelevantFilesUrls: req.body.otherRelevantFilesUrls,
           balance: req.body.balance,
           UNITETermsAndConditions: true,
-          antibriberyAgreement: true
+          antibriberyAgreement: true,
+          createdAt: Date.now(),
+          updatedAt: Date.now()
         });
 
       var user = new Promise((resolve, reject) => {
@@ -529,6 +546,8 @@ exports.postProfile = (req, res) => {
     doc.otherRelevantFilesUrls = req.body.otherRelevantFilesUrls;
     doc.UNITETermsAndConditions = req.body.UNITETermsAndConditions == "on" ? true : false;
     doc.antibriberyAgreement = req.body.antibriberyAgreement == "on" ? true : false;
+    doc.createdAt = req.body.createdAt;
+    doc.updatedAt = Date.now();
 
     return doc.save();
   })

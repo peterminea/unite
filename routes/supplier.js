@@ -8,6 +8,7 @@ router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
 router.get("/", isAuth, sessionExit, supplierController.getIndex);
+//router.get("/logout", isAuth, sessionExit, supplierController.getLogout);
 router.get("/sign-in", supplierController.getSignIn);
 router.get("/sign-up", supplierController.getSignUp);
 router.get("/profile", isAuth, sessionExit, supplierController.getProfile);

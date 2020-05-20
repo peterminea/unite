@@ -7,5 +7,7 @@ const isAuth = require("../middleware/is-auth-buyer");
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
+router.get("/", isAuth, bidRequestController.getIndex);
 router.post("/", isAuth, bidRequestController.postIndex);
+
 module.exports = router;

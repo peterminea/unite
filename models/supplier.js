@@ -135,6 +135,14 @@ const supplierSchema = new Schema({
   antibriberyAgreement: {
     type: Boolean, // Force to true with popup
     required: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now()
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now()
   }
 });
 

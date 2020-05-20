@@ -9,7 +9,7 @@ var storage = multer.diskStorage({
   filename: (req, file, callback) => {
     const match = ["image/png", "image/jpeg"];
 
-    if (1==2 && match.indexOf(file.mimetype) === -1) {
+    if (1==2 && match.indexOf(file.mimetype) === -1) {//Skip this interdiction. #1is2
       var message = '${' + file.originalname + '} is invalid. Only accept png/jpeg.';
       return callback(message, null);
     }
@@ -19,6 +19,22 @@ var storage = multer.diskStorage({
   }
 });
 
-var uploadFiles = multer({ storage: storage }).array("multiple", 10);
+var uploadFiles = multer({
+  storage: storage,
+  fileFilter: function (req, file, callback) {
+    var ext = path.extname(file.originalname);
+    var extArray = ['.png', '.jpg', '.jpeg', '.gif', '.pdf', '.txt'];
+    
+    for(var i in extArray) 
+      if(ext.toLowerCase() !== extArray[i].toLowerCase()) {
+        return callback(new Error('Extension forbidden!'));
+      }
+    
+    callback(null, true);
+  },
+  limits: {
+    fileSize: 1024 * 2048 //2 MB
+  }  
+}).array("multiple", 10);
 var uploadFilesMiddleware = util.promisify(uploadFiles);
 module.exports = uploadFilesMiddleware;

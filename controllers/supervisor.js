@@ -27,6 +27,20 @@ exports.getIndex = (req, res) => {
 };
 
 
+/*
+exports.getLogout = (req, res, next) => {
+  if (req.session) {    
+    req.session.destroy(function(err) {
+      if(err) {
+        return next(err);
+      } else {
+        return res.redirect('/');
+      }
+    });
+  }
+}*/
+
+
 exports.postConfirmation = function (req, res, next) {
     req.assert('email', 'Email is not valid').isEmail();
     req.assert('email', 'Email cannot be blank').notEmpty();
@@ -285,7 +299,7 @@ exports.postSignIn = (req, res) => {
             
             // Make sure the user has been verified
             if (!doc.isVerified) 
-              return res.status(401).send({ 
+              return res.status(401).send({
                 type: 'not-verified', 
                 msg: 'Your account has not been verified. Please check your e-mail for instructions.' });
             
@@ -310,6 +324,7 @@ exports.postSignUp = (req, res) => {
     const email = req.body.emailAddress;
     const email_str_arr = email.split("@");
     const domain_str_location = email_str_arr.length - 1;
+    const final_domain = email_str_arr[domain_str_location];
     var prohibitedArray = ["gmail.com", "hotmail.com", "outlook.com", "yandex.com", "yahoo.com", "gmx"];
     
     for(var i = 0; i < prohibitedArray.length; i++)
@@ -337,7 +352,9 @@ exports.postSignUp = (req, res) => {
           occupationalSafetyAndHealthPolicyUrl: req.body.occupationalSafetyAndHealthPolicyUrl,
           otherRelevantFilesUrls: req.body.otherRelevantFilesUrls,
           UNITETermsAndConditions: true,
-          antibriberyAgreement: true
+          antibriberyAgreement: true,
+          createdAt: Date.now(),
+          updatedAt: Date.now()
         });
 
         console.log(supervisor);
@@ -431,6 +448,8 @@ exports.postProfile = (req, res) => {
     doc.otherRelevantFilesUrls = req.body.otherRelevantFilesUrls;
     doc.UNITETermsAndConditions = req.body.UNITETermsAndConditions == 'on'? true : false;
     doc.antibriberyAgreement = req.body.antibriberyAgreement == 'on'? true : false;
+    doc.createdAt = req.body.createdAt;
+    doc.updatedAt = Date.now();
 
     return doc.save();
   })

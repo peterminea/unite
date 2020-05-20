@@ -13,45 +13,54 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-  <script src="/https.js"></script>    
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
-  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>  
+  <script src="/https.js"></script>
   
   <script type="text/javascript">
       $(document).ready(function() {        
         var token = $("input[name='_csrf']").val();
         
+        var autocomp = function(obj, data) {
+          $('ul.ui-autocomplete').not('div.container *').each(function(i, e) {                
+          if($(this).children('li').length) {
+            $(this).css({'height': '75px', 'text-align': 'left'});
+
+            $(this).find('li').each(function(index, element) {
+              var name = data[index].name;
+              $(element).css({'height': '15px'})
+                .find('div').css({'font-family': 'arial', 'font-size': '15px'}).text(name);
+              $(element).bind('click', function() {                      
+                obj.val(name);
+                $(this).parent('ul').hide();
+                });
+              });
+            }
+          });
+        };
+        
         $("input").unbind('change').bind('change', function() {        
           $('#updateProfile').removeAttr('disabled');
         });
       
-      $('#country')
-      .autocomplete({
-        source: function(req, res) {          
+      $('#country').autocomplete({
+        source: function(req, res) {
+          var obj = $(this.element);
+          
           $.ajax({
             url: "/countryAutocomplete/",
             headers: { "X-CSRF-Token": token },
             datatype: 'jsonp',//"application/json",
-            type: "GET",
+            type: "POST",
             data: req,
-            async: true,
-            cache: false,
-            contentType: false,
-            processData: false,
-            success: function(data) {          
-              //res(data);              
-              res($.map(data, function (el) {
-                  return {
-                     name: el.name
-                    , id: el.id
-                  };
-                  }));         
-              
+            success: function(data) {
+              res(data);
+              autocomp(obj, data);
             },
             error: function(err) {
-
+              alert(err);
             }
           });
         },
@@ -66,7 +75,7 @@
             event.preventDefault();
           }
         }
-      });    
+      });
   });
 </script>
     
@@ -94,7 +103,7 @@
           <a class="btn btn-primary" href="/buyer/profile">Profile</a>
         </li>
         <li class="nav-item" style="margin-left: 20px;">
-          <a class="btn btn-danger" href="?exit=true">Exit</a>
+          <a class="btn btn-danger" href="/logout">Logout</a>
         </li>
       </ul>
     </div>
@@ -114,6 +123,7 @@
       <form method="POST">
         <input type="hidden" name="_id" value="<%= profile._id %>">
         <input type="hidden" name="balance" id="balance" value="<%= profile.balance %>">
+        <input type="hidden" name="createdAt" id="createdAt" value="<%= profile.createdAt %>">
         
         <div class="row m-2">
           <div class="form-group">

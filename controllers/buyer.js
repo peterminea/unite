@@ -31,7 +31,7 @@ exports.postIndex = (req, res) => {
       if (err) return console.error(err);
 
       const suppliers2 = [];
-console.log(key);
+      console.log(key);
       for (const supplier of suppliers) {
         if (
           supplier.capabilityDescription
@@ -62,6 +62,8 @@ console.log(key);
       otherRequirements: req.body.otherRequirements,
       status: req.body.status,
       price: req.body.price,
+      createdAt: req.body.createdAt? req.body.createdAt : Date.now(),
+      updatedAt: Date.now(),
       buyer: req.body.buyer,
       supplier: req.body.supplier
     });
@@ -79,6 +81,19 @@ console.log(key);
     res.redirect("/buyer");
   }
 };
+
+/*
+exports.getLogout = (req, res, next) => {
+  if (req.session) {    
+    req.session.destroy(function(err) {
+      if(err) {
+        return next(err);
+      } else {
+        return res.redirect('/');
+      }
+    });
+  }
+}*/
 
 
 exports.postConfirmation = function (req, res, next) {
@@ -395,8 +410,10 @@ exports.postSignUp = (req, res) => {
           balance: req.body.balance,
           deptAgencyGroup: req.body.deptAgencyGroup,
           qualification: req.body.qualification,
-          country: req.body.country
-        });        
+          country: req.body.country,
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        });
   
       var user = new Promise((resolve, reject) => {
         buyer.save((err) => {
@@ -479,6 +496,8 @@ exports.postProfile = (req, res) => {
     doc.deptAgencyGroup = req.body.deptAgencyGroup;
     doc.qualification = req.body.qualification;
     doc.country = req.body.country;
+    doc.createdAt = req.body.createdAt;
+    doc.updatedAt = Date.now();
 
     return doc.save();
   })
