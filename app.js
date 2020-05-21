@@ -22,6 +22,7 @@ const Supervisor = require("./models/supervisor");
 const Message = require("./models/message");
 const Country = require("./models/country");
 const Industry = require("./models/industry");
+const ProductService = require("./models/productService");
 
 const MONGODB_URI = "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";//The DB url.
 const app = express();
@@ -234,7 +235,7 @@ var country = Country.find({});
 var industry = Industry.find({});
 const jsonp = require('jsonp');
 
-app.post('/countryAutocomplete/', function(req, res, next) {  
+app.post('/countryAutocomplete/', function(req, res, next) {
   var regex = new RegExp(req.body.term, 'i');  
   var countryFilter = Country.find({name: regex}, {'name': 1}).sort({"name" : 1}).limit(5);//Positive sort is ascending.  
   countryFilter.exec(function(err, data) {
@@ -273,6 +274,61 @@ app.post('/industryAutocomplete', function(req, res, next) {
           let obj = {
             id: item._id,
             name: item.name
+          };
+          
+          result.push(obj);          
+        });
+      }
+      
+      res.jsonp(result);     
+    }
+  });
+});
+
+app.get('/prodServiceAutocomplete/', function(req, res, next) {
+  var regex = new RegExp(req.query["term"], 'i');
+  var id = req.query["supplierId"];  
+  console.log(regex + ' ' + req.query["supplierId"]);
+  
+  var prodServiceFilter = ProductService
+    .find({productName: regex, supplier: new ObjectId(id)}, {'productName': 1, 'productPrice': 1}).sort({"productName" : 1}).limit(5);//Negative sort means descending.  
+  prodServiceFilter.exec(function(err, data) {
+  var result = [];
+    
+    if(!err) {
+      if(data && data.length && data.length > 0) {
+        
+        data.forEach(item => {
+          let obj = {
+            id: item._id,
+            name: item.productName,
+            price: item.productPrice
+          };
+          
+          result.push(obj);          
+        });
+      }
+      
+      res.jsonp(result);     
+    }
+  });
+});
+
+
+app.get('/capabilityInputAutocomplete', function(req, res, next) {
+  var regex = new RegExp(req.query["term"], 'i');
+  console.log(regex);
+  var capDescriptionFilter = Supplier.find({capabilityDescription: regex}, {'capabilityDescription': 1})
+    .sort({"capabilityDescription" : 1}).limit(5);
+  capDescriptionFilter.exec(function(err, data) {
+  var result = [];
+    
+    if(!err) {
+      if(data && data.length && data.length > 0) {
+        data.forEach(item => {
+          let obj = {
+            id: item._id,
+            name: item.capabilityDescription
           };
           
           result.push(obj);          

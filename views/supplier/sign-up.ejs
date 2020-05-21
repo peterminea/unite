@@ -16,29 +16,12 @@
   integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  <script src="/autocomp.js"></script>
   <script src="/https.js"></script>
   
   <script type="text/javascript">
       $(document).ready(function () {
-      var token = $("input[name='_csrf']").val();      
-       
-      var autocomp = function(obj, data) {
-        $('ul.ui-autocomplete').not('div.container *').each(function(i, e) {                
-        if($(this).children('li').length) {
-          $(this).css({'height': '75px', 'text-align': 'left'});
-
-          $(this).find('li').each(function(index, element) {
-            var name = data[index].name;
-            $(element).css({'height': '15px'})
-              .find('div').css({'font-family': 'arial', 'font-size': '15px'}).text(name);
-            $(element).bind('click', function() {                      
-              obj.val(name);
-              $(this).parent('ul').hide();
-              });
-            });
-          }
-        });
-      };
+      var token = $("input[name='_csrf']").val();        
       
       $('.country').autocomplete({
         source: function(req, res) {
