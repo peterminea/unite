@@ -13,6 +13,12 @@ body {
   color: #063797;
 }
 
+.ui-autocomplete { 
+    cursor:pointer; 
+    height:120px; 
+    overflow-y:scroll;
+} 
+
 .color-secondary {
   color: #a1830e;
 }

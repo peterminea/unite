@@ -21,6 +21,10 @@
         $("input").unbind('change').bind('change', function() {        
           $('#updateDetails').removeAttr('disabled');
         });
+        
+        $('#amount').bind('change', function() {
+          $('#price').val($(this).val() * $('#defaultPrice').val());          
+        });
       });
     
   </script>  
@@ -53,16 +57,15 @@
       </div>
       <div class="form-group">
         <label>Amount</label>
-        <input type="text" class="form-control" name="amount" value="<%= request.amount %>" required>
-      </div>
+        <input type="text" class="form-control" id="amount" name="amount" value="<%= request.amount %>" required>
+      </div>            
       <div class="form-group">
         <label>Item description (long)</label>
         <input type="text" class="form-control" name="itemDescriptionLong" value="<%= request.itemDescriptionLong %>" required>
       </div>
-      
-      <div class="form-group">          
-         <label>Long item description(file)</label>
-         <input type="url">
+      <div class="form-group">
+        <label>Item description (URL)</label>
+        <input type="url" class="form-control" name="itemDescriptionURL" value="<%= request.itemDescriptionURL %>" required>
       </div>
       <div class="form-group">
         <label>Delivery location</label>
@@ -76,6 +79,15 @@
         <label>Compliance requirements</label>
         <input type="text" class="form-control" name="complianceRequirements" value="<%= request.complianceRequirements %>" required>
       </div>
+      <div class="form-group">
+					<label>Other Requirements</label>
+					<textarea class="form-control"><%= request.otherRequirements %></textarea>
+				</div>
+      <div class="form-group">
+					<label>Price</label>
+					<input type="number" id="price" class="form-control" readonly value="<%= request.price %>"></input>
+          <input type="hidden" id="defaultPrice" value="<%= request.price %>">
+			</div>
       
       <div class="form-group">          
           <label>Long item description(file)</label>

@@ -16,7 +16,8 @@
   integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-  <script src="/https.js"></script>  
+  <script src="/autocomp.js"></script>
+  <script src="/https.js"></script>
   
   <!--
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
@@ -28,26 +29,8 @@
 -->   
   <script type="text/javascript">
       $(document).ready(function () {
-      var token = $("input[name='_csrf']").val();      
-       
-      var autocomp = function(obj, data) {
-        $('ul.ui-autocomplete').not('div.container *').each(function(i, e) {                
-        if($(this).children('li').length) {
-          $(this).css({'height': '75px', 'text-align': 'left'});
-
-          $(this).find('li').each(function(index, element) {
-            var name = data[index].name;
-            $(element).css({'height': '15px'})
-              .find('div').css({'font-family': 'arial', 'font-size': '15px'}).text(name);
-            $(element).bind('click', function() {                      
-              obj.val(name);
-              $(this).parent('ul').hide();
-              });
-            });
-          }
-        });
-      };
-      
+      var token = $("input[name='_csrf']").val();
+    
       $('.country').autocomplete({
         source: function(req, res) {
           var obj = $(this.element);
@@ -256,8 +239,7 @@
         </div>
         <div class="form-group">
           <label>Company Registration No</label>
-          <input type="text" class="form-control" id="companyRegistrationNo" name="companyRegistrationNo"
-            value="<%= profile.companyRegistrationNo %>">
+          <input type="text" class="form-control" id="companyRegistrationNo" name="companyRegistrationNo" value="<%= profile.companyRegistrationNo %>" required>
         </div>
         <div class="form-group">
           <label>Registered Country*</label>
@@ -324,6 +306,7 @@
         <div class="form-group">
           <label>Products or Services Offered*</label>
           <input type="text" class="form-control" id="productsServicesOffered" name="productsServicesOffered" value="<%= profile.productsServicesOffered %>" required>
+          <a href="addproduct">Add new product</a>
         </div>
         <div class="form-group">
           <label>Capability Description*</label>

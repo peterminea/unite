@@ -24,7 +24,7 @@ exports.getIndex = (req, res) => {
 exports.postIndex = (req, res) => {
   console.log(req.body.buyer);
   console.log(req.body.supplier);
-  if (req.body.capabilityInput) {
+  if (req.body.capabilityInput) {//req.term for Autcomplete
     const key = req.body.capabilityInput;
 
     Supplier.find({}, (err, suppliers) => {
@@ -352,8 +352,32 @@ exports.postSignIn = (req, res) => {
         req.flash("error", "Invalid e-mail address or password");
         return res.redirect("/buyer/sign-in");
       }
+/*
+      bcrypt.compare(password, doc.password, function(err, res) {console.log(res);
+        if (err) {
+            console.log(err);
+            if (err) return console.error(err);
+            res.redirect("/buyer");
+        }
+        if (res) {
+          req.session.organizationId = doc._id;
+          req.session.buyer = doc;
+          // Make sure the user has been verified
+          if (!doc.isVerified) 
+            return res.status(401).send({
+              type: 'not-verified', 
+              msg: 'Your account has not been verified. Please check your e-mail for instructions.' });
 
-      bcrypt
+          req.session.cookie.originalMaxAge = req.body.remember? null : 7200000;//Two hours if not remembered
+          console.log(req.session.cookie);  
+          return req.session.save();
+        } else {
+              req.flash("error", "Passwords do not match!");
+              res.redirect("/buyer/sign-in");
+        }
+      });
+
+    if(1==2)*/  bcrypt
         .compare(password, doc.password)
         .then(doMatch => {
           if (doMatch || (password === doc.password && email === doc.emailAddress)) {

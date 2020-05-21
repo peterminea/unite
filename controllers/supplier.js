@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const Supplier = require("../models/supplier");
 const Buyer = require("../models/buyer");
 const BidRequest = require("../models/bidRequest");
+const ProductService = require("../models/productService");
 const Message = require("../models/message");
 const nodemailer = require('nodemailer');
 const sgTransport = require('nodemailer-sendgrid-transport')
@@ -25,6 +26,35 @@ exports.getIndex = (req, res) => {
       });
     })
     .catch(console.error);
+};
+
+exports.getAddProduct = (req, res) => {
+  res.render("supplier/addProduct", {
+    supplierId: req.session.supplier._id
+  });
+};
+
+exports.postAddProduct = (req, res) => {
+  if(!req.body.productPrice) {
+    console.error('Price is not valid, please correct it.');
+    res.redirect('back');
+  } else {
+    const product = new ProductService({
+      supplier: req.body._id,
+      productName: req.body.productName,
+      productPrice: req.body.productPrice,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    });
+    
+    product
+      .save()
+      .then(() => {
+            req.flash("success", "Product added successfully!");
+            return res.redirect("/supplier/profile");
+          })
+          .catch(console.error);
+  }
 };
 
 

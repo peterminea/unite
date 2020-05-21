@@ -6,16 +6,109 @@
   <title>Buyer Dashboard - UNITE</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Another cool thing made with Glitch">
+  <meta name="description" content="A cool thing made with Glitch">
   <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-  <script src="/https.js"></script>
-  <!-- Jquery, Popper, and Bootstrap inclusions-->
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>  
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  <script src="/autocomp.js"></script>
+  <script src="/https.js"></script>
+  
+    <script type="text/javascript">
+      $(document).ready(function() {
+        var token = $("input[name='_csrf']").val();
+       
+        $('#amount').bind('change', function() {
+          $('#price').val($(this).val() * $('#defaultPrice').val());          
+        });
+        
+        $('#search').autocomplete({
+          source: function(req, res) {
+            var obj = $(this.element);
+            
+            $.ajax({
+              url: "/capabilityInputAutocomplete",
+              headers: { "X-CSRF-Token": token },
+              datatype: 'jsonp',
+              type: "GET",
+              data: req,
+              scroll: true,
+              success: function(data) {
+                res(data);
+                autocomp(obj, data, true);
+                return true;
+                var $obj = '<div class="prov"><ul>';
+                for(var i in data) {
+                  $obj += '<li id="' + data[i].price + '">' + data[i].name + '</li>';
+                }
+                
+                $obj += '</ul><div>';
+                $($obj)
+                  .insertAfter(obj.parent('div'))
+                  .find('li')
+                  .click(function() {
+                    obj
+                      .attr('price', $(this).attr('id'))
+                      .val($(this).text());
+                    $(this).parent('ul').hide();
+                });
+              },
+              error: function(err) {
+                alert(err);
+              }
+            });
+          },
+          minLength: 3
+        });
+        
+        $('.prodInput').autocomplete({
+          source: function(req, res) {
+            var obj = $(this.element);
+            $('.prov').remove();
+            req.supplierId = obj.attr('supplierId');
+            
+            $.ajax({
+              url: "/prodServiceAutocomplete/",
+              headers: { "X-CSRF-Token": token },
+              datatype: 'jsonp',
+              type: "GET",
+              data: req,
+              scroll: true,
+              success: function(data) {              
+                res(data);
+                //autocomp(obj, data);                
+                var $obj = '<div class="prov"><ul>';
+                for(var i in data) {
+                  $obj += '<li id="' + data[i].price + '">' + data[i].name + '</li>';
+                }
+                
+                $obj += '</ul><div>';
+                $($obj)
+                  .insertAfter(obj.parent('div'))
+                  .find('li')
+                  .click(function() {
+                    obj
+                      .attr('price', $(this).attr('id'))
+                      .val($(this).text());
+                    $(this).parent('ul').hide();
+                });
+              },
+              error: function(err) {
+                alert(err);
+              }
+            });
+          },
+          minLength: 3
+        });
+        
+      });
+    
+  </script> 
 </head>
 
 <body>
@@ -71,7 +164,7 @@
   <div class="container">
     <form class="my-2 my-lg-2" method="POST">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-      <input class="form-control mr-sm-2" type="search" id="#search" placeholder="Search Capabilites" aria-label="Search"
+      <input class="form-control mr-sm-2" type="search" id="search" placeholder="Search Capabilites" aria-label="Search"
         name="capabilityInput">
     </form>
 
@@ -99,7 +192,7 @@
                 </button>
               </div>
               <div class="modal-body">
-                <form>
+                <form>                  
                   <div class="form-group">
                     <label>Email address</label>
                     <input type="email" class="form-control" readonly value="<%= supplier.emailAddress %>"> </div>
@@ -240,7 +333,6 @@
                       </label>
                     </div>
                   </div>
-
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
                 </form>
               </div>
@@ -261,6 +353,7 @@
                 </button>
               </div>
               <form method="POST">
+                <input type="hidden" class="supplierId" value="<%= supplier._id %>">
                 <div class="modal-body">
                   <div class="form-group">
                     <label class="text-muted form-text">
@@ -278,7 +371,7 @@
                   <div class="form-group">
                     <label class="col-form-label">Products / Services Offered*</label>
                     <div class="input-group">
-                      <input type="text" required class="form-control" placeholder="Add Product/Service" id="prodServiceInput_<%= i %>">
+                      <input type="text" required class="form-control prodInput" supplierId="<%= supplier._id %>" placeholder="Add Product/Service" id="prodServiceInput_<%= i %>">
                       <div class="input-group-append">
                         <button class="btn btn-outline-secondary" type="button" id="addProdService_<%= i %>">Add</button>
                       </div>
@@ -287,17 +380,7 @@
                     <ul class="list-group" id="prodServices_<%= i %>">
                     </ul>
                     <input type="hidden" required id="hiddenProdServicesList_<%= i %>" name="productsServicesOffered" value="">
-                    <script>
-                      document.getElementById("addProdService_<%= i %>").onclick = () => {
-                        if ($("prodServiceInput_<%= i %>").val() != "") {
-                          document.getElementById("prodServices_<%= i %>")
-                            .insertAdjacentHTML("beforeend",
-                              "<li class=\"list-group-item\">" 
-                                + document.getElementById("prodServiceInput_<%= i %>").value + "</li>");
-                          document.getElementById("hiddenProdServicesList_<%= i %>").value += $("prodServiceInput_<%= i %>").val() + ", ";
-                        }
-                      }
-                    </script>
+
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Item Description (Long)</label>
@@ -309,13 +392,13 @@
                       <div class="input-group-prepend">
                         <span class="input-group-text" id="basic-addon3">http(s)://</span>
                       </div>
-                      <input type="text" class="form-control" aria-describedby="basic-addon3" name="urlItemDescription">
+                      <input type="text" class="form-control" aria-describedby="basic-addon3" name="itemDescriptionURL">
                     </div>
                   </div>
 
                   <div class="form-group">
                     <label class="col-form-label">Amount*</label>
-                    <input type="text" class="form-control" id="recipient-name" name="amount" required>
+                    <input type="number" class="form-control" id="amount" name="amount" required>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Delivery Location*</label>
@@ -345,17 +428,40 @@
                   </div>
                    <div class="form-group">
                     <label class="col-form-label">Status*</label>
-                    <input type="number" class="form-control" name="status" value="0" required></input>
+                    <input type="number" class="form-control" name="status" value="0" required>
                   </div>
                    <div class="form-group">
-                    <label class="col-form-label">Price*</label>
-                    <input type="number" class="form-control" name="price" required></input>
+                    <label class="col-form-label">Price</label>
+                    <input type="number" class="form-control" id="price" name="price" value="0" readonly>
+                    <input type="hidden" id="defaultPrice" value="1">
                   </div>
 
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                   <input type="hidden" name="buyer" value="<%= buyer._id %>">
                   <input type="hidden" name="supplier" value="<%= supplier._id %>">
+                  <script>
+                    document.getElementById("addProdService_<%= i %>").onclick = () => {
+                    var amount = document.getElementById('amount');
+                    $(amount).trigger('change');
+                      if(amount.value < 1) {
+                        //alert(amount.value);
+                        //return false;                        
+                      }
 
+                    var input = "#prodServiceInput_<%= i %>";
+                    //alert($('#price').length + ' ' + $('#amount').length);
+                      if ($(input).val() != "") {
+                        var price = $('#price').val() + 3 * $(input).attr('price');
+                        document.getElementById('price').value = (parseInt(price));
+
+                        document
+                          .getElementById("prodServices_<%= i %>")
+                          .insertAdjacentHTML("beforeend", "<li class=\"list-group-item\">" + document.getElementById("prodServiceInput_<%= i %>").value + "</li>");
+                        document.getElementById("hiddenProdServicesList_<%= i %>").value += $(input).val() + ", ";
+                        $(input).val('').removeAttr('price');
+                      }
+                    }
+                  </script>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

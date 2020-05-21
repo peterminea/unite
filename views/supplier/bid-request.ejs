@@ -114,7 +114,7 @@
 					<input type="text" class="form-control" value="<%= request.itemDescription %>" readonly>
 				</div>
 				<div class="form-group">
-					<% const re = /:\s|,\s/; const array = request.productServicesOffered.split(re);  array.splice(array.length - 1);%>
+					<% const re = /:\s|,\s/; const array = request.productServicesOffered.split(re); array.splice(array.length - 1);%>
 					<Code></Code>
 					<label>Products / Services Offered</label>
 					<ul class="list-group">
@@ -125,7 +125,11 @@
 				</div>
 				<div class="form-group">
 					<label>Item Description (Long)</label>
-					<textarea class="form-control"><%= request.itemDescriptionLong %></textarea>
+          <textarea class="form-control"><%= request.itemDescriptionLong %></textarea>
+				</div>
+        <div class="form-group">
+					<label>Item Description (URL)</label>
+					<input type="url" class="form-control" value=<%= request.itemDescriptionUrl %>>
 				</div>
 				<div class="form-group">
 					<label>Amount</label>
@@ -149,11 +153,11 @@
 				</div>
         <div class="form-group">
 					<label>Status</label>
-					<input type="number" class="form-control" readonly><%= request.status %></input>
+					<input type="hidden" class="form-control" readonly value="<%= request.status %>">
 				</div>
         <div class="form-group">
 					<label>Price</label>
-					<input type="number" class="form-control" readonly><%= request.price %></input>
+					<input type="number" class="form-control" readonly value="<%= request.price %>">
 				</div>
 
 				<span><b>Status: </b> 
@@ -163,8 +167,8 @@
 				<% if (request.status == 3) { %> "Buyer wants to buy the product for <%= request.price %>. Cancel or Accept." <% } %>
 				<% if (request.status == 4) { %> "You sent you did the delivery. Wait for confirmation of buyer." <% } %>
 				<% if (request.status == 5) { %> "Payment and delivery is done." <% } %>
-				<% if (request.status == -1) { %> "You cancelled the request." <% } %>
-				<% if (request.status == -2) { %> "Buyer cancelled the request." <% } %>
+				<% if (request.status == 6) { %> "You cancelled the request." <% } %>
+				<% if (request.status == 7 { %> "Buyer cancelled the request." <% } %>
 				</span>
         
         </form>

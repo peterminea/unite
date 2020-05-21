@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>UNITE - Supervisor - Password Reset</title>
+  <title>Supplier Balance</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Another cool thing made with Glitch">
@@ -15,32 +15,47 @@
   <!-- Jquery, Popper, and Bootstrap inclusions-->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>  
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  
+  <script type="text/javascript">
+      $(document).ready(function () {
+        $('#submit').click(function() {
+          if(!$('#productPrice').val()) {
+            alert('Price must be greater than 0.');
+            return false;
+          }
+        });
+      });
+  </script>
 </head>
 
   <body>
     <div class="container">
+      <div>  
+        <input type="button" value="Back" onclick="history.go(-1)">  
+      </div>
       <div class="col-md-12">
-        <form action="/resetPassword/<%= token %>" method="POST">
-          <legend>
-            Reset Password
+        <form method="POST">
+          <input type="hidden" name="_id" value="<%= supplierId %>">
+         <legend>
+            Add new Service/Product
           </legend>
           <div class="form-group">
-            <label for="password">New Password:</label>
-            <input class="form-control" type="password" name="password" value="" autofocus="autofocus" placeholder="newPassword">
-            </input>
+            <label for="addProduct">Product / Service name:</label>
+            <input required class="form-control" type="text" name="productName" autofocus="autofocus"></input>
           </div>
           <div class="form-group">
-            <label for="confirm">Confirm Password:</label>
-            <input class="form-control" type="password" name="confirm" value="" placeholder="confirm">
-            </input>
+            <label for="addProduct">Price:</label>
+            <input required class="form-control" type="number" name="productPrice"></input>
           </div>
           <div class="form-group">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <input type="submit" class="btn btn-primary" value="Update Password"><input>
-          </div>
+            <button type="submit" id="addProduct" value="Add Product" class="btn btn-primary btn-block btn-lg">Add Product</button>
+          </div>            
         </form>
       </div>
     </div>
+    
   </body>
+  
 </html>
