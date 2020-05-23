@@ -355,6 +355,16 @@ exports.getForgotPassword = (req, res) => {
   });
 }
 
+
+exports.getChat = (req, res) => {
+  res.render("supplier/chat", {
+    from: req.params.from,
+    to: req.params.to,
+    reqId: req.params.reqId
+  });
+}
+
+
 exports.postForgotPassword = (req, res, next) => {
   async.waterfall([
     function(done) {
@@ -529,6 +539,7 @@ exports.postBidRequest = (req, res) => {
       to: req.body.to,
       from: req.body.from,
       sender: req.body.sender,
+      bidRequestId: req.body.reqId,
       message: req.body.message
     });
 

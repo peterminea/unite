@@ -8,7 +8,7 @@ const csrf = require("csurf");
 const flash = require("connect-flash");
 const dateTime = require("date-format-simple");
 const multer = require("multer");
-const uploads = multer({ dest: 'upload/'});
+//const uploads = multer({ dest: 'upload/'});
 const fs = require("fs-extra");
 const sortJson = require("sort-json");
 const cookieParser = require('cookie-parser');
@@ -76,8 +76,10 @@ const messageRoutes = require("./routes/chat");
 
 //For chatting:
 const connect = require("./dbconnect");
-var http = require("http").Server(app);
-var io = require("socket.io")(http);
+const http = require("http").Server(app);
+const io = require("socket.io");
+const port = 5000;
+const socket = io(http);
 var url = require("url");
 
 app.use("/", homeRoutes);
@@ -87,51 +89,62 @@ app.use("/buyer", buyerRoutes);
 app.use("/supervisor", supervisorRoutes);
 app.use("/chat", messageRoutes);
 
-const port = 5000;
-var server = app.listen(4000, () => {
-  //console.log("server is running on port", server.address().port);
-});
 
-//Or this:
-http.listen(port, () => {
-  //console.log("Running on Port: " + port);
-});
-
-io.on("connection", socket => {
+//setup event listener
+socket.on("connection", socket => {
   console.log("user connected");
-  socket.on("disconnect", () => {
-    console.log("Disconnected");
+
+  socket.on("disconnect", function() {
+    console.log("user disconnected");
+  });
+
+  //Someone is typing
+  socket.on("typing", data => {
+    socket.broadcast.emit("notifyTyping", {
+      user: data.user,
+      from: data.from,
+      to: data.to,
+      reqId: data.reqId,
+      message: data.message
+    });
+  });
+
+  //when soemone stops typing
+  socket.on("stopTyping", () => {
+    socket.broadcast.emit("notifyStopTyping");
+  });
+
+  socket.on("chat message", function(msgData) {
+    console.log("Message: " + msgData.msg);
+
+    //broadcast message to everyone in port:5000 except yourself.
+    socket.broadcast.emit("received", {
+      message: msgData.msg
+    });
+
+    //save chat to the database
+    connect.then(db => {
+      console.log("Connected correctly to the server!");
+      
+      let chatMessage = new Message({ 
+        message: msgData.msg,
+        from: msgData.from,
+        to: msgData.to,
+        time: Date.now(),
+        bidRequestId: msgData.reqId,
+        sender: "UNITE User"
+      });
+
+      chatMessage.save();
+    });
   });
 });
 
-//Someone is typing:
-io.on("typing", data => {
-  io.broadcast.emit("notifyTyping", {
-    user: data.user,
-    message: data.message
-  });
+//wire up the server to listen to our port 5000
+http.listen(port, ()=>{
+console.log("Connected to port: " + port)
 });
 
-//When someone stops typing:
-io.on("stopTyping", () => {
-  io.broadcast.emit("notifyStopTyping");
-});
-
-io.on("chat message", function(msg) {
-  console.log("message: " + msg);
-
-  //broadcast message to everyone in port:5000 except yourself.
-  io.broadcast.emit("received", { message: msg });
-
-  //save chat to the database
-  connect.then(db => {
-    console.log("connected correctly to the server");
-    let chatMessage = new Message({ 
-      message: msg, 
-      sender: "Anonymous" });
-    chatMessage.save();
-  });
-});
 
 //Upload files to DB:
 const MongoClient = require("mongodb").MongoClient;
@@ -140,10 +153,11 @@ const uploadController = require("./controllers/upload");
 
 var storage = multer.diskStorage({
   destination: function (req, file, callback) {
-    callback(null, 'uploads')
+    callback(null, path.join('${__dirname}/../uploads'));
+    //callback(null, 'uploads/');
   },
   filename: function (req, file, callback) {
-    callback(null, file.fieldname + '-' + Date.now())
+    callback(null, file.originalname + '-' + file.fieldname + '-' + Date.now().toISOString() + path.extname(file.originalname));//The name itself.
   }
 });
 
@@ -153,11 +167,15 @@ var upload = multer({
   storage: storage,
   fileFilter: function (req, file, callback) {
     var ext = path.extname(file.originalname);
+    var isItIn = false;
     
     for(var i in extArray) 
-      if(ext.toLowerCase() !== extArray[i].toLowerCase()) {
-        return callback(new Error('Extension forbidden!'));
+      if(ext.toLowerCase() == extArray[i].toLowerCase()) {
+        isItIn = true;        
       }
+    if(!isItIn) {
+      return callback(new Error('Extension forbidden!'));
+    }
     
     callback(null, true);
   },
@@ -175,7 +193,7 @@ app.post("/uploadfile", upload.single("single"), (req, res, next) => {
     error.httpStatusCode = 400;
     return next(error);
   }
-  console.log(file);
+
   res.send(file);
   return true;
 
@@ -185,7 +203,7 @@ app.post("/uploadfile", upload.single("single"), (req, res, next) => {
 
   /** The original name of the uploaded file
       stored in the variable "originalname". **/
-  var target_path = 'uploads/' + req.file.originalname;
+  var target_path = '/uploads/' + req.file.originalname;
 
   /** A better way to copy the uploaded file. **/
   var src = fs.createReadStream(tmp_path);
@@ -205,7 +223,7 @@ app.post("/uploadmultiple",  upload.array("multiple", 12),   (req, res, next) =>
     const files = req.files;
     
     if (!files) {
-      const error = new Error("Please choose files");
+      const error = new Error("Please choose files (maximum 12)");
       error.httpStatusCode = 400;
       return next(error);
     }

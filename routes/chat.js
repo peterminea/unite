@@ -9,17 +9,15 @@ const router = express.Router();
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
-router.route("/").get((req, res, next) => {
-  res.setHeader("Content-Type", "application/json");
-  res.statusCode = 200;
-
-  connectdb.then(db => {
-    let data = Message.find({ message: "Request 1", sender: "Anonymous" });
-    Message.find({}).then(chat => {
-      res.json(chat);
+router.route("/").get((req, res, next) =>  {
+        res.setHeader("Content-Type", "application/json");
+        res.statusCode  =  200;
+        connectdb.then(db  =>  {
+            Message.find({}).then(chat  =>  {
+              res.json(chat);
+        });
     });
-  });
 });
 
-router.get("/", /*isAuth,*/ sessionExit, chatController.getIndex);
+//router.get("/", /*isAuth,*/ sessionExit, chatController.getIndex);
 module.exports = router;

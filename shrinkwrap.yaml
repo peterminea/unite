@@ -1,5 +1,5 @@
 dependencies:
-  '@angular/core': 9.1.7
+  '@angular/core': 9.1.9
   ajax: 0.0.4
   ajax-request: 1.2.3
   assert: 2.0.0
@@ -9,7 +9,7 @@ dependencies:
   bcryptjs: 2.4.3
   bluebird: 3.7.2
   connect-flash: 0.1.1
-  connect-mongodb-session: 2.3.1
+  connect-mongodb-session: 2.3.2
   cookie-parser: 1.4.5
   cors: 2.8.5
   crypto: 1.0.1
@@ -37,14 +37,14 @@ dependencies:
   token: 0.1.0
   url: 0.11.0
 packages:
-  /@angular/core/9.1.7:
+  /@angular/core/9.1.9:
     dev: false
     peerDependencies:
       rxjs: ^6.5.3
       tslib: ^1.10.0
       zone.js: ~0.10.3
     resolution:
-      integrity: sha512-uJSZ+rdGL47gc3A+Fal1XwJYB4WWpYJrNifvoQ2nOs+X5Qu+j0HN6GXPJb4kixoNzjYCGxmLoirdT3xhNZFcfQ==
+      integrity: sha512-q/DERgVU6vK2LtTcdVCGGBcoO424WsEfImh3Vcuy+P/ZVmthlDUC/+q+tSKt8MMf4hLpxFDQJE8vUSkktj7QEw==
   /@types/node/14.0.1:
     dev: false
     resolution:
@@ -134,8 +134,9 @@ packages:
     dev: false
     resolution:
       integrity: sha1-HjRA6RXwsSA9I3SOeO3XubW0PlY=
-  /archetype/0.10.2:
+  /archetype/0.11.3:
     dependencies:
+      lodash.clonedeep: 4.5.0
       lodash.set: 4.3.2
       mpath: 0.5.1
       standard-error: 1.1.0
@@ -143,7 +144,7 @@ packages:
     engines:
       node: '>= 4.0.0'
     resolution:
-      integrity: sha512-n3RPIiMYM+rsKWbv1HYJlAcqXg118c4wN0e0LWK700g5TCcvS1ZzskMS/4FOBiplQzBOcN+uTIqEfs/ePPhpAg==
+      integrity: sha512-dlZfyq5xke/qPz1l3I76HdeO3zku40wPkejUhqGpf6E7JnhUz9IgMJKPY7a7+LkOQ3/VKFJBbOGv4T+sK1vUoA==
   /array-filter/1.0.0:
     dev: false
     resolution:
@@ -600,13 +601,13 @@ packages:
       node: '>= 0.4.0'
     resolution:
       integrity: sha1-2GMPJtlaf4UfmVax6MxnMvO2qjA=
-  /connect-mongodb-session/2.3.1:
+  /connect-mongodb-session/2.3.2:
     dependencies:
-      archetype: 0.10.2
-      mongodb: 3.5.6
+      archetype: 0.11.3
+      mongodb: 3.5.7
     dev: false
     resolution:
-      integrity: sha512-lVgJkdXwvxuFBqFGMinV7sCulHXBiP0Xiw4Q205R+V16EztMQ9jWmhP6p6MO+mr0BtR6XVgfAvCXvQlCxl97JQ==
+      integrity: sha512-ccMEsIIRoYXPsiOypVzyNWYIKKIgoYXTKzebLQBk+67pwiZcWNA11+Gz/j40c+Co1M5/8z3lenaO/gUV5p3Spg==
   /content-disposition/0.5.3:
     dependencies:
       safe-buffer: 5.1.2
@@ -1652,6 +1653,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-ZuXOH3btJ7QwPYxlEujRIW6BBrw=
+  /lodash.clonedeep/4.5.0:
+    dev: false
+    resolution:
+      integrity: sha1-4j8/nE+Pvd6HJSnBBxhXoIblzO8=
   /lodash.set/4.3.2:
     dev: false
     resolution:
@@ -1784,20 +1789,6 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-NKmAlESf6jMGym1++R0Ra7wvhV+wFW63FaSOFPwRahvea0gMUcGUhVeAg/0BC0wiv9ih5NYPB1Wn1UEI1/L+xQ==
-  /mongodb/3.5.6:
-    dependencies:
-      bl: 2.2.0
-      bson: 1.1.4
-      denque: 1.4.1
-      require_optional: 1.0.1
-      safe-buffer: 5.2.0
-    dev: false
-    engines:
-      node: '>=4'
-    optionalDependencies:
-      saslprep: 1.0.3
-    resolution:
-      integrity: sha512-sh3q3GLDLT4QmoDLamxtAECwC3RGjq+oNuK1ENV8+tnipIavss6sMYt77hpygqlMOCt0Sla5cl7H4SKCVBCGEg==
   /mongodb/3.5.7:
     dependencies:
       bl: 2.2.0
@@ -2805,7 +2796,7 @@ registry: 'https://registry.npmjs.org/'
 shrinkwrapMinorVersion: 9
 shrinkwrapVersion: 3
 specifiers:
-  '@angular/core': ^9.1.7
+  '@angular/core': ^9.1.9
   ajax: ^0.0.4
   ajax-request: ^1.2.3
   assert: ^2.0.0
@@ -2815,7 +2806,7 @@ specifiers:
   bcryptjs: ^2.4.3
   bluebird: ^3.7.2
   connect-flash: ^0.1.1
-  connect-mongodb-session: ^2.3.1
+  connect-mongodb-session: ^2.3.2
   cookie-parser: ^1.4.5
   cors: ^2.8.5
   crypto: ^1.0.1
