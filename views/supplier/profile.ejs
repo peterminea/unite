@@ -38,7 +38,7 @@
           $.ajax({
             url: "/countryAutocomplete/",
             headers: { "X-CSRF-Token": token },
-            datatype: 'jsonp',//'application/json',
+            datatype: 'jsonp',
             type: "POST",
             data: req,/*
             async: true,
@@ -81,9 +81,9 @@
           var obj = $(this.element);
           
           $.ajax({
-            url: '/industryAutocomplete',//"/industryAutocomplete",
+            url: '/industryAutocomplete',
             headers: { "X-CSRF-Token": token },
-            datatype: 'jsonp',//"application/json",
+            datatype: 'jsonp',
             type: "POST",
             data: req,
             success: function(data) {
@@ -117,14 +117,32 @@
         $(this).val ? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
       });
 
+      $('input[type="submit"]').each(function(index, element) {
+        var input = $(this).prev('input');                
+        if(input.val()) {
+          var val = input.val();
+          if(val.charAt(val.length-1) == ',') {//Multi
+            var newVal = val.substring(0, val.length-1);
+            newVal = newVal.split(',');
+            for(var i in newVal) {
+              var ob = '<a href="' + newVal[i] + '" download>Download file "'+i+'"</a>';
+              $(ob).insertAfter($(this).parent('div'));
+            }
+          } else {
+            var ob = '<a href="' + input.val() + '" download>Download</a>';
+            $(ob).insertAfter($(this).parent('div'));  
+          }
+        }
+      });
+        
       $('input[type="submit"]').click(function (e) {
         var input = $(this).prev('input');                
         var isMultiple = $(this).hasClass('multiple')? true : false;
         var formData = new FormData();
         formData.append("_csrf", token);
-        formData.append("upload_file", true);       
+        formData.append("upload_file", true);
         
-        if(isMultiple == false) {          
+        if(isMultiple == false) {
           formData.append('single', input[0].files[0]);          
         }
         else {
@@ -133,14 +151,36 @@
           });
         }
         
-        var theUrl = isMultiple == true? "/multipleupload" : "/uploadfile";
+        var theUrl = isMultiple == true? "/uploadmultiple" : "/uploadfile";
         var xhr = new XMLHttpRequest();
         xhr.open('POST', theUrl, true);
         xhr.setRequestHeader('X-CSRF-TOKEN', token);
-        xhr.onload = function(e) {          
+        xhr.onload = function(e) {
         };
-
+        
         xhr.send(formData);
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState === 4) {
+              var response = JSON.parse(xhr.responseText);
+              if(isMultiple) {
+                for(var i in response) {
+                  var ob = '<a href="/' + response[i].path + '" download>Download file "'+i+'"</a>';
+                  $(ob).insertAfter(input.parent('div'));
+                  input.val('/' + response[i].path + ',');
+                }
+              } else {
+                var ob = '<a href="/' + response.path + '" download>Download file</a>';
+                $(ob).insertAfter(input.parent('div'));
+                input.val('/' + response.path);
+              }
+           
+              if (xhr.status === 200) {
+                 console.log('successful');
+              } else {
+                 console.log('failed');
+              }
+          }
+        };
         
         return false;
         $.ajax({
@@ -148,6 +188,8 @@
           url: theUrl,
           headers: { "X-CSRF-Token": token },
           data: formData
+          , success: function(data) {            
+          }
         })
           .done(function (data) {
           });

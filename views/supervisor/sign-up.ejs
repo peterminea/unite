@@ -64,14 +64,18 @@
         }
       });    
         
+      $('input.fileupload')/*.unbind('change')*/.bind('change', function () {
+        $(this).val ? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
+      });
+        
       $('input[type="submit"]').click(function (e) {
         var input = $(this).prev('input');                
         var isMultiple = $(this).hasClass('multiple')? true : false;
         var formData = new FormData();
         formData.append("_csrf", token);
-        formData.append("upload_file", true);       
+        formData.append("upload_file", true);
         
-        if(isMultiple == false) {          
+        if(isMultiple == false) {
           formData.append('single', input[0].files[0]);          
         }
         else {
@@ -80,25 +84,37 @@
           });
         }
         
-        var theUrl = isMultiple == true? "/multipleupload" : "/uploadfile";
+        var theUrl = isMultiple == true? "/uploadmultiple" : "/uploadfile";
         var xhr = new XMLHttpRequest();
         xhr.open('POST', theUrl, true);
         xhr.setRequestHeader('X-CSRF-TOKEN', token);
-        xhr.onload = function(e) {          
+        xhr.onload = function(e) {
         };
-
-        xhr.send(formData);
         
-        return false;
-        $.ajax({
-          type: "POST",
-          url: theUrl,
-          headers: { "X-CSRF-Token": token },
-          data: formData
-        })
-          .done(function (data) {
-          });
-
+        xhr.send(formData);
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState === 4) {
+              var response = JSON.parse(xhr.responseText);
+              if(isMultiple) {
+                for(var i in response) {
+                  var ob = '<a href="/' + response[i].path + '" download>Download file "'+i+'"</a>';
+                  $(ob).insertAfter(input.parent('div'));
+                  input.val('/' + response[i].path + ',');
+                }
+              } else {
+                var ob = '<a href="/' + response.path + '" download>Download file</a>';
+                $(ob).insertAfter(input.parent('div'));
+                input.val('/' + response.path);
+              }
+           
+              if (xhr.status === 200) {
+                 console.log('successful');
+              } else {
+                 console.log('failed');
+              }
+          }
+        };
+        
         e.preventDefault();
       });
   });

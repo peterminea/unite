@@ -13,7 +13,7 @@
     "express-session": "^1.17.1",
     "bcryptjs": "^2.4.3",
     "csurf": "^1.11.0",
-    "connect-mongodb-session": "^2.3.1",
+    "connect-mongodb-session": "^2.3.2",
     "connect-flash": "^0.1.1",
     "socket.io": "^2.3.0",
     "http": "^0.0.0",
@@ -40,7 +40,7 @@
     "async": "^3.2.0",
     "passport-local-mongoose": "^6.0.0",
     "cookie-parser": "^1.4.5",
-    "@angular/core": "^9.1.7",
+    "@angular/core": "^9.1.9",
     "cors": "^2.8.5",
     "fetch": "^1.1.0",
     "axios": "^0.19.2"

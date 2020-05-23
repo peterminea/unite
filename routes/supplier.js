@@ -17,6 +17,7 @@ router.get("/bid-requests/:id", isAuth, sessionExit, supplierController.getBidRe
 router.get("/balance", isAuth, sessionExit, supplierController.getBalance);
 router.get("/addproduct", isAuth, sessionExit, supplierController.getAddProduct);
 router.get("/forgotPassword", isAuth, sessionExit, supplierController.getForgotPassword);
+router.get("/chat", isAuth, sessionExit, supplierController.getChat);
 router.get("/resetPassword/:token", isAuth, sessionExit, supplierController.getResetPasswordToken);
 
 router.post("/sign-in", supplierController.postSignIn);

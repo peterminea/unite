@@ -15,7 +15,7 @@ const messageSchema = new Schema({
         required: true
     },
     sender: {
-        type: String,
+        type: String,      
         required: true
     },
     time: {
@@ -26,6 +26,9 @@ const messageSchema = new Schema({
         type: Schema.Types.ObjectId,
         required: true
     }
+},
+ {
+ timestamps: true
 });
 
 module.exports = mongoose.model('Message', messageSchema);

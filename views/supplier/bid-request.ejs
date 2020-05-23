@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8">
-	<title>Supplier Dashboard - UNITE</title>
+	<title>Bid request details - UNITE</title>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="A cool thing made with Glitch">
@@ -18,7 +18,7 @@
 
 <body>
 	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-		<a class="navbar-brand" href="/supplier">Supplier - UNITE</a>
+		<a class="navbar-brand" href="/supplier">Bid request details - UNITE</a>
 		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
 			aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 			<span class="navbar-toggler-icon"></span>
@@ -57,8 +57,7 @@
 					<label>Buyer's Organization Name</label>
 					<input type="text" class="form-control" value="<%= buyer.organizationName %>" readonly>
 					<br>
-					<button type="button" class="btn btn-dark" data-target="#buyerDetailsModal" data-toggle="modal">View
-						Buyer Details</button>
+					<button type="button" class="btn btn-dark" data-target="#buyerDetailsModal" data-toggle="modal">View Buyer Details</button>
 				</div>
 
 				<div class="modal fade" id="buyerDetailsModal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -114,7 +113,9 @@
 					<input type="text" class="form-control" value="<%= request.itemDescription %>" readonly>
 				</div>
 				<div class="form-group">
-					<% const re = /:\s|,\s/; const array = request.productServicesOffered.split(re); array.splice(array.length - 1);%>
+					<% const re = /:\s|,\s/; 
+          const array = request.productsServicesOffered.split(re);
+          array.splice(array.length - 1);%>
 					<Code></Code>
 					<label>Products / Services Offered</label>
 					<ul class="list-group">
@@ -168,7 +169,7 @@
 				<% if (request.status == 4) { %> "You sent you did the delivery. Wait for confirmation of buyer." <% } %>
 				<% if (request.status == 5) { %> "Payment and delivery is done." <% } %>
 				<% if (request.status == 6) { %> "You cancelled the request." <% } %>
-				<% if (request.status == 7 { %> "Buyer cancelled the request." <% } %>
+				<% if (request.status == 7) { %> "Buyer cancelled the request." <% } %>
 				</span>
         
         </form>
@@ -183,14 +184,23 @@
 						
 						<input type="hidden" name="from" value="<%= supplier._id %>">
 						<input type="hidden" name="to" value="<%= buyer._id %>">
+            <input type="hidden" name="reqId" value="<%= request._id %>">
+            <input type="hidden" name="sender" value="<%= buyer.organizationName %>">
+            
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 						<button type="submit" class="btn btn-primary" style="float: right;">Send</button>
 					</form>
 				</div>
         
         <div class="container mt-4">
           	<div class="form-group">
-							<a href="/chat/index">
-                <button class="custom-button">Chat</button></a>
+              <input type="hidden" name="from" value="<%= supplier._id %>">
+						  <input type="hidden" name="to" value="<%= buyer._id %>">
+              <input type="hidden" name="reqId" value="<%= request._id %>">
+              
+							<a href="../chat">
+                <button class="custom-button">Chat</button>
+              </a>
 						</div>
         </div>       
 			

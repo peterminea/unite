@@ -41,22 +41,6 @@
               success: function(data) {
                 res(data);
                 autocomp(obj, data, true);
-                return true;
-                var $obj = '<div class="prov"><ul>';
-                for(var i in data) {
-                  $obj += '<li id="' + data[i].price + '">' + data[i].name + '</li>';
-                }
-                
-                $obj += '</ul><div>';
-                $($obj)
-                  .insertAfter(obj.parent('div'))
-                  .find('li')
-                  .click(function() {
-                    obj
-                      .attr('price', $(this).attr('id'))
-                      .val($(this).text());
-                    $(this).parent('ul').hide();
-                });
               },
               error: function(err) {
                 alert(err);
