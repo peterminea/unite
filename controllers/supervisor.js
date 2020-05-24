@@ -26,7 +26,6 @@ exports.getIndex = (req, res) => {
   );
 };
 
-
 /*
 exports.getLogout = (req, res, next) => {
   if (req.session) {    
@@ -39,7 +38,6 @@ exports.getLogout = (req, res, next) => {
     });
   }
 }*/
-
 
 exports.postConfirmation = function (req, res, next) {
     req.assert('email', 'Email is not valid').isEmail();
@@ -69,7 +67,9 @@ exports.postConfirmation = function (req, res, next) {
             user.isVerified = true;
             user.save(function (err) {
                 if (err) { 
-                  return res.status(500).send({ msg: err.message }); 
+                  return res.status(500).send({
+                    msg: err.message 
+                  }); 
                 }
                 res.status(200).send("The account has been verified. Please log in.");
             });
@@ -95,7 +95,10 @@ exports.postResendToken = function (req, res, next) {
           crypto.randomBytes(16).toString('hex') });
 
         token.save(function (err) {
-            if (err) { return res.status(500).send({ msg: err.message }); }
+            if (err) { return res.status(500).send({
+              msg: err.message 
+              }); 
+            }
  
             var options = {
               auth: {
@@ -115,10 +118,14 @@ exports.postResendToken = function (req, res, next) {
                  if (err ) {
                   console.log(err);
                 }  else {
-                  console.log('Message sent: ' + info.response);
+                  console.log('Message sent: ' + info.response);                
                 }
-                  //if (err) { return res.status(500).send({ msg: err.message }); }
-                  //return res.status(200).send('A verification email has been sent to ' + user.emailAddress + '.');
+                if (err) {
+                  return res.status(500).send({
+                        msg: err.message 
+                      });
+                         }
+                  return res.status(200).send('A verification email has been sent to ' + user.emailAddress + '.');
                 });
         }); 
     });
@@ -171,7 +178,6 @@ exports.postForgotPassword = (req, res, next) => {
         + 'You have received this e-mail because you requested a Supervisor password reset on our UNITE platform.'
         + 'Please verify your account by clicking the link: \nhttp:\/\/' 
         + req.headers.host + '\/reset\/' + token + '.\n'
-        //, html: '<b>Hello world</b>'
       };
       
       transporter.sendMail(emailOptions, function(err) {
@@ -182,7 +188,8 @@ exports.postForgotPassword = (req, res, next) => {
     }
   ], function(err) {
     if(err)
-      return next(err);
+      //return next(err);
+      console.error(err);
       res.redirect('/supervisor/forgotPassword');
   });
 }
@@ -283,7 +290,8 @@ exports.postSignIn = (req, res) => {
   if (!email) res.redirect("/supervisor/sign-in");
   else {
     Supervisor.findOne({ emailAddress: email }, (err, doc) => {
-      if (err) return console.error(err);
+      if (err) 
+        return console.error(err);
 
       if (!doc) {
         req.flash("error", "Invalid e-mail address or password");
@@ -303,7 +311,7 @@ exports.postSignIn = (req, res) => {
                 type: 'not-verified', 
                 msg: 'Your account has not been verified. Please check your e-mail for instructions.' });
             
-            req.session.cookie.originalMaxAge = 1==1 || req.body.remember? null : 7200000;
+            req.session.cookie.originalMaxAge = req.body.remember? null : 7200000;
             return req.session.save();
           } else {
             req.flash("error", "Invalid e-mail address or password");
@@ -345,12 +353,12 @@ exports.postSignUp = (req, res) => {
           isVerified: false,
           address: req.body.address,
           country: req.body.country,
-          certificatesUrls: req.body.certificatesUrls,
-          antibriberyPolicyUrl: req.body.antibriberyPolicyUrl,
-          environmentPolicyUrl: req.body.environmentPolicyUrl,
-          qualityManagementPolicyUrl: req.body.qualityManagementPolicyUrl,
-          occupationalSafetyAndHealthPolicyUrl: req.body.occupationalSafetyAndHealthPolicyUrl,
-          otherRelevantFilesUrls: req.body.otherRelevantFilesUrls,
+          certificates: req.body.certificates,
+          antibriberyPolicy: req.body.antibriberyPolicy,
+          environmentPolicy: req.body.environmentPolicy,
+          qualityManagementPolicy: req.body.qualityManagementPolicy,
+          occupationalSafetyAndHealthPolicy: req.body.occupationalSafetyAndHealthPolicy,
+          otherRelevantFiles: req.body.otherRelevantFiles,
           UNITETermsAndConditions: true,
           antibriberyAgreement: true,
           createdAt: Date.now(),
@@ -440,12 +448,12 @@ exports.postProfile = (req, res) => {
     doc.isVerified = req.body.isVerified;
     doc.address = req.body.address;
     doc.country = req.body.country;
-    doc.certificatesUrls = req.body.certificatesUrls;
-    doc.antibriberyPolicyUrl = req.body.antibriberyPolicyUrl;
-    doc.environmentPolicyUrl = req.body.environmentPolicyUrl;
-    doc.qualityManagementPolicyUrl = req.body.qualityManagementPolicyUrl;
-    doc.occupationalSafetyAndHealthPolicyUrl = req.body.occupationalSafetyAndHealthPolicyUrl;
-    doc.otherRelevantFilesUrls = req.body.otherRelevantFilesUrls;
+    doc.certificates = req.body.certificates;
+    doc.antibriberyPolicy = req.body.antibriberyPolicy;
+    doc.environmentPolicy = req.body.environmentPolicy;
+    doc.qualityManagementPolicy = req.body.qualityManagementPolicy;
+    doc.occupationalSafetyAndHealthPolicy = req.body.occupationalSafetyAndHealthPolicy;
+    doc.otherRelevantFiles = req.body.otherRelevantFiles;
     doc.UNITETermsAndConditions = req.body.UNITETermsAndConditions == 'on'? true : false;
     doc.antibriberyAgreement = req.body.antibriberyAgreement == 'on'? true : false;
     doc.createdAt = req.body.createdAt;

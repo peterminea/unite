@@ -9,25 +9,173 @@
   <meta name="description" content="A cool thing made with Glitch">
   <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/messages.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
-    integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/rexeze/formatTimeStamp/src/index.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
-    <script src="/autocomp.js"></script>
-    <script src="/https.js"></script>
-    <script src="/message.js"></script>
-  </head>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  <script src="/https.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/rexeze/formatTimeStamp/src/index.min.js"></script>
+  <script type="text/javascript">
+    
+  $(document).ready(function() {      
+    var token = $("input[name='_csrf']").val();
+    
+    $(() => {
+      });    
+      
+    var socket = io();
+    var messages = document.getElementById("messages");
+    socket.on('message', addMessages);
+      
+    $("form").submit(function(e) {
+      let li = document.createElement("li");
+      let from = $('#from').val();
+      let to = $('#to').val();
+      let reqId = $('#reqId').val();
+      
+      socket.emit("chat message", {
+        msg: $("#message").val(),
+        from: from,
+        to: to,
+        sender: $('#fromName').val(),
+        receiver: $('#toName').val(),
+        reqId: reqId
+      });
+      
+      e.preventDefault(); // prevents page reloading
+      messages.appendChild(li).append($("#message").val());
+      let span = document.createElement("span");
+      messages.appendChild(span).append("From " + "UNITE User" + ": " + "Just now.");
+      $("#message").val("");
+      return false;
+    });
+      
+    socket.on("received", (data) => {
+      //alert(data);
+      let li = document.createElement("li");
+      let span = document.createElement("span");
+      var messages = document.getElementById("messages");
+      messages.appendChild(li).append(data.message);
+      messages.appendChild(span).append("From " + "UNITE User" + ": " + "Just now.");
+      console.log("Hello, UNITE User!");
+    });
+     
+    fetch("/chat")
+      .then(data => {
+        return data.json();
+      })
+      .then(json => {
+        json.map(data => {
+          let li = document.createElement("li");
+          let span = document.createElement("span");
+          messages
+            .appendChild(li)
+            .append(data.message);
+          
+          messages
+            .appendChild(span)
+            .append("From " + data.sender + " to " + data.receiver
+                    + " at: " + (data.time));
+        });
+      });
+      
+  //is typing...
+  let messageInput = document.getElementById("message");
+  let sender = document.getElementById("from");
+  let receiver = document.getElementById("to");
+  let senderName = document.getElementById("fromName");
+  let receiverName = document.getElementById("toName");
+  let reqId = document.getElementById("reqId");
+  let typing = document.getElementById("typing");  
+
+  //isTyping event
+  messageInput.addEventListener("keypress", () => {
+    socket.emit("typing", {
+      user: "UNITE User - " + senderName.value,
+      //dest: 'UNITE User - ' + receiverName.value,
+      //from: sender.value,
+      //to: receiver.value,
+      //reqId: reqId.value,
+      message: " is typing..." });
+  });
+
+  socket.on("notifyTyping", data => {
+    typing.innerText = data.user + " types " + data.message;
+    console.log(data.user + data.message);
+  });
+
+  //stop typing
+  messageInput.addEventListener("keyup", () => {
+    socket.emit("stopTyping", "");
+  });
+
+  socket.on("notifyStopTyping", () => {
+    typing.innerText = "";
+  });
+      
+    function addMessages(message) {
+       $('#messages1').append(' <h4> ${' + message.name + '} </h4> <p>  ${' + message.message + '} </p>');
+       }
+
+    function getMessages() {
+      $.ajax({
+        url: "/messages",
+        headers: { "X-CSRF-Token": token },
+        datatype: 'application/json',
+        type: "GET",
+        success: function(data) {
+          data.forEach(addMessages);
+        }
+      });
+      if(1==2)
+      $.get('/messages', { "X-CSRF-Token": token}, (data) => {
+         data.forEach(addMessages);
+       });
+     }
+
+    function sendMessage(message) {//alert(JSON.stringify(message));
+      $.ajax({
+        url: "/messages",
+        headers: { "X-CSRF-Token": token },
+        datatype: 'application/json',
+        type: "POST",
+        data: message,
+        success: function(data) {
+          //data.forEach(addMessages);
+        }
+      });      
+      if(1==2)
+       $.post('/messages', { "X-CSRF-Token": token}, message);
+     }
+
+      $("#send").click(function() {
+       sendMessage({
+         //name: $("#name").val(),
+         from: sender.value,
+         to: receiver.value,
+         sender: $('#fromName').val(),
+         receiver: $('#toName').val(),
+         bidRequestId: reqId.value,
+         message:$("#message").val()});
+        });
+
+    getMessages();
+    });
+  </script>
+</head>
   
 <body>
-  <div class="container">    
-      <div>  
-        <input type="button" value="Back" onclick="history.go(-1)">  
-      </div>
+  <div class="container">
+    <div>  
+      <input type="button" class="btn btn-primary" value="Back" onclick="history.go(-1)">
+    </div>
+    <br>
       <div class="chat_window">
           <div class="top_menu">
           <div class="buttons">
@@ -39,18 +187,27 @@
       </div>
           <ul id="messages" class="messages"></ul>
       <div class="bottom_wrapper clearfix">
+        <br>
+          <input type='hidden' id="name" class="form-control" placeholder=”Name”>
+        <br>
         <i id="typing"></i>
           <form id="form">
-              <div class="message_input_wrapper">
-                <input type="hidden" id="from" value="<%= from %>">
-                <input type="hidden" id="to" value="<%= to %>">
-                <input type="hidden" id="reqId" value="<%= reqId %>">
-                <input id="message" class="message_input" placeholder="Type your message here..."  />
-              </div>
-              <button class="send_message">Send</button>
+            <div class="message_input_wrapper">
+              <input type="hidden" id="from" value="<%= from %>"/>
+              <input type="hidden" id="to" value="<%= to %>"/>
+              <input type="hidden" id="reqId" value="<%= reqId %>"/>                
+              <input type="hidden" id="fromName" value="<%= fromName %>"/>
+              <input type="hidden" id="toName" value="<%= toName %>"/>
+              <input id="message" class="message_input" placeholder="Type your message here...">
+            </div>
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button id="send" class="btn btn-primary send_message">Send</button>
           </form>
       </div>
-    </div>    
+      <div id="messages1">
+ 
+      </div>
+    </div>
   </div>
     
 </body>

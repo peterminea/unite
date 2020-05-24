@@ -7,6 +7,7 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
 const flash = require("connect-flash");
 const dateTime = require("date-format-simple");
+//const dateTime = require("simple-datetime-formater");
 const multer = require("multer");
 //const uploads = multer({ dest: 'upload/'});
 const fs = require("fs-extra");
@@ -47,7 +48,7 @@ app.use(
     secret: "26UNWwbu26FvXZTJQBkf45dLSV7gG9bx",
     resave: false,
     saveUninitialized: true,
-    cookie: { 
+    cookie: {
       //secure: true
       //, maxAge: 7200000//2 hours in milliseconds
     },
@@ -65,7 +66,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routes
+//Routes and their usage:
 const homeRoutes = require("./routes/home");
 const bidRequestRoutes = require("./routes/bidRequest");
 const supplierRoutes = require("./routes/supplier");
@@ -74,20 +75,50 @@ const supervisorRoutes = require("./routes/supervisor");
 const messageRoutes = require("./routes/chat");
 //const imageRoutes = require('./routes/image');
 
-//For chatting:
-const connect = require("./dbconnect");
-const http = require("http").Server(app);
-const io = require("socket.io");
-const port = 5000;
-const socket = io(http);
-var url = require("url");
-
 app.use("/", homeRoutes);
 app.use("/bidRequest", bidRequestRoutes);
 app.use("/supplier", supplierRoutes);
 app.use("/buyer", buyerRoutes);
 app.use("/supervisor", supervisorRoutes);
 app.use("/chat", messageRoutes);
+
+//For chatting:
+const connect = require("./dbconnect");
+const http = require("http").Server(app);
+const socket = require("socket.io")(http);
+const port = 5000;
+//const socket = 1;//io(http);
+var url = require("url");
+const MongoClient = require("mongodb").MongoClient;
+var db;
+
+MongoClient.connect(MONGODB_URI, (err, client) => {
+  if (err)
+    return console.log(err);
+
+  db = client.db("test");
+  //app.listen(6000, () => {
+    //console.log("listening on 6000");
+ // });
+});
+
+
+app.get('/messages', (req, res) => {
+  Message.find({},(err, messages)=> {
+    res.send(messages);
+  })
+});
+
+app.post('/messages', (req, res) => {
+  var message = new Message(req.body);
+  console.log(message);
+  message.save((err) => {
+    if(err)
+      return res.sendStatus(500);
+    socket.emit('message', req.body);
+    res.sendStatus(200);
+  })
+});
 
 
 //setup event listener
@@ -99,7 +130,7 @@ socket.on("connection", socket => {
   });
 
   //Someone is typing
-  socket.on("typing", data => {
+  socket.on("typing", data => {console.log(11);
     socket.broadcast.emit("notifyTyping", {
       user: data.user,
       from: data.from,
@@ -114,7 +145,7 @@ socket.on("connection", socket => {
     socket.broadcast.emit("notifyStopTyping");
   });
 
-  socket.on("chat message", function(msgData) {
+  socket.on("chat message", function(msgData) {console.log(22);
     console.log("Message: " + msgData.msg);
 
     //broadcast message to everyone in port:5000 except yourself.
@@ -124,7 +155,7 @@ socket.on("connection", socket => {
 
     //save chat to the database
     connect.then(db => {
-      console.log("Connected correctly to the server!");
+      console.log("Connected directly to the server!");
       
       let chatMessage = new Message({ 
         message: msgData.msg,
@@ -132,7 +163,8 @@ socket.on("connection", socket => {
         to: msgData.to,
         time: Date.now(),
         bidRequestId: msgData.reqId,
-        sender: "UNITE User"
+        sender: "UNITE User",
+        receiver: "Another UNITE User"
       });
 
       chatMessage.save();
@@ -141,13 +173,12 @@ socket.on("connection", socket => {
 });
 
 //wire up the server to listen to our port 5000
-http.listen(port, ()=>{
-console.log("Connected to port: " + port)
+app.listen(port, () => {
+  console.log("Connected to port: " + port)
 });
 
 
 //Upload files to DB:
-const MongoClient = require("mongodb").MongoClient;
 const ObjectId = require("mongodb").ObjectId;
 const uploadController = require("./controllers/upload");
 
@@ -157,7 +188,7 @@ var storage = multer.diskStorage({
     //callback(null, 'uploads/');
   },
   filename: function (req, file, callback) {
-    callback(null, file.originalname + '-' + file.fieldname + '-' + Date.now().toISOString() + path.extname(file.originalname));//The name itself.
+    callback(null, file.originalname + '-' + file.fieldname + '-' + Date.now() + path.extname(file.originalname));//The name itself.
   }
 });
 
@@ -236,18 +267,6 @@ app.post("/uploadmultiple",  upload.array("multiple", 12),   (req, res, next) =>
 //Alternate multiupload:
 app.post("/multipleupload", uploadController.multipleUpload);
 
-
-var db;
-
-MongoClient.connect(MONGODB_URI, (err, client) => {
-  if (err) return console.log(err);
-
-  db = client.db("test");
-  app.listen(6000, () => {
-    //console.log("listening on 6000");
-  });
-});
-
 //Autocomplete fields:
 var country = Country.find({});
 var industry = Industry.find({});
@@ -282,7 +301,10 @@ app.post('/countryAutocomplete/', function(req, res, next) {
 
 app.post('/industryAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.query["term"], 'i');
-  var industryFilter = Industry.find({name: regex}, {'name': 1}).sort({"name" : 1}).limit(5);//Negative sort means descending.  
+  var industryFilter = Industry.find({name: regex}, {'name': 1})
+    .sort({"name" : 1})
+    .limit(5);//Negative sort means descending.  
+
   industryFilter.exec(function(err, data) {
   var result = [];
     
@@ -309,7 +331,11 @@ app.get('/prodServiceAutocomplete/', function(req, res, next) {
   console.log(regex + ' ' + req.query["supplierId"]);
   
   var prodServiceFilter = ProductService
-    .find({productName: regex, supplier: new ObjectId(id)}, {'productName': 1, 'productPrice': 1}).sort({"productName" : 1}).limit(5);//Negative sort means descending.  
+    .find({productName: regex, supplier: new ObjectId(id)}, {
+      'productName': 1, 'productPrice': 1})
+    .sort({"productName" : 1})
+    .limit(5);//Negative sort means descending.
+  
   prodServiceFilter.exec(function(err, data) {
   var result = [];
     
@@ -368,8 +394,7 @@ var buildResultSet = function(docs) {
    }
 
 app.get('/countryAutocompleted', function(req, res) {  
-   //var regex = new RegExp(req.query["term"], 'i');
-  var regex = new RegExp('ant', 'i');
+  var regex = new RegExp(req.query["term"], 'i');
   var query = Country.find({name: regex}, { 'name': 1 })/*.sort({"updated_at":-1}).sort({"created_at":-1})*/.limit(5);
   console.log(req.query);
 
@@ -389,7 +414,7 @@ app.get('/countryAutocompleted', function(req, res) {
 });
 
 
-// Database configuration
+// Database configuration and test data saving:
 mongoose
   .connect(MONGODB_URI, {
     useNewUrlParser: true,

@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const passportLocalMongoose = require("passport-local-mongoose");
 const Schema = mongoose.Schema;
+const validator = require('validator');
 
 const supervisorSchema = new Schema({
   organizationName: {
@@ -20,10 +21,24 @@ const supervisorSchema = new Schema({
   emailAddress: {
     type: String,
     unique: true,
+    trim: true,
+    lowercase: true,
+    validate(value) {
+    if(!validator.isEmail(value)) {
+      throw new Error('Invalid e-mail address');
+    }
+  },
     required: true
   },
   password: {
     type: String,
+    minLength: 6,
+    trim: true,
+    validate(value) {
+      if(value.toLowerCase().includes('password')) {
+        throw new Error('Invalid token in the password');
+      }
+    },
     required: true
   },
   isVerified: {

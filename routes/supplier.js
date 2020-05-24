@@ -13,11 +13,11 @@ router.get("/sign-in", supplierController.getSignIn);
 router.get("/sign-up", supplierController.getSignUp);
 router.get("/profile", isAuth, sessionExit, supplierController.getProfile);
 router.get("/bid-requests", isAuth, sessionExit, supplierController.getBidRequests);
-router.get("/bid-requests/:id", isAuth, sessionExit, supplierController.getBidRequest);
+router.get("/bid-requests/:id", isAuth, sessionExit, supplierController.getBidRequest);//:id=param
 router.get("/balance", isAuth, sessionExit, supplierController.getBalance);
 router.get("/addproduct", isAuth, sessionExit, supplierController.getAddProduct);
 router.get("/forgotPassword", isAuth, sessionExit, supplierController.getForgotPassword);
-router.get("/chat", isAuth, sessionExit, supplierController.getChat);
+router.get("/chat/:supplierId/:buyerId/:requestId/:buyerName/:supplierName", isAuth, sessionExit, supplierController.getChat);
 router.get("/resetPassword/:token", isAuth, sessionExit, supplierController.getResetPasswordToken);
 
 router.post("/sign-in", supplierController.postSignIn);

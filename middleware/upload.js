@@ -15,7 +15,7 @@ var storage = multer.diskStorage({
       return callback(message, null);
     }
 
-    var filename = '(' + Date.now().toISOString() + ') -UNITE-' + file.originalname;
+    var filename = '(' + Date.now() + ') -UNITE-' + file.originalname;
     callback(null, filename);
   }
 });
