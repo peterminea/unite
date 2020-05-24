@@ -19,5 +19,4 @@ const tokenSchema = new mongoose.Schema({
     }
 });
 
-
 module.exports = mongoose.model('BuyerToken', tokenSchema);

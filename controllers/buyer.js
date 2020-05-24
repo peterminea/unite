@@ -108,13 +108,18 @@ exports.postConfirmation = function (req, res, next) {
  
     // Find a matching token
     Token.findOne({ token: req.body.token }, function (err, token) {
-        if (!token) return res.status(400).send({ 
+        if (!token) 
+          return res.status(400).send({
           type: 'not-verified', 
-          msg: 'We were unable to find a valid token. Your token may have expired.' });
+          msg: 'We were unable to find a valid token. Your token may have expired.'
+          });
  
         // If we found a token, find a matching user
         Buyer.findOne({ _id: token._userId, email: req.body.email }, function (err, user) {
-            if (!user) return res.status(400).send({ msg: 'We were unable to find a user for this token.' });
+            if (!user) return res.status(400).send({
+              msg: 'We were unable to find a user for this token.' 
+            });
+          
             if (user.isVerified) return res.status(400).send({ 
               type: 'already-verified', 
               msg: 'This user has already been verified.' });
@@ -122,8 +127,12 @@ exports.postConfirmation = function (req, res, next) {
             // Verify and save the user
             user.isVerified = true;
             user.save(function (err) {
-                if (err) { return res.status(500).send({ msg: err.message }); }
-                res.status(200).send("The account has been verified. Please log in.");
+              if (err) {
+                return res.status(500).send({ 
+                  msg: err.message 
+                }); 
+              }
+              res.status(200).send("The account has been verified. Please log in.");
             });
         });
     });
@@ -176,8 +185,10 @@ exports.postResendToken = function (req, res, next) {
                 }  else {
                   console.log('Message sent: ' + info.response);
                 }
-                  //if (err) { return res.status(500).send({ msg: err.message }); }
-                  //return res.status(200).send('A verification email has been sent to ' + supplier.emailAddress + '.');
+                  if (err) {
+                    return res.status(500).send({ msg: err.message });
+                  }
+                  return res.status(200).send('A verification email has been sent to ' + user.emailAddress + '.');
                 });
         });
   });
@@ -203,16 +214,14 @@ exports.getSignUp = (req, res) => {
 exports.getBalance = (req, res) => {
   res.render("buyer/balance", { balance: req.session.buyer.balance });
 }
-/*
-exports.getSupplier = (req, res) => {
-  res.render("buyer/supplier", { balance: req.session.buyer.balance });
-}*/
+
 
 exports.getForgotPassword = (req, res) => {
   res.render("buyer/forgotPassword", {
     email: req.session.buyer.emailAddress
   });
 }
+
 
 exports.postForgotPassword = (req, res, next) => {
   async.waterfall([
@@ -252,9 +261,8 @@ exports.postForgotPassword = (req, res, next) => {
         subject: 'UNITE Password Reset - Buyer', 
         text: 'Hello,\n\n' 
         + 'You have received this e-mail because you requested a Buyer password reset on our UNITE platform.'
-        + 'Please verify your account by clicking the link: \nhttp:\/\/' 
-        + req.headers.host + '\/reset\/' + token + '.\n'
-        //, html: '<b>Hello world</b>'
+        + ' Please verify your account by clicking the link: \nhttp:\/\/' 
+        + req.headers.host + '\/reset\/' + token + '.\n'      
       };
       
       transporter.sendMail(emailOptions, function(err) {
@@ -324,7 +332,7 @@ exports.postResetPasswordToken = (req, res) => {
         subject: 'UNITE Password changed - Buyer', 
         text: 'Hello,\n\n' 
         + 'You have successfully reset your Buyer password on our UNITE platform'
-        + 'for your account ' + user.emailAddress + '. You can log in again.'        
+        + ' for your account ' + user.emailAddress + '. You can log in again.'        
       };
       
       transporter.sendMail(emailOptions, function(err) {
@@ -442,7 +450,7 @@ exports.postSignUp = (req, res) => {
       var user = new Promise((resolve, reject) => {
         buyer.save((err) => {
           if (err) {
-            return reject(new Error('Error with exam result save... ${err}'));
+            return reject(new Error('Error with exam result save... ' + err));
           }
           
             var token = new Token({
@@ -465,8 +473,7 @@ exports.postSignUp = (req, res) => {
                 from: 'no-reply@uniteprocurement.com',
                 to: buyer.emailAddress, 
                 subject: 'Account Verification Token', 
-                text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/confirmation\/' + token.token + '.\n'
-                //, html: '<b>Hello world</b>'
+                text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/confirmation\/' + token.token + '.\n'               
               };
           
               transporter.sendMail(email, function (err, info) {
@@ -475,8 +482,12 @@ exports.postSignUp = (req, res) => {
                 }  else {
                   console.log('Message sent: ' + info.response);
                 }
-                  //if (err) { return res.status(500).send({ msg: err.message }); }
-                  //return res.status(200).send('A verification email has been sent to ' + buyer.emailAddress + '.');
+                  if (err) { 
+                    return res.status(500).send({
+                      msg: err.message 
+                    });
+                  } 
+                  return res.status(200).send('A verification email has been sent to ' + buyer.emailAddress + '.');
                 });
               });
             });
@@ -503,7 +514,9 @@ exports.postSignUp = (req, res) => {
 };
 
 exports.getProfile = (req, res) => {
-  res.render("buyer/profile", { profile: req.session.buyer });
+  res.render("buyer/profile", {
+    profile: req.session.buyer 
+  });
 };
 
 exports.postProfile = (req, res) => {

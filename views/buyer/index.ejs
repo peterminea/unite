@@ -367,7 +367,7 @@
 
                   </div>
                   <div class="form-group">
-                    <label class="col-form-label">Item Description (Long)</label>
+                    <label class="col-form-label">Item Description (Long)*</label>
                     <textarea class="form-control" name="longItemDescription" required></textarea>
                   </div>
                   <div class="form-group">
@@ -442,7 +442,7 @@
                           .getElementById("prodServices_<%= i %>")
                           .insertAdjacentHTML("beforeend", "<li class=\"list-group-item\">" + document.getElementById("prodServiceInput_<%= i %>").value + "</li>");
                         document.getElementById("hiddenProdServicesList_<%= i %>").value += $(input).val() + ", ";
-                        $(input).val('').removeAttr('price');
+                        //$(input).val('').removeAttr('price');
                       }
                     }
                   </script>

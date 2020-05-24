@@ -94,8 +94,27 @@
         $(this).val ? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
       });
         
-      $('input[type="submit"]').click(function (e) {
-        var input = $(this).prev('input');                
+      $('.single,.multiple').each(function(index, element) {
+        var val = $(this).prev('.fileupload').attr('value');
+        
+        if(val) {
+          if(val.charAt(val.length-1) == ',') {//Multi
+            var newVal = val.substring(0, val.length-1);
+            newVal = newVal.split(',');
+            for(var i in newVal) {
+              var ob = '<a href="' + newVal[i] + '" download>Download file "'+i+'"</a>';
+              $(ob).insertAfter($(this).parent('div'));
+            }
+          } else {
+            var ob = '<a href="' + val + '" download>Download</a>';
+            $(ob).insertAfter($(this).parent('div'));  
+          }
+        }
+      });
+        
+      $('.single,.multiple').click(function (e) {
+        var input = $(this).prev('.fileupload'); 
+        
         var isMultiple = $(this).hasClass('multiple')? true : false;
         var formData = new FormData();
         formData.append("_csrf", token);
@@ -120,19 +139,23 @@
         xhr.send(formData);
         xhr.onreadystatechange = function() {
           if (xhr.readyState === 4) {
-              var response = JSON.parse(xhr.responseText);
+              var ob, val, response = JSON.parse(xhr.responseText);
               if(isMultiple) {
                 for(var i in response) {
-                  var ob = '<a href="/' + response[i].path + '" download>Download file "'+i+'"</a>';
+                  val = input.attr('value') + '/' + response[i].path + ',';                  
+                  //input.val(val);
+                  input.attr('value', val);                  
+                  ob = '<a href="/' + response[i].path + '" download>Download file "'+i+'"</a>';
                   $(ob).insertAfter(input.parent('div'));
-                  input.val('/' + response[i].path + ',');
                 }
-              } else {
-                var ob = '<a href="/' + response.path + '" download>Download file</a>';
+              } else {                
+                val = '/' + response.path + ',';                  
+                //input.val(val);
+                input.attr('value', val);
+                ob = '<a href="/' + response.path + '" download>Download file</a>';
                 $(ob).insertAfter(input.parent('div'));
-                input.val('/' + response.path);
               }
-           
+              
               if (xhr.status === 200) {
                  console.log('successful');
               } else {
@@ -271,65 +294,42 @@
         </div>
         
         <div class="form-group">
-            <label>Certificates</label>              
-            <input class="form-control fileupload" type="file" id="certificates" name="certificates" multiple>
-            <input class="form-control multiple" type="submit" disabled value="Upload Files"/>
+          <label>Certificates</label>          
+          <input class="form-control fileupload" type="file" id="certificates" name="certificates" multiple>
+          <input class="form-control multiple btn btn-dark mt-2" type="button" disabled value="Upload Files" />
         </div>
 
         <div class="form-group">
-             <label>Antibribery policy</label>
-             <input class="form-control fileupload" type="file" id="antibriberyPolicy" name="antibriberyPolicy" />
-             <input class="form-control single" type="submit" disabled value="Upload File"/>
+          <label>Antibribery policy</label>
+          <input class="form-control fileupload" type="file" id="antibriberyPolicy" name="antibriberyPolicy"/>
+          <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
         </div>
 
-        <div class="form-group">
-             <label>Environment policy</label>
-             <input class="form-control fileupload" type="file" id="environmentPolicy" name="environmentPolicy" />
-             <input class="form-control single" type="submit" disabled value="Upload File"/>
-        </div>
-
-        <div class="form-group">
-             <label>Quality management policy</label>
-             <input class="form-control fileupload" type="file" id="qualityManagementPolicy" name="qualityManagamentPolicy" />
-             <input class="form-control single" type="submit" disabled value="Upload File"/>
-        </div>
-
-        <div class="form-group">
-             <label>Occupational Safety and Health</label>
-             <input class="form-control fileupload" type="file" id="occupationalSafetyAndHealthPolicy" name="occupationalSafetyAndHealth" />
-             <input class="form-control single" type="submit" disabled value="Upload File"/>
-        </div>
-
-        <div class="form-group">
-            <label>Other relevant files</label>              
-            <input class="form-control fileupload" type="file" id="otherRelevantFiles" name="otherFiles" multiple>
-            <input class="form-control multiple" type="submit" disabled value="Upload Files"/>
-        </div>
-<!--
-        <div class="form-group">
-          <label>Certificates</label>
-          <input type="url" class="form-control" name="certificatesUrls">          
-        </div>
-        <div class="form-group">
-          <label>Anti-bribery policy</label>
-          <input type="url" class="form-control" name="antibriberyPolicyUrl">
-        </div>
         <div class="form-group">
           <label>Environment policy</label>
-          <input type="url" class="form-control" name="environmentPolicyUrl">
+          <input class="form-control fileupload" type="file" id="environmentPolicy" name="environmentPolicy"/>
+          <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
         </div>
+
         <div class="form-group">
           <label>Quality management policy</label>
-          <input type="url" class="form-control" name="qualityManagementPolicyUrl">
+          <input class="form-control fileupload" type="file" id="qualityManagementPolicy"
+            name="qualityManagementPolicy"/>
+          <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
         </div>
+
         <div class="form-group">
           <label>Occupational Safety and Health</label>
-          <input type="url" class="form-control" name="occupationalSafetyAndHealthPolicyUrl">
+          <input class="form-control fileupload" type="file" id="occupationalSafetyAndHealthPolicy"
+            name="occupationalSafetyAndHealthPolicy"/>
+          <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
         </div>
+
         <div class="form-group">
           <label>Other relevant files</label>
-          <input type="url" class="form-control" name="otherRelevantFilesUrls">
-        </div> -->
+          <input class="form-control fileupload" type="file" id="otherRelevantFiles" name="otherRelevantFiles" multiple>
+          <input class="form-control multiple btn btn-dark mt-2" type="button" disabled value="Upload Files" />
+        </div>
 
         <!--Mandatory check of agreements -->
         <div class="form-group">

@@ -10,7 +10,7 @@ exports.index = (req, res) => {
 }
 
 exports.show = (req, res) => {
-  Image.findById(id, function(err, image) {
+  Image.findById(req.params.id, function(err, image) {
     if(err) res.send(err);
     res.json(image);
   });
@@ -38,6 +38,6 @@ exports.update = (req, res) => {
 exports.destroy = (req, res) => {
   Image.deleteOne({_id: req.params.id}, function(err, image) {
     if(err) res.send(err);
-    res.json({message: 'Image (${req.params.id}) was successfully deleted.'});
+    res.json({message: 'Image '+ req.params.id + ' was successfully deleted.'});
   });
 }

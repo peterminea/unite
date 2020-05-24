@@ -103,7 +103,10 @@ exports.postConfirmation = function (req, res, next) {
             // Verify and save the user
             user.isVerified = true;
             user.save(function (err) {
-                if (err) { return res.status(500).send({ msg: err.message }); }
+                if (err) { return res.status(500).send({
+                  msg: err.message }
+                  );
+                }
                 res.status(200).send("The account has been verified. Please log in.");
             });
         });
@@ -202,8 +205,10 @@ exports.postSignIn = (req, res) => {
           }
         })
         .then(err => {
-          if (err) return console.error(err);
+          if (err) {
+          console.error(err);
           res.redirect("/supplier/");
+          }
         })
         .catch(console.error);
     });
@@ -229,7 +234,7 @@ exports.postSignUp = (req, res) => {
     for(var i = 0; i < prohibitedArray.length; i++)
     if(final_domain.includes(prohibitedArray[i])) {
       req.flash("error", "E-mail address must be a custom company domain.");
-      //res.redirect("/supplier/sign-up");
+      res.redirect("back");//supplier/sign-up
     } else {
       if (req.body.password.length < 6) {
         req.flash("error", "Password must have at least 6 characters.");
@@ -257,13 +262,18 @@ exports.postSignUp = (req, res) => {
           capabilityDescription: req.body.capabilityDescription,
           relevantExperience: req.body.relevantExperience,
           supportingInformation: req.body.supportingInformation,
-          certificatesUrls: req.body.certificatesUrls,
-          antibriberyPolicyUrl: req.body.antibriberyPolicyUrl,
-          environmentPolicyUrl: req.body.environmentPolicyUrl,
-          qualityManagementPolicyUrl: req.body.qualityManagementPolicyUrl,
-          occupationalSafetyAndHealthPolicyUrl: req.body.occupationalSafetyAndHealthPolicyUrl,
-          otherRelevantFilesUrls: req.body.otherRelevantFilesUrls,
+          certificates: req.body.certificates,
+          antibriberyPolicy: req.body.antibriberyPolicy,
+          environmentPolicy: req.body.environmentPolicy,
+          qualityManagementPolicy: req.body.qualityManagementPolicy,
+          occupationalSafetyAndHealthPolicy: req.body.occupationalSafetyAndHealthPolicy,
+          otherRelevantFiles: req.body.otherRelevantFiles,
           balance: req.body.balance,
+          facebookURL: req.body.facebookURL,
+          instagramURL: req.body.instagramURL,
+          twitterURL: req.body.twitterURL,
+          linkedinURL: req.body.linkedinURL,
+          otherSocialMediaURL: req.body.otherSocialMediaURL,
           UNITETermsAndConditions: true,
           antibriberyAgreement: true,
           createdAt: Date.now(),
@@ -311,7 +321,6 @@ exports.postSignUp = (req, res) => {
                 to: supplier.emailAddress, 
                 subject: 'Account Verification Token', 
                 text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/confirmation\/' + token.token + '.\n'
-                //, html: '<b>Hello world</b>'
               };
           
               transporter.sendMail(email, function (err, info) {
@@ -333,7 +342,7 @@ exports.postSignUp = (req, res) => {
         assert.ok(user instanceof Promise);
         
         user
-          .then(doc => {
+          .then((doc) => {
             req.session.supplier = doc;
             req.session.id = doc._id;
             return req.session.save();
@@ -403,7 +412,7 @@ exports.postForgotPassword = (req, res, next) => {
         subject: 'UNITE Password Reset - Supplier', 
         text: 'Hello,\n\n' 
         + 'You have received this e-mail because you requested a Supplier password reset on our UNITE platform.'
-        + 'Please verify your account by clicking the link: \nhttp:\/\/' 
+        + ' Please verify your account by clicking the link: \nhttp:\/\/' 
         + req.headers.host + '\/reset\/' + token + '.\n'
       };
       
@@ -474,7 +483,7 @@ exports.postResetPasswordToken = (req, res) => {
         subject: 'UNITE Password changed - Supplier', 
         text: 'Hello,\n\n' 
         + 'You have successfully reset your Supplier password on our UNITE platform'
-        + 'for your account ' + user.emailAddress + '. You can log in again.'        
+        + ' for your account ' + user.emailAddress + '. You can log in again.'        
       };
       
       transporter.sendMail(emailOptions, function(err) {
@@ -539,14 +548,15 @@ exports.postBidRequest = (req, res) => {
       to: req.body.to,
       from: req.body.from,
       sender: req.body.sender,
+      receiver: req.body.receiver,
       bidRequestId: req.body.reqId,
       message: req.body.message
     });
 
     newMessage
       .save()
-      .then(result => {
-        res.render(req.originalUrl);
+      .then(result => {//req.originalUrl
+        res.redirect('back');
       })
       .catch(console.error);
   }
@@ -579,17 +589,21 @@ exports.postProfile = (req, res) => {
     doc.capabilityDescription = req.body.capabilityDescription;
     doc.relevantExperience = req.body.relevantExperience;
     doc.supportingInformation = req.body.supportingInformation;
-    doc.certificatesUrls = req.body.certificatesUrls;
-    doc.antibriberyPolicyUrl = req.body.antibriberyPolicyUrl;
-    doc.environmentPolicyUrl = req.body.environmentPolicyUrl;
-    doc.qualityManagementPolicyUrl = req.body.qualityManagementPolicyUrl;
-    doc.occupationalSafetyAndHealthPolicyUrl = req.body.occupationalSafetyAndHealthPolicyUrl;
-    doc.otherRelevantFilesUrls = req.body.otherRelevantFilesUrls;
+    doc.certificates = req.body.certificates;
+    doc.antibriberyPolicy = req.body.antibriberyPolicy;
+    doc.environmentPolicy = req.body.environmentPolicy;
+    doc.qualityManagementPolicy = req.body.qualityManagementPolicy;
+    doc.occupationalSafetyAndHealthPolicy = req.body.occupationalSafetyAndHealthPolicy;
+    doc.otherRelevantFiles = req.body.otherRelevantFiles;
+    doc.facebookURL = req.body.facebookURL;
+    doc.instagramURL = req.body.instagramURL;
+    doc.twitterURL = req.body.twitterURL;
+    doc.linkedinURL = req.body.linkedinURL;
+    doc.otherSocialMediaURL = req.body.otherSocialMediaURL;
     doc.UNITETermsAndConditions = req.body.UNITETermsAndConditions == "on" ? true : false;
     doc.antibriberyAgreement = req.body.antibriberyAgreement == "on" ? true : false;
     doc.createdAt = req.body.createdAt;
     doc.updatedAt = Date.now();
-
     return doc.save();
   })
     .then(doc => {

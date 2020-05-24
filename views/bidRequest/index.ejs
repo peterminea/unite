@@ -33,6 +33,9 @@
 <body>
 
   <div class="container">
+      <div>  
+        <input type="button" class="btn btn-primary" value="Back" onclick="history.go(-1)">
+      </div>    
     <form method="POST">
       <input type='hidden' name='createdAt' value="<%= request.createdAt %>">
       <div class="form-group">
@@ -60,7 +63,7 @@
         <input type="text" class="form-control" id="amount" name="amount" value="<%= request.amount %>" required>
       </div>            
       <div class="form-group">
-        <label>Item description (long)</label>
+        <label>Item description (long)*</label>
         <input type="text" class="form-control" name="itemDescriptionLong" value="<%= request.itemDescriptionLong %>" required>
       </div>
       <div class="form-group">

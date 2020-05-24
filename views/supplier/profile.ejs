@@ -24,8 +24,7 @@
   integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.jquery.min.js"></script>
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>  
-<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>  
 -->   
   <script type="text/javascript">
       $(document).ready(function () {
@@ -117,10 +116,10 @@
         $(this).val ? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
       });
 
-      $('input[type="submit"]').each(function(index, element) {
-        var input = $(this).prev('input');                
-        if(input.val()) {
-          var val = input.val();
+      $('.single,.multiple').each(function(index, element) {
+        var val = $(this).prev('.fileupload').attr('value');
+        
+        if(val) {
           if(val.charAt(val.length-1) == ',') {//Multi
             var newVal = val.substring(0, val.length-1);
             newVal = newVal.split(',');
@@ -129,14 +128,15 @@
               $(ob).insertAfter($(this).parent('div'));
             }
           } else {
-            var ob = '<a href="' + input.val() + '" download>Download</a>';
+            var ob = '<a href="' + val + '" download>Download</a>';
             $(ob).insertAfter($(this).parent('div'));  
           }
         }
       });
         
-      $('input[type="submit"]').click(function (e) {
-        var input = $(this).prev('input');                
+      $('.single,.multiple').click(function (e) {
+        var input = $(this).prev('.fileupload'); 
+        
         var isMultiple = $(this).hasClass('multiple')? true : false;
         var formData = new FormData();
         formData.append("_csrf", token);
@@ -161,19 +161,23 @@
         xhr.send(formData);
         xhr.onreadystatechange = function() {
           if (xhr.readyState === 4) {
-              var response = JSON.parse(xhr.responseText);
+              var ob, val, response = JSON.parse(xhr.responseText);
               if(isMultiple) {
                 for(var i in response) {
-                  var ob = '<a href="/' + response[i].path + '" download>Download file "'+i+'"</a>';
+                  val = input.attr('value') + '/' + response[i].path + ',';                  
+                  //input.val(val);
+                  input.attr('value', val);                  
+                  ob = '<a href="/' + response[i].path + '" download>Download file "'+i+'"</a>';
                   $(ob).insertAfter(input.parent('div'));
-                  input.val('/' + response[i].path + ',');
                 }
-              } else {
-                var ob = '<a href="/' + response.path + '" download>Download file</a>';
+              } else {                
+                val = '/' + response.path + ',';                  
+                //input.val(val);
+                input.attr('value', val);
+                ob = '<a href="/' + response.path + '" download>Download file</a>';
                 $(ob).insertAfter(input.parent('div'));
-                input.val('/' + response.path);
               }
-           
+              
               if (xhr.status === 200) {
                  console.log('successful');
               } else {
@@ -372,66 +376,41 @@
         
         <div class="form-group">
           <label>Certificates</label>          
-          <input class="form-control fileupload" type="file" id="certificates" name="certificates" multiple>          
-          <input class="form-control multiple btn btn-dark mt-2" type="submit" disabled value="Upload Files" />
+          <input class="form-control fileupload" type="file" id="certificates" name="certificates" multiple value="<%= profile.certificates %>">
+          <input class="form-control multiple btn btn-dark mt-2" type="button" disabled value="Upload Files" />
         </div>
 
         <div class="form-group">
           <label>Antibribery policy</label>
-          <input class="form-control fileupload" type="file" id="antibriberyPolicy" name="antibriberyPolicy" />
-          <input class="form-control single btn btn-dark mt-2" type="submit" disabled value="Upload File" />
+          <input class="form-control fileupload" type="file" id="antibriberyPolicy" name="antibriberyPolicy" value="<%= profile.antibriberyPolicy %>"/>
+          <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
         </div>
 
         <div class="form-group">
           <label>Environment policy</label>
-          <input class="form-control fileupload" type="file" id="environmentPolicy" name="environmentPolicy" />
-          <input class="form-control single btn btn-dark mt-2" type="submit" disabled value="Upload File" />
+          <input class="form-control fileupload" type="file" id="environmentPolicy" name="environmentPolicy" value="<%= profile.environmentPolicy %>"/>
+          <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
         </div>
 
         <div class="form-group">
           <label>Quality management policy</label>
           <input class="form-control fileupload" type="file" id="qualityManagementPolicy"
-            name="qualityManagementPolicy" />
-          <input class="form-control single btn btn-dark mt-2" type="submit" disabled value="Upload File" />
+            name="qualityManagementPolicy" value="<%= profile.qualityManagementPolicy %>"/>
+          <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
         </div>
 
         <div class="form-group">
           <label>Occupational Safety and Health</label>
           <input class="form-control fileupload" type="file" id="occupationalSafetyAndHealthPolicy"
-            name="occupationalSafetyAndHealth" />
-          <input class="form-control single btn btn-dark mt-2" type="submit" disabled value="Upload File" />
+            name="occupationalSafetyAndHealthPolicy" value="<%= profile.occupationalSafetyAndHealthPolicy %>"/>
+          <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
         </div>
 
         <div class="form-group">
           <label>Other relevant files</label>
-          <input class="form-control fileupload" type="file" id="otherRelevantFiles" name="otherFiles" multiple>
-          <input class="form-control multiple btn btn-dark mt-2" type="submit" disabled value="Upload Files" />
+          <input class="form-control fileupload" type="file" id="otherRelevantFiles" name="otherRelevantFiles" multiple value="<%= profile.otherRelevantFiles %>">
+          <input class="form-control multiple btn btn-dark mt-2" type="button" disabled value="Upload Files" />
         </div>
-<!--
-        <div class="form-group">
-          <label>Certificates</label>
-          <input type="url" class="form-control" id="certificatesUrls" value="< %= profile.certificatesUrls %>">
-        </div>
-        <div class="form-group">
-          <label>Anti-bribery policy</label>
-          <input type="url" class="form-control" id="antibriberyPolicyUrl" value="< %= profile.antibriberyPolicyUrl %>">
-        </div>
-        <div class="form-group">
-          <label>Environment policy</label>
-          <input type="url" class="form-control" id="environmentPolicyUrl" value="< %= profile.environmentPolicyUrl %>">
-        </div>
-        <div class="form-group">
-          <label>Quality management policy</label>
-          <input type="url" class="form-control" id="qualityManagementPolicyUrl" value="< %= profile.qualityManagementPolicyUrl%>">
-        </div>
-        <div class="form-group">
-          <label>Occupational Safety and Health</label>
-          <input type="url" class="form-control" id="occupationalSafetyAndHealthPolicyUrl" value="< %= profile.occupationalSafetyAndHealthPolicyUrl %>">
-        </div>
-        <div class="form-group">
-          <label>Other relevant files</label>
-          <input type="url" class="form-control" id="otherRelevantFilesUrls" value="< %= profile.otherRelevantFilesUrls %>">
-        </div>-->
 
         <!--Mandatory check of agreements -->
         <div class="form-group">

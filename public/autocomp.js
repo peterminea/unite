@@ -11,8 +11,7 @@ var autocomp = function(obj, data, enter) {//Not for modals.
         obj.val(name);        
         $(this).parent('ul').hide();
         if(enter) {
-          //var e = $.Event( "keypress", { which: 13 } );
-          //alert(enter);
+          //var e = $.Event( "keypress", { which: 13 } );          
           //obj.trigger(e);
           obj.parent('form').submit();
         }

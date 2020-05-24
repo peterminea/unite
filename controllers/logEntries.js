@@ -38,6 +38,6 @@ exports.update = (req, res) => {
 exports.destroy = (req, res) => {
   LogEntry.deleteOne({_id: req.params.id}, function(err, logEntry) {
     if(err) res.send(err);
-    res.json({message: 'LogEntry (${req.params.id}) was successfully deleted.'});
+    res.json({message: 'LogEntry '+ req.params.id + ' was successfully deleted.'});
   });
 }

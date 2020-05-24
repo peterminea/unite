@@ -47,7 +47,7 @@ app.use(
     secret: "26UNWwbu26FvXZTJQBkf45dLSV7gG9bx",
     resave: false,
     saveUninitialized: true,
-    cookie: { 
+    cookie: {
       //secure: true
       //, maxAge: 7200000//2 hours in milliseconds
     },
@@ -65,7 +65,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routes
+//Routes and their usage:
 const homeRoutes = require("./routes/home");
 const bidRequestRoutes = require("./routes/bidRequest");
 const supplierRoutes = require("./routes/supplier");
@@ -74,6 +74,13 @@ const supervisorRoutes = require("./routes/supervisor");
 const messageRoutes = require("./routes/chat");
 //const imageRoutes = require('./routes/image');
 
+app.use("/", homeRoutes);
+app.use("/bidRequest", bidRequestRoutes);
+app.use("/supplier", supplierRoutes);
+app.use("/buyer", buyerRoutes);
+app.use("/supervisor", supervisorRoutes);
+app.use("/chat", messageRoutes);
+
 //For chatting:
 const connect = require("./dbconnect");
 const http = require("http").Server(app);
@@ -81,13 +88,6 @@ const io = require("socket.io");
 const port = 5000;
 const socket = io(http);
 var url = require("url");
-
-app.use("/", homeRoutes);
-app.use("/bidRequest", bidRequestRoutes);
-app.use("/supplier", supplierRoutes);
-app.use("/buyer", buyerRoutes);
-app.use("/supervisor", supervisorRoutes);
-app.use("/chat", messageRoutes);
 
 
 //setup event listener
@@ -99,7 +99,7 @@ socket.on("connection", socket => {
   });
 
   //Someone is typing
-  socket.on("typing", data => {
+  socket.on("typing", data => {console.log(11);
     socket.broadcast.emit("notifyTyping", {
       user: data.user,
       from: data.from,
@@ -114,7 +114,7 @@ socket.on("connection", socket => {
     socket.broadcast.emit("notifyStopTyping");
   });
 
-  socket.on("chat message", function(msgData) {
+  socket.on("chat message", function(msgData) {console.log(22);
     console.log("Message: " + msgData.msg);
 
     //broadcast message to everyone in port:5000 except yourself.
@@ -132,7 +132,8 @@ socket.on("connection", socket => {
         to: msgData.to,
         time: Date.now(),
         bidRequestId: msgData.reqId,
-        sender: "UNITE User"
+        sender: "UNITE User",
+        receiver: "Another UNITE User"
       });
 
       chatMessage.save();
@@ -157,7 +158,7 @@ var storage = multer.diskStorage({
     //callback(null, 'uploads/');
   },
   filename: function (req, file, callback) {
-    callback(null, file.originalname + '-' + file.fieldname + '-' + Date.now().toISOString() + path.extname(file.originalname));//The name itself.
+    callback(null, file.originalname + '-' + file.fieldname + '-' + Date.now() + path.extname(file.originalname));//The name itself.
   }
 });
 
@@ -389,7 +390,7 @@ app.get('/countryAutocompleted', function(req, res) {
 });
 
 
-// Database configuration
+// Database configuration and test data saving:
 mongoose
   .connect(MONGODB_URI, {
     useNewUrlParser: true,
