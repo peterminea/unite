@@ -36,6 +36,7 @@ dependencies:
   ssl: 1.0.0
   token: 0.1.0
   url: 0.11.0
+  validator: 13.0.0
 packages:
   /@angular/core/9.1.9:
     dev: false
@@ -2708,6 +2709,12 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
+  /validator/13.0.0:
+    dev: false
+    engines:
+      node: '>= 0.10'
+    resolution:
+      integrity: sha512-anYx5fURbgF04lQV18nEQWZ/3wHGnxiKdG4aL8J+jEDsm98n/sU/bey+tYk6tnGJzm7ioh5FoqrAiQ6m03IgaA==
   /vary/1.1.2:
     dev: false
     engines:
@@ -2833,3 +2840,4 @@ specifiers:
   ssl: ^1.0.0
   token: ^0.1.0
   url: ^0.11.0
+  validator: ^13.0.0

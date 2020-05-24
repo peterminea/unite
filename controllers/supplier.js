@@ -173,7 +173,8 @@ exports.postSignIn = (req, res) => {
   const password = req.body.password;
   console.log(email + ' ' + password);
 
-  if(!email) res.redirect("/supplier/sign-in");
+  if(!email) 
+    res.redirect("/supplier/sign-in");
   else {
     Supplier.findOne({ emailAddress: email }, (err, doc) => {
       if (err) 
@@ -197,7 +198,7 @@ exports.postSignIn = (req, res) => {
               type: 'not-verified', 
               msg: 'Your account has not been verified. Please check your e-mail for instructions.' });
             
-            req.session.cookie.originalMaxAge = 1==1 || req.body.remember? null : 7200000;
+            req.session.cookie.originalMaxAge = req.body.remember? null : 7200000;
             return req.session.save();
           } else {
             req.flash("error", "Invalid e-mail address or password");
@@ -284,7 +285,7 @@ exports.postSignUp = (req, res) => {
         // Save model
         supplier.save((err) => {
           if (err) {
-            return reject(new Error('Error with exam result save... ${err}'));
+            reject(new Error('Error with exam result save... ' + err));
           }
           
             // Create a verification token for this user
@@ -295,7 +296,9 @@ exports.postSignUp = (req, res) => {
             // Save the verification token
             token.save(function (err) {
               if (err) { 
-                return res.status(500).send({ msg: err.message });
+                return res.status(500).send({
+                  msg: err.message 
+                });
               }
 
               var options = {
@@ -329,14 +332,18 @@ exports.postSignUp = (req, res) => {
                 }  else {
                   console.log('Message sent: ' + info.response);
                 }
-                  //if (err) { return res.status(500).send({ msg: err.message }); }
+                  if (err) {
+                    return res.status(500).send({
+                      msg: err.message 
+                    });
+                  }
                   //return res.status(200).send('A verification email has been sent to ' + supplier.emailAddress + '.');
                 });
               });
             });
           
           // Return saved model
-          return resolve(supplier);
+          resolve(supplier);
         });
       
         assert.ok(user instanceof Promise);
@@ -345,10 +352,10 @@ exports.postSignUp = (req, res) => {
           .then((doc) => {
             req.session.supplier = doc;
             req.session.id = doc._id;
-            return req.session.save();
+            req.session.save();
           })
-          .then(() => {
-            req.flash("success", "Supplier signed up successfully!");
+          .then(async () => {
+            await req.flash("success", "Supplier signed up successfully!");
             return res.redirect("/supplier");
           })
           .catch(console.error);
@@ -365,11 +372,13 @@ exports.getForgotPassword = (req, res) => {
 }
 
 
-exports.getChat = (req, res) => {
+exports.getChat = (req, res) => {console.log(req.params);
   res.render("supplier/chat", {
-    from: req.params.from,
-    to: req.params.to,
-    reqId: req.params.reqId
+    from: req.params.supplierId,
+    to: req.params.buyerId,
+    fromName: req.params.supplierName,
+    toName: req.params.buyerName,
+    reqId: req.params.requestId
   });
 }
 

@@ -26,6 +26,5 @@ module.exports = (app) => {
   app.route('/logEntries/:logEntryId/images/:id')
   .get(controller.show)
   .put(controller.update)
-  .delete(controller.destroy);
-  
+  .delete(controller.destroy);  
 }

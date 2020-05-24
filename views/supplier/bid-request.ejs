@@ -200,13 +200,14 @@
         
         <div class="container mt-4">
           	<div class="form-group">
-              <input type="hidden" name="from" value="<%= supplier._id %>">
-						  <input type="hidden" name="to" value="<%= buyer._id %>">
-              <input type="hidden" name="reqId" value="<%= request._id %>">
-              
-							<a href="../chat">
+              <input type="hidden" name="from1" value="<%= supplier._id %>">
+						  <input type="hidden" name="to1" value="<%= buyer._id %>">
+              <input type="hidden" name="reqId1" value="<%= request._id %>">
+              <input type="hidden" name="sender1" value="<%= buyer.organizationName %>">
+              <input type="hidden" name="receiver1" value="<%= supplier.companyName %>">
+							<a href="../chat/<%= supplier._id %>/<%= buyer._id %>/<%= request._id %>/<%= buyer.organizationName %>/<%= supplier.companyName %>">
                 <button class="btn-primary custom-button">Chat</button>
-              </a>
+              </a>              
 						</div>
         </div>       
 			

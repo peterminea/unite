@@ -290,7 +290,8 @@ exports.postSignIn = (req, res) => {
   if (!email) res.redirect("/supervisor/sign-in");
   else {
     Supervisor.findOne({ emailAddress: email }, (err, doc) => {
-      if (err) return console.error(err);
+      if (err) 
+        return console.error(err);
 
       if (!doc) {
         req.flash("error", "Invalid e-mail address or password");
@@ -310,7 +311,7 @@ exports.postSignIn = (req, res) => {
                 type: 'not-verified', 
                 msg: 'Your account has not been verified. Please check your e-mail for instructions.' });
             
-            req.session.cookie.originalMaxAge = 1==1 || req.body.remember? null : 7200000;
+            req.session.cookie.originalMaxAge = req.body.remember? null : 7200000;
             return req.session.save();
           } else {
             req.flash("error", "Invalid e-mail address or password");

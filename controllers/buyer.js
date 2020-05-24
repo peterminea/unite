@@ -397,7 +397,7 @@ exports.postSignIn = (req, res) => {
                 type: 'not-verified', 
                 msg: 'Your account has not been verified. Please check your e-mail for instructions.' });
             
-            req.session.cookie.originalMaxAge = 1==1 || req.body.remember? null : 7200000;
+            req.session.cookie.originalMaxAge = req.body.remember? null : 7200000;
             console.log(req.session.cookie);  
             return req.session.save();
           } else {

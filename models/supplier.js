@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const passportLocalMongoose = require("passport-local-mongoose");
 const Schema = mongoose.Schema;
+const validator = require('validator');
 
 const supplierSchema = new Schema({
   companyName: {
@@ -27,10 +28,24 @@ const supplierSchema = new Schema({
   emailAddress: {
     type: String,
     unique: true,
-    required: true // Check @gmail.com or @hotmail.com. Ensure it is company domain
+    trim: true,
+    lowercase: true,
+    validate(value) {
+    if(!validator.isEmail(value)) {
+      throw new Error('Invalid e-mail address');
+    }
+  },
+    required: true
   },
   password: {
     type: String,
+    minLength: 6,
+    trim: true,
+    validate(value) {
+      if(value.toLowerCase().includes('password')) {
+        throw new Error('Invalid token in the password');
+      }
+    },
     required: true
   },
   isVerified: {
@@ -44,7 +59,7 @@ const supplierSchema = new Schema({
   resetPasswordExpires: {
     type: Date,
     required: false
-    //,    default: Date.now() + 43200000
+    //,default: Date.now() + 43200000
   },  
   registeredCountry: {
     type: String,
@@ -76,10 +91,20 @@ const supplierSchema = new Schema({
   },
   employeeNumbers: {
     type: Number,
+    validate(value) {
+      if(value < 1) {
+        throw new Error('Please enter a valid number of employees.')
+      }
+    },
     required: true
   },
   lastYearTurnover: {
     type: Number,
+    validate(value) {
+      if(value < 1) {
+        throw new Error('Please enter a valid number for Turnover.')
+      }
+    },
     required: true
   },
   website: {
