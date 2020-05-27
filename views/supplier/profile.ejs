@@ -212,9 +212,81 @@
     });
     
     //return phonenumber($(this)[0]);
-  });
-        
     });
+        
+    $('#prodServiceInput').bind('change', function() {
+      if($(this).val()) {
+        $('#addProdService').removeAttr('disabled');
+      }
+    });
+        
+    $("#addProdService").click(() => {
+      /*var amount = $('#amount');                      
+        if(amount.val() < 1) {
+          alert('Please select an amount first');
+          return false;
+        }*/
+
+        var input = $("#prodServiceInput");
+        var prodInput = $("#prodServicesList");
+        var prodList = isJson(prodInput.val())? (prodInput.val()) : [];
+        if(!prodList || !prodList.length) {
+          prodList = [];
+        }
+      //input.attr('price', $('#defaultPrice').val());
+        //var amountInput = $("#amountList");
+        //var priceInput = $("#priceList");
+        //var amountList = JSON.parse(amountInput);
+        //var priceList = JSON.parse(priceInput);
+    /*
+      if(!amountList || !amountList.length) {
+          amountList = [];
+        }
+
+      if(!priceList || !priceList.length) {
+          priceList = [];
+        }*/
+
+        if(input.val() != "") {
+          //var addedPrice = parseInt(amount.val()? amount.val() : 0) * parseInt(input.attr('price')? input.attr('price') : 1);
+          //var price = parseInt($('#price').val()) + addedPrice;
+          //$('#price').val(parseInt(price));
+          var elem = (document.getElementById("prodServices"));
+/*
+          elem
+            .insertAdjacentHTML("beforeend", "<li class='list-group-item' price='" + addedPrice + "' amount='" + amount.val() + "'><span>" + $("#prodServiceInput").val() + "</span><span class='rem'>&nbsp;(Remove)</span></li>");*/
+          elem.insertAdjacentHTML("beforeend", "<li class='list-group-item'><span>" + $("#prodServiceInput").val() + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
+          elem = $(elem);
+
+          var prodVal = input.val();//, amountVal = amount.val(), priceVal = $('#price').val();
+          //var prods = prodList.val();, qtys = amountList.val(), prices = priceList.val();
+          //var bigPrice = amountVal * priceVal;
+          prodList.push(prodVal);
+          //amountList.push(amountVal);
+          //priceList.push(bigPrice);//The product
+
+          //$('#totalAmount').val(parseInt($('#totalAmount').val()) + parseInt(amountVal));
+          prodInput.val((prodList));
+          //amountInput.val((amountList));
+          //priceInput.val((priceList));
+
+          $('.rem').unbind('click').click(function() {
+            var li = $(this).parent('li');
+            var newIndex = elem.find('li').index(li);
+            prodList.splice(newIndex, 1);
+            //amountList.splice(index, 1);
+            //priceList.splice(index, 1);
+            //var newAmount = parseInt($('#totalAmount').val()) - parseInt(li.attr('amount'));
+           // var newPrice = parseInt($('#price').val()) - parseInt(li.attr('price'));
+            //$('#totalAmount').val(parseInt(newAmount));
+            //$('#price').val(parseInt(newPrice));
+            li.remove();
+          });
+
+          $(input).val('');//.removeAttr('price');
+        }
+    });
+  });
   </script>
 </head>
 
@@ -365,8 +437,21 @@
         </div>
         <div class="form-group">
           <label>Products or Services Offered*</label>
-          <input type="text" class="form-control" id="productsServicesOffered" name="productsServicesOffered" value="<%= profile.productsServicesOffered %>" required>
+          <input type="text" class="form-control" id="productsServicesOffered1" name="productsServicesOffered1" value="<%= profile.productsServicesOffered %>" required>
           <a href="addproduct">Add new product</a>
+        </div>
+        <div class="form-group">
+          <label class="col-form-label">Products / Services Offered*</label>
+          <div class="input-group">
+            <input type="text" required class="form-control prodInput" supplierId="<%= profile._id %>" placeholder="Add Product/Service" id="prodServiceInput">
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" type="button" disabled id="addProdService">Add</button>
+            </div>
+          </div>
+          <br>
+          <ul class="list-group" id="prodServices">
+          </ul>
+          <input type="hidden" required id="prodServicesList" name="productsServicesOffered" value="">
         </div>
         <div class="form-group">
           <label>Capability Description*</label>

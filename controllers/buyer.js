@@ -51,10 +51,22 @@ exports.postIndex = (req, res) => {
         success: req.flash("success")
       });
     });
-  } else if (req.body.itemDescription) {
+  } else if (req.body.itemDescription) {//The Send Order part.
+    var productList = (req.body.productsServicesOffered);
+    var amountList = (req.body.amountList);
+    var priceList = (req.body.priceList);
+    var products = [];
+    
+    for(var i in productList) {
+      products.push('Product name: \'' + productList[i] + '\', amount: ' + amountList[i] + ', price: ' + priceList[i] + '.');
+    }
+    
     const bidRequest = new BidRequest({
       itemDescription: req.body.itemDescription,
       productsServicesOffered: req.body.productsServicesOffered,
+      amountList: req.body.amountList,
+      priceList: req.body.priceList,
+      orderedProducts: products,
       itemDescriptionLong: req.body.longItemDescription,
       itemDescriptionUrl: req.urlItemDescription,
       amount: req.body.amount,
@@ -65,13 +77,14 @@ exports.postIndex = (req, res) => {
       otherRequirements: req.body.otherRequirements,
       status: req.body.status,
       price: req.body.price,
+      currency: req.body.currency,
       createdAt: req.body.createdAt? req.body.createdAt : Date.now(),
       updatedAt: Date.now(),
       buyer: req.body.buyer,
       supplier: req.body.supplier
     });
     
-  console.log(bidRequest);
+  console.log('Order: ' + bidRequest);
     
     return bidRequest
       .save()

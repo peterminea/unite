@@ -355,14 +355,15 @@
                     <div class="input-group">
                       <input type="text" required class="form-control prodInput" supplierId="<%= supplier._id %>" placeholder="Add Product/Service" id="prodServiceInput_<%= i %>">
                       <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="button" id="addProdService_<%= i %>">Add</button>
+                        <button class="btn btn-outline-secondary" type="button" disabled id="addProdService_<%= i %>">Add</button>
                       </div>
                     </div>
                     <br>
                     <ul class="list-group" id="prodServices_<%= i %>">
                     </ul>
                     <input type="hidden" required id="hiddenProdServicesList_<%= i %>" name="productsServicesOffered" value="">
-
+                    <input type="hidden" required id="amountList_<%= i %>" name="amountList" value="">
+                    <input type="hidden" required id="priceList_<%= i %>" name="priceList" value="">
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Item Description (Long)*</label>
@@ -380,7 +381,8 @@
 
                   <div class="form-group">
                     <label class="col-form-label">Amount*</label>
-                    <input type="number" class="form-control" id="amount_<%= i %>" name="amount" value="0" required>
+                    <input type="number" class="form-control" id="amount_<%= i %>" name="theAmount" value="0" required>
+                    <input type="hidden" id="totalAmount_<%= i %>" name="amount" value="0">
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Delivery Location*</label>
@@ -410,11 +412,12 @@
                   </div>
                    <div class="form-group">
                     <label class="col-form-label">Status*</label>
-                    <input type="number" id="status_<%= i %>" class="form-control" name="status" value="0" required>
+                    <input type="number" id="status_<%= i %>" class="form-control" name="status" min="0" max="6" step="1" value="0" required> 
                   </div>
                    <div class="form-group">
                     <label class="col-form-label">Price</label>
                     <input type="number" class="form-control" id="price_<%= i %>" name="price" value="0" readonly>
+                     <span class="form-control" id="currency_<%= i %>" name="currency">EUR</span>
                     <input type="hidden" id="defaultPrice_<%= i %>" value="1">
                   </div>
 
@@ -423,14 +426,13 @@
                   <input type="hidden" name="supplier" value="<%= supplier._id %>">
                   <script type="text/javascript">
                     function limitStatus(e) {
-                        // Only ASCII charactar in that range allowed 
                         var ASCIICode = (e.which) ? e.which : e.keyCode;
                         if (ASCIICode > 31 && (ASCIICode < 48 || ASCIICode > 54)) 
-                            return false; 
+                            return false;
                         return true; 
                     }
                     
-                    $('input[id^="status_"]').keypress(function(e) {
+                    $('input[id^="status_"]').bind('keypress keyon keyup', function(e) {
                       return limitStatus(e);
                     });
                     
@@ -491,10 +493,17 @@
                       if($("#statusText_"+index).length) $("#statusText_"+index).remove();
                       $(val).insertAfter($('#status_'+index).parent('div'));
                     });
+                    
+                    $('input[id^="prodServiceInput_"]').change(function() {
+                      if($(this).val()) {
+                        var index = "<%= i %>";
+                        $("button[id='addProdService_"+ index +"']").removeAttr('disabled');
+                      }
+                    });
 
-                    $("button[id^='addProdService_']").click(() => {                      
+                    $("button[id^='addProdService_']").click(() => {
                       var index = "<%= i %>";
-                      $('input[id^="status_"]'+index).trigger('change');
+                      $('input[id="status_'+ index +'"]').trigger('change');
                       index = parseInt(index);
                      
                       var amount = $('#amount_'+index);                      
@@ -505,24 +514,57 @@
                         
                         var input = $("#prodServiceInput_"+index);
                         input.attr('price', $('#defaultPrice_'+index).val());
-                        var list = $("#hiddenProdServicesList_"+index);
+                      
+                        var prodInput = $("#hiddenProdServicesList_"+index);
+                        var amountInput = $("#amountList_"+index);
+                        var priceInput = $("#priceList_"+index);
+                      
+                        var product = prodInput.val(), quantity = amountInput.val(), price = priceInput.val();
+                      
+                        var prodList = isJson(product)? (product) : [];
+                        var amountList = isJson(quantity)? (quantity) : [];
+                        var priceList = isJson(price)? (price) : [];
                       
                         if(input.val() != "") {
                           var addedPrice = parseInt(amount.val()? amount.val() : 0) * parseInt(input.attr('price')? input.attr('price') : 1);
                           var price = parseInt($('#price_'+index).val()) + addedPrice;
-                          $('#price_'+index).val(parseInt(price));                          
-                          document.getElementById("prodServices_"+index).insertAdjacentHTML("beforeend", "<li class='list-group-item' price='" + addedPrice + "'><span>" + $("#prodServiceInput_"+index).val() + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
-                          list.val(list.val() && list.val().length? list.val() + ',' + input.val() : input.val());
+                          $('#price_'+index).val(parseInt(price));
+                          var elem = (document.getElementById("prodServices_"+index));
                           
-                          $('.rem').click(function() {
+                          elem
+                            .insertAdjacentHTML("beforeend", "<li class='list-group-item' price='" + addedPrice + "' amount='" + amount.val() + "'><span>" + $("#prodServiceInput_"+index).val() + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
+                          elem = $(elem);
+                          
+                          var prodVal = input.val(), amountVal = amount.val(), priceVal = $('#price_'+index).val();
+                          var prods = prodList.val(), qtys = amountList.val(), prices = priceList.val();
+                          var bigPrice = amountVal * priceVal;
+                          prodList.push(prodVal);
+                          amountList.push(amountVal);
+                          priceList.push(bigPrice);//The product
+                          
+                          //prodList.push(prods && prods.length? prods + ',' + prodVal : prodVal);
+                          //amountList.push(qtys && qtys.length? qtys + ',' + amountVal : amountVal);
+                          //priceList.push(prices && prices.length? prices + ',' + bigPrice : bigPrice);
+                          
+                          $('#totalAmount_'+index).val(parseInt($('#totalAmount_'+index).val()) + parseInt(amountVal));
+                          prodInput.val((prodList));
+                          amountInput.val((amountList));
+                          priceInput.val((priceList));
+                          
+                          $('.rem').unbind('click').click(function() {
                             var li = $(this).parent('li');
-                            var str = list.val().substring(0, list.val().length - li.find('span:first').text().length-1);
-                            list.val(str);                            
+                            var newIndex = elem.find('li').index(li);
+                            prodList.splice(newIndex, 1);
+                            amountList.splice(newIndex, 1);
+                            priceList.splice(newIndex, 1);
+                            var newAmount = parseInt($('#totalAmount_'+index).val()) - parseInt(li.attr('amount'));
                             var newPrice = parseInt($('#price_'+index).val()) - parseInt(li.attr('price'));
+                            $('#totalAmount_'+index).val(parseInt(newAmount));
                             $('#price_'+index).val(parseInt(newPrice));
                             li.remove();
                           });
-                          //$(input).val('').removeAttr('price');                         
+                          
+                          $(input).val('');//.removeAttr('price');                         
                         }
                     });
                   </script>

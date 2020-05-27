@@ -7,7 +7,7 @@ const bidRequestSchema = new Schema({
     required: true
   },
   productsServicesOffered: {
-    type: String,
+    type: [String],
     required: true
   },
   itemDescriptionLong: {
@@ -27,6 +27,23 @@ const bidRequestSchema = new Schema({
     },
     required: true
   },
+  currency: {
+    type: String,
+    required: true,
+  },
+  orderedProducts: [String],//Schema.Types.Mixed,
+  amountList: {
+    type: [Number],
+    required: true
+  },
+  priceList: {
+    type: [Number],
+    required: true
+  },
+  /*{
+    type: [String],
+    required: true
+  },*/
   deliveryLocation: {
     type: String,
     required: true
@@ -84,6 +101,21 @@ const bidRequestSchema = new Schema({
     required: true
   }
 });
+/*
+bidRequestSchema.orderedProducts = {
+  products: {
+    type: [String],
+    required: true
+  },
+  amounts: {
+    type: [Number],
+    required: true
+  },
+  prices: {
+    type: [Number],
+    required: true
+  }
+};*/
 
 /*
 Bid Request Status Legend:

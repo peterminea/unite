@@ -138,8 +138,8 @@ const supplierSchema = new Schema({
     type: String,
     required: false
   },
-  productsServicesOffered: {
-    type: String,
+  productsServicesOffered: {//String array, actually.
+    type: [String],
     required: true
   },
   capabilityDescription: {

@@ -21,6 +21,7 @@ const BidStatus = require("./models/bidStatus");
 const Buyer = require("./models/buyer");
 const Supplier = require("./models/supplier");
 const Supervisor = require("./models/supervisor");
+const Currency = require("./models/currency");
 const Message = require("./models/message");
 const Country = require("./models/country");
 const Industry = require("./models/industry");
@@ -93,12 +94,38 @@ var url = require("url");
 const MongoClient = require("mongodb").MongoClient;
 var db;
 //var ProductService = require('./models/productService');
+console.log('TOLJINT ' + JSON.parse("[]"));
+
+var ss = [];
+ss.push(1);
+ss.push(2);
+console.log(ss[0] + ' ' + ss[1]);
+console.log(JSON.stringify(ss) + ' TATA JURA ' + JSON.parse("[" + ss + "]"));
+if(ss.toString().charAt(0) != '[') {
+  var ss1 = JSON.parse("[" + ss + "]");
+  console.log(ss1[0] + ' T ' + ss1[1]);
+  var ss3 = JSON.stringify(ss1);
+  console.log(ss3[0] + ' U ' + ss3[1]);
+}
+
+console.log(JSON.stringify('[1,2]'));
+var ss2 = JSON.stringify(ss);
+console.log(ss2[0] + ' ' + ss2[1] + ' MASCABASCO');
+
 
 MongoClient.connect(MONGODB_URI, (err, client) => {
   if (err)
     return console.log(err);
 
   db = client.db("UNITEDB");//Right connection!
+  
+  const currency = new Currency({
+    name: 'Swedish Krona',
+    value: 'SEK'
+  });
+  
+  //currency.save();
+  
     /*
   const bidStatus = new BidStatus({
     value: 6,

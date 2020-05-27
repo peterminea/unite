@@ -21,3 +21,11 @@ var autocomp = function(obj, data, enter) {//Not for modals.
     }
   });
 };
+
+function isJson(obj) {
+  if(!obj || !obj.length)
+    return false;
+  if(obj.toString().charAt(0) != '[')
+    return false;
+  return true;
+}
