@@ -4,11 +4,17 @@ const Schema = mongoose.Schema;
 const productserviceSchema = new Schema({
   productName: {
     type: String,
+    unique: true,
     required: true
   },
   productPrice: {
     type: Number,
     default: 1,
+    validation(value) {
+      if(value < 0) {
+        throw new Error('Price cannot be negative.');
+      }
+    },
     required: true
   },
   supplier: {
@@ -25,4 +31,5 @@ const productserviceSchema = new Schema({
   }
 });
 
+productserviceSchema.index({productName: 1, supplier: 1}, {unique: true});
 module.exports = mongoose.model('ProductService', productserviceSchema);

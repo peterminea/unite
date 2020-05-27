@@ -7,6 +7,7 @@ const supplierSchema = new Schema({
   companyName: {
     type: String,
     unique: true,
+    index: true,
     required: true
   },
   directorsName: {
@@ -20,7 +21,7 @@ const supplierSchema = new Schema({
   title: {
     type: String,
     required: true
-  },  
+  },
   companyRegistrationNo: {
     type: String,
     required: true
@@ -28,6 +29,7 @@ const supplierSchema = new Schema({
   emailAddress: {
     type: String,
     unique: true,
+    index: true,
     trim: true,
     lowercase: true,
     validate(value) {
@@ -67,7 +69,12 @@ const supplierSchema = new Schema({
   },
   balance: {
     type: Number,
-    default: 0
+    default: 0,
+    validate(value) {
+      if(value < 0) {
+        throw new Error('Balance must be 0 or positive.');
+      }
+    }
   },
   companyAddress: {
     type: String,
@@ -111,6 +118,26 @@ const supplierSchema = new Schema({
     type: String,
     required: false
   },
+  facebookURL: {
+    type: String,
+    required: false
+  },
+  instagramURL: {
+    type: String,
+    required: false
+  },
+  twitterURL: {
+    type: String,
+    required: false
+  },
+  linkedinURL: {
+    type: String,
+    required: false
+  },
+  otherSocialMediaURL: {
+    type: String,
+    required: false
+  },
   productsServicesOffered: {
     type: String,
     required: true
@@ -128,27 +155,27 @@ const supplierSchema = new Schema({
     required: false
   },  
   // URL's going to download page. Supplier uploads a file and it will be converted to URL
-  certificatesUrls: {
+  certificates: {
     type: String,
     required: false
   },
-  antibriberyPolicyUrl: {
+  antibriberyPolicy: {
     type: String,
     required: false
   },
-  environmentPolicyUrl:{
+  environmentPolicy:{
     type: String,
     required: false
   },
-  qualityManagementPolicyUrl: {
+  qualityManagementPolicy: {
     type: String,
     required: false
   },  
-  occupationalSafetyAndHealthPolicyUrl: {
+  occupationalSafetyAndHealthPolicy: {
     type: String,
     required: false
   },
-  otherRelevantFilesUrls:  {
+  otherRelevantFiles:  {
     type: String,
     required: false
   },  
@@ -170,6 +197,7 @@ const supplierSchema = new Schema({
     default: Date.now()
   }
 });
-
+// db.collection.createIndex
+supplierSchema.index( { "companyName": 1, "emailAddress": 1 }, { unique: true } );
 supplierSchema.plugin(passportLocalMongoose);
 module.exports = mongoose.model('Supplier', supplierSchema);

@@ -20,6 +20,11 @@ const bidRequestSchema = new Schema({
   },
   amount: {
     type: Number,
+    validate(value) {
+      if(value < 0) {
+        throw new Error('Please specify a valid number.');
+      }
+    },
     required: true
   },
   deliveryLocation: {
@@ -45,11 +50,22 @@ const bidRequestSchema = new Schema({
   status: {
     type: Number,
     required: true,
+    validate(value) {
+      if(value < 0 || value >= 7) {
+        throw new Error('Status must be an integer from 0 to 6.');
+      }
+    },
     default: 0
   },
   price: {
     type: Number,
-    required: true
+    required: true,
+    default: 1,
+    validate(value) {
+      if(value < 1) {
+        throw new Error('Price must be a strictly positive value.');
+      }
+    }
   },
   createdAt: {
     type: Date,
@@ -70,16 +86,16 @@ const bidRequestSchema = new Schema({
 });
 
 /*
-Bid Request Status Legend
+Bid Request Status Legend:
 
--2 -> Buyer cancelled the request
--1 -> Supplier cancelled the request
-00 -> Buyer requested
-01 -> Supplier sent information
-02 -> Buyer sent information-request
-03 -> Buyer sent buy-requests
-04 -> Supplier sent "sending-done"
+00 -> Buyer requested.
+01 -> Supplier sent information.
+02 -> Buyer sent information-request.
+03 -> Buyer sent buy-requests.
+04 -> Supplier sent "sending-done".
 05 -> Buyer completes the order, delivery process successful.
+06 -> Buyer cancelled the request.
+07 -> Supplier cancelled the request.
 */
 
 module.exports = mongoose.model('BidRequest', bidRequestSchema);

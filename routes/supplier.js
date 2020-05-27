@@ -16,6 +16,8 @@ router.get("/bid-requests", isAuth, sessionExit, supplierController.getBidReques
 router.get("/bid-requests/:id", isAuth, sessionExit, supplierController.getBidRequest);//:id=param
 router.get("/balance", isAuth, sessionExit, supplierController.getBalance);
 router.get("/addproduct", isAuth, sessionExit, supplierController.getAddProduct);
+router.get('/resend', supplierController.getResendToken);
+router.get("/confirmation/:token", isAuth, sessionExit, supplierController.getConfirmation);
 router.get("/forgotPassword", isAuth, sessionExit, supplierController.getForgotPassword);
 router.get("/chat/:supplierId/:buyerId/:requestId/:buyerName/:supplierName", isAuth, sessionExit, supplierController.getChat);
 router.get("/resetPassword/:token", isAuth, sessionExit, supplierController.getResetPasswordToken);
@@ -25,7 +27,7 @@ router.post("/sign-up", supplierController.postSignUp);
 router.post("/profile", isAuth, sessionExit, supplierController.postProfile);
 router.post("/bid-requests/:id", isAuth, sessionExit, supplierController.postBidRequest);
 router.post("/addproduct", isAuth, sessionExit, supplierController.postAddProduct);
-router.post('/confirmation', supplierController.postConfirmation);
+router.post('/confirmation/:token', supplierController.postConfirmation);
 router.post('/resend', supplierController.postResendToken);
 router.post("/forgotPassword", isAuth, sessionExit, supplierController.postForgotPassword);
 router.post("/resetPassword/:token", isAuth, sessionExit, supplierController.postResetPasswordToken);

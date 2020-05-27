@@ -57,7 +57,7 @@
             req.supplierId = obj.attr('supplierId');
             
             $.ajax({
-              url: "/prodServiceAutocomplete/",
+              url: "/prodServiceAutocomplete",
               headers: { "X-CSRF-Token": token },
               datatype: 'jsonp',
               type: "GET",
@@ -88,10 +88,8 @@
             });
           },
           minLength: 3
-        });
-        
-      });
-    
+        });        
+  });    
   </script> 
 </head>
 
@@ -382,7 +380,7 @@
 
                   <div class="form-group">
                     <label class="col-form-label">Amount*</label>
-                    <input type="number" class="form-control" id="amount" name="amount" required>
+                    <input type="number" class="form-control" id="amount_<%= i %>" name="amount" value="0" required>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Delivery Location*</label>
@@ -412,39 +410,121 @@
                   </div>
                    <div class="form-group">
                     <label class="col-form-label">Status*</label>
-                    <input type="number" class="form-control" name="status" value="0" required>
+                    <input type="number" id="status_<%= i %>" class="form-control" name="status" value="0" required>
                   </div>
                    <div class="form-group">
                     <label class="col-form-label">Price</label>
-                    <input type="number" class="form-control" id="price" name="price" value="0" readonly>
-                    <input type="hidden" id="defaultPrice" value="1">
+                    <input type="number" class="form-control" id="price_<%= i %>" name="price" value="0" readonly>
+                    <input type="hidden" id="defaultPrice_<%= i %>" value="1">
                   </div>
 
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                   <input type="hidden" name="buyer" value="<%= buyer._id %>">
                   <input type="hidden" name="supplier" value="<%= supplier._id %>">
-                  <script>
-                    document.getElementById("addProdService_<%= i %>").onclick = () => {
-                    var amount = document.getElementById('amount');
-                    $(amount).trigger('change');
-                      if(amount.value < 1) {
-                        //alert(amount.value);
-                        //return false;                        
-                      }
-
-                    var input = "#prodServiceInput_<%= i %>";
-                    //alert($('#price').length + ' ' + $('#amount').length);
-                      if ($(input).val() != "") {
-                        var price = $('#price').val() + 3 * $(input).attr('price');
-                        document.getElementById('price').value = (parseInt(price));
-
-                        document
-                          .getElementById("prodServices_<%= i %>")
-                          .insertAdjacentHTML("beforeend", "<li class=\"list-group-item\">" + document.getElementById("prodServiceInput_<%= i %>").value + "</li>");
-                        document.getElementById("hiddenProdServicesList_<%= i %>").value += $(input).val() + ", ";
-                        //$(input).val('').removeAttr('price');
-                      }
+                  <script type="text/javascript">
+                    function limitStatus(e) {
+                        // Only ASCII charactar in that range allowed 
+                        var ASCIICode = (e.which) ? e.which : e.keyCode;
+                        if (ASCIICode > 31 && (ASCIICode < 48 || ASCIICode > 54)) 
+                            return false; 
+                        return true; 
                     }
+                    
+                    $('input[id^="status_"]').keypress(function(e) {
+                      return limitStatus(e);
+                    });
+                    
+                    $('input[id^="status_"]').change(function(e) {
+                      if($(this).val() > 6 || $(this).val() < 0) {
+                        $(this).val(0);
+                        return false;
+                      }
+                      
+                      var index = "<%= i %>";
+                      var price = $('#price_'+index).val();
+                      index = parseInt(index);
+                      var statusText = '';                      
+                      var l = parseInt($(this).val());
+                      
+                      statusText = l == 0? 'Buyer requested a bid from you. Please send information to buyer.' 
+                      : l == 1? 'Waiting for buyer\'s processing.' 
+                      : l == 2? 'Buyer wants to buy the product for the price of ' + price + '. Cancel or Accept.' 
+                      : l == 3? 'You started the delivery. Wait for confirmation of buyer.' : 
+                      l == 4? 'Payment and delivery are done.' : 
+                      l == 5? 'You cancelled the request.' : 
+                      l == 6? 'Buyer cancelled the request.' : '';
+/*
+                      switch((l) {
+                        case 0:
+                          statusText = 'Buyer requested a bid from you. Please send information to buyer.';
+                          break;
+/*
+                        case 1:
+                          statusText = "Waiting for buyer's processing.";
+                          break;
+
+                        case 2:
+                          statusText = 'Buyer wants to buy the product for the price of ' + price + '. Cancel or Accept.';
+                          break;
+
+                        case 3:
+                          statusText = 'You started the delivery. Wait for confirmation of buyer.';
+                          break;
+
+                        case 4:
+                          statusText = 'Payment and delivery is done.';
+                          break;
+
+                        case 5:
+                          statusText = 'You cancelled the request.';
+                          break;
+
+                        case 6:
+                          statusText = 'Buyer cancelled the request.';
+                          break;
+                        default:
+                          statusText = '0';
+                      }*/
+
+                      //alert(statusText);
+                      var val = '<div style="color: blue" id="statusText_'+index + '"><p>' + statusText + '</p></div>';
+                      if($("#statusText_"+index).length) $("#statusText_"+index).remove();
+                      $(val).insertAfter($('#status_'+index).parent('div'));
+                    });
+
+                    $("button[id^='addProdService_']").click(() => {                      
+                      var index = "<%= i %>";
+                      $('input[id^="status_"]'+index).trigger('change');
+                      index = parseInt(index);
+                     
+                      var amount = $('#amount_'+index);                      
+                        if(amount.val() < 1) {
+                          alert('Please select an amount first');
+                          return false;
+                        }
+                        
+                        var input = $("#prodServiceInput_"+index);
+                        input.attr('price', $('#defaultPrice_'+index).val());
+                        var list = $("#hiddenProdServicesList_"+index);
+                      
+                        if(input.val() != "") {
+                          var addedPrice = parseInt(amount.val()? amount.val() : 0) * parseInt(input.attr('price')? input.attr('price') : 1);
+                          var price = parseInt($('#price_'+index).val()) + addedPrice;
+                          $('#price_'+index).val(parseInt(price));                          
+                          document.getElementById("prodServices_"+index).insertAdjacentHTML("beforeend", "<li class='list-group-item' price='" + addedPrice + "'><span>" + $("#prodServiceInput_"+index).val() + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
+                          list.val(list.val() && list.val().length? list.val() + ',' + input.val() : input.val());
+                          
+                          $('.rem').click(function() {
+                            var li = $(this).parent('li');
+                            var str = list.val().substring(0, list.val().length - li.find('span:first').text().length-1);
+                            list.val(str);                            
+                            var newPrice = parseInt($('#price_'+index).val()) - parseInt(li.attr('price'));
+                            $('#price_'+index).val(parseInt(newPrice));
+                            li.remove();
+                          });
+                          //$(input).val('').removeAttr('price');                         
+                        }
+                    });
                   </script>
                 </div>
                 <div class="modal-footer">

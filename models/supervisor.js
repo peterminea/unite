@@ -52,7 +52,7 @@ const supervisorSchema = new Schema({
   resetPasswordExpires: {
     type: Date,
     required: false
-    //,    default: Date.now() + 43200000
+    //,default: Date.now() + 43200000
   },  
   address: {
     type: String,
@@ -63,31 +63,31 @@ const supervisorSchema = new Schema({
     required: true
   },  
     // URLs will be directing to a download page. Suppliers must upload a file, and it will be converted to an URL.
-  certificatesUrls: {
+  certificates: {
     type: String,
     required: false
   },
-  antibriberyPolicyUrl: {
+  antibriberyPolicy: {
     type: String,
     required: false
   },
-  environmentPolicyUrl:{
+  environmentPolicy:{
     type: String,
     required: false
   },
-  qualityManagementPolicyUrl: {
+  qualityManagementPolicy: {
     type: String,
     required: false
   },  
-  occupationalSafetyAndHealthPolicyUrl: {
+  occupationalSafetyAndHealthPolicy: {
     type: String,
     required: false
   },
-  otherRelevantFilesUrls:  {
+  otherRelevantFiles:  {
     type: String,
     required: false
   },
-   // UNITE Agreements
+   //UNITE Agreements:
   UNITETermsAndConditions: {
     type: Boolean, // Force to true with popup
     required: true
@@ -107,4 +107,5 @@ const supervisorSchema = new Schema({
 });
 
 supervisorSchema.plugin(passportLocalMongoose);
+supervisorSchema.index({organizationName: 1, organizationUniteID: 1}, {unique: true});
 module.exports = mongoose.model('Supervisor', supervisorSchema);

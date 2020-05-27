@@ -17,12 +17,14 @@ const path = require('path');
 
 //Classes:
 const BidRequest = require("./models/bidRequest");
+const BidStatus = require("./models/bidStatus");
 const Buyer = require("./models/buyer");
 const Supplier = require("./models/supplier");
 const Supervisor = require("./models/supervisor");
 const Message = require("./models/message");
 const Country = require("./models/country");
 const Industry = require("./models/industry");
+const Capability = require('./models/capability');
 const ProductService = require("./models/productService");
 
 const MONGODB_URI = "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";//The DB url.
@@ -87,19 +89,114 @@ const connect = require("./dbconnect");
 const http = require("http").Server(app);
 const socket = require("socket.io")(http);
 const port = 5000;
-//const socket = 1;//io(http);
 var url = require("url");
 const MongoClient = require("mongodb").MongoClient;
 var db;
+//var ProductService = require('./models/productService');
 
 MongoClient.connect(MONGODB_URI, (err, client) => {
   if (err)
     return console.log(err);
 
-  db = client.db("test");
-  //app.listen(6000, () => {
-    //console.log("listening on 6000");
- // });
+  db = client.db("UNITEDB");//Right connection!
+    /*
+  const bidStatus = new BidStatus({
+    value: 6,
+    name: 'Buyer cancelled the request.'
+  });
+  
+  //bidStatus.save();
+  */
+  //Cleanup script:
+  /*
+  var capability =  Capability.find({});
+  var prodService =  ProductService.find({});  
+  var invalidCapProd = [];
+  
+  function getCaps() {
+   var promise = capability.exec();
+   return promise;
+  }
+  
+  function getProds() {
+   var promise = prodService.exec();
+   return promise;
+  }
+  
+  function getSups(id) {
+    var promise = Supplier.find({_id: id}).exec();
+    return promise;
+  }
+
+  var promise1 = getCaps(), promise2 = getProds();  
+
+  promise1.then(function(caps) {
+     caps.forEach(function(cap) {          
+        var promise = getSups(cap.supplier);
+        promise.then(function(sups) {
+          if(sups.length == 0) 
+            invalidCapProd.push(cap.supplier);
+        });
+     });
+  });
+
+  promise2.then(function(prods) {
+     prods.forEach(function(prod) {          
+        var promise = getSups(prod.supplier);
+        promise.then(function(sups) {
+          if(sups.length == 0) 
+            invalidCapProd.push(prod.supplier);
+        });
+     });
+  });
+
+  setTimeout(function() {
+    console.log(invalidCapProd.length + ' DROSU DOSUL');
+    for(var i in invalidCapProd) {
+      var myquery = { supplier: (invalidCapProd[i]) };
+      db.collection("productservices").deleteOne(myquery, function(err, obj) {
+      });
+      db.collection("capabilities").deleteOne(myquery, function(err, obj) {
+      });
+    }
+  }, 5000);
+  
+  if(1==2)
+  capability.exec(async function(err, data) {
+    if(data && data.length) {      
+      for(var i in data) {
+      var supp = (data[i].supplier);
+      
+      var sup = Supplier.find({_id: (supp)});
+        sup.exec(async function(err, data) {          
+          if(!data || data.length == 0) {
+            var myquery = { supplier: (supp) };          
+            db.collection("productservices").deleteOne(myquery, function(err, obj) {
+            });
+            db.collection("capabilities").deleteOne(myquery, function(err, obj) {
+            });
+            }
+        });
+      }
+    }
+  });
+  */
+ 
+  db.collection("suppliers").ensureIndex( { "companyName": 1, "emailAddress": 1 }, { unique: true } );
+});
+
+
+app.post('/processBuyer', (req, res) => {
+  console.log(req.query('id'));
+  
+  connect.then(db => {
+    db.collection("buyers").deleteOne({_id: req.query('id')}, function(err, obj) {
+      });  
+  });
+  /*
+  var promise = Buyer.find({_id: req.query('id')}).exec();
+  promise.then((buyer) => {    
+  });*/  
 });
 
 
@@ -163,8 +260,8 @@ socket.on("connection", socket => {
         to: msgData.to,
         time: Date.now(),
         bidRequestId: msgData.reqId,
-        sender: "UNITE User",
-        receiver: "Another UNITE User"
+        sender: msgData.fromName,
+        receiver: msgData.toName
       });
 
       chatMessage.save();
@@ -268,13 +365,15 @@ app.post("/uploadmultiple",  upload.array("multiple", 12),   (req, res, next) =>
 app.post("/multipleupload", uploadController.multipleUpload);
 
 //Autocomplete fields:
-var country = Country.find({});
-var industry = Industry.find({});
+//var country = Country.find({});
+//var industry = Industry.find({});
 const jsonp = require('jsonp');
 
-app.post('/countryAutocomplete/', function(req, res, next) {
+app.post('/countryAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.body.term, 'i');  
-  var countryFilter = Country.find({name: regex}, {'name': 1}).sort({"name" : 1}).limit(5);//Positive sort is ascending.  
+  var countryFilter = Country.find({name: regex}, {"name": 1})
+  .sort({"name" : 1})
+  .limit(5);//Positive sort is ascending.  
   countryFilter.exec(function(err, data) {
   var result = [];
     
@@ -286,7 +385,7 @@ app.post('/countryAutocomplete/', function(req, res, next) {
             name: item.name
           };
           
-          result.push(obj);          
+          result.push(obj);
         });
       }
       
@@ -301,7 +400,7 @@ app.post('/countryAutocomplete/', function(req, res, next) {
 
 app.post('/industryAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.query["term"], 'i');
-  var industryFilter = Industry.find({name: regex}, {'name': 1})
+  var industryFilter = Industry.find({name: regex}, {"name": 1})
     .sort({"name" : 1})
     .limit(5);//Negative sort means descending.  
 
@@ -325,7 +424,33 @@ app.post('/industryAutocomplete', function(req, res, next) {
   });
 });
 
-app.get('/prodServiceAutocomplete/', function(req, res, next) {
+app.post('/uniteIDAutocomplete', function(req, res, next) {
+  var regex = new RegExp(req.query["term"], 'i');
+  var uniteIDFilter = Supervisor.find({organizationUniteID: regex}, {"organizationUniteID": 1})
+    .sort({"organizationUniteID" : 1})
+    .limit(5);//Negative sort means descending.  
+
+  uniteIDFilter.exec(function(err, data) {
+  var result = [];
+    
+    if(!err) {
+      if(data && data.length && data.length > 0) {
+        data.forEach(item=>{
+          let obj = {
+            id: item._id,
+            name: item.name
+          };
+          
+          result.push(obj);          
+        });
+      }
+      
+      res.jsonp(result);     
+    }
+  });
+});
+
+app.get('/prodServiceAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.query["term"], 'i');
   var id = req.query["supplierId"];  
   console.log(regex + ' ' + req.query["supplierId"]);

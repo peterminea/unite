@@ -3,16 +3,20 @@ const Supervisor = require("../models/supervisor");
 const Buyer = require("../models/buyer");
 const nodemailer = require('nodemailer');
 const sgTransport = require('nodemailer-sendgrid-transport')
-const Token = require('../models/supplierToken');
+const Token = require('../models/supervisorToken');
 const assert = require('assert');
 const crypto = require('crypto');
 const process = require('process');
 const async = require('async');
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+//sgMail.setApiKey('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');
 
 exports.getIndex = (req, res) => {
+  if(!req || !req.session) return false;
   const supervisor = req.session.supervisor;
 
-  Supervisor.find(
+  Buyer.find(
     { organizationUniteID: supervisor.organizationUniteID },
     (err, results) => {
       if (err) return console.error(err);
@@ -39,24 +43,35 @@ exports.getLogout = (req, res, next) => {
   }
 }*/
 
+exports.getConfirmation = (req, res) => {
+  res.render('supervisor/confirmation', {token: req.params.token});
+}
+
+exports.getResendToken = (req, res) => {
+  res.render('supervisor/resend');
+}
+
 exports.postConfirmation = function (req, res, next) {
-    req.assert('email', 'Email is not valid').isEmail();
-    req.assert('email', 'Email cannot be blank').notEmpty();
+    req.assert('emailAddress', 'Email is not valid').isEmail();
+    req.assert('emailAddress', 'Email cannot be blank').notEmpty();
     req.assert('token', 'Token cannot be blank').notEmpty();
-    req.sanitize('email').normalizeEmail({ remove_dots: false });
+    req.sanitize('emailAddress').normalizeEmail({ remove_dots: false });
  
     var errors = req.validationErrors();
     if (errors) return res.status(400).send(errors);
  
-    Token.findOne({ token: req.body.token }, function (err, token) {
-        if (!token) 
-          return res.status(400).send({ 
+    Token.findOne({ token: req.params.token }, function (err, token) {
+        if (!token) {
+          req.flash('We were unable to find a valid token. It may have expired. Please request a new token.');
+          res.redirect('/supervisor/resend');
+          if(1==2) return res.status(400).send({
             type: 'not-verified', 
             msg: 'We were unable to find a valid token. Your token may have expired.' });
+        }
  
         Supervisor.findOne({
           _id: token._userId, 
-          emailAddress: req.body.emailAddress }, function (err, user) {
+            emailAddress: req.body.emailAddress }, function (err, user) {
             if (!user) 
               return res.status(400).send({ msg: 'We were unable to find a user for this token.' });
             if (user.isVerified) 
@@ -79,9 +94,9 @@ exports.postConfirmation = function (req, res, next) {
 
 
 exports.postResendToken = function (req, res, next) {
-    req.assert('email', 'Email is not valid').isEmail();
-    req.assert('email', 'Email cannot be blank').notEmpty();
-    req.sanitize('email').normalizeEmail({ remove_dots: false });
+    req.assert('emailAddress', 'Email is not valid').isEmail();
+    req.assert('emailAddress', 'Email cannot be blank').notEmpty();
+    req.sanitize('emailAddress').normalizeEmail({ remove_dots: false });
  
     var errors = req.validationErrors();
     if (errors) return res.status(400).send(errors);
@@ -98,23 +113,15 @@ exports.postResendToken = function (req, res, next) {
             if (err) { return res.status(500).send({
               msg: err.message 
               }); 
-            }
- 
-            var options = {
-              auth: {
-                api_user: 'SENDGRID_USERNAME',
-                api_key: 'SENDGRID_PASSWORD'
-              }
-            }
-
-            var transporter = nodemailer.createTransport(sgTransport(options));
+            } 
+         
             var mailOptions = {
-              from: 'no-reply@uniteprocurement.com',
+              from: 'peter@uniteprocurement.com',
               to: user.emailAddress,
               subject: 'Account Verification Token',
               text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/confirmation\/' + token.token + '.\n' };
           
-              transporter.sendMail(mailOptions, function (err, info) {
+              sgMail.send(mailOptions, function (err, info) {
                  if (err ) {
                   console.log(err);
                 }  else {
@@ -150,7 +157,7 @@ exports.postForgotPassword = (req, res, next) => {
       Supervisor.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
         if (!user) {
           req.flash('error', 'Sorry. We were unable to find a user with this e-mail address.');
-          return res.redirect('supervisor/forgotPassword');
+          return res.redirect('/supervisor/forgotPassword');
         }
         
         user.resetPasswordToken = token;
@@ -160,18 +167,9 @@ exports.postForgotPassword = (req, res, next) => {
         });
       });      
     },
-    function(token, user, done) {
-      var options = {
-        auth: {
-          api_user: 'SENDGRID_USERNAME',
-          api_key: 'SENDGRID_PASSWORD'
-        }
-      }
-
-      var transporter = nodemailer.createTransport(sgTransport(options));
-
+    function(token, user, done) {     
       var emailOptions = {
-        from: 'no-reply@uniteprocurement.com',
+        from: 'peter@uniteprocurement.com',
         to: user.emailAddress, 
         subject: 'UNITE Password Reset - Supervisor', 
         text: 'Hello,\n\n' 
@@ -180,7 +178,8 @@ exports.postForgotPassword = (req, res, next) => {
         + req.headers.host + '\/reset\/' + token + '.\n'
       };
       
-      transporter.sendMail(emailOptions, function(err) {
+      sgMail.send(emailOptions/*);              
+              transporter.sendMail(email*/, function (err, info) {console.log(process.env.SENDGRID_API_KEY);
         console.log('E-mail sent!')
         req.flash('success', 'An e-mail has been sent to ' + user.emailAddress + ' with password reset instructions.');
         done(err, 'done');
@@ -201,7 +200,7 @@ exports.getResetPasswordToken = (req, res) => {
       req.flash('error', 'Password reset token is either invalid or expired.');
       return res.redirect('/supervisor/forgotPassword');
     }
-    res.render('resetPassword', {token: req.params.token});
+    res.render('supervisor/resetPassword', {token: req.params.token});
   });
 }
 
@@ -232,18 +231,9 @@ exports.postResetPasswordToken = (req, res) => {
       }
     });
     },
-    function(user, done) {
-      var options = {
-        auth: {
-          api_user: 'SENDGRID_USERNAME',
-          api_key: 'SENDGRID_PASSWORD'
-        }
-      }
-
-      var transporter = nodemailer.createTransport(sgTransport(options));
-
+    function(user, done) {      
       var emailOptions = {
-        from: 'no-reply@uniteprocurement.com',
+        from: 'peter@uniteprocurement.com',
         to: user.emailAddress, 
         subject: 'UNITE Password changed - Supervisor', 
         text: 'Hello,\n\n' 
@@ -251,7 +241,7 @@ exports.postResetPasswordToken = (req, res) => {
         + 'for your account ' + user.emailAddress + '. You can log in again.'        
       };
       
-      transporter.sendMail(emailOptions, function(err) {
+      sgMail.send(emailOptions, function (err, info) {
         console.log('E-mail sent!')
         req.flash('success', 'Your password has been successfully changed!');
         done(err, 'done');
@@ -264,7 +254,7 @@ exports.postResetPasswordToken = (req, res) => {
 
 
 exports.getSignIn = (req, res) => {
-  if (!req.session.supervisorId)
+  if (!req.session.supervisor)
     res.render("supervisor/sign-in", {
       errorMessage: req.flash("error")
     });
@@ -289,7 +279,7 @@ exports.postSignIn = (req, res) => {
 
   if (!email) res.redirect("/supervisor/sign-in");
   else {
-    Supervisor.findOne({ emailAddress: email }, (err, doc) => {
+    Supervisor.findOne({ emailAddress: email, password: password}, (err, doc) => {
       if (err) 
         return console.error(err);
 
@@ -319,13 +309,17 @@ exports.postSignIn = (req, res) => {
           }
         })
         .then(err => {
-          if (err) return console.error(err);
-          res.redirect("/supervisor/");
+          if (err) {
+          console.error(err);
+          res.redirect("/supervisor/sign-in");
+          }
         })
         .catch(console.error);
     });
   }
-};
+}
+
+let global = 0;
 
 exports.postSignUp = (req, res) => {
   if (req.body.emailAddress) {
@@ -338,77 +332,79 @@ exports.postSignUp = (req, res) => {
     for(var i = 0; i < prohibitedArray.length; i++)
     if(final_domain.includes(prohibitedArray[i])) {
       req.flash("error", "E-mail address must be a custom company domain.");
-      //res.redirect("/supervisor/sign-up");
+      res.redirect("back");
     } else {
       if (req.body.password.length < 6) {
         req.flash("error", "Password must have at least 6 characters.");
         res.redirect("back");
-      } else {
-        const supervisor = new Supervisor({
-          organizationName: req.body.organizationName,
-          organizationUniteID: req.body.organizationUniteID,
-          contactName: req.body.contactName,
-          emailAddress: req.body.emailAddress,
-          password: req.body.password,
-          isVerified: false,
-          address: req.body.address,
-          country: req.body.country,
-          certificates: req.body.certificates,
-          antibriberyPolicy: req.body.antibriberyPolicy,
-          environmentPolicy: req.body.environmentPolicy,
-          qualityManagementPolicy: req.body.qualityManagementPolicy,
-          occupationalSafetyAndHealthPolicy: req.body.occupationalSafetyAndHealthPolicy,
-          otherRelevantFiles: req.body.otherRelevantFiles,
-          UNITETermsAndConditions: true,
-          antibriberyAgreement: true,
-          createdAt: Date.now(),
-          updatedAt: Date.now()
-        });
-
-        console.log(supervisor);
-      var user = new Promise((resolve, reject) => {
-        supervisor.save((err) => {
-          if (err) {
-            return reject(new Error('Error with exam result save... ${err}'));
-          }
-      
-            var token = new Token({ 
-              _userId: supervisor._id, 
-              token: crypto.randomBytes(16).toString('hex') });
-
-            token.save(function (err) {
-              if (err) { 
-                return res.status(500).send({ msg: err.message }); 
+        } else if(global++ < 1) {
+          // Make sure this account doesn't already exist
+          Supervisor.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
+            if (user) 
+              return res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
+            
+          user = new Promise((resolve, reject) => {
+            const supervisor = new Supervisor({
+              organizationName: req.body.organizationName,
+              organizationUniteID: req.body.organizationUniteID,
+              contactName: req.body.contactName,
+              emailAddress: req.body.emailAddress,
+              password: req.body.password,
+              isVerified: false,
+              address: req.body.address,
+              country: req.body.country,
+              certificates: req.body.certificates,
+              antibriberyPolicy: req.body.antibriberyPolicy,
+              environmentPolicy: req.body.environmentPolicy,
+              qualityManagementPolicy: req.body.qualityManagementPolicy,
+              occupationalSafetyAndHealthPolicy: req.body.occupationalSafetyAndHealthPolicy,
+              otherRelevantFiles: req.body.otherRelevantFiles,
+              UNITETermsAndConditions: true,
+              antibriberyAgreement: true,
+              createdAt: Date.now(),
+              updatedAt: Date.now()
+            });
+            
+            supervisor.save((err) => {
+              if (err) {
+                return reject(new Error('Error with exam result save... ' + err));
               }
+              
+              // Create a verification token for this user
+              var token = new Token({ 
+                _userId: supervisor._id,
+                token: crypto.randomBytes(16).toString('hex') });
 
-              var options = {
-                auth: {
-                  api_user: 'SENDGRID_USERNAME',
-                  api_key: 'SENDGRID_PASSWORD'
+              // Save the verification token
+              token.save(function (err) {
+                if (err) {
+                  console.error(err.message);
+                  //return res.status(500).send({
+                   // msg: err.message 
+                 // });
                 }
-              }
 
-              var transporter = nodemailer.createTransport(sgTransport(options));
-         
-              var email = {
-                from: 'no-reply@uniteprocurement.com',
-                to: supervisor.emailAddress, 
-                subject: 'Account Verification Token', 
-                text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/confirmation\/' + token.token + '.\n'
-                //, html: '<b>Hello world</b>'
-              };
-          
-              transporter.sendMail(email, function (err, info) {
-                 if (err ) {
-                  console.log(err);
-                }  else {
-                  console.log('Message sent: ' + info.response);
-                }
-                  //if (err) { return res.status(500).send({ msg: err.message }); }
-                  //return res.status(200).send('A verification email has been sent to ' + supplier.emailAddress + '.');
+                var email = {
+                  from: 'peter@uniteprocurement.com',
+                  to: supervisor.emailAddress, // 'peter.minea@gmail.com',
+                  subject: 'Account Verification Token', 
+                  text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/supervisor/confirmation\/' + token.token + '.\n'
+                };
+
+                sgMail.send(email, function (err, info) {
+                   //if (err ) {
+                    console.log(err? err.message : info.response);
+                  //}  else {
+                   // console.log('Message sent: ' + info.response);
+                  //}
+                    if (err) {
+                      console.error(err.message)
+                      //return res.status(500).send({ msg: err.message }); 
+                    } else req.flash('success', 'A verification email has been sent to ' + supervisor.emailAddress + '.');
+                    //return res.status(200).send('A verification email has been sent to ' + supervisor.emailAddress + '.');
+                  });
                 });
               });
-            });
          
           return resolve(supervisor);
         });
@@ -423,9 +419,11 @@ exports.postSignUp = (req, res) => {
           })
           .then(() => {
             req.flash("success", "Supervisor signed up successfully!");
-            return res.redirect("/supervisor");
+            if(typeof res !== 'undefined') 
+              return res.redirect("/supervisor");
           })
           .catch(console.error);
+        });
       }
     }
   }

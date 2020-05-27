@@ -18,14 +18,7 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
   <script src="/autocomp.js"></script>
   <script src="/https.js"></script>
-  
-  <!--
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
-  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.jquery.min.js"></script>
-<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>  
--->   
+
   <script type="text/javascript">
       $(document).ready(function () {
       var token = $("input[name='_csrf']").val();
@@ -35,7 +28,7 @@
           var obj = $(this.element);
         
           $.ajax({
-            url: "/countryAutocomplete/",
+            url: "/countryAutocomplete",
             headers: { "X-CSRF-Token": token },
             datatype: 'jsonp',
             type: "POST",
@@ -117,9 +110,10 @@
       });
 
       $('.single,.multiple').each(function(index, element) {
-        var val = $(this).prev('.fileupload').attr('value');
+        var val = $(this).prev('.fileupload').attr('value');        
         
         if(val) {
+          $(this).prev('.fileupload').val(val);
           if(val.charAt(val.length-1) == ',') {//Multi
             var newVal = val.substring(0, val.length-1);
             newVal = newVal.split(',');
@@ -170,7 +164,7 @@
                   ob = '<a href="/' + response[i].path + '" download>Download file "'+i+'"</a>';
                   $(ob).insertAfter(input.parent('div'));
                 }
-              } else {                
+              } else {
                 val = '/' + response.path + ',';                  
                 //input.val(val);
                 input.attr('value', val);
@@ -200,6 +194,26 @@
 
         e.preventDefault();
       });
+        
+        
+  function phonenumber(input) {
+    var phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+    if(input.value.match(phoneno)) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+        
+  $('#contactMobileNumber').bind('keyup keypress change', function(e) {
+    $(this).text(function(i, text) {
+      return text.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+    });
+    
+    //return phonenumber($(this)[0]);
+  });
+        
     });
   </script>
 </head>
@@ -228,8 +242,9 @@
         <li class="nav-item active">
           <a class="btn btn-primary" href="/supplier/profile">Profile</a>
         </li>
-        <li class="nav-item" style="margin-left: 20px;">
-          <a class="btn btn-danger" href="?exit=true">Exit</a>
+        <br>
+        <li class="nav-item" style="margin-left: 0px;">
+          <a class="btn btn-danger" href="?exit=true">Logout</a>
         </li>
       </ul>
     </div>
@@ -267,7 +282,7 @@
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input required type="password" id="password" name="password" class="form-control" value="<%= profile.password %>">
+          <input required type="password" id="password" name="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}" title="Please type at least one number and one uppercase&lowercase letter, and at least 6 characters" class="form-control" value="<%= profile.password %>">
           <a href="forgotPassword"><label>Forgot your password?</label></a>
         </div>
         <input type="hidden" name="isVerified" id="isVerified" value="<%= profile.isVerified %>">
@@ -304,8 +319,7 @@
         </div>
         <div class="form-group">
           <label>Contact Mobile Number*</label>
-          <input type="tel" class="form-control" id="contactMobileNumber" name="contactMobileNumber"
-            value="<%= profile.contactMobileNumber %>" required>
+          <input type="tel" class="form-control" pattern="[0-9]{4} [0-9]{3} [0-9]{3}" id="contactMobileNumber" name="contactMobileNumber" value="<%= profile.contactMobileNumber %>" required>
         </div>
         <div class="form-group">
           <label>Country*</label>

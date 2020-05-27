@@ -15,6 +15,8 @@ router.get("/sign-up", buyerController.getSignUp);
 router.get("/profile", isAuth, sessionExit, buyerController.getProfile);
 router.get("/balance", isAuth, sessionExit, buyerController.getBalance);
 //router.get("/supplier", isAuth, sessionExit, buyerController.getSupplier);
+router.get("/confirmation/:token", isAuth, sessionExit, buyerController.getConfirmation);
+router.get('/resend', buyerController.getResendToken);
 router.get("/forgotPassword", isAuth, sessionExit, buyerController.getForgotPassword);
 router.get("/resetPassword/:token", isAuth, sessionExit, buyerController.getResetPasswordToken);
 
@@ -22,7 +24,7 @@ router.post("/", isAuth, buyerController.postIndex);
 router.post("/sign-in", buyerController.postSignIn);
 router.post("/sign-up", buyerController.postSignUp);
 router.post('/profile', buyerController.postProfile);
-router.post('/confirmation', buyerController.postConfirmation);
+router.post('/confirmation/:token', buyerController.postConfirmation);
 router.post('/resend', buyerController.postResendToken);
 router.post("/forgotPassword", isAuth, sessionExit, buyerController.postForgotPassword);
 router.post("/resetPassword/:token", isAuth, sessionExit, buyerController.postResetPasswordToken);

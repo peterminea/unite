@@ -13,6 +13,11 @@ body {
   color: #063797;
 }
 
+.rem {
+  color: green;
+  cursor: pointer;
+}
+
 .ui-autocomplete { 
     cursor:pointer; 
     height:120px; 

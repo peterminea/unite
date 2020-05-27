@@ -7,8 +7,7 @@ const ImageSchema = new Schema({
   logEntryId: {
     type: mongoose.Schema.ObjectId,
     required: true
-  },
-  
+  },  
   path: {
     type: String,
     required: true
@@ -16,8 +15,7 @@ const ImageSchema = new Schema({
   label: {
     type: String,
     required: true
-  },
-  
+  },  
   createdAt: {
     type: Date,
     default: Date.now

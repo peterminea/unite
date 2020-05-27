@@ -3,16 +3,26 @@ const Supplier = require("../models/supplier");
 const Buyer = require("../models/buyer");
 const BidRequest = require("../models/bidRequest");
 const ProductService = require("../models/productService");
+const Capability = require("../models/capability");
 const Message = require("../models/message");
 const nodemailer = require('nodemailer');
 const sgTransport = require('nodemailer-sendgrid-transport')
+const sgMail = require('@sendgrid/mail');
 const Token = require('../models/supplierToken');
 const assert = require('assert');
 const crypto = require('crypto');
 const process = require('process');
 const async = require('async');
+const cors = require('cors');
+//sgMail.setApiKey('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');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);//Not working with Glitch, that parameter stays unexplainably empty.
+//process.env.SENDGRID_API_KEY = "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";
 
-exports.getIndex = (req, res) => {
+exports.getIndex = (req, res) => {//console.log(process.env.SENDGRID_API_KEY);
+  console.log('SIGALMORIS');
+  
+  if(!req || !req.session)
+    return false;
   const supplier = req.session.supplier;
 
   BidRequest.find({ supplier: supplier._id })
@@ -71,28 +81,37 @@ exports.getLogout = (req, res, next) => {
   }
 }*/
 
+exports.getConfirmation = (req, res) => {
+  res.render('supplier/confirmation', {token: req.params.token});
+}
+
+exports.getResendToken = (req, res) => {
+  res.render('supplier/resend');
+}
 
 exports.postConfirmation = function (req, res, next) {
-    req.assert('email', 'Email is not valid').isEmail();
-    req.assert('email', 'Email cannot be blank').notEmpty();
+    req.assert('emailAddress', 'Email is not valid').isEmail();
+    req.assert('emailAddress', 'Email cannot be blank').notEmpty();
     req.assert('token', 'Token cannot be blank').notEmpty();
-    req.sanitize('email').normalizeEmail({ remove_dots: false });
+    req.sanitize('emailAddress').normalizeEmail({ remove_dots: false });
  
     // Check for validation errors    
     var errors = req.validationErrors();
     if (errors) return res.status(400).send(errors);
  
     // Find a matching token
-    Token.findOne({ token: req.body.token }, function (err, token) {
-        if (!token) 
-          return res.status(400).send({
+    Token.findOne({ token: req.params.token }, function (err, token) {
+        if (!token) {
+          req.flash('We were unable to find a valid token. It may have expired. Please request a new token.');
+          res.redirect('/supplier/resend');
+          if(1==2) return res.status(400).send({
             type: 'not-verified', 
             msg: 'We were unable to find a valid token. Your token may have expired.' });
- 
+        }
         // If we found a token, find a matching user
         Supplier.findOne({
           _id: token._userId, 
-          email: req.body.emailAddress }, function (err, user) {
+          emailAddress: req.body.emailAddress }, function (err, user) {
             if (!user) 
               return res.status(400).send({ msg: 'We were unable to find a user for this token.' });
             if (user.isVerified) 
@@ -109,23 +128,25 @@ exports.postConfirmation = function (req, res, next) {
                 }
                 res.status(200).send("The account has been verified. Please log in.");
             });
-        });
-    });
-};
+        });    
+  });
+}
 
 
 exports.postResendToken = function (req, res, next) {
-    req.assert('email', 'Email is not valid').isEmail();
-    req.assert('email', 'Email cannot be blank').notEmpty();
-    req.sanitize('email').normalizeEmail({ remove_dots: false });
+    req.assert('emailAddress', 'Email is not valid').isEmail();
+    req.assert('emailAddress', 'Email cannot be blank').notEmpty();
+    req.sanitize('emailAddress').normalizeEmail({ remove_dots: false });
  
-    // Check for validation errors    
+    // Check for validation errors
     var errors = req.validationErrors();
     if (errors) return res.status(400).send(errors);
  
     Supplier.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
-        if (!user) return res.status(400).send({ msg: 'We were unable to find a user with that email.' });
-        if (user.isVerified) return res.status(400).send({ msg: 'This account has already been verified. Please log in.' });
+        if (!user) 
+          return res.status(400).send({ msg: 'We were unable to find a user with that email.' });
+        if (user.isVerified) 
+          return res.status(400).send({ msg: 'This account has already been verified. Please log in.' });
  
         // Create a verification token, save it, and send email
         var token = new Token({
@@ -135,24 +156,17 @@ exports.postResendToken = function (req, res, next) {
         // Save the token
         token.save(function (err) {
             if (err) { return res.status(500).send({ msg: err.message }); }
-              var options = {
-                auth: {
-                  api_user: 'SENDGRID_USERNAME',
-                  api_key: 'SENDGRID_PASSWORD'
-                }
-              }
-
-            var transporter = nodemailer.createTransport(sgTransport(options)); 
-            // Send the email
-            //var transporter2 = nodemailer.createTransport({ service: 'Sendgrid', auth: { user: process.env.SENDGRID_USERNAME, pass: process.env.SENDGRID_PASSWORD } });
+        //Mail send:
             var mailOptions = {
-              from: 'no-reply@uniteprocurement.com',
+              from: 'peter@uniteprocurement.com',
               to: user.emailAddress,
               subject: 'Account Verification Token',
-              text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/confirmation\/' + token.token + '.\n' };
+              text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/supplier/confirmation\/' + token.token + '.\n' };
           
-            transporter.sendMail(mailOptions, function (err, info) {
-                if (err) { return res.status(500).send({ msg: err.message }); }
+            sgMail.send(mailOptions, function (err, info) {
+                if (err) { 
+                  return res.status(500).send({ msg: err.message }); 
+                }
                 res.status(200).send('A verification email has been sent to ' + user.emailAddress + '.');
             });
         });
@@ -160,23 +174,36 @@ exports.postResendToken = function (req, res, next) {
 };
 
 
-exports.getSignIn = (req, res) => {
-  if (!req.session.supplier)
+exports.getSignIn = (req, res) => {console.log(req.session.id);
+  if (!req.session.supplier) {
     return res.render("supplier/sign-in", {
       errorMessage: req.flash("error")
     });
+  }
   else res.redirect("/supplier");
 };
 
-exports.postSignIn = (req, res) => {
+exports.postSignIn = (req, res) => {console.log('BAGRAMONTE');
   const email = req.body.emailAddress;
-  const password = req.body.password;
-  console.log(email + ' ' + password);
+  const password = req.body.password;/*
+  //console.log(email + ' ' + password);
+    //sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+//const sgMail1 = require('@sendgrid/mail');
+//sgMail1.setApiKey('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');
+//console.log(sgMail1);
+const msg = {
+  from: 'peter@uniteprocurement.com',
+  to: 'peter.minea@gmail.com',  
+  subject: 'CHENECCO',
+  text: 'NODE.JS MAILER SEND',
+  html: '<strong>And easy to do anywhere, even with Node.js that is NOT Java.</strong>',
+};
+sgMail.send(msg);*/
 
   if(!email) 
     res.redirect("/supplier/sign-in");
   else {
-    Supplier.findOne({ emailAddress: email }, (err, doc) => {
+    Supplier.findOne({ emailAddress: email, password: password}, (err, doc) => {console.log(doc);
       if (err) 
         return console.error(err);
   
@@ -208,13 +235,15 @@ exports.postSignIn = (req, res) => {
         .then(err => {
           if (err) {
           console.error(err);
-          res.redirect("/supplier/");
+          res.redirect("/supplier/sign-in");
           }
+        
+        res.redirect('/supplier');
         })
         .catch(console.error);
     });
   }
-};
+}
 
 exports.getSignUp = (req, res) => {
   if (!req.session.supplier)
@@ -224,6 +253,8 @@ exports.getSignUp = (req, res) => {
   else res.redirect("/supplier");
 };
 
+
+let global = 0;
 exports.postSignUp = (req, res) => {
   if (req.body.emailAddress) {
     const email = req.body.emailAddress;
@@ -240,129 +271,145 @@ exports.postSignUp = (req, res) => {
       if (req.body.password.length < 6) {
         req.flash("error", "Password must have at least 6 characters.");
         res.redirect("back");
-      } else {
-        const supplier = new Supplier({
-          companyName: req.body.companyName,
-          directorsName: req.body.directorsName,
-          contactName: req.body.contactName,
-          title: req.body.title,
-          companyRegistrationNo: req.body.companyRegistrationNo,
-          emailAddress: req.body.emailAddress,
-          password: req.body.password,
-          isVerified: false,
-          registeredCountry: req.body.registeredCountry,
-          companyAddress: req.body.companyAddress,
-          areaCovered: req.body.areaCovered,
-          contactMobileNumber: req.body.contactMobileNumber,
-          country: req.body.country,
-          industry: req.body.industry,
-          employeeNumbers: req.body.employeeNumbers,
-          lastYearTurnover: req.body.lastYearTurnover,
-          website: req.body.website,
-          productsServicesOffered: req.body.productsServicesOffered,
-          capabilityDescription: req.body.capabilityDescription,
-          relevantExperience: req.body.relevantExperience,
-          supportingInformation: req.body.supportingInformation,
-          certificates: req.body.certificates,
-          antibriberyPolicy: req.body.antibriberyPolicy,
-          environmentPolicy: req.body.environmentPolicy,
-          qualityManagementPolicy: req.body.qualityManagementPolicy,
-          occupationalSafetyAndHealthPolicy: req.body.occupationalSafetyAndHealthPolicy,
-          otherRelevantFiles: req.body.otherRelevantFiles,
-          balance: req.body.balance,
-          facebookURL: req.body.facebookURL,
-          instagramURL: req.body.instagramURL,
-          twitterURL: req.body.twitterURL,
-          linkedinURL: req.body.linkedinURL,
-          otherSocialMediaURL: req.body.otherSocialMediaURL,
-          UNITETermsAndConditions: true,
-          antibriberyAgreement: true,
-          createdAt: Date.now(),
-          updatedAt: Date.now()
-        });
-
-      var user = new Promise((resolve, reject) => {
-        // Save model
-        supplier.save((err) => {
-          if (err) {
-            reject(new Error('Error with exam result save... ' + err));
-          }
+       //Prevent duplicate attempts:
+       } else if(global++ < 1) {           
+          // Make sure this account doesn't already exist
+          Supplier.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
+            if (user)
+              return res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
+            
+        user = new Promise((resolve, reject) => {
+          const supplier = new Supplier({
+            companyName: req.body.companyName,
+            directorsName: req.body.directorsName,
+            contactName: req.body.contactName,
+            title: req.body.title,
+            companyRegistrationNo: req.body.companyRegistrationNo,
+            emailAddress: req.body.emailAddress,
+            password: req.body.password,
+            isVerified: false,
+            registeredCountry: req.body.registeredCountry,
+            companyAddress: req.body.companyAddress,
+            areaCovered: req.body.areaCovered,
+            contactMobileNumber: req.body.contactMobileNumber,
+            country: req.body.country,
+            industry: req.body.industry,
+            employeeNumbers: req.body.employeeNumbers,
+            lastYearTurnover: req.body.lastYearTurnover,
+            website: req.body.website,
+            productsServicesOffered: req.body.productsServicesOffered,
+            capabilityDescription: req.body.capabilityDescription,
+            relevantExperience: req.body.relevantExperience,
+            supportingInformation: req.body.supportingInformation,
+            certificates: req.body.certificates,
+            antibriberyPolicy: req.body.antibriberyPolicy,
+            environmentPolicy: req.body.environmentPolicy,
+            qualityManagementPolicy: req.body.qualityManagementPolicy,
+            occupationalSafetyAndHealthPolicy: req.body.occupationalSafetyAndHealthPolicy,
+            otherRelevantFiles: req.body.otherRelevantFiles,
+            balance: req.body.balance,
+            facebookURL: req.body.facebookURL,
+            instagramURL: req.body.instagramURL,
+            twitterURL: req.body.twitterURL,
+            linkedinURL: req.body.linkedinURL,
+            otherSocialMediaURL: req.body.otherSocialMediaURL,
+            UNITETermsAndConditions: true,
+            antibriberyAgreement: true,
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+          });
           
-            // Create a verification token for this user
-            var token = new Token({ 
-              _userId: supplier._id, 
-              token: crypto.randomBytes(16).toString('hex') });
+          supplier.save((err) => {
+            if (err) {
+              reject(new Error('Error with exam result save... ' + err));
+            }
 
-            // Save the verification token
-            token.save(function (err) {
-              if (err) { 
-                return res.status(500).send({
-                  msg: err.message 
-                });
-              }
+            var productService = new ProductService({
+              supplier: supplier._id,
+              productName: supplier.productsServicesOffered,
+              price: 1,
+              createdAt: Date.now(),
+              updatedAt: Date.now()
+            });
 
-              var options = {
-                auth: {
-                  api_user: 'SENDGRID_USERNAME',
-                  api_key: 'SENDGRID_PASSWORD'
+            productService.save(function (err) {
+              if(err) console.error(err.message);
+            });
+
+            var capability = new Capability({
+              supplier: supplier._id,
+              capabilityDescription: supplier.capabilityDescription,
+              createdAt: Date.now(),
+              updatedAt: Date.now()
+            });
+
+            capability.save(function (err) {
+              if(err) console.error(err.message);
+            });
+
+              // Create a verification token for this user
+              var token = new Token({ 
+                _userId: supplier._id,
+                token: crypto.randomBytes(16).toString('hex') });
+
+              // Save the verification token
+              token.save(function (err) {
+                if (err) {
+                  console.error(err.message);
+                  //return res.status(500).send({
+                   // msg: err.message 
+                 // });
                 }
-              }
 
-              var transporter = nodemailer.createTransport(sgTransport(options));
-              /*
-              // Send the email
-              var transporter2 = nodemailer.createTransport({
-                service: 'Sendgrid', 
-                auth: {
-                  user: process.env.SENDGRID_USERNAME,
-                  pass: process.env.SENDGRID_PASSWORD 
-                } 
-              });*/
-              
-              var email = {
-                from: 'no-reply@uniteprocurement.com',
-                to: supplier.emailAddress, 
-                subject: 'Account Verification Token', 
-                text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/confirmation\/' + token.token + '.\n'
-              };
-          
-              transporter.sendMail(email, function (err, info) {
-                 if (err ) {
-                  console.log(err);
-                }  else {
-                  console.log('Message sent: ' + info.response);
-                }
-                  if (err) {
-                    return res.status(500).send({
-                      msg: err.message 
-                    });
-                  }
-                  //return res.status(200).send('A verification email has been sent to ' + supplier.emailAddress + '.');
+                var email = {
+                  from: 'peter@uniteprocurement.com',
+                  to: 'peter.minea@gmail.com',//supplier.emailAddress,
+                  subject: 'Account Verification Token',
+                  text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/confirmation\/' + token.token + '.\n'};
+
+                console.log('ȘI ASUSPRAIMUL MERGE IAR.');
+                //if(1==2)
+                sgMail.send(email, function (err, info) {
+                   //if (err ) {
+                    console.log(err? err.message : 'Message sent: ' + info);
+
+                  //if(1==2)
+                    if (err) {
+                      console.error(err.message);
+                      //res.redirect('back');
+                      //return res.status(500).send({
+                       // msg: err.message 
+                     // });
+                    }
+                    console.log('A verification email has been sent to ' + supplier.emailAddress + '.');
+                    req.flash("success", 'A verification email has been sent to ' + supplier.emailAddress + '.');
+                    //return res.status(200).send('A verification email has been sent to ' + supplier.emailAddress + '.');
+                  });
                 });
               });
-            });
-          
-          // Return saved model
-          resolve(supplier);
+
+            // Return saved model
+            resolve(supplier);
+          });
+
+          assert.ok(user instanceof Promise);
+
+          user
+            .then((doc) => {
+              req.session.supplier = doc;
+              req.session.id = doc._id;
+              req.session.save();
+            })
+            .then( () => {
+              req.flash("success", "Supplier signed up successfully!");
+              if(res) res.redirect("/supplier");
+            })
+            .catch(console.error);
         });
-      
-        assert.ok(user instanceof Promise);
-        
-        user
-          .then((doc) => {
-            req.session.supplier = doc;
-            req.session.id = doc._id;
-            req.session.save();
-          })
-          .then(async () => {
-            await req.flash("success", "Supplier signed up successfully!");
-            return res.redirect("/supplier");
-          })
-          .catch(console.error);
       }
     }
   }
-};
+}
 
 
 exports.getForgotPassword = (req, res) => {
@@ -406,17 +453,8 @@ exports.postForgotPassword = (req, res, next) => {
       });      
     },
     function(token, user, done) {
-      var options = {
-        auth: {
-          api_user: 'SENDGRID_USERNAME',
-          api_key: 'SENDGRID_PASSWORD'
-        }
-      }
-
-      var transporter = nodemailer.createTransport(sgTransport(options));
-
       var emailOptions = {
-        from: 'no-reply@uniteprocurement.com',
+        from: 'peter@uniteprocurement.com',
         to: user.emailAddress, 
         subject: 'UNITE Password Reset - Supplier', 
         text: 'Hello,\n\n' 
@@ -425,7 +463,7 @@ exports.postForgotPassword = (req, res, next) => {
         + req.headers.host + '\/reset\/' + token + '.\n'
       };
       
-      transporter.sendMail(emailOptions, function(err) {
+      sgMail.send(emailOptions, function (err, info) {
         console.log('E-mail sent!')
         req.flash('success', 'An e-mail has been sent to ' + user.emailAddress + ' with password reset instructions.');
         done(err, 'done');
@@ -434,7 +472,7 @@ exports.postForgotPassword = (req, res, next) => {
   ], function(err) {
     if(err)
       return next(err);
-      res.redirect('supplier/forgotPassword');
+      res.redirect('/supplier/forgotPassword');
   });
 }
 
@@ -477,15 +515,6 @@ exports.postResetPasswordToken = (req, res) => {
     });
     },
     function(user, done) {
-      var options = {
-        auth: {
-          api_user: 'SENDGRID_USERNAME',
-          api_key: 'SENDGRID_PASSWORD'
-        }
-      }
-
-      var transporter = nodemailer.createTransport(sgTransport(options));
-
       var emailOptions = {
         from: 'no-reply@uniteprocurement.com',
         to: user.emailAddress, 
@@ -495,7 +524,7 @@ exports.postResetPasswordToken = (req, res) => {
         + ' for your account ' + user.emailAddress + '. You can log in again.'        
       };
       
-      transporter.sendMail(emailOptions, function(err) {
+      sgMail.send(emailOptions, function (err, info) {
         console.log('E-mail sent!')
         req.flash('success', 'Your password has been successfully changed!');
         done(err, 'done');
@@ -509,6 +538,8 @@ exports.postResetPasswordToken = (req, res) => {
 
 
 exports.getProfile = (req, res) => {
+  if(!req || !req.session)
+    return false;
   res.render("supplier/profile", { profile: req.session.supplier });
 };
 
@@ -574,7 +605,37 @@ exports.postBidRequest = (req, res) => {
 exports.postProfile = (req, res) => {
   console.log(req.body);
   Supplier.findOne({ _id: req.body._id }, (err, doc) => {
-    if (err) return console.error(err);
+    if (err) {
+      console.error(err);
+      res.redirect('back');
+      }
+    
+    var productService = new ProductService({
+      supplier: req.body._id,
+      productName: req.body.productsServicesOffered,
+      price: req.body.price,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    });
+    
+    productService.save((err) => {
+      if(err) {
+        console.log(err);
+      }
+    });
+    
+    var capability = new Capability({
+      supplier: req.body._id,
+      capabilityDescription: req.body.capabilityDescription,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    });
+  
+    capability.save((err) => {
+      if(err) {
+        console.log(err);
+      }
+    });
         
     doc.companyName = req.body.companyName;
     doc.directorsName = req.body.directorsName;
@@ -615,12 +676,12 @@ exports.postProfile = (req, res) => {
     doc.updatedAt = Date.now();
     return doc.save();
   })
-    .then(doc => {
+    .then(doc => {console.log('Saving new session');
       req.session.supplier = doc;
       req.session.id = doc._id;
       return req.session.save();
     })
-    .then(() => {
+    .then(() => {console.log('User updated');
       req.flash("success", "Supplier details updated successfully!");
       return res.redirect("/supplier");
     })

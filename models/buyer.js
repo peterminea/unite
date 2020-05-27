@@ -11,7 +11,7 @@ const buyerSchema = new Schema({
   },
   organizationUniteID: {
     type: String,
-    unique: true,
+    //unique: true,
     required: true
   },
   contactName: {
@@ -52,14 +52,19 @@ const buyerSchema = new Schema({
   resetPasswordExpires: {
     type: Date,
     required: false
-    //,  default: Date.now() + 43200000
+    //,default: Date.now() + 43200000
   },
   address: {
     type: String,
     required: true
   },
   balance: {
-    type: Number,    
+    type: Number,
+    validate(value) {
+      if(value < 0) {
+        throw new Error('Balance must be 0 or positive');
+      }
+    },
     default: 0
   },
   deptAgencyGroup: {
@@ -85,4 +90,5 @@ const buyerSchema = new Schema({
 });
 
 buyerSchema.plugin(passportLocalMongoose);
+buyerSchema.index({organizationName: 1, organizationUniteID: 1}, {unique: true});
 module.exports = mongoose.model('Buyer', buyerSchema);

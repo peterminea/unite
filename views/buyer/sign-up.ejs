@@ -26,12 +26,34 @@
         
       var token = $("input[name='_csrf']").val();
         
+      $('#organizationUniteID').autocomplete({
+        source: function(req, res) {
+          var obj = $(this.element);
+          
+          $.ajax({
+            url: "/uniteIDAutocomplete",
+            headers: { "X-CSRF-Token": token },
+            datatype: 'jsonp',
+            type: "POST",
+            data: req,
+            success: function(data) {
+              res(data);
+              autocomp(obj, data);
+            },
+            error: function(err) {
+              alert(err);
+            }
+          });
+        },
+        minLength: 3
+      });
+        
       $('#country').autocomplete({
         source: function(req, res) {
           var obj = $(this.element);
           
           $.ajax({
-            url: "/countryAutocomplete/",
+            url: "/countryAutocomplete",
             headers: { "X-CSRF-Token": token },
             datatype: 'jsonp',//"application/json",
             type: "POST",
@@ -72,6 +94,9 @@
   </nav>
 
   <div class="container">
+    <div>  
+        <input type="button" class="btn btn-primary" value="Back" onclick="history.go(-1)">
+    </div>
     <div class="mx-auto text-center mt-4">
       <a href="/">
         <img src="https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2Funite.png?v=1587840844949" height="150">
@@ -114,7 +139,7 @@
           </div>
           <div class="form-group">
             <label for="exampleInputPassword1">Password*</label>
-            <input type="password" class="form-control" name="password" required>
+            <input type="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}" title="Please type at least one number and one uppercase&lowercase letter, and at least 6 characters" class="form-control" name="password" required>
           </div>    <!--    
         <div class="form-group">
             <label>Balance</label>
