@@ -13,9 +13,21 @@ exports.getIndex = (req, res) => {
 };
 
 exports.postIndex = (req, res) => {
+      var productList = (req.body.productsServicesOffered);
+      var amountList = (req.body.amountList);
+      var priceList = (req.body.priceList);
+      var products = [];
+
+      for(var i in productList) {
+        products.push("Product name: '" + productList[i] + "', amount: " + amountList[i] + ', price: ' + priceList[i] + '.');
+      }
+  
       const bidRequest = new BidRequest({
       itemDescription: req.body.itemDescription,
       productsServicesOffered: req.body.productsServicesOffered,
+      amountList: req.body.amountList,
+      priceList: req.body.priceList,
+      orderedProducts: products,
       itemDescriptionLong: req.body.longItemDescription,
       itemDescriptionUrl: req.urlItemDescription,
       amount: req.body.amount,
@@ -33,7 +45,7 @@ exports.postIndex = (req, res) => {
     });
 
     return bidRequest
-      .save()
+      .updateOne()
       .then(result => {
         req.flash("success", "Bid updated successfully!");
         return res.redirect("/buyer");

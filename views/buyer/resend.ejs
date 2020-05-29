@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>UNITE - Supplier - Password Reset</title>
+  <title>UNITE - Buyer - Resend confirmation token</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Another cool thing made with Glitch">
@@ -18,29 +18,20 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>  
 </head>
 
-  <body>
+    <body>
     <div class="container">
-      <div>
-        <input type="button" class="btn btn-primary" value="Back" onclick="history.go(-1)">
-      </div>
-      <div class="col-md-12">
-        <form action="/resetPassword/<%= token %>" method="POST">
+       <div class="col-md-12">
+        <form method="POST">
           <legend>
-            Reset Password
+            Resend E-mail Confirmation Token
           </legend>
           <div class="form-group">
-            <label for="password">New Password:</label>
-            <input class="form-control" type="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}" title="Please type at least one number and one uppercase&lowercase letter, and at least 6 characters" name="password" value="" autofocus="autofocus" placeholder="newPassword">
-            </input>
-          </div>
-          <div class="form-group">
-            <label for="confirm">Confirm Password:</label>
-            <input class="form-control" type="password" name="confirm" value="" placeholder="confirm">
-            </input>
+            <label for="email">E-mail:</label>
+            <input required class="form-control" type="email" name="emailAddress" autofocus="autofocus"></input>
           </div>
           <div class="form-group">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <input type="submit" class="btn btn-primary" value="Update Password"><input>
+            <button type="submit" id="resendToken" value="Confirm E-mail" class="btn btn-primary btn-block btn-lg">Resend confirmation token</button>
           </div>
         </form>
       </div>

@@ -18,95 +18,25 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
   <script src="/autocomp.js"></script>
   <script src="/https.js"></script>
-  
-  <!--
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
-  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.jquery.min.js"></script>
-<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>  
--->   
+
   <script type="text/javascript">
       $(document).ready(function () {
       var token = $("input[name='_csrf']").val();
-    
-      $('.country').autocomplete({
-        source: function(req, res) {
-          var obj = $(this.element);
-        
-          $.ajax({
-            url: "/countryAutocomplete/",
-            headers: { "X-CSRF-Token": token },
-            datatype: 'jsonp',
-            type: "POST",
-            data: req,/*
-            async: true,
+      /*    async: true,
             cache: false,
             contentType: false,
             processData: false,*/
-            success: function(data) {              
-              res(data);
-              autocomp(obj, data);              
-              /*
-              res($.map(data, function (el) {
-                  return {
-                     name: el.name
-                    , id: el.id
-                  };
-                  }));*/
-            },
-            error: function(err) {
-              alert(err);
-            }
-          });
-        },
-        minLength: 3,
-        delay: 100,
-        focus: function (event, ui) {
-            if(!ui.item) return true;
-            $(this).name = ui.item.name;
-            event.preventDefault();
-         },
-        select: function(event, ui) {
-          if(ui.item) {
-            $(this.element).val(ui.item.name);
-            event.preventDefault();
-          }
-        }
-      });
-      
-      $("#industry").autocomplete({
-        source: function(req, res) {
-          var obj = $(this.element);
-          
-          $.ajax({
-            url: '/industryAutocomplete',
-            headers: { "X-CSRF-Token": token },
-            datatype: 'jsonp',
-            type: "POST",
-            data: req,
-            success: function(data) {
-              res(data);
-              autocomp(obj, data);
-            },
-            error: function(err) {
-            console.log(err);
-            }
-          });
-        },
-        minLength: 3,
-        delay: 10,
-        focus: function (event, ui) {
-            $(this).val() = ui.item.name;
-            event.preventDefault();
-         },
-        select: function(event, ui) {
-          if(ui.item) {
-            $(this).val(ui.item.name);
-            event.preventDefault();
-            }
-          }
-      });
+      /*
+            res($.map(data, function (el) {
+                return {
+                   name: el.name
+                  , id: el.id
+                };
+                }));*/
+        
+      postAutocomplete('.country', '/countryAutocomplete', token);
+      getAutocomplete('#industry', '/industryGetAutocomplete', token);
+      getAutocomplete('#currency', '/currencyGetAutocomplete', token);
       
       $("input").unbind('change').bind('change', function () {
         $('#updateProfile').removeAttr('disabled');
@@ -118,8 +48,9 @@
 
       $('.single,.multiple').each(function(index, element) {
         var val = $(this).prev('.fileupload').attr('value');
-        
+
         if(val) {
+          $(this).prev('.fileupload').val(val);
           if(val.charAt(val.length-1) == ',') {//Multi
             var newVal = val.substring(0, val.length-1);
             newVal = newVal.split(',');
@@ -135,8 +66,7 @@
       });
         
       $('.single,.multiple').click(function (e) {
-        var input = $(this).prev('.fileupload'); 
-        
+        var input = $(this).prev('.fileupload');        
         var isMultiple = $(this).hasClass('multiple')? true : false;
         var formData = new FormData();
         formData.append("_csrf", token);
@@ -170,7 +100,7 @@
                   ob = '<a href="/' + response[i].path + '" download>Download file "'+i+'"</a>';
                   $(ob).insertAfter(input.parent('div'));
                 }
-              } else {                
+              } else {
                 val = '/' + response.path + ',';                  
                 //input.val(val);
                 input.attr('value', val);
@@ -200,7 +130,89 @@
 
         e.preventDefault();
       });
+        
+        
+  function phonenumber(input) {
+    var phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+    if(input.value.match(phoneno)) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+        
+  function remElem() {alert(2);
+    //var li = $(this).parent('li');
+    //var newIndex = elem.find('li').index(li);
+    //prodList.splice(newIndex, 1);
+    //li.remove();
+  }
+        
+  $('#contactMobileNumber').bind('keyup keypress change', function(e) {
+    $(this).text(function(i, text) {
+      return text.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
     });
+    
+    //return phonenumber($(this)[0]);
+    });
+        
+    $('#prodServiceInput').bind('change', function() {
+      if($(this).val()) {
+        $('#addProdService').removeAttr('disabled');
+      } else {
+        $('#addProdService').attr('disabled', 'disabled');
+      }
+    });
+        
+     $("#addProdService").click(() => {
+        var input = $("#prodServiceInput");
+        var prodInput = $("#prodServicesList");
+        var priceInput = $("#pricesList");
+        var currencyInput = $("#currenciesList");
+     
+        if(input.val() != "") {          
+          var elem = (document.getElementById("prodServices"));
+          elem.insertAdjacentHTML("beforeend", "<li class='list-group-item'><span>" + $("#prodServiceInput").val() + ' - ' + $('#price').val() + ' ' + $('#currency').val() + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
+          elem = $(elem);
+          
+          var prodVal = input.val();
+          var arr = prodInput.val().split(',');
+          arr.push(prodVal);
+          prodInput.val((arr));
+          
+          prodVal = $('#price').val();
+          arr = priceInput.val().split(',');
+          arr.push(prodVal);
+          priceInput.val((arr));
+          
+          prodVal = $('#currency').val();
+          arr = currencyInput.val().split(',');
+          arr.push(prodVal);
+          currencyInput.val((arr));
+
+          $('.rem').unbind('click').bind('click', function() {
+            var li = $(this).parent('li');
+            var newIndex = elem.find('li').index(li);
+            var arr = prodInput.val().split(',');
+            arr.splice(newIndex, 1);
+            prodInput.val((arr));
+            
+            arr = priceInput.val().split(',');
+            arr.splice(newIndex, 1);
+            priceInput.val((arr));
+            
+            arr = currencyInput.val().split(',');
+            arr.splice(newIndex, 1);
+            currencyInput.val((arr));
+            
+            li.remove();
+          });
+
+          input.val('');
+        }
+    });
+  });
   </script>
 </head>
 
@@ -228,8 +240,9 @@
         <li class="nav-item active">
           <a class="btn btn-primary" href="/supplier/profile">Profile</a>
         </li>
-        <li class="nav-item" style="margin-left: 20px;">
-          <a class="btn btn-danger" href="?exit=true">Exit</a>
+        <br>
+        <li class="nav-item" style="margin-left: 0px;">
+          <a class="btn btn-danger" href="?exit=true">Logout</a>
         </li>
       </ul>
     </div>
@@ -245,14 +258,15 @@
           please keep your capabilities up-to-date.</p>
       </div>
     </div>
-
-    <br><br>
-
+    <br>
+    <br>
     <div class="smooth-shadow profile-form">
       <form method="post">
         <input type="hidden" name="_id" value="<%= profile._id %>">
         <input type="hidden" id="balance" name="balance" value="<%= profile.balance %>">
         <input type="hidden" name="createdAt" id="createdAt" value="<%= profile.createdAt %>">
+        <input type="hidden" name="pricesList" id="pricesList">
+        <input type="hidden" name="currenciesList" id="currenciesList">
         
         <div class="form-group">
           <label>Company Name</label>
@@ -267,7 +281,7 @@
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input required type="password" id="password" name="password" class="form-control" value="<%= profile.password %>">
+          <input required type="password" id="password" name="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}" title="Please type at least one number and one uppercase&lowercase letter, and at least 6 characters" class="form-control" value="<%= profile.password %>">
           <a href="forgotPassword"><label>Forgot your password?</label></a>
         </div>
         <input type="hidden" name="isVerified" id="isVerified" value="<%= profile.isVerified %>">
@@ -294,8 +308,7 @@
         </div>
         <div class="form-group">
           <label>Company Address*</label>
-          <input type="text" class="form-control" id="companyAddress" name="companyAddress"
-            value="<%= profile.companyAddress %>" required>
+          <input type="text" class="form-control" id="companyAddress" name="companyAddress" value="<%= profile.companyAddress %>" required>
         </div>
         <div class="form-group">
           <label>Area Covered*</label>
@@ -304,8 +317,7 @@
         </div>
         <div class="form-group">
           <label>Contact Mobile Number*</label>
-          <input type="tel" class="form-control" id="contactMobileNumber" name="contactMobileNumber"
-            value="<%= profile.contactMobileNumber %>" required>
+          <input type="tel" class="form-control" pattern="[0-9]{4} [0-9]{3} [0-9]{3}" id="contactMobileNumber" name="contactMobileNumber" value="<%= profile.contactMobileNumber %>" required>
         </div>
         <div class="form-group">
           <label>Country*</label>
@@ -348,12 +360,46 @@
         <div class="form-group">
           <label>Other Social Media URL</label>
           <input type="url" class="form-control" id="otherSocialMediaURL" name="otherSocialMediaURL" value="<%= profile.otherSocialMediaURL %>">
-        </div>
+        </div>        
         <div class="form-group">
-          <label>Products or Services Offered*</label>
-          <input type="text" class="form-control" id="productsServicesOffered" name="productsServicesOffered" value="<%= profile.productsServicesOffered %>" required>
-          <a href="addproduct">Add new product</a>
+          <label class="col-form-label">Products / Services Offered*</label>
+          <br><a href="addproduct">Add new product</a>
+          <div class="input-group">
+            <input type="text" class="form-control prodInput" title="Add Product/Service" id="prodServiceInput">
+            <br>
+            <input type="number" min="1" class="form-control" title="Price" id="price">
+            <input type="text" class="form-control" title="Currency" id="currency">
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" type="button" disabled id="addProdService">Add</button>
+            </div>
+          </div>
+          <br>
+          <ul class="list-group" id="prodServices">
+            <% let i = 0; if (products != null) { for (product of products) { i++; %>
+            <li class='list-group-item'>
+              <span><%= product.productName %> - <%= product.price %>&nbsp;<%= product.currency %></span>
+              <span class='rem'>&nbsp;(Remove)</span>
+            </li>
+            <% } }%>
+          </ul>
+          <input type="hidden" required id="prodServicesList" name="productsServicesOffered" value="<%= profile.productsServicesOffered %>">
         </div>
+        <script type="text/javascript">          
+           $('.rem').unbind('click').bind('click', function() {
+                var li = $(this).parent('li');
+                var newIndex = $('#prodServices').find('li').index(li);
+                var arr = ($('#prodServicesList').val()).split(',');
+                arr.splice(newIndex, 1);
+                $('#prodServicesList').val(arr);
+                arr = ($('#pricesList').val()).split(',');
+                arr.splice(newIndex, 1);
+                $('#pricesList').val(arr);
+                arr = ($('#currenciesList').val()).split(',');
+                arr.splice(newIndex, 1);
+                $('#currenciesList').val(arr);
+                li.remove();
+              });
+        </script>
         <div class="form-group">
           <label>Capability Description*</label>
           <input type="text" class="form-control" id="capabilityDescription" name="capabilityDescription" value="<%= profile.capabilityDescription %>" required>
@@ -417,7 +463,7 @@
           <div class="form-check">
             <input class="form-check-input" type="checkbox" id="UNITETermsAndConditions" name="UNITETermsAndConditions"
               <%= profile.UNITETermsAndConditions ? "checked" : "" %> required>
-            <label class="form-check-label" for="invalidCheck2">
+            <label class="form-check-label" for="UNITETermsAndConditions">
               <a href="../termsConditions">UNITE Terms And Conditions</a>
             </label>
           </div>
@@ -426,7 +472,7 @@
           <div class="form-check">
             <input class="form-check-input" type="checkbox" id="antibriberyAgreement" name="antibriberyAgreement"
               <%= profile.antibriberyAgreement ? "checked" : "" %> required>
-            <label class="form-check-label" for="invalidCheck2">
+            <label class="form-check-label" for="antibriberyAgreement">
               <a href="../antibriberyAgreement">Antibribery Agreement</a>
             </label>
           </div>

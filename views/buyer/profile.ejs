@@ -22,44 +22,14 @@
   
   <script type="text/javascript">
       $(document).ready(function() {        
-        var token = $("input[name='_csrf']").val();      
-
+        var token = $("input[name='_csrf']").val();
         
         $("input").unbind('change').bind('change', function() {        
           $('#updateProfile').removeAttr('disabled');
         });
-      
-      $('#country').autocomplete({
-        source: function(req, res) {
-          var obj = $(this.element);
-          
-          $.ajax({
-            url: "/countryAutocomplete/",
-            headers: { "X-CSRF-Token": token },
-            datatype: 'jsonp',//"application/json",
-            type: "POST",
-            data: req,
-            success: function(data) {
-              res(data);
-              autocomp(obj, data);
-            },
-            error: function(err) {
-              alert(err);
-            }
-          });
-        },
-        minLength: 3,
-        focus: function (event, ui) {
-            this.value = ui.item.name;
-            event.preventDefault();
-         },
-        select: function(event, ui) {
-          if(ui.item) {
-            $(this).val(ui.item.name);
-            event.preventDefault();
-          }
-        }
-      });
+        
+      //postAutocomplete('#organizationUniteID', '/uniteIDAutocomplete', token);//Readonly, so useless.
+      postAutocomplete('#country', '/countryAutocomplete', token);
   });
 </script>
     
@@ -86,8 +56,9 @@
         <li class="nav-item active">
           <a class="btn btn-primary" href="/buyer/profile">Profile</a>
         </li>
-        <li class="nav-item" style="margin-left: 20px;">
-          <a class="btn btn-danger" href="/logout">Logout</a>
+        <br>
+        <li class="nav-item" style="margin-left: 0px;">
+          <a class="btn btn-danger" href="?exit=true">Logout</a>
         </li>
       </ul>
     </div>
@@ -99,7 +70,7 @@
       <h5 class="card-header">Welcome!</h5>
       <div class="card-body">
         <h5 class="card-title">Hello, <%= profile.organizationName %></h5>
-        <p class="card-text">This is your profile page. To ensure that you continue to appear in buyers' search results,  please keep your capabilities up-to-date.</p>
+        <p class="card-text">This is your profile page. To ensure that you continue to appear in buyers' search results, please keep your capabilities up-to-date.</p>
       </div>
     </div>
     <br><br>
@@ -121,7 +92,7 @@
           </div>
           <div class="form-group mr-2">
             <label>Organization UNITE ID*</label>
-            <input type="text" required class="form-control" id="organizationUniteID" name="organizationUniteID" value="<%= profile.organizationUniteID %>" >
+            <input type="text" readonly class="form-control" id="organizationUniteID" name="organizationUniteID" value="<%= profile.organizationUniteID %>" >
           </div>
           <div class="form-group mr-2">
             <label>Contact name*</label>
@@ -132,8 +103,8 @@
             <input type="email" class="form-control" id="emailAddress" name="emailAddress" value="<%= profile.emailAddress %>" required>
           </div>
           <div class="form-group">
-          <label>Password</label> 
-          <input required type="password" id="password" name="password" class="form-control" value="<%= profile.password %>">
+          <label>Password</label>
+          <input required type="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}" title="Please type at least one number and one uppercase&lowercase letter, and at least 6 characters" id="password" name="password" class="form-control" value="<%= profile.password %>">
             <a href="forgotPassword"><label>Forgot your password?</label></a>
           </div>
         </div>

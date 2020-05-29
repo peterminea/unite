@@ -21,3 +21,93 @@ var autocomp = function(obj, data, enter) {//Not for modals.
     }
   });
 };
+
+function isJson(obj) {
+  if(!obj || !obj.length || !(Array.isArray(obj)))
+    return false;
+  if(obj.toString().charAt(0) == '[')//To be or not to be a JSON array.
+    return false;
+  return true;
+}
+
+function getAutocomplete(elem, url, token) {
+  $('' + elem + '').autocomplete({
+    source: function(req, res) {
+      var obj = $(this.element);
+
+      $.ajax({
+        url: url,
+        headers: { "X-CSRF-Token": token },
+        datatype: 'jsonp',
+        type: "GET",
+        data: req,
+        success: function(data) {
+        if(!data || !data.length) {
+            obj.val('');
+            return false;
+          }
+          res(data);
+          autocomp(obj, data);
+        },
+        error: function(err) {
+          alert(err);
+        }
+      });
+    },
+    minLength: 3,
+    delay: 20,
+    focus: function (event, ui) {
+        if(!ui.item)
+          return false;
+        this.value = ui.item.name;
+        event.preventDefault();
+     },
+    select: function(event, ui) {
+      if(ui.item) {
+        $(this).val(ui.item.name);
+        event.preventDefault();
+      }
+    }
+  });  
+}
+
+function postAutocomplete(elem, url, token) {//alert('EURIBELES ' + elem + ' ' + url + ' ' + token);
+  $('' + elem + '').autocomplete({
+    source: function(req, res) {
+      var obj = $(this.element);
+
+      $.ajax({
+        url: url,
+        headers: { "X-CSRF-Token": token },
+        datatype: 'jsonp',
+        type: "POST",
+        data: req,
+        success: function(data) {
+        if(!data || !data.length) {
+            obj.val('');
+            return false;
+          }
+          res(data);
+          autocomp(obj, data);
+        },
+        error: function(err) {
+          alert(err);
+        }
+      });
+    },
+    minLength: 3,
+    delay: 20,
+    focus: function (event, ui) {
+        if(!ui.item)
+          return false;
+        this.value = ui.item.name;
+        event.preventDefault();
+     },
+    select: function(event, ui) {
+      if(ui.item) {
+        $(this).val(ui.item.name);
+        event.preventDefault();
+      }
+    }
+  });
+}

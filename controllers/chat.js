@@ -10,8 +10,7 @@ const ObjectId = require("mongodb").ObjectId;
 
 exports.getIndex = (req, res, next) => {
       res.setHeader("Content-Type", "application/json");
-      res.statusCode  =  200;
-      console.log('TATAJURA ' + req.params);
+      res.statusCode  =  200;      
 
       connectdb.then(db  =>  {
           Message.find({}).then(chat  =>  {

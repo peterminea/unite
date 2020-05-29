@@ -23,6 +23,10 @@
 			aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 			<span class="navbar-toggler-icon"></span>
 		</button>
+    
+    <div>  
+      <input type="button" class="btn btn-primary" value="Back" onclick="history.go(-1)">
+    </div>
 
 		<div class="collapse navbar-collapse" id="navbarSupportedContent">
 			<ul class="navbar-nav mr-auto">
@@ -40,8 +44,9 @@
 				<li class="nav-item active">
 					<a class="btn btn-primary" href="/supplier/profile">Profile</a>
 				</li>
-				<li class="nav-item" style="margin-left: 20px;">
-					<a class="btn btn-danger" href="?exit=true">Exit</a>
+        <br>
+				<li class="nav-item" style="margin-left: 0px;">
+					<a class="btn btn-danger" href="?exit=true">Logout</a>
 				</li>
 			</ul>
 		</div>
@@ -49,10 +54,7 @@
 
 	<div class="container"><br><br></div>
 
-	<div class="container">
-    <div>  
-        <input type="button" class="btn btn-primary" value="Back" onclick="history.go(-1)">
-    </div>
+	<div class="container">    
 		<% for (request of requests) { %>
 		<div class="card mt-4">
 			<div class="card-header">
@@ -61,10 +63,9 @@
 			<div class="card-body">
 				<h4 class="card-title"><%= request.itemDescription %></h4>
 				<p class="card-text">
-					Amount: <%= request.amount %>, <br>
+					Amount: <%= request.amount %> <br>
 					Delivery Location: <%= request.deliveryLocation %>
 				</p>
-
 				<a href="/supplier/bid-requests/<%= request._id %>" class="btn btn-primary" style="float: right;">Details</a>
 			</div>
 		</div>

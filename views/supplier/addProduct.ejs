@@ -10,21 +10,28 @@
   <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-  <script src="/https.js"></script>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>  
   <!-- Jquery, Popper, and Bootstrap inclusions-->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>  
+  <script src="/autocomp.js"></script>
+  <script src="/https.js"></script>
   
   <script type="text/javascript">
       $(document).ready(function () {
-        $('#submit').click(function() {
-          if(!$('#productPrice').val()) {
-            alert('Price must be greater than 0.');
+        $('#addProduct').click(function() {
+          if($('#price').val() <= 0) {
+            alert('Please enter a price greater than 0.');
             return false;
           }
         });
+        
+      var token = $("input[name='_csrf']").val();
+      getAutocomplete('#currency', '/currencyGetAutocomplete', token);
       });
   </script>
 </head>
@@ -41,12 +48,16 @@
             Add new Service/Product
           </legend>
           <div class="form-group">
-            <label for="addProduct">Product / Service name:</label>
-            <input required class="form-control" type="text" name="productName" autofocus="autofocus"></input>
+            <label for="product">Product / Service name:</label>
+            <input required class="form-control" type="text" name="productName" id="product" autofocus="autofocus"></input>
           </div>
           <div class="form-group">
             <label for="addProduct">Price:</label>
-            <input required class="form-control" type="number" name="productPrice"></input>
+            <input required class="form-control" type="number" min="1" id="price" name="price"></input>
+          </div>
+          <div class="form-group">
+            <label for="currency">Currency:</label>
+            <input required class="form-control" type="text" id="currency" name="currency"></input>
           </div>
           <div class="form-group">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">

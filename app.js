@@ -14,23 +14,34 @@ const fs = require("fs-extra");
 const sortJson = require("sort-json");
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const process = require('process');
+const BASE = process.env.BASE;
+const URI = process.env.MONGODB_URI;
+const MAX_PROD = process.env.SUP_MAX_PROD;
 
 //Classes:
 const BidRequest = require("./models/bidRequest");
+const BidStatus = require("./models/bidStatus");
 const Buyer = require("./models/buyer");
 const Supplier = require("./models/supplier");
 const Supervisor = require("./models/supervisor");
+const Currency = require("./models/currency");
 const Message = require("./models/message");
 const Country = require("./models/country");
 const Industry = require("./models/industry");
+const Capability = require('./models/capability');
 const ProductService = require("./models/productService");
 
-const MONGODB_URI = "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";//The DB url.
+//const MONGODB_URI = "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";//The DB url is actually saved as an Environment variable, it will be easier to use anywhere in the application that way.
+//Syntax: process.env.MONGODB_URI
+
 const app = express();
 mongoose.Promise = global.Promise;
+//const arr = "1".split(',');
+//console.log(arr + ' Z ' + arr.length + ' Y');
 
 const store = new MongoDBStore({
-  uri: MONGODB_URI,
+  uri: URI,
   collection: "sessions"
 });
 
@@ -87,19 +98,185 @@ const connect = require("./dbconnect");
 const http = require("http").Server(app);
 const socket = require("socket.io")(http);
 const port = 5000;
-//const socket = 1;//io(http);
 var url = require("url");
 const MongoClient = require("mongodb").MongoClient;
 var db;
+//var ProductService = require('./models/productService');
+//console.log('TOLJINT ' + JSON.parse("[]"));
+/*
+var ss = [];
+ss.push('1unu');
+ss.push('2doi');
+console.log(ss[0] + ' ' + ss[1]);
+console.log(ss);
+//console.log(JSON.stringify(ss) + ' TATA JURA ' + JSON.parse("[" + ss + "]"));
+if(ss.toString().charAt(0) == '[') {
+  var ss1 = JSON.parse("[" + ss + "]");
+  console.log(ss1[0] + ' T ' + ss1[1]);
+  var ss3 = JSON.stringify(ss1);
+  console.log(ss3[0] + ' U ' + ss3[1]);
+}
 
-MongoClient.connect(MONGODB_URI, (err, client) => {
+console.log(JSON.stringify('[1,2]'));
+var ss2 = JSON.stringify(ss);
+console.log(ss2[0] + ' ' + ss2[1] + ' MASCABASCO');*/
+
+
+MongoClient.connect(URI, (err, client) => {
   if (err)
     return console.log(err);
 
-  db = client.db("test");
-  //app.listen(6000, () => {
-    //console.log("listening on 6000");
- // });
+  db = client.db(BASE);//Right connection!
+  
+  const currency = new Currency({
+    name: 'Norwegian Krona',
+    value: 'NOK'
+  });
+  
+  //currency.save();
+  
+    /*
+  const bidStatus = new BidStatus({
+    value: 6,
+    name: 'Buyer cancelled the request.'
+  });
+  
+  //bidStatus.save();
+  */
+  //Cleanup script:
+  /*
+  var capability =  Capability.find({});
+  var prodService =  ProductService.find({});  
+  var invalidCapProd = [];
+  
+  function getCaps() {
+   var promise = capability.exec();
+   return promise;
+  }
+  
+  function getProds() {
+   var promise = prodService.exec();
+   return promise;
+  }
+  
+  function getSups(id) {
+    var promise = Supplier.find({_id: id}).exec();
+    return promise;
+  }
+
+  var promise1 = getCaps(), promise2 = getProds();  
+
+  promise1.then(function(caps) {
+     caps.forEach(function(cap) {          
+        var promise = getSups(cap.supplier);
+        promise.then(function(sups) {
+          if(sups.length == 0) 
+            invalidCapProd.push(cap.supplier);
+        });
+     });
+  });
+
+  promise2.then(function(prods) {
+     prods.forEach(function(prod) {          
+        var promise = getSups(prod.supplier);
+        promise.then(function(sups) {
+          if(sups.length == 0) 
+            invalidCapProd.push(prod.supplier);
+        });
+     });
+  });
+
+  setTimeout(function() {
+    console.log(invalidCapProd.length + ' DROSU DOSUL');
+    for(var i in invalidCapProd) {
+      var myquery = { supplier: (invalidCapProd[i]) };
+      db.collection("productservices").deleteOne(myquery, function(err, obj) {
+      });
+      db.collection("capabilities").deleteOne(myquery, function(err, obj) {
+      });
+    }
+  }, 5000);
+  
+  if(1==2)
+  capability.exec(async function(err, data) {
+    if(data && data.length) {      
+      for(var i in data) {
+      var supp = (data[i].supplier);
+      
+      var sup = Supplier.find({_id: (supp)});
+        sup.exec(async function(err, data) {          
+          if(!data || data.length == 0) {
+            var myquery = { supplier: (supp) };          
+            db.collection("productservices").deleteOne(myquery, function(err, obj) {
+            });
+            db.collection("capabilities").deleteOne(myquery, function(err, obj) {
+            });
+            }
+        });
+      }
+    }
+  });
+  
+  Industry.find({}).exec().then((inds) => {//Ascending sorting of table contents by name, then resetting its contents based on this new sorting.
+    console.log(inds.length + ' ZABAL');
+    inds.sort(function (a, b) {
+      return a.name.localeCompare(b.name);
+    });
+    
+    for(var i in inds) {
+      //console.log(inds[i].name);
+      var myQuery = {name: inds[i].name};      
+      
+      const ind = new Industry({
+      //_id: inds[i]._id,
+      name: inds[i].name
+      //, __v: inds[i].__v? inds[i].__v : 0
+      });
+      
+      //db.collection('industries').deleteOne(myQuery, function(err, obj) {});
+      //ind.save();      
+    }
+  });
+  
+  ProductService.find({}).exec().then((prods) => {//Products refactored.
+    for(var i in prods) {
+      var myQuery = {_id: prods[i]._id};
+      var setVal = !prods[i].price && !prods[i].productPrice? {price: 5}
+      : (prods[i].productPrice && prods[i].productPrice == 1)? {productPrice: 5} 
+      : (prods[i].price && prods[i].price == 1)? {price: 2}
+      : prods[i].productPrice? {productPrice: prods[i].productPrice}  : {price: prods[i].price};
+      
+      const prod = new ProductService({
+        productName: prods[i].productName,
+        supplier: prods[i].supplier,
+        price: prods[i].price? prods[i].price : prods[i].productPrice? prods[i].productPrice : 5,
+        currency: prods[i].currency? prods[i].currency : 'EUR',
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      });
+      
+      console.log(prod);     
+     // db.collection('productservices').deleteOne(myQuery, function(err, obj) {});
+      //prod.save();
+    }
+  });  
+  */
+  
+  db.collection("suppliers").ensureIndex( { "companyName": 1, "emailAddress": 1 }, { unique: true } );
+});
+
+
+app.post('/processBuyer', (req, res) => {
+  console.log(req.query('id'));
+  
+  connect.then(db => {
+    db.collection("buyers").deleteOne({_id: req.query('id')}, function(err, obj) {
+      });  
+  });
+  /*
+  var promise = Buyer.find({_id: req.query('id')}).exec();
+  promise.then((buyer) => {    
+  });*/  
 });
 
 
@@ -163,8 +340,8 @@ socket.on("connection", socket => {
         to: msgData.to,
         time: Date.now(),
         bidRequestId: msgData.reqId,
-        sender: "UNITE User",
-        receiver: "Another UNITE User"
+        sender: msgData.fromName,
+        receiver: msgData.toName
       });
 
       chatMessage.save();
@@ -202,7 +379,7 @@ var upload = multer({
     
     for(var i in extArray) 
       if(ext.toLowerCase() == extArray[i].toLowerCase()) {
-        isItIn = true;        
+        isItIn = true;
       }
     if(!isItIn) {
       return callback(new Error('Extension forbidden!'));
@@ -268,13 +445,15 @@ app.post("/uploadmultiple",  upload.array("multiple", 12),   (req, res, next) =>
 app.post("/multipleupload", uploadController.multipleUpload);
 
 //Autocomplete fields:
-var country = Country.find({});
-var industry = Industry.find({});
+//var country = Country.find({});
+//var industry = Industry.find({});
 const jsonp = require('jsonp');
 
-app.post('/countryAutocomplete/', function(req, res, next) {
+app.post('/countryAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.body.term, 'i');  
-  var countryFilter = Country.find({name: regex}, {'name': 1}).sort({"name" : 1}).limit(5);//Positive sort is ascending.  
+  var countryFilter = Country.find({name: regex}, {"name": 1})
+  .sort({"name" : 1})
+  .limit(10);//Positive sort is ascending.  
   countryFilter.exec(function(err, data) {
   var result = [];
     
@@ -286,7 +465,7 @@ app.post('/countryAutocomplete/', function(req, res, next) {
             name: item.name
           };
           
-          result.push(obj);          
+          result.push(obj);
         });
       }
       
@@ -301,9 +480,9 @@ app.post('/countryAutocomplete/', function(req, res, next) {
 
 app.post('/industryAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.query["term"], 'i');
-  var industryFilter = Industry.find({name: regex}, {'name': 1})
+  var industryFilter = Industry.find({name: regex}, {"name": 1})
     .sort({"name" : 1})
-    .limit(5);//Negative sort means descending.  
+    .limit(10);//Negative sort means descending.  
 
   industryFilter.exec(function(err, data) {
   var result = [];
@@ -325,28 +504,22 @@ app.post('/industryAutocomplete', function(req, res, next) {
   });
 });
 
-app.get('/prodServiceAutocomplete/', function(req, res, next) {
+
+app.get('/industryGetAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.query["term"], 'i');
-  var id = req.query["supplierId"];  
-  console.log(regex + ' ' + req.query["supplierId"]);
-  
-  var prodServiceFilter = ProductService
-    .find({productName: regex, supplier: new ObjectId(id)}, {
-      'productName': 1, 'productPrice': 1})
-    .sort({"productName" : 1})
-    .limit(5);//Negative sort means descending.
-  
-  prodServiceFilter.exec(function(err, data) {
+  var industryFilter = Industry.find({name: regex}, {"name": 1})
+    .sort({"name" : 1})
+    .limit(10);//Negative sort means descending.  
+
+  industryFilter.exec(function(err, data) {
   var result = [];
     
     if(!err) {
       if(data && data.length && data.length > 0) {
-        
-        data.forEach(item => {
+        data.forEach(item=>{
           let obj = {
             id: item._id,
-            name: item.productName,
-            price: item.productPrice
+            name: item.name
           };
           
           result.push(obj);          
@@ -359,13 +532,134 @@ app.get('/prodServiceAutocomplete/', function(req, res, next) {
 });
 
 
+app.post('/uniteIDAutocomplete', function(req, res, next) {
+  var regex = new RegExp(req.query["term"], 'i');
+  var uniteIDFilter = Supervisor.find({organizationUniteID: regex}, {"organizationUniteID": 1})
+    .sort({"organizationUniteID" : 1})
+    .limit(10);//Negative sort means descending.  
+
+  uniteIDFilter.exec(function(err, data) {
+  var result = [];
+    
+    if(!err) {
+      if(data && data.length && data.length > 0) {
+        data.forEach( (item) => {
+          let obj = {
+            id: item._id,
+            name: item.organizationUniteID
+          };
+          
+          result.push(obj);          
+        });
+      }
+      
+      res.jsonp(result);     
+    }
+  });
+});
+
+
+app.post('/currencyAutocomplete', function(req, res, next) {
+  var regex = new RegExp(req.query["term"], 'i');
+  console.log(regex);
+  var currencyFilter = Currency.find({value: regex}, {"value": 1, "name": 1})
+    .sort({"value" : 1})
+    .limit(10);//Negative sort means descending.  
+
+  currencyFilter.exec(function(err, data) {
+  var result = [];
+    
+    if(!err) {
+      if(data && data.length && data.length > 0) {
+        data.forEach(item=>{
+          let obj = {
+            id: item._id,
+            name: item.value,
+            value: item.name
+          };
+          
+          result.push(obj);          
+        });
+      }
+      
+      res.jsonp(result);     
+    }
+  });
+});
+
+
+app.get('/currencyGetAutocomplete', function(req, res, next) {
+  var regex = new RegExp(req.query["term"], 'i');
+  console.log(regex);
+  var currencyFilter = Currency.find({value: regex}, {"value": 1, "name": 1})
+    .sort({"value" : 1})
+    .limit(10);//Negative sort means descending.  
+
+  currencyFilter.exec(function(err, data) {
+  var result = [];
+    
+    if(!err) {
+      if(data && data.length && data.length > 0) {
+        data.forEach( (item) => {
+          console.log(item);
+          let obj = {
+            id: item._id,
+            name: item.value,
+            value: item.name
+          };
+          
+          result.push(obj);          
+        });
+      }
+      
+      res.jsonp(result);     
+    }
+  });
+});
+
+
+app.get('/prodServiceAutocomplete', function(req, res, next) {
+  var regex = new RegExp(req.query["term"], 'i');
+  var id = req.query["supplierId"];  
+  console.log(regex + ' ' + req.query["supplierId"] + ' ' + MAX_PROD);
+  
+  var prodServiceFilter = ProductService
+    .find({productName: regex, supplier: new ObjectId(id)}, {'productName': 1, 'price': 1, 'currency': 1})
+    .sort({"productName" : 1})
+    .limit(parseInt(MAX_PROD));//Negative sort means descending.
+  
+  prodServiceFilter.exec(function(err, data) {
+  var result = [];
+    
+    if(!err) {
+      if(data && data.length && data.length > 0) {
+        data.forEach( (item) => {
+          let obj = {
+            id: item._id,
+            name: item.productName,
+            price: item.price,
+            currency: item.currency
+          };
+          
+          result.push(obj);
+        });
+      }
+     
+      res.jsonp(result);     
+    }
+  });
+});
+
+
 app.get('/capabilityInputAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.query["term"], 'i');
   console.log(regex);
   var capDescriptionFilter = Supplier.find({capabilityDescription: regex}, {'capabilityDescription': 1})
-    .sort({"capabilityDescription" : 1}).limit(5);
+    .sort({"capabilityDescription" : 1})
+    .limit(10);
+  
   capDescriptionFilter.exec(function(err, data) {
-  var result = [];
+    var result = [];
     
     if(!err) {
       if(data && data.length && data.length > 0) {
@@ -398,16 +692,16 @@ app.get('/countryAutocompleted', function(req, res) {
   var query = Country.find({name: regex}, { 'name': 1 })/*.sort({"updated_at":-1}).sort({"created_at":-1})*/.limit(5);
   console.log(req.query);
 
-    query.exec(function(err, items) {
-      if (!err) {
-         var result = buildResultSet(items);
-        console.log(result);
-         res.send(result, {
-            'Content-Type': 'application/json'
-         }, 200);
-      } else {
-         res.send(JSON.stringify(err), {
-            'Content-Type': 'application/json'
+  query.exec(function(err, items) {
+    if (!err) {
+       var result = buildResultSet(items);
+      
+       res.send(result, {
+          'Content-Type': 'application/json'
+       }, 200);
+    } else {
+       res.send(JSON.stringify(err), {
+          'Content-Type': 'application/json'
          }, 404);
       }
    });
@@ -416,7 +710,7 @@ app.get('/countryAutocompleted', function(req, res) {
 
 // Database configuration and test data saving:
 mongoose
-  .connect(MONGODB_URI, {
+  .connect(URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
   })
@@ -546,6 +840,6 @@ mongoose
     return null;
   })
   .then(() => {
-    app.listen(process.env.PORT);
+    //app.listen(5000);
   })
   .catch(console.error);
