@@ -46,7 +46,7 @@
 				</li>
         <br>
 				<li class="nav-item" style="margin-left: 0px;">
-					<a class="btn btn-danger" href="?exit=true">Exit</a>
+					<a class="btn btn-danger" href="?exit=true">Logout</a>
 				</li>
 			</ul>
 		</div>
@@ -63,10 +63,9 @@
 			<div class="card-body">
 				<h4 class="card-title"><%= request.itemDescription %></h4>
 				<p class="card-text">
-					Amount: <%= request.amount %>, <br>
+					Amount: <%= request.amount %> <br>
 					Delivery Location: <%= request.deliveryLocation %>
 				</p>
-
 				<a href="/supplier/bid-requests/<%= request._id %>" class="btn btn-primary" style="float: right;">Details</a>
 			</div>
 		</div>

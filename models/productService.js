@@ -7,7 +7,7 @@ const productserviceSchema = new Schema({
     unique: true,
     required: true
   },
-  productPrice: {
+  price: {
     type: Number,
     default: 1,
     validation(value) {
@@ -15,6 +15,10 @@ const productserviceSchema = new Schema({
         throw new Error('Price cannot be negative.');
       }
     },
+    required: true
+  },
+  currency: {
+    type: String,
     required: true
   },
   supplier: {

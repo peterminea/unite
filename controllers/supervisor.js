@@ -10,7 +10,8 @@ const process = require('process');
 const async = require('async');
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-//sgMail.setApiKey('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');
+const MongoClient = require('mongodb').MongoClient;
+const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 
 exports.getIndex = (req, res) => {
   if(!req || !req.session) return false;
@@ -342,7 +343,8 @@ exports.postSignUp = (req, res) => {
           Supervisor.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
             if (user) 
               return res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
-            
+          
+          bcrypt.hash(req.body.password, 10, function(err, hash) {
           user = new Promise((resolve, reject) => {
             const supervisor = new Supervisor({
               organizationName: req.body.organizationName,
@@ -407,6 +409,7 @@ exports.postSignUp = (req, res) => {
               });
          
           return resolve(supervisor);
+          });
         });
       
         assert.ok(user instanceof Promise);
@@ -437,7 +440,7 @@ exports.getProfile = (req, res) => {
 exports.postProfile = (req, res) => {
   Supervisor.findOne({ _id: req.body._id }, (err, doc) => {
     if (err) return console.error(err);
-    
+    doc._id = req.body._id;
     doc.organizationName = req.body.organizationName;
     doc.organizationUniteID = req.body.organizationUniteID;
     doc.contactName = req.body.contactName;
@@ -457,7 +460,18 @@ exports.postProfile = (req, res) => {
     doc.createdAt = req.body.createdAt;
     doc.updatedAt = Date.now();
 
-    return doc.save();
+    MongoClient.connect(URL, function(err, db) {//db or client.
+      if (err) throw err;
+      var dbo = db.db(BASE);
+      var myquery = { _id: doc._id };
+      var newvalues = { $set: doc };
+      dbo.collection("supervisors").updateOne(myquery, newvalues, function(err, res) {        
+        if(err) {
+          console.error(err.message);
+          return false;
+        }
+      });
+    });
   })
     .then(doc => {
       req.session.supervisor = doc;

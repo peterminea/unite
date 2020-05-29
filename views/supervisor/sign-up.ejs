@@ -27,38 +27,7 @@
           $(this).val? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
         });
         
-      $('#country').autocomplete({       
-        
-        source: function(req, res) {
-          var obj = $(this.element);
-          
-          $.ajax({
-            url: "/countryAutocomplete",
-            headers: { "X-CSRF-Token": token },
-            datatype: 'jsonp',//"application/json",
-            type: "POST",
-            data: req,
-            success: function(data) {          
-              res(data);              
-              autocomp(obj, data);              
-            },
-            error: function(err) {
-              alert(err);
-            }
-          });
-        },
-        minLength: 3,
-        focus: function (event, ui) {
-            this.value = ui.item.name;
-            event.preventDefault();
-         },
-        select: function(event, ui) {
-          if(ui.item) {
-            $(this).val(ui.item.name);
-            event.preventDefault();
-          }
-        }
-      });    
+      postAutocomplete('#country', '/countryAutocomplete', token);    
         
       $('input.fileupload')/*.unbind('change')*/.bind('change', function () {
         $(this).val ? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
@@ -112,15 +81,13 @@
               var ob, val, response = JSON.parse(xhr.responseText);
               if(isMultiple) {
                 for(var i in response) {
-                  val = input.attr('value') + '/' + response[i].path + ',';                  
-                  //input.val(val);
+                  val = input.attr('value') + '/' + response[i].path + ',';
                   input.attr('value', val);                  
                   ob = '<a href="/' + response[i].path + '" download>Download file "'+i+'"</a>';
                   $(ob).insertAfter(input.parent('div'));
                 }
               } else {                
-                val = '/' + response.path + ',';                  
-                //input.val(val);
+                val = '/' + response.path + ',';
                 input.attr('value', val);
                 ob = '<a href="/' + response.path + '" download>Download file</a>';
                 $(ob).insertAfter(input.parent('div'));
@@ -136,6 +103,14 @@
         
         e.preventDefault();
       });
+        
+    $('.cb').click(function() {
+      if($(':checkbox:checked').length == 2) {
+        $('#submit').removeAttr('disabled');
+      } else {
+        $('#submit').attr('disabled', 'disabled');
+      }
+    });
   });
   </script>  
 </head>
@@ -248,9 +223,9 @@
         <!--Mandatory check of agreements -->
         <div class="form-group">
           <div class="form-check">
-            <input class="form-check-input" name="UNITETermsAndConditions" type="checkbox" checked required>
+            <input class="form-check-input cb" name="UNITETermsAndConditions" id="termscon" type="checkbox" required>
             <a href="../termsConditions">
-              <label class="form-check-label" for="invalidCheck2">
+              <label class="form-check-label cb" for="termscon">
                 UNITE Terms And Conditions              
               </label>
             </a>
@@ -259,9 +234,9 @@
         
         <div class="form-group">
           <div class="form-check">
-            <input class="form-check-input" name="antibriberyAgreement" type="checkbox" checked required>          
+            <input class="form-check-input cb" name="antibriberyAgreement" id="antibrib" type="checkbox" required>          
             <a href="../antibriberyAgreement">
-              <label class="form-check-label" for="invalidCheck2">
+              <label class="form-check-label cb" for="antibrib">
                   Antibribery Agreement
               </label>
             </a>
@@ -269,7 +244,7 @@
         </div>
 
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" >
-        <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+        <button disabled id="submit" type="submit" class="btn btn-primary btn-block">Sign Up</button>
         <div class="form-group">
           <label class="text-muted form-text">
             By clicking the "Sign Up" button, you accept <a href="../termsConditions">the UNITE Terms And Conditions</a> and <a href="../antibriberyAgreement">the Antibribery Agreement</a>.

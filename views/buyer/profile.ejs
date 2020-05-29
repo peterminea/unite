@@ -28,59 +28,8 @@
           $('#updateProfile').removeAttr('disabled');
         });
         
-      $('#organizationUniteID').autocomplete({
-        source: function(req, res) {
-          var obj = $(this.element);
-          
-          $.ajax({
-            url: "/uniteIDAutocomplete",
-            headers: { "X-CSRF-Token": token },
-            datatype: 'jsonp',
-            type: "POST",
-            data: req,
-            success: function(data) {
-              res(data);
-              autocomp(obj, data);
-            },
-            error: function(err) {
-              alert(err);
-            }
-          });
-        },
-        minLength: 3
-      });
-      
-      $('#country').autocomplete({
-        source: function(req, res) {
-          var obj = $(this.element);
-          
-          $.ajax({
-            url: "/countryAutocomplete",
-            headers: { "X-CSRF-Token": token },
-            datatype: 'jsonp',//"application/json",
-            type: "POST",
-            data: req,
-            success: function(data) {
-              res(data);
-              autocomp(obj, data);
-            },
-            error: function(err) {
-              alert(err);
-            }
-          });
-        },
-        minLength: 3,
-        focus: function (event, ui) {
-            this.value = ui.item.name;
-            event.preventDefault();
-         },
-        select: function(event, ui) {
-          if(ui.item) {
-            $(this).val(ui.item.name);
-            event.preventDefault();
-          }
-        }
-      });
+      //postAutocomplete('#organizationUniteID', '/uniteIDAutocomplete', token);//Readonly, so useless.
+      postAutocomplete('#country', '/countryAutocomplete', token);
   });
 </script>
     

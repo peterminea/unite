@@ -22,10 +22,6 @@
     <script type="text/javascript">
       $(document).ready(function() {
         var token = $("input[name='_csrf']").val();
-       
-        $('#amount').bind('change', function() {
-          $('#price').val($(this).val() * $('#defaultPrice').val());          
-        });
         
         $('#search').autocomplete({
           source: function(req, res) {
@@ -39,6 +35,11 @@
               data: req,
               scroll: true,
               success: function(data) {
+                if(!data || !data.length) {
+                  obj.val('');
+                  return false;
+                }
+                
                 res(data);
                 autocomp(obj, data, true);
               },
@@ -63,12 +64,18 @@
               type: "GET",
               data: req,
               scroll: true,
-              success: function(data) {              
+              success: function(data) {                
+                if(!data || !data.length) {
+                  obj.val('');
+                  obj.next('.prodButton').attr('disabled', 'disabled');
+                  return false;
+                }
+                
                 res(data);
-                //autocomp(obj, data);                
+                //autocomp(obj, data);
                 var $obj = '<div class="prov"><ul>';
                 for(var i in data) {
-                  $obj += '<li id="' + data[i].price + '">' + data[i].name + '</li>';
+                  $obj += '<li id="' + data[i].price + '" currency="' + data[i].currency + '">' + data[i].name + '</li>';
                 }
                 
                 $obj += '</ul><div>';
@@ -77,8 +84,9 @@
                   .find('li')
                   .click(function() {
                     obj
-                      .attr('price', $(this).attr('id'))
-                      .val($(this).text());
+                      .attr({'price': $(this).attr('id'), 'currency': $(this).attr('currency')})
+                      .val($(this).text())
+                      .trigger('change');
                     $(this).parent('ul').hide();
                 });
               },
@@ -146,8 +154,8 @@
   <div class="container">
     <form class="my-2 my-lg-2" method="POST">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-      <input class="form-control mr-sm-2" type="search" id="search" placeholder="Search Capabilites" aria-label="Search"
-        name="capabilityInput">
+      <input class="form-control mr-sm-2" type="search" id="search" placeholder="Search Capabilites" aria-label="Search" name="capabilityInput">
+      <p class='littleNote'>Suppliers with the requested capabilities will be searched for.</p>
     </form>
 
     <div>
@@ -155,12 +163,12 @@
       <div class="card mt-4">
         <h5 class="card-header bg-dark text-white"><%= supplier.companyName %></h5>
         <div class="card-body">
-          <h5 class="card-title">Contact Name</h5>
-          <p class="card-text">Capability Description.</p>
+          <h5 class="card-title">Contact Name: <%= supplier.contactName %></h5>
+          <p class="card-text">Capability Description: <%= supplier.capabilityDescription %></p>
           <button class="btn btn-primary ml-2" style="float: right;" data-target="#request_<%= i %>"
             data-toggle="modal">Request a Bid</button>
           <button class="btn btn-dark" style="float: right;" data-target="#comp_<%= i %>"
-            data-toggle="modal">View</button>
+            data-toggle="modal">View Details</button>
         </div>
 
         <!-- View Button's Modal -->
@@ -195,8 +203,8 @@
                     <input type="text" class="form-control" readonly value="<%= supplier.companyRegistrationNo %>">
                   </div>
                   <div class="form-group">
-                    <label>Registration Company</label>
-                    <input type="text" class="form-control" readonly value="<%= supplier.registrationCompany %>"
+                    <label>Registered Country</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.registeredCountry %>"
                       required>
                   </div>
                   <div class="form-group">
@@ -204,8 +212,8 @@
                     <input type="text" class="form-control" readonly value="<%= supplier.companyAddress %>" required>
                   </div>
                   <div class="form-group">
-                    <label>Storage Location</label>
-                    <input type="text" class="form-control" readonly value="<%= supplier.storageLocation %>">
+                    <label>Area Covered</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.areaCovered %>">
                   </div>
                   <div class="form-group">
                     <label>Contact Mobile Number</label>
@@ -252,13 +260,12 @@
                     <input type="text" class="form-control" readonly value="<%= supplier.otherSocialMediaURL %>">
                   </div>
                   <div class="form-group">
-                    <label>Other Social Media URL</label>
-                    <input type="text" class="form-control" readonly value="<%= supplier.commodities %>" required>
+                    <label>Products / Services Offered</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.productsServicesOffered %>" >
                   </div>
                   <div class="form-group">
                     <label>Capability Description</label>
-                    <input type="text" class="form-control" readonly value="<%= supplier.capabilityDescription %>"
-                      required>
+                    <input type="text" class="form-control" readonly value="<%= supplier.capabilityDescription %>"                      >
                   </div>
                   <div class="form-group">
                     <label>Relevant Experience</label>
@@ -299,8 +306,8 @@
                   <!--Mandatory check of agreements -->
                   <div class="form-group">
                     <div class="form-check">
-                      <input required disabled class="form-check-input" type="checkbox"
-                        <%= !supplier.UNITETermsAndConditions ? "checked" : "" %>>
+                      <input readonly disabled class="form-check-input" type="checkbox"
+                        <%= supplier.UNITETermsAndConditions ? "checked" : "" %>>
                       <label class="form-check-label" for="invalidCheck2">
                         UNITE Terms And Conditions
                       </label>
@@ -308,8 +315,8 @@
                   </div>
                   <div class="form-group">
                     <div class="form-check">
-                      <input required disabled class="form-check-input" type="checkbox"
-                        <%= supplier.antibriberyAgreement ? "checked" : "" %> readonly>
+                      <input class="form-check-input" type="checkbox"
+                        <%= supplier.antibriberyAgreement ? "checked" : "" %> disabled readonly>
                       <label class="form-check-label" for="invalidCheck2">
                         Antibribery Agreement
                       </label>
@@ -355,8 +362,11 @@
                     <div class="input-group">
                       <input type="text" required class="form-control prodInput" supplierId="<%= supplier._id %>" placeholder="Add Product/Service" id="prodServiceInput_<%= i %>">
                       <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="button" disabled id="addProdService_<%= i %>">Add</button>
+                        <button class="btn btn-outline-secondary prodButton" type="button" disabled id="addProdService_<%= i %>">Add</button>
                       </div>
+                      <p class='littleNote'>
+                        Please note that only available products with this supplier can be selected.
+                      </p>
                     </div>
                     <br>
                     <ul class="list-group" id="prodServices_<%= i %>">
@@ -436,15 +446,15 @@
                       return limitStatus(e);
                     });
                     
+                    var index = "<%= i %>";
+                    
                     $('input[id^="status_"]').change(function(e) {
                       if($(this).val() > 6 || $(this).val() < 0) {
                         $(this).val(0);
                         return false;
-                      }
+                      }                      
                       
-                      var index = "<%= i %>";
                       var price = $('#price_'+index).val();
-                      index = parseInt(index);
                       var statusText = '';                      
                       var l = parseInt($(this).val());
                       
@@ -460,7 +470,7 @@
                         case 0:
                           statusText = 'Buyer requested a bid from you. Please send information to buyer.';
                           break;
-/*
+
                         case 1:
                           statusText = "Waiting for buyer's processing.";
                           break;
@@ -487,76 +497,68 @@
                         default:
                           statusText = '0';
                       }*/
-
-                      //alert(statusText);
                       var val = '<div style="color: blue" id="statusText_'+index + '"><p>' + statusText + '</p></div>';
                       if($("#statusText_"+index).length) $("#statusText_"+index).remove();
                       $(val).insertAfter($('#status_'+index).parent('div'));
                     });
                     
+                    
                     $('input[id^="prodServiceInput_"]').change(function() {
                       if($(this).val()) {
-                        var index = "<%= i %>";
                         $("button[id='addProdService_"+ index +"']").removeAttr('disabled');
+                        $('#defaultPrice_'+index).val($(this).attr('price'));
+                        $('#currency_'+index).val($(this).attr('currency'));                        
                       }
                     });
+                    
+                    
+                    $('#amount_'+index).bind('change', function() {
+                      $('#price_'+index).val($(this).val() * $('#defaultPrice_'+index).val());          
+                    });
+                    
+                    var elem = (document.getElementById("prodServices_"+index));                    
 
                     $("button[id^='addProdService_']").click(() => {
-                      var index = "<%= i %>";
+                      if($(elem).find('li').length >= 5) {
+                          alert('You have reached the limit of products to request from this supplier.');
+                          return false;
+                      }
+                      
                       $('input[id="status_'+ index +'"]').trigger('change');
-                      index = parseInt(index);
                      
-                      var amount = $('#amount_'+index);                      
+                        var amount = $('#amount_'+index);                      
                         if(amount.val() < 1) {
                           alert('Please select an amount first');
                           return false;
                         }
                         
                         var input = $("#prodServiceInput_"+index);
-                        input.attr('price', $('#defaultPrice_'+index).val());
-                      
+                        input.attr('price', $('#defaultPrice_'+index).val());                      
                         var prodInput = $("#hiddenProdServicesList_"+index);
                         var amountInput = $("#amountList_"+index);
-                        var priceInput = $("#priceList_"+index);
-                      
-                        var product = prodInput.val(), quantity = amountInput.val(), price = priceInput.val();
-                      
-                        var prodList = isJson(product)? (product) : [];
-                        var amountList = isJson(quantity)? (quantity) : [];
-                        var priceList = isJson(price)? (price) : [];
-                      
+                        var priceInput = $("#priceList_"+index);                      
+                        var product = prodInput.val(), quantity = amountInput.val(), price = priceInput.val();                      
                         if(input.val() != "") {
                           var addedPrice = parseInt(amount.val()? amount.val() : 0) * parseInt(input.attr('price')? input.attr('price') : 1);
                           var price = parseInt($('#price_'+index).val()) + addedPrice;
                           $('#price_'+index).val(parseInt(price));
-                          var elem = (document.getElementById("prodServices_"+index));
                           
                           elem
-                            .insertAdjacentHTML("beforeend", "<li class='list-group-item' price='" + addedPrice + "' amount='" + amount.val() + "'><span>" + $("#prodServiceInput_"+index).val() + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
+                            .insertAdjacentHTML("beforeend", "<li class='list-group-item' price='" + addedPrice + "' amount='" + amount.val() + "'><span>" + $("#prodServiceInput_"+index).val() + ' - ' + input.attr('price') + ' ' + $('#currency_'+index).val() + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
                           elem = $(elem);
-                          
-                          var prodVal = input.val(), amountVal = amount.val(), priceVal = $('#price_'+index).val();
-                          var prods = prodList.val(), qtys = amountList.val(), prices = priceList.val();
-                          var bigPrice = amountVal * priceVal;
-                          prodList.push(prodVal);
-                          amountList.push(amountVal);
-                          priceList.push(bigPrice);//The product
-                          
-                          //prodList.push(prods && prods.length? prods + ',' + prodVal : prodVal);
-                          //amountList.push(qtys && qtys.length? qtys + ',' + amountVal : amountVal);
-                          //priceList.push(prices && prices.length? prices + ',' + bigPrice : bigPrice);
-                          
-                          $('#totalAmount_'+index).val(parseInt($('#totalAmount_'+index).val()) + parseInt(amountVal));
-                          prodInput.val((prodList));
-                          amountInput.val((amountList));
-                          priceInput.val((priceList));
                           
                           $('.rem').unbind('click').click(function() {
                             var li = $(this).parent('li');
                             var newIndex = elem.find('li').index(li);
-                            prodList.splice(newIndex, 1);
-                            amountList.splice(newIndex, 1);
-                            priceList.splice(newIndex, 1);
+                            var arr = prodInput.val().split(',');
+                            arr.splice(newIndex, 1);
+                            prodInput.val(arr);
+                            arr = amountInput.val().split(',');
+                            arr.splice(newIndex, 1);
+                            amountInput.val(arr);
+                            arr = priceInput.val().split(',');
+                            arr.splice(newIndex, 1);
+                            priceInput.val(arr);
                             var newAmount = parseInt($('#totalAmount_'+index).val()) - parseInt(li.attr('amount'));
                             var newPrice = parseInt($('#price_'+index).val()) - parseInt(li.attr('price'));
                             $('#totalAmount_'+index).val(parseInt(newAmount));
@@ -564,6 +566,18 @@
                             li.remove();
                           });
                           
+                          var prodVal = input.val(), amountVal = amount.val(), priceVal = $('#price_'+index).val();
+                          var bigPrice = amountVal * priceVal;
+                          var arr = prodInput.val().split(',');
+                          arr.push(prodVal);
+                          prodInput.val(arr);
+                          arr = amountInput.val().split(',');
+                          arr.push(amountVal);
+                          amountInput.val(arr);
+                          arr = priceInput.val().split(',');
+                          arr.push(bigPrice);
+                          priceInput.val(arr);
+                          $('#totalAmount_'+index).val(parseInt($('#totalAmount_'+index).val()) + parseInt(amountVal));
                           $(input).val('');//.removeAttr('price');                         
                         }
                     });

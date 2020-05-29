@@ -19,7 +19,7 @@ exports.postIndex = (req, res) => {
       var products = [];
 
       for(var i in productList) {
-        products.push('Product name: \'' + productList[i] + '\', amount: ' + amountList[i] + ', price: ' + priceList[i] + '.');
+        products.push("Product name: '" + productList[i] + "', amount: " + amountList[i] + ', price: ' + priceList[i] + '.');
       }
   
       const bidRequest = new BidRequest({
@@ -45,7 +45,7 @@ exports.postIndex = (req, res) => {
     });
 
     return bidRequest
-      .save()
+      .updateOne()
       .then(result => {
         req.flash("success", "Bid updated successfully!");
         return res.redirect("/buyer");

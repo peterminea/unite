@@ -15,7 +15,8 @@ const BidRequest = require("../models/bidRequest");
 const async = require('async');
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-//sgMail.setApiKey('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');
+const MongoClient = require('mongodb').MongoClient;
+const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 
 exports.getIndex = (req, res) => {
   res.render("buyer/index", {
@@ -52,9 +53,9 @@ exports.postIndex = (req, res) => {
       });
     });
   } else if (req.body.itemDescription) {//The Send Order part.
-    var productList = (req.body.productsServicesOffered);
-    var amountList = (req.body.amountList);
-    var priceList = (req.body.priceList);
+    var productList = (req.body.productsServicesOffered[0].split(','));
+    var amountList = (req.body.amountList[0].split(','));
+    var priceList = (req.body.priceList[0].split(','));
     var products = [];
     
     for(var i in productList) {
@@ -84,8 +85,7 @@ exports.postIndex = (req, res) => {
       supplier: req.body.supplier
     });
     
-  console.log('Order: ' + bidRequest);
-    
+    console.log('Order: ' + bidRequest);
     return bidRequest
       .save()
       .then(result => {
@@ -387,7 +387,7 @@ exports.postSignIn = (req, res) => {
             req.session.organizationId = doc._id;
             req.session.buyer = doc;
             // Make sure the user has been verified
-            if (!doc.isVerified) 
+            if (!doc.isVerified)
               return res.status(401).send({
                 type: 'not-verified', 
                 msg: 'Your account has not been verified. Please check your e-mail for instructions.' });
@@ -403,10 +403,10 @@ exports.postSignIn = (req, res) => {
         .then(err => {
           if (err) {
           console.error(err);
-          res.redirect("/supplier/sign-in");
+          res.redirect("/buyer/sign-in");
           }
         
-        res.redirect('/supplier');
+        res.redirect('/buyer');
         })
         .catch(console.error);
     });
@@ -448,7 +448,9 @@ exports.postSignUp = (req, res) => {
           Buyer.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
             if (user)
               return res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
-            user = new Promise((resolve, reject) => {          
+            
+          bcrypt.hash(req.body.password, 10, function(err, hash) {
+            user = new Promise((resolve, reject) => {
               const buyer = new Buyer({
                 organizationName: req.body.organizationName,
                 organizationUniteID: req.body.organizationUniteID,
@@ -484,7 +486,7 @@ exports.postSignUp = (req, res) => {
                 }
                     var email = {
                       from: 'peter@uniteprocurement.com',
-                      to: 'peter.minea@gmail.com',//buyer.emailAddress, 
+                      to: buyer.emailAddress, 
                       subject: 'Account Verification Token',
                       text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/buyer/confirmation\/' + token.token + '.\n'               
                     };
@@ -509,6 +511,7 @@ exports.postSignUp = (req, res) => {
 
                 return resolve(buyer);
               });
+            });
 
           assert.ok(user instanceof Promise);
 
@@ -540,7 +543,9 @@ exports.getProfile = (req, res) => {
 
 exports.postProfile = (req, res) => {
   Buyer.findOne({ _id: req.body._id }, (err, doc) => {
-    if (err) return console.error(err);
+    if (err) 
+      return console.error(err);
+    doc._id = req.body._id;
     doc.organizationName = req.body.organizationName;
     doc.organizationUniteID = req.body.organizationUniteID;
     doc.contactName = req.body.contactName;
@@ -555,7 +560,18 @@ exports.postProfile = (req, res) => {
     doc.createdAt = req.body.createdAt;
     doc.updatedAt = Date.now();
 
-    return doc.save();
+    MongoClient.connect(URL, function(err, db) {//db or client.
+      if (err) throw err;
+      var dbo = db.db(BASE);
+      var myquery = { _id: doc._id };
+      var newvalues = { $set: doc };
+      dbo.collection("buyers").updateOne(myquery, newvalues, function(err, res) {        
+        if(err) {
+          console.error(err.message);
+          return false;
+        }
+      });
+    });
   })
     .then(doc => {
       req.session.buyer = doc;

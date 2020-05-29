@@ -29,40 +29,9 @@
         
         $('input.fileupload')/*.unbind('change')*/.bind('change', function() {
           $(this).val? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
-        }); 
-      
-      $('#country').autocomplete({
+        });
         
-        source: function(req, res) {
-          var obj = $(this.element);
-          
-          $.ajax({
-            url: "/countryAutocomplete",
-            headers: { "X-CSRF-Token": token },
-            datatype: 'jsonp',//"application/json",
-            type: "POST",
-            data: req,            
-            success: function(data) {          
-              res(data);
-              autocomp(obj, data);              
-            },
-            error: function(err) {
-              alert(err);
-            }
-          });
-        },
-        minLength: 3,
-        focus: function (event, ui) {
-            this.value = ui.item.name;
-            event.preventDefault();
-         },
-        select: function(event, ui) {
-          if(ui.item) {
-            $(this).val(ui.item.name);
-            event.preventDefault();
-          }
-        }
-      });    
+      postAutocomplete('#country', '/countryAutocomplete', token);
         
       $('.single,.multiple').each(function(index, element) {
         var val = $(this).prev('.fileupload').attr('value');
@@ -247,7 +216,7 @@
           <div class="form-group">
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="uniteTermsAndConditions" <%= profile.UNITETermsAndConditions ? "checked" : "" %> required>
-              <label class="form-check-label" for="invalidCheck2">
+              <label class="form-check-label" for="uniteTermsAndConditions">
                 <a href="../termsConditions">UNITE Terms And Conditions</a>
               </label>
             </div>
@@ -255,7 +224,7 @@
           <div class="form-group">
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="antibriberyAgreement" <%= profile.antibriberyAgreement ? "checked" : "" %> required>
-              <label class="form-check-label" for="invalidCheck2">
+              <label class="form-check-label" for="antibriberyAgreement">
                 <a href="../antibriberyAgreement">Antibribery Agreement </a>
               </label>
             </div>

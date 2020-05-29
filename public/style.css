@@ -9,6 +9,11 @@ body {
   font-size: 16pt;
 }
 
+p.term {
+  color: navy;
+  font-size: 14pt;
+}
+
 .color-primary {
   color: #063797;
 }
@@ -16,6 +21,12 @@ body {
 .rem {
   color: green;
   cursor: pointer;
+}
+
+.littleNote {
+  color: red;
+  font-size: 10pt;
+  font-style: italic;
 }
 
 .ui-autocomplete { 

@@ -21,74 +21,11 @@
   
   <script type="text/javascript">
       $(document).ready(function () {
-      var token = $("input[name='_csrf']").val();        
-      
-      $('.country').autocomplete({
-        source: function(req, res) {
-          var obj = $(this.element);
+      var token = $("input[name='_csrf']").val();
         
-          $.ajax({
-            url: "/countryAutocomplete",
-            headers: { "X-CSRF-Token": token },
-            datatype: 'jsonp',
-            type: "POST",
-            data: req,
-            success: function(data) {              
-              res(data);
-              autocomp(obj, data);
-            },
-            error: function(err) {
-              alert(err);
-            }
-          });
-        },
-        minLength: 3,
-        delay: 100,
-        focus: function (event, ui) {
-            if(!ui.item) return true;
-            $(this).name = ui.item.name;
-            event.preventDefault();
-         },
-        select: function(event, ui) {
-          if(ui.item) {
-            $(this.element).val(ui.item.name);
-            event.preventDefault();
-          }
-        }
-      });
-      
-      $("#industry").autocomplete({
-        source: function(req, res) {
-          var obj = $(this.element);
-          
-          $.ajax({
-            url: '/industryAutocomplete',
-            headers: { "X-CSRF-Token": token },
-            datatype: 'jsonp',
-            type: "POST",
-            data: req,
-            success: function(data) {
-              res(data);
-              autocomp(obj, data);
-            },
-            error: function(err) {
-            console.log(err);
-            }
-          });
-        },
-        minLength: 3,
-        delay: 10,
-        focus: function (event, ui) {
-            $(this).val() = ui.item.name;
-            event.preventDefault();
-         },
-        select: function(event, ui) {
-          if(ui.item) {
-            $(this).val(ui.item.name);
-            event.preventDefault();
-            }
-          }
-      });
+      postAutocomplete('.country', '/countryAutocomplete', token);
+      getAutocomplete('#industry', '/industryGetAutocomplete', token);
+      getAutocomplete('#currency', '/currencyGetAutocomplete', token);
     
       $('input.fileupload')/*.unbind('change')*/.bind('change', function () {
         $(this).val ? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
@@ -167,7 +104,68 @@
         
         e.preventDefault();
       });
+        
+    $('.cb').click(function() {
+      if($(':checkbox:checked').length == 2) {
+        $('#submit').removeAttr('disabled');
+      } else {
+        $('#submit').attr('disabled', 'disabled');
+      }
     });
+        
+    $('#prodServiceInput').bind('change', function() {
+      if($(this).val()) {
+        $('#addProdService').removeAttr('disabled');
+      } else {
+        $('#addProdService').attr('disabled', 'disabled');
+      }
+    });
+        
+     $("#addProdService").click(() => {
+        var input = $("#prodServiceInput");
+        var prodInput = $("#prodServicesList");
+        var priceInput = $("#pricesList");
+        var currencyInput = $("#currenciesList");
+     
+        if(input.val() != "") {          
+          var elem = (document.getElementById("prodServices"));
+          elem.insertAdjacentHTML("beforeend", "<li class='list-group-item'><span>" + $("#prodServiceInput").val() + ' - ' + $('#price').val() + ' ' + $('#currency').val() + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
+          elem = $(elem);
+          
+          var prodVal = input.val();
+          var arr = prodInput.val().split(',');
+          arr.push(prodVal);
+          prodInput.val((arr));
+          
+          prodVal = $('#price').val();
+          arr = priceInput.val().split(',');
+          arr.push(prodVal);
+          priceInput.val((arr));
+          
+          prodVal = $('#currency').val();
+          arr = currencyInput.val().split(',');
+          arr.push(prodVal);
+          currencyInput.val((arr));
+
+          $('.rem').unbind('click').bind('click', function() {
+            var li = $(this).parent('li');
+            var newIndex = elem.find('li').index(li);
+            var arr = prodInput.val().split(',');
+            arr.splice(newIndex, 1);
+            prodInput.val((arr));
+            arr = priceInput.val().split(',');
+            arr.splice(newIndex, 1);
+            priceInput.val((arr));
+            arr = currencyInput.val().split(',');
+            arr.splice(newIndex, 1);
+            currencyInput.val((arr));
+            li.remove();
+          });
+
+          input.val('');
+        }
+    });
+  });
   </script>
 </head>
 
@@ -203,6 +201,8 @@
     <div class="sign-in-form smooth-shadow">
       <form method="POST">
         <h2>Sign up as Supplier</h2>
+        <input type="hidden" name="priceList" id="priceList">
+        <input type="hidden" name="currencyList" id="currencyList">
         <div class="form-group">
           <label class="text-muted form-text">
             Please fill in all the required (*) fields.
@@ -272,10 +272,23 @@
         <div class="form-group">
           <label>Website</label>
           <input type="text" class="form-control" name="website">
-        </div>
+        </div>        
         <div class="form-group">
-          <label>Products or Services Offered*</label>
-          <input type="text" class="form-control" name="productsServicesOffered" required>
+          <label class="col-form-label">Products / Services Offered*</label>
+          <br><a href="addproduct">Add new product</a>
+          <div class="input-group">
+            <input type="text" class="form-control prodInput" title="Add Product/Service" id="prodServiceInput">
+            <br>
+            <input type="number" min="1" class="form-control" title="Price" id="price">
+            <input type="text" class="form-control" title="Currency" id="currency">
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" type="button" disabled id="addProdService">Add</button>
+            </div>
+          </div>
+          <br>
+          <ul class="list-group" id="prodServices">           
+          </ul>
+          <input type="hidden" required id="prodServicesList" name="productsServicesOffered">
         </div>
         <div class="form-group">
           <label>Capability Description*</label>
@@ -297,7 +310,7 @@
         </div>
         
         <div class="form-group">
-          <label>Certificates</label>          
+          <label>Certificates</label>
           <input class="form-control fileupload" type="file" id="certificates" name="certificates" multiple>
           <input class="form-control multiple btn btn-dark mt-2" type="button" disabled value="Upload Files" />
         </div>
@@ -337,9 +350,9 @@
         <!--Mandatory check of agreements -->
         <div class="form-group">
           <div class="form-check">
-            <input class="form-check-input" name="UNITETermsAndConditions" type="checkbox" checked required>
+            <input class="form-check-input cb" name="UNITETermsAndConditions" id="termscon" type="checkbox" required>
             <a href="../termsConditions">
-              <label class="form-check-label" for="invalidCheck2">
+              <label class="form-check-label cb" for="termscon">
                 UNITE Terms And Conditions
               </label>
             </a>
@@ -348,9 +361,9 @@
         
         <div class="form-group">
           <div class="form-check">
-            <input class="form-check-input" name="antibriberyAgreement" type="checkbox" checked required>          
+            <input class="form-check-input cb" name="antibriberyAgreement" id="antibrib" type="checkbox" required>          
             <a href="../antibriberyAgreement">
-              <label class="form-check-label" for="invalidCheck2">
+              <label class="form-check-label cb" for="antibrib">
                 Antibribery Agreement
               </label>
             </a>
@@ -358,7 +371,7 @@
         </div>
 
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+        <button disabled id="submit" type="submit" class="btn btn-primary btn-block">Sign Up</button>
         <div class="form-group">
           <label class="text-muted form-text">
             By clicking the "Sign Up" button, you accept <a href="../termsConditions">the UNITE Terms And Conditions</a> and <a href="../antibriberyAgreement">the Antibribery Agreement</a>.

@@ -1,7 +1,9 @@
 const mongoose = require("mongoose");
-mongoose.Promise = require("bluebird");
-const url = "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";
-const connect = mongoose.connect(url, {
+const process = require('process');
+//mongoose.Promise = require("bluebird");
+
+const connect = mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true }
 );
+
 module.exports = connect;

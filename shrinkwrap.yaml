@@ -27,7 +27,7 @@ dependencies:
   jsonp: 0.2.1
   mongoose: 5.9.16
   multer: 1.4.2
-  nodemailer: 6.4.6
+  nodemailer: 6.4.8
   nodemailer-sendgrid-transport: 0.2.0
   passport-local-mongoose: 6.0.1
   process: 0.11.10
@@ -2118,13 +2118,13 @@ packages:
     dev: false
     resolution:
       integrity: sha1-pRZZO/49HyeM/hcGDh2yNlio9Pw=
-  /nodemailer/6.4.6:
+  /nodemailer/6.4.8:
     dev: false
     engines:
       node: '>=6.0.0'
     requiresBuild: true
     resolution:
-      integrity: sha512-/kJ+FYVEm2HuUlw87hjSqTss+GU35D4giOpdSfGp7DO+5h6RlJj7R94YaYHOkoxu1CSaM0d3WRBtCzwXrY6MKA==
+      integrity: sha512-UbJD0+g5e2H20bWv7Rpj3B+N3TMMJ0MLoLwaGVJ0k3Vo8upq0UltwHJ5BJfrpST1vFa91JQ8cf7cICK5DSIo1Q==
   /nth-check/1.0.2:
     dependencies:
       boolbase: 1.0.0
@@ -3184,7 +3184,7 @@ specifiers:
   jsonp: ^0.2.1
   mongoose: ^5.9.16
   multer: ^1.4.2
-  nodemailer: ^6.4.6
+  nodemailer: ^6.4.8
   nodemailer-sendgrid-transport: ^0.2.0
   passport-local-mongoose: ^6.0.0
   process: ^0.11.10
