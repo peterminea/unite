@@ -14,9 +14,6 @@ router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({
   extended: true
 }));
-//  
-//router.get('/:supplierId/:buyerId/:requestId/:buyerName/:supplierName', isAuth, sessionExit, chatController.getIndex);
-//if(1==2)
 
 function chatter() {
   
@@ -28,7 +25,6 @@ router.route("/").get((req, res, next) =>  {
   
         connectdb.then( (db)  =>  {
             Message.find({}).then( (chat)  =>  {
-              //console.log('FAIDER ' + chat.length);
               
               if(chat && chat.length) {
                 for(var message of chat) {                
@@ -36,13 +32,11 @@ router.route("/").get((req, res, next) =>  {
                   .then((data) => {
                     if(data && data.length) {
                       message.fromName = data[0].organizationName;
-                      //console.log('MOIDER');
 
                       Buyer.find({_id: new ObjectId(message.to)}, {'organizationName': 1})
                         .then((data2) => {
                           if(data2 && data2.length) {
                           message.toName = data2[0].companyName;
-                          //console.log('LOIVER');                          
                           }
                         });
                       }
@@ -51,27 +45,8 @@ router.route("/").get((req, res, next) =>  {
                 
                   setTimeout(function() {
                     res.json(chat);
-                  }, 5000);
-                }              
-              /*
-              var supplierFilter = Supplier.find({_id: new ObjectId(chat.from)}, {'companyName': 1} );
-              var buyerFilter = Buyer.find({_id: new ObjectId(chat.to)}, {'organizationName': 1});
-              
-              buyerFilter.exec(function(err, data) {//organization company
-                if(data && data.length) {
-                  chat.fromName = data[0].organizationName;
-                  console.log('MOIDER');                                   
-                }
-              });
-              
-              supplierFilter.exec(function(err, data) {//organization company
-                if(data && data.length) {
-                  chat.toName = data[0].companyName;
-                  console.log('LOIVER');                  
-                }
-              });
-              
-            res.json(chat);*/
+                  }, 4000);
+                }             
         });
     });
 });

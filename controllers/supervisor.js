@@ -21,7 +21,6 @@ exports.getIndex = (req, res) => {
     { organizationUniteID: supervisor.organizationUniteID },
     (err, results) => {
       if (err) return console.error(err);
-      console.log(results);
       res.render("supervisor/index", {
         supervisor: supervisor,
         buyers: results,
@@ -180,7 +179,7 @@ exports.postForgotPassword = (req, res, next) => {
       };
       
       sgMail.send(emailOptions/*);              
-              transporter.sendMail(email*/, function (err, info) {console.log(process.env.SENDGRID_API_KEY);
+              transporter.sendMail(email*/, function (err, info) {
         console.log('E-mail sent!')
         req.flash('success', 'An e-mail has been sent to ' + user.emailAddress + ' with password reset instructions.');
         done(err, 'done');
@@ -263,7 +262,6 @@ exports.getSignIn = (req, res) => {
 };
 
 exports.getSignUp = (req, res) => {
-  console.log(req.session.supervisor);
   if (!req.session.supervisor)
     return res.render("supervisor/sign-up", {
       errorMessage: req.flash("error")
@@ -275,8 +273,7 @@ exports.getSignUp = (req, res) => {
 exports.postSignIn = (req, res) => {
   const email = req.body.emailAddress;
   const password = req.body.password;
-  const rememberUser = req.body.remember;
-  console.log(rememberUser);
+  const rememberUser = req.body.remember;  
 
   if (!email) res.redirect("/supervisor/sign-in");
   else {

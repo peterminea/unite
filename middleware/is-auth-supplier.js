@@ -1,5 +1,5 @@
 module.exports = (req, res, next) => {
-  if (!req.session.supplier)
+  if (!req.session.supplierId)
     return res.redirect("/supplier/sign-in");
   next();
 }

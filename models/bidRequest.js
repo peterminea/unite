@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const bidRequestSchema = new Schema({
+  requestName: {
+    type: String,
+    unique: true,
+    required: true
+  },
   supplierName: {
     type: String,
     required: true

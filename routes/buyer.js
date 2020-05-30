@@ -14,7 +14,6 @@ router.get("/sign-in", buyerController.getSignIn);
 router.get("/sign-up", buyerController.getSignUp);
 router.get("/profile", isAuth, sessionExit, buyerController.getProfile);
 router.get("/balance", isAuth, sessionExit, buyerController.getBalance);
-//router.get("/supplier", isAuth, sessionExit, buyerController.getSupplier);
 router.get("/confirmation/:token", isAuth, sessionExit, buyerController.getConfirmation);
 router.get('/resend', isAuth, sessionExit, buyerController.getResendToken);
 router.get("/forgotPassword", isAuth, sessionExit, buyerController.getForgotPassword);

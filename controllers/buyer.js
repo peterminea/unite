@@ -8,6 +8,7 @@ const assert = require('assert');
 const crypto = require('crypto');
 const process = require('process');
 const Schema = mongoose.Schema;
+const Message = require("../models/message");
 const Buyer = require("../models/buyer");
 const Supervisor = require("../models/supervisor");
 const Supplier = require("../models/supplier");
@@ -28,8 +29,6 @@ exports.getIndex = (req, res) => {
 }
 
 exports.postIndex = (req, res) => {
-  console.log(req.body.buyer);
-  console.log(req.body.supplier);
   if (req.body.capabilityInput) {//req.term for Autocomplete
     const key = req.body.capabilityInput;
 
@@ -38,7 +37,6 @@ exports.postIndex = (req, res) => {
         return console.error(err);
 
       const suppliers2 = [];
-      console.log(key);
       for (const supplier of suppliers) {
         if (
           supplier.capabilityDescription
@@ -71,6 +69,7 @@ exports.postIndex = (req, res) => {
     }
     
     const bidRequest = new BidRequest({
+      requestName: req.body.requestName,
       supplierName: req.body.supplierName,
       buyerName: req.body.buyerName,
       itemDescription: req.body.itemDescription,
@@ -94,8 +93,7 @@ exports.postIndex = (req, res) => {
       buyer: req.body.buyer,
       supplier: req.body.supplier
     });
-    
-    console.log('Order: ' + bidRequest);
+
     return bidRequest
       .save()
       .then(result => {
@@ -110,7 +108,6 @@ exports.postIndex = (req, res) => {
 
 
 exports.getViewBids = (req, res) => {
-  console.log(req.params);
   var promise = BidRequest.find({supplier: req.params.supplierId, buyer: req.params.buyerId}).exec();
   
   promise.then((bids) => {
@@ -134,8 +131,32 @@ exports.postViewBids = (req, res) => {
           console.error(err.message);
           return false;
         }
-        req.flash('success', 'Bid status updated successfully!');
+        req.flash('success', 'Bid status updated successfully!');        
+        
+      if(req.body.message) {
+        const newMessage = new Message({
+          to: req.body.to,
+          from: req.body.from,
+          sender: req.body.sender,
+          receiver: req.body.receiver,
+          bidRequestId: req.body.reqId,
+          message: req.body.message
+        });
+
+        newMessage
+          .save()
+          .then( (err, result) => {
+            if(err) {
+              console.error(err.message);        
+            }
+
+            req.flash('', 'Message sent to Supplier!');
+        })
+          .catch(console.error);              
+      }
       });
+    
+    res.redirect('back');
     });  
 }
 
@@ -232,7 +253,7 @@ exports.postResendToken = function (req, res, next) {
               text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/confirmation\/' + token.token + '.\n' 
             };
           
-              sgMail.send(mailOptions, function (err, info) {console.log(process.env.SENDGRID_API_KEY);
+              sgMail.send(mailOptions, function (err, info) {
                  if (err ) {
                   console.log(err);
                 }  else {
@@ -434,7 +455,6 @@ exports.postSignIn = (req, res) => {
                 msg: 'Your account has not been verified. Please check your e-mail for instructions.' });
             
             req.session.cookie.originalMaxAge = req.body.remember? null : 7200000;
-            console.log(req.session.cookie);  
             return req.session.save();
           } else {
             req.flash("error", "Invalid e-mail address or password");
