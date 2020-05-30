@@ -7,12 +7,8 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
 const flash = require("connect-flash");
 const dateTime = require("date-format-simple");
-//const dateTime = require("simple-datetime-formater");
 const multer = require("multer");
-//const uploads = multer({ dest: 'upload/'});
 const fs = require("fs-extra");
-const sortJson = require("sort-json");
-const cookieParser = require('cookie-parser');
 const path = require('path');
 const process = require('process');
 const BASE = process.env.BASE;
@@ -94,7 +90,6 @@ const connect = require("./dbconnect");
 const http = require("http").Server(app);
 const socket = require("socket.io")(http);
 const port = 5000;
-var url = require("url");
 const MongoClient = require("mongodb").MongoClient;
 var db;
 //var ProductService = require('./models/productService');
@@ -360,7 +355,6 @@ function compareTimes(a, b) {
 
 //Lambda variant: objs.sort((a,b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0));
 app.get('/messages', (req, res) => {
-  //console.log(req.query.from + ' LBOHALAM');
   Message.find({
       from: req.query.from, 
      to: req.query.to
@@ -502,23 +496,21 @@ app.post("/uploadfile", upload.single("single"), (req, res, next) => {
   res.send(file);
   return true;
 
-     /** When using the "single"
-      data come in "req.file" regardless of the attribute "name". **/
+  // When using the "single" data come in "req.file" regardless of the attribute "name".
   var tmp_path = req.file.path;
 
-  /** The original name of the uploaded file
-      stored in the variable "originalname". **/
+  // The original name of the uploaded file stored in the variable "originalname".
   var target_path = '/uploads/' + req.file.originalname;
 
-  /** A better way to copy the uploaded file. **/
+  // A better way to copy the uploaded file.
   var src = fs.createReadStream(tmp_path);
   var dest = fs.createWriteStream(target_path);
   src.pipe(dest);
   src.on('end', function() {
-    //res.render('complete'); 
+    res.render('complete'); 
   });
   src.on('error', function(err) {
-    //res.render('error'); 
+    res.render('error'); 
   });
 });
 
@@ -542,8 +534,6 @@ app.post("/uploadmultiple",  upload.array("multiple", 12),   (req, res, next) =>
 app.post("/multipleupload", uploadController.multipleUpload);
 
 //Autocomplete fields:
-//var country = Country.find({});
-//var industry = Industry.find({});
 const jsonp = require('jsonp');
 
 app.post('/countryAutocomplete', function(req, res, next) {
@@ -567,13 +557,10 @@ app.post('/countryAutocomplete', function(req, res, next) {
       }
       
       res.jsonp(result);
-      
-      if(1==2)res.send(result, {
-            'Content-Type': 'application/json'
-         }, 100);
     }
   });
 });
+
 
 app.post('/industryAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.query["term"], 'i');
@@ -956,7 +943,6 @@ mongoose
     //console.log(industriesLong[i]);
     //demoIndustry.save();
   }
-  
   */
     return null;
   })

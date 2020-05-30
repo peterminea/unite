@@ -1,11 +1,8 @@
 const bcrypt = require("bcryptjs");
 const Supervisor = require("../models/supervisor");
 const Buyer = require("../models/buyer");
-const nodemailer = require('nodemailer');
-const sgTransport = require('nodemailer-sendgrid-transport')
 const Token = require('../models/supervisorToken');
 const assert = require('assert');
-const crypto = require('crypto');
 const process = require('process');
 const async = require('async');
 const sgMail = require('@sendgrid/mail');
@@ -30,18 +27,6 @@ exports.getIndex = (req, res) => {
   );
 };
 
-/*
-exports.getLogout = (req, res, next) => {
-  if (req.session) {    
-    req.session.destroy(function(err) {
-      if(err) {
-        return next(err);
-      } else {
-        return res.redirect('/');
-      }
-    });
-  }
-}*/
 
 exports.getConfirmation = (req, res) => {
   res.render('supervisor/confirmation', {token: req.params.token});

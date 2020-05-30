@@ -9,7 +9,6 @@ router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
 router.get("/", isAuth, sessionExit, supervisorController.getIndex);
-//router.get("/logout", isAuth, sessionExit, supervisorController.getLogout);
 router.get("/sign-in", supervisorController.getSignIn);
 router.get("/sign-up", supervisorController.getSignUp);
 router.get("/profile", isAuth, sessionExit, supervisorController.getProfile);

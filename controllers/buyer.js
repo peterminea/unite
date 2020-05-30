@@ -1,11 +1,8 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const mongoose = require("mongoose");
-const nodemailer = require('nodemailer');
-const sgTransport = require('nodemailer-sendgrid-transport')
 const Token = require('../models/buyerToken');
 const assert = require('assert');
-const crypto = require('crypto');
 const process = require('process');
 const Schema = mongoose.Schema;
 const Message = require("../models/message");
@@ -160,18 +157,6 @@ exports.postViewBids = (req, res) => {
     });  
 }
 
-/*
-exports.getLogout = (req, res, next) => {
-  if (req.session) {    
-    req.session.destroy(function(err) {
-      if(err) {
-        return next(err);
-      } else {
-        return res.redirect('/');
-      }
-    });
-  }
-}*/
 
 exports.getConfirmation = (req, res) => {
   res.render('buyer/confirmation', {token: req.params.token});
