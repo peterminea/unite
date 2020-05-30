@@ -1,4 +1,4 @@
-var autocomp = function(obj, data, enter) {//Not for modals.
+var autocomp = function(obj, data, enter) {//Not suitable for modals.
   $('ul.ui-autocomplete').not('div.container *').each(function(i, e) {                
   if($(this).children('li').length) {
     $(this).css({'height': '75px', 'text-align': 'left'});
@@ -17,10 +17,10 @@ var autocomp = function(obj, data, enter) {//Not for modals.
         }
         });
       });
-    //$(this).clone().appendTo(obj);
     }
   });
-};
+}
+
 
 function isJson(obj) {
   if(!obj || !obj.length || !(Array.isArray(obj)))

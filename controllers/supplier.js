@@ -6,20 +6,16 @@ const BidStatus = require("../models/bidStatus");
 const ProductService = require("../models/productService");
 const Capability = require("../models/capability");
 const Message = require("../models/message");
-const nodemailer = require("nodemailer");
-const sgTransport = require("nodemailer-sendgrid-transport");
 const sgMail = require("@sendgrid/mail");
 const Token = require("../models/supplierToken");
 const assert = require("assert");
-const crypto = require("crypto");
 const process = require("process");
 const async = require("async");
 sgMail.setApiKey(process.env.SENDGRID_API_KEY); //Stored in the *.env file.
 //sgMail.setApiKey('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');
 //process.env.SENDGRID_API_KEY = "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";
 const MongoClient = require("mongodb").MongoClient;
-const URL = process.env.MONGODB_URI,
-  BASE = process.env.BASE;
+const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 
 exports.getIndex = (req, res) => {
   if (!req || !req.session) return false;
@@ -67,19 +63,6 @@ exports.postAddProduct = (req, res) => {
       .catch(console.error);
   }
 };
-
-/*
-exports.getLogout = (req, res, next) => {
-  if (req.session) {    
-    req.session.destroy(function(err) {
-      if(err) {
-        return next(err);
-      } else {
-        return res.redirect('/');
-      }
-    });
-  }
-}*/
 
 exports.getConfirmation = (req, res) => {
   res.render("supplier/confirmation", { token: req.params.token });

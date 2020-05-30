@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Chat system for UNITE</title>
+  <title>Messaging system - UNITE</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="A cool thing made with Glitch">
@@ -13,7 +13,6 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-  <script src="/https.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
@@ -21,56 +20,57 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/rexeze/formatTimeStamp/src/index.min.js"></script>
-  <script type="text/javascript">
-    
-  $(document).ready(function() {      
-    var token = $("input[name='_csrf']").val();
-    var socket = io();
-    var messages = document.getElementById("messages");
-    socket.on('message', addMessages);
-      //is typing...
-    let messageInput = document.getElementById("message");
-    let sender = document.getElementById("from");
-    let receiver = document.getElementById("to");
-    let senderName = document.getElementById("fromName");
-    let receiverName = document.getElementById("toName");
-    let reqId = document.getElementById("reqId");
-    let reqName = document.getElementById("reqName");
-    let typing = document.getElementById("typing");
-    
-    $(messageInput).append('<h3 style="color: blue">Chat about the Order "' + reqName.value + '"</h3>');
-      
-    $("form").submit(function(e) {
-      let li = document.createElement("li");
-      let from = $('#from').val();
-      let to = $('#to').val();
-      let reqId = $('#reqId').val();
-      
-      socket.emit("chat message", {
-        msg: $("#message").val(),
-        from: from,
-        to: to,
-        fromName: $('#fromName').val(),
-        toName: $('#toName').val(),
-        reqId: reqId
+  <script src="/https.js"></script>
+  
+  <script type="text/javascript">    
+    $(document).ready(function() {      
+      var token = $("input[name='_csrf']").val();
+      var socket = io();
+      var messages = document.getElementById("messages");
+      socket.on('message', addMessages);
+        //is typing...
+      let messageInput = document.getElementById("message");
+      let sender = document.getElementById("from");
+      let receiver = document.getElementById("to");
+      let senderName = document.getElementById("fromName");
+      let receiverName = document.getElementById("toName");
+      let reqId = document.getElementById("reqId");
+      let reqName = document.getElementById("reqName");
+      let typing = document.getElementById("typing");
+
+      $(messageInput).append('<h3 style="color: blue">Chat about the Order "' + reqName.value + '"</h3>');
+
+      $("form").submit(function(e) {
+        let li = document.createElement("li");
+        let from = $('#from').val();
+        let to = $('#to').val();
+        let reqId = $('#reqId').val();
+
+        socket.emit("chat message", {
+          msg: $("#message").val(),
+          from: from,
+          to: to,
+          fromName: $('#fromName').val(),
+          toName: $('#toName').val(),
+          reqId: reqId
+        });
+
+        e.preventDefault(); // prevents page reloading
+        messages.appendChild(li).append($("#message").val());
+        let span = document.createElement("span");
+        messages.appendChild(span).append("From " + "UNITE User" + ": " + "Just now.");
+        $("#message").val("");
+        return false;
       });
-      
-      e.preventDefault(); // prevents page reloading
-      messages.appendChild(li).append($("#message").val());
-      let span = document.createElement("span");
-      messages.appendChild(span).append("From " + "UNITE User" + ": " + "Just now.");
-      $("#message").val("");
-      return false;
-    });
-      
-    socket.on("received", (data) => {
-      alert(data);
-      let li = document.createElement("li");
-      let span = document.createElement("span");
-      //var messages = document.getElementById("messages");
-      messages.appendChild(li).append(data.message);
-      messages.appendChild(span).append("From " + "UNITE User" + ": " + "Just now.");
-      console.log("Hello, UNITE User!");
+
+      socket.on("received", (data) => {
+        alert(data);
+        let li = document.createElement("li");
+        let span = document.createElement("span");
+        //var messages = document.getElementById("messages");
+        messages.appendChild(li).append(data.message);
+        messages.appendChild(span).append("From " + "UNITE User" + ": " + "Just now.");
+        console.log("Hello, UNITE User!");
     });
     
     
