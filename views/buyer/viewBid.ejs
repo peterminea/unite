@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>UNITE - Buyer - View Bid(s)</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Another cool thing made with Glitch">
+  <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  <script src="/https.js"></script>
+  <!-- Jquery, Popper, and Bootstrap inclusions-->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  <script src="/https.js"></script>
+  
+  <script type="text/javascript">
+    $(document).ready(function() {
+      var token = $("input[name='_csrf']").val();
+      
+      $.ajax({
+              url: "/bidStatuses",
+              headers: { "X-CSRF-Token": token },
+              datatype: 'jsonp',
+              type: "GET",
+              scroll: true,
+              error: function() {},
+              success: function(data) {                
+                if(!data || !data.length)
+                  return false;
+                
+                $('select[id^="statuses_"]')
+                  .bind('change', function() {//Difficult DOM jQuery navigation in modals.
+                  ($(this)
+                    .parent('div')
+                    .prev('div')
+                    .find('input[id^="status"]'))
+                    .val($(this)
+                      .find('option:selected')
+                      .attr('value'));
+                  
+                    $(this)
+                      .parent('div')
+                      .parent('div')
+                      .next('div')
+                      .find('button[id^="updateRequest_"]')
+                      .removeAttr('disabled');
+                });
+                
+                $('select[id^="statuses_"]')
+                  .each(function(index, el) {
+                  for(var i in data) {
+                    var opt = '<option title="' + data[i].name +'" value="' + data[i].value + '">' + data[i].name + '</option>';
+                    $(el).append(opt);
+                    }
+                  
+                  setTimeout(function() {
+                    var statusInput = $(el)
+                      .parent('div')
+                      .prev('div')
+                      .find('input[id^="status_"]');
+                   
+                    $(el)
+                        .find('option[value="' + statusInput.val() + '"]')
+                        .attr({'selected': 'selected'});
+                    $(el).attr('title', $(this).find('option:selected').text());                  
+                  }, 500);
+                });
+              }
+      });
+    });
+  </script>
+</head>
+
+  <body id="<%= supplierId %>" id2="<%= buyerId %>">
+    <div class="container">
+      <div>  
+        <input type="button" class="btn btn-primary" value="Back" onclick="history.go(-1)">
+      </div>
+      <div class="col-md-12">
+        <% let i = 0; if (bids != null && bids.length > 0) { for (bid of bids) { i++; %>
+        <div>      
+          <div class="card mt-4">
+            <h5 class="card-header bg-dark text-white">From: <%= bid.buyerName %></h5>
+            <div class="card-body">
+              <h5 class="card-title">To: <%= bid.supplierName %></h5>          
+              <button class="btn btn-primary ml-2" style="float: right" data-target="#request_<%= i %>" data-toggle="modal">View Bid Details</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Modal window for the new Bid Request -->
+        <div class="modal fade" id="request_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">View Bid Request</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <form method="POST">
+                <input type="hidden" name="id" value="<%= bid._id %>">
+                <div class="modal-body">
+                  <div class="form-group">
+                    <label class="text-muted form-text">
+                      (*) are required fields.
+                    </label>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Supplier Company*</label>
+                    <input readonly type="text" class="form-control" name="supplierName" value="<%= bid.supplierName %>">
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Buyer Organization*</label>
+                    <input readonly type="text" class="form-control" name="buyerName" value="<%= bid.buyerName %>">
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Item Description (Short*)</label>
+                    <input readonly type="text" class="form-control" name="itemDescription" value="<%= bid.itemDescription %>">
+                  </div>
+                  <div class="form-group">
+                    <% const re = /:\s|,\s/; 
+                    const products = bid.productsServicesOffered;
+                    const prices = bid.priceList;
+                    const amounts = bid.amountList;
+                      %>
+                    <Code></Code>
+                    <label>Products / Services Offered</label>
+                    <ul class="list-group">
+                      <% for (i in products) { %>
+                      <li class="list-group-item"><%= amounts[i] %>*<%= products[i] %> - <%= prices[i] %> <%= bid.currency %></li>
+                      <% } %>
+                    </ul>
+                  </div><!--
+                  <div class="form-group">
+                    <label class="col-form-label">Products / Services Offered*</label>
+                    <input type="text" readonly id="prodServicesList_< %= i %>" name="productsServicesOffered" value="< %= bid.productsServicesOffered %>">
+                    <input type="hidden" id="amountList_< %= i %>" name="amountList" value="< %= bid.amountList %>">
+                    <input type="hidden" id="priceList_< %= i %>" name="priceList" value="< %= bid.priceList %>">
+                  </div> -->
+                  <div class="form-group">
+                    <label class="col-form-label">Item Description (Long)*</label>
+                    <textarea disabled class="form-control" name="itemDescriptionLong" value="<%= bid.itemDescriptionLong %>"><%= bid.itemDescriptionLong %></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Item Description URL (Long)</label>
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon3">http(s)://</span>
+                      </div>
+                      <input readonly type="text" class="form-control" aria-describedby="basic-addon3" value="<%= bid.itemDescriptionUrl %>" name="itemDescriptionUrl">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Amount*</label>
+                    <input type="hidden" class="form-control" id="amount_<%= i %>" name="theAmount" value="0">
+                    <% j = 0; for(i in bid.amountList) {j += bid.amountList[i];} %>
+                    <input type="text" readonly id="totalAmount_<%= i %>" name="amount" value="<%= j %>">
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Delivery Location*</label>
+                    <textarea disabled class="form-control" value="<%= bid.deliveryLocation %>" name="deliveryLocation"><%= bid.deliveryLocation %></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Delivery Requirements*</label>
+                    <textarea disabled class="form-control" value="<%= bid.deliveryRequirements %>" name="deliveryRequirements"><%= bid.deliveryRequirements %></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Compliance Requirements*</label>
+                    <textarea disabled class="form-control" value="<%= bid.complianceRequirements %>" name="complianceRequirements"><%= bid.complianceRequirements %></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Compliance Requirements URL</label>
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon3">http(s)://</span>
+                      </div>
+                      <input readonly type="text" class="form-control" value="<%= bid.complianceRequirementsUrl %>" name="complianceRequirementsUrl" aria-describedby="basic-addon3">
+                    </div>
+                  </div>
+                   <div class="form-group">
+                    <label class="col-form-label">Other Requirements</label>
+                    <textarea disabled class="form-control" value="<%= bid.otherRequirements %>" name="otherRequirements"><%= bid.otherRequirements %></textarea>
+                  </div>
+                   <div class="form-group">
+                    <label class="col-form-label">Price</label>
+                    <input type="text" value="<%= bid.price %>" class="form-control" id="price_<%= i %>" name="price" readonly>
+                     <span class="form-control" value="<%= bid.currency %>" id="currency_<%= i %>" name="currency"></span>
+                     <input type="hidden" id="defaultPrice_<%= i %>" value="1">
+                  </div>
+                   <div class="form-group">
+                    <label class="col-form-label">Status*</label>
+                    <input type="hidden" id="status_<%= i %>" class="form-control" name="status" value="<%= bid.status %>">
+                  </div>
+                  <div class="form-group selectstatus">
+                    <select style="width: 100%" id="statuses_<%= i %>">
+                    </select>
+                  </div>
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <input type="hidden" name="buyer" value="<%= bid.buyer %>">
+                  <input type="hidden" name="supplier" value="<%= bid.supplier %>">
+                </div>                
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <button id="updateRequest_<%= i %>" disabled type="submit" class="btn btn-primary">Update request</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        
+        <% } } else { %>
+        <p style="font-size: 12pt; font-weight: bold; color: purple">You have not placed any bids to this supplier. If you prefer, you may do so at any time.</p>
+        <% } %>
+      </div>
+      </div>
+  </body>
+</html>

@@ -2,6 +2,14 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const bidRequestSchema = new Schema({
+  supplierName: {
+    type: String,
+    required: true
+  },
+  buyerName: {
+    type: String,
+    required: true
+  },
   itemDescription: {
     type: String,
     required: true
@@ -39,11 +47,7 @@ const bidRequestSchema = new Schema({
   priceList: {
     type: [Number],
     required: true
-  },
-  /*{
-    type: [String],
-    required: true
-  },*/
+  },  
   deliveryLocation: {
     type: String,
     required: true

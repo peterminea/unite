@@ -12,6 +12,7 @@ const Buyer = require("../models/buyer");
 const Supervisor = require("../models/supervisor");
 const Supplier = require("../models/supplier");
 const BidRequest = require("../models/bidRequest");
+const BidStatus = require("../models/bidStatus");
 const async = require('async');
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -29,11 +30,12 @@ exports.getIndex = (req, res) => {
 exports.postIndex = (req, res) => {
   console.log(req.body.buyer);
   console.log(req.body.supplier);
-  if (req.body.capabilityInput) {//req.term for Autcomplete
+  if (req.body.capabilityInput) {//req.term for Autocomplete
     const key = req.body.capabilityInput;
 
     Supplier.find({}, (err, suppliers) => {
-      if (err) return console.error(err);
+      if (err) 
+        return console.error(err);
 
       const suppliers2 = [];
       console.log(key);
@@ -46,10 +48,16 @@ exports.postIndex = (req, res) => {
           suppliers2.push(supplier);
         }
       }
-      res.render("buyer/index", {
-        buyer: req.session.buyer,
-        suppliers: suppliers2,
-        success: req.flash("success")
+      
+    var promise = BidStatus.find({}).exec();
+    promise.then((statuses) => {
+        res.render("buyer/index", {
+          buyer: req.session.buyer,
+          suppliers: suppliers2,
+          MAX_PROD: process.env.SUP_MAX_PROD,
+          statuses: statuses,
+          success: req.flash("success")
+        });
       });
     });
   } else if (req.body.itemDescription) {//The Send Order part.
@@ -63,13 +71,15 @@ exports.postIndex = (req, res) => {
     }
     
     const bidRequest = new BidRequest({
+      supplierName: req.body.supplierName,
+      buyerName: req.body.buyerName,
       itemDescription: req.body.itemDescription,
       productsServicesOffered: req.body.productsServicesOffered,
       amountList: req.body.amountList,
       priceList: req.body.priceList,
       orderedProducts: products,
-      itemDescriptionLong: req.body.longItemDescription,
-      itemDescriptionUrl: req.urlItemDescription,
+      itemDescriptionLong: req.body.itemDescriptionLong,
+      itemDescriptionUrl: req.itemDescriptionUrl,
       amount: req.body.amount,
       deliveryLocation: req.body.deliveryLocation,
       deliveryRequirements: req.body.deliveryRequirements,
@@ -96,7 +106,38 @@ exports.postIndex = (req, res) => {
   } else {
     res.redirect("/buyer");
   }
-};
+}
+
+
+exports.getViewBids = (req, res) => {
+  console.log(req.params);
+  var promise = BidRequest.find({supplier: req.params.supplierId, buyer: req.params.buyerId}).exec();
+  
+  promise.then((bids) => {
+    res.render("buyer/viewBid", {
+      bids: bids? bids : [],
+      supplierId: req.params.supplierId, 
+      buyerId: req.params.buyerId
+    });
+  });
+}
+
+
+exports.postViewBids = (req, res) => {
+  MongoClient.connect(URL, function(err, db) {//db or client.
+      if (err) throw err;
+      var dbo = db.db(BASE);
+      var myquery = { _id: req.body.id };
+      var newvalues = { $set: {status: req.body.status} };
+      dbo.collection("bidrequests").updateOne(myquery, newvalues, function(err, res) {        
+        if(err) {
+          console.error(err.message);
+          return false;
+        }
+        req.flash('success', 'Bid status updated successfully!');
+      });
+    });  
+}
 
 /*
 exports.getLogout = (req, res, next) => {

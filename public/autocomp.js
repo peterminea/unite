@@ -30,7 +30,18 @@ function isJson(obj) {
   return true;
 }
 
-function getAutocomplete(elem, url, token) {
+
+function checkName(arr, name) {
+  for(var i in arr) {
+    if(arr[i] == name)
+      return true;
+  }
+  
+  return false;
+}
+
+
+function getAutocomplete(elem, url, token, isEnter) {
   $('' + elem + '').autocomplete({
     source: function(req, res) {
       var obj = $(this.element);
@@ -47,7 +58,7 @@ function getAutocomplete(elem, url, token) {
             return false;
           }
           res(data);
-          autocomp(obj, data);
+          autocomp(obj, data, isEnter);          
         },
         error: function(err) {
           alert(err);
@@ -71,7 +82,7 @@ function getAutocomplete(elem, url, token) {
   });  
 }
 
-function postAutocomplete(elem, url, token) {//alert('EURIBELES ' + elem + ' ' + url + ' ' + token);
+function postAutocomplete(elem, url, token) {
   $('' + elem + '').autocomplete({
     source: function(req, res) {
       var obj = $(this.element);

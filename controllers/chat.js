@@ -13,7 +13,8 @@ exports.getIndex = (req, res, next) => {
       res.statusCode  =  200;      
 
       connectdb.then(db  =>  {
-          Message.find({}).then(chat  =>  {
+          Message.find({}).then( (chat)  =>  {
+            
             var supplierFilter = Supplier.find({_id: new ObjectId(chat.from)}, {'companyName': 1} );
             var buyerFilter = Buyer.find({_id: new ObjectId(chat.to)}, {'organizationName': 1});
 

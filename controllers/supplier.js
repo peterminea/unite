@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const Supplier = require("../models/supplier");
 const Buyer = require("../models/buyer");
 const BidRequest = require("../models/bidRequest");
+const BidStatus = require("../models/bidStatus");
 const ProductService = require("../models/productService");
 const Capability = require("../models/capability");
 const Message = require("../models/message");
@@ -706,19 +707,24 @@ exports.getBidRequest = (req, res) => {
   const id = req.params.id;
 
   BidRequest.findOne({ _id: id })
-    .then(_request => {
-      request = _request;
+    .then( (reqresult) => {
+      request = reqresult;
       return Buyer.findOne({ _id: request.buyer }); //Object ID
     })
-    .then(buyer => {
+    .then((buyer) => {
+    var promise = BidStatus.find({}).exec();
+    promise.then((statuses) => {
       res.render("supplier/bid-request", {
         supplier: supplier,
         request: request,
-        buyer: buyer
+        buyer: buyer,
+        statuses: statuses
+        });
       });
     })
     .catch(console.error);
-};
+}
+
 
 exports.postBidRequest = (req, res) => {
   if (req.body.message) {
@@ -734,6 +740,19 @@ exports.postBidRequest = (req, res) => {
     newMessage
       .save()
       .then(result => {
+        MongoClient.connect(URL, function(err, db) {//db or client.
+          if (err) throw err;
+          var dbo = db.db(BASE);
+          var myquery = { _id: req.body.reqId };
+          var newvalues = { $set: {status: req.body.status} };
+          dbo.collection("bidrequests").updateOne(myquery, newvalues, function(err, res) {        
+            if(err) {
+              console.error(err.message);
+              return false;
+            }
+            req.flash('success', 'Bid status updated successfully and message sent!');
+          });
+        });
         //req.originalUrl
         res.redirect("back");
       })

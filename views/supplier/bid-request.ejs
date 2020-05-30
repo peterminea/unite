@@ -14,6 +14,13 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
   <script src="/https.js"></script>
+  <script src="/autocomp.js"></script>
+  
+  <script type="text/javascript">
+  $(document).ready(function() {
+  });
+  </script>
+  
 </head>
 
 <body>
@@ -60,7 +67,7 @@
 
 	<div class="container">
 		<div class="smooth-shadow profile-form">
-			<form>
+			<form method="POST">
 				<div class="form-group">
 					<label>Buyer's Organization Name</label>
 					<input type="text" class="form-control" value="<%= buyer.organizationName %>" readonly>
@@ -122,19 +129,29 @@
 				</div>
 				<div class="form-group">
 					<% const re = /:\s|,\s/; 
-          const array = (request.productsServicesOffered)[0].split(re);
-          array.splice(array.length - 1);%>
+            const products = request.productsServicesOffered;
+            const prices = request.priceList;
+            const amounts = request.amountList;
+            %>
 					<Code></Code>
 					<label>Products / Services Offered</label>
 					<ul class="list-group">
-						<% for (item of array) { %>
-						<li class="list-group-item"><%= item %></li>
-						<% } %>
-					</ul>
+            <% for (i in products) { %>
+            <li class="list-group-item"><%= amounts[i] %>*<%= products[i] %> - <%= prices[i] %> <%= request.currency %></li>
+            <% } %>
+          </ul>
 				</div>
+        <div class="form-group">
+          <label class="col-form-label">Supplier Company*</label>
+          <input readonly type="text" class="form-control" name="supplierName" value="<%= request.supplierName %>">
+        </div>
+        <div class="form-group">
+          <label class="col-form-label">Buyer Organization*</label>
+          <input readonly type="text" class="form-control" name="buyerName" value="<%= request.buyerName %>">
+        </div>
 				<div class="form-group">
 					<label>Item Description (Long)</label>
-          <textarea readonly class="form-control"><%= request.itemDescriptionLong %></textarea>
+          <textarea disabled class="form-control"><%= request.itemDescriptionLong %></textarea>
 				</div>
         <div class="form-group">
 					<label>Item Description (URL)</label>
@@ -142,60 +159,95 @@
 				</div>
 				<div class="form-group">
 					<label>Amount</label>
-					<input type="number" readonly class="form-control" value="<%= request.amount %>">
+          <% j = 0; for(i in request.amountList) {j += request.amountList[i];} %>
+          <input type="text" readonly id="totalAmount_<%= i %>" name="amount" value="<%= j %>">					
 				</div>
 				<div class="form-group">
 					<label>Delivery Location</label>
-					<textarea class="form-control" readonly><%= request.deliveryLocation %></textarea>
+					<textarea class="form-control" disabled><%= request.deliveryLocation %></textarea>
 				</div>
 				<div class="form-group">
 					<label>Delivery Requirements</label>
-					<textarea class="form-control" readonly><%= request.deliveryRequirements %></textarea>
+					<textarea class="form-control" disabled><%= request.deliveryRequirements %></textarea>
 				</div>
 				<div class="form-group">
 					<label>Compliance Requirements</label>
-					<textarea class="form-control" readonly><%= request.complianceRequirements %></textarea>
+					<textarea class="form-control" disabled><%= request.complianceRequirements %></textarea>
 				</div>
         <div class="form-group">
 					<label>Other Requirements</label>
-					<textarea class="form-control" readonly><%= request.otherRequirements %></textarea>
-				</div>
-        <div class="form-group">
-					<label>Status</label>
-					<input type="hidden" class="form-control" readonly value="<%= request.status %>">
+					<textarea class="form-control" disabled><%= request.otherRequirements %></textarea>
 				</div>
         <div class="form-group">
 					<label>Price</label>
 					<input type="number" class="form-control" readonly value="<%= request.price %>">
 				</div>
+        <div class="form-group">
+					<label>Currency</label>
+					<input type="text" class="form-control" readonly value="<%= request.currency %>">
+				</div>
+        <div class="form-group">
+					<label>Status</label>
+					<input type="hidden" id="status" name="status" class="form-control" readonly value="<%= request.status %>">
+				</div>        
+        <div class="form-group selectstatus">
+          <select style="width: 100%" id="statuses">
+            <% if (statuses != null) { for (status of statuses) { %>
+            <option title="<%= status.name %>" value="<%= status.value %>"><%= status.name %></option>
+            <% } }%>
+          </select>
+        </div>
+        <script type="text/javascript">            
+           $('select[id="statuses"]')
+            .bind('change', function() {
+            $('#status')        
+              .val($(this)
+                   .find('option:selected')
+                   .attr('value'));
 
-				<span><b>Status: </b> 
-				<% if (request.status == 0) { %> "Buyer requested a bid from you. Please send information to buyer." <% } %>
-				<% if (request.status == 1) { %> "Waiting for buyer's processing." <% } %>				
-				<% if (request.status == 2) { %> "Buyer wants to buy the product for <%= request.price %>. Cancel or Accept." <% } %>
-				<% if (request.status == 3) { %> "You started the delivery. Wait for confirmation of buyer." <% } %>
-				<% if (request.status == 4) { %> "Payment and delivery are done." <% } %>
-				<% if (request.status == 5) { %> "You cancelled the request." <% } %>
-				<% if (request.status == 6) { %> "Buyer cancelled the request." <% } %>
-				</span>
-        
-        </form>
+              $('#updateBidStatus')
+                .removeAttr('disabled');
+          });
 
-				<div class="container mt-4">
-					<h3>Messages</h3>
-					<form method="POST">
-						<div class="form-group">
-							<label>Message</label>
-							<textarea name="message" class="form-control"></textarea>
-						</div>
-						
-						<input type="hidden" name="from" value="<%= supplier._id %>">
-						<input type="hidden" name="to" value="<%= buyer._id %>">
+            $('#statuses')
+                .find('option[value="' + $('#status').val() + '"]')
+                .attr({'selected': 'selected'});
+
+            $('#statuses').attr('title', $(this).find('option:selected').text());            
+          </script>
+          <div>
+            <h3>Messages</h3>
+            <div class="form-group">
+              <label>Message</label>
+              <textarea name="message" class="form-control"></textarea>
+            </div>
+
+            <input type="hidden" name="from" value="<%= supplier._id %>">
+            <input type="hidden" name="to" value="<%= buyer._id %>">
             <input type="hidden" name="reqId" value="<%= request._id %>">
             <input type="hidden" name="sender" value="<%= buyer.organizationName %>">
             <input type="hidden" name="receiver" value="<%= supplier.companyName %>">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-						<button type="submit" class="btn btn-primary" style="float: right;">Send</button>
+            <button class="btn btn-primary" disabled type="submit" id="updateBidStatus">
+                Update Bid & Message Buyer
+            </button>
+            
+            <div class="form-group">
+              <span style="color: purple; font-size: 12pt; font-weight: bold"><b>Bid Status Description</b> 
+                <% if (request.status == 0) { %> "Buyer requested a bid from you. Please send information to buyer." <% } %>
+                <% if (request.status == 1) { %> "Waiting for buyer's processing." <% } %>				
+                <% if (request.status == 2) { %> "Buyer wants to buy the product for <%= request.price %>. Cancel or Accept." <% } %>
+                <% if (request.status == 3) { %> "You started the delivery. Wait for confirmation of buyer." <% } %>
+                <% if (request.status == 4) { %> "Payment and delivery are done." <% } %>
+                <% if (request.status == 5) { %> "You cancelled the request." <% } %>
+                <% if (request.status == 6) { %> "Buyer cancelled the request." <% } %>
+              </span>
+            </div>
+          </div>          
+        </form>
+
+				<div class="container mt-4">					
+					<form method="GET">
 					</form>
 				</div>
         

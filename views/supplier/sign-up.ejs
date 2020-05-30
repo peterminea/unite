@@ -31,6 +31,14 @@
         $(this).val ? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
       });
         
+      $('#updateProfile').click(function() {
+        if($('#prodServices li').length == 0) {
+          var obj = '<p class="productRequired littleNote">You are required to include at least one product or service.</p>';
+          $(obj).insertBefore($(this));
+          return false;
+        }
+      });        
+        
       $('.single,.multiple').each(function(index, element) {
         var val = $(this).prev('.fileupload').attr('value');
         
@@ -159,10 +167,15 @@
             arr = currencyInput.val().split(',');
             arr.splice(newIndex, 1);
             currencyInput.val((arr));
+            $("#prodServiceInput").trigger('change');
             li.remove();
           });
 
           input.val('');
+          $('#price').val('');
+          $('#curency').val('');
+          
+          $('.productRequired').remove();
         }
     });
   });
