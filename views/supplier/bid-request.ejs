@@ -41,8 +41,8 @@
 					<a class="nav-link" href="/supplier">Dashboard</a>
 				</li>
 				<li class="nav-item">
-					<a class="nav-link active" href="/supplier/bid-requests">Bid Requests <span
-							class="sr-only">(current)</span></a>
+					<a class="nav-link active" href="/supplier/bid-requests">Bid Request - Request: <%= request.requestName %> 
+            <span class="sr-only">(current)</span></a>
 				</li>
 			</ul>
 			<ul class="navbar-nav">
@@ -136,11 +136,15 @@
 					<Code></Code>
 					<label>Products / Services Offered</label>
 					<ul class="list-group">
-            <% for (i in products) { %>
-            <li class="list-group-item"><%= amounts[i] %>*<%= products[i] %> - <%= prices[i] %> <%= request.currency %></li>
+            <% for (h in products) { %>
+            <li class="list-group-item"><%= amounts[h] %>*<%= products[h] %> - <%= prices[h] %> <%= request.currency %></li>
             <% } %>
           </ul>
 				</div>
+        <div class="form-group">
+          <label class="col-form-label">Request Name*</label>
+          <input readonly type="text" class="form-control" name="requestName" value="<%= request.requestName %>">
+        </div>
         <div class="form-group">
           <label class="col-form-label">Supplier Company*</label>
           <input readonly type="text" class="form-control" name="supplierName" value="<%= request.supplierName %>">
@@ -159,8 +163,8 @@
 				</div>
 				<div class="form-group">
 					<label>Amount</label>
-          <% j = 0; for(i in request.amountList) {j += request.amountList[i];} %>
-          <input type="text" readonly id="totalAmount_<%= i %>" name="amount" value="<%= j %>">					
+          <% j = 0; for(h in request.amountList) {j += request.amountList[h];} %>
+          <input type="text" readonly id="totalAmount" name="amount" value="<%= j %>">					
 				</div>
 				<div class="form-group">
 					<label>Delivery Location</label>
@@ -180,11 +184,12 @@
 				</div>
         <div class="form-group">
 					<label>Price</label>
-					<input type="number" class="form-control" readonly value="<%= request.price %>">
+					<% l = 0; for(m in request.priceList) {l += request.priceList[m];} %>
+          <input type="text" title="Total order price" value="<%= l %> <%= request.currency %>" class="form-control" id="price_<%= i %>" name="price" readonly>
 				</div>
         <div class="form-group">
 					<label>Currency</label>
-					<input type="text" class="form-control" readonly value="<%= request.currency %>">
+					<input type="hidden" class="form-control" readonly value="<%= request.currency %>">
 				</div>
         <div class="form-group">
 					<label>Status</label>
@@ -215,54 +220,44 @@
 
             $('#statuses').attr('title', $(this).find('option:selected').text());            
           </script>
-          <div>
-            <h3>Messages</h3>
-            <div class="form-group">
-              <label>Message</label>
-              <textarea name="message" class="form-control"></textarea>
-            </div>
-
+          
+          <div class="form-group">
+            <h3>Message for Buyer</h3>
+            <br>
+            <label>Type your message below</label>
+            <textarea name="message" class="form-control"></textarea>
             <input type="hidden" name="from" value="<%= supplier._id %>">
             <input type="hidden" name="to" value="<%= buyer._id %>">
             <input type="hidden" name="reqId" value="<%= request._id %>">
-            <input type="hidden" name="sender" value="<%= buyer.organizationName %>">
-            <input type="hidden" name="receiver" value="<%= supplier.companyName %>">
+            <input type="hidden" name="requestName" value="<%= request.requestName %>">
+            <input type="hidden" name="sender" value="<%= supplier.companyName %>">
+            <input type="hidden" name="receiver" value="<%= buyer.organizationName %>">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <button class="btn btn-primary" disabled type="submit" id="updateBidStatus">
                 Update Bid & Message Buyer
             </button>
-            
-            <div class="form-group">
-              <span style="color: purple; font-size: 12pt; font-weight: bold"><b>Bid Status Description</b> 
-                <% if (request.status == 0) { %> "Buyer requested a bid from you. Please send information to buyer." <% } %>
-                <% if (request.status == 1) { %> "Waiting for buyer's processing." <% } %>				
-                <% if (request.status == 2) { %> "Buyer wants to buy the product for <%= request.price %>. Cancel or Accept." <% } %>
-                <% if (request.status == 3) { %> "You started the delivery. Wait for confirmation of buyer." <% } %>
-                <% if (request.status == 4) { %> "Payment and delivery are done." <% } %>
-                <% if (request.status == 5) { %> "You cancelled the request." <% } %>
-                <% if (request.status == 6) { %> "Buyer cancelled the request." <% } %>
-              </span>
-            </div>
-          </div>          
-        </form>
+          </div>
 
-				<div class="container mt-4">					
-					<form method="GET">
-					</form>
-				</div>
-        
+          <div class="form-group">
+            <span style="color: purple; font-size: 12pt; font-weight: bold"><b>Bid Status Description</b> 
+              <% if (request.status == 0) { %> "Buyer requested a bid from you. Please send information to buyer." <% } %>
+              <% if (request.status == 1) { %> "Waiting for buyer's processing." <% } %>				
+              <% if (request.status == 2) { %> "Buyer wants to buy the product for <%= request.price %>. Cancel or Accept." <% } %>
+              <% if (request.status == 3) { %> "You started the delivery. Wait for confirmation of buyer." <% } %>
+              <% if (request.status == 4) { %> "Payment and delivery are done." <% } %>
+              <% if (request.status == 5) { %> "You cancelled the request." <% } %>
+              <% if (request.status == 6) { %> "Buyer cancelled the request." <% } %>
+            </span>
+          </div>          
+      </form>
+<!-- Supplier=sender, buyer=receiver. -->
         <div class="container mt-4">
           	<div class="form-group">
-              <input type="hidden" name="from1" value="<%= supplier._id %>">
-						  <input type="hidden" name="to1" value="<%= buyer._id %>">
-              <input type="hidden" name="reqId1" value="<%= request._id %>">
-              <input type="hidden" name="sender1" value="<%= buyer.organizationName %>">
-              <input type="hidden" name="receiver1" value="<%= supplier.companyName %>">
-							<a href="../chat/<%= supplier._id %>/<%= buyer._id %>/<%= request._id %>/<%= buyer.organizationName %>/<%= supplier.companyName %>">
-                <button class="btn-primary custom-button">Chat</button>
-              </a>              
+							<a href="../chat/<%= supplier._id %>/<%= buyer._id %>/<%= request._id %>/<%= request.requestName %>/<%= buyer.organizationName %>/<%= supplier.companyName %>">
+                <button class="btn-primary custom-button">Chat with your buyer</button>
+              </a>
 						</div>
-        </div>       
+        </div>
 			
 		</div>
 	</div>

@@ -19,7 +19,7 @@ router.get("/addproduct", isAuth, sessionExit, supplierController.getAddProduct)
 router.get('/resend', isAuth, sessionExit, supplierController.getResendToken);
 router.get("/confirmation/:token", isAuth, sessionExit, supplierController.getConfirmation);
 router.get("/forgotPassword", isAuth, sessionExit, supplierController.getForgotPassword);
-router.get("/chat/:supplierId/:buyerId/:requestId/:buyerName/:supplierName", isAuth, sessionExit, supplierController.getChat);
+router.get("/chat/:supplierId/:buyerId/:requestId/:requestName/:buyerName/:supplierName", isAuth, sessionExit, supplierController.getChat);
 router.get("/resetPassword/:token", isAuth, sessionExit, supplierController.getResetPasswordToken);
 
 router.post("/sign-in", supplierController.postSignIn);

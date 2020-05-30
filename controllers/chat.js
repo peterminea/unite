@@ -13,25 +13,30 @@ exports.getIndex = (req, res, next) => {
       res.statusCode  =  200;      
 
       connectdb.then(db  =>  {
-          Message.find({}).then( (chat)  =>  {
-            
-            var supplierFilter = Supplier.find({_id: new ObjectId(chat.from)}, {'companyName': 1} );
-            var buyerFilter = Buyer.find({_id: new ObjectId(chat.to)}, {'organizationName': 1});
-
-            buyerFilter.exec(function(err, data) {//organization company
-              if(data && data.length) {
-                chat.fromName = data[0].organizationName;
-              }
-            });
-
-            supplierFilter.exec(function(err, data) {//organization company
-              if(data && data.length) {
-                chat.toName = data[0].companyName;
-              }
-            });
-
-            res.json(chat);
-      });
+            Message.find({}).then( (chat)  =>  {
+              if(chat && chat.length) {
+                
+                for(var message of chat) {                
+                Supplier.find({_id: new ObjectId(message.from)}, {'companyName': 1} )
+                  .then((data) => {
+                    if(data && data.length) {
+                      message.fromName = data[0].organizationName;
+                     
+                      Buyer.find({_id: new ObjectId(message.to)}, {'organizationName': 1})
+                        .then((data2) => {
+                          if(data2 && data2.length) {
+                          message.toName = data2[0].companyName;
+                          }
+                        });
+                      }
+                    });
+                  }
+                
+                  setTimeout(function() {
+                    res.json(chat);
+                  }, 5000);
+                }             
+        });
   });
                                         
   res.render("chat/index", {

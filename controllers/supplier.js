@@ -14,7 +14,6 @@ const assert = require("assert");
 const crypto = require("crypto");
 const process = require("process");
 const async = require("async");
-const cors = require("cors");
 sgMail.setApiKey(process.env.SENDGRID_API_KEY); //Stored in the *.env file.
 //sgMail.setApiKey('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');
 //process.env.SENDGRID_API_KEY = "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";
@@ -219,9 +218,9 @@ exports.postSignIn = (req, res) => {
   const email = req.body.emailAddress;
   const password =
     req.body
-      .password; /*
-  //console.log(email + ' ' + password);
-const msg = {
+      .password; 
+  /*
+  const msg = {
   from: 'peter@uniteprocurement.com',
   to: 'peter.minea@gmail.com',  
   subject: 'CHENECCO',
@@ -251,7 +250,7 @@ sgMail.send(msg);*/
               (password === doc.password && email === doc.emailAddress)
             ) {
               req.session.supplier = doc;
-              req.session.id = doc._id;
+              req.session.supplierId = doc._id;
 
               // Make sure the user has been verified
               if (!doc.isVerified)
@@ -449,13 +448,10 @@ exports.postSignUp = (req, res) => {
                         ".\n"
                     };
 
-                    console.log("ȘI ASUSPRAIMUL MERGE IAR.");
-                    //if(1==2)
                     sgMail.send(email, function(err, info) {
                       //if (err ) {
                       console.log(err ? err.message : "Message sent: " + info);
 
-                      //if(1==2)
                       if (err) {
                         console.error(err.message);
                         //res.redirect('back');
@@ -509,13 +505,13 @@ exports.getForgotPassword = (req, res) => {
 };
 
 exports.getChat = (req, res) => {
-  console.log(req.params);
   res.render("supplier/chat", {
     from: req.params.supplierId,
     to: req.params.buyerId,
     fromName: req.params.supplierName,
     toName: req.params.buyerName,
-    reqId: req.params.requestId
+    reqId: req.params.requestId,
+    reqName: req.params.requestName
   });
 };
 
@@ -668,8 +664,7 @@ exports.getProfile = (req, res) => {
   const supplier = req.session.supplier;
 
   ProductService.find({ supplier: supplier._id })
-    .then(products => {
-      console.log(products);
+    .then( (products) => {
       req.session.supplier.productsServicesOffered = [];
     
       for(var i in products) {
@@ -727,38 +722,45 @@ exports.getBidRequest = (req, res) => {
 
 
 exports.postBidRequest = (req, res) => {
-  if (req.body.message) {
-    const newMessage = new Message({
-      to: req.body.to,
-      from: req.body.from,
-      sender: req.body.sender,
-      receiver: req.body.receiver,
-      bidRequestId: req.body.reqId,
-      message: req.body.message
-    });
+  MongoClient.connect(URL, function(err, db) {//db or client.
+    if (err) throw err;
+    var dbo = db.db(BASE);
+    var myquery = { _id: req.body.reqId };
+    var newvalues = { $set: {status: req.body.status} };
+    dbo.collection("bidrequests").updateOne(myquery, newvalues, function(err, res) {
+      if(err) {
+        console.error(err.message);
+        return false;
+      }
+      req.flash('success', 'Bid status updated successfully!');
 
-    newMessage
-      .save()
-      .then(result => {
-        MongoClient.connect(URL, function(err, db) {//db or client.
-          if (err) throw err;
-          var dbo = db.db(BASE);
-          var myquery = { _id: req.body.reqId };
-          var newvalues = { $set: {status: req.body.status} };
-          dbo.collection("bidrequests").updateOne(myquery, newvalues, function(err, res) {        
-            if(err) {
-              console.error(err.message);
-              return false;
-            }
-            req.flash('success', 'Bid status updated successfully and message sent!');
-          });
+      if(req.body.message) {
+        const newMessage = new Message({
+          to: req.body.to,
+          from: req.body.from,
+          sender: req.body.sender,
+          receiver: req.body.receiver,
+          bidRequestId: req.body.reqId,
+          message: req.body.message
         });
-        //req.originalUrl
-        res.redirect("back");
-      })
-      .catch(console.error);
-  }
-}
+
+        newMessage
+          .save()
+          .then( (err, result) => {
+            if(err) {
+              console.error(err.message);        
+            }
+
+            req.flash('', 'Message sent to Supplier!');
+        })
+          .catch(console.error);              
+      }
+    });
+    res.redirect("back");
+  });
+  //req.originalUrl  
+ }
+
 
 
 exports.postProfile = (req, res) => {
@@ -812,7 +814,7 @@ exports.postProfile = (req, res) => {
     doc.updatedAt = Date.now();
     //doc.__v = 1;
     var price = req.body.price;
-    console.log(doc + " " + price + " " + doc.productsServicesOffered);
+    //console.log(doc + " " + price + " " + doc.productsServicesOffered);
 
     MongoClient.connect(URL, function(err, db) {
       //db or client.

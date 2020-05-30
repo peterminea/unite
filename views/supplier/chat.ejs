@@ -28,6 +28,17 @@
     var socket = io();
     var messages = document.getElementById("messages");
     socket.on('message', addMessages);
+      //is typing...
+    let messageInput = document.getElementById("message");
+    let sender = document.getElementById("from");
+    let receiver = document.getElementById("to");
+    let senderName = document.getElementById("fromName");
+    let receiverName = document.getElementById("toName");
+    let reqId = document.getElementById("reqId");
+    let reqName = document.getElementById("reqName");
+    let typing = document.getElementById("typing");
+    
+    $(messageInput).append('<h3 style="color: blue">Chat about the Order "' + reqName.value + '"</h3>');
       
     $("form").submit(function(e) {
       let li = document.createElement("li");
@@ -61,6 +72,9 @@
       messages.appendChild(span).append("From " + "UNITE User" + ": " + "Just now.");
       console.log("Hello, UNITE User!");
     });
+    
+    
+    /*
     if(1==2)
     fetch("/chat")
       .then( (data) => {
@@ -85,14 +99,17 @@
         });
       });
       
-  //is typing...
-  let messageInput = document.getElementById("message");
-  let sender = document.getElementById("from");
-  let receiver = document.getElementById("to");
-  let senderName = document.getElementById("fromName");
-  let receiverName = document.getElementById("toName");
-  let reqId = document.getElementById("reqId");
-  let typing = document.getElementById("typing");  
+      if(1==2)
+      $.get('/messages', { "X-CSRF-Token": token}, (data) => {
+         data.forEach(addMessages);
+       });
+     }
+    
+    if(1==2)
+       $.post('/messages', { "X-CSRF-Token": token}, message);
+     }
+    */
+
 
   //isTyping event
   messageInput.addEventListener("keypress", () => {
@@ -107,7 +124,6 @@
 
   socket.on("notifyTyping", data => {
     typing.innerText = data.user + " types " + data.message;
-    //console.log(data.user + data.message);
   });
 
   //stop typing
@@ -131,13 +147,13 @@
         .append("From " + data.sender + " to " + data.receiver + " at: " + (data.time));
     }
     
-    function addMessages(message) {//alert(JSON.stringify(message));
+    function addMessages(message) {
        $('#messages1').append('<h4>' + message.sender + '</h4><p>' + message.message + '</p>');
     }
 
     function getMessages() {
       $.ajax({
-        url: "/messages",
+        url: "/messages",//Two-sided: we have to check if sender is from and receiver to, but also inversely.
         data: {
           from: sender.value,
           to: receiver.value
@@ -149,7 +165,6 @@
           console.log('error');
         },
         success: function(data) {
-          //data.forEach(addMessages);
           var msg = document.getElementById("messages");
           for(item of data) {
             putMessages(msg, item);
@@ -157,11 +172,6 @@
         }
       });
       
-      if(1==2)
-      $.get('/messages', { "X-CSRF-Token": token}, (data) => {
-         data.forEach(addMessages);
-       });
-     }
 
     function sendMessage(message) {
       $.ajax({
@@ -174,9 +184,6 @@
           //data.forEach(addMessages);
         }
       });
-      if(1==2)
-       $.post('/messages', { "X-CSRF-Token": token}, message);
-     }
 
       $("#send").click(function() {
        sendMessage({
@@ -206,7 +213,7 @@
           <div class="button minimize"></div>
           <div class="button maximize"></div>
       </div>
-          <div class="title">Chat system</div>
+          <div class="title">Talk instantly to your partner</div>
       </div>
         <ul id="messages" class="messages">
         </ul>
@@ -222,6 +229,7 @@
               <input type="hidden" id="from" value="<%= from %>"/>
               <input type="hidden" id="to" value="<%= to %>"/>
               <input type="hidden" id="reqId" value="<%= reqId %>"/>                
+              <input type="hidden" id="reqName" value="<%= reqName %>"/>
               <input type="hidden" id="fromName" value="<%= fromName %>"/>
               <input type="hidden" id="toName" value="<%= toName %>"/>
               <input id="message" class="message_input" placeholder="Type your message here...">

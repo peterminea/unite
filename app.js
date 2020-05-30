@@ -37,8 +37,6 @@ const ProductService = require("./models/productService");
 
 const app = express();
 mongoose.Promise = global.Promise;
-//const arr = "1".split(',');
-//console.log(arr + ' Z ' + arr.length + ' Y');
 
 const store = new MongoDBStore({
   uri: URI,
@@ -79,19 +77,17 @@ app.use((req, res, next) => {
 
 //Routes and their usage:
 const homeRoutes = require("./routes/home");
-const bidRequestRoutes = require("./routes/bidRequest");
 const supplierRoutes = require("./routes/supplier");
 const buyerRoutes = require("./routes/buyer");
 const supervisorRoutes = require("./routes/supervisor");
-const messageRoutes = require("./routes/chat");
+//const messageRoutes = require("./routes/chat");
 //const imageRoutes = require('./routes/image');
 
 app.use("/", homeRoutes);
-app.use("/bidRequest", bidRequestRoutes);
 app.use("/supplier", supplierRoutes);
 app.use("/buyer", buyerRoutes);
 app.use("/supervisor", supervisorRoutes);
-app.use("/chat", messageRoutes);
+//app.use("/chat", messageRoutes);
 
 //For chatting:
 const connect = require("./dbconnect");
@@ -109,14 +105,18 @@ MongoClient.connect(URI, (err, client) => {
 
   db = client.db(BASE);//Right connection!
   
+  process.on('uncaughtException', function (err) {
+    console.log(err);
+  }); 
+  
+  /*    
   const currency = new Currency({
     name: 'Norwegian Krona',
     value: 'NOK'
   });
   
   //currency.save();
-  
-    /*
+    
   const bidStatus = new BidStatus({
     value: 6,
     name: 'Buyer cancelled the request.'
@@ -330,10 +330,13 @@ MongoClient.connect(URI, (err, client) => {
   productList.push("Product name: 'Frames', amount: 3, price: 15.");
   
   var myQuery = {}, newValues = { $set: {productsServicesOffered: productsList, amountList: amountList, priceList: priceList, products: productList} };
-  //db.collection("bidrequests").updateMany(myQuery, newValues, function(err, obj) {});
-  */
+  db.collection("bidrequests").updateMany(myQuery, newValues, function(err, obj) {});
+  
   
   //db.collection("bidrequests").updateMany({}, { $set: {itemDescriptionLong: "Pictures on walls in isolation chambers for COVID patients"} }, function(err, obj) {});  
+  
+  //db.collection("bidrequests").updateMany({}, { $set: {requestName: "Basic Tender Request - May 30th, 2020"} }, function(err, obj) {}); 
+  */
 });
 
 
@@ -345,20 +348,43 @@ app.post('/processBuyer', (req, res) => {
 });
 
 
+function compareTimes(a, b) {
+  if ( a.time < b.time ){
+    return -1;
+  }
+  if ( a.time > b.time ){
+    return 1;
+  }
+  return 0;
+}
+
+//Lambda variant: objs.sort((a,b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0));
 app.get('/messages', (req, res) => {
+  //console.log(req.query.from + ' LBOHALAM');
   Message.find({
       from: req.query.from, 
      to: req.query.to
     }, (err, messages) => {
-      //console.log(messages);
       if(err) {
         console.error(err.message);
         return false;
       }
-      console.log(res.send);
-      res.send(messages);
+   
+      Message.find({from: req.query.to, to: req.query.from}, (err, messages2) => {
+        var allMessages = [];
+        for(var msg of messages) {
+          allMessages.push(msg);
+        }
+        for(var msg of messages2) {
+          allMessages.push(msg);
+        }
+        
+        allMessages.sort(compareTimes);
+        res.send(allMessages);
+      });
   });
 });
+
 
 app.post('/messages', (req, res) => {
   var message = new Message(req.body);
@@ -657,7 +683,7 @@ app.post('/uniteIDAutocomplete', function(req, res, next) {
 
 app.post('/currencyAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.query["term"], 'i');
-  //console.log(regex);
+  
   var currencyFilter = Currency.find({value: regex}, {"value": 1, "name": 1})
     .sort({"value" : 1})
     .limit(10);//Negative sort means descending.  
@@ -686,7 +712,7 @@ app.post('/currencyAutocomplete', function(req, res, next) {
 
 app.get('/currencyGetAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.query["term"], 'i');
-  console.log(regex);
+  
   var currencyFilter = Currency.find({value: regex}, {"value": 1, "name": 1})
     .sort({"value" : 1})
     .limit(10);//Negative sort means descending.  
@@ -717,8 +743,7 @@ app.get('/currencyGetAutocomplete', function(req, res, next) {
 app.get('/prodServiceAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.query["term"], 'i');
   var id = req.query["supplierId"];  
-  //console.log(regex + ' ' + req.query["supplierId"] + ' ' + MAX_PROD);
-  
+   
   var prodServiceFilter = ProductService
     .find({productName: regex, supplier: new ObjectId(id)}, {'productName': 1, 'price': 1, 'currency': 1})
     .sort({"productName" : 1})
@@ -749,7 +774,7 @@ app.get('/prodServiceAutocomplete', function(req, res, next) {
 
 app.get('/capabilityInputAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.query["term"], 'i');
-  //console.log(regex);
+  
   var capDescriptionFilter = Supplier.find({capabilityDescription: regex}, {'capabilityDescription': 1})
     .sort({"capabilityDescription" : 1})
     .limit(10)
@@ -787,8 +812,7 @@ var buildResultSet = function(docs) {
 app.get('/countryAutocompleted', function(req, res) {  
   var regex = new RegExp(req.query["term"], 'i');
   var query = Country.find({name: regex}, { 'name': 1 })/*.sort({"updated_at":-1}).sort({"created_at":-1})*/.limit(5);
-  //console.log(req.query);
-
+ 
   query.exec(function(err, items) {
     if (!err) {
        var result = buildResultSet(items);
