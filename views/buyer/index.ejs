@@ -22,34 +22,7 @@
     <script type="text/javascript">
       $(document).ready(function() {
         var token = $("input[name='_csrf']").val();
-        
-        $('#search').autocomplete({
-          source: function(req, res) {
-            var obj = $(this.element);
-            
-            $.ajax({
-              url: "/capabilityInputAutocomplete",
-              headers: { "X-CSRF-Token": token },
-              datatype: 'jsonp',
-              type: "GET",
-              data: req,
-              scroll: true,
-              success: function(data) {
-                if(!data || !data.length) {
-                  obj.val('');
-                  return false;
-                }
-                
-                res(data);
-                autocomp(obj, data, true);
-              },
-              error: function(err) {
-                alert(err);
-              }
-            });
-          },
-          minLength: 3
-        });
+        getAutocomplete('#search', '/capabilityInputAutocomplete', token, true);
         
         $('.prodInput').autocomplete({
           source: function(req, res) {
@@ -165,13 +138,14 @@
         <div class="card-body">
           <h5 class="card-title">Contact Name: <%= supplier.contactName %></h5>
           <p class="card-text">Capability Description: <%= supplier.capabilityDescription %></p>
-          <button class="btn btn-primary ml-2" style="float: right;" data-target="#request_<%= i %>"
+          <button class="btn btn-primary ml-2" style="float: right" data-target="#request_<%= i %>"
             data-toggle="modal">Request a Bid</button>
-          <button class="btn btn-dark" style="float: right;" data-target="#comp_<%= i %>"
-            data-toggle="modal">View Details</button>
+          <button class="btn btn-dark" style="float: right" data-target="#comp_<%= i %>"
+            data-toggle="modal">Supplier Details</button>
+          <a href="../buyer/viewBid/<%= supplier._id %>/<%= buyer._id %>"><button class="btn btn-dark" style="margin-right: 10px; float: right">View Bid(s)</button></a>
         </div>
 
-        <!-- View Button's Modal -->
+        <!-- Modal view of Supplier Details (read-only mode) -->
         <div class="modal fade" id="comp_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -265,12 +239,11 @@
                   </div>
                   <div class="form-group">
                     <label>Capability Description</label>
-                    <input type="text" class="form-control" readonly value="<%= supplier.capabilityDescription %>"                      >
+                    <input type="text" class="form-control" readonly value="<%= supplier.capabilityDescription %>" >
                   </div>
                   <div class="form-group">
                     <label>Relevant Experience</label>
-                    <input type="text" class="form-control" readonly value="<%= supplier.relevantExperience %>"
-                      required>
+                    <input type="text" class="form-control" readonly value="<%= supplier.relevantExperience %>" required>
                   </div>
                   <div class="form-group">
                     <label>Supporting Information</label>
@@ -279,30 +252,34 @@
 
                   <!-- Uploading files field section-->
                   <div class="form-group">
-                    <label>Certificates</label>
-                    <input type="url" class="form-control" readonly>
-                  </div>
-                  <div class="form-group">
-                    <label>Anti-bribery policy</label>
-                    <input type="url" class="form-control" readonly>
-                  </div>
-                  <div class="form-group">
-                    <label>Environment policy</label>
-                    <input type="url" class="form-control" readonly>
-                  </div>
-                  <div class="form-group">
-                    <label>Quality management policy</label>
-                    <input type="url" class="form-control" readonly>
-                  </div>
-                  <div class="form-group">
-                    <label>Occupational Safety and Health</label>
-                    <input type="url" class="form-control" readonly>
-                  </div>
-                  <div class="form-group">
-                    <label>Other relevant files</label>
-                    <input type="url" class="form-control" readonly>
+                    <label>Certificates</label>          
+                    <input readonly class="form-control" type="text" id="certificates" name="certificates" value="<%= supplier.certificates %>">
                   </div>
 
+                  <div class="form-group">
+                    <label>Antibribery policy</label>
+                    <input readonly class="form-control" type="text" id="antibriberyPolicy" name="antibriberyPolicy" value="<%= supplier.antibriberyPolicy %>"/>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Environment policy</label>
+                    <input readonly class="form-control" type="text" id="environmentPolicy" name="environmentPolicy" value="<%= supplier.environmentPolicy %>"/>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Quality management policy</label>
+                    <input readonly class="form-control" type="text" id="qualityManagementPolicy" name="qualityManagementPolicy" value="<%= supplier.qualityManagementPolicy %>"/>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Occupational Safety and Health</label>
+                    <input readonly class="form-control" type="text" id="occupationalSafetyAndHealthPolicy" name="occupationalSafetyAndHealthPolicy" value="<%= supplier.occupationalSafetyAndHealthPolicy %>"/>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Other relevant files</label>
+                    <input readonly class="form-control" type="text" id="otherRelevantFiles" name="otherRelevantFiles" value="<%= supplier.otherRelevantFiles %>">
+                  </div>                  
                   <!--Mandatory check of agreements -->
                   <div class="form-group">
                     <div class="form-check">
@@ -326,12 +303,13 @@
                 </form>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button> </div>
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Request Button's Modal -->
+        <!-- Modal window for the new Bid Request -->
         <div class="modal fade" id="request_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -342,7 +320,6 @@
                 </button>
               </div>
               <form method="POST">
-                <input type="hidden" class="supplierId" value="<%= supplier._id %>">
                 <div class="modal-body">
                   <div class="form-group">
                     <label class="text-muted form-text">
@@ -351,7 +328,11 @@
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Supplier Company</label>
-                    <input type="text" class="form-control" value="<%= supplier.companyName %>" readonly>
+                    <input type="text" class="form-control" name="supplierName" value="<%= supplier.companyName %>" readonly>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Buyer Organization</label>
+                    <input type="text" class="form-control" name="buyerName" value="<%= buyer.organizationName %>" readonly>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Item Description (Short)<b>*</b></label>
@@ -377,7 +358,7 @@
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Item Description (Long)*</label>
-                    <textarea class="form-control" name="longItemDescription" required></textarea>
+                    <textarea class="form-control" name="itemDescriptionLong" required></textarea>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Item Description URL (Long)</label>
@@ -385,7 +366,7 @@
                       <div class="input-group-prepend">
                         <span class="input-group-text" id="basic-addon3">http(s)://</span>
                       </div>
-                      <input type="text" class="form-control" aria-describedby="basic-addon3" name="itemDescriptionURL">
+                      <input type="text" class="form-control" aria-describedby="basic-addon3" name="itemDescriptionUrl">
                     </div>
                   </div>
 
@@ -412,7 +393,7 @@
                       <div class="input-group-prepend">
                         <span class="input-group-text" id="basic-addon3">http(s)://</span>
                       </div>
-                      <input type="text" class="form-control" name="complianceRequirementsURL"
+                      <input type="text" class="form-control" name="complianceRequirementsUrl"
                         aria-describedby="basic-addon3">
                     </div>
                   </div>
@@ -421,16 +402,23 @@
                     <textarea class="form-control" name="otherRequirements"></textarea>
                   </div>
                    <div class="form-group">
-                    <label class="col-form-label">Status*</label>
-                    <input type="number" id="status_<%= i %>" class="form-control" name="status" min="0" max="6" step="1" value="0" required> 
-                  </div>
-                   <div class="form-group">
                     <label class="col-form-label">Price</label>
                     <input type="number" class="form-control" id="price_<%= i %>" name="price" value="0" readonly>
-                     <span class="form-control" id="currency_<%= i %>" name="currency">EUR</span>
+                     <span class="form-control" id="currency_<%= i %>" name="currency"><%= supplier.currenciesList[0] %></span>
+                    
                     <input type="hidden" id="defaultPrice_<%= i %>" value="1">
                   </div>
-
+                   <div class="form-group">
+                    <label class="col-form-label">Status*</label>
+                    <input type="number" id="status_<%= i %>" class="form-control" name="status" min="0" max="6" step="1" value="0" readonly>
+                  </div>
+                  <div class="form-group">
+                    <select style="width: 100%" id="statuses_<%= i %>">
+                      <% if (statuses != null) { for (status of statuses) { %>
+                      <option disabled title="<%= status.name %>" value="<%= status.value %>"><%= status.name %></option>
+                      <% } }%>
+                    </select>
+                  </div>
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                   <input type="hidden" name="buyer" value="<%= buyer._id %>">
                   <input type="hidden" name="supplier" value="<%= supplier._id %>">
@@ -447,6 +435,11 @@
                     });
                     
                     var index = "<%= i %>";
+                    var sel = $('select[id="statuses_'+index + '"]');
+                    sel
+                      .find('option[value="' + $('#status_'+index).val() + '"]')
+                      .attr({'selected': 'selected'});
+                    sel.attr('title', sel.find('option:selected').text());
                     
                     $('input[id^="status_"]').change(function(e) {
                       if($(this).val() > 6 || $(this).val() < 0) {
@@ -513,13 +506,13 @@
                     
                     
                     $('#amount_'+index).bind('change', function() {
-                      $('#price_'+index).val($(this).val() * $('#defaultPrice_'+index).val());          
+                      $('#price_'+index).val($(this).val() * $('#defaultPrice_'+index).val());
                     });
                     
                     var elem = (document.getElementById("prodServices_"+index));                    
 
                     $("button[id^='addProdService_']").click(() => {
-                      if($(elem).find('li').length >= 5) {
+                      if($(elem).find('li').length >= <%= MAX_PROD %>) {
                           alert('You have reached the limit of products to request from this supplier.');
                           return false;
                       }
@@ -528,7 +521,7 @@
                      
                         var amount = $('#amount_'+index);                      
                         if(amount.val() < 1) {
-                          alert('Please select an amount first');
+                          alert('Please select an amount first.');
                           return false;
                         }
                         
@@ -569,6 +562,10 @@
                           var prodVal = input.val(), amountVal = amount.val(), priceVal = $('#price_'+index).val();
                           var bigPrice = amountVal * priceVal;
                           var arr = prodInput.val().split(',');
+                          if(checkName(arr, prodVal)) {
+                            alert('You have already added ' + prodVal + ' to the list. Please refine your selection.');
+                            return false;
+                          }
                           arr.push(prodVal);
                           prodInput.val(arr);
                           arr = amountInput.val().split(',');
@@ -583,6 +580,7 @@
                     });
                   </script>
                 </div>
+                
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                   <button type="submit" class="btn btn-primary">Send request</button>

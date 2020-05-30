@@ -25,10 +25,6 @@
     
   $(document).ready(function() {      
     var token = $("input[name='_csrf']").val();
-    
-    $(() => {
-      });    
-      
     var socket = io();
     var messages = document.getElementById("messages");
     socket.on('message', addMessages);
@@ -57,21 +53,26 @@
     });
       
     socket.on("received", (data) => {
-      //alert(data);
+      alert(data);
       let li = document.createElement("li");
       let span = document.createElement("span");
-      var messages = document.getElementById("messages");
+      //var messages = document.getElementById("messages");
       messages.appendChild(li).append(data.message);
       messages.appendChild(span).append("From " + "UNITE User" + ": " + "Just now.");
       console.log("Hello, UNITE User!");
     });
-     
+    if(1==2)
     fetch("/chat")
-      .then(data => {
+      .then( (data) => {
         return data.json();
       })
-      .then(json => {
-        json.map(data => {
+      .then( (json) => {
+       // for(var data of json) {
+          //addMessage(data);
+       // }
+      
+        json.map( (data) => {
+          addMessages(data); return true;
           let li = document.createElement("li");
           let span = document.createElement("span");
           messages
@@ -80,8 +81,7 @@
           
           messages
             .appendChild(span)
-            .append("From " + data.sender + " to " + data.receiver
-                    + " at: " + (data.time));
+            .append("From " + data.sender + " to " + data.receiver + " at: " + (data.time));
         });
       });
       
@@ -107,7 +107,7 @@
 
   socket.on("notifyTyping", data => {
     typing.innerText = data.user + " types " + data.message;
-    console.log(data.user + data.message);
+    //console.log(data.user + data.message);
   });
 
   //stop typing
@@ -119,27 +119,51 @@
     typing.innerText = "";
   });
       
-    function addMessages(message) {
-       $('#messages1').append(' <h4> ${' + message.name + '} </h4> <p>  ${' + message.message + '} </p>');
-       }
+    function putMessages(messages, data) {
+      let li = document.createElement("li");
+      let span = document.createElement("span");
+      
+      messages
+        .appendChild(li)
+        .append(data.message);
+      messages
+        .appendChild(span)
+        .append("From " + data.sender + " to " + data.receiver + " at: " + (data.time));
+    }
+    
+    function addMessages(message) {//alert(JSON.stringify(message));
+       $('#messages1').append('<h4>' + message.sender + '</h4><p>' + message.message + '</p>');
+    }
 
     function getMessages() {
       $.ajax({
         url: "/messages",
+        data: {
+          from: sender.value,
+          to: receiver.value
+        },
         headers: { "X-CSRF-Token": token },
         datatype: 'application/json',
         type: "GET",
+        error: function() {
+          console.log('error');
+        },
         success: function(data) {
-          data.forEach(addMessages);
+          //data.forEach(addMessages);
+          var msg = document.getElementById("messages");
+          for(item of data) {
+            putMessages(msg, item);
+          }
         }
       });
+      
       if(1==2)
       $.get('/messages', { "X-CSRF-Token": token}, (data) => {
          data.forEach(addMessages);
        });
      }
 
-    function sendMessage(message) {//alert(JSON.stringify(message));
+    function sendMessage(message) {
       $.ajax({
         url: "/messages",
         headers: { "X-CSRF-Token": token },
@@ -149,14 +173,13 @@
         success: function(data) {
           //data.forEach(addMessages);
         }
-      });      
+      });
       if(1==2)
        $.post('/messages', { "X-CSRF-Token": token}, message);
      }
 
       $("#send").click(function() {
        sendMessage({
-         //name: $("#name").val(),
          from: sender.value,
          to: receiver.value,
          sender: $('#fromName').val(),
@@ -185,7 +208,10 @@
       </div>
           <div class="title">Chat system</div>
       </div>
-          <ul id="messages" class="messages"></ul>
+        <ul id="messages" class="messages">
+        </ul>
+      <div id="messages1" style="color: fuchsia">
+      </div>
       <div class="bottom_wrapper clearfix">
         <br>
           <input type='hidden' id="name" class="form-control" placeholder=”Name”>
@@ -203,10 +229,7 @@
               <input type="hidden" name="_csrf" value="<%= csrfToken %>">
               <button id="send" class="btn btn-primary send_message">Send</button>
           </form>
-      </div>
-      <div id="messages1">
- 
-      </div>
+      </div>      
     </div>
   </div>
     

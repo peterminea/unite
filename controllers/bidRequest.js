@@ -23,25 +23,27 @@ exports.postIndex = (req, res) => {
       }
   
       const bidRequest = new BidRequest({
-      itemDescription: req.body.itemDescription,
-      productsServicesOffered: req.body.productsServicesOffered,
-      amountList: req.body.amountList,
-      priceList: req.body.priceList,
-      orderedProducts: products,
-      itemDescriptionLong: req.body.longItemDescription,
-      itemDescriptionUrl: req.urlItemDescription,
-      amount: req.body.amount,
-      deliveryLocation: req.body.deliveryLocation,
-      deliveryRequirements: req.body.deliveryRequirements,
-      complianceRequirements: req.body.complianceRequirements,
-      complianceRequirementsUrl: req.body.complianceRequirementsUrl,
-      otherRequirements: req.body.otherRequirements,
-      status: req.body.status,
-      price: req.body.price,
-      createdAt: req.body.createdAt,
-      updatedAt: Date.now(),
-      buyer: req.body.buyer,
-      supplier: req.body.supplier
+        supplierName: req.body.supplierName,
+        buyerName: req.body.buyerName,
+        itemDescription: req.body.itemDescription,
+        productsServicesOffered: req.body.productsServicesOffered,
+        amountList: req.body.amountList,
+        priceList: req.body.priceList,
+        orderedProducts: products,
+        itemDescriptionLong: req.body.itemDescriptionLong,
+        itemDescriptionUrl: req.itemDescriptionUrl,
+        amount: req.body.amount,
+        deliveryLocation: req.body.deliveryLocation,
+        deliveryRequirements: req.body.deliveryRequirements,
+        complianceRequirements: req.body.complianceRequirements,
+        complianceRequirementsUrl: req.body.complianceRequirementsUrl,
+        otherRequirements: req.body.otherRequirements,
+        status: req.body.status,
+        price: req.body.price,
+        createdAt: req.body.createdAt,
+        updatedAt: Date.now(),
+        buyer: req.body.buyer,
+        supplier: req.body.supplier
     });
 
     return bidRequest

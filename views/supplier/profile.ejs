@@ -41,6 +41,14 @@
       $("input").unbind('change').bind('change', function () {
         $('#updateProfile').removeAttr('disabled');
       });
+        
+      $('#updateProfile').click(function() {
+        if($('#prodServices li').length == 0) {
+          var obj = '<p class="productRequired littleNote">You are required to include at least one product or service.</p>';
+          $(obj).insertBefore($(this));
+          return false;
+        }
+      });
 
       $('input.fileupload')/*.unbind('change')*/.bind('change', function () {
         $(this).val ? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
@@ -141,14 +149,7 @@
       return false;
     }
   }
-        
-  function remElem() {alert(2);
-    //var li = $(this).parent('li');
-    //var newIndex = elem.find('li').index(li);
-    //prodList.splice(newIndex, 1);
-    //li.remove();
-  }
-        
+ 
   $('#contactMobileNumber').bind('keyup keypress change', function(e) {
     $(this).text(function(i, text) {
       return text.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
@@ -171,13 +172,17 @@
         var priceInput = $("#pricesList");
         var currencyInput = $("#currenciesList");
      
-        if(input.val() != "") {          
+        if(input.val() != "") {
           var elem = (document.getElementById("prodServices"));
           elem.insertAdjacentHTML("beforeend", "<li class='list-group-item'><span>" + $("#prodServiceInput").val() + ' - ' + $('#price').val() + ' ' + $('#currency').val() + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
           elem = $(elem);
           
           var prodVal = input.val();
           var arr = prodInput.val().split(',');
+          if(checkName(arr, prodVal)) {
+            alert('You have already added ' + prodVal + ' to the list. Please refine your selection.');
+            return false;
+          }
           arr.push(prodVal);
           prodInput.val((arr));
           
@@ -207,9 +212,14 @@
             currencyInput.val((arr));
             
             li.remove();
+            $("#prodServiceInput").trigger('change');
           });
 
           input.val('');
+          $('#price').val('');
+          $('#curency').val('');
+          
+          $('.productRequired').remove();
         }
     });
   });
@@ -397,6 +407,7 @@
                 arr = ($('#currenciesList').val()).split(',');
                 arr.splice(newIndex, 1);
                 $('#currenciesList').val(arr);
+                $("#prodServiceInput").trigger('change');
                 li.remove();
               });
         </script>

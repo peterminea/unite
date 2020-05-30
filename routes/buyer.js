@@ -19,6 +19,7 @@ router.get("/confirmation/:token", isAuth, sessionExit, buyerController.getConfi
 router.get('/resend', isAuth, sessionExit, buyerController.getResendToken);
 router.get("/forgotPassword", isAuth, sessionExit, buyerController.getForgotPassword);
 router.get("/resetPassword/:token", isAuth, sessionExit, buyerController.getResetPasswordToken);
+router.get("/viewBid/:supplierId/:buyerId", isAuth, sessionExit, buyerController.getViewBids);
 
 router.post("/", isAuth, sessionExit, buyerController.postIndex);
 router.post("/sign-in", buyerController.postSignIn);
@@ -28,5 +29,6 @@ router.post('/confirmation/:token', isAuth, sessionExit, buyerController.postCon
 router.post('/resend', isAuth, sessionExit, buyerController.postResendToken);
 router.post("/forgotPassword", isAuth, sessionExit, buyerController.postForgotPassword);
 router.post("/resetPassword/:token", isAuth, sessionExit, buyerController.postResetPasswordToken);
+router.post("/viewBid", isAuth, sessionExit, buyerController.postViewBids);
 
 module.exports = router;

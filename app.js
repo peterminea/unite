@@ -102,29 +102,10 @@ var url = require("url");
 const MongoClient = require("mongodb").MongoClient;
 var db;
 //var ProductService = require('./models/productService');
-//console.log('TOLJINT ' + JSON.parse("[]"));
-/*
-var ss = [];
-ss.push('1unu');
-ss.push('2doi');
-console.log(ss[0] + ' ' + ss[1]);
-console.log(ss);
-//console.log(JSON.stringify(ss) + ' TATA JURA ' + JSON.parse("[" + ss + "]"));
-if(ss.toString().charAt(0) == '[') {
-  var ss1 = JSON.parse("[" + ss + "]");
-  console.log(ss1[0] + ' T ' + ss1[1]);
-  var ss3 = JSON.stringify(ss1);
-  console.log(ss3[0] + ' U ' + ss3[1]);
-}
-
-console.log(JSON.stringify('[1,2]'));
-var ss2 = JSON.stringify(ss);
-console.log(ss2[0] + ' ' + ss2[1] + ' MASCABASCO');*/
-
 
 MongoClient.connect(URI, (err, client) => {
   if (err)
-    return console.log(err);
+    return console.error(err.message);
 
   db = client.db(BASE);//Right connection!
   
@@ -262,33 +243,126 @@ MongoClient.connect(URI, (err, client) => {
   });  
   */
   
-  db.collection("suppliers").ensureIndex( { "companyName": 1, "emailAddress": 1 }, { unique: true } );
+  //db.collection("suppliers").ensureIndex( { "companyName": 1, "emailAddress": 1 }, { unique: true } );
+  
+  //Refactor the orders table:
+  /*
+  function prom(bids, i, len) {   
+    if(bids[i].buyer && bids[i].supplier) {
+      var promise1 = Buyer.findOne({_id: bids[i].buyer}).exec();
+      
+      promise1.then((buys) => {
+        if(buys) {
+          var query = {_id: bids[i]._id}, newvalues = { $set: {buyerName: buys.organizationName} };
+          db.collection("bidrequests").updateOne(query, newvalues, function(err, obj) {});
+        } else {
+          db.collection("bidrequests").deleteOne({_id: bids[i]._id}, function(err, obj) {});
+        }
+      });
+      
+      var promise2 = Supplier.findOne({_id: bids[i].supplier}).exec();
+        promise2.then((sups) => {
+          if(sups) {
+            var query = {_id: bids[i]._id}, newvalues = { $set: {supplierName: sups.companyName} };
+            db.collection("bidrequests").updateOne(query, newvalues, function(err, obj) {});
+          } else {
+            db.collection("bidrequests").deleteOne({_id: bids[i]._id}, function(err, obj) {});
+          }
+        });
+    } else {
+      db.collection("bidrequests").deleteOne({_id: bids[i]._id}, function(err, obj) {});
+    }
+    
+    if(i < len) 
+      setTimeout(prom(bids, i+1, len), 6000);
+  }
+  
+  var promise = BidRequest.find({}).exec();
+  promise.then( (bids) =>  {
+    prom(bids, 0, bids.length);
+  });
+  
+  var currenciesList = [];
+  currenciesList.push('EUR');
+  currenciesList.push('EUR');  
+  currenciesList.push('EUR');  
+  
+  var productsList = [];  
+  productsList.push('Mask');
+  productsList.push('Ventilator');
+  productsList.push('Disinfecting');
+  
+  var pricesList = [];
+  pricesList.push(3);
+  pricesList.push(2);
+  pricesList.push(5);
+  
+  //console.log(currenciesList + ' ' + productsList + ' ' + pricesList);
+  var myQuery = {};
+  var newValues = { $set: {currenciesList: currenciesList, pricesList: pricesList, productsServicesOffered: productsList} };
+  
+  //db.collection("suppliers").updateMany(myQuery, newValues, function(err, obj) {});
+  */
+
+   // db.collection('suppliers').find({companyName: {$regex: "^(?!Demo$)"}})
+  // db.collection('suppliers').find({companyName: {$regex: /^((?!Demo).)*$/}})
+  // db.collection('suppliers').find({companyName: { $not: /^Demo.*/ }})
+  // db.collection('suppliers').find({ companyName: $not:{$regex: /^Demo.*/ }}})
+  /*
+  var productsList = [];  
+  productsList.push('Tempera');
+  productsList.push('Paintbrushes');
+  productsList.push('Frames');
+  
+  var amountList = [];
+  amountList.push(2);
+  amountList.push(5);
+  amountList.push(3);
+  
+  var priceList = [];
+  priceList.push(6);
+  priceList.push(10);
+  priceList.push(15);
+  
+  var productList = [];
+  productList.push("Product name: 'Tempera', amount: 2, price: 6.");
+  productList.push("Product name: 'Paintbrushes', amount: 5, price: 10.");
+  productList.push("Product name: 'Frames', amount: 3, price: 15.");
+  
+  var myQuery = {}, newValues = { $set: {productsServicesOffered: productsList, amountList: amountList, priceList: priceList, products: productList} };
+  //db.collection("bidrequests").updateMany(myQuery, newValues, function(err, obj) {});
+  */
+  
+  //db.collection("bidrequests").updateMany({}, { $set: {itemDescriptionLong: "Pictures on walls in isolation chambers for COVID patients"} }, function(err, obj) {});  
 });
 
 
 app.post('/processBuyer', (req, res) => {
-  console.log(req.query('id'));
-  
   connect.then(db => {
     db.collection("buyers").deleteOne({_id: req.query('id')}, function(err, obj) {
       });  
-  });
-  /*
-  var promise = Buyer.find({_id: req.query('id')}).exec();
-  promise.then((buyer) => {    
-  });*/  
+  }); 
 });
 
 
 app.get('/messages', (req, res) => {
-  Message.find({},(err, messages)=> {
-    res.send(messages);
-  })
+  Message.find({
+      from: req.query.from, 
+     to: req.query.to
+    }, (err, messages) => {
+      //console.log(messages);
+      if(err) {
+        console.error(err.message);
+        return false;
+      }
+      console.log(res.send);
+      res.send(messages);
+  });
 });
 
 app.post('/messages', (req, res) => {
   var message = new Message(req.body);
-  console.log(message);
+  
   message.save((err) => {
     if(err)
       return res.sendStatus(500);
@@ -307,7 +381,7 @@ socket.on("connection", socket => {
   });
 
   //Someone is typing
-  socket.on("typing", data => {console.log(11);
+  socket.on("typing", data => {
     socket.broadcast.emit("notifyTyping", {
       user: data.user,
       from: data.from,
@@ -317,15 +391,13 @@ socket.on("connection", socket => {
     });
   });
 
-  //when soemone stops typing
+  //when someone stops typing
   socket.on("stopTyping", () => {
     socket.broadcast.emit("notifyStopTyping");
   });
 
-  socket.on("chat message", function(msgData) {console.log(22);
-    console.log("Message: " + msgData.msg);
-
-    //broadcast message to everyone in port:5000 except yourself.
+  socket.on("chat message", function(msgData) {
+   //broadcast message to everyone in port:5000 except yourself.
     socket.broadcast.emit("received", {
       message: msgData.msg
     });
@@ -354,7 +426,6 @@ app.listen(port, () => {
   console.log("Connected to port: " + port)
 });
 
-
 //Upload files to DB:
 const ObjectId = require("mongodb").ObjectId;
 const uploadController = require("./controllers/upload");
@@ -369,7 +440,7 @@ var storage = multer.diskStorage({
   }
 });
 
-var extArray = ['.png', '.jpg', '.jpeg', '.gif', '.pdf', '.txt'];
+var extArray = ['.png', '.jpg', '.jpeg', '.gif', '.pdf', '.txt', '.docx', '.rtf'];
  
 var upload = multer({
   storage: storage,
@@ -532,6 +603,31 @@ app.get('/industryGetAutocomplete', function(req, res, next) {
 });
 
 
+app.get('/bidStatuses', function(req, res, next) {  
+  var statusFilter = BidStatus.find({});
+  
+  statusFilter.exec(function(err, data) {
+  var result = [];
+    
+    if(!err) {
+      if(data && data.length && data.length > 0) {
+        data.forEach(item=>{
+          let obj = {
+            id: item._id,
+            value: item.value,
+            name: item.value + ' - ' + item.name
+          };
+          
+          result.push(obj);
+        });
+      }
+      
+      res.jsonp(result);     
+    }
+  });
+});
+
+
 app.post('/uniteIDAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.query["term"], 'i');
   var uniteIDFilter = Supervisor.find({organizationUniteID: regex}, {"organizationUniteID": 1})
@@ -561,7 +657,7 @@ app.post('/uniteIDAutocomplete', function(req, res, next) {
 
 app.post('/currencyAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.query["term"], 'i');
-  console.log(regex);
+  //console.log(regex);
   var currencyFilter = Currency.find({value: regex}, {"value": 1, "name": 1})
     .sort({"value" : 1})
     .limit(10);//Negative sort means descending.  
@@ -574,7 +670,7 @@ app.post('/currencyAutocomplete', function(req, res, next) {
         data.forEach(item=>{
           let obj = {
             id: item._id,
-            name: item.value,
+            name: item.value + '-' + item.name,
             value: item.name
           };
           
@@ -621,7 +717,7 @@ app.get('/currencyGetAutocomplete', function(req, res, next) {
 app.get('/prodServiceAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.query["term"], 'i');
   var id = req.query["supplierId"];  
-  console.log(regex + ' ' + req.query["supplierId"] + ' ' + MAX_PROD);
+  //console.log(regex + ' ' + req.query["supplierId"] + ' ' + MAX_PROD);
   
   var prodServiceFilter = ProductService
     .find({productName: regex, supplier: new ObjectId(id)}, {'productName': 1, 'price': 1, 'currency': 1})
@@ -645,7 +741,7 @@ app.get('/prodServiceAutocomplete', function(req, res, next) {
         });
       }
      
-      res.jsonp(result);     
+      res.jsonp(result);
     }
   });
 });
@@ -653,10 +749,11 @@ app.get('/prodServiceAutocomplete', function(req, res, next) {
 
 app.get('/capabilityInputAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.query["term"], 'i');
-  console.log(regex);
+  //console.log(regex);
   var capDescriptionFilter = Supplier.find({capabilityDescription: regex}, {'capabilityDescription': 1})
     .sort({"capabilityDescription" : 1})
-    .limit(10);
+    .limit(10)
+  ;
   
   capDescriptionFilter.exec(function(err, data) {
     var result = [];
@@ -690,7 +787,7 @@ var buildResultSet = function(docs) {
 app.get('/countryAutocompleted', function(req, res) {  
   var regex = new RegExp(req.query["term"], 'i');
   var query = Country.find({name: regex}, { 'name': 1 })/*.sort({"updated_at":-1}).sort({"created_at":-1})*/.limit(5);
-  console.log(req.query);
+  //console.log(req.query);
 
   query.exec(function(err, items) {
     if (!err) {

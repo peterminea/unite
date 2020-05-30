@@ -27,8 +27,7 @@
         $("input").unbind('change').bind('change', function() {        
           $('#updateProfile').removeAttr('disabled');
         });
-        
-      //postAutocomplete('#organizationUniteID', '/uniteIDAutocomplete', token);//Readonly, so useless.
+      
       postAutocomplete('#country', '/countryAutocomplete', token);
   });
 </script>

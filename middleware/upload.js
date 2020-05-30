@@ -15,7 +15,7 @@ var storage = multer.diskStorage({
       return callback(message, null);
     }
 
-    var filename = '(' + Date.now() + ') -UNITE-' + file.originalname;
+    var filename =  'UNITE-'+ Date.now() + '-' + file.originalname;
     callback(null, filename);
   }
 });
@@ -24,7 +24,7 @@ var uploadFiles = multer({
   storage: storage,
   fileFilter: function (req, file, callback) {
     var ext = path.extname(file.originalname);
-    var extArray = ['.png', '.jpg', '.jpeg', '.gif', '.pdf', '.txt'];
+    var extArray = ['.png', '.jpg', '.jpeg', '.gif', '.pdf', '.txt', '.docx', '.rtf'];
     var isItIn = false;
     
     for(var i in extArray) 
@@ -39,7 +39,7 @@ var uploadFiles = multer({
     callback(null, true);
   },
   limits: {
-    fileSize: 1024 * 2048 //2 MB
+    fileSize: 2048 * 2048 //4 MB
   }  
 }).array("multiple", 10);
 var uploadFilesMiddleware = util.promisify(uploadFiles);
