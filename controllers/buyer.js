@@ -69,6 +69,7 @@ exports.postIndex = (req, res) => {
       requestName: req.body.requestName,
       supplierName: req.body.supplierName,
       buyerName: req.body.buyerName,
+      buyerEmail: req.body.buyerEmail,
       itemDescription: req.body.itemDescription,
       productsServicesOffered: req.body.productsServicesOffered,
       amountList: req.body.amountList,
@@ -104,12 +105,19 @@ exports.postIndex = (req, res) => {
 }
 
 
+exports.getCart = (req, res) => {
+  res.render('buyer/cart', {});
+}
+
+
 exports.getViewBids = (req, res) => {
   var promise = BidRequest.find({supplier: req.params.supplierId, buyer: req.params.buyerId}).exec();
   
   promise.then((bids) => {
     res.render("buyer/viewBid", {
       bids: bids? bids : [],
+      stripePublicKey: process.env.STRIPE_KEY_PUBLIC,
+      stripeSecretKey: process.env.STRIPE_KEY_SECRET,
       supplierId: req.params.supplierId, 
       buyerId: req.params.buyerId
     });
@@ -504,6 +512,7 @@ exports.postSignUp = (req, res) => {
                 emailAddress: req.body.emailAddress,
                 password: req.body.password,          
                 isVerified: false,
+                contactMobileNumber: req.body.contactMobileNumber,
                 address: req.body.address,
                 balance: req.body.balance,
                 deptAgencyGroup: req.body.deptAgencyGroup,
@@ -598,6 +607,7 @@ exports.postProfile = (req, res) => {
     doc.emailAddress = req.body.emailAddress;
     doc.password = req.body.password;
     doc.isVerified = req.body.isVerified;
+    doc.contactMobileNumber = req.body.contactMobileNumber;
     doc.address = req.body.address;
     doc.balance = req.body.balance;
     doc.deptAgencyGroup = req.body.deptAgencyGroup;

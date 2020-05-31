@@ -14,6 +14,7 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  <script src="https://checkout.stripe.com/checkout.js" defer></script>
   <script src="/https.js"></script>
   
   <script type="text/javascript">
@@ -125,8 +126,15 @@
                     <input readonly type="text" class="form-control" name="buyerName" value="<%= bid.buyerName %>">
                   </div>
                   <div class="form-group">
+                    <label class="col-form-label">Buyer's E-mail Address*</label>
+                    <input readonly type="text" class="form-control" name="buyerName" value="<%= bid.buyerEmail %>">
+                  </div>
+                  <div class="form-group">
                     <label class="col-form-label">Item Description (Short*)</label>
                     <input readonly type="text" class="form-control" name="itemDescription" value="<%= bid.itemDescription %>">
+                    <input type="hidden" id="products_<%= i %>" value="<%= bid.productsServicesOffered %>">
+                    <input type="hidden" id="prices_<%= i %>" value="<%= bid.priceList %>">
+                    <input type="hidden" id="quantities_<%= i %>" value="<%= bid.amountList %>">
                   </div>
                   <div class="form-group">
                     <% const re = /:\s|,\s/; 
@@ -136,7 +144,7 @@
                       %>
                     <Code></Code>
                     <label>Products / Services Offered</label>
-                    <ul class="list-group">
+                    <ul id="cartList_<%= i %>" class="list-group">
                       <% for (h in products) { %>
                       <li class="list-group-item"><%= amounts[h] %>*<%= products[h] %> - <%= prices[h] %> <%= bid.currency %></li>
                       <% } %>
@@ -212,23 +220,82 @@
                     <br>
                     <label>Type your message below</label>
                     <textarea name="message" id="message_<%= i %>" class="form-control"></textarea>
+                    
                     <script type="text/javascript">
                       var index = "<%= i %>";
+                      var stripePublicKey = "<%= stripePublicKey %>";
+                      var status = $('#status_'+index).val();
+                      
+                      if($('#status_'+index).val() == 3) {//Ready to pay -> STRIPE in action!
+                        var amount = $('#totalAmount_'+index).val();
+                        var currency = $('#currency_'+index).val();
+                        var from = "<%= bid.supplierName %>",
+                        to = "<%= bid.buyerName %>",
+                        desc = "<%= bid.requestName %>",
+                        emailAddress = "<%= bid.buyerEmail %>";
+                        
+                        $('#message_'+index)
+                          .parent('div')
+                          .append('<button type="button" title="Pay ' + amount + ' ' + currency + '" class="btn btn-primary" id="purchase_'+index+'">Go to Purchase</button>');
+						  
+						              var stripeHandler = StripeCheckout.configure({
+                            key: stripePublicKey,
+                            locale: 'en',
+                            token: function(token) {
+                              fetch('/purchase', {
+                                method: 'POST',
+                                headers: {
+                                  "X-CSRF-Token": $("#csrf_"+index).val(),
+                                  'Content-Type': 'application/json',
+                                  'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                  stripeTokenId: token.id,
+                                  from: from,
+                                  to: to,
+                                  emailAddress: emailAddress,//Buyer's e-mail.
+                                  description: "Order - " + desc,
+                                  amount: amount,
+                                  currency: currency
+                                })
+                              })
+                                .then(function(res) {
+                                return res.json();
+                              })
+                                .then((data) => {
+                                alert(data.message);
+                                });
+                              }
+                            });
+                        
+                        $('#purchase_'+index).bind('click', function() {
+							            stripeHandler.open({
+                            amount: amount,
+                            currency: currency,
+                            from: from,
+                            to: to,
+                            description: desc
+                          });
+                        });
+                      } else {
+                        $('#purchase_'+index).remove();
+                        if(status >= 4) {//Beyond the purchase phase.
+                          $('#cartList_'+index).find('li').css({"title": "Already ordered!", "border": "2px"});//Mark them!
+                        }
+                      }
                       
                       $("#message_"+index).bind('change', function() {
-                        var s = $(this).attr('id');
-                        var t = s.indexOf('_');
-                        var u = s.substr(t+1);
-                        $('#updateBidStatus_'+u).removeAttr('disabled');
+                        $('#updateBidStatus_'+getId($(this).attr('id'))).removeAttr('disabled');
                       });
                     </script>
+                    
                     <input type="hidden" name="from" value="<%= bid.buyer %>">
                     <input type="hidden" name="to" value="<%= bid.supplier %>">
                     <input type="hidden" name="reqId" value="<%= bid._id %>">
                     <input type="hidden" name="reqName" value="<%= bid.requestName %>">
                     <input type="hidden" name="sender" value="<%= bid.buyerName %>">
                     <input type="hidden" name="receiver" value="<%= bid.supplierName %>">
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="_csrf" id="csrf_<%= i %>" value="<%= csrfToken %>">
                     <button class="btn btn-primary" disabled type="submit" id="updateBidStatus_<%= i %>">
                         Update Bid & Message Supplier
                     </button>

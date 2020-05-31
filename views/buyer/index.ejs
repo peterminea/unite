@@ -95,7 +95,7 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item active">
-          <a class="nav-link" href="/buyer">Dashboard <span class="sr-only">(current)</span></a>
+          <a class="nav-link" href="/buyer">Buyer's Dashboard <span class="sr-only">(current)</span></a>
         </li>
       </ul>
       <ul class="navbar-nav">
@@ -332,11 +332,15 @@
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Supplier Company</label>
-                    <input type="text" class="form-control" name="supplierName" value="<%= supplier.companyName %>" readonly>
+                    <input type="text" class="form-control" name="supplierName" value="<%= supplier.companyName %>" disabled>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Buyer Organization</label>
-                    <input type="text" class="form-control" name="buyerName" value="<%= buyer.organizationName %>" readonly>
+                    <input type="text" class="form-control" name="buyerName" value="<%= buyer.organizationName %>" disabled>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Buyer's E-mail Address*</label>
+                    <input type="email" class="form-control" name="buyerEmail" value="<%= buyer.emailAddress %>" disabled>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Item Description (Short)<b>*</b></label>

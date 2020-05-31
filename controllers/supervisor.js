@@ -335,6 +335,7 @@ exports.postSignUp = (req, res) => {
               emailAddress: req.body.emailAddress,
               password: req.body.password,
               isVerified: false,
+              contactMobileNumber: req.body.contactMobileNumber,
               address: req.body.address,
               country: req.body.country,
               certificates: req.body.certificates,
@@ -429,6 +430,7 @@ exports.postProfile = (req, res) => {
     doc.emailAddress = req.body.emailAddress;
     doc.password = req.body.password;
     doc.isVerified = req.body.isVerified;
+    doc.contactMobileNumber = req.body.contactMobileNumber;
     doc.address = req.body.address;
     doc.country = req.body.country;
     doc.certificates = req.body.certificates;

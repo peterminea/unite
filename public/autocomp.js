@@ -31,13 +31,26 @@ function isJson(obj) {
 }
 
 
+function isUnique(value, index, self) {//Unique values in JS arrays.
+    return self.indexOf(value) === index;
+}
+
+ 
+//var unique = myArray.filter(isUnique);
+//var unique = myArray.filter((v, i, a) => a.indexOf(v) === i); 
+
+
 function checkName(arr, name) {
   for(var i in arr) {
-    if(arr[i] == name)
+    if(arr[i].toLowerCase() == name.toLowerCase())
       return true;
   }
   
   return false;
+}
+
+function getId(val) {
+  return val.substr(val.indexOf('_')+1);
 }
 
 
