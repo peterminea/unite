@@ -53,7 +53,11 @@ const supervisorSchema = new Schema({
     type: Date,
     required: false
     //,default: Date.now() + 43200000
-  },  
+  },
+  contactMobileNumber: {
+    type: String,
+    required: true
+  },
   address: {
     type: String,
     required: true

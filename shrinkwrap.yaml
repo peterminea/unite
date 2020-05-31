@@ -23,6 +23,7 @@ dependencies:
   process: 0.11.10
   socket.io: 2.3.0
   ssl: 1.0.0
+  stripe: 8.56.0
   token: 0.1.0
   utf-8-validate: 5.0.2
   validator: 13.0.0
@@ -54,6 +55,10 @@ packages:
       node: '>=6.0.0'
     resolution:
       integrity: sha512-VXdJ9J6vBNMw+wMIGFRvms6EmV6pvoRHMWoLJGweHlsZDnvmK3rWUnnNaS3OdDQ3A8B5bMv2WKsEnHsMZ6iDUg==
+  /@types/node/14.0.6:
+    dev: false
+    resolution:
+      integrity: sha512-FbNmu4F67d3oZMWBV6Y4MaPER+0EpE9eIYf2yaHhCWovc1dlXCZkqGX4NLHfVVr6umt20TNBdRzrNJIzIKfdbw==
   /accepts/1.3.7:
     dependencies:
       mime-types: 2.1.25
@@ -1224,6 +1229,12 @@ packages:
       node: '>=0.6'
     resolution:
       integrity: sha512-VCdBRNFTX1fyE7Nb6FYoURo/SPe62QCaAyzJvUjwRaIsc+NePBEniHlvxFmmX56+HZphIGtV0XeCirBtpDrTyQ==
+  /qs/6.9.4:
+    dev: false
+    engines:
+      node: '>=0.6'
+    resolution:
+      integrity: sha512-A1kFqHekCTM7cz0udomYUoYNWjBebHm/5wzU/XqrBRBNWectVH0QIiN+NEcZ0Dte5hvzHwbr8+XQmguPhJ6WdQ==
   /random-bytes/1.0.0:
     dev: false
     engines:
@@ -1494,6 +1505,15 @@ packages:
     dev: false
     resolution:
       integrity: sha512-n/ShnvDi6FHbbVfviro+WojiFzv+s8MPMHBczVePfUpDJLwoLT0ht1l4YwBCbi8pJAveEEdnkHyPyTP/mzRfwg==
+  /stripe/8.56.0:
+    dependencies:
+      '@types/node': 14.0.6
+      qs: 6.9.4
+    dev: false
+    engines:
+      node: ^8.1 || >=10.*
+    resolution:
+      integrity: sha512-HwFbAC3bhBrWFm9+2nTzztTirsFOGyPCEtKJPKiB03N6ZY+lZipBh+v6eCTaxhzHKm8/qT4vfP6DhZC7YHAOiw==
   /supports-color/5.5.0:
     dependencies:
       has-flag: 3.0.0
@@ -1667,6 +1687,7 @@ specifiers:
   process: ^0.11.10
   socket.io: ^2.3.0
   ssl: ^1.0.0
+  stripe: ^8.54.0
   token: ^0.1.0
   utf-8-validate: ^5.0.2
   validator: ^13.0.0

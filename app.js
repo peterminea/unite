@@ -11,9 +11,20 @@ const multer = require("multer");
 const fs = require("fs-extra");
 const path = require('path');
 const process = require('process');
+const MongoClient = require("mongodb").MongoClient;
+const connect = require("./dbconnect");
+const app = express();
+const http = require("http").Server(app);
+const socket = require("socket.io")(http);
+
 const BASE = process.env.BASE;
 const URI = process.env.MONGODB_URI;
 const MAX_PROD = process.env.SUP_MAX_PROD;
+
+const stripeSecretKey = process.env.STRIPE_KEY_SECRET;
+const stripePublicKey = process.env.STRIPE_KEY_PUBLIC;
+//dotenv.config, not load.
+const stripe = require('stripe')(stripeSecretKey);
 
 //Classes:
 const BidRequest = require("./models/bidRequest");
@@ -31,7 +42,6 @@ const ProductService = require("./models/productService");
 //const MONGODB_URI = "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";//The DB url is actually saved as an Environment variable, it will be easier to use anywhere in the application that way.
 //Syntax: process.env.MONGODB_URI
 
-const app = express();
 mongoose.Promise = global.Promise;
 
 const store = new MongoDBStore({
@@ -40,6 +50,7 @@ const store = new MongoDBStore({
 });
 
 //app.use(express.static(path.join(__dirname, '..', "public")));
+app.use(express.json());
 app.use(express.static('public'));
 app.set("view engine", "ejs");
 
@@ -86,11 +97,7 @@ app.use("/supervisor", supervisorRoutes);
 //app.use("/chat", messageRoutes);
 
 //For chatting:
-const connect = require("./dbconnect");
-const http = require("http").Server(app);
-const socket = require("socket.io")(http);
 const port = 5000;
-const MongoClient = require("mongodb").MongoClient;
 var db;
 //var ProductService = require('./models/productService');
 
@@ -327,10 +334,9 @@ MongoClient.connect(URI, (err, client) => {
   var myQuery = {}, newValues = { $set: {productsServicesOffered: productsList, amountList: amountList, priceList: priceList, products: productList} };
   db.collection("bidrequests").updateMany(myQuery, newValues, function(err, obj) {});
   
-  
-  //db.collection("bidrequests").updateMany({}, { $set: {itemDescriptionLong: "Pictures on walls in isolation chambers for COVID patients"} }, function(err, obj) {});  
-  
-  //db.collection("bidrequests").updateMany({}, { $set: {requestName: "Basic Tender Request - May 30th, 2020"} }, function(err, obj) {}); 
+  //db.collection("bidrequests").updateMany({}, { $set: {itemDescriptionLong: "Pictures on walls in isolation chambers for COVID patients", buyerEmail: "peter.minea@gmail.com", requestName: "Basic Tender Request - May 30th, 2020"} }, function(err, obj) {}); 
+  //db.collection("buyers").updateMany({}, { $set: {contactMobileNumber: "0732 060 807"} }, function(err, obj) {});
+  //db.collection("supervisors").updateMany({}, { $set: {contactMobileNumber: "0732 060 807"} }, function(err, obj) {});
   */
 });
 
@@ -468,7 +474,7 @@ var upload = multer({
     var ext = path.extname(file.originalname);
     var isItIn = false;
     
-    for(var i in extArray) 
+    for(var i in extArray)
       if(ext.toLowerCase() == extArray[i].toLowerCase()) {
         isItIn = true;
       }
@@ -512,6 +518,53 @@ app.post("/uploadfile", upload.single("single"), (req, res, next) => {
   src.on('error', function(err) {
     res.render('error'); 
   });
+});
+
+
+app.post('/purchase', (req, res, next) => {
+    const headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type"
+  };
+  
+  stripe.customers.create({
+    email: req.body.emailAddress,
+    source: req.body.stripeTokenId
+  })
+  .then((customer) => stripe.charges.create({
+    amount: req.body.amount,
+    from: req.body.from,
+    to: req.body.to,
+    description: req.body.description,
+    source: req.body.stripeTokenId,
+    customer: customer.id,
+    currency: req.body.currency.toLowerCase()
+  }))
+    .then((charge) => {
+      console.log('Payment successful!\n' + charge);      
+      const response = {
+        headers,
+        statusCode: 200,
+        body: JSON.stringify({
+          message: "You have successfully paid for your items!",
+          charge: charge
+        })
+      };    
+
+    res.json(response);
+  }).catch(err => {
+      console.log('Payment failed! Please repeat the operation.\n' + err);
+      const response = {
+        headers,
+        statusCode: 500,
+        body: JSON.stringify({
+          error: err.message
+        })
+      };
+    
+      res.json(response);
+      //res.status(500).end();
+    });
 });
 
 

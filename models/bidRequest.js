@@ -15,6 +15,10 @@ const bidRequestSchema = new Schema({
     type: String,
     required: true
   },
+  buyerEmail: {
+    type: String,
+    required: true
+  },
   itemDescription: {
     type: String,
     required: true

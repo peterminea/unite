@@ -9,6 +9,12 @@ body {
   font-size: 16pt;
 }
 
+.font-14pt-custom {
+  font-size: 14pt;
+  font-weight: bold;
+  font-style:italic;
+}
+
 p.term {
   color: navy;
   font-size: 14pt;

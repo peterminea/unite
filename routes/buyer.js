@@ -18,6 +18,7 @@ router.get('/resend', isAuth, sessionExit, buyerController.getResendToken);
 router.get("/forgotPassword", isAuth, sessionExit, buyerController.getForgotPassword);
 router.get("/resetPassword/:token", isAuth, sessionExit, buyerController.getResetPasswordToken);
 router.get("/viewBid/:supplierId/:buyerId", isAuth, sessionExit, buyerController.getViewBids);
+router.get("/cart", isAuth, sessionExit, buyerController.getCart);
 
 router.post("/", isAuth, sessionExit, buyerController.postIndex);
 router.post("/sign-in", buyerController.postSignIn);
