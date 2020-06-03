@@ -49,7 +49,8 @@ function checkName(arr, name) {
   return false;
 }
 
-function getId(val) {
+function getId(val) {//alert(val);
+  //alert(val.indexOf('_'));
   return val.substr(val.indexOf('_')+1);
 }
 
@@ -135,3 +136,12 @@ function postAutocomplete(elem, url, token) {
     }
   });
 }
+
+$(document).ready(function() {
+  $('input,textarea,span,label,li,button,h2,h3,h4,h5')
+    .each(function(index, el) {
+    if(!$(el).attr('title')) {
+      $(el).attr('title', $(el).val()? $(el).val() : $(el).text());
+    }
+  });
+});

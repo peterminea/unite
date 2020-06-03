@@ -12,9 +12,12 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
   <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>    
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-  <script src="https://checkout.stripe.com/checkout.js" defer></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>  
+  <script src="https://checkout.stripe.com/checkout.js"></script>
+  <script src="/autocomp.js"></script>
   <script src="/https.js"></script>
   
   <script type="text/javascript">
@@ -33,19 +36,28 @@
                   return false;                
                 
                 $('select[id^="statuses_"]')
-                  .bind('change', function() {//Difficult DOM jQuery navigation in modals.
+                  .bind('change', function() {//Difficult DOM jQuery navigation in modals.                  
+                  var theVal = $(this).find('option:selected').attr('value');
+                  var index = getId($(this).attr('id'));
+                  var statusDiv = $(this).parent('div').parent('div').next('div');
+                                   
                   ($(this)
                     .parent('div')
                     .prev('div')
                     .find('input[id^="status"]'))
-                    .val($(this)
-                      .find('option:selected')
-                      .attr('value'));
+                    .val(theVal);
                   
-                  $(this)
-                      .parent('div')
-                      .parent('div')
-                      .next('div')
+                  
+                  if(theVal == 3) {
+                    var amount = $('#price_'+index).val();
+                    
+                    statusDiv.append('<button type="button" style="float: left; position: center" title="Pay ' + amount + '" class="btn btn-primary" id="purchase_'+index+'">Go to Purchase</button>');
+                  } else {
+                    statusDiv.find('button[id^="purchase"]').remove();
+                    $('#cartList_'+index).find('li').css({"title": "Already ordered!", "border": "2px"});
+                  }
+                  
+                  statusDiv
                       .find('button[id^="updateBidStatus_"]')
                       .removeAttr('disabled');
                 });
@@ -53,21 +65,23 @@
                 $('select[id^="statuses_"]')
                   .each(function(index, el) {
                   for(var i in data) {
-                    var opt = '<option title="' + data[i].name +'" value="' + data[i].value + '">' + data[i].name + '</option>';
+                    var opt = '<option style="word-wrap: break-word; width: 100px" title="' + data[i].name +'" value="' + data[i].value + '">' + data[i].name + '</option>';
                     $(el).append(opt);
                     }
                   
-                  setTimeout(function() {
+                  //setTimeout(function() {
+                    
                     var statusInput = $(el)
                       .parent('div')
                       .prev('div')
                       .find('input[id^="status_"]');
-                   
+                   //alert(statusInput.length + ' ' + statusInput.attr('id'));
                     $(el)
                         .find('option[value="' + statusInput.val() + '"]')
                         .attr({'selected': 'selected'});
+                  
                     $(el).attr('title', $(this).find('option:selected').text());                  
-                  }, 200);
+                 // }, 300);
                 });
               }
       });
@@ -137,7 +151,7 @@
                     <input type="hidden" id="quantities_<%= i %>" value="<%= bid.amountList %>">
                   </div>
                   <div class="form-group">
-                    <% const re = /:\s|,\s/; 
+                    <% const re = /:\s|,\s/;
                     const products = bid.productsServicesOffered;
                     const prices = bid.priceList;
                     const amounts = bid.amountList;
@@ -197,8 +211,8 @@
                    <div class="form-group">
                     <label class="col-form-label">Price</label>
                      <% l = 0; for(m in bid.priceList) {l += bid.priceList[m];} %>
-                    <input type="text" title="Total order price" value="<%= l %> <%= bid.currency %>" class="form-control" id="price_<%= i %>" name="price" readonly>
-                     <span style="display: none" value="<%= bid.currency %>" id="currency_<%= i %>" name="currency"></span>
+                    <input type="text" title="Total order price" value="<%= l %> <%= bid.currency %>" class="form-control" id="price_<%= i %>" name="price" disabled>
+                     <input type="hidden" value="<%= bid.currency %>" id="currency_<%= i %>" name="currency"></span>
                      <input type="hidden" id="defaultPrice_<%= i %>" value="1">
                   </div>
                    <div class="form-group">
@@ -212,31 +226,46 @@
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                   <input type="hidden" name="buyer" value="<%= bid.buyer %>">
                   <input type="hidden" name="supplier" value="<%= bid.supplier %>">
-                </div>                
+                </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                   <div class="form-group">
                     <h3>Message for Supplier</h3>
                     <br>
-                    <label>Type your message below</label>
+                    <label>Type your message below:</label>
                     <textarea name="message" id="message_<%= i %>" class="form-control"></textarea>
-                    
+                    <br>
+                    <input type="hidden" name="from" value="<%= bid.buyer %>">
+                    <input type="hidden" name="to" value="<%= bid.supplier %>">
+                    <input type="hidden" name="reqId" value="<%= bid._id %>">
+                    <input type="hidden" name="reqName" value="<%= bid.requestName %>">
+                    <input type="hidden" name="sender" value="<%= bid.buyerName %>">
+                    <input type="hidden" name="receiver" value="<%= bid.supplierName %>">
+                    <input type="hidden" name="_csrf" id="csrf_<%= i %>" value="<%= csrfToken %>">
+                    <button class="btn btn-primary" title="Update status/Send message" disabled type="submit" id="updateBidStatus_<%= i %>">Update Bid & Message Supplier
+                    </button>
                     <script type="text/javascript">
                       var index = "<%= i %>";
+                      
+                      $("#message_"+index).bind('change', function() {
+                        $('#updateBidStatus_'+getId($(this).attr('id'))).removeAttr('disabled');
+                      });
+                      
                       var stripePublicKey = "<%= stripePublicKey %>";
                       var status = $('#status_'+index).val();
                       
                       if($('#status_'+index).val() == 3) {//Ready to pay -> STRIPE in action!
-                        var amount = $('#totalAmount_'+index).val();
+                        var amount = $('#price_'+index).val();//Not to be confused with the number of items!
                         var currency = $('#currency_'+index).val();
                         var from = "<%= bid.supplierName %>",
                         to = "<%= bid.buyerName %>",
                         desc = "<%= bid.requestName %>",
                         emailAddress = "<%= bid.buyerEmail %>";
+                        var that = index;
                         
                         $('#message_'+index)
                           .parent('div')
-                          .append('<button type="button" title="Pay ' + amount + ' ' + currency + '" class="btn btn-primary" id="purchase_'+index+'">Go to Purchase</button>');
+                          .append('<button type="button" style="float: left; position: center" title="Pay ' + amount + '" class="btn btn-primary" id="purchase_'+index+'">Go to Purchase</button>');
 						  
 						              var stripeHandler = StripeCheckout.configure({
                             key: stripePublicKey,
@@ -251,11 +280,10 @@
                                 },
                                 body: JSON.stringify({
                                   stripeTokenId: token.id,
-                                  from: from,
-                                  to: to,
+                                  token: token,
                                   emailAddress: emailAddress,//Buyer's e-mail.
                                   description: "Order - " + desc,
-                                  amount: amount,
+                                  amount: parseInt(amount),
                                   currency: currency
                                 })
                               })
@@ -263,17 +291,22 @@
                                 return res.json();
                               })
                                 .then((data) => {
-                                alert(data.message);
+                                //if(!data) {//Assert we have success.
+                                  $('#purchase_'+that).remove();
+                                  $('#status_'+that).val(4);
+                                  $('#statuses_'+that).find('option:eq('+4+')').attr('selected', 'selected');
+                                  $('#cartList_'+that).find('li').css({"title": "Already ordered!", "border": "2px"});
+                                //}
                                 });
                               }
                             });
                         
                         $('#purchase_'+index).bind('click', function() {
+                          amount = parseInt(amount)*100;
 							            stripeHandler.open({
                             amount: amount,
                             currency: currency,
-                            from: from,
-                            to: to,
+                            emailAddress: emailAddress,
                             description: desc
                           });
                         });
@@ -283,22 +316,7 @@
                           $('#cartList_'+index).find('li').css({"title": "Already ordered!", "border": "2px"});//Mark them!
                         }
                       }
-                      
-                      $("#message_"+index).bind('change', function() {
-                        $('#updateBidStatus_'+getId($(this).attr('id'))).removeAttr('disabled');
-                      });
                     </script>
-                    
-                    <input type="hidden" name="from" value="<%= bid.buyer %>">
-                    <input type="hidden" name="to" value="<%= bid.supplier %>">
-                    <input type="hidden" name="reqId" value="<%= bid._id %>">
-                    <input type="hidden" name="reqName" value="<%= bid.requestName %>">
-                    <input type="hidden" name="sender" value="<%= bid.buyerName %>">
-                    <input type="hidden" name="receiver" value="<%= bid.supplierName %>">
-                    <input type="hidden" name="_csrf" id="csrf_<%= i %>" value="<%= csrfToken %>">
-                    <button class="btn btn-primary" disabled type="submit" id="updateBidStatus_<%= i %>">
-                        Update Bid & Message Supplier
-                    </button>
                   </div>
               </div>
           </form>
@@ -306,7 +324,7 @@
           <div class="container mt-4">
             <div class="form-group">
               <a href="../../../supplier/chat/<%= bid.buyer %>/<%= bid.supplier %>/<%= bid._id %>/<%= bid.requestName %>/<%= bid.supplierName %>/<%= bid.buyerName %>">
-                <button class="btn-primary custom-button">Chat with your supplier</button>
+                <button title="Chat" class="btn-primary custom-button">Chat with your supplier</button>
               </a>
             </div>
           </div>

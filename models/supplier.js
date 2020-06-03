@@ -207,5 +207,5 @@ const supplierSchema = new Schema({
 });
 // db.collection.createIndex
 supplierSchema.index( { "companyName": 1, "emailAddress": 1 }, { unique: true } );
-supplierSchema.plugin(passportLocalMongoose);
+//supplierSchema.plugin(passportLocalMongoose);
 module.exports = mongoose.model('Supplier', supplierSchema);

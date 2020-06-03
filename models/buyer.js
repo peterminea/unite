@@ -93,6 +93,6 @@ const buyerSchema = new Schema({
   }
 });
 
-buyerSchema.plugin(passportLocalMongoose);
+//buyerSchema.plugin(passportLocalMongoose);
 buyerSchema.index({organizationName: 1, organizationUniteID: 1}, {unique: true});
 module.exports = mongoose.model('Buyer', buyerSchema);
