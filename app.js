@@ -16,6 +16,7 @@ const connect = require("./dbconnect");
 const app = express();
 const http = require("http").Server(app);
 const socket = require("socket.io")(http);
+const crypto = require('crypto');
 
 const BASE = process.env.BASE;
 const URI = process.env.MONGODB_URI;
@@ -23,7 +24,6 @@ const MAX_PROD = process.env.SUP_MAX_PROD;
 
 const stripeSecretKey = process.env.STRIPE_KEY_SECRET;
 const stripePublicKey = process.env.STRIPE_KEY_PUBLIC;
-//dotenv.config, not load.
 const stripe = require('stripe')(stripeSecretKey);
 
 //Classes:
@@ -54,7 +54,7 @@ app.use(express.json());
 app.use(express.static('public'));
 app.set("view engine", "ejs");
 
-// body parser
+//body parser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -109,14 +109,16 @@ MongoClient.connect(URI, (err, client) => {
   
   process.on('uncaughtException', function (err) {
     console.log(err);
-  }); 
+  });
   
-  /*    
+  /*
+  //console.log(parseInt('31 EUR'));
+  
   const currency = new Currency({
     name: 'Norwegian Krona',
     value: 'NOK'
   });
-  
+
   //currency.save();
     
   const bidStatus = new BidStatus({
@@ -170,7 +172,6 @@ MongoClient.connect(URI, (err, client) => {
   });
 
   setTimeout(function() {
-    console.log(invalidCapProd.length + ' DROSU DOSUL');
     for(var i in invalidCapProd) {
       var myquery = { supplier: (invalidCapProd[i]) };
       db.collection("productservices").deleteOne(myquery, function(err, obj) {
@@ -201,13 +202,11 @@ MongoClient.connect(URI, (err, client) => {
   });
   
   Industry.find({}).exec().then((inds) => {//Ascending sorting of table contents by name, then resetting its contents based on this new sorting.
-    console.log(inds.length + ' ZABAL');
     inds.sort(function (a, b) {
       return a.name.localeCompare(b.name);
     });
     
     for(var i in inds) {
-      //console.log(inds[i].name);
       var myQuery = {name: inds[i].name};      
       
       const ind = new Industry({
@@ -362,7 +361,7 @@ function compareTimes(a, b) {
 //Lambda variant: objs.sort((a,b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0));
 app.get('/messages', (req, res) => {
   Message.find({
-      from: req.query.from, 
+      from: req.query.from,
      to: req.query.to
     }, (err, messages) => {
       if(err) {
@@ -529,15 +528,15 @@ app.post('/purchase', (req, res, next) => {
   
   stripe.customers.create({
     email: req.body.emailAddress,
+    //card: '4242424242424242'//
     source: req.body.stripeTokenId
   })
   .then((customer) => stripe.charges.create({
     amount: req.body.amount,
-    from: req.body.from,
-    to: req.body.to,
+    receipt_email: req.body.emailAddress,
     description: req.body.description,
-    source: req.body.stripeTokenId,
     customer: customer.id,
+    //source: req.body.stripeTokenId,
     currency: req.body.currency.toLowerCase()
   }))
     .then((charge) => {
@@ -549,21 +548,21 @@ app.post('/purchase', (req, res, next) => {
           message: "You have successfully paid for your items!",
           charge: charge
         })
-      };    
+      };
 
     res.json(response);
   }).catch(err => {
       console.log('Payment failed! Please repeat the operation.\n' + err);
-      const response = {
+      /*const response = {
         headers,
         statusCode: 500,
         body: JSON.stringify({
           error: err.message
         })
-      };
+      };*/
     
-      res.json(response);
-      //res.status(500).end();
+      //res.json(response);
+      res.status(500).end();
     });
 });
 

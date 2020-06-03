@@ -15,6 +15,14 @@ body {
   font-style:italic;
 }
 
+::placeholder {
+ color: #acafea; 
+}
+
+input.errorField {
+  background-color : red;
+}
+
 p.term {
   color: navy;
   font-size: 14pt;

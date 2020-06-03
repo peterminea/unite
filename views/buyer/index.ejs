@@ -528,7 +528,7 @@
                       $('input[id="status_'+ index +'"]').trigger('change');
                      
                         var amount = $('#amount_'+index);                      
-                        if(amount.val() < 1) {
+                        if(!amount.val() || amount.val() < 1) {
                           alert('Please select an amount first.');
                           return false;
                         }
@@ -538,8 +538,12 @@
                         var prodInput = $("#hiddenProdServicesList_"+index);
                         var amountInput = $("#amountList_"+index);
                         var priceInput = $("#priceList_"+index);                      
-                        var product = prodInput.val(), quantity = amountInput.val(), price = priceInput.val();                      
-                        if(input.val() != "") {
+                        var product = prodInput.val(), quantity = amountInput.val(), price = priceInput.val();
+                        //var req = input.val().length && $('#price').val().length && $('#currency').val().length;
+     
+                       //if(req) {
+                        if(input.val().length) {
+                          input.removeClass('errorField');
                           var addedPrice = parseInt(amount.val()? amount.val() : 0) * parseInt(input.attr('price')? input.attr('price') : 1);
                           var price = parseInt($('#price_'+index).val()) + addedPrice;
                           $('#price_'+index).val(parseInt(price));
@@ -551,15 +555,19 @@
                           $('.rem').unbind('click').click(function() {
                             var li = $(this).parent('li');
                             var newIndex = elem.find('li').index(li);
+                            
                             var arr = prodInput.val().split(',');
                             arr.splice(newIndex, 1);
                             prodInput.val(arr);
+                            
                             arr = amountInput.val().split(',');
                             arr.splice(newIndex, 1);
                             amountInput.val(arr);
+                            
                             arr = priceInput.val().split(',');
                             arr.splice(newIndex, 1);
                             priceInput.val(arr);
+                            
                             var newAmount = parseInt($('#totalAmount_'+index).val()) - parseInt(li.attr('amount'));
                             var newPrice = parseInt($('#price_'+index).val()) - parseInt(li.attr('price'));
                             $('#totalAmount_'+index).val(parseInt(newAmount));
@@ -569,22 +577,30 @@
                           
                           var prodVal = input.val(), amountVal = amount.val(), priceVal = $('#price_'+index).val();
                           var bigPrice = amountVal * priceVal;
-                          var arr = prodInput.val().split(',');
+                          
+                          var arr = !prodInput.val().length? [] : (prodInput.val()).split(',');
                           if(checkName(arr, prodVal)) {
                             alert('You have already added ' + prodVal + ' to the list. Please refine your selection.');
                             return false;
-                          }
+                          }          
                           arr.push(prodVal);
-                          prodInput.val(arr);
-                          arr = amountInput.val().split(',');
+                          prodInput.val((arr));
+
+                          arr = !amountInput.val().length? [] : (amountInput.val()).split(',');
                           arr.push(amountVal);
-                          amountInput.val(arr);
-                          arr = priceInput.val().split(',');
+                          amountInput.val((arr));
+
+                          arr = !priceInput.val().length? [] : (priceInput.val()).split(',');
                           arr.push(bigPrice);
-                          priceInput.val(arr);
+                          priceInput.val((arr));
+                          
                           $('#totalAmount_'+index).val(parseInt($('#totalAmount_'+index).val()) + parseInt(amountVal));
                           $(input).val('');//.removeAttr('price');                         
-                        }
+                        } else {
+                            alert('Please enter valid data for the product to be added.');
+                            input.addClass('errorField');
+                            //$('#prodServiceInput,#price,#currency').addClass('errorField');
+                          }
                     });
                   </script>
                 </div>

@@ -11,6 +11,7 @@ const Token = require("../models/supplierToken");
 const assert = require("assert");
 const process = require("process");
 const async = require("async");
+const crypto = require('crypto');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY); //Stored in the *.env file.
 //sgMail.setApiKey('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');
 //process.env.SENDGRID_API_KEY = "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";
@@ -65,7 +66,9 @@ exports.postAddProduct = (req, res) => {
 };
 
 exports.getConfirmation = (req, res) => {
-  res.render("supplier/confirmation", { token: req.params.token });
+  if(!req.session || !req.session.supplierId) {req.session.supplierId = req.params.token? req.params.token._userId : null}
+  res.render("supplier/confirmation", {
+    token: req.params.token });
 };
 
 exports.getResendToken = (req, res) => {
@@ -73,74 +76,72 @@ exports.getResendToken = (req, res) => {
 };
 
 exports.postConfirmation = function(req, res, next) {
-  req.assert("emailAddress", "Email is not valid").isEmail();
-  req.assert("emailAddress", "Email cannot be blank").notEmpty();
-  req.assert("token", "Token cannot be blank").notEmpty();
-  req.sanitize("emailAddress").normalizeEmail({ remove_dots: false });
+  //assert("token", "Token cannot be blank").notEmpty();
+  //req.sanitize("emailAddress").normalizeEmail({ remove_dots: false });
+  //var errors = req.validationErrors();
+  //if (errors) return res.status(400).send(errors);  
 
-  // Check for validation errors
-  var errors = req.validationErrors();
-  if (errors) return res.status(400).send(errors);
-
-  // Find a matching token
   Token.findOne({ token: req.params.token }, function(err, token) {
     if (!token) {
       req.flash(
-        "We were unable to find a valid token. It may have expired. Please request a new token."
+        "We were unable to find a valid token. It may have expired. Please request a new confirmation token."
       );
-      res.redirect("/supplier/resend");
-      if (1 == 2)
+      
+      if(1==2)
         return res.status(400).send({
           type: "not-verified",
           msg:
             "We were unable to find a valid token. Your token may have expired."
         });
+      
+      res.redirect("/supplier/resend");
     }
-    // If we found a token, find a matching user
-    Supplier.findOne(
-      {
-        _id: token._userId,
-        emailAddress: req.body.emailAddress
-      },
-      function(err, user) {
-        if (!user)
-          return res
-            .status(400)
-            .send({ msg: "We were unable to find a user for this token." });
-        if (user.isVerified)
-          return res.status(400).send({
-            type: "already-verified",
-            msg: "This user has already been verified."
-          });
-
-        // Verify and save the user
-        user.isVerified = true;
-        user.save(function(err) {
-          if (err) {
-            return res.status(500).send({
-              msg: err.message
+  
+    Supplier.findOne({ _id: token._userId, emailAddress: req.body.emailAddress }, function (err, user) {
+            if (!user) 
+              return res.status(400).send({
+              msg: 'We were unable to find a user for this token.' 
             });
-          }
-          res.status(200).send("The account has been verified. Please log in.");
+          
+            if (user.isVerified) 
+              return res.status(400).send({ 
+              type: 'already-verified', 
+              msg: 'This user has already been verified.' });           
+          
+            MongoClient.connect(URL, function(err, db) {//db or client.
+                  if (err) throw err;
+                  var dbo = db.db(BASE);
+                  var myquery = { _id: user._id };
+                  var newvalues = { $set: {isVerified: true} };
+                  dbo.collection("suppliers").updateOne(myquery, newvalues, function(err, resp) {
+                    if(err) {
+                      console.error(err.message);
+                      /*
+                      return res.status(500).send({ 
+                        msg: err.message 
+                      });
+                      */
+                      return false;
+                    }                   
+                    
+                    console.log("The account has been verified. Please log in.");
+                    req.flash('success', "The account has been verified. Please log in.");
+                    db.close();
+                    if(res) res.status(200).send("The account has been verified. Please log in.");
+                  });
+                });
+          /*
+            user.isVerified = true;
+            user.save(function (err) {
+              if (err) {                
+              }              
+            });*/
         });
-      }
-    );
   });
 };
 
 exports.postResendToken = function(req, res, next) {
-  req.assert("emailAddress", "Email is not valid").isEmail();
-  req.assert("emailAddress", "Email cannot be blank").notEmpty();
-  req.sanitize("emailAddress").normalizeEmail({ remove_dots: false });
-
-  // Check for validation errors
-  var errors = req.validationErrors();
-  if (errors) return res.status(400).send(errors);
-
-  Supplier.findOne({ emailAddress: req.body.emailAddress }, function(
-    err,
-    user
-  ) {
+  Supplier.findOne({ emailAddress: req.body.emailAddress }, function(err, user) {
     if (!user)
       return res
         .status(400)
@@ -172,7 +173,7 @@ exports.postResendToken = function(req, res, next) {
           req.headers.host +
           "/supplier/confirmation/" +
           token.token +
-          ".\n"
+          "\n"
       };
 
       sgMail.send(mailOptions, function(err, info) {
@@ -190,7 +191,7 @@ exports.postResendToken = function(req, res, next) {
 };
 
 exports.getSignIn = (req, res) => {
-  if (!req.session.supplier) {
+  if (!req.session.supplierId) {
     return res.render("supplier/sign-in", {
       errorMessage: req.flash("error")
     });
@@ -199,29 +200,31 @@ exports.getSignIn = (req, res) => {
 
 exports.postSignIn = (req, res) => {
   const email = req.body.emailAddress;
-  const password =
-    req.body
-      .password; 
+  const password = req.body.password;
+  console.log(email + ' ' + password);
   /*
   const msg = {
   from: 'peter@uniteprocurement.com',
-  to: 'peter.minea@gmail.com',  
+  to: 'peter.minea@gmail.com',
   subject: 'CHENECCO',
   text: 'NODE.JS MAILER SEND',
   html: '<strong>And easy to do anywhere, even with Node.js that is NOT Java.</strong>',
 };
 sgMail.send(msg);*/
 
-  if (!email) res.redirect("/supplier/sign-in");
+  if (!email) 
+    res.redirect("/supplier/sign-in");
   else {
     Supplier.findOne(
-      { emailAddress: email, password: password },
+      { 
+      emailAddress: email,
+      password: password 
+      },
       (err, doc) => {
-        console.log(doc);
-        if (err) return console.error(err);
+        if(err) return console.error(err.message);
 
         if (!doc) {
-          req.flash("error", "Invalid e-mail address or password");
+          req.flash("error", "Invalid e-mail address or password.");
           return res.redirect("/supplier/sign-in");
         }
 
@@ -243,9 +246,7 @@ sgMail.send(msg);*/
                     "Your account has not been verified. Please check your e-mail for instructions."
                 });
 
-              req.session.cookie.originalMaxAge = req.body.remember
-                ? null
-                : 7200000;
+              req.session.cookie.originalMaxAge = req.body.remember? null : 7200000;//Two hours.
               return req.session.save();
             } else {
               req.flash("error", "Invalid e-mail address or password");
@@ -275,13 +276,13 @@ exports.getSignUp = (req, res) => {
 };
 
 
-function prel(req) {
-  var arr = req;
-  arr = arr[0].split(',');
+function prel(req, isNumber) {
+  var arr = (req);
+  arr = arr.split(',');
   var newProd = [];
   for (var i in arr) {
-    newProd.push(arr);
-    }
+    newProd.push(isNumber? parseInt(arr[i]) : String(arr[i]));
+    }  
   
   return newProd;
 }
@@ -304,20 +305,18 @@ exports.postSignUp = (req, res) => {
     ];
 
     for (var i = 0; i < prohibitedArray.length; i++)
-      if (final_domain.includes(prohibitedArray[i])) {
+      if (final_domain.toLowerCase().includes(prohibitedArray[i].toLowerCase())) {
         req.flash("error", "E-mail address must be a custom company domain.");
         res.redirect("back"); //supplier/sign-up
       } else {
         if (req.body.password.length < 6) {
           req.flash("error", "Password must have at least 6 characters.");
           res.redirect("back");
+          var supplier;
           //Prevent duplicate attempts:
         } else if (global++ < 1) {
           // Make sure this account doesn't already exist
-          Supplier.findOne({ emailAddress: req.body.emailAddress }, function(
-            err,
-            user
-          ) {
+          Supplier.findOne({ emailAddress: req.body.emailAddress }, function(err,  user) {
             if (user)
               return res.status(400).send({
                 msg:
@@ -325,8 +324,8 @@ exports.postSignUp = (req, res) => {
               });
 
             bcrypt.hash(req.body.password, 10, function(err, hash) {
-              user = new Promise((resolve, reject) => {
-                const supplier = new Supplier({
+              //user = new Promise((resolve, reject) => {
+                supplier = new Supplier({
                   companyName: req.body.companyName,
                   directorsName: req.body.directorsName,
                   contactName: req.body.contactName,
@@ -345,7 +344,7 @@ exports.postSignUp = (req, res) => {
                   lastYearTurnover: req.body.lastYearTurnover,
                   website: req.body.website,
                   productsServicesOffered: prel(req.body.productsServicesOffered),
-                  pricesList: prel(req.body.pricesList),
+                  pricesList: prel(req.body.pricesList, true),
                   currenciesList: prel(req.body.currenciesList),
                   capabilityDescription: req.body.capabilityDescription,
                   relevantExperience: req.body.relevantExperience,
@@ -368,28 +367,39 @@ exports.postSignUp = (req, res) => {
                   updatedAt: Date.now()
                 });
 
-                supplier.save(err => {
+                supplier.save((err) => {
                   if (err) {
-                    reject(new Error("Error with exam result save... " + err));
+                    //req.flash('error', err.message);
+                    console.error(err);
+                     return res.status(500).send({
+                         msg: err.message
+                         });
+                    //reject(new Error("Error with exam result save... " + err));
                   }
+                  
+                  req.session.supplier = supplier;
+                  req.session.id = supplier._id;
+                  req.session.save();
 
-                  if (Array.isArray(supplier.productsServicesOffered))
+                  if (Array.isArray(supplier.productsServicesOffered)) {
                     for (var i in supplier.productsServicesOffered) {
                       var productService = new ProductService({
                         supplier: supplier._id,
-                        productName: req.body.productsServicesOffered[i],
-                        price: req.body.pricesList[i],
-                        currency: req.body.currenciesList[i],
+                        productName: supplier.productsServicesOffered[i],
+                        price: supplier.pricesList[i],
+                        currency: supplier.currenciesList[i],
                         createdAt: Date.now(),
                         updatedAt: Date.now()
                       });
 
-                      productService.save(err => {
+                      productService.save((err) => {
                         if (err) {
+                          req.flash('error', err.message);
                           console.error(err.message);
                         }
                       });
                     }
+                  }
 
                   var capability = new Capability({
                     supplier: supplier._id,
@@ -399,8 +409,9 @@ exports.postSignUp = (req, res) => {
                   });
 
                   capability.save(function(err) {
-                    if (err) 
+                    if(err) {
                       console.error(err.message);
+                      }
                   });
 
                   // Create a verification token for this user
@@ -413,69 +424,54 @@ exports.postSignUp = (req, res) => {
                   token.save(function(err) {
                     if (err) {
                       console.error(err.message);
-                      //return res.status(500).send({
-                      // msg: err.message
-                      // });
+                      return res.status(500).send({
+                       msg: err.message
+                       });
                     }
 
                     var email = {
                       from: "peter@uniteprocurement.com",
-                      to: "peter.minea@gmail.com", //supplier.emailAddress,
+                      to: supplier.emailAddress,//'peter.minea@gmail.com'
                       subject: "Account Verification Token",
                       text:
-                        "Hello,\n\n" +
-                        "Please verify your account by clicking the link: \nhttp://" +
-                        req.headers.host +
-                        "/confirmation/" +
-                        token.token +
-                        ".\n"
+                        "Hello " + supplier.companyName +
+                        ",\n\nCongratulations for registering on the UNITE Public Procurement Platform!\n\nPlease verify your account by clicking the link: \nhttp://" 
+                      + req.headers.host + "/supplier/confirmation/" + token.token + "\n"
                     };
 
                     sgMail.send(email, function(err, info) {
-                      //if (err ) {
-                      console.log(err ? err.message : "Message sent: " + info);
-
                       if (err) {
-                        console.error(err.message);
+                        console.error(err);
                         //res.redirect('back');
                         //return res.status(500).send({
                         // msg: err.message
                         // });
                       }
-                      console.log(
-                        "A verification email has been sent to " +
-                          supplier.emailAddress +
-                          "."
-                      );
-                      req.flash(
-                        "success",
-                        "A verification email has been sent to " +
-                          supplier.emailAddress +
-                          "."
-                      );
-                      //return res.status(200).send('A verification email has been sent to ' + supplier.emailAddress + '.');
+                      
+                      console.log("A verification email has been sent to " +  supplier.emailAddress + ".");
+                      req.flash("success", "A verification email has been sent to " +
+                          supplier.emailAddress + ". Please check your e-mail.");
+                      //return res.status(200).send('A verification email has been sent to ' + supplier.emailAddress + '. Please check your e-mail.');
                     });
                   });
-                });
-
+                })/*;
                 assert.ok(user instanceof Promise);
-
-                user
-                  .then(doc => {
-                    req.session.supplier = doc;
-                    req.session.id = doc._id;
-                    req.session.save();
+                user*/
+                });
+              })
+                  .then((doc) => {
                   })
                   .then(() => {
                     req.flash("success", "Supplier signed up successfully!");
-                    if (res) res.redirect("/supplier");
+                    if (res)
+                      res.redirect("/supplier");
                   })
                   .catch(console.error);
-                // Return saved model
-                resolve(supplier);
-              });
-            });
-          });
+                
+                //resolve(supplier);
+              //});
+            //});
+          //});
         }
       }
   }
@@ -789,16 +785,13 @@ exports.postProfile = (req, res) => {
     doc.twitterURL = req.body.twitterURL;
     doc.linkedinURL = req.body.linkedinURL;
     doc.otherSocialMediaURL = req.body.otherSocialMediaURL;
-    doc.UNITETermsAndConditions =
-      req.body.UNITETermsAndConditions == "on" ? true : false;
-    doc.antibriberyAgreement =
-      req.body.antibriberyAgreement == "on" ? true : false;
+    doc.UNITETermsAndConditions = req.body.UNITETermsAndConditions == "on" ? true : false;
+    doc.antibriberyAgreement = req.body.antibriberyAgreement == "on" ? true : false;
     doc.createdAt = req.body.createdAt;
     doc.updatedAt = Date.now();
-    //doc.__v = 1;
+    //doc.__v = 1;//Last saved version. To be taken into account for future cases of concurrential changes, in case updateOne does not protect us from that problem.
     var price = req.body.price;
-    //console.log(doc + " " + price + " " + doc.productsServicesOffered);
-
+    
     MongoClient.connect(URL, function(err, db) {
       //db or client.
       if (err) throw err;

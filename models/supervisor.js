@@ -110,6 +110,6 @@ const supervisorSchema = new Schema({
   }
 });
 
-supervisorSchema.plugin(passportLocalMongoose);
+//supervisorSchema.plugin(passportLocalMongoose);
 supervisorSchema.index({organizationName: 1, organizationUniteID: 1}, {unique: true});
 module.exports = mongoose.model('Supervisor', supervisorSchema);

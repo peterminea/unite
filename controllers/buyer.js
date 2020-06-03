@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const mongoose = require("mongoose");
@@ -105,11 +106,6 @@ exports.postIndex = (req, res) => {
 }
 
 
-exports.getCart = (req, res) => {
-  res.render('buyer/cart', {});
-}
-
-
 exports.getViewBids = (req, res) => {
   var promise = BidRequest.find({supplier: req.params.supplierId, buyer: req.params.buyerId}).exec();
   
@@ -159,6 +155,8 @@ exports.postViewBids = (req, res) => {
         })
           .catch(console.error);              
       }
+        
+        db.close();
       });
     
     res.redirect('back');
@@ -175,53 +173,66 @@ exports.getResendToken = (req, res) => {
 }
 
 exports.postConfirmation = function (req, res, next) {
-    req.assert('emailAddress', 'Email is not valid').isEmail();
-    req.assert('emailAddress', 'Email cannot be blank').notEmpty();
-    req.assert('token', 'Token cannot be blank').notEmpty();
-    req.sanitize('emailAddress').normalizeEmail({ remove_dots: false });
-    
-    var errors = req.validationErrors();
-    if (errors) return res.status(400).send(errors);
-
     Token.findOne({ token: req.params.token }, function (err, token) {
         if (!token) {
           req.flash('We were unable to find a valid token. It may have expired. Please request a new token.');
           res.redirect('/buyer/resend');
-          if(1==2) return res.status(400).send({
+          if(1==2) 
+            return res.status(400).send({
             type: 'not-verified', 
             msg: 'We were unable to find a valid token. Your token may have expired.' });
         }
 
         Buyer.findOne({ _id: token._userId, emailAddress: req.body.emailAddress }, function (err, user) {
-            if (!user) return res.status(400).send({
+            if (!user) 
+              return res.status(400).send({
               msg: 'We were unable to find a user for this token.' 
             });
           
-            if (user.isVerified) return res.status(400).send({ 
+            if (user.isVerified) 
+              return res.status(400).send({ 
               type: 'already-verified', 
-              msg: 'This user has already been verified.' });
+              msg: 'This user has already been verified.' });           
+          
+              MongoClient.connect(URL, function(err, db) {//db or client.
+                    if (err) throw err;
+                    var dbo = db.db(BASE);
+                    var myquery = { _id: user._id };
+                    var newvalues = { $set: {isVerified: true} };
+                    dbo.collection("buyers").updateOne(myquery, newvalues, function(err, resp) {
+                      if(err) {
+                        console.error(err.message);
+                        /*
+                        return res.status(500).send({ 
+                          msg: err.message 
+                        });
+                        */
+                        return false;
+                      }                   
 
+                      console.log("The account has been verified. Please log in.");
+                      req.flash('success', "The account has been verified. Please log in.");
+                      db.close();
+                      if(res) res.status(200).send("The account has been verified. Please log in.");
+                    });
+                  });
+          /*
             user.isVerified = true;
             user.save(function (err) {
-              if (err) {
-                return res.status(500).send({ 
-                  msg: err.message 
-                }); 
-              }
-              res.status(200).send("The account has been verified. Please log in.");
-            });
+              if (err) {                
+              }              
+            });*/
         });
     });
 }
 
 
-exports.postResendToken = function (req, res, next) {
+exports.postResendToken = function (req, res, next) {/*
     req.assert('emailAddress', 'Email is not valid').isEmail();
     req.assert('emailAddress', 'Email cannot be blank').notEmpty();
-    req.sanitize('emailAddress').normalizeEmail({ remove_dots: false });
-   
+    req.sanitize('emailAddress').normalizeEmail({ remove_dots: false });   
     var errors = req.validationErrors();
-    if (errors) return res.status(400).send(errors);
+    if (errors) return res.status(400).send(errors);*/
  
     Buyer.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
         if (!user) 
@@ -243,7 +254,13 @@ exports.postResendToken = function (req, res, next) {
               from: 'peter@uniteprocurement.com',
               to: user.emailAddress,
               subject: 'Account Verification Token',
-              text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/confirmation\/' + token.token + '.\n' 
+              text:
+                        "Hello,\n\n" +
+                        "Please verify your account by clicking the link: \nhttp://" +
+                        req.headers.host +
+                        "/buyer/confirmation/" +
+                        token.token +
+                        "\n"
             };
           
               sgMail.send(mailOptions, function (err, info) {
@@ -262,7 +279,7 @@ exports.postResendToken = function (req, res, next) {
 }
 
 exports.getSignIn = (req, res) => {
-  if (!req.session.buyer)
+  if (!req.session.organizationId)
     res.render("buyer/sign-in", {
       errorMessage: req.flash("error")
     });
@@ -483,7 +500,7 @@ exports.postSignUp = (req, res) => {
     var prohibitedArray = ["gmail.com", "hotmail.com", "outlook.com", "yandex.com", "yahoo.com", "gmx"];
     
     for(var i = 0; i < prohibitedArray.length; i++)
-    if(final_domain.includes(prohibitedArray[i])) {
+    if (final_domain.toLowerCase().includes(prohibitedArray[i].toLowerCase())) {
       req.flash("error", "E-mail address must be a custom company domain.");
       res.redirect("back");
     } else {
@@ -543,7 +560,10 @@ exports.postSignUp = (req, res) => {
                       from: 'peter@uniteprocurement.com',
                       to: buyer.emailAddress, 
                       subject: 'Account Verification Token',
-                      text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/buyer/confirmation\/' + token.token + '.\n'               
+                      text: 
+                        "Hello " + buyer.organizationName +
+                        ",\n\nCongratulations for registering on the UNITE Public Procurement Platform!\n\nPlease verify your account by clicking the link: \nhttp://" 
+                      + req.headers.host + "/buyer/confirmation/" + token.token + "\n"
                     };
 
                     sgMail.send(email, function (err, info) {
@@ -626,6 +646,8 @@ exports.postProfile = (req, res) => {
           console.error(err.message);
           return false;
         }
+        
+        db.close();
       });
     });
   })
