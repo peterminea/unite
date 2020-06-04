@@ -155,29 +155,37 @@ exports.postForgotPassword = (req, res, next) => {
       Supervisor.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
         if (!user) {
           req.flash('error', 'Sorry. We were unable to find a user with this e-mail address.');
-          return res.redirect('/supervisor/forgotPassword');
+          return res.redirect('supervisor/forgotPassword');
         }
         
-        user.resetPasswordToken = token;
-        user.resetPasswordExpires = Date.now() + 43200000;//12 hours
-        user.save(function(err) {
-          done(err, token, user);
+        MongoClient.connect(URL, function(err, db) {
+          if (err) throw err;
+          var dbo = db.db(BASE);
+          var myquery = { _id: user._id };
+          var newvalues = { resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000};
+          dbo.collection("supervisors").updateOne(myquery, newvalues, function(err, res) {        
+            if(err) {
+              console.error(err.message);
+              return false;
+            }
+
+            db.close();
+          });
         });
-      });      
+      });
     },
     function(token, user, done) {     
       var emailOptions = {
         from: 'peter@uniteprocurement.com',
         to: user.emailAddress, 
         subject: 'UNITE Password Reset - Supervisor', 
-        text: 'Hello,\n\n' 
-        + 'You have received this e-mail because you requested a Supervisor password reset on our UNITE platform.'
-        + 'Please verify your account by clicking the link: \nhttp:\/\/' 
-        + req.headers.host + '\/reset\/' + token + '.\n'
-      };
+        text:
+            "Hello,\n\n" +
+            "You have received this e-mail because you requested a Supervisor password reset on our UNITE platform." +
+            " Please reset your password within 24 hours, by clicking the link: \nhttp://" + req.headers.host + "/supervisor/reset/" + token + "\n"
+        };
       
-      sgMail.send(emailOptions/*);              
-              transporter.sendMail(email*/, function (err, info) {
+      sgMail.send(emailOptions, function (err, info) {
         console.log('E-mail sent!')
         req.flash('success', 'An e-mail has been sent to ' + user.emailAddress + ' with password reset instructions.');
         done(err, 'done');
@@ -206,28 +214,34 @@ exports.getResetPasswordToken = (req, res) => {
 exports.postResetPasswordToken = (req, res) => {
   async.waterfall([
     function(done) {
-      Supervisor.findOne({resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() }}, function(err, user) {
+      Supervisor.findOne({resetPasswordToken: req.params.token, 
+                     resetPasswordExpires: { $gt: Date.now() }
+                    }, function(err, user) {
       if(!user) {
         req.flash('error', 'Password reset token is either invalid or expired.');
         return res.redirect('back');
       }
         
     if(req.body.password === req.body.confirm) {
-      user.setPassword(req.body.password, function(err) {
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpires = undefined;
-        
-        user.save(function(err) {
-          req.logIn(user, function(err) {
-            done(err, user);
+        MongoClient.connect(URL, function(err, db) {
+          if (err) throw err;
+          var dbo = db.db(BASE);
+          var myquery = { _id: user._id };
+          var newvalues = { password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined};
+          dbo.collection("supervisors").updateOne(myquery, newvalues, function(err, res) {        
+            if(err) {
+              console.error(err.message);
+              return false;
+              }
+
+            db.close();
+            });
           });
-        });
-      })
-      } else {
-        req.flash('error', 'Passwords do not match.');
-        return res.redirect('back');
-      }
-    });
+        } else {
+          req.flash('error', 'Passwords do not match.');
+          return res.redirect('back');
+        }
+      });
     },
     function(user, done) {      
       var emailOptions = {
@@ -236,7 +250,7 @@ exports.postResetPasswordToken = (req, res) => {
         subject: 'UNITE Password changed - Supervisor', 
         text: 'Hello,\n\n' 
         + 'You have successfully reset your Supervisor password on our UNITE platform'
-        + 'for your account ' + user.emailAddress + '. You can log in again.'        
+        + 'for the account registered with ' + user.emailAddress + '. You can log in again.'        
       };
       
       sgMail.send(emailOptions, function (err, info) {
@@ -286,7 +300,7 @@ exports.postSignIn = (req, res) => {
 
       bcrypt
         .compare(password, doc.password)
-        .then(doMatch => {
+        .then((doMatch) => {
           if (doMatch || (password === doc.password && email === doc.emailAddress)) {
             req.session.supervisorId = doc._id;
             req.session.supervisor = doc;
@@ -300,7 +314,7 @@ exports.postSignIn = (req, res) => {
             req.session.cookie.originalMaxAge = req.body.remember? null : 7200000;
             return req.session.save();
           } else {
-            req.flash("error", "Invalid e-mail address or password");
+            req.flash("error", "Passwords and e-mail do not match!");
             res.redirect("/supervisor/sign-in");
           }
         })

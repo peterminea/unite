@@ -322,11 +322,26 @@ exports.postForgotPassword = (req, res, next) => {
           return res.redirect('buyer/forgotPassword');
         }
         
+        MongoClient.connect(URL, function(err, db) {
+          if (err) throw err;
+          var dbo = db.db(BASE);
+          var myquery = { _id: user._id };
+          var newvalues = { resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000};
+          dbo.collection("buyers").updateOne(myquery, newvalues, function(err, res) {        
+            if(err) {
+              console.error(err.message);
+              return false;
+            }
+
+            db.close();
+          });
+        });
+        /*
         user.resetPasswordToken = token;
         user.resetPasswordExpires = Date.now() + 43200000;//12 hours
         user.save(function(err) {
           done(err, token, user);
-        });
+        });*/
       });
     },
     function(token, user, done) {
@@ -334,10 +349,10 @@ exports.postForgotPassword = (req, res, next) => {
         from: 'peter@uniteprocurement.com',
         to: user.emailAddress, 
         subject: 'UNITE Password Reset - Buyer', 
-        text: 'Hello,\n\n' 
-        + 'You have received this e-mail because you requested a Buyer password reset on our UNITE platform.'
-        + ' Please verify your account by clicking the link: \nhttp:\/\/' 
-        + req.headers.host + '\/reset\/' + token + '.\n'      
+        text:
+            "Hello,\n\n" +
+            "You have received this e-mail because you requested a Buyer password reset on our UNITE platform." +
+            " Please reset your password within 24 hours, by clicking the link: \nhttp://" + req.headers.host + "/buyer/reset/" + token + "\n"
       };
       
       sgMail.send(emailOptions, function (err, info) {
@@ -377,16 +392,31 @@ exports.postResetPasswordToken = (req, res) => {
       }
         
     if(req.body.password === req.body.confirm) {
-      user.setPassword(req.body.password, function(err) {
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpires = undefined;
-        
-        user.save(function(err) {
-          req.logIn(user, function(err) {
-            done(err, user);
-          });
+      MongoClient.connect(URL, function(err, db) {
+        if (err) throw err;
+        var dbo = db.db(BASE);
+        var myquery = { _id: user._id };
+        var newvalues = { password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined};
+        dbo.collection("buyers").updateOne(myquery, newvalues, function(err, res) {        
+          if(err) {
+            console.error(err.message);
+            return false;
+          }
+
+          db.close();
         });
-      })
+      });
+        /*
+        user.setPassword(req.body.password, function(err) {
+          user.resetPasswordToken = undefined;
+          user.resetPasswordExpires = undefined;
+
+          user.save(function(err, done) {
+            //req.logIn(user, function(err) {
+              done(err, user);
+            //});
+          });
+        })*/
       } else {
         req.flash('error', 'Passwords do not match.');
         return res.redirect('back');
@@ -400,7 +430,7 @@ exports.postResetPasswordToken = (req, res) => {
         subject: 'UNITE Password changed - Buyer', 
         text: 'Hello,\n\n' 
         + 'You have successfully reset your Buyer password on our UNITE platform'
-        + ' for your account ' + user.emailAddress + '. You can log in again.'        
+        + ' for the account registered with ' + user.emailAddress + '. You can log in again.'        
       };
       
       sgMail.send(emailOptions, function (err, info) {
@@ -413,6 +443,7 @@ exports.postResetPasswordToken = (req, res) => {
       res.redirect('/buyer');
     });
 }
+
 
 exports.postSignIn = (req, res) => {
   const email = req.body.emailAddress;
@@ -454,7 +485,7 @@ exports.postSignIn = (req, res) => {
 
     if(1==2)*/  bcrypt
         .compare(password, doc.password)
-        .then(doMatch => {
+        .then((doMatch) => {
           if (doMatch || (password === doc.password && email === doc.emailAddress)) {
             req.session.organizationId = doc._id;
             req.session.buyer = doc;
@@ -467,7 +498,7 @@ exports.postSignIn = (req, res) => {
             req.session.cookie.originalMaxAge = req.body.remember? null : 7200000;
             return req.session.save();
           } else {
-            req.flash("error", "Invalid e-mail address or password");
+            req.flash("error", "Passwords and e-mail do not match!");
             res.redirect("/buyer/sign-in");
           }
         })

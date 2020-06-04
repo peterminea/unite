@@ -33,13 +33,15 @@ exports.getIndex = (req, res) => {
       });
     })
     .catch(console.error);
-};
+}
+
 
 exports.getAddProduct = (req, res) => {
   res.render("supplier/addProduct", {
     supplierId: req.session.supplier._id
   });
-};
+}
+
 
 exports.postAddProduct = (req, res) => {
   if (!req.body.productPrice) {
@@ -63,17 +65,20 @@ exports.postAddProduct = (req, res) => {
       })
       .catch(console.error);
   }
-};
+}
+
 
 exports.getConfirmation = (req, res) => {
   if(!req.session || !req.session.supplierId) {req.session.supplierId = req.params.token? req.params.token._userId : null}
   res.render("supplier/confirmation", {
     token: req.params.token });
-};
+}
+
 
 exports.getResendToken = (req, res) => {
   res.render("supplier/resend");
-};
+}
+
 
 exports.postConfirmation = function(req, res, next) {
   //assert("token", "Token cannot be blank").notEmpty();
@@ -138,7 +143,8 @@ exports.postConfirmation = function(req, res, next) {
             });*/
         });
   });
-};
+}
+
 
 exports.postResendToken = function(req, res, next) {
   Supplier.findOne({ emailAddress: req.body.emailAddress }, function(err, user) {
@@ -188,7 +194,8 @@ exports.postResendToken = function(req, res, next) {
       });
     });
   });
-};
+}
+
 
 exports.getSignIn = (req, res) => {
   if (!req.session.supplierId) {
@@ -196,7 +203,8 @@ exports.getSignIn = (req, res) => {
       errorMessage: req.flash("error")
     });
   } else res.redirect("/supplier");
-};
+}
+
 
 exports.postSignIn = (req, res) => {
   const email = req.body.emailAddress;
@@ -230,7 +238,7 @@ sgMail.send(msg);*/
 
         bcrypt
           .compare(password, doc.password)
-          .then(doMatch => {
+          .then((doMatch) => {
             if (
               doMatch ||
               (password === doc.password && email === doc.emailAddress)
@@ -249,7 +257,7 @@ sgMail.send(msg);*/
               req.session.cookie.originalMaxAge = req.body.remember? null : 7200000;//Two hours.
               return req.session.save();
             } else {
-              req.flash("error", "Invalid e-mail address or password");
+              req.flash("error", "Passwords and e-mail do not match!");
               res.redirect("/supplier/sign-in");
             }
           })
@@ -265,7 +273,7 @@ sgMail.send(msg);*/
       }
     );
   }
-};
+}
 
 exports.getSignUp = (req, res) => {
   if (!req.session.supplier)
@@ -475,13 +483,15 @@ exports.postSignUp = (req, res) => {
         }
       }
   }
-};
+}
+
 
 exports.getForgotPassword = (req, res) => {
   res.render("supplier/forgotPassword", {
     email: req.session.supplier.emailAddress
   });
-};
+}
+
 
 exports.getChat = (req, res) => {
   res.render("supplier/chat", {
@@ -492,7 +502,8 @@ exports.getChat = (req, res) => {
     reqId: req.params.requestId,
     reqName: req.params.requestName
   });
-};
+}
+
 
 exports.postForgotPassword = (req, res, next) => {
   async.waterfall(
@@ -504,22 +515,25 @@ exports.postForgotPassword = (req, res, next) => {
         });
       },
       function(token, done) {
-        Supplier.findOne({ emailAddress: req.body.emailAddress }, function(
-          err,
-          user
-        ) {
+        Supplier.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
           if (!user) {
-            req.flash(
-              "error",
-              "Sorry. We were unable to find a user with this e-mail address."
-            );
-            return res.redirect("supplier/forgotPassword");
+            req.flash('error', 'Sorry. We were unable to find a user with this e-mail address.');
+            return res.redirect('supplier/forgotPassword');
           }
 
-          user.resetPasswordToken = token;
-          user.resetPasswordExpires = Date.now() + 43200000; //12 hours
-          user.save(function(err) {
-            done(err, token, user);
+          MongoClient.connect(URL, function(err, db) {
+            if (err) throw err;
+            var dbo = db.db(BASE);
+            var myquery = { _id: user._id };
+            var newvalues = { resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000};
+            dbo.collection("suppliers").updateOne(myquery, newvalues, function(err, res) {        
+              if(err) {
+                console.error(err.message);
+                return false;
+              }
+
+              db.close();
+            });
           });
         });
       },
@@ -531,11 +545,7 @@ exports.postForgotPassword = (req, res, next) => {
           text:
             "Hello,\n\n" +
             "You have received this e-mail because you requested a Supplier password reset on our UNITE platform." +
-            " Please verify your account by clicking the link: \nhttp://" +
-            req.headers.host +
-            "/reset/" +
-            token +
-            ".\n"
+            " Please reset your password within 24 hours, by clicking the link: \nhttp://" + req.headers.host + "/supplier/reset/" + token + "\n"
         };
 
         sgMail.send(emailOptions, function(err, info) {
@@ -558,8 +568,7 @@ exports.postForgotPassword = (req, res, next) => {
 };
 
 exports.getResetPasswordToken = (req, res) => {
-  Supplier.findOne(
-    {
+  Supplier.findOne({
       resetPasswordToken: req.params.token,
       resetPasswordExpires: { $gt: Date.now() }
     },
@@ -577,41 +586,37 @@ exports.getResetPasswordToken = (req, res) => {
 };
 
 exports.postResetPasswordToken = (req, res) => {
-  async.waterfall(
-    [
-      function(done) {
-        Supplier.findOne(
-          {
-            resetPasswordToken: req.params.token,
-            resetPasswordExpires: { $gt: Date.now() }
-          },
-          function(err, user) {
-            if (!user) {
-              req.flash(
-                "error",
-                "Password reset token is either invalid or expired."
-              );
-              return res.redirect("back");
+  async.waterfall([
+    function(done) {
+      Supplier.findOne({resetPasswordToken: req.params.token, 
+                     resetPasswordExpires: { $gt: Date.now() }
+                    }, function(err, user) {
+      if(!user) {
+        req.flash('error', 'Password reset token is either invalid or expired.');
+        return res.redirect('back');
+      }
+        
+    if(req.body.password === req.body.confirm) {
+        MongoClient.connect(URL, function(err, db) {
+          if (err) throw err;
+          var dbo = db.db(BASE);
+          var myquery = { _id: user._id };
+          var newvalues = { password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined};
+          dbo.collection("suppliers").updateOne(myquery, newvalues, function(err, res) {        
+            if(err) {
+              console.error(err.message);
+              return false;
             }
 
-            if (req.body.password === req.body.confirm) {
-              user.setPassword(req.body.password, function(err) {
-                user.resetPasswordToken = undefined;
-                user.resetPasswordExpires = undefined;
-
-                user.save(function(err) {
-                  req.logIn(user, function(err) {
-                    done(err, user);
-                  });
-                });
-              });
-            } else {
-              req.flash("error", "Passwords do not match.");
-              return res.redirect("back");
-            }
-          }
-        );
-      },
+            db.close();
+          });
+        });
+      } else {
+        req.flash('error', 'Passwords do not match.');
+        return res.redirect('back');
+      }
+    });
+    },
       function(user, done) {
         var emailOptions = {
           from: "no-reply@uniteprocurement.com",
@@ -620,9 +625,7 @@ exports.postResetPasswordToken = (req, res) => {
           text:
             "Hello,\n\n" +
             "You have successfully reset your Supplier password on our UNITE platform" +
-            " for your account " +
-            user.emailAddress +
-            ". You can log in again."
+            " for the account registered with " + user.emailAddress + ". You can log in again."
         };
 
         sgMail.send(emailOptions, function(err, info) {
@@ -636,7 +639,8 @@ exports.postResetPasswordToken = (req, res) => {
       res.redirect("/supplier");
     }
   );
-};
+}
+
 
 exports.getProfile = (req, res) => {
   if (!req || !req.session) return false;
@@ -656,7 +660,8 @@ exports.getProfile = (req, res) => {
       });
     })
     .catch(console.error);
-};
+}
+
 
 exports.getBidRequests = (req, res) => {
   const supplier = req.session.supplier;
@@ -673,7 +678,8 @@ exports.getBidRequests = (req, res) => {
 
 exports.getBalance = (req, res) => {
   res.render("supplier/balance", { balance: req.session.supplier.balance });
-};
+}
+
 
 exports.getBidRequest = (req, res) => {
   const supplier = req.session.supplier;
