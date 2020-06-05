@@ -16,6 +16,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY); //Stored in the *.env file.
 //sgMail.setApiKey('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');
 //process.env.SENDGRID_API_KEY = "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";
 const MongoClient = require("mongodb").MongoClient;
+const ObjectId = require("mongodb").ObjectId;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 
 exports.getIndex = (req, res) => {
@@ -51,7 +52,7 @@ exports.postAddProduct = (req, res) => {
     const product = new ProductService({
       supplier: req.body._id,
       productName: req.body.productName,
-      price: req.body.price,
+      price: parseFloat(req.body.price),
       currency: req.body.currency ? req.body.currency : "EUR",
       createdAt: Date.now(),
       updatedAt: Date.now()
@@ -69,14 +70,14 @@ exports.postAddProduct = (req, res) => {
 
 
 exports.postCancelBid = (req, res) => {
-  console.log(req.body + ' ' + req.params);
   //BidRequest.findOne({_id: req.params.bidId});
   MongoClient.connect(URL, function(err, db) {
       if (err) 
         throw err;
+    
       var dbo = db.db(BASE);
-      var myquery = { _id: req.body.bidId };
-      var newvalues = { $set: {isCancelled: true, status: process.env.SUPP_BID_CANCEL} };
+      var myquery = { _id: new ObjectId(req.body.bidId) };
+      var newvalues = { $set: {isCancelled: true, status: parseInt(process.env.SUPP_BID_CANCEL)} };
       dbo.collection("bidrequests").updateOne(myquery, newvalues, function(err, resp) {
         if(err) {
           console.error(err.message);
@@ -86,33 +87,32 @@ exports.postCancelBid = (req, res) => {
           });         
         }
 
-        console.log("The Bid Request has been cancelled by Supplier " + req.body.suppliersName + '.');
-        req.flash('success', "The Bid Request has been cancelled by Supplier " + req.body.suppliersName + '.');
         db.close();
-      });
-    })
-  .then((result) => {
         var mailOptions = {
-        from: "peter@uniteprocurement.com",
-        to: req.body.buyersEmail,
-        subject: "Bid request " + req.body.requestsName + " cancelled!",
-        text:
-          "Hello " + req.body.buyersName + 
-          ",\n\nWe regret to inform you that your outgoing Order named " + req.body.requestsName + " has been cancelled by "
-          + "the Supplier " + req.body.suppliersName + ".\nPlease contact the Supplier at " + req.body.suppliersEmail + " for more"
-          + " details.\nUNITE apologizes for any inconvenience that this issue may have caused to you."+ "\n\n"
-          + "Sincerely,\nThe UNITE Public Procurement Platform Staff"
-      };
+          from: "peter@uniteprocurement.com",
+          to: req.body.buyersEmail,
+          subject: "Bid request " + req.body.requestsName + " cancelled!",
+          text:
+            "Hello " + req.body.buyersName + 
+            ",\n\nWe regret to inform you that your outgoing Order named " + req.body.requestsName + " has been cancelled by "
+            + "the Supplier " + req.body.suppliersName + ".\nPlease contact the Supplier at " + req.body.suppliersEmail + " for more"
+            + " details.\nUNITE apologizes for any inconvenience that this issue may have caused to you."+ "\n\n"
+            + "Sincerely,\nThe UNITE Public Procurement Platform Staff"
+        };
 
-      sgMail.send(mailOptions, function(err) {
-        if(err) {
-          return res.status(500).send({ msg: err.message });
-        }
-        
-        res.status(200)
-          .send("The Bid Request " + req.body.requestsName + " has been cancelled by Supplier " + req.body.suppliersName + '.');
+        sgMail.send(mailOptions, function(err) {
+          if(err) {
+            return res.status(500).send({ msg: err.message });
+          }
+          
+          var msg = "The Bid Request has been cancelled by Supplier " + req.body.suppliersName + '.\n' + 'Buyer ' + req.body.buyersName + ' has been notified via e-mail about the Order cancellation.';
+          console.log(msg);
+          req.flash(msg);
+          res.status(200).send(msg);
+          //res.redirect('/supplier/bid-requests');
+        });
       });
-  });
+    });
 }
 
 
@@ -445,7 +445,7 @@ exports.postSignUp = (req, res) => {
                       var productService = new ProductService({
                         supplier: supplier._id,
                         productName: supplier.productsServicesOffered[i],
-                        price: supplier.pricesList[i],
+                        price: parseFloat(supplier.pricesList[i]),
                         currency: supplier.currenciesList[i],
                         createdAt: Date.now(),
                         updatedAt: Date.now()
@@ -878,7 +878,7 @@ exports.postProfile = (req, res) => {
               var productService = new ProductService({
                 supplier: doc._id,
                 productName: arr[i],
-                price: doc.pricesList[i],
+                price: parseFloat(doc.pricesList[i]),
                 currency: doc.currenciesList[i],
                 createdAt: Date.now(),
                 updatedAt: Date.now()
