@@ -6,9 +6,9 @@ const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
 const flash = require("connect-flash");
-const dateTime = require("date-format-simple");
 const multer = require("multer");
 const fs = require("fs-extra");
+const fs2 = require('fs');
 const path = require('path');
 const process = require('process');
 const MongoClient = require("mongodb").MongoClient;
@@ -17,6 +17,7 @@ const app = express();
 const http = require("http").Server(app);
 const socket = require("socket.io")(http);
 const crypto = require('crypto');
+const dateformat = require("dateformat");
 
 const BASE = process.env.BASE;
 const URI = process.env.MONGODB_URI;
@@ -43,6 +44,8 @@ const ProductService = require("./models/productService");
 //Syntax: process.env.MONGODB_URI
 
 mongoose.Promise = global.Promise;
+//const dateformat = global.dateFirmat;
+
 mongoose.set('useCreateIndex', true);
 
 const store = new MongoDBStore({
@@ -501,8 +504,9 @@ var storage = multer.diskStorage({
     callback(null, path.join('${__dirname}/../uploads'));
     //callback(null, 'uploads/');
   },
-  filename: function (req, file, callback) {
-    callback(null, file.originalname + '-' + file.fieldname + '-' + Date.now() + path.extname(file.originalname));//The name itself.
+  filename: function (req, file, callback) {// + path.extname(file.originalname)
+    var date = dateformat(new Date(), 'dddd-mmmm-dS-yyyy-h:MM:ss-TT');//Date.now()
+    callback(null, file.fieldname + '-' + date + '-' + file.originalname);//The name itself.
   }
 });
 
@@ -696,6 +700,20 @@ app.post('/deleteBid', function(req, res, next) {
 
       db.close();
     });
+  });
+});
+
+
+app.post('/deleteFile', function(req, res, next) {
+  //fs2.unlinkSync(req.body.file);
+  
+  fs2.unlink(req.body.file, function (err) {
+    if (err) 
+      throw err;
+    //if no error, file has been deleted successfully
+    console.log('File deleted!');
+    req.flash('success', 'File deleted!');
+    res.status(200).end();
   });
 });
 

@@ -7,7 +7,7 @@ dependencies:
   connect-flash: 0.1.1
   connect-mongodb-session: 2.3.2
   csurf: 1.11.0
-  date-format-simple: 1.1.5
+  dateformat: 3.0.3
   ejs: 3.1.3
   express: 4.17.1
   express-session: 1.17.1
@@ -392,10 +392,10 @@ packages:
       node: '>= 0.8.0'
     resolution:
       integrity: sha512-UCtehyEExKTxgiu8UHdGvHj4tnpE/Qctue03Giq5gPgMQ9cg/ciod5blZQ5a4uCEenNQjxyGuzygLdKUmee/bQ==
-  /date-format-simple/1.1.5:
+  /dateformat/3.0.3:
     dev: false
     resolution:
-      integrity: sha512-q220TypgXomDGRSBlB6Aw+lWjGBJK94OhWrNs7QHFhzJV4W/R5ObFthyPFkQAgHfhZ9h6ewgHi5ZNaSXW3q44w==
+      integrity: sha512-jyCETtSl3VMZMWeRo7iY1FL19ges1t55hMo5yaam4Jrsm5EPL89UQkoQRyiI+Yf4k8r2ZpdngkV8hr1lIdjb3Q==
   /debug/2.6.9:
     dependencies:
       ms: 2.0.0
@@ -1658,7 +1658,7 @@ specifiers:
   connect-flash: ^0.1.1
   connect-mongodb-session: ^2.3.2
   csurf: ^1.11.0
-  date-format-simple: ^1.1.5
+  dateformat: ^3.0.3
   ejs: ^3.1.3
   express: ^4.17.1
   express-session: ^1.17.1

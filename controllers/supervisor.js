@@ -40,55 +40,49 @@ exports.getResendToken = (req, res) => {
 
 
 exports.postConfirmation = function (req, res, next) {
-    Token.findOne({ token: req.params.token }, function (err, token) {
-        if (!token) {
-          req.flash('We were unable to find a valid token. It may have expired. Please request a new token.');
-          res.redirect('/supervisor/resend');
-          if(1==2) 
-            return res.status(400).send({
-            type: 'not-verified', 
-            msg: 'We were unable to find a valid token. Your token may have expired.' });
-        }
- 
-        Supervisor.findOne({ _id: token._userId, emailAddress: req.body.emailAddress }, function (err, user) {
-            if (!user)
-              return res.status(400).send({
-              msg: 'We were unable to find a user for this token.' 
-            });
-          
-            if (user.isVerified) 
-              return res.status(400).send({ 
-              type: 'already-verified', 
-              msg: 'This user has already been verified.' });           
-          
-              MongoClient.connect(URL, function(err, db) {//db or client.
-                    if (err) throw err;
-                    var dbo = db.db(BASE);
-                    var myquery = { _id: user._id };
-                    var newvalues = { $set: {isVerified: true} };
-                    dbo.collection("supervisors").updateOne(myquery, newvalues, function(err, resp) {
-                      if(err) {
-                        console.error(err.message);
-                        /*
-                        return res.status(500).send({ 
-                          msg: err.message 
-                        });
-                        */
-                        return false;
-                      }                   
+  Token.findOne({ token: req.params.token }, function (err, token) {
+    if (!token) {
+      req.flash('We were unable to find a valid token. It may have expired. Please request a new token.');
+      res.redirect('/supervisor/resend');
+      if(1==2) 
+        return res.status(400).send({
+        type: 'not-verified', 
+        msg: 'We were unable to find a valid token. Your token may have expired.' });
+    }
 
-                      console.log("The account has been verified. Please log in.");
-                      req.flash('success', "The account has been verified. Please log in.");
-                      db.close();
-                      if(res) res.status(200).send("The account has been verified. Please log in.");
+    Supervisor.findOne({ _id: token._userId, emailAddress: req.body.emailAddress }, function (err, user) {
+        if (!user)
+          return res.status(400).send({
+          msg: 'We were unable to find a user for this token.' 
+        });
+
+        if (user.isVerified) 
+          return res.status(400).send({ 
+          type: 'already-verified', 
+          msg: 'This user has already been verified.' });           
+
+          MongoClient.connect(URL, function(err, db) {//db or client.
+                if (err) throw err;
+                var dbo = db.db(BASE);
+                var myquery = { _id: user._id };
+                var newvalues = { $set: {isVerified: true} };
+                dbo.collection("supervisors").updateOne(myquery, newvalues, function(err, resp) {
+                  if(err) {
+                    console.error(err.message);
+                    /*
+                    return res.status(500).send({ 
+                      msg: err.message 
                     });
-                  });
-          /*
-            user.isVerified = true;
-            user.save(function (err) {
-              if (err) {                
-              }              
-            });*/
+                    */
+                    return false;
+                  }                   
+
+                  console.log("The account has been verified. Please log in.");
+                  req.flash('success', "The account has been verified. Please log in.");
+                  db.close();
+                  if(res) res.status(200).send("The account has been verified. Please log in.");
+                });
+              });        
         });
     });
 }
@@ -141,7 +135,7 @@ exports.postResendToken = function (req, res, next) {
 
 exports.getForgotPassword = (req, res) => {
   res.render("supervisor/forgotPassword", {
-    email: req.session.supervisor.emailAddress //We pre-fill the e-mail field with the address.
+    email: req.session.supervisor.emailAddress//We pre-fill the e-mail field with the address.
   });
 }
 
@@ -269,7 +263,7 @@ exports.postResetPasswordToken = (req, res) => {
 
 
 exports.getSignIn = (req, res) => {
-  if (!req.session.supervisorId)
+  if(!req.session.supervisorId)
     res.render("supervisor/sign-in", {
       errorMessage: req.flash("error")
     });
@@ -278,8 +272,8 @@ exports.getSignIn = (req, res) => {
 
 
 exports.getSignUp = (req, res) => {
-  if (!req.session.supervisor)
-    return res.render("supervisor/sign-up", {
+  if(!req.session.supervisorId)
+    res.render("supervisor/sign-up", {
       errorMessage: req.flash("error")
     });
   else 

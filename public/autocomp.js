@@ -22,6 +22,59 @@ var autocomp = function(obj, data, enter) {//Not suitable for modals.
 }
 
 
+function treatDiv(div, isMulti, val, input) {
+    if(isMulti) {
+      var newIndex = div.parent('div').find('div').index(div);
+      //alert(div.parent('div').length + ' ' + newIndex + ' ' + div.parent('div').hasClass('fileWrapper'));
+      var val2 = val.substring(0, val.length-1);
+      val2 = val2.split(',');      
+      val2.splice(newIndex, 1);      
+      input.attr('value', (val2 && val2.length)? val2.toString() + ',' : '');
+      
+      //var text = (val2 && val2.length)? val2.length + ' files' : '';
+      //alert(text);
+      if(!val2 || !val2.length)
+        input.val('');;
+    } else {
+      //alert(isMulti + ' ' + val + ' ' + input.attr('value'));
+      input.attr('value', '');
+      input.val('');
+    }
+  
+  div.remove();
+}
+
+
+function removeFile(obj) {
+  var token = $(obj).attr('token');
+  var file = $(obj).attr('file');  
+  var div = $(obj).parent('div');
+  var isMulti = div.parent('div').hasClass('fileWrapper');
+  
+  var input = isMulti? 
+      div.parent('div').prev('div').find('.fileupload') : div.prev('div').find('.fileupload');
+  //alert(file + ' ' + token + ' ' + div.length + ' ' + input.length);
+  var val = input.attr('value');
+  //var isMulti = val.charAt(val.length-1) == ','? true : false;
+  
+  $.ajax({
+    url: '/deleteFile',
+    type: 'POST',
+    headers: { "X-CSRF-Token": token },
+    data: {file: file},
+    datatype: 'application/json',
+    error: function() {
+      //alert('Error on AJAX Request!');
+      treatDiv(div, isMulti, val, input);
+    },
+    success: function(data) {
+      treatDiv(div, isMulti, val, input);
+      //alert('File removed!');
+    }
+  });
+}
+
+
 function isJson(obj) {
   if(!obj || !obj.length || !(Array.isArray(obj)))
     return false;
@@ -174,5 +227,103 @@ $(document).ready(function() {
     nav.append($str);
   }
   
-  if(nav) nav.find('span').attr('title', 'Expand/collapse UNITE basic options');
+  if(nav) 
+    nav.find('span').attr('title', 'Expand/collapse UNITE basic options');
+  
+  if(!($('.fileupload').length))
+    return false;
+  
+  var token = $("input[name='_csrf']:first").val();
+  
+  $('input.fileupload').bind('change', function() {
+    $(this).val()? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
+    });
+
+  $('.single,.multiple').each(function(index, element) {
+    var val = $(this).prev('.fileupload').attr('value');
+    var theDiv = $(this).parent('div');
+
+    if(val) {
+      if(val.charAt(val.length-1) == ',') {//Multi
+        var newVal = val.substring(0, val.length-1);
+        newVal = newVal.split(',');
+        var ob = '<div class="fileWrapper">';
+        for(var i in newVal) {
+          ob += '<div><a href="../../' + newVal[i] + '" title="Download ' + newVal[i] + '" download>Download file "' + i + '"</a>&nbsp;<span token="' + token + '" file="' + newVal[i] + '" class="remFile" onclick="removeFile(this)" title="Delete this file">Remove</span></div>';              
+        }
+
+        ob += '</div>';
+        $(ob).insertAfter(theDiv);
+      } else {
+        var ob = '<div><a href="../../' + val + '" title="Download ' + newVal[i] + '" download>Download file</a>&nbsp;<span token="' + token + '" file="' + val + '" class="remFile" onclick="removeFile(this)" title="Delete this file">Remove</span></div>';            
+        $(ob).insertAfter(theDiv);
+      }
+    }
+  });
+
+  $('.single,.multiple').click(function (e) {
+    var input = $(this).prev('.fileupload');        
+    var isMultiple = $(this).hasClass('multiple');
+    var formData = new FormData();
+    formData.append("_csrf", token);
+    formData.append("upload_file", true);
+
+    if(isMultiple == false) {
+      formData.append('single', input[0].files[0]);          
+    }
+    else {
+      $.each(input[0].files, function(i, file) {
+        formData.append('multiple', file);
+      });
+    }
+
+    var theUrl = isMultiple == true? "/uploadmultiple" : "/uploadfile";
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', theUrl, true);
+    xhr.setRequestHeader('X-CSRF-TOKEN', token);
+    xhr.onload = function(e) {
+    };
+
+    xhr.send(formData);
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4) {//Success!
+          input.next('input').attr('disabled', 'disabled');
+        
+          var ob, val, response = JSON.parse(xhr.responseText);
+          var theDiv = input.parent('div');
+          if(isMultiple) {
+            var hasDiv = theDiv.next('div').hasClass('fileWrapper');
+
+            ob = hasDiv? '' : '<div class="fileWrapper">';
+            for(var i in response) {
+              val = !(input.attr('value'))? response[i].path + ',' : input.attr('value') + response[i].path + ',';
+              //input.val(val);
+              input.attr('value', val);
+              ob += '<div><a href="../../' + response[i].path + '" title="Download ' + response[i].path + '" download>Download file "' + i + '"</a>&nbsp;<span token="' + token + '" file="' + response[i].path + '" class="remFile" onclick="removeFile(this)" title="Delete this file">Remove</span></div>';                  
+            }
+
+            if(hasDiv) {
+              theDiv.next('div').append(ob);
+            } else {
+              ob += '</div>';
+              $(ob).insertAfter(theDiv);
+            }
+          } else {
+            val = response.path;
+            //input.val(val);
+            input.attr('value', val);
+            ob = '<div><a href="../../' + val + '" title="Download ' + val + '" download>Download file</a>&nbsp;<span token="' + token + '" file="' + val + '" class="remFile" onclick="removeFile(this)" title="Delete this file">Remove</span></div>';
+            $(ob).insertAfter(theDiv);
+          }
+
+          if (xhr.status === 200) {
+             console.log('successful');
+          } else {
+             console.log('failed');
+          }
+      }
+    };
+
+    e.preventDefault();
+  });
 });

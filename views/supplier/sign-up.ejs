@@ -20,98 +20,12 @@
   <script src="/https.js"></script>
   
   <script type="text/javascript">
-      $(document).ready(function () {
-      var token = $("input[name='_csrf']").val();
-        
-      postAutocomplete('.country', '/countryAutocomplete', token);
-      getAutocomplete('#industry', '/industryGetAutocomplete', token);
-      getAutocomplete('#currency', '/currencyGetAutocomplete', token);
-    
-      $('input.fileupload')/*.unbind('change')*/.bind('change', function () {
-        $(this).val ? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
-      });
-        
-      $('#updateProfile').click(function() {
-        if($('#prodServices li').length == 0) {
-          var obj = '<p class="productRequired littleNote">You are required to include at least one product or service.</p>';
-          $(obj).insertBefore($(this));
-          return false;
-        }
-      });        
-        
-      $('.single,.multiple').each(function(index, element) {
-        var val = $(this).prev('.fileupload').attr('value');
-        
-        if(val) {
-          $(this).prev('.fileupload').val(val);
-          if(val.charAt(val.length-1) == ',') {//Multi
-            var newVal = val.substring(0, val.length-1);
-            newVal = newVal.split(',');
-            for(var i in newVal) {
-              var ob = '<a href="' + newVal[i] + '" download>Download file "'+i+'"</a>';
-              $(ob).insertAfter($(this).parent('div'));
-            }
-          } else {
-            var ob = '<a href="' + val + '" download>Download</a>';
-            $(ob).insertAfter($(this).parent('div'));  
-          }
-        }
-      });
-        
-      $('.single,.multiple').click(function (e) {
-        var input = $(this).prev('.fileupload'); 
-        
-        var isMultiple = $(this).hasClass('multiple')? true : false;
-        var formData = new FormData();
-        formData.append("_csrf", token);
-        formData.append("upload_file", true);
-        
-        if(isMultiple == false) {
-          formData.append('single', input[0].files[0]);          
-        }
-        else {
-          $.each(input[0].files, function(i, file) {
-            formData.append('multiple', file);
-          });
-        }
-        
-        var theUrl = isMultiple == true? "/uploadmultiple" : "/uploadfile";
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', theUrl, true);
-        xhr.setRequestHeader('X-CSRF-TOKEN', token);
-        xhr.onload = function(e) {
-        };
-        
-        xhr.send(formData);
-        xhr.onreadystatechange = function() {
-          if (xhr.readyState === 4) {
-              var ob, val, response = JSON.parse(xhr.responseText);
-              if(isMultiple) {
-                for(var i in response) {
-                  val = input.attr('value') + '/' + response[i].path + ',';                  
-                  //input.val(val);
-                  input.attr('value', val);                  
-                  ob = '<a href="/' + response[i].path + '" download>Download file "'+i+'"</a>';
-                  $(ob).insertAfter(input.parent('div'));
-                }
-              } else {                
-                val = '/' + response.path + ',';                  
-                //input.val(val);
-                input.attr('value', val);
-                ob = '<a href="/' + response.path + '" download>Download file</a>';
-                $(ob).insertAfter(input.parent('div'));
-              }
-              
-              if (xhr.status === 200) {
-                 console.log('successful');
-              } else {
-                 console.log('failed');
-              }
-          }
-        };
-        
-        e.preventDefault();
-      });
+    $(document).ready(function () {
+    var token = $("input[name='_csrf']").val();
+
+    postAutocomplete('.country', '/countryAutocomplete', token);
+    getAutocomplete('#industry', '/industryGetAutocomplete', token);
+    getAutocomplete('#currency', '/currencyGetAutocomplete', token);    
         
     $('.cb').click(function() {
       if($(':checkbox:checked').length == 2) {

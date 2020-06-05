@@ -21,13 +21,13 @@
   <script src="/https.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {        
-        var token = $("input[name='_csrf']").val();
-        
-        $("input").unbind('change').bind('change', function() {        
-          $('#updateProfile').removeAttr('disabled');
-        });
+      var token = $("input[name='_csrf']").val();
       
       postAutocomplete('#country', '/countryAutocomplete', token);
+        
+        $("input").bind('change', function() {        
+          $('#updateProfile').removeAttr('disabled');
+        });
     });
   </script>
 </head>
