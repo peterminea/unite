@@ -16,9 +16,9 @@
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
   integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-  <script src="/autocomp.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>  
   <script src="/https.js"></script>
+  <script src="/autocomp.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {        
       var token = $("input[name='_csrf']").val();
@@ -54,7 +54,7 @@
           <a class="btn btn-primary" href="/buyer/profile">Profile</a>
         </li>
         <br>
-        <li class="nav-item" style="margin-left: 0px;">
+        <li class="nav-item">
           <a class="btn btn-danger" href="?exit=true">Logout</a>
         </li>
       </ul>
@@ -67,7 +67,7 @@
       <h5 class="card-header">Welcome!</h5>
       <div class="card-body">
         <h5 class="card-title">Hello, <%= profile.organizationName %></h5>
-        <p class="card-text">This is your profile page. To ensure that you continue to appear in buyers' search results, please keep your capabilities up-to-date.</p>
+        <p class="card-text">This is your profile page. Please keep your data accurate, and you will have good luck with finding your needed suppliers!</p>
       </div>
     </div>
     <br><br>

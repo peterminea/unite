@@ -30,13 +30,11 @@ function treatDiv(div, isMulti, val, input) {
       val2 = val2.split(',');      
       val2.splice(newIndex, 1);      
       input.attr('value', (val2 && val2.length)? val2.toString() + ',' : '');
-      
       //var text = (val2 && val2.length)? val2.length + ' files' : '';
-      //alert(text);
+      
       if(!val2 || !val2.length)
         input.val('');;
     } else {
-      //alert(isMulti + ' ' + val + ' ' + input.attr('value'));
       input.attr('value', '');
       input.val('');
     }
@@ -90,9 +88,7 @@ function isUnique(value, index, self) {//Unique values in JS arrays.
 
  
 //var unique = myArray.filter(isUnique);
-//var unique = myArray.filter((v, i, a) => a.indexOf(v) === i); 
-
-
+//var unique = myArray.filter((v, i, a) => a.indexOf(v) === i);
 function checkName(arr, name) {
   for(var i in arr) {
     if(arr[i].toLowerCase() == name.toLowerCase())
@@ -102,8 +98,7 @@ function checkName(arr, name) {
   return false;
 }
 
-function getId(val) {//alert(val);
-  //alert(val.indexOf('_'));
+function getId(val) {
   return val.substr(val.indexOf('_')+1);
 }
 
@@ -192,8 +187,8 @@ function postAutocomplete(elem, url, token) {
 }
 
 $(document).ready(function() {
-  $('input,textarea,span,label,li,button,h2,h3,h4,h5')
-    .each(function(index, el) {
+  $('input,textarea,span,label,li,button,a,b,p,h2,h3,h4,h5')
+    .each(function(index, el) {//Tooltips in the App.
     if(!$(el).attr('title')) {
       $(el).attr('title', $(el).val()? $(el).val() : $(el).text());
     }
@@ -237,7 +232,7 @@ $(document).ready(function() {
   
   $('input.fileupload').bind('change', function() {
     $(this).val()? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
-    });
+  });
 
   $('.single,.multiple').each(function(index, element) {
     var val = $(this).prev('.fileupload').attr('value');
@@ -297,7 +292,6 @@ $(document).ready(function() {
             ob = hasDiv? '' : '<div class="fileWrapper">';
             for(var i in response) {
               val = !(input.attr('value'))? response[i].path + ',' : input.attr('value') + response[i].path + ',';
-              //input.val(val);
               input.attr('value', val);
               ob += '<div><a href="../../' + response[i].path + '" title="Download ' + response[i].path + '" download>Download file "' + i + '"</a>&nbsp;<span token="' + token + '" file="' + response[i].path + '" class="remFile" onclick="removeFile(this)" title="Delete this file">Remove</span></div>';                  
             }
@@ -310,7 +304,6 @@ $(document).ready(function() {
             }
           } else {
             val = response.path;
-            //input.val(val);
             input.attr('value', val);
             ob = '<div><a href="../../' + val + '" title="Download ' + val + '" download>Download file</a>&nbsp;<span token="' + token + '" file="' + val + '" class="remFile" onclick="removeFile(this)" title="Delete this file">Remove</span></div>';
             $(ob).insertAfter(theDiv);
