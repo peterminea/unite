@@ -108,8 +108,8 @@ exports.postCancelBid = (req, res) => {
           var msg = "The Bid Request has been cancelled by Supplier " + req.body.suppliersName + '.\n' + 'Buyer ' + req.body.buyersName + ' has been notified via e-mail about the Order cancellation.';
           console.log(msg);
           req.flash(msg);
-          res.status(200).send(msg);
-          //res.redirect('/supplier/bid-requests');
+          //res.status(200).send(msg);
+          res.redirect('/supplier/bid-requests');
         });
       });
     });
@@ -117,7 +117,10 @@ exports.postCancelBid = (req, res) => {
 
 
 exports.getConfirmation = (req, res) => {
-  if(!req.session || !req.session.supplierId) {req.session.supplierId = req.params.token? req.params.token._userId : null}
+  if(!req.session || !req.session.supplierId) {
+    req.session.supplierId = req.params.token? req.params.token._userId : null;
+  }
+  
   res.render("supplier/confirmation", {
     token: req.params.token });
 }
@@ -327,7 +330,7 @@ sgMail.send(msg);*/
 }
 
 exports.getSignUp = (req, res) => {
-  if (!req.session.supplier)
+  if (!req.session.supplierId)
     return res.render("supplier/sign-up", {
       errorMessage: req.flash("error")
     });

@@ -5,6 +5,12 @@ body {
   
 }
 
+.remFile {
+  font-size: 12pt;
+  cursor: pointer;
+  color: #88cc44
+}
+
 .font-16pt {
   font-size: 16pt;
 }

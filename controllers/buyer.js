@@ -210,8 +210,8 @@ exports.postCancelBid = (req, res) => {
           var msg = "The Bid Request has been cancelled by Buyer " + req.body.buyersName + '.\n' + 'Supplier ' + req.body.suppliersName + ' has been notified via e-mail about the Order cancellation.';
           console.log(msg);
           req.flash('success', msg);
-          res.status(200).send(msg);
-          //res.redirect('/buyer/viewBid');
+          //res.status(200).send(msg);
+          res.redirect('/buyer/viewBid');
       });
     });
   });
@@ -344,7 +344,7 @@ exports.getSignIn = (req, res) => {
 
 
 exports.getSignUp = (req, res) => {
-  if (!req.session.buyer)
+  if (!req.session.organizationId)
     return res.render("buyer/sign-up", {
       errorMessage: req.flash("error")
     });

@@ -22,8 +22,7 @@
   
   <script type="text/javascript">
       $(document).ready(function() {
-        var token = $("input[name='_csrf']").val();        
-        //postAutocomplete('#organizationUniteID', '/uniteIDAutocomplete', token);
+        var token = $("input[name='_csrf']").val();
         getAutocomplete('#organizationUniteID', '/uniteIDAutocomplete', token);
         postAutocomplete('#country', '/countryAutocomplete', token);
   });

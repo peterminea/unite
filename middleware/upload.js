@@ -1,10 +1,11 @@
 const util = require("util");
 const path = require("path");
 const multer = require("multer");
+const dateformat = require("dateformat");
 
 var storage = multer.diskStorage({
   destination: (req, file, callback) => {
-    //callback(null, '/uploads');
+    //callback(null, 'uploads/');
     callback(null, path.join('${__dirname}/../uploads'));
   },
   filename: (req, file, callback) => {
@@ -15,7 +16,8 @@ var storage = multer.diskStorage({
       return callback(message, null);
     }
 
-    var filename =  'UNITE-'+ Date.now() + '-' + file.originalname;
+    var date = dateformat(new Date(), 'dddd, mmmm dS, yyyy, h:MM:ss TT');//Date.now()
+    var filename =  'UNITE-'+ date + '-' + file.originalname;
     callback(null, filename);
   }
 });
