@@ -80,7 +80,7 @@ function getAutocomplete(elem, url, token, isEnter) {
       });
     },
     minLength: 3,
-    delay: 20,
+    delay: 50,
     focus: function (event, ui) {
         if(!ui.item)
           return false;
@@ -93,8 +93,9 @@ function getAutocomplete(elem, url, token, isEnter) {
         event.preventDefault();
       }
     }
-  });  
+  });
 }
+
 
 function postAutocomplete(elem, url, token) {
   $('' + elem + '').autocomplete({
@@ -121,7 +122,7 @@ function postAutocomplete(elem, url, token) {
       });
     },
     minLength: 3,
-    delay: 20,
+    delay: 50,
     focus: function (event, ui) {
         if(!ui.item)
           return false;
@@ -144,4 +145,34 @@ $(document).ready(function() {
       $(el).attr('title', $(el).val()? $(el).val() : $(el).text());
     }
   });
+  
+  var nav = $('body').find('nav');
+  if(nav.length && !(nav.find('div[id="navbarSupportedContent"]').length)) {
+    
+    var $str = ' <div class="collapse navbar-collapse" id="navbarSupportedContent">'
+      + '<ul class="navbar-nav mr-auto">'
+      + '<li class="nav-item">'
+      + '<a class="nav-link" href="/">Home<span class="sr-only">(current)</span></a>'
+      + '</li>'
+      + '<li class="nav-item">'
+      + '<a class="nav-link" href="/about">About</a>'
+      + '</li>'
+      + '<li class="nav-item">'
+      + '<a class="nav-link" href="/termsConditions">Terms</a>'
+      + '</li>'
+      + '<li class="nav-item">'
+      + '<a class="nav-link" href="/antibriberyAgreement">Anti-Bribery</a>'
+      + '</li>'
+      + '<li class="nav-item">'
+      + '<a class="btn btn-danger" href="?exit=true&home=true" title="Clear user session">Clear Session</a>'
+      + '</li>'
+      + '</ul>'
+      + '<br>'
+      + '<button class="btn btn-primary" data-toggle="modal" data-target="#signUpModal">Sign up</button>'
+      + '</div>';
+    
+    nav.append($str);
+  }
+  
+  if(nav) nav.find('span').attr('title', 'Expand/collapse UNITE basic options');
 });

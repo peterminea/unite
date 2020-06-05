@@ -28,5 +28,6 @@ router.post('/resend', /*isAuth,*/ sessionExit, buyerController.postResendToken)
 router.post("/forgotPassword", isAuth, sessionExit, buyerController.postForgotPassword);
 router.post("/resetPassword/:token", isAuth, sessionExit, buyerController.postResetPasswordToken);
 router.post("/viewBid", isAuth, sessionExit, buyerController.postViewBids);
+router.post("/cancelBid", isAuth, sessionExit, buyerController.postCancelBid);
 
 module.exports = router;

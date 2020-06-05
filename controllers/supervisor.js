@@ -26,16 +26,18 @@ exports.getIndex = (req, res) => {
       });
     }
   );
-};
+}
 
 
 exports.getConfirmation = (req, res) => {
   res.render('supervisor/confirmation', {token: req.params.token});
 }
 
+
 exports.getResendToken = (req, res) => {
   res.render('supervisor/resend');
 }
+
 
 exports.postConfirmation = function (req, res, next) {
     Token.findOne({ token: req.params.token }, function (err, token) {
@@ -89,7 +91,7 @@ exports.postConfirmation = function (req, res, next) {
             });*/
         });
     });
-};
+}
 
 
 exports.postResendToken = function (req, res, next) {
@@ -134,7 +136,7 @@ exports.postResendToken = function (req, res, next) {
                 });
         }); 
     });
-};
+}
 
 
 exports.getForgotPassword = (req, res) => {
@@ -142,6 +144,7 @@ exports.getForgotPassword = (req, res) => {
     email: req.session.supervisor.emailAddress //We pre-fill the e-mail field with the address.
   });
 }
+
 
 exports.postForgotPassword = (req, res, next) => {
   async.waterfall([
@@ -271,7 +274,8 @@ exports.getSignIn = (req, res) => {
       errorMessage: req.flash("error")
     });
   else res.redirect("/supervisor");
-};
+}
+
 
 exports.getSignUp = (req, res) => {
   if (!req.session.supervisor)
@@ -280,7 +284,8 @@ exports.getSignUp = (req, res) => {
     });
   else 
     res.redirect("/supervisor");
-};
+}
+
 
 exports.postSignIn = (req, res) => {
   const email = req.body.emailAddress;
@@ -298,6 +303,7 @@ exports.postSignIn = (req, res) => {
         return res.redirect("/supervisor/sign-in");
       }
 
+    try {
       bcrypt
         .compare(password, doc.password)
         .then((doMatch) => {
@@ -305,7 +311,6 @@ exports.postSignIn = (req, res) => {
             req.session.supervisorId = doc._id;
             req.session.supervisor = doc;
             
-            // Make sure the user has been verified
             if (!doc.isVerified) 
               return res.status(401).send({
                 type: 'not-verified', 
@@ -317,20 +322,23 @@ exports.postSignIn = (req, res) => {
             req.flash("error", "Passwords and e-mail do not match!");
             res.redirect("/supervisor/sign-in");
           }
-        })
-        .then(err => {
+        })        
+        .then((err) => {
           if (err) {
           console.error(err);
           res.redirect("/supervisor/sign-in");
           }
         })
         .catch(console.error);
+      } catch {
+        res.redirect("/supervisor/sign-in");
+      }
     });
   }
 }
 
-let global = 0;
 
+let global = 0;
 exports.postSignUp = (req, res) => {
   if (req.body.emailAddress) {
     const email = req.body.emailAddress;
@@ -352,10 +360,11 @@ exports.postSignUp = (req, res) => {
           Supervisor.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
             if (user) 
               return res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
-          
-          //bcrypt.hash(req.body.password, 10, function(err, hash) {
-          user = new Promise((resolve, reject) => {
-            const supervisor = new Supervisor({
+        var supervisor;
+        try {
+          bcrypt.hash(req.body.password, 10, function(err, hash) {
+          //user = new Promise((resolve, reject) => {
+            supervisor = new Supervisor({
               organizationName: req.body.organizationName,
               organizationUniteID: req.body.organizationUniteID,
               contactName: req.body.contactName,
@@ -379,15 +388,16 @@ exports.postSignUp = (req, res) => {
             
             supervisor.save((err) => {
               if (err) {
-                return reject(new Error('Error with exam result save... ' + err));
+                //return reject(new Error('Error with exam result save... ' + err));
               }
               
-              // Create a verification token for this user
+              req.session.supervisor = supervisor;
+              req.session.id = supervisor._id;
+              req.session.save();
               var token = new Token({ 
                 _userId: supervisor._id,
                 token: crypto.randomBytes(16).toString('hex') });
-
-              // Save the verification token
+              
               token.save(function (err) {
                 if (err) {
                   console.error(err.message);
@@ -400,55 +410,41 @@ exports.postSignUp = (req, res) => {
                   from: 'peter@uniteprocurement.com',
                   to: supervisor.emailAddress,
                   subject: 'Account Verification Token', 
-                  text:
-                        "Hello " + supervisor.organizationName +
+                  text: "Hello " + supervisor.organizationName +
                         ",\n\nCongratulations for registering on the UNITE Public Procurement Platform!\n\nPlease verify your account by clicking the link: \nhttp://" 
                       + req.headers.host + "/supervisor/confirmation/" + token.token + "\n"
                 };
 
                 sgMail.send(email, function (err, info) {
-                   //if (err ) {
-                    console.log(err? err.message : info.response);
-                  //}  else {
-                   // console.log('Message sent: ' + info.response);
-                  //}
                     if (err) {
                       console.error(err.message)
-                      //return res.status(500).send({ msg: err.message }); 
-                    } else req.flash('success', 'A verification email has been sent to ' + supervisor.emailAddress + '.');
+                      return res.status(500).send({ msg: err.message }); 
+                    } else {
+                      req.flash('success', 'A verification email has been sent to ' + supervisor.emailAddress + '.');
+                      console.log('A verification email has been sent to ' + supervisor.emailAddress + '.');
+                      req.flash("success", "Supervisor signed up successfully!");
+                      if(typeof res !== 'undefined') 
+                        return res.redirect("/supervisor");
                     //return res.status(200).send('A verification email has been sent to ' + supervisor.emailAddress + '.');
+                    }
                   });
                 });
               });
-         
-          return resolve(supervisor);
-          });
-        //});
-      
-        assert.ok(user instanceof Promise);
-        
-        user
-          .then(doc => {
-            req.session.supervisor = doc;
-            req.session.id = doc._id;
-            return req.session.save();
-          })
-          .then(() => {
-            req.flash("success", "Supervisor signed up successfully!");
-            if(typeof res !== 'undefined') 
-              return res.redirect("/supervisor");
-          })
-          .catch(console.error);
+            });
+          } catch {
+            res.redirect('/supervisor/sign-up');
+          }
         });
       }
     }
   }
-};
+}
 
 
 exports.getProfile = (req, res) => {
   res.render("supervisor/profile", { profile: req.session.supervisor });
-};
+}
+
 
 exports.postProfile = (req, res) => {
   Supervisor.findOne({ _id: req.body._id }, (err, doc) => {
@@ -499,4 +495,4 @@ exports.postProfile = (req, res) => {
       return res.redirect("/supervisor");
     })
     .catch(console.error);
-};
+}

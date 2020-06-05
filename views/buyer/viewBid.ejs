@@ -22,7 +22,7 @@
   
   <script type="text/javascript">
     $(document).ready(function() {
-      var token = $("input[name='_csrf']").val();
+      var token = $("input[name='_csrf']:first").val();
       
       $.ajax({
               url: "/bidStatuses",
@@ -47,7 +47,6 @@
                     .find('input[id^="status"]'))
                     .val(theVal);
                   
-                  
                   if(theVal == 3) {
                     var amount = $('#price_'+index).val();
                     
@@ -65,17 +64,15 @@
                 $('select[id^="statuses_"]')
                   .each(function(index, el) {
                   for(var i in data) {
-                    var opt = '<option style="word-wrap: break-word; width: 100px" title="' + data[i].name +'" value="' + data[i].value + '">' + data[i].name + '</option>';
+                    var opt = '<option ' + (i >= 5? 'disabled ' : '') + 'style="word-wrap: break-word; width: 100px" title="' + data[i].name +'" value="' + data[i].value + '">' + data[i].name + '</option>';
                     $(el).append(opt);
                     }
                   
-                  //setTimeout(function() {
-                    
+                  //setTimeout(function() {                    
                     var statusInput = $(el)
                       .parent('div')
                       .prev('div')
-                      .find('input[id^="status_"]');
-                   //alert(statusInput.length + ' ' + statusInput.attr('id'));
+                      .find('input[id^="status_"]');                   
                     $(el)
                         .find('option[value="' + statusInput.val() + '"]')
                         .attr({'selected': 'selected'});
@@ -84,7 +81,32 @@
                  // }, 300);
                 });
               }
-      });
+      });      
+      
+      if($('.delete').length()) {
+        $('.delete').bind('click', function() {          
+          var bidId = $(this).attr('id');
+          var div1 = $(this).parent('div'), div2 = div1.prev('div');
+          
+          if(confirm('Are you sure you want to remove this bid from your Buyer Dashboard forever?')) {
+            $.ajax({
+              url: '/deleteBid',
+              type: 'POST',
+              headers: { "X-CSRF-Token": token },
+              data: {bidId: bidId},
+              datatype: 'application/json',
+              error: function() {
+                alert('Error on AJAX Request!');
+              },
+              success: function() {
+                div2.remove();
+                div1.remove();
+                alert('Bid removed by buyer!');
+              }
+            });
+          }
+        });
+      }      
     });
   </script>
 </head>
@@ -96,6 +118,7 @@
       </div>
       <div class="col-md-12">
         <% let i = 0; if (bids != null && bids.length > 0) { for (bid of bids) { i++; %>
+        
         <div>      
           <div class="card mt-4">
             <h5 class="card-header bg-dark text-white">From: <%= bid.buyerName %></h5>
@@ -103,13 +126,22 @@
               <h5 class="card-title">To: <%= bid.supplierName %></h5>
               <div>
                 <span>Request: <%= bid.requestName %></span>
-              </div>              
+              </div>
+              <% if(bid.isCancelled == false) { %>
               <button class="btn btn-primary ml-2" style="float: right" data-target="#request_<%= i %>" data-toggle="modal">View Bid Details</button>
+              <% } %>
             </div>
           </div>
         </div>
-        
-        <!-- Modal window for the new Bid Request -->
+        <% if(bid.isCancelled == true) { %>
+          <div class="card mt-4">
+            <p>
+              This bid was cancelled upon <% if(bid.status == 6) { %> your <% } else { %> Supplier's <% } %> decision. You can remove the bid completely.
+            </p>
+            <button class="btn btn-primary ml-2 delete" style="float: right" id="<%= bid._id %>">Delete Bid</button>
+          </div>
+        <% } else { %>
+        <!-- Modal window for the new, valid Bid Request -->
         <div class="modal fade" id="request_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -141,7 +173,11 @@
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Buyer's E-mail Address*</label>
-                    <input readonly type="text" class="form-control" name="buyerName" value="<%= bid.buyerEmail %>">
+                    <input readonly type="text" class="form-control" name="buyerEmail" value="<%= bid.buyerEmail %>">
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Buyer's E-mail Address*</label>
+                    <input readonly type="text" class="form-control" name="supplierEmail" value="<%= bid.supplierEmail %>">
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Item Description (Short*)</label>
@@ -328,11 +364,25 @@
               </a>
             </div>
           </div>
+          <div class="container mt-4">
+            <div class="form-group">
+              <form action="../../../buyer/cancelBid/" method="POST">
+                <input type="hidden" name="bidId" value="<%= bid._id %>">
+                <input type="hidden" name="requestsName" value="<%= bid.requestName %>">
+                <input type="hidden" name="buyersName" value="<%= bid.buyerName %>">
+                <input type="hidden" name="suppliersName" value="<%= bid.supplierName %>">
+                <input type="hidden" name="buyersEmail" value="<%= bid.buyerEmail %>">
+                <input type="hidden" name="suppliersEmail" value="<%= bid.supplierEmail %>">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit" title="Cancel Order" class="btn-primary custom-button">Cancel your Order</button>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     </div>
         
-    <% } } else { %>
+    <% } } } else { %>
     <p style="font-size: 12pt; font-weight: bold; color: purple">You have not placed any bids to this supplier. If you prefer, you may do so at any time.</p>
     <% } %>
   </div>

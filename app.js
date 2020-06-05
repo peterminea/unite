@@ -43,6 +43,7 @@ const ProductService = require("./models/productService");
 //Syntax: process.env.MONGODB_URI
 
 mongoose.Promise = global.Promise;
+mongoose.set('useCreateIndex', true);
 
 const store = new MongoDBStore({
   uri: URI,
@@ -99,16 +100,15 @@ app.use("/supervisor", supervisorRoutes);
 //For chatting:
 const port = 5000;
 var db;
-//var ProductService = require('./models/productService');
 
-MongoClient.connect(URI, (err, client) => {
+MongoClient.connect(URI, {useUnifiedTopology: true}, (err, client) => {
   if (err)
     return console.error(err.message);
 
   db = client.db(BASE);//Right connection!
-  
+  console.log('FALLENIUS');
   process.on('uncaughtException', function (err) {
-    console.log(err);
+    console.log(err.message);
   });
   
   /*
@@ -337,6 +337,9 @@ MongoClient.connect(URI, (err, client) => {
   //db.collection("buyers").updateMany({}, { $set: {contactMobileNumber: "0732 060 807"} }, function(err, obj) {});
   //db.collection("supervisors").updateMany({}, { $set: {contactMobileNumber: "0732 060 807"} }, function(err, obj) {});
   */
+  
+  //db.collection("bidrequests").updateMany({}, { $set: {supplierEmail: "peter.minea@gmail.com", isCancelled: false} }, function(err, obj) {}); 
+  
 });
 
 
@@ -484,7 +487,7 @@ var upload = multer({
     callback(null, true);
   },
   limits: {
-    fileSize: 1024 * 1024//1 MB
+    fileSize: 2048 * 2048//4 MB
   }
 });
 
@@ -572,7 +575,7 @@ app.post("/uploadmultiple",  upload.array("multiple", 12),   (req, res, next) =>
     const files = req.files;
     
     if (!files) {
-      const error = new Error("Please choose files (maximum 12)");
+      const error = new Error("Please choose maximum 12 files.");
       error.httpStatusCode = 400;
       return next(error);
     }
@@ -592,7 +595,7 @@ app.post('/countryAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.body.term, 'i');  
   var countryFilter = Country.find({name: regex}, {"name": 1})
   .sort({"name" : 1})
-  .limit(10);//Positive sort is ascending.  
+  .limit(15);//Positive sort is ascending.  
   countryFilter.exec(function(err, data) {
   var result = [];
     
@@ -618,7 +621,7 @@ app.post('/industryAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.query["term"], 'i');
   var industryFilter = Industry.find({name: regex}, {"name": 1})
     .sort({"name" : 1})
-    .limit(10);//Negative sort means descending.  
+    .limit(15);//Negative sort means descending.  
 
   industryFilter.exec(function(err, data) {
   var result = [];
@@ -641,11 +644,29 @@ app.post('/industryAutocomplete', function(req, res, next) {
 });
 
 
+app.post('/deleteBid', function(req, res, next) {
+  MongoClient.connect(URL, function(err, db) {
+    if (err) 
+      throw err;
+    var dbo = db.db(BASE), myquery = { _id: req.body.bidId };
+    
+    dbo.collection("bidrequests").deleteOne(myquery, function(err, resp) {
+      if(err) {
+        console.error(err.message);
+        //return false;
+      }
+
+      db.close();
+    });
+  });
+});
+
+
 app.get('/industryGetAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.query["term"], 'i');
   var industryFilter = Industry.find({name: regex}, {"name": 1})
     .sort({"name" : 1})
-    .limit(10);//Negative sort means descending.  
+    .limit(15);//Negative sort means descending.  
 
   industryFilter.exec(function(err, data) {
   var result = [];
@@ -693,11 +714,39 @@ app.get('/bidStatuses', function(req, res, next) {
 });
 
 
+
+app.get('/uniteIDAutocomplete', function(req, res, next) {
+  var regex = new RegExp(req.query["term"], 'i');
+  var uniteIDFilter = Supervisor.find({organizationUniteID: regex}, {"organizationUniteID": 1})
+    .sort({"organizationUniteID" : 1})
+    .limit(15);//Negative sort means descending.  
+
+  uniteIDFilter.exec(function(err, data) {
+  var result = [];
+    
+    if(!err) {
+      if(data && data.length && data.length > 0) {
+        data.forEach( (item) => {
+          let obj = {
+            id: item._id,
+            name: item.organizationUniteID
+          };
+          
+          result.push(obj);          
+        });
+      }
+      
+      res.jsonp(result);     
+    }
+  });
+});
+
+
 app.post('/uniteIDAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.query["term"], 'i');
   var uniteIDFilter = Supervisor.find({organizationUniteID: regex}, {"organizationUniteID": 1})
     .sort({"organizationUniteID" : 1})
-    .limit(10);//Negative sort means descending.  
+    .limit(15);//Negative sort means descending.  
 
   uniteIDFilter.exec(function(err, data) {
   var result = [];
@@ -732,7 +781,7 @@ app.post('/currencyAutocomplete', function(req, res, next) {
     
     if(!err) {
       if(data && data.length && data.length > 0) {
-        data.forEach(item=>{
+        data.forEach(item => {
           let obj = {
             id: item._id,
             name: item.value + '-' + item.name,
@@ -816,7 +865,7 @@ app.get('/capabilityInputAutocomplete', function(req, res, next) {
   
   var capDescriptionFilter = Supplier.find({capabilityDescription: regex}, {'capabilityDescription': 1})
     .sort({"capabilityDescription" : 1})
-    .limit(10)
+    .limit(15)
   ;
   
   capDescriptionFilter.exec(function(err, data) {
@@ -839,7 +888,7 @@ app.get('/capabilityInputAutocomplete', function(req, res, next) {
   });
 });
 
-
+/*
 var buildResultSet = function(docs) {
     var result = [];
     for(var object in docs){
@@ -848,9 +897,12 @@ var buildResultSet = function(docs) {
     return result;
    }
 
+
 app.get('/countryAutocompleted', function(req, res) {  
   var regex = new RegExp(req.query["term"], 'i');
-  var query = Country.find({name: regex}, { 'name': 1 })/*.sort({"updated_at":-1}).sort({"created_at":-1})*/.limit(5);
+  var query = Country.find({name: regex}, { 'name': 1 })
+  .sort({"updated_at":-1}).sort({"created_at":-1})
+  .limit(5);
  
   query.exec(function(err, items) {
     if (!err) {
@@ -865,100 +917,30 @@ app.get('/countryAutocompleted', function(req, res) {
          }, 404);
       }
    });
-});
+});*/
 
 
 // Database configuration and test data saving:
+
 mongoose
   .connect(URI, {
     useNewUrlParser: true,
+    useCreateIndex: true,
     useUnifiedTopology: true
   })
-  .then(result => {
-    //Here comes some mockup data for our model entities:
-    /*
-      const demoSupplier = new Supplier({
-        companyName: "Paulaner Brauerei Wien",
-        directorsName: "Herr Direktor",
-        contactName: "Demo Contact Name",
-        title: "Demo Title",
-        emailAddress: "demo@email.com",
-        password: "demopass",
-        companyRegistrationNo: "0",
-        registrationCompany: "Demo Company",
-        companyAddress: "Demo Address",
-        storageLocation: "Demo Location",
-        contactMobileNumber: "+000000000000",
-        country: "Austria",
-        industry: "Demo Industry",
-        employeeNumbers: 5,
-        lastYearTurnover: "5",
-        website: "www.demo.dem",
-        facebookURL: "https://www.facebook.com/demoName",
-        instagramURL: "https://www.instagram.com/demoName",
-        twitterURL: "https://www.twitter.com/demoName",
-        linkedinURL: "https://www.linkedin.com/demoName",
-        otherSocialMediaURL: "https://www.tumblr.com/thumbtombraider",
-        commodities: "Isopropylic Alcohol, Silica Gel",
-        capabilityDescription: "Demo Description",
-        relevantExperience: "Demo Experience",
-        supportingInformation: "Default info in our documents",
-        UNITETermsAndConditions: true,
-        antibriberyAgreement: true
-      });
-  
-    const demoBuyer = new Buyer({
-      organizationName: "AKH Krankenhaus Wien",
-      organizationUniteID: "1",
-      contactName: "Demo Contact Name",
-      emailAddress: "demo@email.com",
-      password: "Sha9*gil^4Gh",
-      deptAgencyGroup: "Abdulsalam Mustapha Al-Shawaf, Nablus, Irak",
-      qualification: "Basic qualification",
-      address: "Casino Boulevard, Amsterdam",
-      country: "Netherlands"
-    });
-    
-      //demoSupplier.save(); demoBuyer.save();
-  
-      const demoGovernmentSupervisor = new Supervisor({
-      organisationName: "European Parliament",
-      contactName: "Van der Sagner, Galesio",
-      emailAddress: "galesio.vandersagner@parliament.eu",
-      password: "S&ki0_9mil^j*8Ab%O",
-      address: "Viale Maciste 113, Caposele, Avellino, IT",
-      country: "Italy",
-      UNITETermsAndConditions: true,
-      antibriberyAgreement: true
-    });
-    
-    demoGovernmentSupervisor.save();   
+  .then((result) => {
+      
+    return null;
+  })
+  .then(() => {
+    //app.listen(5000);
+  })
+  .catch(console.error);
 
-   const {ObjectId} = require('mongodb');
-   
-   const demoBidRequest = new BidRequest({
-      itemDescription: "Refrigerators",
-      commodityList: "Zanussi, Bosch, Whirlpool",      
-      itemDescriptionLong: "Medium-size refrigerators",
-      itemDescriptionUrl: "https://www.demos.org",
-      amount: 10,
-      deliveryLocation: "Mariahilfestrasse 30, Vienna, Austria",
-      deliveryRequirements: "Original papers",
-      complianceRequirements: "Certificate of authenticity",      
-      complianceRequirementsUrl: "https://www.iso9001.net",
-      otherRequirements: "Fast delivery",
-      status: 1,
-      price: 5,
-      buyer: ObjectId("507f191e810c18729de860ea"),
-      supplier: ObjectId("507f191e810c17729de860ea")
-    });
-    
-    demoBidRequest.save().then(result => {
-      console.log('Bid requested successfully!');      
-    }).catch(console.error);*/
 
-    //const options = { ignoreCase: true, reverse: true, depth: 1};
-    
+//const {ObjectId} = require('mongodb');
+    /*    
+  //const options = { ignoreCase: true, reverse: true, depth: 1};    
   //let rawdata = fs.readFileSync('countries.json');  
  // let countries = JSON.parse(rawdata);
   
@@ -996,9 +978,3 @@ mongoose
     //demoIndustry.save();
   }
   */
-    return null;
-  })
-  .then(() => {
-    //app.listen(5000);
-  })
-  .catch(console.error);

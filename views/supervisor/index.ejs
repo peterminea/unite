@@ -22,21 +22,23 @@
         var tr = $(this).parent('tr');
         var id = $(this).attr('id');
         
-        $.ajax({
-            url: "/processBuyer",
-            headers: { "X-CSRF-Token": token },
-            datatype: "application/json",
-            type: "POST",
-            data: {"id": id},
-            success: function(data) {
-              //res(data);
-              tr.remove();
-              alert('Buyer removed!');
-            },
-            error: function(err) {
-              alert(err);
-            }
-          });
+        if(confirm('Are you sure you want to remove the selected buyer from the UNITE Platform?')) {
+          $.ajax({
+              url: "/processBuyer",
+              headers: { "X-CSRF-Token": token },
+              datatype: "application/json",
+              type: "POST",
+              data: {"id": id},
+              success: function(data) {
+                //res(data);
+                tr.remove();
+                alert('The Buyer has been removed!');
+              },
+              error: function(err) {
+                alert(err);
+              }
+            });
+          }
       });
     });
   </script>
@@ -106,15 +108,15 @@
           <td scope="col">€<%= buyer.balance %></td>
           <td scope="col">YES</td>
           <td scope="col">
-            <button id="process_<%= i %>" class="btn btn-primary">Process</button>
+            <button title="Remove selected Buyer from UNITE" id="process_<%= i %>" class="btn btn-primary">Process</button>
           </td>
         </tr>
         <% i++; } } else {%>
         <div>
           <p style="color: green; font-family: arial">
-            Sorry, no buyers with this Organization UNITE ID are currently available.
+            Sorry, no buyers with your Organization UNITE ID are currently available. Please wait for their registration
           </p>
-          <input type="hidden" name="_csrf" value="<%= csrfToken %>" >
+          <!-- <input type="hidden" name="_csrf" value="< %= csrfToken %>" > -->
         </div>
         <% }%>
       </tbody>

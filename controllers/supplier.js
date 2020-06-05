@@ -68,6 +68,54 @@ exports.postAddProduct = (req, res) => {
 }
 
 
+exports.postCancelBid = (req, res) => {
+  console.log(req.body + ' ' + req.params);
+  //BidRequest.findOne({_id: req.params.bidId});
+  MongoClient.connect(URL, function(err, db) {
+      if (err) 
+        throw err;
+      var dbo = db.db(BASE);
+      var myquery = { _id: req.body.bidId };
+      var newvalues = { $set: {isCancelled: true, status: process.env.SUPP_BID_CANCEL} };
+      dbo.collection("bidrequests").updateOne(myquery, newvalues, function(err, resp) {
+        if(err) {
+          console.error(err.message);
+          
+          return res.status(500).send({ 
+            msg: err.message 
+          });         
+        }
+
+        console.log("The Bid Request has been cancelled by Supplier " + req.body.suppliersName + '.');
+        req.flash('success', "The Bid Request has been cancelled by Supplier " + req.body.suppliersName + '.');
+        db.close();
+      });
+    })
+  .then((result) => {
+        var mailOptions = {
+        from: "peter@uniteprocurement.com",
+        to: req.body.buyersEmail,
+        subject: "Bid request " + req.body.requestsName + " cancelled!",
+        text:
+          "Hello " + req.body.buyersName + 
+          ",\n\nWe regret to inform you that your outgoing Order named " + req.body.requestsName + " has been cancelled by "
+          + "the Supplier " + req.body.suppliersName + ".\nPlease contact the Supplier at " + req.body.suppliersEmail + " for more"
+          + " details.\nUNITE apologizes for any inconvenience that this issue may have caused to you."+ "\n\n"
+          + "Sincerely,\nThe UNITE Public Procurement Platform Staff"
+      };
+
+      sgMail.send(mailOptions, function(err) {
+        if(err) {
+          return res.status(500).send({ msg: err.message });
+        }
+        
+        res.status(200)
+          .send("The Bid Request " + req.body.requestsName + " has been cancelled by Supplier " + req.body.suppliersName + '.');
+      });
+  });
+}
+
+
 exports.getConfirmation = (req, res) => {
   if(!req.session || !req.session.supplierId) {req.session.supplierId = req.params.token? req.params.token._userId : null}
   res.render("supplier/confirmation", {
@@ -168,14 +216,14 @@ exports.postResendToken = function(req, res, next) {
       if (err) {
         return res.status(500).send({ msg: err.message });
       }
-      //Mail send:
+
       var mailOptions = {
         from: "peter@uniteprocurement.com",
         to: user.emailAddress,
-        subject: "Account Verification Token",
+        subject: "Account Verification Token - Resent",
         text:
           "Hello,\n\n" +
-          "Please verify your account by clicking the link: \nhttp://" +
+          "Please verify your account within 24 hours, by clicking the link: \nhttp://" +
           req.headers.host +
           "/supplier/confirmation/" +
           token.token +
@@ -183,13 +231,13 @@ exports.postResendToken = function(req, res, next) {
       };
 
       sgMail.send(mailOptions, function(err, info) {
-        if (err) {
+        if(err) {
           return res.status(500).send({ msg: err.message });
         }
         res
           .status(200)
           .send(
-            "A verification email has been sent to " + user.emailAddress + "."
+            "A verification email has been sent to " + user.emailAddress + ". Please check your e-mail."
           );
       });
     });
@@ -236,7 +284,8 @@ sgMail.send(msg);*/
           return res.redirect("/supplier/sign-in");
         }
 
-        bcrypt
+        try {
+          bcrypt
           .compare(password, doc.password)
           .then((doMatch) => {
             if (
@@ -261,7 +310,7 @@ sgMail.send(msg);*/
               res.redirect("/supplier/sign-in");
             }
           })
-          .then(err => {
+          .then((err) => {
             if (err) {
               console.error(err);
               res.redirect("/supplier/sign-in");
@@ -270,8 +319,10 @@ sgMail.send(msg);*/
             res.redirect("/supplier");
           })
           .catch(console.error);
-      }
-    );
+        } catch {
+          res.redirect("/supplier/sign-in")
+        }       
+      });
   }
 }
 
@@ -314,7 +365,7 @@ exports.postSignUp = (req, res) => {
 
     for (var i = 0; i < prohibitedArray.length; i++)
       if (final_domain.toLowerCase().includes(prohibitedArray[i].toLowerCase())) {
-        req.flash("error", "E-mail address must be a custom company domain.");
+        req.flash("error", "E-mail address must belong to a custom company domain.");
         res.redirect("back"); //supplier/sign-up
       } else {
         if (req.body.password.length < 6) {
@@ -330,7 +381,7 @@ exports.postSignUp = (req, res) => {
                 msg:
                   "The e-mail address you have entered is already associated with another account."
               });
-
+          try {
             bcrypt.hash(req.body.password, 10, function(err, hash) {
               //user = new Promise((resolve, reject) => {
                 supplier = new Supplier({
@@ -466,6 +517,9 @@ exports.postSignUp = (req, res) => {
                 assert.ok(user instanceof Promise);
                 user*/
                 });
+            } catch {
+              res.redirect('/supplier/sign-up');
+            }
               })
                   .then((doc) => {
                   })
@@ -554,7 +608,7 @@ exports.postForgotPassword = (req, res, next) => {
             "success",
             "An e-mail has been sent to " +
               user.emailAddress +
-              " with password reset instructions."
+              " with password reset instructions. Please check your e-mail."
           );
           done(err, "done");
         });
@@ -689,7 +743,7 @@ exports.getBidRequest = (req, res) => {
   BidRequest.findOne({ _id: id })
     .then( (reqresult) => {
       request = reqresult;
-      return Buyer.findOne({ _id: request.buyer }); //Object ID
+      return Buyer.findOne({ _id: request.buyer });
     })
     .then((buyer) => {
     var promise = BidStatus.find({}).exec();
@@ -707,7 +761,7 @@ exports.getBidRequest = (req, res) => {
 
 
 exports.postBidRequest = (req, res) => {
-  MongoClient.connect(URL, function(err, db) {//db or client.
+  MongoClient.connect(URL, function(err, db) {
     if (err) throw err;
     var dbo = db.db(BASE);
     var myquery = { _id: req.body.reqId };
@@ -799,7 +853,6 @@ exports.postProfile = (req, res) => {
     var price = req.body.price;
     
     MongoClient.connect(URL, function(err, db) {
-      //db or client.
       if (err) throw err;
       var dbo = db.db(BASE);
       var myquery = { _id: doc._id };
@@ -863,7 +916,6 @@ exports.postProfile = (req, res) => {
   })
     .then(doc => {
       console.log("Saving new data to session:");
-      req.session.supplier = null; //Cleanup attempt
       req.session.supplier = doc;
       req.session.id = doc._id;
       return req.session.save();

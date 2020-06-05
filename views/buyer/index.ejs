@@ -343,6 +343,10 @@
                     <input type="email" class="form-control" name="buyerEmail" value="<%= buyer.emailAddress %>" disabled>
                   </div>
                   <div class="form-group">
+                    <label class="col-form-label">Supplier's E-mail Address*</label>
+                    <input type="email" class="form-control" name="supplierEmail" value="<%= supplier.emailAddress %>" disabled>
+                  </div>
+                  <div class="form-group">
                     <label class="col-form-label">Item Description (Short)<b>*</b></label>
                     <input type="text" class="form-control" name="itemDescription" required>
                   </div>
@@ -418,7 +422,7 @@
                   </div>
                    <div class="form-group">
                     <label class="col-form-label">Status*</label>
-                    <input type="number" id="status_<%= i %>" class="form-control" name="status" min="0" max="6" step="1" value="0" readonly>
+                    <input type="number" id="status_<%= i %>" class="form-control" name="status" min="0" max="4" step="1" value="0" readonly>
                   </div>
                   <div class="form-group">
                     <select style="width: 100%" id="statuses_<%= i %>">
@@ -450,7 +454,7 @@
                     sel.attr('title', sel.find('option:selected').text());
                     
                     $('input[id^="status_"]').change(function(e) {
-                      if($(this).val() > 6 || $(this).val() < 0) {
+                      if($(this).val() > 4 || $(this).val() < 0) {//The last two options can be triggered by the corresponding Cancel Bid button. 5 for Supplier cancellation, 6 for Buyer cancellation.
                         $(this).val(0);
                         return false;
                       }                      
@@ -463,9 +467,9 @@
                       : l == 1? 'Waiting for buyer\'s processing.' 
                       : l == 2? 'Buyer wants to buy the product for the price of ' + price + '. Cancel or Accept.' 
                       : l == 3? 'You started the delivery. Wait for confirmation of buyer.' : 
-                      l == 4? 'Payment and delivery are done.' : 
-                      l == 5? 'You cancelled the request.' : 
-                      l == 6? 'Buyer cancelled the request.' : '';
+                      l == 4? 'Payment and delivery are done.' /*: 
+                      l == 5? 'Supplier cancelled the request.' : 
+                      l == 6? 'Buyer cancelled the request.' :*/ '';
 /*
                       switch((l) {
                         case 0:
@@ -473,23 +477,23 @@
                           break;
 
                         case 1:
-                          statusText = "Waiting for buyer's processing.";
+                          statusText = "Waiting for buyer to process the order information.";
                           break;
 
                         case 2:
-                          statusText = 'Buyer wants to buy the product for the price of ' + price + '. Cancel or Accept.';
+                          statusText = 'Buyer wants to buy the product for the price of ' + price + '. Please Cancel or Accept.';
                           break;
 
                         case 3:
-                          statusText = 'You started the delivery. Wait for confirmation of buyer.';
+                          statusText = 'You started the delivery. Please wait for confirmation of buyer.';
                           break;
 
                         case 4:
-                          statusText = 'Payment and delivery is done.';
+                          statusText = 'Payment and delivery have been successfully made.';
                           break;
 
                         case 5:
-                          statusText = 'You cancelled the request.';
+                          statusText = 'Supplier cancelled the request.';
                           break;
 
                         case 6:

@@ -19,6 +19,10 @@ const bidRequestSchema = new Schema({
     type: String,
     required: true
   },
+  supplierEmail: {
+    type: String,
+    required: true
+  },
   itemDescription: {
     type: String,
     required: true
@@ -96,6 +100,10 @@ const bidRequestSchema = new Schema({
         throw new Error('Price must be a strictly positive value.');
       }
     }
+  },
+  isCancelled: {
+    type: Boolean,
+    default: false
   },
   createdAt: {
     type: Date,
