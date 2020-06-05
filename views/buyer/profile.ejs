@@ -19,9 +19,8 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
   <script src="/autocomp.js"></script>
   <script src="/https.js"></script>
-  
   <script type="text/javascript">
-      $(document).ready(function() {        
+    $(document).ready(function() {        
         var token = $("input[name='_csrf']").val();
         
         $("input").unbind('change').bind('change', function() {        
@@ -29,9 +28,8 @@
         });
       
       postAutocomplete('#country', '/countryAutocomplete', token);
-  });
-</script>
-    
+    });
+  </script>
 </head>
 
 <body>

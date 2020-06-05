@@ -14,12 +14,11 @@ dependencies:
   fetch: 1.1.0
   fileupload: 1.0.0
   form-data: 3.0.0
-  fs-extra: 9.0.0
+  fs-extra: 9.0.1
   http: 0.0.0
   jsonp: 0.2.1
   mongoose: 5.9.17
   multer: 1.4.2
-  passport-local-mongoose: 6.0.1
   process: 0.11.10
   socket.io: 2.3.0
   ssl: 1.0.0
@@ -701,7 +700,7 @@ packages:
       node: '>= 0.6'
     resolution:
       integrity: sha1-PYyt2Q2XZWn6g1qx+OSyOhBWBac=
-  /fs-extra/9.0.0:
+  /fs-extra/9.0.1:
     dependencies:
       at-least-node: 1.0.0
       graceful-fs: 4.2.4
@@ -711,15 +710,11 @@ packages:
     engines:
       node: '>=10'
     resolution:
-      integrity: sha512-pmEYSk3vYsG/bF651KPUXZ+hvjpgWYw/Gc7W9NFUe3ZVLczKKWIij3IKpOrQcdw4TILtibFslZ0UmR8Vvzig4g==
+      integrity: sha512-h2iAoN838FqAFJY2/qVpzFXy+EBxfVE220PalAqQLDVsFOHLJrZvut5puAbCdNv6WJk+B8ihI+k0c7JK5erwqQ==
   /function-bind/1.1.1:
     dev: false
     resolution:
       integrity: sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A==
-  /generaterr/1.5.0:
-    dev: false
-    resolution:
-      integrity: sha1-sM62zFFk3yoGEzjMNAqGFTlcUvw=
   /graceful-fs/4.2.4:
     dev: false
     resolution:
@@ -1185,31 +1180,6 @@ packages:
       node: '>= 0.8'
     resolution:
       integrity: sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==
-  /passport-local-mongoose/6.0.1:
-    dependencies:
-      generaterr: 1.5.0
-      passport-local: 1.0.0
-      scmp: 2.1.0
-      semver: 7.3.2
-    dev: false
-    engines:
-      node: '>= 6.0.0'
-    resolution:
-      integrity: sha512-Jc/ImrVnG7o7aTIqrAznt2CxVxy5M2gAxc3erVZyPVUVfiwgvrhlzA9c5fswValA12H2C9mm1AjqGDz+491TDg==
-  /passport-local/1.0.0:
-    dependencies:
-      passport-strategy: 1.0.0
-    dev: false
-    engines:
-      node: '>= 0.4.0'
-    resolution:
-      integrity: sha1-H+YyaMkudWBmJkN+O5BmYsFbpu4=
-  /passport-strategy/1.0.0:
-    dev: false
-    engines:
-      node: '>= 0.4.0'
-    resolution:
-      integrity: sha1-tVOaqPwiWj0a0XlHbd8ja0QPUuQ=
   /path-to-regexp/0.1.7:
     dev: false
     resolution:
@@ -1339,22 +1309,11 @@ packages:
     optional: true
     resolution:
       integrity: sha512-/MY/PEMbk2SuY5sScONwhUDsV2p77Znkb/q3nSVstq/yQzYJOH/Azh29p9oJLsl3LnQwSvZDKagDGBsBwSooag==
-  /scmp/2.1.0:
-    dev: false
-    resolution:
-      integrity: sha512-o/mRQGk9Rcer/jEEw/yw4mwo3EU/NvYvp577/Btqrym9Qy5/MdWGBqipbALgd2lrdWTJ5/gqDusxfnQBxOxT2Q==
   /semver/5.7.1:
     dev: false
     hasBin: true
     resolution:
       integrity: sha512-sauaDf/PZdVgrLTNYHRtpXa1iRiKcaebiKQ1BJdpQlWH2lCvexQdX55snPFyK7QzpudqbCI0qXFfOasHdyNDGQ==
-  /semver/7.3.2:
-    dev: false
-    engines:
-      node: '>=10'
-    hasBin: true
-    resolution:
-      integrity: sha512-OrOb32TeeambH6UrhtShmF7CRDqhL6/5XpPNp2DuRH6+9QLw/orhp72j87v8Qa1ScDkvrrBNpZcDejAirJmfXQ==
   /send/0.17.1:
     dependencies:
       debug: 2.6.9
@@ -1692,12 +1651,11 @@ specifiers:
   fetch: ^1.1.0
   fileupload: ^1.0.0
   form-data: ^3.0.0
-  fs-extra: ^9.0.0
+  fs-extra: ^9.0.1
   http: ^0.0.0
   jsonp: ^0.2.1
   mongoose: ^5.9.17
   multer: ^1.4.2
-  passport-local-mongoose: ^6.0.0
   process: ^0.11.10
   socket.io: ^2.3.0
   ssl: ^1.0.0

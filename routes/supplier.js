@@ -30,5 +30,6 @@ router.post('/confirmation/:token', sessionExit, supplierController.postConfirma
 router.post('/resend', /*isAuth,*/ sessionExit, supplierController.postResendToken);
 router.post("/forgotPassword", isAuth, sessionExit, supplierController.postForgotPassword);
 router.post("/resetPassword/:token", isAuth, sessionExit, supplierController.postResetPasswordToken);
+router.post("/cancelBid", isAuth, sessionExit, supplierController.postCancelBid);
 
 module.exports = router;

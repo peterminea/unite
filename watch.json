@@ -1,0 +1,10 @@
+{
+  "restart": {
+    "include": [
+      ".ejs$",
+      ".json$",
+      ".js$"
+    ]
+  },
+  "throttle": 500
+}
