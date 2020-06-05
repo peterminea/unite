@@ -17,59 +17,58 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
   <script src="/autocomp.js"></script>
-  <script src="/https.js"></script>
-  
-    <script type="text/javascript">
-      $(document).ready(function() {
-        var token = $("input[name='_csrf']").val();
-        getAutocomplete('#search', '/capabilityInputAutocomplete', token, true);
-        
-        $('.prodInput').autocomplete({
-          source: function(req, res) {
-            var obj = $(this.element);
-            $('.prov').remove();
-            req.supplierId = obj.attr('supplierId');
-            
-            $.ajax({
-              url: "/prodServiceAutocomplete",
-              headers: { "X-CSRF-Token": token },
-              datatype: 'jsonp',
-              type: "GET",
-              data: req,
-              scroll: true,
-              success: function(data) {                
-                if(!data || !data.length) {
-                  obj.val('');
-                  obj.next('.prodButton').attr('disabled', 'disabled');
-                  return false;
-                }
-                
-                res(data);
-                //autocomp(obj, data);
-                var $obj = '<div class="prov"><ul>';
-                for(var i in data) {
-                  $obj += '<li id="' + data[i].price + '" currency="' + data[i].currency + '">' + data[i].name + '</li>';
-                }
-                
-                $obj += '</ul><div>';
-                $($obj)
-                  .insertAfter(obj.parent('div'))
-                  .find('li')
-                  .click(function() {
-                    obj
-                      .attr({'price': $(this).attr('id'), 'currency': $(this).attr('currency')})
-                      .val($(this).text())
-                      .trigger('change');
-                    $(this).parent('ul').hide();
-                });
-              },
-              error: function(err) {
-                alert(err);
+  <script src="/https.js"></script>  
+  <script type="text/javascript">
+    $(document).ready(function() {
+      var token = $("input[name='_csrf']").val();
+      getAutocomplete('#search', '/capabilityInputAutocomplete', token, true);
+
+      $('.prodInput').autocomplete({
+        source: function(req, res) {
+          var obj = $(this.element);
+          $('.prov').remove();
+          req.supplierId = obj.attr('supplierId');
+
+          $.ajax({
+            url: "/prodServiceAutocomplete",
+            headers: { "X-CSRF-Token": token },
+            datatype: 'jsonp',
+            type: "GET",
+            data: req,
+            scroll: true,
+            success: function(data) {                
+              if(!data || !data.length) {
+                obj.val('');
+                obj.next('.prodButton').attr('disabled', 'disabled');
+                return false;
               }
-            });
-          },
-          minLength: 3
-        });        
+
+              res(data);
+              //autocomp(obj, data);
+              var $obj = '<div class="prov"><ul>';
+              for(var i in data) {
+                $obj += '<li id="' + data[i].price + '" currency="' + data[i].currency + '">' + data[i].name + '</li>';
+              }
+
+              $obj += '</ul><div>';
+              $($obj)
+                .insertAfter(obj.parent('div'))
+                .find('li')
+                .click(function() {
+                  obj
+                    .attr({'price': $(this).attr('id'), 'currency': $(this).attr('currency')})
+                    .val($(this).text())
+                    .trigger('change');
+                  $(this).parent('ul').hide();
+              });
+            },
+            error: function(err) {
+              alert(err);
+            }
+          });
+        },
+        minLength: 3
+      });        
   });    
   </script> 
 </head>
@@ -118,7 +117,7 @@
     <div class="card">
       <h5 class="card-header">Welcome!</h5>
       <div class="card-body">
-        <h5 class="card-title">Hello, <%= buyer.organizationName %></h5>
+        <h5 class="card-title">Hello, <%= buyer.organizationName %>!</h5>
         <p class="card-text">You can send bid requests to suppliers from here.</p>
       </div>
     </div>

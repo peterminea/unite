@@ -18,7 +18,6 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>  
   <script src="/https.js"></script>
   <script src="/autocomp.js"></script>
-
   <script type="text/javascript">
     $(document).ready(function () {
       var token = $("input[name='_csrf']").val();
@@ -168,9 +167,8 @@
     <div class="card">
       <h5 class="card-header">Welcome!</h5>
       <div class="card-body">
-        <h5 class="card-title">Hello, <%= profile.companyName %></h5>
-        <p class="card-text">This is your profile page. To ensure you continue to appear in buyers' search results,
-          please keep your capabilities up-to-date.</p>
+        <h5 class="card-title">Hello, <%= profile.companyName %>!</h5>
+        <p class="card-text">This is your profile page. In order to ensure that you continue to appear in the search results of buyers, please keep your capabilities up-to-date.</p>
       </div>
     </div>
     <br>

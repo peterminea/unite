@@ -15,9 +15,9 @@
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
   integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-  <script src="/autocomp.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>  
   <script src="/https.js"></script>
+  <script src="/autocomp.js"></script>
   
   <script type="text/javascript">
       $(document).ready(function() {        
@@ -59,6 +59,14 @@
   </nav>
 
   <div class="container">
+    <div class="card">
+      <h5 class="card-header">Welcome!</h5>
+      <div class="card-body">
+        <h5 class="card-title">Hello, <%= profile.organizationName %>!</h5>
+        <p class="card-text">This is your Supervisor profile page. Please keep your data accurate, and take care of the honest activity of your mates on UNITE!</p>
+      </div>
+    </div>
+    <br><br>
     <div class="profile-form smooth-shadow mt-4 mb-4">
       <form method="POST">
         <input type="hidden" name="_id" value="<%= profile._id %>">
@@ -70,7 +78,7 @@
             placeholder="organizationName" name="organizationName" required value="<%= profile.organizationName %>">
         </div>
         <div class="form-group">
-            <label for="organizationUniteID">Organization UNITE ID*</label>
+            <label for="organizationUniteID">Organization UNITE ID (only editable by you)*</label>
             <input type="text" required class="form-control" id="organizationUniteID" name="organizationUniteID" value="<%= profile.organizationUniteID %>">
         </div>
         <div class="form-group">
