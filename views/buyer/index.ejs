@@ -191,7 +191,7 @@
                   </div>
                   <div class="form-group">
                     <label>Contact Mobile Number</label>
-                    <input type="tel" class="form-control" readonly value="<%= supplier.contactMobileNumber %>">
+                    <input type="text" class="form-control" readonly value="<%= supplier.contactMobileNumber %>">
                   </div>
                   <div class="form-group">
                     <label>Country</label>
@@ -202,8 +202,8 @@
                     <input type="text" class="form-control" readonly value="<%= supplier.industry %>" required>
                   </div>
                   <div class="form-group">
-                    <label>Employee Numbers</label>
-                    <input type="number" class="form-control" readonly value="<%= supplier.employeeNumbers %>" required>
+                    <label>Employee Number</label>
+                    <input type="text" class="form-control" readonly value="<%= supplier.employeeNumbers %>" required>
                   </div>
                   <div class="form-group">
                     <label>Last Year Turnover</label>
@@ -548,9 +548,9 @@
                        //if(req) {
                         if(input.val().length) {
                           input.removeClass('errorField');
-                          var addedPrice = parseInt(amount.val()? amount.val() : 0) * parseInt(input.attr('price')? input.attr('price') : 1);
-                          var price = parseInt($('#price_'+index).val()) + addedPrice;
-                          $('#price_'+index).val(parseInt(price));
+                          var addedPrice = parseInt(amount.val()? amount.val() : 0) * parseFloat(input.attr('price')? input.attr('price') : 1);
+                          var price = parseFloat($('#price_'+index).val()) + addedPrice;
+                          $('#price_'+index).val(parseFloat(price));
                           
                           elem
                             .insertAdjacentHTML("beforeend", "<li class='list-group-item' price='" + addedPrice + "' amount='" + amount.val() + "'><span>" + $("#prodServiceInput_"+index).val() + ' - ' + input.attr('price') + ' ' + $('#currency_'+index).val() + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
@@ -573,9 +573,9 @@
                             priceInput.val(arr);
                             
                             var newAmount = parseInt($('#totalAmount_'+index).val()) - parseInt(li.attr('amount'));
-                            var newPrice = parseInt($('#price_'+index).val()) - parseInt(li.attr('price'));
+                            var newPrice = parseFloat($('#price_'+index).val()) - parseFloat(li.attr('price'));
                             $('#totalAmount_'+index).val(parseInt(newAmount));
-                            $('#price_'+index).val(parseInt(newPrice));
+                            $('#price_'+index).val(parseFloat(newPrice));
                             li.remove();
                           });
                           

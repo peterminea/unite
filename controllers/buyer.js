@@ -16,6 +16,7 @@ const async = require('async');
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const MongoClient = require('mongodb').MongoClient;
+const ObjectId = require("mongodb").ObjectId;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 
 exports.getIndex = (req, res) => {
@@ -56,14 +57,19 @@ exports.postIndex = (req, res) => {
         });
       });
     });
-  } else if (req.body.itemDescription) {
-    var productList = (req.body.productsServicesOffered[0].split(','));
-    var amountList = (req.body.amountList[0].split(','));
-    var priceList = (req.body.priceList[0].split(','));
+  } else if (req.body.itemDescription) {//New Bid Request
+    var productList = (req.body.productsServicesOffered);
+    var amountList = (req.body.amountList);
+    var priceList = (req.body.priceList);
+    
+    productList = productList.split(',');
+    amountList = amountList.split(',');
+    priceList = priceList.split(',');
+    
     var products = [];
     
     for(var i in productList) {
-      products.push('Product name: \'' + productList[i] + '\', amount: ' + amountList[i] + ', price: ' + priceList[i] + '.');
+      products.push('Product name: \'' + productList[i] + '\', amount: ' + parseInt(amountList[i]) + ', price: ' + parseFloat(priceList[i]) + '.');
     }
     
     const bidRequest = new BidRequest({
@@ -167,50 +173,47 @@ exports.postViewBids = (req, res) => {
 
 
 exports.postCancelBid = (req, res) => {
-  console.log(JSON.stringify(req.body) + ' ' + JSON.stringify(req.params) + ' ' + req);
   //BidRequest.findOne({_id: req.body.bidId});
-  //if(1==2)
-  MongoClient.connect(URL, function(err, db) {
+  MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
       if (err) 
         throw err;
       var dbo = db.db(BASE);
-      var myquery = { _id: req.body.bidId };
-      var newvalues = { $set: {isCancelled: true, status: process.env.BUYER_BID_CANCEL} };
+      var myquery = { _id: new ObjectId(req.body.bidId) };
+      var newvalues = { $set: {isCancelled: true, status: parseInt(process.env.BUYER_BID_CANCEL)} };
+    
       dbo.collection("bidrequests").updateOne(myquery, newvalues, function(err, resp) {
         if(err) {
           console.error(err.message);
-          
           return res.status(500).send({ 
             msg: err.message 
           });
         }
-
-        console.log("The Bid Request has been cancelled by Buyer " + req.body.buyersName + '.');
-        req.flash('success', "The Bid Request has been cancelled by Buyer " + req.body.buyersName + '.');
-        db.close();
-      });
-    })
-  .then((result) => {
-        var mailOptions = {
-        from: "peter@uniteprocurement.com",
-        to: req.body.suppliersEmail,
-        subject: "Bid request " + req.body.requestsName + " cancelled!",
-        text:
-          "Hello " + req.body.suppliersName + 
-          ",\n\nWe regret to inform you that your incoming Order named " + req.body.requestsName + " has been cancelled by "
-          + "the Buyer " + req.body.buyersName + ".\nPlease contact the Buyer at " + req.body.buyersEmail + " for more"
-          + " details.\nUNITE apologizes for any inconvenience that this issue may have caused to you."+ "\n\n"
-          + "Sincerely,\nThe UNITE Public Procurement Platform Staff"
-      };
-
-      sgMail.send(mailOptions, function(err) {
-        if(err) {
-          return res.status(500).send({ msg: err.message });
-        }
         
-        res.status(200)
-          .send("The Bid Request " + req.body.requestsName + " has been cancelled by Buyer " + req.body.buyersName + '.');
+        db.close();
+        var mailOptions = {
+          from: "peter@uniteprocurement.com",
+          to: req.body.suppliersEmail,
+          subject: "Bid request " + req.body.requestsName + " cancelled!",
+          text:
+            "Hello " + req.body.suppliersName + 
+            ",\n\nWe regret to inform you that your incoming Order named " + req.body.requestsName + " has been cancelled by "
+            + "the Buyer " + req.body.buyersName + ".\nPlease contact the Buyer at " + req.body.buyersEmail + " for more"
+            + " details.\nUNITE apologizes for any inconvenience that this issue may have caused to you."+ "\n\n"
+            + "Sincerely,\nThe UNITE Public Procurement Platform Staff"
+        };
+
+        sgMail.send(mailOptions, function(err) {
+          if(err) {
+            return res.status(500).send({ msg: err.message });
+          }
+          
+          var msg = "The Bid Request has been cancelled by Buyer " + req.body.buyersName + '.\n' + 'Supplier ' + req.body.suppliersName + ' has been notified via e-mail about the Order cancellation.';
+          console.log(msg);
+          req.flash('success', msg);
+          res.status(200).send(msg);
+          //res.redirect('/buyer/viewBid');
       });
+    });
   });
 }
 
@@ -712,7 +715,7 @@ exports.postProfile = (req, res) => {
     doc.createdAt = req.body.createdAt;
     doc.updatedAt = Date.now();
 
-    MongoClient.connect(URL, function(err, db) {
+    MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
       if (err) throw err;
       var dbo = db.db(BASE);
       var myquery = { _id: doc._id };

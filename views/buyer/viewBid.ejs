@@ -217,7 +217,7 @@
                     <label class="col-form-label">Amount*</label>
                     <input type="hidden" class="form-control" id="amount_<%= i %>" name="theAmount" value="0">
                     <% j = 0; for(h in bid.amountList) {j += bid.amountList[h];} %>
-                    <input type="text" disabled id="totalAmount_<%= i %>" name="amount" value="<%= j %>">
+                    <input type="text" title="Total number of items" disabled id="totalAmount_<%= i %>" name="amount" value="<%= j %>">
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Delivery Location*</label>
@@ -360,7 +360,7 @@
           <div class="container mt-4">
             <div class="form-group">
               <a href="../../../supplier/chat/<%= bid.buyer %>/<%= bid.supplier %>/<%= bid._id %>/<%= bid.requestName %>/<%= bid.supplierName %>/<%= bid.buyerName %>">
-                <button title="Chat" class="btn-primary custom-button">Chat with your supplier</button>
+                <button title="Chat" class="btn-secondary custom-button">Chat with your supplier</button>
               </a>
             </div>
           </div>
@@ -374,7 +374,7 @@
                 <input type="hidden" name="buyersEmail" value="<%= bid.buyerEmail %>">
                 <input type="hidden" name="suppliersEmail" value="<%= bid.supplierEmail %>">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <button type="submit" title="Cancel Order" class="btn-primary custom-button">Cancel your Order</button>
+                <button type="submit" title="Cancel Order" class="btn-secondary custom-button">Cancel your Order</button>
               </form>
             </div>
           </div>

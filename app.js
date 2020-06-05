@@ -111,7 +111,7 @@ MongoClient.connect(URI, {useUnifiedTopology: true}, (err, client) => {
     console.log(err.message);
   });
   
-  /*
+  /* //Database scripting / Manipulating data and datatypes. Askin, please do not delete these ones :) .
   //console.log(parseInt('31 EUR'));
   
   const currency = new Currency({
@@ -340,6 +340,44 @@ MongoClient.connect(URI, {useUnifiedTopology: true}, (err, client) => {
   
   //db.collection("bidrequests").updateMany({}, { $set: {supplierEmail: "peter.minea@gmail.com", isCancelled: false} }, function(err, obj) {}); 
   
+  //db.collection("bidrequests").updateMany({}, { $set: {price: parseFloat("31.00")} }, function(err, obj) {}); 
+  
+  /*
+  db.collection('bidrequests')
+  .find({})
+  .forEach(function(data) {//console.log(parseFloat(data.price+0.5));
+    db.collection('bidrequests')
+      .updateOne({_id: data._id},{ $set: { price: parseFloat(data.price+0.5)} });
+  });
+  
+  db.collection('bidrequests')
+    .find( { 'price' : { $type : 1 } } )
+    .forEach( function (x) {   
+      x.price = parseFloat(x.price+0.5); // convert field to Double
+      db.collection('bidrequests').save(x);
+  });  
+  
+    db.collection('bidrequests').find({price: {$exists: true}}).forEach( function(x) {
+      db.collection('bidrequests').updateOne({_id: x._id}, {$set: {price: parseFloat(x.price-x.price+32.5)}});
+  });
+
+   db.collection('bidrequests').find({priceList: {$exists: true}}).forEach( function(x) {
+        console.log(parseFloat(3.25));
+        db.collection('bidrequests').updateOne({_id: x._id}, {$set: {'priceList.$[]': parseFloat(3.25)}});
+      }); 
+      
+   db.collection('suppliers').find({pricesList: {$exists: true}}).forEach( function(x) {
+        db.collection('suppliers').updateOne({_id: x._id}, {$set: {balance: parseFloat(5.5), 'pricesList.$[]': parseFloat(5.25)}});
+      });
+      
+      db.collection('buyers').find({balance: {$exists: true}}).forEach( function(x) {
+        db.collection('buyers').updateOne({_id: x._id}, {$set: {balance: parseFloat(5.5)} });
+      });
+      
+      db.collection('productservices').find({price: {$exists: true}}).forEach( function(x) {
+        db.collection('productservices').updateOne({_id: x._id}, {$set: {price: parseFloat(x.price + 0.5)} });
+      });      
+      */
 });
 
 
@@ -492,7 +530,7 @@ var upload = multer({
 });
 
 
-app.post("/uploadfile", upload.single("single"), (req, res, next) => { 
+app.post("/uploadfile", upload.single("single"), (req, res, next) => {
   const file = req.file;
   
   if (!file) {
