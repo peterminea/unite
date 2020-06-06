@@ -14,12 +14,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
   <script src="/https.js"></script>
-  <script src="/autocomp.js"></script>  
-  <script type="text/javascript">
-  $(document).ready(function() {
-  });
-  </script>
-  
+  <script src="/autocomp.js"></script>
 </head>
 
 <body>
@@ -52,8 +47,8 @@
 					<a class="btn btn-primary" href="/supplier/profile">Profile</a>
 				</li>
         <br>
-				<li class="nav-item" style="margin-left: 0px;">
-					<a class="btn btn-danger" href="?exit=true">Exit</a>
+				<li class="nav-item">
+					<a class="btn btn-danger" href="?exit=true">Logout</a>
 				</li>
 			</ul>
 		</div>
@@ -65,18 +60,19 @@
   </div>
 
 	<div class="container">
-		<div class="smooth-shadow profile-form">
-			<form method="POST">
-				<div class="form-group">
-					<label>Buyer's Organization Name</label>
-					<input type="text" class="form-control" value="<%= buyer.organizationName %>" readonly>
-					<br>
-					<button type="button" class="btn btn-dark" data-target="#buyerDetailsModal" data-toggle="modal">View Buyer Details</button>
-				</div>
-
-				<div class="modal fade" id="buyerDetailsModal" tabindex="-1" role="dialog" aria-hidden="true">
-					<div class="modal-dialog modal-dialog-centered" role="document">
-						<div class="modal-content">
+		<div class="smooth-shadow profile-form">			
+      <div class="modal-content">
+        <div class="form-group">
+          <label>Buyer's Organization Name</label>
+          <input type="text" class="form-control" value="<%= buyer.organizationName %>" readonly>
+          <br>
+          <button type="button" class="btn btn-dark" data-target="#buyerDetailsModal" data-toggle="modal">View Buyer Details</button>
+        </div>
+        <form method="POST">
+          <div class="modal fade" id="buyerDetailsModal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+						
+              
 							<div class="modal-header">
 								<h5 class="modal-title" id="exampleModalLongTitle">Buyer</h5>
 								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -86,39 +82,38 @@
 							<div class="modal-body">
 								<div class="form-group">
 									<label>Buyer's Organization UNITE ID</label>
-									<input type="text" class="form-control" value="<%= buyer.organizationUniteID %>" readonly>
+									<input type="text" class="form-control" value="<%= buyer.organizationUniteID %>" disabled>
 								</div>
 								<div class="form-group">
 									<label>Buyer's Contact name</label>
-									<input type="text" class="form-control" value="<%= buyer.contactName %>" readonly>
+									<input type="text" class="form-control" value="<%= buyer.contactName %>" disabled>
 								</div>
 								<div class="form-group">
 									<label>Buyer's Email address</label>
-									<input type="email" class="form-control" value="<%= buyer.emailAddress %>" readonly>
+									<input type="email" class="form-control" value="<%= buyer.emailAddress %>" disabled>
 								</div>
 								<div class="form-group">
 									<label>Buyer's Department / Agency / Group</label>
-									<input type="text" class="form-control" value="<%= buyer.deptAgencyGroup %>" readonly>
+									<input type="text" class="form-control" value="<%= buyer.deptAgencyGroup %>" disabled>
 								</div>
 								<div class="form-group">
 									<label>Buyer's Qualification / Experience</label>
-									<input type="text" class="form-control" value="<%= buyer.qualification %>" readonly>
+									<input type="text" class="form-control" value="<%= buyer.qualification %>" disabled>
 								</div>
 								<div class="form-group">
 									<label>Buyer's Address</label>
-									<input type="text" class="form-control" value="<%= buyer.address %>" readonly>
+									<input type="text" class="form-control" value="<%= buyer.address %>" disabled>
 								</div>
 								<div class="form-group">
 									<label>Buyer's Country</label>
-									<input type="text" class="form-control" value="<%= buyer.country %>" readonly>
+									<input type="text" class="form-control" value="<%= buyer.country %>" disabled>
 								</div>
 							</div>
 							<div class="modal-footer">
 								<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
 							</div>
 						</div>
-					</div>
-				</div>
+					</div>				
         
         <input type='hidden' name='createdAt' value="<%= request.createdAt %>">
 
@@ -171,7 +166,7 @@
 				<div class="form-group">
 					<label>Amount</label>
           <% j = 0; for(h in request.amountList) {j += request.amountList[h];} %>
-          <input title="Total number of items" type="text" readonly id="totalAmount" name="amount" value="<%= j %>">					
+          <input title="Total number of items" type="text" disabled id="totalAmount" name="amount" value="<%= j %>">					
 				</div>
 				<div class="form-group">
 					<label>Delivery Location</label>
@@ -192,7 +187,7 @@
         <div class="form-group">
 					<label>Price</label>
 					<% l = 0; for(m in request.priceList) {l += request.priceList[m];} %>
-          <input type="text" title="Total order price" value="<%= l %> <%= request.currency %>" class="form-control" id="price_<%= i %>" name="price" readonly>
+          <input type="text" title="Total order price" value="<%= l %> <%= request.currency %>" class="form-control" id="price" name="price" readonly>
 				</div>
         <div class="form-group">
 					<label>Currency</label>
@@ -227,7 +222,7 @@
                 .find('option[value="' + $('#status').val() + '"]')
                 .attr({'selected': 'selected'});
 
-            $('#statuses').attr('title', $(this).find('option:selected').text());            
+            $('#statuses').attr('title', $('#statuses').find('option:selected').text());            
           </script>
           
           <div class="form-group">
@@ -242,14 +237,14 @@
             <input type="hidden" name="sender" value="<%= supplier.companyName %>">
             <input type="hidden" name="receiver" value="<%= buyer.organizationName %>">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button class="btn btn-primary" disabled type="submit" id="updateBidStatus">
-                Update Bid & Message Buyer
+            <button class="btn btn-primary" title="Update Bid Status / Message Buyer" disabled type="submit" id="updateBidStatus">
+                Update Status & Send Message
             </button>
           </div>
 
           <div class="form-group">
-            <span style="color: purple; font-size: 12pt; font-weight: bold"><b>Bid Status Description</b> 
-              <% if (request.status == 0) { %> "Buyer requested a bid from you. Please send further information to Buyer." <% } %>
+            <span style="color: purple; font-size: 12pt; font-weight: bold"><b>Bid Status Description:</b> <br>
+              <% if (request.status == 0) { %> "Buyer requested a bid from Supplier. Please send further information to Buyer." <% } %>
               <% if (request.status == 1) { %> "Waiting for Buyer to process the order information." <% } %>				
               <% if (request.status == 2) { %> "Buyer wants to buy the product for <%= request.price %>. Please Cancel or Accept." <% } %>
               <% if (request.status == 3) { %> "Supplier started the delivery. Please wait for confirmation of buyer." <% } %>
@@ -263,13 +258,9 @@
         <div class="container mt-4">
           	<div class="form-group">
 							<a href="../chat/<%= supplier._id %>/<%= buyer._id %>/<%= request._id %>/<%= request.requestName %>/<%= buyer.organizationName %>/<%= supplier.companyName %>">
-                <button class="btn-primary custom-button">Chat with your buyer</button>
+                <button style="float: left" title="Chat" id="chat" class="btn-primary btn">Chat with your buyer</button>
               </a>
-						</div>
-        </div>
-        <div class="container mt-4">
-          <div class="form-group">
-            <form action="../../../supplier/cancelBid/" method="POST">
+            <form class="cancelForm" action="../../../supplier/cancelBid/" method="POST">
               <input type="hidden" name="bidId" value="<%= request._id %>">
               <input type="hidden" name="requestsName" value="<%= request.requestName %>">
               <input type="hidden" name="buyersName" value="<%= request.buyerName %>">
@@ -277,10 +268,11 @@
               <input type="hidden" name="buyersEmail" value="<%= request.buyerEmail %>">
               <input type="hidden" name="suppliersEmail" value="<%= request.supplierEmail %>">
               <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-              <button type="submit" title="Cancel Buyer's Order" class="btn-primary custom-button">Cancel Buyer's Order</button>
+              <button style="float: right" type="submit" id="submitCancel" title="Cancel Order" class="btn-primary btn">Cancel Buyer's Order</button><br>
             </form>
           </div>
         </div>
+      </div>
 		</div>
 	</div>
 

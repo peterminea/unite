@@ -109,7 +109,7 @@ exports.postCancelBid = (req, res) => {
           console.log(msg);
           req.flash(msg);
           //res.status(200).send(msg);
-          res.redirect('/supplier/bid-requests');
+          res.redirect('back');
         });
       });
     });

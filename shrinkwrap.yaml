@@ -18,10 +18,11 @@ dependencies:
   fs-extra: 9.0.1
   http: 0.0.0
   jsonp: 0.2.1
-  mongoose: 5.9.17
+  mongoose: 5.9.18
   multer: 1.4.2
   process: 0.11.10
   socket.io: 2.3.0
+  socket.io-client: 2.3.0
   ssl: 1.0.0
   stripe: 8.60.0
   token: 0.1.0
@@ -305,6 +306,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-E3kY1teCg/ffemt8WmPhQOaUJeY=
+  /component-emitter/1.3.0:
+    dev: false
+    resolution:
+      integrity: sha512-Rd3se6QB+sO1TwqZjscQrurpEPIfO0/yYnSin6Q/rD3mOutHvUrCAhJub3r90uNb+SESBuE0QYoB90YdfatsRg==
   /component-inherit/0.0.3:
     dev: false
     resolution:
@@ -491,9 +496,9 @@ packages:
     dev: false
     resolution:
       integrity: sha1-U4tm8+5izRq1HsMjgp0flIDHS+s=
-  /engine.io-client/3.4.1:
+  /engine.io-client/3.4.3:
     dependencies:
-      component-emitter: 1.2.1
+      component-emitter: 1.3.0
       component-inherit: 0.0.3
       debug: 4.1.1
       engine.io-parser: 2.2.0
@@ -506,7 +511,7 @@ packages:
       yeast: 0.1.2
     dev: false
     resolution:
-      integrity: sha512-RJNmA+A9Js+8Aoq815xpGAsgWH1VoSYM//2VgIiu9lNOaHFfLpTjH4tOzktBpjIs5lvOfiNY1dwf+NuU6D38Mw==
+      integrity: sha512-0NGY+9hioejTEJCaSJZfWZLk4FPI9dN+1H1C4+wj2iuFba47UgZbJzfWs4aNFajnX/qAaYKbe2lLTfEEWzCmcw==
   /engine.io-parser/2.2.0:
     dependencies:
       after: 0.8.2
@@ -1042,7 +1047,7 @@ packages:
       mongoose: '*'
     resolution:
       integrity: sha512-Yo/7qQU4/EyIS8YDFSeenIvXxZN+ld7YdV9LqFVQJzTLye8unujAWPZ4NWKfFA+RNjh+wvTWKY9Z3E5XM6ZZiQ==
-  /mongoose/5.9.17:
+  /mongoose/5.9.18:
     dependencies:
       bson: 1.1.4
       kareem: 2.3.1
@@ -1059,7 +1064,7 @@ packages:
     engines:
       node: '>=4.0.0'
     resolution:
-      integrity: sha512-9EDmTiKrOu/41twlPWUA1aOsdxSN6PRIdFwTpLu4MjyNcJ/vuBE+VewKrN1jsD4oXO5rB8bMYtYxVmJQ02SrPg==
+      integrity: sha512-agZbIuQcN1gZ12BJn6KesA+bgsvoLVjCwhfPw88hggxX8O24SWK4EJwN35GEZKDej9AHUZKNAPgmdeXCVQxviA==
   /mpath/0.5.1:
     dev: false
     engines:
@@ -1382,7 +1387,7 @@ packages:
       component-bind: 1.0.0
       component-emitter: 1.2.1
       debug: 4.1.1
-      engine.io-client: 3.4.1
+      engine.io-client: 3.4.3
       has-binary2: 1.0.3
       has-cors: 1.1.0
       indexof: 0.0.1
@@ -1669,10 +1674,11 @@ specifiers:
   fs-extra: ^9.0.1
   http: ^0.0.0
   jsonp: ^0.2.1
-  mongoose: ^5.9.17
+  mongoose: ^5.9.18
   multer: ^1.4.2
   process: ^0.11.10
   socket.io: ^2.3.0
+  socket.io-client: ^2.3.0
   ssl: ^1.0.0
   stripe: ^8.60.0
   token: ^0.1.0

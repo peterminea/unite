@@ -12,8 +12,7 @@
   <link rel="stylesheet" href="/messages.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>  
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
   integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
@@ -21,224 +20,237 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/rexeze/formatTimeStamp/src/index.min.js"></script>
   <script src="/https.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script> -->
+  <script src="/socket.io/socket.io.js"></script>
   <script src="/autocomp.js"></script>
   <script type="text/javascript"> 
     $(document).ready(function() {
-      var token = $("input[name='_csrf']").val();
-      var socket = io();
+      //$('nav').css({'position: relative', 'z-index': 1});
+
+      const token = $("input[name='_csrf']").val();
+      const sock = io();      
       var messages = document.getElementById("messages");
-      socket.on('message', addMessages);
-        //is typing...
+
       let messageInput = document.getElementById("message");
       let sender = document.getElementById("from");
       let receiver = document.getElementById("to");
       let senderName = document.getElementById("fromName");
       let receiverName = document.getElementById("toName");
-      let reqId = document.getElementById("reqId");
+      let requestId = document.getElementById("reqId");
       let reqName = document.getElementById("reqName");
-      let typing = document.getElementById("typing");
+      let typing = document.getElementById("typing");      
 
-      $(messageInput).append('<h3 style="color: blue">Chat about the Order "' + reqName.value + '"</h3>');
-
-      $("form").submit(function(e) {
-        let li = document.createElement("li");
-        let from = $('#from').val();
-        let to = $('#to').val();
-        let reqId = $('#reqId').val();
-
-        socket.emit("chat message", {
-          msg: $("#message").val(),
-          from: from,
-          to: to,
-          fromName: $('#fromName').val(),
-          toName: $('#toName').val(),
-          reqId: reqId
-        });
-
-        e.preventDefault(); // prevents page reloading
-        messages.appendChild(li).append($("#message").val());
-        let span = document.createElement("span");
-        messages.appendChild(span).append("From " + "UNITE User" + ": " + "Just now.");
-        $("#message").val("");
-        return false;
-      });
-
-      socket.on("received", (data) => {
-        alert(data);
-        let li = document.createElement("li");
-        let span = document.createElement("span");
-        //var messages = document.getElementById("messages");
-        messages.appendChild(li).append(data.message);
-        messages.appendChild(span).append("From " + "UNITE User" + ": " + "Just now.");
-        console.log("Hello, UNITE User!");
-    });
-    
-    
-    /*
-    if(1==2)
-    fetch("/chat")
-      .then( (data) => {
-        return data.json();
-      })
-      .then( (json) => {
-       // for(var data of json) {
-          //addMessage(data);
-       // }
-      
-        json.map( (data) => {
-          addMessages(data); return true;
-          let li = document.createElement("li");
-          let span = document.createElement("span");
-          messages
-            .appendChild(li)
-            .append(data.message);
-          
-          messages
-            .appendChild(span)
-            .append("From " + data.sender + " to " + data.receiver + " at: " + (data.time));
-        });
-      });
-      
-      if(1==2)
-      $.get('/messages', { "X-CSRF-Token": token}, (data) => {
-         data.forEach(addMessages);
-       });
-     }
-    
-    if(1==2)
-       $.post('/messages', { "X-CSRF-Token": token}, message);
-     }
-    */
-
-
-  //isTyping event
-  messageInput.addEventListener("keypress", () => {
-    socket.emit("typing", {
-      user: "UNITE User - " + senderName.value,
-      //dest: 'UNITE User - ' + receiverName.value,
-      //from: sender.value,
-      //to: receiver.value,
-      //reqId: reqId.value,
-      message: " is typing..." });
-  });
-
-  socket.on("notifyTyping", data => {
-    typing.innerText = data.user + " types " + data.message;
-  });
-
-  //stop typing
-  messageInput.addEventListener("keyup", () => {
-    socket.emit("stopTyping", "");
-  });
-
-  socket.on("notifyStopTyping", () => {
-    typing.innerText = "";
-  });
-      
     function putMessages(messages, data) {
       let li = document.createElement("li");
       let span = document.createElement("span");
-      
+
       messages
         .appendChild(li)
         .append(data.message);
       messages
         .appendChild(span)
         .append("From " + data.sender + " to " + data.receiver + " at: " + (data.time));
-    }
-    
-    function addMessages(message) {
-       $('#messages1').append('<h4>' + message.sender + '</h4><p>' + message.message + '</p>');
-    }
+      }
 
-    function getMessages() {
-      $.ajax({
-        url: "/messages",//Two-sided: we have to check if sender is from and receiver to, but also inversely.
-        data: {
-          from: sender.value,
-          to: receiver.value
-        },
-        headers: { "X-CSRF-Token": token },
-        datatype: 'application/json',
-        type: "GET",
-        error: function() {
-          console.log('error');
-        },
-        success: function(data) {
-          var msg = document.getElementById("messages");
-          for(item of data) {
-            putMessages(msg, item);
+      function addMessages(message) {
+         $('#messages1').append('<h4>' + message.sender + '</h4><p>' + message.message + '</p>');
+      }
+
+      function getMessages() {
+        $.ajax({
+          url: "/messages",//Two-sided: we have to check if sender is from and receiver to, but also inversely.
+          data: {
+            from: sender.value,
+            to: receiver.value
+          },
+          headers: { "X-CSRF-Token": token },
+          datatype: 'application/json',
+          type: "GET",
+          error: function() {
+            console.log('error');
+          },
+          success: function(data) {
+            var msg = document.getElementById("messages");
+            for(var item of data) {
+              putMessages(msg, item);
+            }
           }
-        }
-      });
-      
-
-    function sendMessage(message) {
-      $.ajax({
-        url: "/messages",
-        headers: { "X-CSRF-Token": token },
-        datatype: 'application/json',
-        type: "POST",
-        data: message,
-        success: function(data) {
-          //data.forEach(addMessages);
-        }
-      });
-
-      $("#send").click(function() {
-       sendMessage({
-         from: sender.value,
-         to: receiver.value,
-         sender: $('#fromName').val(),
-         receiver: $('#toName').val(),
-         bidRequestId: reqId.value,
-         message:$("#message").val()});
         });
+      }
 
-    getMessages();
+      getMessages();
+
+      sock.on('countUpdated', (count) => {
+        console.log('The connections count has been updated! It is ' + count + '.');
+      });
+
+      $('#increment').bind('click', function() {
+        console.log('Clicked!');
+        sock.emit('increment');
+      });
+
+      sock.on('message', (message) => {
+        console.log(message);
+      });
+
+      //socket.on('message', addMessages);
+      
+      sock.on("received", (data) => {
+        let li = document.createElement("li"), span = document.createElement("span");
+        messages.appendChild(li).append(data.message);
+        messages.appendChild(span).append("From " + $('#fromName').val() + ": " + "Just now.");
+        console.log("Hello, " + $('#fromName').val() + '!');
+      });
+
+      $(messageInput).append('<h3 style="color: blue">Chat about the Order "' + reqName.value + '"</h3>');
+
+      function sendMessage(message) {
+        $.ajax({
+          url: "/messages",
+          headers: { "X-CSRF-Token": token },
+          datatype: 'application/json',
+          type: "POST",
+          data: message,
+          success: function(data) {
+            }
+          });
+      }
+
+      $("#form").submit(function(e) {
+        let li = document.createElement("li");
+       
+        var obj = {
+          message:$("#message").val(),
+          from: sender.value,
+          to: receiver.value,
+          sender: $('#fromName').val(),
+          receiver: $('#toName').val(),
+          bidRequestId: requestId.value          
+          };
+
+        sock.emit("chatMessage", obj);//Via socket.        
+        //sendMessage(obj);//Via AJAX.
+
+        e.preventDefault(); // prevents page reloading
+        messages.appendChild(li).append($("#message").val());
+        let span = document.createElement("span");
+        messages.appendChild(span).append("From " + obj.sender + ": " + "Just now.");
+        $("#message").val("");
+      });
+
+    //isTyping event
+    messageInput.addEventListener("keypress", (e) => {//e.target.elements
+      sock.emit("typing", {
+        user: "UNITE User - " + senderName.value,
+        message: " is typing..." });
     });
+
+    sock.on("notifyTyping", (data) => {
+      typing.innerText = data.user + " types " + data.message;
+    });
+
+    //stop typing
+    messageInput.addEventListener("keyup", (e) => {
+      sock.emit("stopTyping", "");
+    });
+
+    sock.on("notifyStopTyping", (e) => {
+      typing.innerText = "";
+    });
+  /*
+    document.querySelector('#form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const msg = e.target.elements.message.value;
+      socket.emit('sendMessage', msg);
+    });
+
+    $("#send").click(function() {//Form submit
+      //e.target.elements.message.value = the message body, in case instead of send we had the form ID.
+    //socket.emit('sendMessage', messageObj);
+     sendMessage({
+       from: sender.value,
+       to: receiver.value,
+       sender: $('#fromName').val(),
+       receiver: $('#toName').val(),
+       bidRequestId: reqId.value,
+       message:$("#message").val()
+       });
+    });*/   
+      
+    $('#sendLocation').bind('click', function() {
+      if(!navigator.geolocation) {
+        return alert('Geolocation not supported at your endpoint. WEe are sorry fr the inconvenience.');
+      }
+      
+      navigator.geolocation.getCurrentPosition((position) => {//alert(JSON.stringify(position));
+        sock.emit('sendLocation', {
+          latitude: position.coords? position.coords.latitude : '45,00',
+          longitude: position.coords? position.coords.longitude : '25,00'
+        });
+      });
+    });
+      
+  });
   </script>
 </head>
   
 <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="position: absolute; width: 100% !important;">
+    <a class="navbar-brand" href="/">UNITE</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </nav>
+  <div>
+    <button class="btn btn-primary" id="increment" style="float: right">
+      Increment
+    </button>
+  </div>
   <div class="container">
     <div>  
       <input type="button" class="btn btn-primary" value="Back" onclick="history.go(-1)">
     </div>
     <br>
       <div class="chat_window">
-          <div class="top_menu">
+        <div class="top_menu">
           <div class="buttons">
-          <div class="button close"></div>
-          <div class="button minimize"></div>
-          <div class="button maximize"></div>
-      </div>
-          <div class="title">Talk instantly to your partner</div>
-      </div>
+            <div class="button close"></div>
+            <div class="button minimize"></div>
+            <div class="button maximize"></div>
+          </div>
+          <div class="title">Talk instantly to your partner
+          <span title="Send your geographic location" style="color: blue; cursor: pointer" id="sendLocation"> - Send Location</span>
+          </div>
+        </div>
+        <div style="position: center; color: brown; font-family: arial; font-size: 12pt; text-decoration: underline; font-weight: bold">
+          <span id="partner1"><%= fromName %> and <%= toName %> are talking</span>
+        </div>
+        <br>
         <ul id="messages" class="messages">
         </ul>
-      <div id="messages1" style="color: fuchsia">
-      </div>
-      <div class="bottom_wrapper clearfix">
-        <br>
-          <input type='hidden' id="name" class="form-control" placeholder=”Name”>
-        <br>
-        <i id="typing"></i>
-          <form id="form">
-            <div class="message_input_wrapper">
-              <input type="hidden" id="from" value="<%= from %>"/>
-              <input type="hidden" id="to" value="<%= to %>"/>
-              <input type="hidden" id="reqId" value="<%= reqId %>"/>                
-              <input type="hidden" id="reqName" value="<%= reqName %>"/>
-              <input type="hidden" id="fromName" value="<%= fromName %>"/>
-              <input type="hidden" id="toName" value="<%= toName %>"/>
-              <input id="message" class="message_input" placeholder="Type your message here...">
-            </div>
-              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-              <button id="send" class="btn btn-primary send_message">Send</button>
-          </form>
-      </div>      
-    </div>
+        <div id="messages1" style="color: fuchsia">
+        </div>
+        <div class="bottom_wrapper clearfix">
+          <br>
+            <input type='hidden' id="name" class="form-control" placeholder=”Name”>
+          <br>
+          <i id="typing"></i>
+            <form id="form">
+              <div class="message_input_wrapper">
+                <input type="hidden" name="from" id="from" value="<%= from %>"/>
+                <input type="hidden" name="to" id="to" value="<%= to %>"/>
+                <input type="hidden" name="reqId" id="reqId" value="<%= reqId %>"/>
+                <input type="hidden" name="reqName" id="reqName" value="<%= reqName %>"/>
+                <input type="hidden" name="fromName" id="fromName" value="<%= fromName %>"/>
+                <input type="hidden" name="toName" id="toName" value="<%= toName %>"/>
+                <input id="message" name="message" class="message_input" placeholder="Type your message here...">
+              </div>
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button id="send" type='submit' class="btn btn-primary send_message">Send</button>
+            </form>
+          </div>      
+        </div>
   </div>
     
 </body>

@@ -1,5 +1,8 @@
 //Basic declarations:
+const path = require('path');
+const http = require("http");
 const express = require("express");
+const socketio = require("socket.io");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const session = require("express-session");
@@ -9,13 +12,16 @@ const flash = require("connect-flash");
 const multer = require("multer");
 const fs = require("fs-extra");
 const fs2 = require('fs');
-const path = require('path');
+
 const process = require('process');
 const MongoClient = require("mongodb").MongoClient;
 const connect = require("./dbconnect");
 const app = express();
-const http = require("http").Server(app);
-const socket = require("socket.io")(http);
+const server = http.createServer(app);
+const socket = socketio(server);
+
+//.Server(app);
+//(http);
 const crypto = require('crypto');
 const dateformat = require("dateformat");
 
@@ -91,25 +97,629 @@ const homeRoutes = require("./routes/home");
 const supplierRoutes = require("./routes/supplier");
 const buyerRoutes = require("./routes/buyer");
 const supervisorRoutes = require("./routes/supervisor");
-//const messageRoutes = require("./routes/chat");
 //const imageRoutes = require('./routes/image');
 
 app.use("/", homeRoutes);
 app.use("/supplier", supplierRoutes);
 app.use("/buyer", buyerRoutes);
 app.use("/supervisor", supervisorRoutes);
-//app.use("/chat", messageRoutes);
 
 //For chatting:
 const port = 5000;
-var db;
 
+app.post('/processBuyer', (req, res) => {
+  connect.then((db) => {
+    db.collection("buyers").deleteOne({_id: req.query('id')}, function(err, obj) {
+      });  
+  }); 
+});
+
+
+function compareTimes(a, b) {
+  if ( a.time < b.time ){
+    return -1;
+  }
+  if ( a.time > b.time ){
+    return 1;
+  }
+  return 0;
+}
+
+//Lambda variant: allMessages.sort((a,b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0));
+app.get('/messages', (req, res) => {
+  Message.find({
+      from: req.query.from,
+      to: req.query.to
+    }, (err, messages) => {
+      if(err) {
+        return console.error(err.message);        
+      }
+   
+      Message.find({
+        from: req.query.to, 
+        to: req.query.from
+      }, (err, messages2) => {
+          if(err) {
+          return console.error(err.message);        
+        }
+        
+        var allMessages = [];
+        for(var msg of messages) {
+          allMessages.push(msg);
+        }
+        
+        for(var msg of messages2) {
+          allMessages.push(msg);
+        }
+        //console.log(allMessages.length);
+        allMessages.sort(compareTimes);
+        res.send(allMessages);
+      });
+  });
+});
+
+//wire up the server to listen to our port 5000
+server.listen(port, () => {
+  console.log("Connected to port: " + port + '.');
+});
+
+app.post('/messages', (req, res) => {
+  var message = new Message(req.body);
+  
+  message.save((err) => {
+    if(err)
+      return res.sendStatus(500);
+    socket.emit('message', req.body);
+    res.sendStatus(200);
+  })
+});
+
+let count = 0;
+
+socket.on("connection", (sock) => {
+  console.log("User connected!");  
+  sock.emit('countUpdated', count);
+  sock.emit('message', 'Welcome to the UNITE Chat!');  
+  sock.broadcast.emit('message', 'We have a new user joined in Chat!');
+  
+  sock.on('increment', () => {
+    count++;
+    //sock.emit('countUpdated', count);//Particularly
+    socket.emit('countUpdated', count);//Globally
+  });
+  
+  sock.on('sendMessage', (messageObj) => {
+    socket.emit('message', messageObj);
+  });
+  
+  sock.on("disconnect", function() {
+    console.log("User disconnected!");
+    socket.emit('message', 'Someone has just left us!');
+  });
+
+  sock.on("stopTyping", () => {
+    sock.broadcast.emit("notifyStopTyping");
+  });
+  
+  sock.on('sendLocation', (coords) => {console.log(coords);
+    socket.emit('message', 'Location: ' + 'https://www.google.com/maps?q=' + coords.latitude + ',' + coords.longitude + '');
+    console.log('https://www.google.com/maps?q=' + coords.latitude + ',' + coords.longitude + '');
+  });
+
+  sock.on("chatMessage", function(msgData) {
+    msgData.time = Date.now();
+    
+    sock.broadcast.emit("received", {
+      message: msgData.message
+    });
+    
+    var mesg = new Message(msgData);
+    mesg.save((err) => {
+      if(err) {
+        console.error(err.message);
+      }
+    })
+  });
+  
+  sock.on("typing", (data) => {
+    sock.broadcast.emit("notifyTyping", {
+      user: data.user,
+      from: data.from,
+      to: data.to,
+      reqId: data.reqId,
+      message: data.message
+    });    
+  });
+  
+});
+
+
+//Upload files to DB:
+const ObjectId = require("mongodb").ObjectId;
+const uploadController = require("./controllers/upload");
+
+var storage = multer.diskStorage({
+  destination: function (req, file, callback) {
+    callback(null, path.join('${__dirname}/../uploads'));
+    //callback(null, 'uploads/');
+  },
+  filename: function (req, file, callback) {// + path.extname(file.originalname)
+    var date = dateformat(new Date(), 'dddd-mmmm-dS-yyyy-h:MM:ss-TT');//Date.now()
+    callback(null, file.fieldname + '-' + date + '-' + file.originalname);//The name itself.
+  }
+});
+
+var extArray = ['.png', '.jpg', '.jpeg', '.gif', '.pdf', '.txt', '.docx', '.rtf'];
+ 
+var upload = multer({
+  storage: storage,
+  fileFilter: function (req, file, callback) {
+    var ext = path.extname(file.originalname);
+    var isItIn = false;
+    
+    for(var i in extArray)
+      if(ext.toLowerCase() == extArray[i].toLowerCase()) {
+        isItIn = true;
+      }
+    if(!isItIn) {
+      return callback(new Error('Extension forbidden!'));
+    }
+    
+    callback(null, true);
+  },
+  limits: {
+    fileSize: 2048 * 2048//4 MB
+  }
+});
+
+
+app.post("/uploadfile", upload.single("single"), (req, res, next) => {
+  const file = req.file;
+  
+  if (!file) {
+    const error = new Error("Please upload a file");
+    error.httpStatusCode = 400;
+    return next(error);
+  }
+
+  res.send(file);
+  return true;
+
+  // When using the "single" data come in "req.file" regardless of the attribute "name".
+  var tmp_path = req.file.path;
+
+  // The original name of the uploaded file stored in the variable "originalname".
+  var target_path = '/uploads/' + req.file.originalname;
+
+  // A better way to copy the uploaded file.
+  var src = fs.createReadStream(tmp_path);
+  var dest = fs.createWriteStream(target_path);
+  src.pipe(dest);
+  src.on('end', function() {
+    res.render('complete'); 
+  });
+  src.on('error', function(err) {
+    res.render('error'); 
+  });
+});
+
+
+app.post('/purchase', (req, res, next) => {
+    const headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type"
+  };
+  
+  stripe.customers.create({
+    email: req.body.emailAddress,
+    //card: '4242424242424242'//
+    source: req.body.stripeTokenId
+  })
+  .then((customer) => stripe.charges.create({
+    amount: req.body.amount,
+    receipt_email: req.body.emailAddress,
+    description: req.body.description,
+    customer: customer.id,
+    //source: req.body.stripeTokenId,
+    currency: req.body.currency.toLowerCase()
+  }))
+    .then((charge) => {
+      console.log('Payment successful!\n' + charge);      
+      const response = {
+        headers,
+        statusCode: 200,
+        body: JSON.stringify({
+          message: "You have successfully paid for your items!",
+          charge: charge
+        })
+      };
+
+    res.json(response);
+  }).catch((err) => {
+      console.log('Payment failed! Please repeat the operation.\n' + err);
+      /*const response = {
+        headers,
+        statusCode: 500,
+        body: JSON.stringify({
+          error: err.message
+        })
+      };*/
+    
+      //res.json(response);
+      res.status(500).end();
+    });
+});
+
+
+//Uploading multiple files
+app.post("/uploadmultiple",  upload.array("multiple", 12),   (req, res, next) => {
+    const files = req.files;
+    
+    if (!files) {
+      const error = new Error("Please choose maximum 12 files.");
+      error.httpStatusCode = 400;
+      return next(error);
+    }
+  
+    console.log(files);
+    res.send(files);
+  }
+);
+
+//Alternate multiupload:
+app.post("/multipleupload", uploadController.multipleUpload);
+
+//Autocomplete fields:
+const jsonp = require('jsonp');
+
+app.post('/countryAutocomplete', function(req, res, next) {
+  var regex = new RegExp(req.body.term, 'i');  
+  var countryFilter = Country.find({name: regex}, {"name": 1})
+  .sort({"name" : 1})
+  .limit(15);//Positive sort is ascending.  
+  countryFilter.exec(function(err, data) {
+  var result = [];
+    
+    if(!err) {
+      if(data && data.length && data.length > 0) {
+        data.forEach(item => {
+          let obj = {
+            id: item._id,
+            name: item.name
+          };
+          
+          result.push(obj);
+        });
+      }
+      
+      res.jsonp(result);
+    }
+  });
+});
+
+
+app.post('/industryAutocomplete', function(req, res, next) {
+  var regex = new RegExp(req.query["term"], 'i');
+  var industryFilter = Industry.find({name: regex}, {"name": 1})
+    .sort({"name" : 1})
+    .limit(15);//Negative sort means descending.  
+
+  industryFilter.exec(function(err, data) {
+  var result = [];
+    
+    if(!err) {
+      if(data && data.length && data.length > 0) {
+        data.forEach(item=>{
+          let obj = {
+            id: item._id,
+            name: item.name
+          };
+          
+          result.push(obj);          
+        });
+      }
+      
+      res.jsonp(result);     
+    }
+  });
+});
+
+
+app.post('/deleteBid', function(req, res, next) {
+  MongoClient.connect(URL, function(err, db) {
+    if (err) 
+      throw err;
+    var dbo = db.db(BASE), myquery = { _id: req.body.bidId };
+    
+    dbo.collection("bidrequests").deleteOne(myquery, function(err, resp) {
+      if(err) {
+        console.error(err.message);
+        //return false;
+      }
+
+      db.close();
+    });
+  });
+});
+
+
+app.post('/deleteFile', function(req, res, next) {
+  //fs2.unlinkSync(req.body.file);
+  
+  fs2.unlink(req.body.file, function (err) {
+    if (err) 
+      throw err;
+    //if no error, file has been deleted successfully
+    console.log('File deleted!');
+    req.flash('success', 'File deleted!');
+    res.status(200).end();
+  });
+});
+
+
+app.get('/industryGetAutocomplete', function(req, res, next) {
+  var regex = new RegExp(req.query["term"], 'i');
+  var industryFilter = Industry.find({name: regex}, {"name": 1})
+    .sort({"name" : 1})
+    .limit(15);//Negative sort means descending.  
+
+  industryFilter.exec(function(err, data) {
+  var result = [];
+    
+    if(!err) {
+      if(data && data.length && data.length > 0) {
+        data.forEach(item=>{
+          let obj = {
+            id: item._id,
+            name: item.name
+          };
+          
+          result.push(obj);          
+        });
+      }
+      
+      res.jsonp(result);     
+    }
+  });
+});
+
+
+app.get('/bidStatuses', function(req, res, next) {  
+  var statusFilter = BidStatus.find({});
+  
+  statusFilter.exec(function(err, data) {
+  var result = [];
+    
+    if(!err) {
+      if(data && data.length && data.length > 0) {
+        data.forEach((item) => {
+          let obj = {
+            id: item._id,
+            value: item.value,
+            name: item.value + ' - ' + item.name
+          };
+          
+          result.push(obj);
+        });
+      }
+      
+      res.jsonp(result);     
+    }
+  });
+});
+
+
+
+app.get('/uniteIDAutocomplete', function(req, res, next) {
+  var regex = new RegExp(req.query["term"], 'i');
+  var uniteIDFilter = Supervisor.find({organizationUniteID: regex}, {"organizationUniteID": 1})
+    .sort({"organizationUniteID" : 1})
+    .limit(15);//Negative sort means descending.  
+
+  uniteIDFilter.exec(function(err, data) {
+  var result = [];
+    
+    if(!err) {
+      if(data && data.length && data.length > 0) {
+        data.forEach( (item) => {
+          let obj = {
+            id: item._id,
+            name: item.organizationUniteID
+          };
+          
+          result.push(obj);          
+        });
+      }
+      
+      res.jsonp(result);     
+    }
+  });
+});
+
+
+app.post('/uniteIDAutocomplete', function(req, res, next) {
+  var regex = new RegExp(req.query["term"], 'i');
+  var uniteIDFilter = Supervisor.find({organizationUniteID: regex}, {"organizationUniteID": 1})
+    .sort({"organizationUniteID" : 1})
+    .limit(15);//Negative sort means descending.  
+
+  uniteIDFilter.exec(function(err, data) {
+  var result = [];
+    
+    if(!err) {
+      if(data && data.length && data.length > 0) {
+        data.forEach( (item) => {
+          let obj = {
+            id: item._id,
+            name: item.organizationUniteID
+          };
+          
+          result.push(obj);          
+        });
+      }
+      
+      res.jsonp(result);     
+    }
+  });
+});
+
+
+app.post('/currencyAutocomplete', function(req, res, next) {
+  var regex = new RegExp(req.query["term"], 'i');
+  
+  var currencyFilter = Currency.find({value: regex}, {"value": 1, "name": 1})
+    .sort({"value" : 1})
+    .limit(10);//Negative sort means descending.  
+
+  currencyFilter.exec(function(err, data) {
+  var result = [];
+    
+    if(!err) {
+      if(data && data.length && data.length > 0) {
+        data.forEach(item => {
+          let obj = {
+            id: item._id,
+            name: item.value + '-' + item.name,
+            value: item.name
+          };
+          
+          result.push(obj);          
+        });
+      }
+      
+      res.jsonp(result);     
+    }
+  });
+});
+
+
+app.get('/currencyGetAutocomplete', function(req, res, next) {
+  var regex = new RegExp(req.query["term"], 'i');
+  
+  var currencyFilter = Currency.find({value: regex}, {"value": 1, "name": 1})
+    .sort({"value" : 1})
+    .limit(10);//Negative sort means descending.  
+
+  currencyFilter.exec(function(err, data) {
+  var result = [];
+    
+    if(!err) {
+      if(data && data.length && data.length > 0) {
+        data.forEach( (item) => {
+          console.log(item);
+          let obj = {
+            id: item._id,
+            name: item.value,
+            value: item.name
+          };
+          
+          result.push(obj);          
+        });
+      }
+      
+      res.jsonp(result);     
+    }
+  });
+});
+
+
+app.get('/prodServiceAutocomplete', function(req, res, next) {
+  var regex = new RegExp(req.query["term"], 'i');
+  var id = req.query["supplierId"];  
+   
+  var prodServiceFilter = ProductService
+    .find({productName: regex, supplier: new ObjectId(id)}, {'productName': 1, 'price': 1, 'currency': 1})
+    .sort({"productName" : 1})
+    .limit(parseInt(MAX_PROD));//Negative sort means descending.
+  
+  prodServiceFilter.exec(function(err, data) {
+  var result = [];
+    
+    if(!err) {
+      if(data && data.length && data.length > 0) {
+        data.forEach( (item) => {
+          let obj = {
+            id: item._id,
+            name: item.productName,
+            price: item.price,
+            currency: item.currency
+          };
+          
+          result.push(obj);
+        });
+      }
+     
+      res.jsonp(result);
+    }
+  });
+});
+
+
+app.get('/capabilityInputAutocomplete', function(req, res, next) {
+  var regex = new RegExp(req.query["term"], 'i');
+  
+  var capDescriptionFilter = Supplier.find({capabilityDescription: regex}, {'capabilityDescription': 1})
+    .sort({"capabilityDescription" : 1})
+    .limit(15)
+  ;
+  
+  capDescriptionFilter.exec(function(err, data) {
+    var result = [];
+    
+    if(!err) {
+      if(data && data.length && data.length > 0) {
+        data.forEach(item => {
+          let obj = {
+            id: item._id,
+            name: item.capabilityDescription
+          };
+          
+          result.push(obj);          
+        });
+      }
+      
+      res.jsonp(result);     
+    }
+  });
+});
+
+/*
+var buildResultSet = function(docs) {
+    var result = [];
+    for(var object in docs){
+      result.push(docs[object]);
+    }
+    return result;
+   }
+
+
+app.get('/countryAutocompleted', function(req, res) {  
+  var regex = new RegExp(req.query["term"], 'i');
+  var query = Country.find({name: regex}, { 'name': 1 })
+  .sort({"updated_at":-1}).sort({"created_at":-1})
+  .limit(5);
+ 
+  query.exec(function(err, items) {
+    if (!err) {
+       var result = buildResultSet(items);
+      
+       res.send(result, {
+          'Content-Type': 'application/json'
+       }, 200);
+    } else {
+       res.send(JSON.stringify(err), {
+          'Content-Type': 'application/json'
+         }, 404);
+      }
+   });
+});*/
+
+var db;
 MongoClient.connect(URI, {useUnifiedTopology: true}, (err, client) => {
   if (err)
     return console.error(err.message);
 
   db = client.db(BASE);//Right connection!
-  console.log('FALLENIUS');
   process.on('uncaughtException', function (err) {
     console.log(err.message);
   });
@@ -382,600 +992,6 @@ MongoClient.connect(URI, {useUnifiedTopology: true}, (err, client) => {
       });      
       */
 });
-
-
-app.post('/processBuyer', (req, res) => {
-  connect.then(db => {
-    db.collection("buyers").deleteOne({_id: req.query('id')}, function(err, obj) {
-      });  
-  }); 
-});
-
-
-function compareTimes(a, b) {
-  if ( a.time < b.time ){
-    return -1;
-  }
-  if ( a.time > b.time ){
-    return 1;
-  }
-  return 0;
-}
-
-//Lambda variant: objs.sort((a,b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0));
-app.get('/messages', (req, res) => {
-  Message.find({
-      from: req.query.from,
-     to: req.query.to
-    }, (err, messages) => {
-      if(err) {
-        console.error(err.message);
-        return false;
-      }
-   
-      Message.find({from: req.query.to, to: req.query.from}, (err, messages2) => {
-        var allMessages = [];
-        for(var msg of messages) {
-          allMessages.push(msg);
-        }
-        for(var msg of messages2) {
-          allMessages.push(msg);
-        }
-        
-        allMessages.sort(compareTimes);
-        res.send(allMessages);
-      });
-  });
-});
-
-
-app.post('/messages', (req, res) => {
-  var message = new Message(req.body);
-  
-  message.save((err) => {
-    if(err)
-      return res.sendStatus(500);
-    socket.emit('message', req.body);
-    res.sendStatus(200);
-  })
-});
-
-
-//setup event listener
-socket.on("connection", socket => {
-  console.log("user connected");
-
-  socket.on("disconnect", function() {
-    console.log("user disconnected");
-  });
-
-  //Someone is typing
-  socket.on("typing", data => {
-    socket.broadcast.emit("notifyTyping", {
-      user: data.user,
-      from: data.from,
-      to: data.to,
-      reqId: data.reqId,
-      message: data.message
-    });
-  });
-
-  //when someone stops typing
-  socket.on("stopTyping", () => {
-    socket.broadcast.emit("notifyStopTyping");
-  });
-
-  socket.on("chat message", function(msgData) {
-   //broadcast message to everyone in port:5000 except yourself.
-    socket.broadcast.emit("received", {
-      message: msgData.msg
-    });
-
-    //save chat to the database
-    connect.then(db => {
-      console.log("Connected directly to the server!");
-      
-      let chatMessage = new Message({ 
-        message: msgData.msg,
-        from: msgData.from,
-        to: msgData.to,
-        time: Date.now(),
-        bidRequestId: msgData.reqId,
-        sender: msgData.fromName,
-        receiver: msgData.toName
-      });
-
-      chatMessage.save();
-    });
-  });
-});
-
-//wire up the server to listen to our port 5000
-app.listen(port, () => {
-  console.log("Connected to port: " + port)
-});
-
-//Upload files to DB:
-const ObjectId = require("mongodb").ObjectId;
-const uploadController = require("./controllers/upload");
-
-var storage = multer.diskStorage({
-  destination: function (req, file, callback) {
-    callback(null, path.join('${__dirname}/../uploads'));
-    //callback(null, 'uploads/');
-  },
-  filename: function (req, file, callback) {// + path.extname(file.originalname)
-    var date = dateformat(new Date(), 'dddd-mmmm-dS-yyyy-h:MM:ss-TT');//Date.now()
-    callback(null, file.fieldname + '-' + date + '-' + file.originalname);//The name itself.
-  }
-});
-
-var extArray = ['.png', '.jpg', '.jpeg', '.gif', '.pdf', '.txt', '.docx', '.rtf'];
- 
-var upload = multer({
-  storage: storage,
-  fileFilter: function (req, file, callback) {
-    var ext = path.extname(file.originalname);
-    var isItIn = false;
-    
-    for(var i in extArray)
-      if(ext.toLowerCase() == extArray[i].toLowerCase()) {
-        isItIn = true;
-      }
-    if(!isItIn) {
-      return callback(new Error('Extension forbidden!'));
-    }
-    
-    callback(null, true);
-  },
-  limits: {
-    fileSize: 2048 * 2048//4 MB
-  }
-});
-
-
-app.post("/uploadfile", upload.single("single"), (req, res, next) => {
-  const file = req.file;
-  
-  if (!file) {
-    const error = new Error("Please upload a file");
-    error.httpStatusCode = 400;
-    return next(error);
-  }
-
-  res.send(file);
-  return true;
-
-  // When using the "single" data come in "req.file" regardless of the attribute "name".
-  var tmp_path = req.file.path;
-
-  // The original name of the uploaded file stored in the variable "originalname".
-  var target_path = '/uploads/' + req.file.originalname;
-
-  // A better way to copy the uploaded file.
-  var src = fs.createReadStream(tmp_path);
-  var dest = fs.createWriteStream(target_path);
-  src.pipe(dest);
-  src.on('end', function() {
-    res.render('complete'); 
-  });
-  src.on('error', function(err) {
-    res.render('error'); 
-  });
-});
-
-
-app.post('/purchase', (req, res, next) => {
-    const headers = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type"
-  };
-  
-  stripe.customers.create({
-    email: req.body.emailAddress,
-    //card: '4242424242424242'//
-    source: req.body.stripeTokenId
-  })
-  .then((customer) => stripe.charges.create({
-    amount: req.body.amount,
-    receipt_email: req.body.emailAddress,
-    description: req.body.description,
-    customer: customer.id,
-    //source: req.body.stripeTokenId,
-    currency: req.body.currency.toLowerCase()
-  }))
-    .then((charge) => {
-      console.log('Payment successful!\n' + charge);      
-      const response = {
-        headers,
-        statusCode: 200,
-        body: JSON.stringify({
-          message: "You have successfully paid for your items!",
-          charge: charge
-        })
-      };
-
-    res.json(response);
-  }).catch(err => {
-      console.log('Payment failed! Please repeat the operation.\n' + err);
-      /*const response = {
-        headers,
-        statusCode: 500,
-        body: JSON.stringify({
-          error: err.message
-        })
-      };*/
-    
-      //res.json(response);
-      res.status(500).end();
-    });
-});
-
-
-//Uploading multiple files
-app.post("/uploadmultiple",  upload.array("multiple", 12),   (req, res, next) => {
-    const files = req.files;
-    
-    if (!files) {
-      const error = new Error("Please choose maximum 12 files.");
-      error.httpStatusCode = 400;
-      return next(error);
-    }
-  
-    console.log(files);
-    res.send(files);
-  }
-);
-
-//Alternate multiupload:
-app.post("/multipleupload", uploadController.multipleUpload);
-
-//Autocomplete fields:
-const jsonp = require('jsonp');
-
-app.post('/countryAutocomplete', function(req, res, next) {
-  var regex = new RegExp(req.body.term, 'i');  
-  var countryFilter = Country.find({name: regex}, {"name": 1})
-  .sort({"name" : 1})
-  .limit(15);//Positive sort is ascending.  
-  countryFilter.exec(function(err, data) {
-  var result = [];
-    
-    if(!err) {
-      if(data && data.length && data.length > 0) {
-        data.forEach(item => {
-          let obj = {
-            id: item._id,
-            name: item.name
-          };
-          
-          result.push(obj);
-        });
-      }
-      
-      res.jsonp(result);
-    }
-  });
-});
-
-
-app.post('/industryAutocomplete', function(req, res, next) {
-  var regex = new RegExp(req.query["term"], 'i');
-  var industryFilter = Industry.find({name: regex}, {"name": 1})
-    .sort({"name" : 1})
-    .limit(15);//Negative sort means descending.  
-
-  industryFilter.exec(function(err, data) {
-  var result = [];
-    
-    if(!err) {
-      if(data && data.length && data.length > 0) {
-        data.forEach(item=>{
-          let obj = {
-            id: item._id,
-            name: item.name
-          };
-          
-          result.push(obj);          
-        });
-      }
-      
-      res.jsonp(result);     
-    }
-  });
-});
-
-
-app.post('/deleteBid', function(req, res, next) {
-  MongoClient.connect(URL, function(err, db) {
-    if (err) 
-      throw err;
-    var dbo = db.db(BASE), myquery = { _id: req.body.bidId };
-    
-    dbo.collection("bidrequests").deleteOne(myquery, function(err, resp) {
-      if(err) {
-        console.error(err.message);
-        //return false;
-      }
-
-      db.close();
-    });
-  });
-});
-
-
-app.post('/deleteFile', function(req, res, next) {
-  //fs2.unlinkSync(req.body.file);
-  
-  fs2.unlink(req.body.file, function (err) {
-    if (err) 
-      throw err;
-    //if no error, file has been deleted successfully
-    console.log('File deleted!');
-    req.flash('success', 'File deleted!');
-    res.status(200).end();
-  });
-});
-
-
-app.get('/industryGetAutocomplete', function(req, res, next) {
-  var regex = new RegExp(req.query["term"], 'i');
-  var industryFilter = Industry.find({name: regex}, {"name": 1})
-    .sort({"name" : 1})
-    .limit(15);//Negative sort means descending.  
-
-  industryFilter.exec(function(err, data) {
-  var result = [];
-    
-    if(!err) {
-      if(data && data.length && data.length > 0) {
-        data.forEach(item=>{
-          let obj = {
-            id: item._id,
-            name: item.name
-          };
-          
-          result.push(obj);          
-        });
-      }
-      
-      res.jsonp(result);     
-    }
-  });
-});
-
-
-app.get('/bidStatuses', function(req, res, next) {  
-  var statusFilter = BidStatus.find({});
-  
-  statusFilter.exec(function(err, data) {
-  var result = [];
-    
-    if(!err) {
-      if(data && data.length && data.length > 0) {
-        data.forEach(item=>{
-          let obj = {
-            id: item._id,
-            value: item.value,
-            name: item.value + ' - ' + item.name
-          };
-          
-          result.push(obj);
-        });
-      }
-      
-      res.jsonp(result);     
-    }
-  });
-});
-
-
-
-app.get('/uniteIDAutocomplete', function(req, res, next) {
-  var regex = new RegExp(req.query["term"], 'i');
-  var uniteIDFilter = Supervisor.find({organizationUniteID: regex}, {"organizationUniteID": 1})
-    .sort({"organizationUniteID" : 1})
-    .limit(15);//Negative sort means descending.  
-
-  uniteIDFilter.exec(function(err, data) {
-  var result = [];
-    
-    if(!err) {
-      if(data && data.length && data.length > 0) {
-        data.forEach( (item) => {
-          let obj = {
-            id: item._id,
-            name: item.organizationUniteID
-          };
-          
-          result.push(obj);          
-        });
-      }
-      
-      res.jsonp(result);     
-    }
-  });
-});
-
-
-app.post('/uniteIDAutocomplete', function(req, res, next) {
-  var regex = new RegExp(req.query["term"], 'i');
-  var uniteIDFilter = Supervisor.find({organizationUniteID: regex}, {"organizationUniteID": 1})
-    .sort({"organizationUniteID" : 1})
-    .limit(15);//Negative sort means descending.  
-
-  uniteIDFilter.exec(function(err, data) {
-  var result = [];
-    
-    if(!err) {
-      if(data && data.length && data.length > 0) {
-        data.forEach( (item) => {
-          let obj = {
-            id: item._id,
-            name: item.organizationUniteID
-          };
-          
-          result.push(obj);          
-        });
-      }
-      
-      res.jsonp(result);     
-    }
-  });
-});
-
-
-app.post('/currencyAutocomplete', function(req, res, next) {
-  var regex = new RegExp(req.query["term"], 'i');
-  
-  var currencyFilter = Currency.find({value: regex}, {"value": 1, "name": 1})
-    .sort({"value" : 1})
-    .limit(10);//Negative sort means descending.  
-
-  currencyFilter.exec(function(err, data) {
-  var result = [];
-    
-    if(!err) {
-      if(data && data.length && data.length > 0) {
-        data.forEach(item => {
-          let obj = {
-            id: item._id,
-            name: item.value + '-' + item.name,
-            value: item.name
-          };
-          
-          result.push(obj);          
-        });
-      }
-      
-      res.jsonp(result);     
-    }
-  });
-});
-
-
-app.get('/currencyGetAutocomplete', function(req, res, next) {
-  var regex = new RegExp(req.query["term"], 'i');
-  
-  var currencyFilter = Currency.find({value: regex}, {"value": 1, "name": 1})
-    .sort({"value" : 1})
-    .limit(10);//Negative sort means descending.  
-
-  currencyFilter.exec(function(err, data) {
-  var result = [];
-    
-    if(!err) {
-      if(data && data.length && data.length > 0) {
-        data.forEach( (item) => {
-          console.log(item);
-          let obj = {
-            id: item._id,
-            name: item.value,
-            value: item.name
-          };
-          
-          result.push(obj);          
-        });
-      }
-      
-      res.jsonp(result);     
-    }
-  });
-});
-
-
-app.get('/prodServiceAutocomplete', function(req, res, next) {
-  var regex = new RegExp(req.query["term"], 'i');
-  var id = req.query["supplierId"];  
-   
-  var prodServiceFilter = ProductService
-    .find({productName: regex, supplier: new ObjectId(id)}, {'productName': 1, 'price': 1, 'currency': 1})
-    .sort({"productName" : 1})
-    .limit(parseInt(MAX_PROD));//Negative sort means descending.
-  
-  prodServiceFilter.exec(function(err, data) {
-  var result = [];
-    
-    if(!err) {
-      if(data && data.length && data.length > 0) {
-        data.forEach( (item) => {
-          let obj = {
-            id: item._id,
-            name: item.productName,
-            price: item.price,
-            currency: item.currency
-          };
-          
-          result.push(obj);
-        });
-      }
-     
-      res.jsonp(result);
-    }
-  });
-});
-
-
-app.get('/capabilityInputAutocomplete', function(req, res, next) {
-  var regex = new RegExp(req.query["term"], 'i');
-  
-  var capDescriptionFilter = Supplier.find({capabilityDescription: regex}, {'capabilityDescription': 1})
-    .sort({"capabilityDescription" : 1})
-    .limit(15)
-  ;
-  
-  capDescriptionFilter.exec(function(err, data) {
-    var result = [];
-    
-    if(!err) {
-      if(data && data.length && data.length > 0) {
-        data.forEach(item => {
-          let obj = {
-            id: item._id,
-            name: item.capabilityDescription
-          };
-          
-          result.push(obj);          
-        });
-      }
-      
-      res.jsonp(result);     
-    }
-  });
-});
-
-/*
-var buildResultSet = function(docs) {
-    var result = [];
-    for(var object in docs){
-      result.push(docs[object]);
-    }
-    return result;
-   }
-
-
-app.get('/countryAutocompleted', function(req, res) {  
-  var regex = new RegExp(req.query["term"], 'i');
-  var query = Country.find({name: regex}, { 'name': 1 })
-  .sort({"updated_at":-1}).sort({"created_at":-1})
-  .limit(5);
- 
-  query.exec(function(err, items) {
-    if (!err) {
-       var result = buildResultSet(items);
-      
-       res.send(result, {
-          'Content-Type': 'application/json'
-       }, 200);
-    } else {
-       res.send(JSON.stringify(err), {
-          'Content-Type': 'application/json'
-         }, 404);
-      }
-   });
-});*/
-
-
 // Database configuration and test data saving:
 
 mongoose
