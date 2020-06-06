@@ -211,7 +211,7 @@ exports.postCancelBid = (req, res) => {
           console.log(msg);
           req.flash('success', msg);
           //res.status(200).send(msg);
-          res.redirect('/buyer/viewBid');
+          res.redirect('back');
       });
     });
   });

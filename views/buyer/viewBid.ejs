@@ -263,8 +263,7 @@
                   <input type="hidden" name="buyer" value="<%= bid.buyer %>">
                   <input type="hidden" name="supplier" value="<%= bid.supplier %>">
                 </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <div class="modal-body" style="position: center">
                   <div class="form-group">
                     <h3>Message for Supplier</h3>
                     <br>
@@ -278,7 +277,7 @@
                     <input type="hidden" name="sender" value="<%= bid.buyerName %>">
                     <input type="hidden" name="receiver" value="<%= bid.supplierName %>">
                     <input type="hidden" name="_csrf" id="csrf_<%= i %>" value="<%= csrfToken %>">
-                    <button class="btn btn-primary" title="Update status/Send message" disabled type="submit" id="updateBidStatus_<%= i %>">Update Bid & Message Supplier
+                    <button style="float: right" class="btn btn-primary" title="Update status/Send message" disabled type="submit" id="updateBidStatus_<%= i %>">Update Status & Send Message
                     </button>
                     <script type="text/javascript">
                       var index = "<%= i %>";
@@ -301,7 +300,7 @@
                         
                         $('#message_'+index)
                           .parent('div')
-                          .append('<button type="button" style="float: left; position: center" title="Pay ' + amount + '" class="btn btn-primary" id="purchase_'+index+'">Go to Purchase</button>');
+                          .append('<button type="button" style="float: left" title="Pay ' + amount + '" class="btn btn-primary" id="purchase_'+index+'">Purchase</button>');
 						  
 						              var stripeHandler = StripeCheckout.configure({
                             key: stripePublicKey,
@@ -356,17 +355,14 @@
                   </div>
               </div>
           </form>
+             
      <!-- Buyer=sender, supplier=receiver. -->     
           <div class="container mt-4">
             <div class="form-group">
               <a href="../../../supplier/chat/<%= bid.buyer %>/<%= bid.supplier %>/<%= bid._id %>/<%= bid.requestName %>/<%= bid.supplierName %>/<%= bid.buyerName %>">
-                <button title="Chat" class="btn-secondary custom-button">Chat with your supplier</button>
+                <button style="float: left" title="Chat" id="chat" class="btn-primary btn">Chat with your supplier</button>                
               </a>
-            </div>
-          </div>
-          <div class="container mt-4">
-            <div class="form-group">
-              <form action="../../../buyer/cancelBid/" method="POST">
+              <form class="cancelForm" action="../../../buyer/cancelBid/" method="POST">
                 <input type="hidden" name="bidId" value="<%= bid._id %>">
                 <input type="hidden" name="requestsName" value="<%= bid.requestName %>">
                 <input type="hidden" name="buyersName" value="<%= bid.buyerName %>">
@@ -374,13 +370,16 @@
                 <input type="hidden" name="buyersEmail" value="<%= bid.buyerEmail %>">
                 <input type="hidden" name="suppliersEmail" value="<%= bid.supplierEmail %>">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <button type="submit" title="Cancel Order" class="btn-secondary custom-button">Cancel your Order</button>
+                <button style="float: right" type="submit" id="submitCancel" title="Cancel Order" class="btn-primary btn">Cancel your Order</button>
               </form>
             </div>
           </div>
+          <div class="modal-footer">
+            <button type="button" style="position: center;" class="btn btn-secondary" data-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
+  </div>
         
     <% } } } else { %>
     <p style="font-size: 12pt; font-weight: bold; color: purple">You have not placed any bids to this supplier. If you prefer, you may do so at any time.</p>

@@ -187,7 +187,7 @@ function postAutocomplete(elem, url, token) {
 }
 
 $(document).ready(function() {
-  $('input,textarea,span,label,li,button,a,b,p,h2,h3,h4,h5')
+  $('input,textarea,span,label,li,button,a,b,p,h2,h3,h4,h5,option')
     .each(function(index, el) {//Tooltips in the App.
     if(!$(el).attr('title')) {
       $(el).attr('title', $(el).val()? $(el).val() : $(el).text());
@@ -224,6 +224,10 @@ $(document).ready(function() {
   
   if(nav) 
     nav.find('span').attr('title', 'Expand/collapse UNITE basic options');
+  
+  $('.cancelForm').submit(function() {
+    return confirm('Are you sure you want to cancel this order?');
+  });
   
   if(!($('.fileupload').length))
     return false;
