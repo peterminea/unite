@@ -22,7 +22,7 @@
   
   <script type="text/javascript">
     $(document).ready(function() {
-      var token = $("input[name='_csrf']:first").val();
+      var token = $("input[name='_csrf']").first().val();
       
       $.ajax({
               url: "/bidStatuses",
@@ -291,7 +291,7 @@
                         $('#updateBidStatus_'+getId($(this).attr('id'))).removeAttr('disabled');
                       });
                       
-                      var x = JSON.parse($('#statusJsonValues_'+index+' span:first').text());
+                      var x = JSON.parse($('#statusJsonValues_'+index+' span').first().text());
                       var stripePublicKey = "<%= stripePublicKey %>";
                       var status = $('#status_'+index).val();
                       

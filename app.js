@@ -15,14 +15,10 @@ const fs2 = require('fs');
 const dateformat = require("dateformat");
 const process = require('process');
 const MongoClient = require("mongodb").MongoClient;
-const connect = require("./dbconnect");
 const app = express();
 const server = http.createServer(app);
 const socket = socketio(server);
 const BadWords = require('bad-words');
-
-//.Server(app);
-//(http);
 const crypto = require('crypto');
 
 
@@ -51,8 +47,6 @@ const ProductService = require("./models/productService");
 //Syntax: process.env.MONGODB_URI
 
 mongoose.Promise = global.Promise;
-//const dateformat = global.dateFirmat;
-
 mongoose.set('useCreateIndex', true);
 
 const store = new MongoDBStore({
@@ -109,10 +103,19 @@ app.use("/supervisor", supervisorRoutes);
 const port = 5000;
 
 app.post('/processBuyer', (req, res) => {
-  connect.then((db) => {
-    db.collection("buyers").deleteOne({_id: req.query('id')}, function(err, obj) {
-      });  
-  }); 
+  MongoClient.connect(URI, {useUnifiedTopology: true}, function(err, db) {
+    if (err) 
+      throw err;
+    
+    var dbo = db.db(BASE), myquery = { _id: req.body.id };    
+    dbo.collection("buyers").deleteOne(myquery, function(err, resp) {
+      if(err) {
+        return console.error(err.message);        
+      }
+
+      db.close();
+    });
+  });
 });
 
 
@@ -209,9 +212,10 @@ socket.on("connection", (sock) => {
     sock.broadcast.emit("notifyStopTyping");
   });
   
-  sock.on('sendLocation', (coords) => {console.log(coords);
+  sock.on('sendLocation', (coords, callback) => {console.log(coords);
     socket.emit('message', 'Location: ' + 'https://www.google.com/maps?q=' + coords.latitude + ',' + coords.longitude + '');
     console.log('https://www.google.com/maps?q=' + coords.latitude + ',' + coords.longitude + '');
+    callback();
   });
 
   sock.on("chatMessage", function(msgData) {
@@ -434,7 +438,7 @@ app.post('/industryAutocomplete', function(req, res, next) {
 
 
 app.post('/deleteBid', function(req, res, next) {
-  MongoClient.connect(URL, function(err, db) {
+  MongoClient.connect(URI, {useUnifiedTopology: true}, function(err, db) {
     if (err) 
       throw err;
     var dbo = db.db(BASE), myquery = { _id: req.body.bidId };

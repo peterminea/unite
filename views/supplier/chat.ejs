@@ -22,6 +22,9 @@
   <script src="/https.js"></script>
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script> -->
   <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/3.0.1/mustache.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.6.0/qs.min.js"></script>
   <script src="/autocomp.js"></script>
   <script type="text/javascript"> 
     $(document).ready(function() {
@@ -38,7 +41,9 @@
       let receiverName = document.getElementById("toName");
       let requestId = document.getElementById("reqId");
       let reqName = document.getElementById("reqName");
-      let typing = document.getElementById("typing");      
+      let typing = document.getElementById("typing");  
+      
+      const messageTemplate = $('#message-template').val();
 
     function putMessages(messages, data) {
       let li = document.createElement("li");
@@ -91,6 +96,8 @@
 
       sock.on('message', (message) => {
         console.log(message);
+        const html = Mustache.render(messageTemplate, {message});
+        messages.append(html);
       });
 
       //socket.on('message', addMessages);
@@ -117,6 +124,16 @@
       }
 
       $("#form").submit(function(e) {
+        e.preventDefault(); // prevents page reloading
+        $('#send').attr('disabled', 'disabled');
+        messages.appendChild(li).append($("#message").val());
+        $("#message")
+          .val("")
+          .focus();
+        
+        let span = document.createElement("span");
+        messages.appendChild(span).append("From " + obj.sender + ": " + "Just now.");
+        
         let li = document.createElement("li");
        
         var obj = {
@@ -129,6 +146,7 @@
           };
 
         sock.emit("chatMessage", obj, (error) => {
+          $('#send').removeAttr('disabled');
           
           if(error) {
             return console.error(error);
@@ -138,11 +156,9 @@
         });//Via socket.        
         //sendMessage(obj);//Via AJAX.
 
-        e.preventDefault(); // prevents page reloading
-        messages.appendChild(li).append($("#message").val());
-        let span = document.createElement("span");
-        messages.appendChild(span).append("From " + obj.sender + ": " + "Just now.");
-        $("#message").val("");
+        
+        
+        
       });
 
     //isTyping event
@@ -189,10 +205,15 @@
         return alert('Geolocation not supported at your endpoint. WEe are sorry fr the inconvenience.');
       }
       
+      $('#sendLocation').attr('disabled', 'disabled');
+      
       navigator.geolocation.getCurrentPosition((position) => {//alert(JSON.stringify(position));
         sock.emit('sendLocation', {
           latitude: position.coords? position.coords.latitude : '45,00',
           longitude: position.coords? position.coords.longitude : '25,00'
+        }, () => {
+          $('#sendLocation').removeAttr('disabled');
+          console.log('Location has been shared!');//Callback means feedback.
         });
       });
     });
@@ -258,6 +279,11 @@
             </form>
           </div>      
         </div>
+    <script id="message-template" type="text/html">
+      <div>
+        <p>{{message}}</p>
+      </div>
+    </script>
   </div>
     
 </body>

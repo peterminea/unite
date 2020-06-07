@@ -211,7 +211,7 @@
         </div>
         <script type="text/javascript">
           
-          var x = JSON.parse($('#statusJsonValues span:first').text());          
+          var x = JSON.parse($('#statusJsonValues span').first().text());
           
            $('select[id="statuses"]')
             .bind('change', function() {

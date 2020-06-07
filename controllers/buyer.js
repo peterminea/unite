@@ -114,9 +114,12 @@ exports.postIndex = (req, res) => {
 
     return bidRequest
       .save()
-      .then(result => {
+      .then((err, result) => {
+        if(err) {
+          throw err;
+        }
         req.flash("success", "Bid requested successfully!");
-        return res.redirect("/buyer");
+        return res.redirect("/buyer/index");
       })
       .catch(console.error);
   } else {
@@ -142,12 +145,13 @@ exports.getViewBids = (req, res) => {
 
 
 exports.postViewBids = (req, res) => {
-  MongoClient.connect(URL, function(err, db) {//db or client.
-      if (err) throw err;
+  MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {//db or client.
+      if (err) 
+        throw err;
       var dbo = db.db(BASE);
       var myquery = { _id: req.body.id };
       var newvalues = { $set: {status: req.body.status} };
-      dbo.collection("bidrequests").updateOne(myquery, newvalues, function(err, res) {        
+      dbo.collection("bidrequests").updateOne(myquery, newvalues, function(err, resp) {        
         if(err) {
           console.error(err.message);
           return false;
@@ -168,19 +172,17 @@ exports.postViewBids = (req, res) => {
           .save()
           .then( (err, result) => {
             if(err) {
-              console.error(err.message);        
+              return console.error(err.message);        
             }
 
             req.flash('', 'Message sent to Supplier!');
+            db.close();
+            res.redirect('back');            
         })
           .catch(console.error);              
       }
-        
-        db.close();
-      });
-    
-    res.redirect('back');
-    });  
+    });
+  });  
 }
 
 
@@ -240,55 +242,50 @@ exports.getResendToken = (req, res) => {
 
 
 exports.postConfirmation = function (req, res, next) {
-    Token.findOne({ token: req.params.token }, function (err, token) {
-        if (!token) {
-          req.flash('We were unable to find a valid token. It may have expired. Please request a new token.');
-          res.redirect('/buyer/resend');
-          if(1==2) 
+  Token.findOne({ token: req.params.token }, function (err, token) {
+      if (!token) {
+        req.flash('We were unable to find a valid token. It may have expired. Please request a new token.');
+        res.redirect('/buyer/resend');
+        if(1==2) 
+          return res.status(400).send({
+          type: 'not-verified', 
+          msg: 'We were unable to find a valid token. Your token may have expired.' });
+      }
+
+      Buyer.findOne({ _id: token._userId, emailAddress: req.body.emailAddress }, function (err, user) {
+          if (!user) 
             return res.status(400).send({
-            type: 'not-verified', 
-            msg: 'We were unable to find a valid token. Your token may have expired.' });
-        }
+            msg: 'We were unable to find a user for this token.' 
+          });
 
-        Buyer.findOne({ _id: token._userId, emailAddress: req.body.emailAddress }, function (err, user) {
-            if (!user) 
-              return res.status(400).send({
-              msg: 'We were unable to find a user for this token.' 
-            });
-          
-            if (user.isVerified) 
-              return res.status(400).send({ 
-              type: 'already-verified', 
-              msg: 'This user has already been verified.' });           
-          
-              MongoClient.connect(URL, function(err, db) {
-                    if (err) throw err;
-                    var dbo = db.db(BASE);
-                    var myquery = { _id: user._id };
-                    var newvalues = { $set: {isVerified: true} };
-                    dbo.collection("buyers").updateOne(myquery, newvalues, function(err, resp) {
-                      if(err) {
-                        console.error(err.message);
-                        /*
-                        return res.status(500).send({ 
-                          msg: err.message 
-                        });
-                        */
-                        return false;
-                      }                   
+          if (user.isVerified) 
+            return res.status(400).send({ 
+            type: 'already-verified', 
+            msg: 'This user has already been verified.' });           
 
-                      console.log("The account has been verified. Please log in.");
-                      req.flash('success', "The account has been verified. Please log in.");
-                      db.close();
-                      if(res) res.status(200).send("The account has been verified. Please log in.");
-                    });
+            MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
+                  if (err) throw err;
+                  var dbo = db.db(BASE);
+                  var myquery = { _id: user._id };
+                  var newvalues = { $set: {isVerified: true} };
+                  dbo.collection("buyers").updateOne(myquery, newvalues, function(err, resp) {
+                    if(err) {
+                      console.error(err.message);
+                      /*
+                      return res.status(500).send({ 
+                        msg: err.message 
+                      });
+                      */
+                      return false;
+                    }                   
+
+                    console.log("The account has been verified. Please log in.");
+                    req.flash('success', "The account has been verified. Please log in.");
+                    db.close();
+                    if(res) 
+                      res.status(200).send("The account has been verified. Please log in.");
                   });
-          /*
-            user.isVerified = true;
-            user.save(function (err) {
-              if (err) {                
-              }              
-            });*/
+                });
         });
     });
 }
@@ -330,15 +327,12 @@ exports.postResendToken = function (req, res, next) {/*
                         "\n"
             };
           
-              sgMail.send(mailOptions, function (err, info) {
+              sgMail.send(mailOptions, function (err, resp) {
                  if (err ) {
-                  console.log(err);
-                }  else {
-                  console.log('Message sent: ' + info.response);
+                   console.error(err.message);
+                   return res.status(500).send({ msg: err.message });
                 }
-                  if (err) {
-                    return res.status(500).send({ msg: err.message });
-                  }
+                  console.log('Message sent: ' + resp? resp.response : user.emailAddress);
                   return res.status(200).send('A verification email has been sent to ' + user.emailAddress + '.');
                 });
         });
@@ -391,12 +385,12 @@ exports.postForgotPassword = (req, res, next) => {
           return res.redirect('buyer/forgotPassword');
         }
         
-        MongoClient.connect(URL, function(err, db) {
+        MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
           if (err) throw err;
           var dbo = db.db(BASE);
           var myquery = { _id: user._id };
           var newvalues = { resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000};
-          dbo.collection("buyers").updateOne(myquery, newvalues, function(err, res) {        
+          dbo.collection("buyers").updateOne(myquery, newvalues, function(err, resp) {        
             if(err) {
               console.error(err.message);
               return false;
@@ -405,10 +399,6 @@ exports.postForgotPassword = (req, res, next) => {
             db.close();
           });
         });
-        /*
-        user.save(function(err) {
-          done(err, token, user);
-        });*/
       });
     },
     function(token, user, done) {
@@ -422,7 +412,7 @@ exports.postForgotPassword = (req, res, next) => {
             " Please reset your password within 24 hours, by clicking the link: \nhttp://" + req.headers.host + "/buyer/reset/" + token + "\n"
       };
       
-      sgMail.send(emailOptions, function (err, info) {
+      sgMail.send(emailOptions, function (err, resp1) {
         console.log('E-mail sent!')
         req.flash('success', 'An e-mail has been sent to ' + user.emailAddress + ' with password reset instructions.');
         done(err, 'done');
@@ -459,28 +449,20 @@ exports.postResetPasswordToken = (req, res) => {
       }
         
     if(req.body.password === req.body.confirm) {
-      MongoClient.connect(URL, function(err, db) {
+      MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
         if (err) throw err;
         var dbo = db.db(BASE);
         var myquery = { _id: user._id };
         var newvalues = { password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined};
-        dbo.collection("buyers").updateOne(myquery, newvalues, function(err, res) {        
+        dbo.collection("buyers").updateOne(myquery, newvalues, function(err, resp) {        
           if(err) {
             console.error(err.message);
             return false;
-          }
+            }
 
           db.close();
-        });
-      });
-        /*
-        user.setPassword(req.body.password, function(err) {
-          user.save(function(err, done) {
-            //req.logIn(user, function(err) {
-              done(err, user);
-            //});
           });
-        })*/
+        });
       } else {
         req.flash('error', 'Passwords do not match.');
         return res.redirect('back');
@@ -497,7 +479,7 @@ exports.postResetPasswordToken = (req, res) => {
         + ' for the account registered with ' + user.emailAddress + '. You can log in again.'        
       };
       
-      sgMail.send(emailOptions, function (err, info) {
+      sgMail.send(emailOptions, function (err, resp1) {
         console.log('E-mail sent!')
         req.flash('success', 'Your password has been successfully changed!');
         done(err, 'done');
@@ -667,7 +649,7 @@ exports.postSignUp = (req, res) => {
                       + req.headers.host + "/buyer/confirmation/" + token.token + "\n"
                     };
 
-                    sgMail.send(email, function (err, info) {
+                    sgMail.send(email, function (err, resp) {
                        if (err ) {
                         console.log(err.message);
                          return res.status(500).send({
@@ -727,20 +709,22 @@ exports.postProfile = (req, res) => {
       doc.updatedAt = Date.now();
 
       MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
-        if (err) throw err;
+        if (err) 
+          throw err;
         var dbo = db.db(BASE);
         var myquery = { _id: doc._id };
         var newvalues = { $set: doc };
-        dbo.collection("buyers").updateOne(myquery, newvalues, function(err, res) {        
+        dbo.collection("buyers").updateOne(myquery, newvalues, function(err, resp) {        
           if(err) {
             return console.error(err.message);          
           }
 
           req.session.buyer = doc;
           req.session.id = doc._id;
-          req.session.save();
-          req.flash("success", "Buyer details updated successfully!");
+          req.session.save();          
           db.close();
+          req.flash("success", "Buyer details updated successfully!");
+          console.log('Buyer details updated successfully!');
           return res.redirect("/buyer");
         });
       });

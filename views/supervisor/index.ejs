@@ -16,8 +16,8 @@
   <script src="/https.js"></script>
   <script src="/autocomp.js"></script>
   <script type="text/javascript">
-    $(document.ready(function() {
-      var token = $("input[name='_csrf']").val();
+    $(document).ready(function() {
+      var token = $("input[name^='_csrf']").first().val();
       
       $('button[id^="process"]').click(function(e) {
         var tr = $(this).parent('tr');
@@ -29,14 +29,14 @@
               headers: { "X-CSRF-Token": token },
               datatype: "application/json",
               type: "POST",
-              data: {"id": id},
+              data: {id: id},
               success: function(data) {
                 //res(data);
                 tr.remove();
                 alert('The Buyer has been removed!');
               },
               error: function(err) {
-                alert(err);
+                alert(err.message);
               }
             });
           }
@@ -55,12 +55,15 @@
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home<span class="sr-only">(current)</span></a>
+        </li>
         <li class="nav-item active">
           <a class="nav-link" href="/supervisor">Dashboard <span class="sr-only">(current)</span></a>
         </li>
       </ul>
       <ul class="navbar-nav">
-        <li class="nav-item active">
+        <li class="nav-item">
           <a class="btn btn-primary" href="/supervisor/profile">Profile</a>
         </li>
         <br>
@@ -103,24 +106,24 @@
         </tr>
       </thead>
       <tbody>
-        <% console.log(buyers + ' NIL ' + buyers.length) %>
+        <% console.log(buyers) %>
         <% let i = 0; for (buyer of buyers) { %>
         <tr id="<%= buyer._id %>">
           <td scope="col"><%= i %></td>
           <td scope="col"><%= buyer.deptAgencyGroup %></td>
           <td scope="col"><%= buyer.contactName %></td>
           <td scope="col">€<%= buyer.balance %></td>
-          <td scope="col">YES</td>
+          <td scope="col"><%= buyer.isVerified %></td>
           <td scope="col">
             <button title="Remove selected Buyer from UNITE" id="process_<%= i %>" class="btn btn-primary">Process</button>
           </td>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" >
         </tr>
         <% i++; } } else {%>
         <div>
           <p style="color: green; font-family: arial">
-            Sorry, no buyers with your Organization UNITE ID are currently available. Please wait for their registration
-          </p>
-          <!-- <input type="hidden" name="_csrf" value="< %= csrfToken %>" > -->
+            Sorry, no buyers with your Organization UNITE ID are currently available. Please wait for their registration.
+          </p>          
         </div>
         <% }%>
       </tbody>

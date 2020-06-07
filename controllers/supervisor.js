@@ -61,7 +61,7 @@ exports.postConfirmation = function (req, res, next) {
           type: 'already-verified', 
           msg: 'This user has already been verified.' });           
 
-          MongoClient.connect(URL, function(err, db) {//db or client.
+          MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {//db or client.
                 if (err) throw err;
                 var dbo = db.db(BASE);
                 var myquery = { _id: user._id };
@@ -80,7 +80,8 @@ exports.postConfirmation = function (req, res, next) {
                   console.log("The account has been verified. Please log in.");
                   req.flash('success', "The account has been verified. Please log in.");
                   db.close();
-                  if(res) res.status(200).send("The account has been verified. Please log in.");
+                  if(res) 
+                    res.status(200).send("The account has been verified. Please log in.");
                 });
               });        
         });
@@ -90,8 +91,10 @@ exports.postConfirmation = function (req, res, next) {
 
 exports.postResendToken = function (req, res, next) {
     Supervisor.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
-        if (!user) return res.status(400).send({ msg: 'We were unable to find a user with that email.' });
-        if (user.isVerified) return res.status(400).send({ msg: 'This account has already been verified. Please log in.' });
+        if (!user) 
+          return res.status(400).send({ msg: 'We were unable to find a user with that email.' });
+        if (user.isVerified) 
+          return res.status(400).send({ msg: 'This account has already been verified. Please log in.' });
 
         var token = new Token({ 
           _userId: user._id, token: 
@@ -155,7 +158,7 @@ exports.postForgotPassword = (req, res, next) => {
           return res.redirect('supervisor/forgotPassword');
         }
         
-        MongoClient.connect(URL, function(err, db) {
+        MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
           if (err) throw err;
           var dbo = db.db(BASE);
           var myquery = { _id: user._id };
@@ -220,12 +223,12 @@ exports.postResetPasswordToken = (req, res) => {
       }
         
     if(req.body.password === req.body.confirm) {
-        MongoClient.connect(URL, function(err, db) {
+        MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
           if (err) throw err;
           var dbo = db.db(BASE);
           var myquery = { _id: user._id };
           var newvalues = { password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined};
-          dbo.collection("supervisors").updateOne(myquery, newvalues, function(err, res) {        
+          dbo.collection("supervisors").updateOne(myquery, newvalues, function(err, resp) {        
             if(err) {
               console.error(err.message);
               return false;
@@ -286,12 +289,17 @@ exports.postSignIn = (req, res) => {
   const password = req.body.password;
   const rememberUser = req.body.remember;  
 
-  if (!email) res.redirect("/supervisor/sign-in");
+  if(!email) {
+    console.error('E-mail is mandatory!');
+    req.flash("error", "E-mail is mandatory!");
+    res.redirect("/supervisor/sign-in");
+    }
   else {
     Supervisor.findOne({ emailAddress: email, password: password}, (err, doc) => {
       if (err) 
         return console.error(err);
-
+      
+      console.log(doc);      
       if (!doc) {
         req.flash("error", "Invalid e-mail address or password");
         return res.redirect("/supervisor/sign-in");
@@ -302,16 +310,19 @@ exports.postSignIn = (req, res) => {
         .compare(password, doc.password)
         .then((doMatch) => {
           if (doMatch || (password === doc.password && email === doc.emailAddress)) {
-            req.session.supervisorId = doc._id;
-            req.session.supervisor = doc;
-            
             if (!doc.isVerified) 
               return res.status(401).send({
-                type: 'not-verified', 
+                type: 'not-verified',
                 msg: 'Your account has not been verified. Please check your e-mail for instructions.' });
             
+            req.session.supervisorId = doc._id;
+            req.session.supervisor = doc;
+            if(!req.session.cookie) {
+              req.session.cookie = {};
+            }
+            
             req.session.cookie.originalMaxAge = req.body.remember? null : 7200000;
-            return req.session.save();
+            req.session.save();
           } else {
             req.flash("error", "Passwords and e-mail do not match!");
             res.redirect("/supervisor/sign-in");
@@ -382,7 +393,7 @@ exports.postSignUp = (req, res) => {
             
             supervisor.save((err) => {
               if (err) {
-                //return reject(new Error('Error with exam result save... ' + err));
+                throw err;
               }
               
               req.session.supervisor = supervisor;
@@ -409,7 +420,7 @@ exports.postSignUp = (req, res) => {
                       + req.headers.host + "/supervisor/confirmation/" + token.token + "\n"
                 };
 
-                sgMail.send(email, function (err, info) {
+                sgMail.send(email, function (err, resp) {
                     if (err) {
                       console.error(err.message)
                       return res.status(500).send({ msg: err.message }); 
@@ -465,12 +476,13 @@ exports.postProfile = (req, res) => {
     doc.createdAt = req.body.createdAt;
     doc.updatedAt = Date.now();
 
-    MongoClient.connect(URL, function(err, db) {//db or client.
-      if (err) throw err;
+    MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {//db or client.
+      if (err) 
+        throw err;
       var dbo = db.db(BASE);
       var myquery = { _id: doc._id };
       var newvalues = { $set: doc };
-      dbo.collection("supervisors").updateOne(myquery, newvalues, function(err, res) {
+      dbo.collection("supervisors").updateOne(myquery, newvalues, function(err, resp) {
         if(err) {
           console.error(err.message);
           return false;
@@ -478,9 +490,12 @@ exports.postProfile = (req, res) => {
         req.session.supervisor = doc;
         req.session.id = doc._id;
         req.session.save((err) => {
-          if (err) throw err;
-          req.flash("success", "Supervisor details updated successfully!");
+          if (err)
+            throw err;
+          
           db.close();
+          req.flash("success", "Supervisor details updated successfully!");
+          console.log("Supervisor details updated successfully!");
           return res.redirect("/supervisor");
         });
       });

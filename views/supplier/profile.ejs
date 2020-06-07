@@ -63,6 +63,9 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item">
+          <a class="nav-link" href="/">Home<span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" href="/supplier">Dashboard <span class="sr-only">(current)</span></a>
         </li>
         <li class="nav-item">
@@ -153,7 +156,7 @@
         </div>
         <div class="form-group">
           <label>Contact Mobile Number*</label>
-          <input type="tel" class="form-control" title="Please write the number as +XX XXX XXX XXX" pattern="\+[0-9]{2} [0-9]{3} [0-9]{3} [0-9]{3}" id="contactMobileNumber" name="contactMobileNumber" value="<%= profile.contactMobileNumber %>" required>
+          <input type="tel" class="form-control" title="Please write the number as +XX XXX XXX XXX" pattern="\+[0-9]{2} [0-9]{3} [0-9]{3} [0-9]{3}" id="contactMobileNumber" placeholder="+XX XXX XXX XXX" name="contactMobileNumber" value="<%= profile.contactMobileNumber %>" required>
         </div>
         <div class="form-group">
           <label>Country*</label>
@@ -201,10 +204,10 @@
           <label class="col-form-label">Products / Services Offered*</label>
           <br><a href="addproduct">Add new product</a>
           <div class="input-group">
-            <input type="text" class="form-control prodInput" title="Add Product/Service" id="prodServiceInput">
+            <input type="text" class="form-control prodInput" placeholder="Product*" title="Add Product/Service" id="prodServiceInput">
             <br>
-            <input type="number" min="0.1" step="0.1" class="form-control" title="Price" id="price">
-            <input type="text" class="form-control" title="Currency" id="currency">
+            <input type="number" min="0.1" step="0.1" placeholder="Price*" class="form-control" title="Price" id="price">
+            <input type="text" class="form-control" placeholder="Currency*" title="Currency" id="currency">
             <div class="input-group-append">
               <button class="btn btn-outline-secondary" type="button" disabled id="addProdService">Add</button>
             </div>
