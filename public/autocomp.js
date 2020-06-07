@@ -186,6 +186,102 @@ function postAutocomplete(elem, url, token) {
   });
 }
 
+
+  function bindRemoveProduct(obj, elem, prodInput, priceInput, currencyInput, prodServiceInput) {
+    obj.bind('click', function() {
+      var li = $(this).parent('li');
+      var newIndex = elem.find('li').index(li);
+
+      var arr = prodInput.val() && prodInput.val().length? 
+          (prodInput.val()).split(',') : [];             
+      if(arr.length) {
+        arr.splice(newIndex, 1);
+        prodInput.val(arr);
+      } else {
+        prodInput.val('');
+      }
+
+      arr = priceInput.val() && priceInput.val().length? 
+          (priceInput.val()).split(',') : [];             
+      if(arr.length) {
+        arr.splice(newIndex, 1);
+        priceInput.val(arr);
+      } else {
+        priceInput.val('');
+      }
+
+      arr = currencyInput.val() && currencyInput.val().length? 
+          (currencyInput.val()).split(',') : [];             
+      if(arr.length) {
+        arr.splice(newIndex, 1);
+        currencyInput.val(arr);
+      } else {
+        currencyInput.val('');
+      }            
+
+      prodServiceInput.trigger('change');
+      li.remove();
+    });
+   }
+
+
+function addProduct(obj, MAX) {
+  obj.click(function() {
+     var elem = $("#prodServices");
+
+     if(elem.find('li').length >= MAX) {
+          alert('You have reached the limit of products to add.');
+          return false;
+      }
+
+      var input = $("#prodServiceInput");
+      var prodInput = $("#prodServicesList");
+      var priceInput = $("#pricesList");
+      var currencyInput = $("#currenciesList");
+      var req = input.val().length && $('#price').val().length && $('#currency').val().length;
+
+      if(req) {
+        $('#prodServiceInput,#price,#currency').removeClass('errorField');
+
+        var prodVal = input.val();          
+        var arr = prodInput.val() && prodInput.val().length?
+          (prodInput.val()).split(',') : [];          
+
+        if(checkName(arr, prodVal)) {
+          alert('You have already added ' + prodVal + ' to the list. Please refine your selection.');
+          return false;
+        } 
+
+        elem.append("<li class='list-group-item'><span>" + prodVal + ' - ' + $('#price').val() + ' ' + $('#currency').val() + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
+
+        bindRemoveProduct($('.rem').last(), elem, prodInput, priceInput, currencyInput, input);
+
+        arr.push(prodVal);
+        prodInput.val((arr));
+
+        arr = priceInput.val() && priceInput.val().length?
+          (priceInput.val()).split(',') : [];
+        arr.push($('#price').val());
+        priceInput.val((arr));
+
+        arr = currencyInput.val() && currencyInput.val().length?
+          (currencyInput.val()).split(',') : [];
+        arr.push($('#currency').val());
+        currencyInput.val((arr));
+
+        input.val('');
+        $('#price').val('');
+        $('#currency').val('');
+        $('#addProdService').attr('disabled', 'disabled');
+        $('.productRequired').remove();
+      } else {
+        alert('Please enter valid values for products, prices and currency.');
+        $('#prodServiceInput,#price,#currency').addClass('errorField');
+      }
+    });
+}
+
+
 $(document).ready(function() {
   $('input,textarea,span,label,li,button,a,b,p,h2,h3,h4,h5,option')
     .each(function(index, el) {//Tooltips in the App.
@@ -323,4 +419,7 @@ $(document).ready(function() {
 
     e.preventDefault();
   });
+
+  
+
 });

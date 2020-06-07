@@ -258,7 +258,12 @@
                   <div class="form-group selectstatus">
                     <select style="width: 100%" id="statuses_<%= i %>">
                     </select>
-                  </div>                    
+                  </div>
+                  <div style="display: none" id="statusJsonValues_<%= i %>">                      
+                    <% if (statusesJson != null) {  %>
+                      <span><%= statusesJson %></span>
+                    <% }  %>
+                  </div>                
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                   <input type="hidden" name="buyer" value="<%= bid.buyer %>">
                   <input type="hidden" name="supplier" value="<%= bid.supplier %>">
@@ -286,10 +291,11 @@
                         $('#updateBidStatus_'+getId($(this).attr('id'))).removeAttr('disabled');
                       });
                       
+                      var x = JSON.parse($('#statusJsonValues_'+index+' span:first').text());
                       var stripePublicKey = "<%= stripePublicKey %>";
                       var status = $('#status_'+index).val();
                       
-                      if($('#status_'+index).val() == 3) {//Ready to pay -> STRIPE in action!
+                      if($('#status_'+index).val() == x.SUPP_STARTED_DELIVERY) {//Ready to pay -> STRIPE in action!
                         var amount = $('#price_'+index).val();//Not to be confused with the number of items!
                         var currency = $('#currency_'+index).val();
                         var from = "<%= bid.supplierName %>",
@@ -325,13 +331,11 @@
                                 .then(function(res) {
                                 return res.json();
                               })
-                                .then((data) => {
-                                //if(!data) {//Assert we have success.
+                                .then((data) => {                                
                                   $('#purchase_'+that).remove();
-                                  $('#status_'+that).val(4);
-                                  $('#statuses_'+that).find('option:eq('+4+')').attr('selected', 'selected');
+                                  $('#status_'+that).val(x.PAYMENT_DELIVERY_DONE);
+                                  $('#statuses_'+that).find('option:eq('+x.PAYMENT_DELIVERY_DONE+')').attr('selected', 'selected');
                                   $('#cartList_'+that).find('li').css({"title": "Already ordered!", "border": "2px"});
-                                //}
                                 });
                               }
                             });
@@ -347,7 +351,7 @@
                         });
                       } else {
                         $('#purchase_'+index).remove();
-                        if(status >= 4) {//Beyond the purchase phase.
+                        if(status >= x.PAYMENT_DELIVERY_DONE) {//Beyond the purchase phase.
                           $('#cartList_'+index).find('li').css({"title": "Already ordered!", "border": "2px"});//Mark them!
                         }
                       }

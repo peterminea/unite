@@ -19,6 +19,16 @@ const MongoClient = require("mongodb").MongoClient;
 const ObjectId = require("mongodb").ObjectId;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 
+const statusesJson = {
+  BUYER_REQUESTED_BID: parseInt(process.env.BUYER_REQ_BID),
+  WAIT_BUYER_PROCESS_INFO: parseInt(process.env.BUYER_PROC_INFO),
+  BUYER_WANTS_FOR_PRICE: parseInt(process.env.BUYER_ACCEPT_PRICE),
+  SUPP_STARTED_DELIVERY: parseInt(process.env.SUPP_START_DELIVERY),
+  PAYMENT_DELIVERY_DONE: parseInt(process.env.PAYMENT_DELIVERY_DONE),
+  SUPPLIER_CANCELS_BID: parseInt(process.env.SUPP_CANCEL_BID),
+  BUYER_CANCELS_BID: parseInt(process.env.BUYER_CANCEL_BID)
+};
+
 exports.getIndex = (req, res) => {
   if (!req || !req.session) return false;
   const supplier = req.session.supplier;
@@ -332,6 +342,7 @@ sgMail.send(msg);*/
 exports.getSignUp = (req, res) => {
   if (!req.session.supplierId)
     return res.render("supplier/sign-up", {
+      MAX_PROD: process.env.SUPP_MAX_PROD,
       errorMessage: req.flash("error")
     });
   else res.redirect("/supplier");
@@ -343,8 +354,8 @@ function prel(req, isNumber) {
   arr = arr.split(',');
   var newProd = [];
   for (var i in arr) {
-    newProd.push(isNumber? parseInt(arr[i]) : String(arr[i]));
-    }  
+    newProd.push(isNumber? parseFloat(arr[i]) : String(arr[i]));
+    }
   
   return newProd;
 }
@@ -377,16 +388,15 @@ exports.postSignUp = (req, res) => {
           var supplier;
           //Prevent duplicate attempts:
         } else if (global++ < 1) {
-          // Make sure this account doesn't already exist
           Supplier.findOne({ emailAddress: req.body.emailAddress }, function(err,  user) {
             if (user)
               return res.status(400).send({
                 msg:
                   "The e-mail address you have entered is already associated with another account."
               });
+            
           try {
             bcrypt.hash(req.body.password, 10, function(err, hash) {
-              //user = new Promise((resolve, reject) => {
                 supplier = new Supplier({
                   companyName: req.body.companyName,
                   directorsName: req.body.directorsName,
@@ -436,33 +446,12 @@ exports.postSignUp = (req, res) => {
                      return res.status(500).send({
                          msg: err.message
                          });
-                    //reject(new Error("Error with exam result save... " + err));
                   }
                   
                   req.session.supplier = supplier;
                   req.session.id = supplier._id;
                   req.session.save();
-
-                  if (Array.isArray(supplier.productsServicesOffered)) {
-                    for (var i in supplier.productsServicesOffered) {
-                      var productService = new ProductService({
-                        supplier: supplier._id,
-                        productName: supplier.productsServicesOffered[i],
-                        price: parseFloat(supplier.pricesList[i]),
-                        currency: supplier.currenciesList[i],
-                        createdAt: Date.now(),
-                        updatedAt: Date.now()
-                      });
-
-                      productService.save((err) => {
-                        if (err) {
-                          req.flash('error', err.message);
-                          console.error(err.message);
-                        }
-                      });
-                    }
-                  }
-
+                  
                   var capability = new Capability({
                     supplier: supplier._id,
                     capabilityDescription: supplier.capabilityDescription,
@@ -472,71 +461,88 @@ exports.postSignUp = (req, res) => {
 
                   capability.save(function(err) {
                     if(err) {
-                      console.error(err.message);
+                      return console.error(err.message);
                       }
+                    
+                    console.log('Capability saved!');
                   });
-
-                  // Create a verification token for this user
+                  
                   var token = new Token({
                     _userId: supplier._id,
                     token: crypto.randomBytes(16).toString("hex")
                   });
-
-                  // Save the verification token
+                  
                   token.save(function(err) {
                     if (err) {
                       console.error(err.message);
                       return res.status(500).send({
                        msg: err.message
                        });
-                    }
-
-                    var email = {
-                      from: "peter@uniteprocurement.com",
-                      to: supplier.emailAddress,//'peter.minea@gmail.com'
-                      subject: "Account Verification Token",
-                      text:
-                        "Hello " + supplier.companyName +
-                        ",\n\nCongratulations for registering on the UNITE Public Procurement Platform!\n\nPlease verify your account by clicking the link: \nhttp://" 
-                      + req.headers.host + "/supplier/confirmation/" + token.token + "\n"
-                    };
-
-                    sgMail.send(email, function(err, info) {
-                      if (err) {
-                        console.error(err);
-                        //res.redirect('back');
-                        //return res.status(500).send({
-                        // msg: err.message
-                        // });
-                      }
+                        }
                       
-                      console.log("A verification email has been sent to " +  supplier.emailAddress + ".");
-                      req.flash("success", "A verification email has been sent to " +
-                          supplier.emailAddress + ". Please check your e-mail.");
-                      //return res.status(200).send('A verification email has been sent to ' + supplier.emailAddress + '. Please check your e-mail.');
+                        var email = {
+                          from: "peter@uniteprocurement.com",
+                          to: supplier.emailAddress,
+                          subject: "Account Verification Token",
+                          text:
+                            "Hello " + supplier.companyName +
+                            ",\n\nCongratulations for registering on the UNITE Public Procurement Platform!\n\nPlease verify your account by clicking the link: \nhttp://" 
+                          + req.headers.host + "/supplier/confirmation/" + token.token + "\n"
+                        };
+
+                        sgMail.send(email, function(err) {
+                          if (err) {
+                            return console.error(err);
+                            //res.redirect('back');
+                            //return res.status(500).send({
+                            // msg: err.message
+                            // });
+                          }
+
+                          console.log("A verification email has been sent to " +  supplier.emailAddress + ".");
+                          req.flash("success", "A verification email has been sent to " +
+                              supplier.emailAddress + ". Please check your e-mail.");
+                          //return res.status(200).send('A verification email has been sent to ' + supplier.emailAddress + '. Please check your e-mail.');
+                          
+                          if (Array.isArray(supplier.productsServicesOffered)) {
+                            for (var i in supplier.productsServicesOffered) {
+                              var productService = new ProductService({
+                                supplier: supplier._id,
+                                productName: supplier.productsServicesOffered[i],
+                                price: parseFloat(supplier.pricesList[i]),
+                                currency: supplier.currenciesList[i],
+                                createdAt: Date.now(),
+                                updatedAt: Date.now()
+                              });
+
+                              productService.save((err) => {
+                                if (err) {
+                                  req.flash('error', err.message);
+                                  return console.error(err.message);
+                                }
+                                
+                                if(i == supplier.productsServicesOffered.length-1) {
+                                  console.log('All products saved!');
+                                  req.flash("success", "Supplier signed up successfully!");
+                                  if (res)
+                                    res.redirect("/supplier");
+                                }
+                              });
+                            }
+                          }
+                      });
                     });
-                  });
-                })/*;
-                assert.ok(user instanceof Promise);
-                user*/
-                });
+                })
+              });
             } catch {
               res.redirect('/supplier/sign-up');
             }
-              })
-                  .then((doc) => {
-                  })
-                  .then(() => {
-                    req.flash("success", "Supplier signed up successfully!");
-                    if (res)
-                      res.redirect("/supplier");
-                  })
-                  .catch(console.error);
-                
-                //resolve(supplier);
-              //});
-            //});
-          //});
+          }) 
+          .then(() => {
+            //if (res)
+              //res.redirect("/supplier");
+          })
+            .catch(console.error);
         }
       }
   }
@@ -713,6 +719,7 @@ exports.getProfile = (req, res) => {
     
       res.render("supplier/profile", {
         products: products,
+        MAX_PROD: process.env.SUPP_MAX_PROD,
         profile: req.session.supplier
       });
     })
@@ -755,7 +762,8 @@ exports.getBidRequest = (req, res) => {
         supplier: supplier,
         request: request,
         buyer: buyer,
-        statuses: statuses
+        statuses: statuses,
+        statusesJson: JSON.stringify(statusesJson)
         });
       });
     })
@@ -806,6 +814,9 @@ exports.postBidRequest = (req, res) => {
 
 
 exports.postProfile = (req, res) => {
+  global = 0;
+  //console.log(global);
+  try {
   Supplier.findOne({ _id: req.body._id }, (err, doc) => {
     if (err) {
       console.error(err);
@@ -855,78 +866,88 @@ exports.postProfile = (req, res) => {
     //doc.__v = 1;//Last saved version. To be taken into account for future cases of concurrential changes, in case updateOne does not protect us from that problem.
     var price = req.body.price;
     
-    MongoClient.connect(URL, function(err, db) {
+    MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
       if (err) throw err;
       var dbo = db.db(BASE);
       var myquery = { _id: doc._id };
       var newvalues = { $set: doc };
       dbo
         .collection("suppliers")
-        .updateOne(myquery, newvalues, function(err, res) {
+        .updateOne(myquery, newvalues, function(err, resp0) {
           if (err) {
-            console.error(err.message);
-            return false;
+            return console.error(err.message);
           }
 
-          console.log("One document updated!");
+          console.log("Supplier updated!");
           var arr = doc.productsServicesOffered;
           var query = {supplier: doc._id};
         
-          dbo.collection("productservices").deleteMany(query, (err, res) => {
-            if(err) console.log(err.message);
-          });
+          dbo.collection("capabilities").deleteMany(query, (err, resp1) => {
+            if(err) 
+              return console.error(err.message);
 
-          if (Array.isArray(arr))
-            for (var i in arr) {
-              var productService = new ProductService({
-                supplier: doc._id,
-                productName: arr[i],
-                price: parseFloat(doc.pricesList[i]),
-                currency: doc.currenciesList[i],
-                createdAt: Date.now(),
-                updatedAt: Date.now()
-              });
-
-              productService.save(err => {
-                if (err) {
-                  console.error(err.message);
-                }
-              });
-            }
-
-        console.log('Products offered list saved!');
-        dbo.collection("capabilities").deleteMany(query, (err, res) => {
-            if(err) console.log(err.message);
-          });
-        
-          var capability = new Capability({
+            var capability = new Capability({
             supplier: doc._id,
             capabilityDescription: doc.capabilityDescription,
             createdAt: Date.now(),
             updatedAt: Date.now()
           });
 
-          capability.save(err => {
+          capability.save((err) => {
             if (err) {
-              console.error(err.message);
-            }
+              return console.error(err.message);
+              }
+
+            console.log('Capability description saved!');
+            });
           });
         
-          console.log('Capability description also saved!');
-          db.close();
-        });
+          dbo.collection("productservices").deleteMany(query, (err, resp2) => {
+            if(err) 
+              return console.error(err.message);
+            
+            if (Array.isArray(arr))
+              for (var i in arr) {
+                if(!doc.pricesList[i]) continue;
+                var productService = new ProductService({
+                  supplier: doc._id,
+                  productName: arr[i],
+                  price: parseFloat(doc.pricesList[i]),
+                  currency: doc.currenciesList[i],
+                  createdAt: Date.now(),
+                  updatedAt: Date.now()
+                });
+
+                productService.save((err) => {
+                  if (err) {
+                    return console.error(err.message);
+                  }
+                  console.log('Product saved!');
+                  
+                  if((i == arr.length-1) && (global++ < 1)) {
+                    console.log('Products offered list saved! Now saving new data to session:');
+                    req.session.supplier = doc;
+                    req.session.id = doc._id;
+                    
+                    req.session.save((err) => {
+                      if(err) {
+                        return console.error(err.message);
+                      }
+
+                      console.log("User updated and session saved!");
+                      req.flash("success", "Supplier details updated successfully!");
+                      db.close();
+                      return res.redirect("/supplier");
+                    });
+                  }                  
+                });
+              }
+          });
+        });      
     });
   })
-    .then(doc => {
-      console.log("Saving new data to session:");
-      req.session.supplier = doc;
-      req.session.id = doc._id;
-      return req.session.save();
-    })
-    .then(() => {
-      console.log("User updated!");
-      req.flash("success", "Supplier details updated successfully!");
-      return res.redirect("/supplier");
-    })
     .catch(console.error);
+  } catch {
+    res.redirect("/supplier/profile");
+  }
 };

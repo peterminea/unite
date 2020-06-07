@@ -2,6 +2,7 @@ dependencies:
   '@sendgrid/mail': 7.1.1
   assert: 2.0.0
   async: 3.2.0
+  bad-words: 3.0.3
   bcryptjs: 2.4.3
   bufferutil: 4.0.1
   connect-flash: 0.1.1
@@ -161,6 +162,18 @@ packages:
     dev: false
     resolution:
       integrity: sha1-MasayLEpNjRj41s+u2n038+6eUc=
+  /bad-words/3.0.3:
+    dependencies:
+      badwords-list: 1.0.0
+    dev: false
+    engines:
+      node: '>=8.0.0'
+    resolution:
+      integrity: sha512-To+nGz+U8SpEQieZ2kSadY/1hVO88UXAslCJuTgLjDOuGrs/tNW2BYwl0fctxcRLooe0nzYN1pGzgvRIrd0BeA==
+  /badwords-list/1.0.0:
+    dev: false
+    resolution:
+      integrity: sha1-XphW2/E0gqKVw7CzBK+51M/FxXk=
   /balanced-match/1.0.0:
     dev: false
     resolution:
@@ -1658,6 +1671,7 @@ specifiers:
   '@sendgrid/mail': ^7.1.1
   assert: ^2.0.0
   async: ^3.2.0
+  bad-words: ^3.0.3
   bcryptjs: ^2.4.3
   bufferutil: ^4.0.1
   connect-flash: ^0.1.1

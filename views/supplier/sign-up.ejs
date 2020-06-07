@@ -41,66 +41,9 @@
         $('#addProdService').attr('disabled', 'disabled');
       }
     });
-        
-     $("#addProdService").click(function() {
-        var input = $("#prodServiceInput");
-        var prodInput = $("#prodServicesList");
-        var priceInput = $("#pricesList");
-        var currencyInput = $("#currenciesList");
-        var req = input.val().length && $('#price').val().length && $('#currency').val().length;
-     
-        if(req) {
-          $('#prodServiceInput,#price,#currency').removeClass('errorField');
-          var elem = (document.getElementById("prodServices"));
-          
-          elem.insertAdjacentHTML("beforeend", "<li class='list-group-item'><span>" + $("#prodServiceInput").val() + ' - ' + $('#price').val() + ' ' + $('#currency').val() + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
-          elem = $(elem);
-          var prodVal = input.val();
-          var arr = !prodInput.val().length? [] : (prodInput.val()).split(',');
-          if(checkName(arr, prodVal)) {
-            alert('You have already added ' + prodVal + ' to the list. Please refine your selection.');
-            return false;
-          }
-          arr.push(prodVal);
-          prodInput.val((arr));
-          
-          arr = !priceInput.val().length? [] : (priceInput.val()).split(',');
-          arr.push($('#price').val());
-          priceInput.val((arr));
-          
-          arr = !currencyInput.val().length? [] : (currencyInput.val()).split(',');
-          arr.push($('#currency').val());
-          currencyInput.val((arr));
-
-          $('.rem').unbind('click').bind('click', function() {
-            var li = $(this).parent('li');            
-            var newIndex = elem.find('li').index(li);
-            
-            var arr = prodInput.val().split(',');
-            arr.splice(newIndex, 1);            
-            prodInput.val((arr));
-            
-            arr = priceInput.val().split(',');
-            arr.splice(newIndex, 1);
-            priceInput.val((arr));
-            
-            arr = currencyInput.val().split(',');
-            arr.splice(newIndex, 1);            
-            currencyInput.val((arr));
-            
-            $("#prodServiceInput").trigger('change');
-            li.remove();
-          });
-
-          input.val('');
-          $('#price').val('');
-          $('#currency').val('');
-          $('.productRequired').remove();
-        } else {
-          alert('Please enter valid values for products, prices and currency.');
-          $('#prodServiceInput,#price,#currency').addClass('errorField');
-        }
-    });
+      
+     var MAX = parseInt("<%= MAX_PROD %>");
+     addProduct($("#addProdService"), MAX);
   });
   </script>
 </head>

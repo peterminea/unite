@@ -19,6 +19,16 @@ const MongoClient = require('mongodb').MongoClient;
 const ObjectId = require("mongodb").ObjectId;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 
+const statusesJson = {
+  BUYER_REQUESTED_BID: parseInt(process.env.BUYER_REQ_BID),
+  WAIT_BUYER_PROCESS_INFO: parseInt(process.env.BUYER_PROC_INFO),
+  BUYER_WANTS_FOR_PRICE: parseInt(process.env.BUYER_ACCEPT_PRICE),
+  SUPP_STARTED_DELIVERY: parseInt(process.env.SUPP_START_DELIVERY),
+  PAYMENT_DELIVERY_DONE: parseInt(process.env.PAYMENT_DELIVERY_DONE),
+  SUPPLIER_CANCELS_BID: parseInt(process.env.SUPP_CANCEL_BID),
+  BUYER_CANCELS_BID: parseInt(process.env.BUYER_CANCEL_BID)
+};
+
 exports.getIndex = (req, res) => {
   res.render("buyer/index", {
     buyer: req.session.buyer,
@@ -47,12 +57,13 @@ exports.postIndex = (req, res) => {
       }
       
     var promise = BidStatus.find({}).exec();
-    promise.then((statuses) => {
+    promise.then((statuses) => {//console.log(JSON.stringify(statusesJson)); console.log(statuses);
         res.render("buyer/index", {
           buyer: req.session.buyer,
           suppliers: suppliers2,
-          MAX_PROD: process.env.SUP_MAX_PROD,
+          MAX_PROD: process.env.BID_MAX_PROD,
           statuses: statuses,
+          statusesJson: JSON.stringify(statusesJson),
           success: req.flash("success")
         });
       });
@@ -122,6 +133,7 @@ exports.getViewBids = (req, res) => {
       bids: bids? bids : [],
       stripePublicKey: process.env.STRIPE_KEY_PUBLIC,
       stripeSecretKey: process.env.STRIPE_KEY_SECRET,
+      statusesJson: JSON.stringify(statusesJson),
       supplierId: req.params.supplierId, 
       buyerId: req.params.buyerId
     });
@@ -607,7 +619,6 @@ exports.postSignUp = (req, res) => {
             var buyer;
         try {
           bcrypt.hash(req.body.password, 10, function(err, hash) {
-            //user = new Promise((resolve, reject) => {
               buyer = new Buyer({
                 organizationName: req.body.organizationName,
                 organizationUniteID: req.body.organizationUniteID,
@@ -627,7 +638,7 @@ exports.postSignUp = (req, res) => {
 
               buyer.save((err) => {
                 if (err) {
-                 //return reject(new Error('Error with exam result save... ' + err));
+                   return console.error(err.message);
                 }
                 
               req.session.buyer = buyer;
@@ -662,10 +673,9 @@ exports.postSignUp = (req, res) => {
                          return res.status(500).send({
                             msg: err.message 
                           });
-                      }  else {
-                        console.log('A verification email has been sent to ' + buyer.emailAddress + '.');
                       }
-                       
+                      
+                        console.log('A verification email has been sent to ' + buyer.emailAddress + '.');
                         req.flash('success', 'A verification email has been sent to ' + buyer.emailAddress + '.');
                         req.flash("success", "Buyer signed up successfully!");
                         return res.redirect("/buyer");
@@ -677,7 +687,7 @@ exports.postSignUp = (req, res) => {
               //});
             });
           } catch {
-          res.redirect('/buyer/sign-up');
+            res.redirect('/buyer/sign-up');
           }
         });
         }
@@ -696,48 +706,47 @@ exports.getProfile = (req, res) => {
 };
 
 exports.postProfile = (req, res) => {
-  Buyer.findOne({ _id: req.body._id }, (err, doc) => {
-    if (err) 
-      return console.error(err);
-    doc._id = req.body._id;
-    doc.organizationName = req.body.organizationName;
-    doc.organizationUniteID = req.body.organizationUniteID;
-    doc.contactName = req.body.contactName;
-    doc.emailAddress = req.body.emailAddress;
-    doc.password = req.body.password;
-    doc.isVerified = req.body.isVerified;
-    doc.contactMobileNumber = req.body.contactMobileNumber;
-    doc.address = req.body.address;
-    doc.balance = req.body.balance;
-    doc.deptAgencyGroup = req.body.deptAgencyGroup;
-    doc.qualification = req.body.qualification;
-    doc.country = req.body.country;
-    doc.createdAt = req.body.createdAt;
-    doc.updatedAt = Date.now();
+  try {
+    Buyer.findOne({ _id: req.body._id }, (err, doc) => {
+      if (err) 
+        return console.error(err);
+      doc._id = req.body._id;
+      doc.organizationName = req.body.organizationName;
+      doc.organizationUniteID = req.body.organizationUniteID;
+      doc.contactName = req.body.contactName;
+      doc.emailAddress = req.body.emailAddress;
+      doc.password = req.body.password;
+      doc.isVerified = req.body.isVerified;
+      doc.contactMobileNumber = req.body.contactMobileNumber;
+      doc.address = req.body.address;
+      doc.balance = req.body.balance;
+      doc.deptAgencyGroup = req.body.deptAgencyGroup;
+      doc.qualification = req.body.qualification;
+      doc.country = req.body.country;
+      doc.createdAt = req.body.createdAt;
+      doc.updatedAt = Date.now();
 
-    MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
-      if (err) throw err;
-      var dbo = db.db(BASE);
-      var myquery = { _id: doc._id };
-      var newvalues = { $set: doc };
-      dbo.collection("buyers").updateOne(myquery, newvalues, function(err, res) {        
-        if(err) {
-          console.error(err.message);
-          return false;
-        }
-        
-        db.close();
+      MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
+        if (err) throw err;
+        var dbo = db.db(BASE);
+        var myquery = { _id: doc._id };
+        var newvalues = { $set: doc };
+        dbo.collection("buyers").updateOne(myquery, newvalues, function(err, res) {        
+          if(err) {
+            return console.error(err.message);          
+          }
+
+          req.session.buyer = doc;
+          req.session.id = doc._id;
+          req.session.save();
+          req.flash("success", "Buyer details updated successfully!");
+          db.close();
+          return res.redirect("/buyer");
+        });
       });
-    });
-  })
-    .then((doc) => {
-      req.session.buyer = doc;
-      req.session.id = doc._id;
-      return req.session.save();
-    })
-    .then(() => {
-      req.flash("success", "Buyer details updated successfully!");
-      return res.redirect("/buyer");
-    })
-    .catch(console.error);
+    })    
+      .catch(console.error);
+  } catch {
+  res.redirect('/buyer/profile');
+  }
 }

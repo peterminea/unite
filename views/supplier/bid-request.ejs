@@ -204,7 +204,15 @@
             <% } }%>
           </select>
         </div>
-        <script type="text/javascript">            
+        <div style="display: none" id="statusJsonValues">
+          <% if (statusesJson != null) {  %>
+            <span><%= statusesJson %></span>
+          <% }  %>
+        </div>
+        <script type="text/javascript">
+          
+          var x = JSON.parse($('#statusJsonValues span:first').text());          
+          
            $('select[id="statuses"]')
             .bind('change', function() {
             $('#status')        
@@ -216,7 +224,7 @@
                 .removeAttr('disabled');
           });
           
-          $('#statuses').find('option:gt(4)').attr('disabled', 'disabled');//Cancel from button and make the content unavailable.
+          $('#statuses').find('option:gt(' + x.PAYMENT_DELIVERY_DONE + ')').attr('disabled', 'disabled');//Cancel from button and make the content unavailable.
 
             $('#statuses')
                 .find('option[value="' + $('#status').val() + '"]')
