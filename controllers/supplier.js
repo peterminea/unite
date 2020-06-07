@@ -81,7 +81,7 @@ exports.postAddProduct = (req, res) => {
 
 exports.postCancelBid = (req, res) => {
   //BidRequest.findOne({_id: req.params.bidId});
-  MongoClient.connect(URL, function(err, db) {
+  MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
       if (err) 
         throw err;
     
@@ -164,44 +164,39 @@ exports.postConfirmation = function(req, res, next) {
     }
   
     Supplier.findOne({ _id: token._userId, emailAddress: req.body.emailAddress }, function (err, user) {
-            if (!user) 
-              return res.status(400).send({
-              msg: 'We were unable to find a user for this token.' 
-            });
-          
-            if (user.isVerified) 
-              return res.status(400).send({ 
-              type: 'already-verified', 
-              msg: 'This user has already been verified.' });           
-          
-            MongoClient.connect(URL, function(err, db) {//db or client.
-                  if (err) throw err;
-                  var dbo = db.db(BASE);
-                  var myquery = { _id: user._id };
-                  var newvalues = { $set: {isVerified: true} };
-                  dbo.collection("suppliers").updateOne(myquery, newvalues, function(err, resp) {
-                    if(err) {
-                      console.error(err.message);
-                      /*
-                      return res.status(500).send({ 
-                        msg: err.message 
-                      });
-                      */
-                      return false;
-                    }                   
-                    
-                    console.log("The account has been verified. Please log in.");
-                    req.flash('success', "The account has been verified. Please log in.");
-                    db.close();
-                    if(res) res.status(200).send("The account has been verified. Please log in.");
-                  });
+      if (!user) 
+        return res.status(400).send({
+        msg: 'We were unable to find a user for this token.' 
+      });
+
+      if (user.isVerified) 
+        return res.status(400).send({ 
+        type: 'already-verified', 
+        msg: 'This user has already been verified.' });           
+
+      MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {//db or client.
+            if (err) throw err;
+            var dbo = db.db(BASE);
+            var myquery = { _id: user._id };
+            var newvalues = { $set: {isVerified: true} };
+            dbo.collection("suppliers").updateOne(myquery, newvalues, function(err, resp) {
+              if(err) {
+                console.error(err.message);
+                /*
+                return res.status(500).send({ 
+                  msg: err.message 
                 });
-          /*
-            user.isVerified = true;
-            user.save(function (err) {
-              if (err) {                
-              }              
-            });*/
+                */
+                return false;
+              }                   
+
+              console.log("The account has been verified. Please log in.");
+              req.flash('success', "The account has been verified. Please log in.");
+              db.close();
+              if(res) 
+                res.status(200).send("The account has been verified. Please log in.");
+            });
+          });         
         });
   });
 }
@@ -218,7 +213,6 @@ exports.postResendToken = function(req, res, next) {
         msg: "This account has already been verified. Please log in."
       });
 
-    // Create a verification token, save it, and send email
     var token = new Token({
       _userId: user._id,
       token: crypto.randomBytes(16).toString("hex")
@@ -271,15 +265,6 @@ exports.postSignIn = (req, res) => {
   const email = req.body.emailAddress;
   const password = req.body.password;
   console.log(email + ' ' + password);
-  /*
-  const msg = {
-  from: 'peter@uniteprocurement.com',
-  to: 'peter.minea@gmail.com',
-  subject: 'CHENECCO',
-  text: 'NODE.JS MAILER SEND',
-  html: '<strong>And easy to do anywhere, even with Node.js that is NOT Java.</strong>',
-};
-sgMail.send(msg);*/
 
   if (!email) 
     res.redirect("/supplier/sign-in");
@@ -584,15 +569,14 @@ exports.postForgotPassword = (req, res, next) => {
             return res.redirect('supplier/forgotPassword');
           }
 
-          MongoClient.connect(URL, function(err, db) {
+          MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
             if (err) throw err;
             var dbo = db.db(BASE);
             var myquery = { _id: user._id };
             var newvalues = { resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000};
-            dbo.collection("suppliers").updateOne(myquery, newvalues, function(err, res) {        
+            dbo.collection("suppliers").updateOne(myquery, newvalues, function(err, resp) {        
               if(err) {
-                console.error(err.message);
-                return false;
+                return console.error(err.message);
               }
 
               db.close();
@@ -611,7 +595,7 @@ exports.postForgotPassword = (req, res, next) => {
             " Please reset your password within 24 hours, by clicking the link: \nhttp://" + req.headers.host + "/supplier/reset/" + token + "\n"
         };
 
-        sgMail.send(emailOptions, function(err, info) {
+        sgMail.send(emailOptions, function(err, resp1) {
           console.log("E-mail sent!");
           req.flash(
             "success",
@@ -637,10 +621,7 @@ exports.getResetPasswordToken = (req, res) => {
     },
     function(err, user) {
       if (!user) {
-        req.flash(
-          "error",
-          "Password reset token is either invalid or expired."
-        );
+        req.flash("error", "Password reset token is either invalid or expired.");
         return res.redirect("supplier/forgotPassword");
       }
       res.render("supplier/resetPassword", { token: req.params.token });
@@ -660,12 +641,12 @@ exports.postResetPasswordToken = (req, res) => {
       }
         
     if(req.body.password === req.body.confirm) {
-        MongoClient.connect(URL, function(err, db) {
+        MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
           if (err) throw err;
           var dbo = db.db(BASE);
           var myquery = { _id: user._id };
           var newvalues = { password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined};
-          dbo.collection("suppliers").updateOne(myquery, newvalues, function(err, res) {        
+          dbo.collection("suppliers").updateOne(myquery, newvalues, function(err, resp) {        
             if(err) {
               console.error(err.message);
               return false;
@@ -691,7 +672,7 @@ exports.postResetPasswordToken = (req, res) => {
             " for the account registered with " + user.emailAddress + ". You can log in again."
         };
 
-        sgMail.send(emailOptions, function(err, info) {
+        sgMail.send(emailOptions, function(err, resp1) {
           console.log("E-mail sent!");
           req.flash("success", "Your password has been successfully changed!");
           done(err, "done");
@@ -772,7 +753,7 @@ exports.getBidRequest = (req, res) => {
 
 
 exports.postBidRequest = (req, res) => {
-  MongoClient.connect(URL, function(err, db) {
+  MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
     if (err) throw err;
     var dbo = db.db(BASE);
     var myquery = { _id: req.body.reqId };
@@ -801,12 +782,13 @@ exports.postBidRequest = (req, res) => {
               console.error(err.message);        
             }
 
-            req.flash('', 'Message sent to Supplier!');
+          req.flash('success', 'Message sent to Buyer!');
+          res.redirect('/supplier/index')
         })
           .catch(console.error);              
       }
     });
-    res.redirect("back");
+    res.redirect('/supplier/index');
   });
   //req.originalUrl  
  }
