@@ -37,26 +37,7 @@
           return false;
         }
       });
-      
-        /*
-  function phonenumber(input) {
-    var phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-    if(input.value.match(phoneno)) {
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
- 
-  $('#contactMobileNumber').bind('keyup keypress change', function(e) {
-    $(this).text(function(i, text) {
-      return text.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
-    });
-    
-    //return phonenumber($(this)[0]);
-    });*/
-        
+
     $('#prodServiceInput').bind('change', function() {
       if($(this).val()) {
         $('#addProdService').removeAttr('disabled');
@@ -64,68 +45,9 @@
         $('#addProdService').attr('disabled', 'disabled');
       }
     });
-        
-     $("#addProdService").click(function() {
-        var input = $("#prodServiceInput");
-        var prodInput = $("#prodServicesList");
-        var priceInput = $("#pricesList");
-        var currencyInput = $("#currenciesList");
-        var req = input.val().length && $('#price').val().length && $('#currency').val().length;
-     
-        if(req) {
-          $('#prodServiceInput,#price,#currency').removeClass('errorField');
-          var elem = (document.getElementById("prodServices"));
-          
-          elem.insertAdjacentHTML("beforeend", "<li class='list-group-item'><span>" + $("#prodServiceInput").val() + ' - ' + $('#price').val() + ' ' + $('#currency').val() + "</span><span class='rem'>&nbsp;(Remove)</span></li>");          
-          elem = $(elem);
-          var prodVal = input.val();
-          
-          var arr = !prodInput.val().length? [] : (prodInput.val()).split(',');
-          if(checkName(arr, prodVal)) {
-            alert('You have already added ' + prodVal + ' to the list. Please refine your selection.');
-            return false;
-          }          
-          arr.push(prodVal);
-          prodInput.val((arr));
-          
-          arr = !priceInput.val().length? [] : (priceInput.val()).split(',');
-          arr.push($('#price').val());
-          priceInput.val((arr));
-          
-          arr = !currencyInput.val().length? [] : (currencyInput.val()).split(',');
-          arr.push($('#currency').val());
-          currencyInput.val((arr));
-
-          $('.rem').unbind('click').bind('click', function() {
-            var li = $(this).parent('li');
-            var newIndex = elem.find('li').index(li);
-            
-            var arr = prodInput.val().split(',');
-            arr.splice(newIndex, 1);
-            prodInput.val((arr));
-            
-            arr = priceInput.val().split(',');
-            arr.splice(newIndex, 1);
-            priceInput.val((arr));
-            
-            arr = currencyInput.val().split(',');
-            arr.splice(newIndex, 1);
-            currencyInput.val((arr));
-            
-            li.remove();
-            $("#prodServiceInput").trigger('change');
-          });
-
-          input.val('');
-          $('#price').val('');
-          $('#currency').val('');
-          
-          $('.productRequired').remove();
-        } else {
-          alert('Please enter valid values for products, prices and currency.');
-          $('#prodServiceInput,#price,#currency').addClass('errorField');
-        }
-    });
+      
+    var MAX = parseInt("<%= MAX_PROD %>");    
+    addProduct($("#addProdService"), MAX);
   });
   </script>
 </head>
@@ -163,6 +85,9 @@
   </nav>
 
   <div class="container">
+    <div>  
+      <input type="button" class="btn btn-primary" value="Back" onclick="history.go(-1)">
+    </div>
     <br><br>
     <div class="card">
       <h5 class="card-header">Welcome!</h5>
@@ -177,9 +102,7 @@
       <form method="post">
         <input type="hidden" name="_id" value="<%= profile._id %>">
         <input type="hidden" id="balance" name="balance" value="<%= profile.balance %>">
-        <input type="hidden" name="createdAt" id="createdAt" value="<%= profile.createdAt %>">
-        <input type="hidden" name="pricesList" id="pricesList">
-        <input type="hidden" name="currenciesList" id="currenciesList">
+        <input type="hidden" name="createdAt" id="createdAt" value="<%= profile.createdAt %>">        
         
         <div class="form-group">
           <label>Company Name</label>
@@ -296,24 +219,14 @@
             <% } }%>
           </ul>
           <input type="hidden" required id="prodServicesList" name="productsServicesOffered" value="<%= profile.productsServicesOffered %>">
+        <input type="hidden" name="pricesList" id="pricesList" value="<%= profile.pricesList %>">
+        <input type="hidden" name="currenciesList" id="currenciesList" value="<%= profile.currenciesList %>">
         </div>
-        <script type="text/javascript">          
-           $('.rem').unbind('click').bind('click', function() {
-                var li = $(this).parent('li');
-                var newIndex = $('#prodServices').find('li').index(li);
-                var arr = ($('#prodServicesList').val()).split(',');
-                arr.splice(newIndex, 1);
-                $('#prodServicesList').val(arr);
-                arr = ($('#pricesList').val()).split(',');
-                arr.splice(newIndex, 1);
-                $('#pricesList').val(arr);
-                arr = ($('#currenciesList').val()).split(',');
-                arr.splice(newIndex, 1);
-                $('#currenciesList').val(arr);
-                $("#prodServiceInput").trigger('change');
-                li.remove();
-              });
+        
+        <script type="text/javascript">
+          bindRemoveProduct($('.rem'), $('#prodServices'), $('#prodServicesList'), $('#pricesList'), $('#currenciesList'), $('#prodServiceInput'));
         </script>
+        
         <div class="form-group">
           <label>Capability Description*</label>
           <input type="text" class="form-control" id="capabilityDescription" name="capabilityDescription" value="<%= profile.capabilityDescription %>" required>

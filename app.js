@@ -12,18 +12,19 @@ const flash = require("connect-flash");
 const multer = require("multer");
 const fs = require("fs-extra");
 const fs2 = require('fs');
-
+const dateformat = require("dateformat");
 const process = require('process');
 const MongoClient = require("mongodb").MongoClient;
 const connect = require("./dbconnect");
 const app = express();
 const server = http.createServer(app);
 const socket = socketio(server);
+const BadWords = require('bad-words');
 
 //.Server(app);
 //(http);
 const crypto = require('crypto');
-const dateformat = require("dateformat");
+
 
 const BASE = process.env.BASE;
 const URI = process.env.MONGODB_URI;
@@ -175,6 +176,7 @@ app.post('/messages', (req, res) => {
 });
 
 let count = 0;
+console.log(Date.now() + ' ' + new Date());
 
 socket.on("connection", (sock) => {
   console.log("User connected!");  
@@ -188,8 +190,14 @@ socket.on("connection", (sock) => {
     socket.emit('countUpdated', count);//Globally
   });
   
-  sock.on('sendMessage', (messageObj) => {
+  sock.on('sendMessage', (messageObj, callback) => {
+    const filter = new BadWords();
+    if(filter.isProfane(messageObj)) {
+      return callback('Please be careful with the words you use. Delivery failed. Thank you for understanding!');
+    }
+    
     socket.emit('message', messageObj);
+    callback('Delivered!');
   });
   
   sock.on("disconnect", function() {
@@ -207,7 +215,7 @@ socket.on("connection", (sock) => {
   });
 
   sock.on("chatMessage", function(msgData) {
-    msgData.time = Date.now();
+    msgData.time = Date.now();//dateformat(new Date(), 'dddd, mmmm dS, yyyy, h:MM:ss TT');
     
     sock.broadcast.emit("received", {
       message: msgData.message

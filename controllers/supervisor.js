@@ -441,6 +441,7 @@ exports.getProfile = (req, res) => {
 
 
 exports.postProfile = (req, res) => {
+  try {
   Supervisor.findOne({ _id: req.body._id }, (err, doc) => {
     if (err) return console.error(err);
     doc._id = req.body._id;
@@ -469,24 +470,24 @@ exports.postProfile = (req, res) => {
       var dbo = db.db(BASE);
       var myquery = { _id: doc._id };
       var newvalues = { $set: doc };
-      dbo.collection("supervisors").updateOne(myquery, newvalues, function(err, res) {        
+      dbo.collection("supervisors").updateOne(myquery, newvalues, function(err, res) {
         if(err) {
           console.error(err.message);
           return false;
         }
-        
-        db.close();
+        req.session.supervisor = doc;
+        req.session.id = doc._id;
+        req.session.save((err) => {
+          if (err) throw err;
+          req.flash("success", "Supervisor details updated successfully!");
+          db.close();
+          return res.redirect("/supervisor");
+        });
       });
     });
   })
-    .then(doc => {
-      req.session.supervisor = doc;
-      req.session.id = doc._id;
-      return req.session.save();
-    })
-    .then(() => {
-      req.flash("success", "Supervisor details updated successfully!");
-      return res.redirect("/supervisor");
-    })
     .catch(console.error);
+  } catch {
+    res.redirect('/supervisor/profile');
+  } 
 }

@@ -128,7 +128,14 @@
           bidRequestId: requestId.value          
           };
 
-        sock.emit("chatMessage", obj);//Via socket.        
+        sock.emit("chatMessage", obj, (error) => {
+          
+          if(error) {
+            return console.error(error);
+          }
+          
+          console.log('Message sent!', obj);
+        });//Via socket.        
         //sendMessage(obj);//Via AJAX.
 
         e.preventDefault(); // prevents page reloading
