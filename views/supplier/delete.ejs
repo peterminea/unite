@@ -3,34 +3,27 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Supplier - Add a Product/Service - UNITE</title>
+  <title>UNITE - Buyer - User Confirmation</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Another cool thing made with Glitch">
   <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
-  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
   <script src="/https.js"></script>
-  <script src="/autocomp.js"></script>  
+  <script src="/autocomp.js"></script>
   <script type="text/javascript">
-      $(document).ready(function () {
-        $('#addProduct').click(function() {
-          if($('#price').val() <= 0) {
-            alert('Please enter a price greater than 0.');
-            return false;
-          }
-        });
-        
-      var token = $("input[name='_csrf']").val();
-      getAutocomplete('#currency', '/currencyGetAutocomplete', token);
+    $(document).ready(function() {
+      $('#mainForm').submit(function(e) {
+        if(!confirm('Are you sure you want to delete your Supplier account?\nThis will also remove:\n\nYour products/services;\nYour capabilities;\nYour received orders;\nYour user tokens (if any);\nYour message history from UNITE.')) {
+          return false;
+        }
       });
+  });
   </script>
 </head>
 
@@ -45,33 +38,27 @@
     <div class="container">
       <div>  
         <input type="button" class="btn btn-primary" value="Back" onclick="history.go(-1)">
-    </div>
-      <div class="col-md-12">
-        <form method="POST">
-          <input type="hidden" name="_id" value="<%= supplierId %>">
-         <legend>
-            Add new Service/Product
+      </div>
+       <div class="col-md-12">
+        <form action="/supplier/delete/<%= id %>" method="POST">
+          <legend>
+            Delete Supplier Account - Please fill in the required (*) fields
           </legend>
           <div class="form-group">
-            <label for="product">Product / Service name:</label>
-            <input required class="form-control" type="text" name="productName" id="product" autofocus="autofocus"></input>
+            <label for="email">E-mail*:</label>
+            <input required class="form-control" type="email" name="emailAddress" autofocus="autofocus"></input>
           </div>
-          <div class="form-group">
-            <label for="addProduct">Price:</label>
-            <input required class="form-control" type="number" min="1" id="price" name="price"></input>
-          </div>
-          <div class="form-group">
-            <label for="currency">Currency:</label>
-            <input required class="form-control" type="text" id="currency" name="currency"></input>
+         <div class="form-group">
+            <label for="email">Company name*:</label>
+            <input required class="form-control" type="text" name="companyName"></input>
+            <input type="hidden" name="id" value="<%= id %>">
           </div>
           <div class="form-group">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button type="submit" id="addProduct" value="Add Product" class="btn btn-primary btn-block btn-lg">Add Product</button>
-          </div>            
+            <button type="submit" id="delete" title="Delete Account" class="btn btn-primary btn-block btn-lg">Delete Account</button>
+          </div>
         </form>
       </div>
     </div>
-    
   </body>
-  
 </html>

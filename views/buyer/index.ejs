@@ -452,12 +452,13 @@
                         return true; 
                     }
                     
-                    $('input[id^="status_"]').bind('keypress keyon keyup', function(e) {
-                      return limitStatus(e);
-                    });
-                    
                     var index = "<%= i %>";
-                    var sel = $('select[id="statuses_'+index + '"]');
+                    
+                    $('#status_'+index).bind('keypress keyon keyup', function(e) {
+                      return limitStatus(e);
+                    });                    
+                    
+                    var sel = $('#statuses_'+index);
                     var statusVector = [];
                     sel.find('option').each(function(index, element) {
                       statusVector.push($(element).text());
@@ -470,90 +471,94 @@
                     
                     var x = JSON.parse($('#statusJsonValues_'+index+' span:first').text());
                     
-                    $('input[id^="status_"]').change(function(e) {//Read-only select, though.
+                    $('#status_'+index).change(function(e) {//Read-only select, though.
                       if($(this).val() < x.BUYER_REQUESTED_BID
                          || $(this).val() > x.PAYMENT_DELIVERY_DONE) {//The last two options can be triggered by the corresponding Cancel Bid button. 5 for Supplier cancellation, 6 for Buyer cancellation.
                         return false;
                       }
                     
+                      var id = getId($(this).attr('id'));
                       var statusText = statusVector[parseInt($(this).val())];
-                      if($("#statusText_"+index).length)
-                        $("#statusText_"+index).remove();
+                      if($("#statusText_"+id).length)
+                        $("#statusText_"+id).remove();
                       
-                      $('<div style="color: blue" id="statusText_'+index + '"><p>' + statusText + '</p></div>')
-                        .insertAfter($('#status_'+index).parent('div'));
+                      $('<div style="color: blue" id="statusText_'+id + '"><p>' + statusText + '</p></div>')
+                        .insertAfter($('#status_'+id).parent('div'));
                     });
                     
-                    $('input[id^="prodServiceInput_"]').change(function() {
+                    
+                    $('#prodServiceInput_'+index).change(function() {
                       if($(this).val()) {
-                        $("button[id='addProdService_"+ index +"']").removeAttr('disabled');
-                        $('#defaultPrice_'+index).val($(this).attr('price'));
-                        $('#currency_'+index).val($(this).attr('currency'));                        
+                        var id = getId($(this).attr('id'));
+                        $("#addProdService_"+id).removeAttr('disabled');
+                        $('#defaultPrice_'+id).val($(this).attr('price'));
+                        $('#currency_'+id).val($(this).attr('currency'));                        
                       }
                     });
                     
                     $('#amount_'+index).bind('change', function() {
-                      $('#price_'+index).val($(this).val() * $('#defaultPrice_'+index).val());
+                      var id = getId($(this).attr('id'));
+                      $('#price_'+id).val($(this).val() * $('#defaultPrice_'+id).val());
                     });
                     
                     var elem = $("#prodServices_"+index);
                     var MAX = parseInt("<%= MAX_PROD %>");
 
-                    $("button[id^='addProdService_']").bind('click', function() {
+                    $("#addProdService_"+index).bind('click', function() {
                       if(elem.find('li').length >= MAX) {
                           alert('You have reached the limit of products to request from the supplier.');
                           return false;
                       }
                       
-                      $('input[id="status_'+ index +'"]').trigger('change');
-                     
-                        var amount = $('#amount_'+index);                      
-                        if(!amount.val() || amount.val() < 1) {
-                          alert('Please select an amount first.');
-                          return false;
-                        }
-                        
-                        var input = $("#prodServiceInput_"+index);
-                        input.attr('price', $('#defaultPrice_'+index).val());                      
-                        var prodInput = $("#hiddenProdServicesList_"+index);
-                        var amountInput = $("#amountList_"+index);
-                        var priceInput = $("#priceList_"+index);                      
-                        var product = prodInput.val(), quantity = amountInput.val(), price = priceInput.val();
-                        //var req = input.val().length;// && $('#price').val().length && $('#currency').val().length;
+                      var id = getId($(this).attr('id'));
+                      $('#status_'+ id).trigger('change');                      
+                      var amount = $('#amount_'+id);                      
+                      if(!amount.val() || amount.val() < 1) {
+                        alert('Please select an amount first.');
+                        return false;
+                      }
+
+                      var input = $("#prodServiceInput_"+id);
+                      input.attr('price', $('#defaultPrice_'+id).val());                      
+                      var prodInput = $("#hiddenProdServicesList_"+id);
+                      var amountInput = $("#amountList_"+id);
+                      var priceInput = $("#priceList_"+id);                      
+                      var product = prodInput.val(), quantity = amountInput.val(), price = priceInput.val();
+                      //var req = input.val().length;// && $('#price').val().length && $('#currency').val().length;
      
-                        if(input.val() && input.val().length) {
-                          input.removeClass('errorField');
-                          var addedPrice = parseInt(amount.val()? amount.val() : 0) * parseFloat(input.attr('price')? input.attr('price') : 1);
-                          var price = parseFloat($('#price_'+index).val()) + addedPrice;
-                          $('#price_'+index).val(parseFloat(price));
+                      if(input.val() && input.val().length) {
+                        input.removeClass('errorField');
+                        var addedPrice = parseInt(amount.val()? amount.val() : 0) * parseFloat(input.attr('price')? input.attr('price') : 1);
+                        var price = parseFloat($('#price_'+id).val()) + addedPrice;
+                        $('#price_'+id).val(parseFloat(price));
+
+                        $('.rem').unbind('click').click(function() {
+                          var li = $(this).parent('li');
+                          var newIndex = elem.find('li').index(li);
+
+                          var arr = prodInput.val() && prodInput.val().length? 
+                              prodInput.val().split(',') : [];
+                          if(arr.length) arr.splice(newIndex, 1);
+                          prodInput.val(arr.length? arr : '');
+
+                          arr = amountInput.val() && amountInput.val().length? 
+                            amountInput.val().split(',') : [];
+                          if(arr.length) arr.splice(newIndex, 1);
+                          amountInput.val(arr.length? arr : '');
+
+                          arr = priceInput.val() && priceInput.val().length? 
+                            priceInput.val().split(',') : [];
+                          if(arr.length) arr.splice(newIndex, 1);
+                          priceInput.val(arr.length? arr : '');
+
+                          var newAmount = parseInt($('#totalAmount_'+id).val()) - parseInt(li.attr('amount'));
+                          var newPrice = parseFloat($('#price_'+id).val()) - parseFloat(li.attr('price'));
+                          $('#totalAmount_'+id).val(parseInt(newAmount));
+                          $('#price_'+id).val(parseFloat(newPrice));
+                          li.remove();
+                        });
                           
-                          $('.rem').unbind('click').click(function() {
-                            var li = $(this).parent('li');
-                            var newIndex = elem.find('li').index(li);
-                            
-                            var arr = prodInput.val() && prodInput.val().length? 
-                                prodInput.val().split(',') : [];
-                            if(arr.length) arr.splice(newIndex, 1);
-                            prodInput.val(arr.length? arr : '');
-                            
-                            arr = amountInput.val() && amountInput.val().length? 
-                              amountInput.val().split(',') : [];
-                            if(arr.length) arr.splice(newIndex, 1);
-                            amountInput.val(arr.length? arr : '');
-                            
-                            arr = priceInput.val() && priceInput.val().length? 
-                              priceInput.val().split(',') : [];
-                            if(arr.length) arr.splice(newIndex, 1);
-                            priceInput.val(arr.length? arr : '');
-                            
-                            var newAmount = parseInt($('#totalAmount_'+index).val()) - parseInt(li.attr('amount'));
-                            var newPrice = parseFloat($('#price_'+index).val()) - parseFloat(li.attr('price'));
-                            $('#totalAmount_'+index).val(parseInt(newAmount));
-                            $('#price_'+index).val(parseFloat(newPrice));
-                            li.remove();
-                          });
-                          
-                          var prodVal = input.val(), amountVal = amount.val(), priceVal = $('#price_'+index).val();
+                          var prodVal = input.val(), amountVal = amount.val(), priceVal = $('#price_'+id).val();
                           var bigPrice = amountVal * priceVal;
                           
                           var arr = prodInput.val() && prodInput.val().length? (prodInput.val()).split(',') : [];
@@ -562,7 +567,7 @@
                             return false;
                           }
                           
-                          elem.append("<li class='list-group-item' price='" + addedPrice + "' amount='" + amount.val() + "'><span>" + prodVal + ' - ' + input.attr('price') + ' ' + $('#currency_'+index).val() + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
+                          elem.append("<li class='list-group-item' price='" + addedPrice + "' amount='" + amount.val() + "'><span>" + prodVal + ' - ' + input.attr('price') + ' ' + $('#currency_'+id).val() + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
                           arr.push(prodVal);
                           prodInput.val((arr));
 
@@ -574,7 +579,7 @@
                           arr.push(bigPrice);
                           priceInput.val((arr));
                           
-                          $('#totalAmount_'+index).val(parseInt($('#totalAmount_'+index).val()) + parseInt(amountVal));
+                          $('#totalAmount_'+id).val(parseInt($('#totalAmount_'+id).val()) + parseInt(amountVal));
                           $(input).val('');//.removeAttr('price');                         
                         } else {
                             alert('Please enter valid data for the product to be added.');

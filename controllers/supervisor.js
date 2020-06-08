@@ -30,13 +30,140 @@ exports.getIndex = (req, res) => {
 
 
 exports.getConfirmation = (req, res) => {
+  if(!req.session || !req.session.supplierId) {
+    req.session = req.session? req.session : {};
+    req.session.supplierId = req.params.token? req.params.token._userId : null;
+  }
+  
   res.render('supervisor/confirmation', {token: req.params.token});
+}
+
+exports.getDelete = (req, res) => {
+  res.render('buyer/delete', {id: req.params.id});
 }
 
 
 exports.getResendToken = (req, res) => {
   res.render('supervisor/resend');
 }
+
+
+function removeSupervisor(id, req, res, db) {//Tokens first, user last.
+  db.collection('supervisortokens').deleteMany({ _userId: id }, function(err, resp1) {
+  if(err) {
+    throw err;
+    }
+
+    db.collection('supervisors').deleteOne({ _id: id }, function(err, resp2) {
+      if(err) {
+        throw err;
+      }
+      //Mail to the ex-Supervisor to confirm their final deletion:
+        var email = {
+          from: 'peter@uniteprocurement.com',
+          to: req.body.emailAddress, 
+          subject: 'UNITE - Supervisor Account Deletion Completed',
+          text: 
+            "Hello " + req.body.organizationName +
+            ",\n\nWe are sorry to see you go from the UNITE Public Procurement Platform!\n\nYour Supervisor account has just been terminated, as a result of your decision to quit UNITE, and subsequently all your associated Buyers, including their personal data such as placed orders, sent/received messages and any user tokens, have also been safely removed.\nWe hope to see you and your Buyers back in the coming future. If you have improvement suggestions for us, please send them to our e-mail address above.\n\nWith kind regards,\nThe UNITE Public Procurement Platform Team"
+        };
+
+        sgMail.send(email, function (err, resp3) {
+           if (err ) {
+            console.log(err.message);
+             throw err;
+          }
+
+            console.log('A termination confirmation email has been sent to ' + req.body.emailAddress + '.');
+            req.flash('success', 'A termination confirmation email has been sent to ' + req.body.emailAddress + '.\n' + "Supervisor account finished off successfully!");
+            db.close();
+            return res.redirect("/supervisor/sign-in");
+            //return res.status(200).send('A termination confirmation email has been sent to ' + req.body.emailAddress + '.');
+          });
+    });
+  });
+}
+
+
+exports.postDelete = function (req, res, next) {  
+  var id = req.body.id;
+  var uniteID = req.body.uniteID;
+  
+  try {
+    //Find Supervisor's Buyers first:
+    MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
+      db.collection('buyers').find({ organizationUniteID: uniteID }).exec().then((buyers) => {
+        
+        if(!buyers || !buyers.length) {//No buyer data, let's directly pass to Supervisor.
+          removeSupervisor(id, req, res, db);
+        } else {
+          var len = buyers.length;
+          
+          //Delete buyers data one by one:
+          for(var i in buyers) {
+            var theId = buyers[i]._id;
+            var emailAddress = buyers[i].emailAddress, organizationName = buyers[i].organizationName;
+            
+            //Bids:
+            db.collection('bidrequests').deleteMany({ buyer: theId }, function(err, resp) {
+              if(err) {
+                throw err;
+              }
+
+              //Now delete the messages sent/received by Buyer:
+              db.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp0) {
+                if(err) {
+                  throw err;
+                }
+
+                //Remove the possibly existing Buyer Tokens:
+                db.collection('buyertokens').deleteMany({ _userId: theId }, function(err, resp1) {
+                  if(err) {
+                    throw err;
+                  }
+
+                  //And now, remove the Buyer themselves:
+                  db.collection('buyers').deleteOne({ _id: theId }, function(err, resp2) {
+                    if(err) {
+                      throw err;
+                    }
+
+                    //Finally, send a mail to the ex-Buyer:
+                    var email = {
+                      from: 'peter@uniteprocurement.com',
+                      to: emailAddress, 
+                      subject: 'UNITE - Buyer Account Deletion Completed Upon Supervisor Quit',
+                      text: 
+                        "Hello " + organizationName +
+                        ",\n\nWe are sorry to see you go from the UNITE Public Procurement Platform!\n\nYour Buyer account has just been terminated, as a result of the decision of your Supervisor to quit UNITE, and subsequently all your personal data such as placed orders, sent/received messages and any user tokens have also been lost.\nWe hope to see you and your Supervisor back in the coming future. If you have improvement suggestions for us, please send them to our e-mail address above.\n\nWith kind regards,\nThe UNITE Public Procurement Platform Team"};
+
+                    sgMail.send(email, function (err, resp3) {
+                       if (err ) {
+                        console.log(err.message);
+                         throw err;
+                      }
+
+                        console.log('A termination confirmation email has been sent to ' + emailAddress + '.');
+                        req.flash('success', 'A termination confirmation email has been sent to ' + emailAddress + '.\n' + "Buyer account finished off successfully!");                        
+                        //return res.status(200).send('A termination confirmation email has been sent to ' + req.body.emailAddress + '.');
+                      });
+                  });
+                });
+              });
+            });
+            
+            if(i == len-1) {//All buyers are lost, now let's pass to the Supervisor themselves and remove their data.              
+              removeSupervisor(id, req, res, db);
+            }
+          }
+        }
+      });
+    });
+  } catch {
+    res.redirect("/supervisor");
+  }
+}
+
 
 
 exports.postConfirmation = function (req, res, next) {

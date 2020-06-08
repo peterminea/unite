@@ -81,6 +81,10 @@ const bidRequestSchema = new Schema({
     type: String,
     required: false
   },
+  specialMentions: {
+    type: String,
+    required: false
+  },
   status: {
     type: Number,
     required: true,

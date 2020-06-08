@@ -1,0 +1,54 @@
+<html>
+  
+  <head>
+    <title>Chat Login for UNITE</title>
+    <meta charset="utf-8">    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Another cool thing made with Glitch">
+    <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="/https.js"></script>
+    <script src="/autocomp.js"></script>
+  </head>
+  
+  <body>
+    
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
+    <a class="navbar-brand" href="/">UNITE</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </nav>
+    <div class="container">
+      <div>  
+        <input type="button" class="btn btn-primary" value="Back" onclick="history.go(-1)">
+      </div>
+      <div>
+        <h1>
+          Join Room
+        </h1>
+        <form action="">
+          <div class="form-group">
+            <label>Display Name</label>
+            <input type="text" name="username" placeholder="Name" required>
+            <label>Room</label>
+            <input type="text" name="room" placeholder="Room" required>
+            <button class="btn btn-danger" type="submit">
+              Join Chat!
+            </button>
+          </div>
+        </form>
+      </div>
+      
+    </div>
+    
+  </body>
+  
+</html>
