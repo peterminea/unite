@@ -19,6 +19,7 @@ dependencies:
   fs-extra: 9.0.1
   http: 0.0.0
   jsonp: 0.2.1
+  moment: 2.26.0
   mongoose: 5.9.18
   multer: 1.4.2
   process: 0.11.10
@@ -1026,6 +1027,10 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-NKmAlESf6jMGym1++R0Ra7wvhV+wFW63FaSOFPwRahvea0gMUcGUhVeAg/0BC0wiv9ih5NYPB1Wn1UEI1/L+xQ==
+  /moment/2.26.0:
+    dev: false
+    resolution:
+      integrity: sha512-oIixUO+OamkUkwjhAVE18rAMfRJNsNe/Stid/gwHSOfHrOtw9EhAY2AHvdKZ/k/MggcYELFCJz/Sn2pL8b8JMw==
   /mongodb/3.5.7:
     dependencies:
       bl: 2.2.0
@@ -1688,6 +1693,7 @@ specifiers:
   fs-extra: ^9.0.1
   http: ^0.0.0
   jsonp: ^0.2.1
+  moment: ^2.26.0
   mongoose: ^5.9.18
   multer: ^1.4.2
   process: ^0.11.10

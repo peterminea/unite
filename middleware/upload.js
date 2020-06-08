@@ -1,6 +1,7 @@
 const util = require("util");
 const path = require("path");
 const multer = require("multer");
+const moment = require('moment');
 const dateformat = require("dateformat");
 
 var storage = multer.diskStorage({
@@ -17,7 +18,8 @@ var storage = multer.diskStorage({
     }
 
     var date = dateformat(new Date(), 'dddd, mmmm dS, yyyy, h:MM:ss TT');//Date.now()
-    var filename =  'UNITE-'+ date + '-' + file.originalname;
+    var date2 = moment(new Date().getTime()).format('h:mm a');
+    var filename =  'UNITE-'+ date2 + '-' + file.originalname;
     callback(null, filename);
   }
 });

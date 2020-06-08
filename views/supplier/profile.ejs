@@ -308,11 +308,14 @@
           </div>
         </div>
         <br>
-
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <button type="submit" disabled id="updateProfile" value="Update Profile"
           class="btn btn-primary btn-block btn-lg">Update Profile</button>
       </form>
+        <div class="form-group mr-2">
+          <label>Terminate your account</label>
+          <a href="../delete/<%= profile._id %>"><button class="btn-secondary btn" id="termination" title="Close Account"></a>
+        </div>
     </div>
   </div>
 </body>

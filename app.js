@@ -20,7 +20,7 @@ const server = http.createServer(app);
 const socket = socketio(server);
 const BadWords = require('bad-words');
 const crypto = require('crypto');
-
+const moment = require('moment');
 
 const BASE = process.env.BASE;
 const URI = process.env.MONGODB_URI;
@@ -118,7 +118,7 @@ app.post('/processBuyer', (req, res) => {
   });
 });
 
-
+/*
 function compareTimes(a, b) {
   if ( a.time < b.time ){
     return -1;
@@ -127,40 +127,22 @@ function compareTimes(a, b) {
     return 1;
   }
   return 0;
-}
+}*/
 
-//Lambda variant: allMessages.sort((a,b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0));
+//Lambda variant: messages.sort((a,b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0));
 app.get('/messages', (req, res) => {
-  Message.find({
-      from: req.query.from,
-      to: req.query.to
-    }, (err, messages) => {
+  Message.find( { $or: [ { from: req.query.from, to: req.query.to }, { from: req.query.to, to: req.query.from } ] },
+     (err, messages) => {
       if(err) {
         return console.error(err.message);        
       }
-   
-      Message.find({
-        from: req.query.to, 
-        to: req.query.from
-      }, (err, messages2) => {
-          if(err) {
-          return console.error(err.message);        
-        }
-        
-        var allMessages = [];
-        for(var msg of messages) {
-          allMessages.push(msg);
-        }
-        
-        for(var msg of messages2) {
-          allMessages.push(msg);
-        }
-        //console.log(allMessages.length);
-        allMessages.sort(compareTimes);
-        res.send(allMessages);
-      });
+       
+      //messages.sort(compareTimes);
+      messages.sort((a,b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0));
+      res.send(messages);
   });
 });
+
 
 //wire up the server to listen to our port 5000
 server.listen(port, () => {
@@ -179,13 +161,24 @@ app.post('/messages', (req, res) => {
 });
 
 let count = 0;
-console.log(Date.now() + ' ' + new Date());
+var x = `${191}, ${192}`;
+console.log(x);
+
+const {generateMessage, generateLocationMessage} = require('./public/chatMessages');
+
+console.log(Date.now() + ' ' + new Date() + ' ' + new Date().getTime());
 
 socket.on("connection", (sock) => {
   console.log("User connected!");  
   sock.emit('countUpdated', count);
-  sock.emit('message', 'Welcome to the UNITE Chat!');  
-  sock.broadcast.emit('message', 'We have a new user joined in Chat!');
+  
+  sock.on('join', ({ username, room }) => {
+    sock.join(room);
+    sock.emit('message', generateMessage('Welcome to the UNITE chat!'));
+    sock.broadcast.to(room).emit('message', generateMessage(`We have a new user, ${username}, that has joined us in Chat!`));
+  });
+  
+   
   
   sock.on('increment', () => {
     count++;
@@ -194,42 +187,47 @@ socket.on("connection", (sock) => {
   });
   
   sock.on('sendMessage', (messageObj, callback) => {
-    const filter = new BadWords();
-    if(filter.isProfane(messageObj)) {
-      return callback('Please be careful with the words you use. Delivery failed. Thank you for understanding!');
-    }
-    
     socket.emit('message', messageObj);
     callback('Delivered!');
   });
   
   sock.on("disconnect", function() {
     console.log("User disconnected!");
-    socket.emit('message', 'Someone has just left us!');
+    socket.emit('message', generateMessage('Someone has just left us!'));
   });
 
   sock.on("stopTyping", () => {
     sock.broadcast.emit("notifyStopTyping");
   });
   
+  
+  
   sock.on('sendLocation', (coords, callback) => {console.log(coords);
-    socket.emit('message', 'Location: ' + 'https://www.google.com/maps?q=' + coords.latitude + ',' + coords.longitude + '');
+    socket.emit('locationMessage', generateLocationMessage(`https://www.google.com/maps?q=${coords.latitude},${coords.longitude}`));
     console.log('https://www.google.com/maps?q=' + coords.latitude + ',' + coords.longitude + '');
     callback();
   });
 
-  sock.on("chatMessage", function(msgData) {
+  sock.on("chatMessage", function(msgData, callback) {
     msgData.time = Date.now();//dateformat(new Date(), 'dddd, mmmm dS, yyyy, h:MM:ss TT');
     
     sock.broadcast.emit("received", {
       message: msgData.message
     });
     
+    const filter = new BadWords();
+    if(filter.isProfane(msgData.message)) {      
+      return callback(console.log('Please be careful with the words you use. Delivery failed. Thank you for understanding!'));
+    }
+    
+    socket.to('Chamber room').emit('message', generateMessage('Delivered!'));
+    
     var mesg = new Message(msgData);
     mesg.save((err) => {
       if(err) {
         console.error(err.message);
       }
+      callback();
     })
   });
   
@@ -242,7 +240,6 @@ socket.on("connection", (sock) => {
       message: data.message
     });    
   });
-  
 });
 
 
@@ -257,7 +254,8 @@ var storage = multer.diskStorage({
   },
   filename: function (req, file, callback) {// + path.extname(file.originalname)
     var date = dateformat(new Date(), 'dddd-mmmm-dS-yyyy-h:MM:ss-TT');//Date.now()
-    callback(null, file.fieldname + '-' + date + '-' + file.originalname);//The name itself.
+    var date2 = moment(new Date().getTime()).format('HH:mm:ss a');
+    callback(null, file.fieldname + '-' + date2 + '-' + file.originalname);//The name itself.
   }
 });
 
@@ -956,7 +954,9 @@ MongoClient.connect(URI, {useUnifiedTopology: true}, (err, client) => {
   productList.push("Product name: 'Frames', amount: 3, price: 15.");
   
   var myQuery = {}, newValues = { $set: {productsServicesOffered: productsList, amountList: amountList, priceList: priceList, products: productList} };
+  
   db.collection("bidrequests").updateMany(myQuery, newValues, function(err, obj) {});
+   
   
   //db.collection("bidrequests").updateMany({}, { $set: {itemDescriptionLong: "Pictures on walls in isolation chambers for COVID patients", buyerEmail: "peter.minea@gmail.com", requestName: "Basic Tender Request - May 30th, 2020"} }, function(err, obj) {}); 
   //db.collection("buyers").updateMany({}, { $set: {contactMobileNumber: "0732 060 807"} }, function(err, obj) {});
@@ -1003,6 +1003,8 @@ MongoClient.connect(URI, {useUnifiedTopology: true}, (err, client) => {
         db.collection('productservices').updateOne({_id: x._id}, {$set: {price: parseFloat(x.price + 0.5)} });
       });      
       */
+  //db.collection("bidrequests").updateMany({}, { $set: {specialMentions: 'Buyer sent you some questions to be answered about the blankets to be used at the South Park Hospital.'} }, function(err, obj) {});
+  
 });
 // Database configuration and test data saving:
 

@@ -68,7 +68,7 @@
           <br>
           <button type="button" class="btn btn-dark" data-target="#buyerDetailsModal" data-toggle="modal">View Buyer Details</button>
         </div>
-        <form method="POST">
+        <form method="POST" id="mainForm">
           <div class="modal fade" id="buyerDetailsModal" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
 						
@@ -209,19 +209,56 @@
             <span><%= statusesJson %></span>
           <% }  %>
         </div>
+        <div class="form-group" id="acceptBid" style="display: none">
+					<label>Currency</label>
+          <button class="btn-primary btn" id="acceptButton" title="Accept Buyer's Bid"></button>
+				</div>
+        <input type="hidden" name="requestId" value="<%= request._id %>">
         <script type="text/javascript">
-          
           var x = JSON.parse($('#statusJsonValues span').first().text());
           
-           $('select[id="statuses"]')
+           $('#statuses')
             .bind('change', function() {
             $('#status')        
               .val($(this)
                    .find('option:selected')
                    .attr('value'));
+             
+             var that = $(this);
+             
+             if($('#status').val() == x.BUYER_ACCEPT_PRICE) {
+                $('#acceptBid').show();
+                $('#acceptButton').unbind('click').bind('click', function() {
+
+                  if(confirm('Are you sure you want to accept this Bid from ' + $('#buyerName').val() + '?')) {
+                    $('#status').val(x.SUPP_START_DELIVERY);
+                    
+                    that.find('option')
+                      .eq(x.SUPP_START_DELIVERY)
+                      .attr('selected', 'selected');
+
+                    $('#updateBidStatus').trigger('click');
+                  } else {
+                    return false;
+                  }
+                });
+             } else {
+               $('#acceptBid').hide();
+             }
 
               $('#updateBidStatus')
                 .removeAttr('disabled');
+          });
+          
+          $('#mainForm').submit(function(e) {
+            //e.preventDefault();
+            
+            if(!($('#messageArea').text()) 
+               && !confirm('Are you sure you want to update Bid Status without any mentions for the Buyer ' + $('input[name="buyerName"]').val() + '?')) {
+              return false;
+            }
+            
+          return true;
           });
           
           $('#statuses').find('option:gt(' + x.PAYMENT_DELIVERY_DONE + ')').attr('disabled', 'disabled');//Cancel from button and make the content unavailable.
@@ -234,10 +271,10 @@
           </script>
           
           <div class="form-group">
-            <h3>Message for Buyer</h3>
+            <h3>Mentions for Buyer</h3>
             <br>
             <label>Type your message below</label>
-            <textarea name="message" class="form-control"></textarea>
+            <textarea name="message" id="messageArea" class="form-control"><%= request.specialMentions %></textarea>
             <input type="hidden" name="from" value="<%= supplier._id %>">
             <input type="hidden" name="to" value="<%= buyer._id %>">
             <input type="hidden" name="reqId" value="<%= request._id %>">
@@ -246,7 +283,7 @@
             <input type="hidden" name="receiver" value="<%= buyer.organizationName %>">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <button class="btn btn-primary" title="Update Bid Status / Message Buyer" disabled type="submit" id="updateBidStatus">
-                Update Status & Send Message
+                Update Status & Send Mentions
             </button>
           </div>
 
@@ -260,7 +297,7 @@
               <% if (request.status == 5) { %> "Supplier cancelled the request." <% } %>
               <% if (request.status == 6) { %> "Buyer cancelled the request." <% } %>
             </span>
-          </div>          
+          </div>
       </form>
 <!-- Supplier=sender, buyer=receiver. -->
         <div class="container mt-4">

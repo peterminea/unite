@@ -128,6 +128,7 @@ exports.postCancelBid = (req, res) => {
 
 exports.getConfirmation = (req, res) => {
   if(!req.session || !req.session.supplierId) {
+    req.session = req.session? req.session : {};
     req.session.supplierId = req.params.token? req.params.token._userId : null;
   }
   
@@ -135,10 +136,91 @@ exports.getConfirmation = (req, res) => {
     token: req.params.token });
 }
 
+exports.getDelete = (req, res) => {
+  res.render('buyer/delete', {id: req.params.id});
+}
 
 exports.getResendToken = (req, res) => {
   res.render("supplier/resend");
 }
+
+
+exports.postDelete = function (req, res, next) {  
+  var id = req.body.id;
+  try {
+    //Delete Supplier's Capabilities first:
+    MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
+      db.collection('capabilities').deleteMany({ supplier: id }, function(err, resp) {
+        if(err) {
+          throw err;
+        }
+        
+        //Products/Services offered:
+        db.collection('productservices').deleteMany({ supplier: id }, function(err, resp0) {
+          if(err) {
+              throw err;
+            }
+
+          //Now delete the messages sent/received by Supplier:
+          db.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp1) {
+            if(err) {
+              throw err;
+            }
+    
+            //The received bids:
+            db.collection('bidrequests').deleteMany({ supplier: id }, function(err, resp2) {
+              if(err) {
+                throw err;
+              }
+            
+              //Remove the possibly existing Supplier Tokens:
+              db.collection('suppliertokens').deleteMany({ _userId: id }, function(err, resp3) {
+                if(err) {
+                  throw err;
+                }
+
+                //And now, remove the Supplier themselves:
+                db.collection('suppliers').deleteOne({ _id: id }, function(err, resp4) {
+                  if(err) {
+                    throw err;
+                  }
+
+                  //Finally, send a mail to the ex-Buyer:
+                  var email = {
+                    from: 'peter@uniteprocurement.com',
+                    to: req.body.emailAddress, 
+                    subject: 'UNITE - Supplier Account Deletion Completed',
+                    text: 
+                      "Hello " + req.body.companyName +
+                      ",\n\nWe are sorry to see you go from the UNITE Public Procurement Platform!\n\nYour Supplier account has just been terminated and all your data such as received orders, products/services offered, listed capabilities, sent/received messages, and any user tokens have also been lost.\nWe hope to see you back in the coming future. If you have improvement suggestions for us, please send them to our e-mail address above.\n\nWith kind regards,\nThe UNITE Public Procurement Platform Team"
+                  };
+
+                  sgMail.send(email, function (err, resp5) {
+                     if (err ) {
+                      return console.log(err.message);
+                       /*return res.status(500).send({
+                          msg: err.message 
+                        });*/
+                    }
+
+                      console.log('A termination confirmation email has been sent to ' + req.body.emailAddress + '.');
+                      req.flash('success', 'A termination confirmation email has been sent to ' + req.body.emailAddress + '.\n' + "Supplier account finished off successfully!");
+                      db.close();
+                      return res.redirect("/supplier/sign-in");
+                      //return res.status(200).send('A termination confirmation email has been sent to ' + req.body.emailAddress + '.');
+                    });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  } catch {
+    res.redirect("/supplier");
+  }
+}
+
 
 
 exports.postConfirmation = function(req, res, next) {
@@ -788,7 +870,7 @@ exports.postBidRequest = (req, res) => {
           .catch(console.error);              
       }
     });
-    res.redirect('/supplier/index');
+    if(res) res.redirect('/supplier/index');
   });
   //req.originalUrl  
  }

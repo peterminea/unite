@@ -57,7 +57,7 @@ exports.postIndex = (req, res) => {
       }
       
     var promise = BidStatus.find({}).exec();
-    promise.then((statuses) => {//console.log(JSON.stringify(statusesJson)); console.log(statuses);
+    promise.then((statuses) => {
         res.render("buyer/index", {
           buyer: req.session.buyer,
           suppliers: suppliers2,
@@ -106,6 +106,9 @@ exports.postIndex = (req, res) => {
       price: req.body.price,
       isCancelled: false,
       currency: req.body.currency,
+      specialMentions: req.body.specialMentions? 
+        req.body.specialMentions 
+          : req.body.buyerName + ' has sent a new Order to ' + req.body.supplierName + ', and the price is ' + req.body.price + ' ' + req.body.currency + '.',
       createdAt: req.body.createdAt? req.body.createdAt : Date.now(),
       updatedAt: Date.now(),
       buyer: req.body.buyer,
@@ -156,31 +159,10 @@ exports.postViewBids = (req, res) => {
           console.error(err.message);
           return false;
         }
-        req.flash('success', 'Bid status updated successfully!');        
         
-      if(req.body.message) {
-        const newMessage = new Message({
-          to: req.body.to,
-          from: req.body.from,
-          sender: req.body.sender,
-          receiver: req.body.receiver,
-          bidRequestId: req.body.reqId,
-          message: req.body.message
-        });
-
-        newMessage
-          .save()
-          .then( (err, result) => {
-            if(err) {
-              return console.error(err.message);        
-            }
-
-            req.flash('', 'Message sent to Supplier!');
-            db.close();
-            res.redirect('back');            
-        })
-          .catch(console.error);              
-      }
+        req.flash('success', 'Bid status updated successfully!');        
+        db.close();
+        res.redirect('back');
     });
   });  
 }
@@ -232,12 +214,83 @@ exports.postCancelBid = (req, res) => {
 }
 
 exports.getConfirmation = (req, res) => {
+    if(!req.session || !req.session.supplierId) {
+    req.session = req.session? req.session : {};
+    req.session.supplierId = req.params.token? req.params.token._userId : null;
+  }
+  
   res.render('buyer/confirmation', {token: req.params.token});
 }
 
+exports.getDelete = (req, res) => {
+  res.render('buyer/delete', {id: req.params.id});
+}
 
 exports.getResendToken = (req, res) => {
   res.render('buyer/resend');
+}
+
+
+exports.postDelete = function (req, res, next) {  
+  var id = req.body.id;
+  try {
+    //Delete Buyer's Bid Requests first:
+    MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
+      db.collection('bidrequests').deleteMany({ buyer: id }, function(err, resp) {
+        if(err) {
+          throw err;
+        }
+
+        //Now delete the messages sent or received by Buyer:
+        db.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp0) {
+          if(err) {
+            throw err;
+          }
+
+          //Remove the possibly existing Buyer Tokens:
+          db.collection('buyertokens').deleteMany({ _userId: id }, function(err, resp1) {
+            if(err) {
+              throw err;
+            }
+
+            //And now, remove the Buyer themselves:
+            db.collection('buyers').deleteOne({ _id: id }, function(err, resp2) {
+              if(err) {
+                throw err;
+              }
+
+              //Finally, send a mail to the ex-Buyer:
+              var email = {
+                from: 'peter@uniteprocurement.com',
+                to: req.body.emailAddress, 
+                subject: 'UNITE - Buyer Account Deletion Completed',
+                text: 
+                  "Hello " + req.body.organizationName +
+                  ",\n\nWe are sorry to see you go from the UNITE Public Procurement Platform!\n\nYour Buyer account has just been terminated and all your data such as placed orders, sent/received messages and any user tokens have also been lost.\nWe hope to see you back in the coming future. If you have improvement suggestions for us, please send them to our e-mail address above.\n\nWith kind regards,\nThe UNITE Public Procurement Platform Team"
+              };
+
+              sgMail.send(email, function (err, resp3) {
+                 if (err ) {
+                  console.log(err.message);
+                   return res.status(500).send({
+                      msg: err.message 
+                    });
+                }
+
+                  console.log('A termination confirmation email has been sent to ' + req.body.emailAddress + '.');
+                  req.flash('success', 'A termination confirmation email has been sent to ' + req.body.emailAddress + '.\n' + "Buyer account finished off successfully!");
+                  db.close();
+                  return res.redirect("/buyer/sign-in");
+                  //return res.status(200).send('A termination confirmation email has been sent to ' + req.body.emailAddress + '.');
+                });
+            });
+          });
+        });
+      });
+    });
+  } catch {
+    res.redirect("/buyer");
+  }
 }
 
 
