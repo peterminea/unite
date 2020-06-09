@@ -160,24 +160,37 @@ app.post('/messages', (req, res) => {
   })
 });
 
+
 let count = 0;
 var x = `${191}, ${192}`;
 console.log(x);
-
-const {generateMessage, generateLocationMessage} = require('./public/chatMessages');
-
+const {generateMessage, generateSimpleMessage, generateLocationMessage} = require('./public/chatMessages');
+const { addUser, removeUser, getUser, getUsersInRoom } = require('./public/chatUsers');
 console.log(Date.now() + ' ' + new Date() + ' ' + new Date().getTime());
 
 socket.on("connection", (sock) => {
   console.log("User connected!");  
   sock.emit('countUpdated', count);
   
-  sock.on('join', ({ username, room }) => {
-    sock.join(room);
-    sock.emit('message', generateMessage('Welcome to the UNITE chat!'));
-    sock.broadcast.to(room).emit('message', generateMessage(`We have a new user, ${username}, that has joined us in Chat!`));
+  sock.on('join', (options, callback) => {
+    console.log('New WebSocket Connection:');
+    
+    const {error, user} = addUser({ id: socket.id, ...options });
+    if(error) {
+      return callback(error);
+    }
+    
+    sock.join(user.room);
+    sock.emit('message', generateSimpleMessage('Admin', 'Welcome to the UNITE chat!'));
+    sock.broadcast.to(user.room).emit('message', generateSimpleMessage('Admin', `We have a new user, ${user.username}, that has joined us in Chat!`));
+    
+    socket.to(user.room).emit('roomData', {
+      room: user.room,
+      users: getUsersInRoom(user.room)
+    });
+    
+    callback();
   });
-  
    
   
   sock.on('increment', () => {
@@ -186,30 +199,29 @@ socket.on("connection", (sock) => {
     socket.emit('countUpdated', count);//Globally
   });
   
-  sock.on('sendMessage', (messageObj, callback) => {
-    socket.emit('message', messageObj);
-    callback('Delivered!');
-  });
   
   sock.on("disconnect", function() {
     console.log("User disconnected!");
-    socket.emit('message', generateMessage('Someone has just left us!'));
+    const user = removeUser(socket.id);
+    
+    if(user) {
+      socket.to(user.room).emit('message', generateSimpleMessage('Admin', `${user.username} has just left us!`));
+      socket.to(user.room).emit('roomData', {
+        room: user.room,
+        users: getUsersInRoom(user.room)
+      });
+    }
   });
+  
 
   sock.on("stopTyping", () => {
     sock.broadcast.emit("notifyStopTyping");
   });
   
-  
-  
-  sock.on('sendLocation', (coords, callback) => {console.log(coords);
-    socket.emit('locationMessage', generateLocationMessage(`https://www.google.com/maps?q=${coords.latitude},${coords.longitude}`));
-    console.log('https://www.google.com/maps?q=' + coords.latitude + ',' + coords.longitude + '');
-    callback();
-  });
 
-  sock.on("chatMessage", function(msgData, callback) {
-    msgData.time = Date.now();//dateformat(new Date(), 'dddd, mmmm dS, yyyy, h:MM:ss TT');
+  sock.on("sendMessage", async function(msgData, callback) {
+    const user = getUser(sock.id);
+    msgData.time = new Date().getTime();//dateformat(new Date(), 'dddd, mmmm dS, yyyy, h:MM:ss TT');
     
     sock.broadcast.emit("received", {
       message: msgData.message
@@ -220,25 +232,31 @@ socket.on("connection", (sock) => {
       return callback(console.log('Please be careful with the words you use. Delivery failed. Thank you for understanding!'));
     }
     
-    socket.to('Chamber room').emit('message', generateMessage('Delivered!'));
-    
     var mesg = new Message(msgData);
-    mesg.save((err) => {
+    //if(msgData.)
+    await mesg.save((err) => {
       if(err) {
-        console.error(err.message);
+       console.error(err.message);
+        throw new Error();
       }
-      callback();
-    })
+    });
+    
+    socket.to(user.room).emit('message', generateMessage(user.username, msgData));
+    callback();
   });
   
+  
+  sock.on('sendLocation', (coords, callback) => {console.log(coords);
+    const user = getUser(sock.id);
+    socket.to(user.room).emit('locationMessage', generateLocationMessage(user.username,  `https://www.google.com/maps?q=${coords.latitude},${coords.longitude}`));
+    console.log('https://www.google.com/maps?q=' + coords.latitude + ',' + coords.longitude + '');
+    callback();
+  });
+  
+  
   sock.on("typing", (data) => {
-    sock.broadcast.emit("notifyTyping", {
-      user: data.user,
-      from: data.from,
-      to: data.to,
-      reqId: data.reqId,
-      message: data.message
-    });    
+    const user = getUser(sock.id);
+    sock.broadcast.to(user.room).emit("notifyTyping", generateSimpleMessage('Admin', `${user.username} is typing...`));
   });
 });
 
@@ -314,6 +332,9 @@ app.post("/uploadfile", upload.single("single"), (req, res, next) => {
 });
 
 
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
 app.post('/purchase', (req, res, next) => {
     const headers = {
     "Access-Control-Allow-Origin": "*",
@@ -343,8 +364,27 @@ app.post('/purchase', (req, res, next) => {
           charge: charge
         })
       };
+    
+    //Send an e-mail to user:
+    var mailOptions = {
+      from: 'peter@uniteprocurement.com',
+      to: req.body.emailAddress,
+      subject: 'Order Paid Successfully!',
+      text: "Hello,\n\n" +
+            "We inform you that your purchase in value of" + req.body.amount + " " + req.body.currency +                
+            " has been successfully completed. Please wait for your delivery to finish.\nCurrently it was just a test, nothing for real yet though :)."
+      + "\n\nWith kind regards,\nThe UNITE Public procurement Platform Team"
+    };
 
-    res.json(response);
+    sgMail.send(mailOptions, function (err, resp) {
+       if (err ) {
+         console.error(err.message);
+         return res.status(500).send({ msg: err.message });
+      }
+        console.log('Message sent: ' + resp? resp.response : req.body.emailAddress);
+        req.flash('success', 'A verification email has been sent to ' + req.body.emailAddress, + '.');
+        res.json(response);
+      });
   }).catch((err) => {
       console.log('Payment failed! Please repeat the operation.\n' + err);
       /*const response = {

@@ -19,25 +19,25 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/rexeze/formatTimeStamp/src/index.min.js"></script>
-  <script src="/https.js"></script>
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script> 
-  <script src="moment.js"></script>
--->
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/3.0.1/mustache.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.6.0/qs.min.js"></script>
+  <script src="/https.js"></script>
   <script src="/autocomp.js"></script>
   <script type="text/javascript"> 
     $(document).ready(function() {
-      //$('nav').css({'position: relative', 'z-index': 1});
       const token = $("input[name='_csrf']").val();
       const sock = io();
-      const messageTemplate = $('#message-template').val();
-      const locationMessageTemplate = $('#location-message-template').val();      
-      const {username, room} = Qs.parse(location.search, {ignoreQueryPrefix: true});
-
+      
+      //Templating:
+      const messageTemplate = $('#message-template').text();
+      const locationMessageTemplate = $('#location-message-template').text();      
+      const sidebarTemplate = $('#sidebar-template').text();      
+      
+      //Inputs (plain JS):
       var messages = document.getElementById("messages");
+      var $messages = document.getElementById("messages2");
       let messageInput = document.getElementById("message");
       let sender = document.getElementById("from");
       let receiver = document.getElementById("to");
@@ -46,6 +46,28 @@
       let requestId = document.getElementById("reqId");
       let reqName = document.getElementById("reqName");
       let typing = document.getElementById("typing");
+      
+      const {username, room} = Qs.parse(location.search, {ignoreQueryPrefix: true});
+      
+      const autoscroll = () => {
+        //var $messages = $('#messages2')[0];        
+        const $newMessage = $messages.lastElementChild;
+        const newMessageStyles = getComputedStyle($newMessage);
+        const newMessageMargin = parseInt(newMessageStyles.marginBottom);
+        const newMessageHeight = $newMessage.offsetHeight + newMessageMargin;
+        const visibleHeight = $messages.offsetHeight;
+        const containerHeight = $messages.scrollHeight;
+        const scrollOffset = $messages.scrollTop + offsetHeight;
+        
+        if(containerHeight - newMessageHeight <= scrollOffset) {
+          $messages.scrollTop = $messages.scrollHeight;
+        }        
+      };
+      
+      if(reqName.value && reqName.value != 'None') {
+          $(messageInput).append('<h3 style="color: blue">Chat about the Order "' + reqName.value + '"</h3>');
+      }      
+      
 
       function putMessages(messages, data) {
         let li = document.createElement("li");
@@ -86,38 +108,87 @@
           });
         }
 
+      
         getMessages();
-
         sock.on('countUpdated', (count) => {
           console.log('The connections count has been updated! It is ' + count + '.');
         });
+      
 
         $('#increment').bind('click', function() {
           console.log('Clicked!');
           sock.emit('increment');
         });
       
-        sock.on('locationMessage', (url) => {
+      
+        $("#message-form").submit(function(e) {
+            e.preventDefault();//prevents page reloading
+
+            var msg = {
+               from: sender.value,
+               to: receiver.value,
+               sender: $('#fromName').val(),
+               receiver: $('#toName').val(),
+               bidRequestId: !requestId.value || requestId.value.length < 12? null : requestId.value,
+               //bidRequestName: reqName.value == 'None'? null : reqName.value,
+               message: $("#message").val()
+            }
+
+            socket.emit('sendMessage', msg);
+            $('#send').attr('disabled', 'disabled');
+        });
+      
+      
+        sock.emit("sendMessage", obj, (error) => {
+          $('#send').removeAttr('disabled');
+
+          if(typeof error !== 'undefined') {
+             $("#message").val("").focus();
+            return false;
+          }
+
+          let li = document.createElement("li");
+          messages.appendChild(li).append($("#message").val());
+          $("#message").val("").focus();
+          let span = document.createElement("span");
+          messages.appendChild(span).append("From " + $('#fromName').val() + " to " + $('#toName').val() + ": " + "Just now.");
+          console.log('Message sent! ', obj);
+        });//Via socket.        
+        //sendMessage(obj);//Via AJAX.
+
+        sock.on('message', (message) => {
+          $(messages).append(message);
+          
+          const html = Mustache.render(messageTemplate, {
+            username: message.username,
+            message: message.text,
+            createdAt: moment(message.createdAt).format('HH:mm:ss A')
+          });          
+          
+          $($messages).append(html);
+          autoscroll();
+        });
+      
+      
+        sock.on('locationMessage', (message) => {
           console.log(url);
           const html= Mustache.render(locationMessageTemplate, {
+            username: message.username,
             url: message.url,
             createdAt: moment(message.createdAt).format('HH:mm:ss A')
           });
           
-          $(messages).append(html);
+          $($messages).append(html);
+          autoscroll();
         });
-
-        sock.on('message', (message) => {
-          messages.append(message);
-          const html = Mustache.render(messageTemplate, {
-            message: message.text,
-            createdAt: moment(message.createdAt).format('HH:mm:ss A')
-          });
-          
-          $(messages).append(html);
-        });      
+      
         
-        sock.emit('join', {username, room});
+        sock.emit('join', { username, room }, (error) => {
+          if(error) {
+            alert(error);
+            location.href = '/';
+          }
+        });
 
         //socket.on('message', addMessages);
         sock.on("received", (data) => {
@@ -126,8 +197,6 @@
           messages.appendChild(span).append("From " + $('#fromName').val() + " to " + $('#toName').val() + ": " + "Just now.");
           console.log("Hello, " + $('#fromName').val() + '!');
         });
-
-        $(messageInput).append('<h3 style="color: blue">Chat about the Order "' + reqName.value + '"</h3>');
 
         function sendMessage(message) {
           $.ajax({
@@ -141,89 +210,53 @@
             });
         }
 
-        $("#form").submit(function(e) {
-          e.preventDefault();//prevents page reloading
-          $('#send').attr('disabled', 'disabled');
-          var obj = {
-            message:$("#message").val(),
-            from: sender.value,
-            to: receiver.value,
-            sender: $('#fromName').val(),
-            receiver: $('#toName').val(),
-            bidRequestId: requestId.value          
-            };
-          
-          sock.emit("chatMessage", obj, (error) => {
-            $('#send').removeAttr('disabled');
-            
-            if(typeof error !== 'undefined') {
-               $("#message").val("").focus();
-              return false;
-            }
-            
-            let li = document.createElement("li");
-            messages.appendChild(li).append($("#message").val());
-            $("#message").val("").focus();
-            let span = document.createElement("span");
-            messages.appendChild(span).append("From " + $('#fromName').val() + " to " + $('#toName').val() + ": " + "Just now.");
-            console.log('Message sent!', obj);
-          });//Via socket.        
-          //sendMessage(obj);//Via AJAX.
+
+      messageInput.addEventListener("keypress", (e) => {//e.target.elements
+        sock.emit("typing", {
+          user: "UNITE User - " + senderName.value,
+          message: " is typing..." });
       });
 
-    //isTyping event
-    messageInput.addEventListener("keypress", (e) => {//e.target.elements
-      sock.emit("typing", {
-        user: "UNITE User - " + senderName.value,
-        message: " is typing..." });
-    });
 
-    sock.on("notifyTyping", (data) => {
-      typing.innerText = data.user + " types " + data.message;
-    });
+      sock.on("notifyTyping", (data) => {
+        typing.innerText = data.user + " types " + data.message;
+      });
 
-    //stop typing
-    messageInput.addEventListener("keyup", (e) => {
-      sock.emit("stopTyping", "");
-    });
 
-    sock.on("notifyStopTyping", (e) => {
-      typing.innerText = "";
-    });
-  /*
-    document.querySelector('#form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const msg = e.target.elements.message.value;
-      socket.emit('sendMessage', msg);
-    });
+      sock.on('roomData', ({ room, users }) => {
+        console.log(room + '\n' + users);
+        const html = Mustache.render(sidebarTemplate, {
+          room, users
+        });
+        $('#sidebar').text(html);
+      })
 
-    $("#send").click(function() {//Form submit
-      //e.target.elements.message.value = the message body, in case instead of send we had the form ID.
-    //socket.emit('sendMessage', messageObj);
-     sendMessage({
-       from: sender.value,
-       to: receiver.value,
-       sender: $('#fromName').val(),
-       receiver: $('#toName').val(),
-       bidRequestId: reqId.value,
-       message:$("#message").val()
-       });
-    });*/   
+
+      //stop typing
+      messageInput.addEventListener("keyup", (e) => {
+        sock.emit("stopTyping", "");
+      });
+
+
+      sock.on("notifyStopTyping", (e) => {
+        typing.innerText = "";
+      });
+  
       
-    $('#sendLocation').bind('click', function() {
-      if(!navigator.geolocation) {
-        return alert('Geolocation not supported at your endpoint. WEe are sorry fr the inconvenience.');
-      }
-      
-      $('#sendLocation').attr('disabled', 'disabled');
-      
-      navigator.geolocation.getCurrentPosition((position) => {//alert(JSON.stringify(position));
-        sock.emit('sendLocation', {
-          latitude: position.coords? position.coords.latitude : '45,00',
-          longitude: position.coords? position.coords.longitude : '25,00'
-        }, () => {
-          $('#sendLocation').removeAttr('disabled');
-          console.log('Location has been shared!');//Callback means feedback.
+      $('#sendLocation').bind('click', function() {
+        if(!navigator.geolocation) {
+          return alert('Geolocation not supported at your endpoint. WEe are sorry fr the inconvenience.');
+        }
+
+        $('#sendLocation').attr('disabled', 'disabled');
+
+        navigator.geolocation.getCurrentPosition((position) => {
+          sock.emit('sendLocation', {
+            latitude: position.coords? position.coords.latitude : '45,00',
+            longitude: position.coords? position.coords.longitude : '25,00'
+          }, () => {
+            $('#sendLocation').removeAttr('disabled');
+            console.log('Location has been shared!');//Callback means feedback.
         });
       });
     });
@@ -232,7 +265,7 @@
 </head>
   
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="position: absolute; width: 100% !important;">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="position: absolute; width: 100% !important;">
     <a class="navbar-brand" href="/">UNITE</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -244,8 +277,37 @@
       Increment
     </button>
   </div>
+  <div id="sidebar" class="chat_sidebar">
+  </div>
+  
+  <div class="chat">
+    <div class="chat_sidebar">
+      UNITE Chat Application
+    </div>
+    <div class="chat_main">
+      <div id="messages2" class="chat_messages"> </div>
+      <div class="compose">
+        <form id="message-form">
+            <div class="message_input_wrapper">
+              <input type="hidden" name="from" id="from" value="<%= from %>"/>
+              <input type="hidden" name="to" id="to" value="<%= to %>"/>
+              <input type="hidden" name="reqId" id="reqId" value="<%= reqId %>"/>
+              <input type="hidden" name="reqName" id="reqName" value="<%= reqName %>"/>
+              <input type="hidden" name="fromName" id="fromName" value="<%= fromName %>"/>
+              <input type="hidden" name="toName" id="toName" value="<%= toName %>"/>
+              <input id="message" name="message" class="message_input" required autocomplete="off" placeholder="Type your message here...">
+            </div>
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button id="send" type='submit' class="btn btn-primary send_message">Send</button>
+          </form>
+          <button class="btn" title="Send your geographic location" style="color: blue; cursor: pointer" id="sendLocation">
+            Send Location
+          </button>
+      </div>
+    </div>
+  </div>
   <div class="container">
-    <div>  
+    <div>
       <input type="button" class="btn btn-primary" value="Back" onclick="history.go(-1)">
     </div>
     <br>
@@ -256,8 +318,8 @@
             <div class="button minimize"></div>
             <div class="button maximize"></div>
           </div>
-          <div class="title">Talk instantly to your partner
-          <span title="Send your geographic location" style="color: blue; cursor: pointer" id="sendLocation"> - Send Location</span>
+          <div class="title">
+            <span title="Talk">Talk instantly to your partner</span>
           </div>
         </div>
         <div style="position: center; color: brown; font-family: arial; font-size: 12pt; text-decoration: underline; font-weight: bold">
@@ -266,31 +328,19 @@
         <br>
         <ul id="messages" class="messages">
         </ul>
-        <div id="messages1" style="color: fuchsia">
+        
+        <div id="messages1" style="display: none; color: fuchsia">
         </div>
         <div class="bottom_wrapper clearfix">
           <br>
             <input type='hidden' id="name" class="form-control" placeholder=”Name”>
           <br>
-          <i id="typing"></i>
-            <form id="form">
-              <div class="message_input_wrapper">
-                <input type="hidden" name="from" id="from" value="<%= from %>"/>
-                <input type="hidden" name="to" id="to" value="<%= to %>"/>
-                <input type="hidden" name="reqId" id="reqId" value="<%= reqId %>"/>
-                <input type="hidden" name="reqName" id="reqName" value="<%= reqName %>"/>
-                <input type="hidden" name="fromName" id="fromName" value="<%= fromName %>"/>
-                <input type="hidden" name="toName" id="toName" value="<%= toName %>"/>
-                <input id="message" name="message" class="message_input" placeholder="Type your message here...">
-              </div>
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <button id="send" type='submit' class="btn btn-primary send_message">Send</button>
-            </form>
+          <i id="typing"></i>                  
           </div>      
         </div>
     <script id="message-template" type="text/html">
       <div class="message">
-        <p><span class="messageName">User Name</span>
+        <p><span class="messageName">{{username}}</span>
            <span class="messageMeta">{{createdAt}}</span>
         </p>
          <p>{{message}}</p>
@@ -298,13 +348,21 @@
     </script>
     <script id="location-message-template" type="text/html">
       <div class="message">
-        <p><span class="messageName">User Name</span>
+        <p><span class="messageName">{{username}}</span>
            <span class="messageMeta">{{createdAt}}</span>
         </p>
         <p><a href="{{url}}" target="_blank">My current location</a></p>
       </div>
     </script>
+    <script id="sidebar-template" type="text/html">
+      <h2 class="room-title">{{room}}</h2>
+      <h3 class="list-title">User List</h3>
+      <ul class="users">
+        {{#users}}
+          <li>{{username}}</li>
+        {{/users}}
+      </ul>
+    </script>
   </div>
-    
 </body>
 </html>

@@ -18,6 +18,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const MongoClient = require('mongodb').MongoClient;
 const ObjectId = require("mongodb").ObjectId;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
+const { sendConfirmationEmail, sendCancellationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail } = require('../public/emails');
 
 const statusesJson = {
   BUYER_REQUESTED_BID: parseInt(process.env.BUYER_REQ_BID),
@@ -152,9 +153,7 @@ exports.postViewBids = (req, res) => {
       if (err) 
         throw err;
       var dbo = db.db(BASE);
-      var myquery = { _id: req.body.id };
-      var newvalues = { $set: {status: req.body.status} };
-      dbo.collection("bidrequests").updateOne(myquery, newvalues, function(err, resp) {        
+      dbo.collection("bidrequests").updateOne({ _id: req.body.id }, { $set: {status: req.body.status} }, function(err, resp) {        
         if(err) {
           console.error(err.message);
           return false;
@@ -169,48 +168,30 @@ exports.postViewBids = (req, res) => {
 
 
 exports.postCancelBid = (req, res) => {
-  //BidRequest.findOne({_id: req.body.bidId});
-  MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
+  try {
+  MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
       if (err) 
         throw err;
-      var dbo = db.db(BASE);
-      var myquery = { _id: new ObjectId(req.body.bidId) };
-      var newvalues = { $set: {isCancelled: true, status: parseInt(process.env.BUYER_BID_CANCEL)} };
     
-      dbo.collection("bidrequests").updateOne(myquery, newvalues, function(err, resp) {
+      var dbo = db.db(BASE);
+      await dbo.collection("bidrequests").updateOne({ _id: new ObjectId(req.body.bidId) }, { $set: {isCancelled: true, status: parseInt(process.env.BUYER_BID_CANCEL)} }, async function(err, resp) {
         if(err) {
           console.error(err.message);
           return res.status(500).send({ 
             msg: err.message 
           });
         }
-        
-        db.close();
-        var mailOptions = {
-          from: "peter@uniteprocurement.com",
-          to: req.body.suppliersEmail,
-          subject: "Bid request " + req.body.requestsName + " cancelled!",
-          text:
-            "Hello " + req.body.suppliersName + 
-            ",\n\nWe regret to inform you that your incoming Order named " + req.body.requestsName + " has been cancelled by "
-            + "the Buyer " + req.body.buyersName + ".\nPlease contact the Buyer at " + req.body.buyersEmail + " for more"
-            + " details.\nUNITE apologizes for any inconvenience that this issue may have caused to you."+ "\n\n"
-            + "Sincerely,\nThe UNITE Public Procurement Platform Staff"
-        };
-
-        sgMail.send(mailOptions, function(err) {
-          if(err) {
-            return res.status(500).send({ msg: err.message });
-          }
-          
-          var msg = "The Bid Request has been cancelled by Buyer " + req.body.buyersName + '.\n' + 'Supplier ' + req.body.suppliersName + ' has been notified via e-mail about the Order cancellation.';
-          console.log(msg);
-          req.flash('success', msg);
-          //res.status(200).send(msg);
-          res.redirect('back');
+       
+        await sendCancelBidEmail(req, req.body.suppliersName, req.body.buyersName, req.body.suppliersEmail, req.body.buyersEmail, 'Supplier ', 'Buyer ');
       });
+    
+    db.close();
     });
-  });
+  } catch {
+    res.redirect('/buyer/index');
+  }
+  
+  res.redirect('back');
 }
 
 exports.getConfirmation = (req, res) => {
@@ -231,71 +212,52 @@ exports.getResendToken = (req, res) => {
 }
 
 
-exports.postDelete = function (req, res, next) {  
+exports.postDelete = async function (req, res, next) {  
   var id = req.body.id;
   try {
     //Delete Buyer's Bid Requests first:
-    MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
-      db.collection('bidrequests').deleteMany({ buyer: id }, function(err, resp) {
+    MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
+      await db.collection('bidrequests').deleteMany({ buyer: id }, function(err, resp) {
+        if(err) {
+          throw err;
+        }        
+      });
+
+      //Now delete the messages sent or received by Buyer:
+      await db.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp0) {
         if(err) {
           throw err;
         }
-
-        //Now delete the messages sent or received by Buyer:
-        db.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp0) {
-          if(err) {
-            throw err;
-          }
-
-          //Remove the possibly existing Buyer Tokens:
-          db.collection('buyertokens').deleteMany({ _userId: id }, function(err, resp1) {
-            if(err) {
-              throw err;
-            }
-
-            //And now, remove the Buyer themselves:
-            db.collection('buyers').deleteOne({ _id: id }, function(err, resp2) {
-              if(err) {
-                throw err;
-              }
-
-              //Finally, send a mail to the ex-Buyer:
-              var email = {
-                from: 'peter@uniteprocurement.com',
-                to: req.body.emailAddress, 
-                subject: 'UNITE - Buyer Account Deletion Completed',
-                text: 
-                  "Hello " + req.body.organizationName +
-                  ",\n\nWe are sorry to see you go from the UNITE Public Procurement Platform!\n\nYour Buyer account has just been terminated and all your data such as placed orders, sent/received messages and any user tokens have also been lost.\nWe hope to see you back in the coming future. If you have improvement suggestions for us, please send them to our e-mail address above.\n\nWith kind regards,\nThe UNITE Public Procurement Platform Team"
-              };
-
-              sgMail.send(email, function (err, resp3) {
-                 if (err ) {
-                  console.log(err.message);
-                   return res.status(500).send({
-                      msg: err.message 
-                    });
-                }
-
-                  console.log('A termination confirmation email has been sent to ' + req.body.emailAddress + '.');
-                  req.flash('success', 'A termination confirmation email has been sent to ' + req.body.emailAddress + '.\n' + "Buyer account finished off successfully!");
-                  db.close();
-                  return res.redirect("/buyer/sign-in");
-                  //return res.status(200).send('A termination confirmation email has been sent to ' + req.body.emailAddress + '.');
-                });
-            });
-          });
-        });
       });
+
+      //Remove the possibly existing Buyer Tokens:
+      await db.collection('buyertokens').deleteMany({ _userId: id }, function(err, resp1) {
+        if(err) {
+          throw err;
+        }
+      });
+
+      //And now, remove the Buyer themselves:
+      await db.collection('buyers').deleteOne({ _id: id }, function(err, resp2) {
+        if(err) {
+          throw err;
+        }
+      });
+    //Finally, send a mail to the ex-Buyer:
+    sendCancellationEmail('Buyer', req, 'placed orders, sent/received messages');
+    db.close();              
     });
+    
+    return res.redirect("/buyer/sign-in");
   } catch {
     res.redirect("/buyer");
   }
 }
 
 
-exports.postConfirmation = function (req, res, next) {
-  Token.findOne({ token: req.params.token }, function (err, token) {
+exports.postConfirmation = async function (req, res, next) {
+  try {
+  await Token.findOne({ token: req.params.token }, async function (err, token) {
       if (!token) {
         req.flash('We were unable to find a valid token. It may have expired. Please request a new token.');
         res.redirect('/buyer/resend');
@@ -305,42 +267,43 @@ exports.postConfirmation = function (req, res, next) {
           msg: 'We were unable to find a valid token. Your token may have expired.' });
       }
 
-      Buyer.findOne({ _id: token._userId, emailAddress: req.body.emailAddress }, function (err, user) {
+      await Buyer.findOne({ _id: token._userId, emailAddress: req.body.emailAddress }, async function (err, user) {
           if (!user) 
             return res.status(400).send({
             msg: 'We were unable to find a user for this token.' 
           });
 
-          if (user.isVerified) 
+          if(user.isVerified) 
             return res.status(400).send({ 
             type: 'already-verified', 
             msg: 'This user has already been verified.' });           
 
-            MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
+            await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
                   if (err) throw err;
                   var dbo = db.db(BASE);
-                  var myquery = { _id: user._id };
-                  var newvalues = { $set: {isVerified: true} };
-                  dbo.collection("buyers").updateOne(myquery, newvalues, function(err, resp) {
+                  await dbo.collection("buyers").updateOne({ _id: user._id }, { $set: {isVerified: true} }, function(err, resp) {
                     if(err) {
-                      console.error(err.message);
+                      return console.error(err.message);
                       /*
                       return res.status(500).send({ 
                         msg: err.message 
                       });
                       */
-                      return false;
-                    }                   
-
-                    console.log("The account has been verified. Please log in.");
-                    req.flash('success', "The account has been verified. Please log in.");
-                    db.close();
-                    if(res) 
-                      res.status(200).send("The account has been verified. Please log in.");
+                    }
                   });
-                });
-        });
+              db.close();
+            });        
+          });
+    
+    console.log("The account has been verified. Please log in.");
+    req.flash('success', "The account has been verified. Please log in."); 
     });
+  } catch {
+    req.flash('error', 'Error on Verification!');
+    res.redirect('/buyer/sign-in/');
+  }
+  
+  res.status(200).send("The account has been verified. Please log in.");
 }
 
 
@@ -361,33 +324,14 @@ exports.postResendToken = function (req, res, next) {/*
           _userId: user._id, 
           token: crypto.randomBytes(16).toString('hex') });
  
-        token.save(function (err) {
+        token.save(async function (err) {
             if (err) { 
               return res.status(500).send(
                 { msg: err.message }); 
             }
           
-            var mailOptions = {
-              from: 'peter@uniteprocurement.com',
-              to: user.emailAddress,
-              subject: 'Account Verification Token',
-              text:
-                        "Hello,\n\n" +
-                        "Please verify your account by clicking the link: \nhttp://" +
-                        req.headers.host +
-                        "/buyer/confirmation/" +
-                        token.token +
-                        "\n"
-            };
-          
-              sgMail.send(mailOptions, function (err, resp) {
-                 if (err ) {
-                   console.error(err.message);
-                   return res.status(500).send({ msg: err.message });
-                }
-                  console.log('Message sent: ' + resp? resp.response : user.emailAddress);
-                  return res.status(200).send('A verification email has been sent to ' + user.emailAddress + '.');
-                });
+            await resendTokenEmail(user, token.token, '/buyer/confirmation/', req);
+            return res.status(200).send('A verification email has been sent to ' + user.emailAddress + '.');
         });
   });
 }
@@ -441,9 +385,7 @@ exports.postForgotPassword = (req, res, next) => {
         MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
           if (err) throw err;
           var dbo = db.db(BASE);
-          var myquery = { _id: user._id };
-          var newvalues = { resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000};
-          dbo.collection("buyers").updateOne(myquery, newvalues, function(err, resp) {        
+          dbo.collection("buyers").updateOne({ _id: user._id }, { $set: {resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000} }, function(err, resp) {        
             if(err) {
               console.error(err.message);
               return false;
@@ -455,21 +397,7 @@ exports.postForgotPassword = (req, res, next) => {
       });
     },
     function(token, user, done) {
-      var emailOptions = {
-        from: 'peter@uniteprocurement.com',
-        to: user.emailAddress, 
-        subject: 'UNITE Password Reset - Buyer', 
-        text:
-            "Hello,\n\n" +
-            "You have received this e-mail because you requested a Buyer password reset on our UNITE platform." +
-            " Please reset your password within 24 hours, by clicking the link: \nhttp://" + req.headers.host + "/buyer/reset/" + token + "\n"
-      };
-      
-      sgMail.send(emailOptions, function (err, resp1) {
-        console.log('E-mail sent!')
-        req.flash('success', 'An e-mail has been sent to ' + user.emailAddress + ' with password reset instructions.');
-        done(err, 'done');
-      });      
+      sendForgotPasswordEmail(user, 'Buyer', "/buyer/reset/", token, req);
     }
   ], function(err) {
     if(err)
@@ -505,9 +433,7 @@ exports.postResetPasswordToken = (req, res) => {
       MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
         if (err) throw err;
         var dbo = db.db(BASE);
-        var myquery = { _id: user._id };
-        var newvalues = { password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined};
-        dbo.collection("buyers").updateOne(myquery, newvalues, function(err, resp) {        
+        dbo.collection("buyers").updateOne({ _id: user._id }, { $set: {password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined} }, function(err, resp) {        
           if(err) {
             console.error(err.message);
             return false;
@@ -523,20 +449,7 @@ exports.postResetPasswordToken = (req, res) => {
     });
     },
     function(user, done) {
-      var emailOptions = {
-        from: 'peter@uniteprocurement.com',
-        to: user.emailAddress, 
-        subject: 'UNITE Password changed - Buyer', 
-        text: 'Hello,\n\n' 
-        + 'You have successfully reset your Buyer password on our UNITE platform'
-        + ' for the account registered with ' + user.emailAddress + '. You can log in again.'        
-      };
-      
-      sgMail.send(emailOptions, function (err, resp1) {
-        console.log('E-mail sent!')
-        req.flash('success', 'Your password has been successfully changed!');
-        done(err, 'done');
-      });      
+      sendResetPasswordEmail(user, 'Buyer', req);
     }
   ], function(err) {
       res.redirect('/buyer');
@@ -624,7 +537,7 @@ function getSupers(id) {
   return promise;
 }
 
-exports.postSignUp = (req, res) => {
+exports.postSignUp = async (req, res) => {
   if (req.body.emailAddress) {
     const email = req.body.emailAddress;
     const email_str_arr = email.split("@");
@@ -653,7 +566,7 @@ exports.postSignUp = (req, res) => {
               return res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
             var buyer;
         try {
-          bcrypt.hash(req.body.password, 10, function(err, hash) {
+          bcrypt.hash(req.body.password, 10, async function(err, hash) {
               buyer = new Buyer({
                 organizationName: req.body.organizationName,
                 organizationUniteID: req.body.organizationUniteID,
@@ -671,7 +584,7 @@ exports.postSignUp = (req, res) => {
                 updatedAt: Date.now()
               });
 
-              buyer.save((err) => {
+              await buyer.save((err) => {
                 if (err) {
                    return console.error(err.message);
                 }
@@ -685,41 +598,20 @@ exports.postSignUp = (req, res) => {
                 token: crypto.randomBytes(16).toString('hex')
               });
 
-              token.save(function (err) {
+              token.save( async function (err) {
                 if (err) {
-                  console.error(err.message);
+                  return console.error(err.message);
                   //return res.status(500).send({
                    // msg: err.message 
                  // });
                 }
-                    var email = {
-                      from: 'peter@uniteprocurement.com',
-                      to: buyer.emailAddress, 
-                      subject: 'Account Verification Token',
-                      text: 
-                        "Hello " + buyer.organizationName +
-                        ",\n\nCongratulations for registering on the UNITE Public Procurement Platform!\n\nPlease verify your account by clicking the link: \nhttp://" 
-                      + req.headers.host + "/buyer/confirmation/" + token.token + "\n"
-                    };
-
-                    sgMail.send(email, function (err, resp) {
-                       if (err ) {
-                        console.log(err.message);
-                         return res.status(500).send({
-                            msg: err.message 
-                          });
-                      }
-                      
-                        console.log('A verification email has been sent to ' + buyer.emailAddress + '.');
-                        req.flash('success', 'A verification email has been sent to ' + buyer.emailAddress + '.');
-                        req.flash("success", "Buyer signed up successfully!");
-                        return res.redirect("/buyer");
-                        //return res.status(200).send('A verification email has been sent to ' + buyer.emailAddress + '.');
-                      });
-                    });
-                  });
-                //return resolve(buyer);
-              //});
+                
+                await sendConfirmationEmail(buyer.emailAddress, "/buyer/confirmation/", token.token, buyer.organizationName, req);
+                req.flash("success", "Buyer signed up successfully!");
+                return res.redirect("/buyer");
+                //return res.status(200).send('A verification email has been sent to ' + buyer.emailAddress + '.');
+                });
+              });             
             });
           } catch {
             res.redirect('/buyer/sign-up');
@@ -745,6 +637,7 @@ exports.postProfile = (req, res) => {
     Buyer.findOne({ _id: req.body._id }, (err, doc) => {
       if (err) 
         return console.error(err);
+      
       doc._id = req.body._id;
       doc.organizationName = req.body.organizationName;
       doc.organizationUniteID = req.body.organizationUniteID;
@@ -761,13 +654,12 @@ exports.postProfile = (req, res) => {
       doc.createdAt = req.body.createdAt;
       doc.updatedAt = Date.now();
 
-      MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
+      MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
         if (err) 
           throw err;
         var dbo = db.db(BASE);
-        var myquery = { _id: doc._id };
-        var newvalues = { $set: doc };
-        dbo.collection("buyers").updateOne(myquery, newvalues, function(err, resp) {        
+        
+        await dbo.collection("buyers").updateOne({ _id: doc._id }, { $set: doc }, function(err, resp) {
           if(err) {
             return console.error(err.message);          
           }
@@ -778,8 +670,9 @@ exports.postProfile = (req, res) => {
           db.close();
           req.flash("success", "Buyer details updated successfully!");
           console.log('Buyer details updated successfully!');
-          return res.redirect("/buyer");
         });
+        
+        return res.redirect("/buyer");
       });
     })    
       .catch(console.error);

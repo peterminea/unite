@@ -10,6 +10,7 @@ const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const MongoClient = require('mongodb').MongoClient;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
+const { sendConfirmationEmail, sendCancellationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail } = require('../public/emails');
 
 exports.getIndex = (req, res) => {
   if(!req || !req.session) return false;
@@ -48,40 +49,31 @@ exports.getResendToken = (req, res) => {
 }
 
 
-function removeSupervisor(id, req, res, db) {//Tokens first, user last.
-  db.collection('supervisortokens').deleteMany({ _userId: id }, function(err, resp1) {
+async function removeSupervisor(id, req, res, db) {
+  //Now delete the messages sent/received by Supervisor:
+  await db.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp1) {
+    if(err) {
+      throw err;
+    }
+  });
+  
+  //Tokens first, user last.
+  await db.collection('supervisortokens').deleteMany({ _userId: id }, function(err, resp1) {
   if(err) {
     throw err;
     }
-
-    db.collection('supervisors').deleteOne({ _id: id }, function(err, resp2) {
-      if(err) {
-        throw err;
-      }
-      //Mail to the ex-Supervisor to confirm their final deletion:
-        var email = {
-          from: 'peter@uniteprocurement.com',
-          to: req.body.emailAddress, 
-          subject: 'UNITE - Supervisor Account Deletion Completed',
-          text: 
-            "Hello " + req.body.organizationName +
-            ",\n\nWe are sorry to see you go from the UNITE Public Procurement Platform!\n\nYour Supervisor account has just been terminated, as a result of your decision to quit UNITE, and subsequently all your associated Buyers, including their personal data such as placed orders, sent/received messages and any user tokens, have also been safely removed.\nWe hope to see you and your Buyers back in the coming future. If you have improvement suggestions for us, please send them to our e-mail address above.\n\nWith kind regards,\nThe UNITE Public Procurement Platform Team"
-        };
-
-        sgMail.send(email, function (err, resp3) {
-           if (err ) {
-            console.log(err.message);
-             throw err;
-          }
-
-            console.log('A termination confirmation email has been sent to ' + req.body.emailAddress + '.');
-            req.flash('success', 'A termination confirmation email has been sent to ' + req.body.emailAddress + '.\n' + "Supervisor account finished off successfully!");
-            db.close();
-            return res.redirect("/supervisor/sign-in");
-            //return res.status(200).send('A termination confirmation email has been sent to ' + req.body.emailAddress + '.');
-          });
-    });
   });
+
+  await db.collection('supervisors').deleteOne({ _id: id }, function(err, resp2) {
+    if(err) {
+      throw err;
+    }
+  });
+  
+  //Mail to the ex-Supervisor to confirm their final deletion:
+  sendCancellationEmail('Supervisor', req, 'sent/received messages and all your associated Buyers, including their personal data such as placed orders, sent/received messages');
+  db.close();
+  return res.redirect("/supervisor/sign-in");
 }
 
 
@@ -91,71 +83,54 @@ exports.postDelete = function (req, res, next) {
   
   try {
     //Find Supervisor's Buyers first:
-    MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
-      db.collection('buyers').find({ organizationUniteID: uniteID }).exec().then((buyers) => {
+    MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
+      await db.collection('buyers').find({ organizationUniteID: uniteID }).exec().then( async (buyers) => {
         
         if(!buyers || !buyers.length) {//No buyer data, let's directly pass to Supervisor.
-          removeSupervisor(id, req, res, db);
+          await removeSupervisor(id, req, res, db);
         } else {
           var len = buyers.length;
           
           //Delete buyers data one by one:
           for(var i in buyers) {
             var theId = buyers[i]._id;
-            var emailAddress = buyers[i].emailAddress, organizationName = buyers[i].organizationName;
+            var req2 = { emailAddress : buyers[i].emailAddress, organizationName : buyers[i].organizationName} ;
             
             //Bids:
-            db.collection('bidrequests').deleteMany({ buyer: theId }, function(err, resp) {
+            await db.collection('bidrequests').deleteMany({ buyer: theId }, function(err, resp) {
               if(err) {
                 throw err;
               }
+            });            
 
-              //Now delete the messages sent/received by Buyer:
-              db.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp0) {
-                if(err) {
-                  throw err;
-                }
-
-                //Remove the possibly existing Buyer Tokens:
-                db.collection('buyertokens').deleteMany({ _userId: theId }, function(err, resp1) {
-                  if(err) {
-                    throw err;
-                  }
-
-                  //And now, remove the Buyer themselves:
-                  db.collection('buyers').deleteOne({ _id: theId }, function(err, resp2) {
-                    if(err) {
-                      throw err;
-                    }
-
-                    //Finally, send a mail to the ex-Buyer:
-                    var email = {
-                      from: 'peter@uniteprocurement.com',
-                      to: emailAddress, 
-                      subject: 'UNITE - Buyer Account Deletion Completed Upon Supervisor Quit',
-                      text: 
-                        "Hello " + organizationName +
-                        ",\n\nWe are sorry to see you go from the UNITE Public Procurement Platform!\n\nYour Buyer account has just been terminated, as a result of the decision of your Supervisor to quit UNITE, and subsequently all your personal data such as placed orders, sent/received messages and any user tokens have also been lost.\nWe hope to see you and your Supervisor back in the coming future. If you have improvement suggestions for us, please send them to our e-mail address above.\n\nWith kind regards,\nThe UNITE Public Procurement Platform Team"};
-
-                    sgMail.send(email, function (err, resp3) {
-                       if (err ) {
-                        console.log(err.message);
-                         throw err;
-                      }
-
-                        console.log('A termination confirmation email has been sent to ' + emailAddress + '.');
-                        req.flash('success', 'A termination confirmation email has been sent to ' + emailAddress + '.\n' + "Buyer account finished off successfully!");                        
-                        //return res.status(200).send('A termination confirmation email has been sent to ' + req.body.emailAddress + '.');
-                      });
-                  });
-                });
-              });
+            //Now delete the messages sent/received by Buyer:
+            await db.collection('messages').deleteMany({ $or: [ { from: theId }, { to: theId } ] }, function(err, resp0) {
+              if(err) {
+                throw err;
+              }
             });
-            
-            if(i == len-1) {//All buyers are lost, now let's pass to the Supervisor themselves and remove their data.              
-              removeSupervisor(id, req, res, db);
-            }
+
+            //Remove the possibly existing Buyer Tokens:
+            await db.collection('buyertokens').deleteMany({ _userId: theId }, function(err, resp1) {
+              if(err) {
+                throw err;
+              }
+            });
+
+            //And now, remove the Buyer themselves:
+            await db.collection('buyers').deleteOne({ _id: theId }, function(err, resp2) {
+              if(err) {
+                throw err;
+              }
+            });
+
+            //Finally, send a mail to the ex-Buyer:
+            sendCancellationEmail('Buyer', req2, 'placed orders, sent/received messages');
+            //if(i == len-1) {//All buyers are lost, now let's pass to the Supervisor themselves and remove their data.
+            //}
           }
+          //Get rid of the Supervisor themselves too.
+          removeSupervisor(id, req, res, db);
         }
       });
     });
@@ -166,18 +141,16 @@ exports.postDelete = function (req, res, next) {
 
 
 
-exports.postConfirmation = function (req, res, next) {
-  Token.findOne({ token: req.params.token }, function (err, token) {
+exports.postConfirmation = async function (req, res, next) {
+  
+  try {
+  await Token.findOne({ token: req.params.token }, async function (err, token) {
     if (!token) {
-      req.flash('We were unable to find a valid token. It may have expired. Please request a new token.');
+      req.flash('error', 'We were unable to find a valid token. It may have expired. Please request a new token.');
       res.redirect('/supervisor/resend');
-      if(1==2) 
-        return res.status(400).send({
-        type: 'not-verified', 
-        msg: 'We were unable to find a valid token. Your token may have expired.' });
     }
 
-    Supervisor.findOne({ _id: token._userId, emailAddress: req.body.emailAddress }, function (err, user) {
+    await Supervisor.findOne({ _id: token._userId, emailAddress: req.body.emailAddress }, async function (err, user) {
         if (!user)
           return res.status(400).send({
           msg: 'We were unable to find a user for this token.' 
@@ -185,34 +158,38 @@ exports.postConfirmation = function (req, res, next) {
 
         if (user.isVerified) 
           return res.status(400).send({ 
-          type: 'already-verified', 
-          msg: 'This user has already been verified.' });           
+            type: 'already-verified', 
+            msg: 'This user has already been verified.' });
 
-          MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {//db or client.
-                if (err) throw err;
-                var dbo = db.db(BASE);
-                var myquery = { _id: user._id };
-                var newvalues = { $set: {isVerified: true} };
-                dbo.collection("supervisors").updateOne(myquery, newvalues, function(err, resp) {
+          await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
+            if (err)
+              throw err;
+            var dbo = db.db(BASE);
+                
+            await dbo.collection("supervisors").updateOne({ _id: user._id }, { $set: {isVerified: true} }, function(err, resp) {
                   if(err) {
-                    console.error(err.message);
+                    return console.error(err.message);
                     /*
                     return res.status(500).send({ 
                       msg: err.message 
                     });
                     */
-                    return false;
-                  }                   
-
-                  console.log("The account has been verified. Please log in.");
-                  req.flash('success', "The account has been verified. Please log in.");
-                  db.close();
-                  if(res) 
-                    res.status(200).send("The account has been verified. Please log in.");
+                  }
                 });
-              });        
+            
+            db.close();
+            });        
         });
+    
+    console.log("The account has been verified. Please log in.");
+    req.flash('success', "The account has been verified. Please log in.");
     });
+  } catch {
+    req.flash('error', 'Error on Verification!');
+    res.redirect('/supervisor/sign-in');
+  }
+  
+  res.redirect('/supervisor/sign-in');
 }
 
 
@@ -227,38 +204,15 @@ exports.postResendToken = function (req, res, next) {
           _userId: user._id, token: 
           crypto.randomBytes(16).toString('hex') });
 
-        token.save(function (err) {
+        token.save(async function (err) {
             if (err) { return res.status(500).send({
               msg: err.message 
               }); 
             } 
-         
-            var mailOptions = {
-              from: 'peter@uniteprocurement.com',
-              to: user.emailAddress,
-              subject: 'Account Verification Token',
-              text:
-                        "Hello,\n\n" +
-                        "Please verify your account by clicking the link: \nhttp://" +
-                        req.headers.host +
-                        "/supervisor/confirmation/" +
-                        token.token +
-                        "\n" };
-          
-              sgMail.send(mailOptions, function (err, info) {
-                 if (err ) {
-                  console.log(err);
-                }  else {
-                  console.log('Message sent: ' + info.response);                
-                }
-                if (err) {
-                  return res.status(500).send({
-                        msg: err.message 
-                      });
-                         }
-                  return res.status(200).send('A verification email has been sent to ' + user.emailAddress + '.');
-                });
-        }); 
+
+        await resendTokenEmail(user, token.token, '/supervisor/confirmation/', req);
+        return res.status(200).send('A verification email has been sent to ' + user.emailAddress + '.');
+        });
     });
 }
 
@@ -288,9 +242,7 @@ exports.postForgotPassword = (req, res, next) => {
         MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
           if (err) throw err;
           var dbo = db.db(BASE);
-          var myquery = { _id: user._id };
-          var newvalues = { resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000};
-          dbo.collection("supervisors").updateOne(myquery, newvalues, function(err, res) {        
+          dbo.collection("supervisors").updateOne({ _id: user._id }, { $set: {resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000} }, function(err, res) {        
             if(err) {
               console.error(err.message);
               return false;
@@ -301,22 +253,8 @@ exports.postForgotPassword = (req, res, next) => {
         });
       });
     },
-    function(token, user, done) {     
-      var emailOptions = {
-        from: 'peter@uniteprocurement.com',
-        to: user.emailAddress, 
-        subject: 'UNITE Password Reset - Supervisor', 
-        text:
-            "Hello,\n\n" +
-            "You have received this e-mail because you requested a Supervisor password reset on our UNITE platform." +
-            " Please reset your password within 24 hours, by clicking the link: \nhttp://" + req.headers.host + "/supervisor/reset/" + token + "\n"
-        };
-      
-      sgMail.send(emailOptions, function (err, info) {
-        console.log('E-mail sent!')
-        req.flash('success', 'An e-mail has been sent to ' + user.emailAddress + ' with password reset instructions.');
-        done(err, 'done');
-      });
+    function(token, user, done) {
+      sendForgotPasswordEmail(user, 'Supervisor', "/supervisor/reset/", token, req);
     }
   ], function(err) {
     if(err)
@@ -353,9 +291,7 @@ exports.postResetPasswordToken = (req, res) => {
         MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
           if (err) throw err;
           var dbo = db.db(BASE);
-          var myquery = { _id: user._id };
-          var newvalues = { password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined};
-          dbo.collection("supervisors").updateOne(myquery, newvalues, function(err, resp) {        
+          dbo.collection("supervisors").updateOne({ _id: user._id }, { $set: {password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined} }, function(err, resp) {        
             if(err) {
               console.error(err.message);
               return false;
@@ -370,21 +306,8 @@ exports.postResetPasswordToken = (req, res) => {
         }
       });
     },
-    function(user, done) {      
-      var emailOptions = {
-        from: 'peter@uniteprocurement.com',
-        to: user.emailAddress, 
-        subject: 'UNITE Password changed - Supervisor', 
-        text: 'Hello,\n\n' 
-        + 'You have successfully reset your Supervisor password on our UNITE platform'
-        + 'for the account registered with ' + user.emailAddress + '. You can log in again.'        
-      };
-      
-      sgMail.send(emailOptions, function (err, info) {
-        console.log('E-mail sent!')
-        req.flash('success', 'Your password has been successfully changed!');
-        done(err, 'done');
-      });      
+    function(user, done) {
+      sendResetPasswordEmail(user, 'Supervisor', req);
     }
   ], function(err) {
       res.redirect('/supervisor');
@@ -471,7 +394,7 @@ exports.postSignIn = (req, res) => {
 
 
 let global = 0;
-exports.postSignUp = (req, res) => {
+exports.postSignUp = async (req, res) => {
   if (req.body.emailAddress) {
     const email = req.body.emailAddress;
     const email_str_arr = email.split("@");
@@ -494,7 +417,7 @@ exports.postSignUp = (req, res) => {
               return res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
         var supervisor;
         try {
-          bcrypt.hash(req.body.password, 10, function(err, hash) {
+          bcrypt.hash(req.body.password, 10, async function(err, hash) {
           //user = new Promise((resolve, reject) => {
             supervisor = new Supervisor({
               organizationName: req.body.organizationName,
@@ -518,7 +441,7 @@ exports.postSignUp = (req, res) => {
               updatedAt: Date.now()
             });
             
-            supervisor.save((err) => {
+            await supervisor.save((err) => {
               if (err) {
                 throw err;
               }
@@ -526,11 +449,12 @@ exports.postSignUp = (req, res) => {
               req.session.supervisor = supervisor;
               req.session.id = supervisor._id;
               req.session.save();
+              
               var token = new Token({ 
                 _userId: supervisor._id,
                 token: crypto.randomBytes(16).toString('hex') });
               
-              token.save(function (err) {
+              token.save(async function (err) {
                 if (err) {
                   console.error(err.message);
                   //return res.status(500).send({
@@ -538,28 +462,9 @@ exports.postSignUp = (req, res) => {
                  // });
                 }
 
-                var email = {
-                  from: 'peter@uniteprocurement.com',
-                  to: supervisor.emailAddress,
-                  subject: 'Account Verification Token', 
-                  text: "Hello " + supervisor.organizationName +
-                        ",\n\nCongratulations for registering on the UNITE Public Procurement Platform!\n\nPlease verify your account by clicking the link: \nhttp://" 
-                      + req.headers.host + "/supervisor/confirmation/" + token.token + "\n"
-                };
-
-                sgMail.send(email, function (err, resp) {
-                    if (err) {
-                      console.error(err.message)
-                      return res.status(500).send({ msg: err.message }); 
-                    } else {
-                      req.flash('success', 'A verification email has been sent to ' + supervisor.emailAddress + '.');
-                      console.log('A verification email has been sent to ' + supervisor.emailAddress + '.');
-                      req.flash("success", "Supervisor signed up successfully!");
-                      if(typeof res !== 'undefined') 
-                        return res.redirect("/supervisor");
-                    //return res.status(200).send('A verification email has been sent to ' + supervisor.emailAddress + '.');
-                    }
-                  });
+                await sendConfirmationEmail(supervisor.emailAddress, "/supervisor/confirmation/", token.token, supervisor.organizationName, req);
+                req.flash("success", "Supervisor signed up successfully!");
+                return res.redirect("/supervisor");
                 });
               });
             });
@@ -580,7 +485,7 @@ exports.getProfile = (req, res) => {
 
 exports.postProfile = (req, res) => {
   try {
-  Supervisor.findOne({ _id: req.body._id }, (err, doc) => {
+  Supervisor.findOne({ _id: req.body._id }, async (err, doc) => {
     if (err) return console.error(err);
     doc._id = req.body._id;
     doc.organizationName = req.body.organizationName;
@@ -603,33 +508,33 @@ exports.postProfile = (req, res) => {
     doc.createdAt = req.body.createdAt;
     doc.updatedAt = Date.now();
 
-    MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {//db or client.
+    await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
       if (err) 
         throw err;
       var dbo = db.db(BASE);
-      var myquery = { _id: doc._id };
-      var newvalues = { $set: doc };
-      dbo.collection("supervisors").updateOne(myquery, newvalues, function(err, resp) {
+      await dbo.collection("supervisors").updateOne({ _id: doc._id }, { $set: doc }, function(err, resp) {
         if(err) {
           console.error(err.message);
           return false;
         }
-        req.session.supervisor = doc;
-        req.session.id = doc._id;
-        req.session.save((err) => {
-          if (err)
-            throw err;
-          
-          db.close();
-          req.flash("success", "Supervisor details updated successfully!");
-          console.log("Supervisor details updated successfully!");
-          return res.redirect("/supervisor");
-        });
       });
+      
+    db.close();  
     });
+    
+    req.session.supervisor = doc;
+    req.session.id = doc._id;
+    await req.session.save((err) => {
+      if (err)
+        throw err;
+    });
+    
+    req.flash("success", "Supervisor details updated successfully!");
+    console.log("Supervisor details updated successfully!");
+    return res.redirect("/supervisor");
   })
     .catch(console.error);
   } catch {
     res.redirect('/supervisor/profile');
-  } 
+  }
 }

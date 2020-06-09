@@ -24,11 +24,6 @@
 			aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 			<span class="navbar-toggler-icon"></span>
 		</button>
-    
-    <div>  
-      <input type="button" class="btn btn-primary" value="Back" onclick="history.go(-1)">
-    </div>
-
 		<div class="collapse navbar-collapse" id="navbarSupportedContent">
 			<ul class="navbar-nav mr-auto">
 				<li class="nav-item">
@@ -252,7 +247,6 @@
           
           $('#mainForm').submit(function(e) {
             //e.preventDefault();
-            
             if(!($('#messageArea').text()) 
                && !confirm('Are you sure you want to update Bid Status without any mentions for the Buyer ' + $('input[name="buyerName"]').val() + '?')) {
               return false;
@@ -262,10 +256,9 @@
           });
           
           $('#statuses').find('option:gt(' + x.PAYMENT_DELIVERY_DONE + ')').attr('disabled', 'disabled');//Cancel from button and make the content unavailable.
-
-            $('#statuses')
-                .find('option[value="' + $('#status').val() + '"]')
-                .attr({'selected': 'selected'});
+          $('#statuses')
+              .find('option[value="' + $('#status').val() + '"]')
+              .attr({'selected': 'selected'});
 
             $('#statuses').attr('title', $('#statuses').find('option:selected').text());            
           </script>
@@ -274,7 +267,7 @@
             <h3>Mentions for Buyer</h3>
             <br>
             <label>Type your message below</label>
-            <textarea name="message" id="messageArea" class="form-control"><%= request.specialMentions %></textarea>
+            <textarea name="specialMentions" id="messageArea" class="form-control"><%= request.specialMentions %></textarea>
             <input type="hidden" name="from" value="<%= supplier._id %>">
             <input type="hidden" name="to" value="<%= buyer._id %>">
             <input type="hidden" name="reqId" value="<%= request._id %>">
@@ -291,7 +284,7 @@
             <span style="color: purple; font-size: 12pt; font-weight: bold"><b>Bid Status Description:</b> <br>
               <% if (request.status == 0) { %> "Buyer requested a bid from Supplier. Please send further information to Buyer." <% } %>
               <% if (request.status == 1) { %> "Waiting for Buyer to process the order information." <% } %>				
-              <% if (request.status == 2) { %> "Buyer wants to buy the product for <%= request.price %>. Please Cancel or Accept." <% } %>
+              <% if (request.status == 2) { %> "Buyer wants to buy the product for the total price of <%= request.price %> <%= request.currency %>. Please Cancel or Accept." <% } %>
               <% if (request.status == 3) { %> "Supplier started the delivery. Please wait for confirmation of buyer." <% } %>
               <% if (request.status == 4) { %> "Payment and delivery have been successfully made." <% } %>
               <% if (request.status == 5) { %> "Supplier cancelled the request." <% } %>
@@ -302,7 +295,7 @@
 <!-- Supplier=sender, buyer=receiver. -->
         <div class="container mt-4">
           	<div class="form-group">
-							<a href="../chat/<%= supplier._id %>/<%= buyer._id %>/<%= request._id %>/<%= request.requestName %>/<%= buyer.organizationName %>/<%= supplier.companyName %>">
+							<a href="../chatLogin/<%= supplier._id %>/<%= buyer._id %>/<%= request._id %>/<%= request.requestName %>/<%= buyer.organizationName %>/<%= supplier.companyName %>">
                 <button style="float: left" title="Chat" id="chat" class="btn-primary btn">Chat with your buyer</button>
               </a>
             <form class="cancelForm" action="../../../supplier/cancelBid/" method="POST">

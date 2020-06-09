@@ -283,13 +283,6 @@ function addProduct(obj, MAX) {
 
 
 $(document).ready(function() {
-  $('input,textarea,span,label,li,button,a,b,p,h2,h3,h4,h5,option')
-    .each(function(index, el) {//Tooltips in the App.
-    if(!$(el).attr('title')) {
-      $(el).attr('title', $(el).val()? $(el).val() : $(el).text());
-    }
-  });
-  
   var nav = $('body').find('nav');
   if(nav.length && !(nav.find('div[id="navbarSupportedContent"]').length)) {
     
@@ -317,6 +310,21 @@ $(document).ready(function() {
     
     nav.append($str);
   }
+  
+  $('div.container')
+    .first()
+    .prepend('<div><input type="button" class="btn btn-primary" style="float: left"' 
+                                    + ' value="Back" onclick="history.go(-1)">'
+                + '<input type="button" class="btn btn-primary" style="float: right"' 
+                                    + ' value="Forward" onclick="history.go(1)">' 
+                                   +'</div>');
+  
+  $('input,textarea,span,label,li,button,a,b,p,h2,h3,h4,h5,option')
+    .each(function(index, el) {//Tooltips in the App.
+    if(!$(el).attr('title')) {
+      $(el).attr('title', $(el).val()? $(el).val() : $(el).text());
+    }
+  });
   
   if(nav) 
     nav.find('span').attr('title', 'Expand/collapse UNITE basic options');

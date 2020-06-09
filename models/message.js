@@ -28,7 +28,7 @@ const messageSchema = new Schema({
     },
     bidRequestId: {
         type: Schema.Types.ObjectId,
-        required: true
+        required: false
     }
 },
  {
