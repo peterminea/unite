@@ -75,9 +75,6 @@
   </nav>
   
   <div class="container mt-4">
-    <div>  
-      <input type="button" class="btn btn-primary" value="Back" onclick="history.go(-1)">
-    </div>
     <div class="card">
       <div class="card-header">
         Hello!
@@ -116,6 +113,11 @@
           <td scope="col"><%= buyer.isVerified %></td>
           <td scope="col">
             <button title="Remove selected Buyer from UNITE" id="process_<%= i %>" class="btn btn-primary">Process</button>
+          </td>
+          <td scope="col">
+            <a href="../../../supplier/chatLogin/<%= supervisor._id %>/<%= buyer._id %>/0/None/<%= buyer.organizationName %>/(Supervisor)-<%= supervisor.organizationName %>">
+              <button title="Chat with your buyer in UNITE" id="chat_<%= i %>" class="btn btn-primary">Chat</button>
+            </a>
           </td>
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" >
         </tr>

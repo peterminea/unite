@@ -18,6 +18,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY); //Stored in the *.env file.
 const MongoClient = require("mongodb").MongoClient;
 const ObjectId = require("mongodb").ObjectId;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
+const { sendConfirmationEmail, sendCancellationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail } = require('../public/emails');
 
 const statusesJson = {
   BUYER_REQUESTED_BID: parseInt(process.env.BUYER_REQ_BID),
@@ -81,14 +82,13 @@ exports.postAddProduct = (req, res) => {
 
 exports.postCancelBid = (req, res) => {
   //BidRequest.findOne({_id: req.params.bidId});
-  MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
+  try {
+  MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
       if (err) 
         throw err;
     
       var dbo = db.db(BASE);
-      var myquery = { _id: new ObjectId(req.body.bidId) };
-      var newvalues = { $set: {isCancelled: true, status: parseInt(process.env.SUPP_BID_CANCEL)} };
-      dbo.collection("bidrequests").updateOne(myquery, newvalues, function(err, resp) {
+      await dbo.collection("bidrequests").updateOne({ _id: new ObjectId(req.body.bidId) }, { $set: {isCancelled: true, status: parseInt(process.env.SUPP_BID_CANCEL)} }, async function(err, resp) {
         if(err) {
           console.error(err.message);
           
@@ -96,33 +96,17 @@ exports.postCancelBid = (req, res) => {
             msg: err.message 
           });         
         }
-
-        db.close();
-        var mailOptions = {
-          from: "peter@uniteprocurement.com",
-          to: req.body.buyersEmail,
-          subject: "Bid request " + req.body.requestsName + " cancelled!",
-          text:
-            "Hello " + req.body.buyersName + 
-            ",\n\nWe regret to inform you that your outgoing Order named " + req.body.requestsName + " has been cancelled by "
-            + "the Supplier " + req.body.suppliersName + ".\nPlease contact the Supplier at " + req.body.suppliersEmail + " for more"
-            + " details.\nUNITE apologizes for any inconvenience that this issue may have caused to you."+ "\n\n"
-            + "Sincerely,\nThe UNITE Public Procurement Platform Staff"
-        };
-
-        sgMail.send(mailOptions, function(err) {
-          if(err) {
-            return res.status(500).send({ msg: err.message });
-          }
-          
-          var msg = "The Bid Request has been cancelled by Supplier " + req.body.suppliersName + '.\n' + 'Buyer ' + req.body.buyersName + ' has been notified via e-mail about the Order cancellation.';
-          console.log(msg);
-          req.flash(msg);
-          //res.status(200).send(msg);
-          res.redirect('back');
-        });
+        
+        await sendCancelBidEmail(req, req.body.buyersName, req.body.suppliersName, req.body.buyersEmail, req.body.suppliersEmail, 'Buyer ', 'Supplier ');
       });
+    
+    db.close();
     });
+  } catch {
+    res.redirect('/supplier/index');
+  }
+  
+  res.redirect('back');
 }
 
 
@@ -149,72 +133,52 @@ exports.postDelete = function (req, res, next) {
   var id = req.body.id;
   try {
     //Delete Supplier's Capabilities first:
-    MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
-      db.collection('capabilities').deleteMany({ supplier: id }, function(err, resp) {
+    MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
+      await db.collection('capabilities').deleteMany({ supplier: id }, function(err, resp) {
         if(err) {
           throw err;
         }
-        
-        //Products/Services offered:
-        db.collection('productservices').deleteMany({ supplier: id }, function(err, resp0) {
-          if(err) {
-              throw err;
-            }
-
-          //Now delete the messages sent/received by Supplier:
-          db.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp1) {
-            if(err) {
-              throw err;
-            }
-    
-            //The received bids:
-            db.collection('bidrequests').deleteMany({ supplier: id }, function(err, resp2) {
-              if(err) {
-                throw err;
-              }
-            
-              //Remove the possibly existing Supplier Tokens:
-              db.collection('suppliertokens').deleteMany({ _userId: id }, function(err, resp3) {
-                if(err) {
-                  throw err;
-                }
-
-                //And now, remove the Supplier themselves:
-                db.collection('suppliers').deleteOne({ _id: id }, function(err, resp4) {
-                  if(err) {
-                    throw err;
-                  }
-
-                  //Finally, send a mail to the ex-Buyer:
-                  var email = {
-                    from: 'peter@uniteprocurement.com',
-                    to: req.body.emailAddress, 
-                    subject: 'UNITE - Supplier Account Deletion Completed',
-                    text: 
-                      "Hello " + req.body.companyName +
-                      ",\n\nWe are sorry to see you go from the UNITE Public Procurement Platform!\n\nYour Supplier account has just been terminated and all your data such as received orders, products/services offered, listed capabilities, sent/received messages, and any user tokens have also been lost.\nWe hope to see you back in the coming future. If you have improvement suggestions for us, please send them to our e-mail address above.\n\nWith kind regards,\nThe UNITE Public Procurement Platform Team"
-                  };
-
-                  sgMail.send(email, function (err, resp5) {
-                     if (err ) {
-                      return console.log(err.message);
-                       /*return res.status(500).send({
-                          msg: err.message 
-                        });*/
-                    }
-
-                      console.log('A termination confirmation email has been sent to ' + req.body.emailAddress + '.');
-                      req.flash('success', 'A termination confirmation email has been sent to ' + req.body.emailAddress + '.\n' + "Supplier account finished off successfully!");
-                      db.close();
-                      return res.redirect("/supplier/sign-in");
-                      //return res.status(200).send('A termination confirmation email has been sent to ' + req.body.emailAddress + '.');
-                    });
-                });
-              });
-            });
-          });
-        });
       });
+        
+      //Products/Services offered:
+      await db.collection('productservices').deleteMany({ supplier: id }, function(err, resp0) {
+        if(err) {
+            throw err;
+          }
+      });
+
+      //Now delete the messages sent/received by Supplier:
+      await db.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp1) {
+        if(err) {
+          throw err;
+        }
+      });
+    
+      //The received bids:
+      await db.collection('bidrequests').deleteMany({ supplier: id }, function(err, resp2) {
+        if(err) {
+          throw err;
+        }
+      });
+            
+      //Remove the possibly existing Supplier Tokens:
+      await db.collection('suppliertokens').deleteMany({ _userId: id }, function(err, resp3) {
+        if(err) {
+          throw err;
+        }
+      });
+
+      //And now, remove the Supplier themselves:
+      await db.collection('suppliers').deleteOne({ _id: id }, function(err, resp4) {
+        if(err) {
+          throw err;
+        }
+      });
+
+      //Finally, send a mail to the ex-Supplier:
+      sendCancellationEmail('Supplier', req, 'received orders, products/services offered, listed capabilities, sent/received messages,');
+      db.close();
+      return res.redirect("/supplier/sign-in");
     });
   } catch {
     res.redirect("/supplier");
@@ -222,14 +186,13 @@ exports.postDelete = function (req, res, next) {
 }
 
 
-
-exports.postConfirmation = function(req, res, next) {
+exports.postConfirmation = async function(req, res, next) {
   //assert("token", "Token cannot be blank").notEmpty();
   //req.sanitize("emailAddress").normalizeEmail({ remove_dots: false });
   //var errors = req.validationErrors();
   //if (errors) return res.status(400).send(errors);  
 
-  Token.findOne({ token: req.params.token }, function(err, token) {
+  await Token.findOne({ token: req.params.token }, async function(err, token) {
     if (!token) {
       req.flash(
         "We were unable to find a valid token. It may have expired. Please request a new confirmation token."
@@ -245,7 +208,7 @@ exports.postConfirmation = function(req, res, next) {
       res.redirect("/supplier/resend");
     }
   
-    Supplier.findOne({ _id: token._userId, emailAddress: req.body.emailAddress }, function (err, user) {
+    await Supplier.findOne({ _id: token._userId, emailAddress: req.body.emailAddress }, async function (err, user) {
       if (!user) 
         return res.status(400).send({
         msg: 'We were unable to find a user for this token.' 
@@ -254,33 +217,28 @@ exports.postConfirmation = function(req, res, next) {
       if (user.isVerified) 
         return res.status(400).send({ 
         type: 'already-verified', 
-        msg: 'This user has already been verified.' });           
+        msg: 'This user has already been verified.' });
+      
 
-      MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {//db or client.
-            if (err) throw err;
-            var dbo = db.db(BASE);
-            var myquery = { _id: user._id };
-            var newvalues = { $set: {isVerified: true} };
-            dbo.collection("suppliers").updateOne(myquery, newvalues, function(err, resp) {
+      await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
+        if (err) throw err;
+        var dbo = db.db(BASE);
+            
+        await dbo.collection("suppliers").updateOne({ _id: user._id }, { $set: {isVerified: true} }, function(err, resp) {
               if(err) {
-                console.error(err.message);
-                /*
-                return res.status(500).send({ 
-                  msg: err.message 
-                });
-                */
-                return false;
-              }                   
-
-              console.log("The account has been verified. Please log in.");
-              req.flash('success', "The account has been verified. Please log in.");
-              db.close();
-              if(res) 
-                res.status(200).send("The account has been verified. Please log in.");
-            });
-          });         
+                res.status(500).send(err.message);
+              }
         });
+
+        console.log("The account has been verified. Please log in.");
+        req.flash('success', "The account has been verified. Please log in.");
+        db.close();              
+      });
+    });         
   });
+  
+  if(res) 
+    res.status(200).send("The account has been verified. Please log in.");
 }
 
 
@@ -301,34 +259,13 @@ exports.postResendToken = function(req, res, next) {
     });
 
     // Save the token
-    token.save(function(err) {
+    token.save(async function(err) {
       if (err) {
         return res.status(500).send({ msg: err.message });
       }
 
-      var mailOptions = {
-        from: "peter@uniteprocurement.com",
-        to: user.emailAddress,
-        subject: "Account Verification Token - Resent",
-        text:
-          "Hello,\n\n" +
-          "Please verify your account within 24 hours, by clicking the link: \nhttp://" +
-          req.headers.host +
-          "/supplier/confirmation/" +
-          token.token +
-          "\n"
-      };
-
-      sgMail.send(mailOptions, function(err, info) {
-        if(err) {
-          return res.status(500).send({ msg: err.message });
-        }
-        res
-          .status(200)
-          .send(
-            "A verification email has been sent to " + user.emailAddress + ". Please check your e-mail."
-          );
-      });
+      await resendTokenEmail(user, token.token, '/supplier/confirmation/', req);
+      return res.status(200).send('A verification email has been sent to ' + user.emailAddress + '.');
     });
   });
 }
@@ -429,7 +366,7 @@ function prel(req, isNumber) {
 
 
 let global = 0;
-exports.postSignUp = (req, res) => {
+exports.postSignUp = async (req, res) => {
   if (req.body.emailAddress) {
     const email = req.body.emailAddress;
     const email_str_arr = email.split("@");
@@ -463,7 +400,7 @@ exports.postSignUp = (req, res) => {
               });
             
           try {
-            bcrypt.hash(req.body.password, 10, function(err, hash) {
+            bcrypt.hash(req.body.password, 10, async function(err, hash) {
                 supplier = new Supplier({
                   companyName: req.body.companyName,
                   directorsName: req.body.directorsName,
@@ -506,7 +443,7 @@ exports.postSignUp = (req, res) => {
                   updatedAt: Date.now()
                 });
 
-                supplier.save((err) => {
+                await supplier.save((err) => {
                   if (err) {
                     //req.flash('error', err.message);
                     console.error(err);
@@ -539,76 +476,52 @@ exports.postSignUp = (req, res) => {
                     token: crypto.randomBytes(16).toString("hex")
                   });
                   
-                  token.save(function(err) {
+                  token.save(async function(err) {
                     if (err) {
                       console.error(err.message);
                       return res.status(500).send({
                        msg: err.message
                        });
                         }
-                      
-                        var email = {
-                          from: "peter@uniteprocurement.com",
-                          to: supplier.emailAddress,
-                          subject: "Account Verification Token",
-                          text:
-                            "Hello " + supplier.companyName +
-                            ",\n\nCongratulations for registering on the UNITE Public Procurement Platform!\n\nPlease verify your account by clicking the link: \nhttp://" 
-                          + req.headers.host + "/supplier/confirmation/" + token.token + "\n"
-                        };
+                    
+                    await sendConfirmationEmail(supplier.emailAddress, "/supplier/confirmation/", token.token, supplier.companyName, req);
+                   
+                    if (Array.isArray(supplier.productsServicesOffered)) {
+                      for (var i in supplier.productsServicesOffered) {
+                        var productService = new ProductService({
+                          supplier: supplier._id,
+                          productName: supplier.productsServicesOffered[i],
+                          price: parseFloat(supplier.pricesList[i]),
+                          currency: supplier.currenciesList[i],
+                          createdAt: Date.now(),
+                          updatedAt: Date.now()
+                        });
 
-                        sgMail.send(email, function(err) {
+                        await productService.save((err) => {
                           if (err) {
-                            return console.error(err);
-                            //res.redirect('back');
-                            //return res.status(500).send({
-                            // msg: err.message
-                            // });
+                            req.flash('error', err.message);
+                            return console.error(err.message);
                           }
 
-                          console.log("A verification email has been sent to " +  supplier.emailAddress + ".");
-                          req.flash("success", "A verification email has been sent to " +
-                              supplier.emailAddress + ". Please check your e-mail.");
-                          //return res.status(200).send('A verification email has been sent to ' + supplier.emailAddress + '. Please check your e-mail.');
-                          
-                          if (Array.isArray(supplier.productsServicesOffered)) {
-                            for (var i in supplier.productsServicesOffered) {
-                              var productService = new ProductService({
-                                supplier: supplier._id,
-                                productName: supplier.productsServicesOffered[i],
-                                price: parseFloat(supplier.pricesList[i]),
-                                currency: supplier.currenciesList[i],
-                                createdAt: Date.now(),
-                                updatedAt: Date.now()
-                              });
+                          if(i == supplier.productsServicesOffered.length-1) {
+                            console.log('All products saved!');
 
-                              productService.save((err) => {
-                                if (err) {
-                                  req.flash('error', err.message);
-                                  return console.error(err.message);
-                                }
-                                
-                                if(i == supplier.productsServicesOffered.length-1) {
-                                  console.log('All products saved!');
-                                  req.flash("success", "Supplier signed up successfully!");
-                                  if (res)
-                                    res.redirect("/supplier");
-                                }
-                              });
-                            }
+                          if (res)
+                            res.redirect("/supplier");
                           }
-                      });
-                    });
+                        });
+                      }
+                    }
+                    
+                   req.flash("success", "Supplier signed up successfully!");
+                   res.redirect("/supplier");
+                  });
                 })
               });
             } catch {
               res.redirect('/supplier/sign-up');
             }
-          }) 
-          .then(() => {
-            //if (res)
-              //res.redirect("/supplier");
-          })
+          })           
             .catch(console.error);
         }
       }
@@ -623,14 +536,26 @@ exports.getForgotPassword = (req, res) => {
 }
 
 
-exports.getChat = (req, res) => {
-  res.render("supplier/chat", {
+exports.getChatLogin = (req, res) => {//We need a username, a room name, and a socket-based ID.
+  res.render("../public/chatLogin", {
     from: req.params.supplierId,
     to: req.params.buyerId,
     fromName: req.params.supplierName,
     toName: req.params.buyerName,
-    reqId: req.params.requestId,
-    reqName: req.params.requestName
+    reqId: req.params.requestId? req.params.requestId : 0,
+    reqName: req.params.requestName? req.params.requestName : 'None'
+  });
+}
+
+
+exports.postChatLogin = (req, res) => {//Coming from the getLogin above.
+  res.render("/supplier/chat", {
+    from: req.body.from,
+    to: req.body.to,
+    fromName: req.body.fromName,
+    toName: req.body.toName,
+    reqId: req.body.reqId,
+    reqName: req.body.reqName
   });
 }
 
@@ -654,9 +579,7 @@ exports.postForgotPassword = (req, res, next) => {
           MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
             if (err) throw err;
             var dbo = db.db(BASE);
-            var myquery = { _id: user._id };
-            var newvalues = { resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000};
-            dbo.collection("suppliers").updateOne(myquery, newvalues, function(err, resp) {        
+            dbo.collection("suppliers").updateOne({ _id: user._id }, { $set: {resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000} }, function(err, resp) {        
               if(err) {
                 return console.error(err.message);
               }
@@ -667,26 +590,7 @@ exports.postForgotPassword = (req, res, next) => {
         });
       },
       function(token, user, done) {
-        var emailOptions = {
-          from: "peter@uniteprocurement.com",
-          to: user.emailAddress,
-          subject: "UNITE Password Reset - Supplier",
-          text:
-            "Hello,\n\n" +
-            "You have received this e-mail because you requested a Supplier password reset on our UNITE platform." +
-            " Please reset your password within 24 hours, by clicking the link: \nhttp://" + req.headers.host + "/supplier/reset/" + token + "\n"
-        };
-
-        sgMail.send(emailOptions, function(err, resp1) {
-          console.log("E-mail sent!");
-          req.flash(
-            "success",
-            "An e-mail has been sent to " +
-              user.emailAddress +
-              " with password reset instructions. Please check your e-mail."
-          );
-          done(err, "done");
-        });
+        sendForgotPasswordEmail(user, 'Supplier', "/supplier/reset/", token, req);
       }
     ],
     function(err) {
@@ -726,9 +630,7 @@ exports.postResetPasswordToken = (req, res) => {
         MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
           if (err) throw err;
           var dbo = db.db(BASE);
-          var myquery = { _id: user._id };
-          var newvalues = { password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined};
-          dbo.collection("suppliers").updateOne(myquery, newvalues, function(err, resp) {        
+          dbo.collection("suppliers").updateOne({ _id: user._id }, { $set: {password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined} }, function(err, resp) {
             if(err) {
               console.error(err.message);
               return false;
@@ -744,21 +646,7 @@ exports.postResetPasswordToken = (req, res) => {
     });
     },
       function(user, done) {
-        var emailOptions = {
-          from: "no-reply@uniteprocurement.com",
-          to: user.emailAddress,
-          subject: "UNITE Password changed - Supplier",
-          text:
-            "Hello,\n\n" +
-            "You have successfully reset your Supplier password on our UNITE platform" +
-            " for the account registered with " + user.emailAddress + ". You can log in again."
-        };
-
-        sgMail.send(emailOptions, function(err, resp1) {
-          console.log("E-mail sent!");
-          req.flash("success", "Your password has been successfully changed!");
-          done(err, "done");
-        });
+        sendResetPasswordEmail(user, 'Supplier', req);
       }
     ],
     function(err) {
@@ -835,53 +723,32 @@ exports.getBidRequest = (req, res) => {
 
 
 exports.postBidRequest = (req, res) => {
-  MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
+  MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
     if (err) throw err;
     var dbo = db.db(BASE);
-    var myquery = { _id: req.body.reqId };
-    var newvalues = { $set: {status: req.body.status} };
-    dbo.collection("bidrequests").updateOne(myquery, newvalues, function(err, res) {
+    
+    await dbo.collection("bidrequests").updateOne({ _id: req.body.reqId }, { $set: {status: req.body.status} }, function(err, res) {
       if(err) {
         console.error(err.message);
         return false;
       }
+      
       req.flash('success', 'Bid status updated successfully!');
-
-      if(req.body.message) {
-        const newMessage = new Message({
-          to: req.body.to,
-          from: req.body.from,
-          sender: req.body.sender,
-          receiver: req.body.receiver,
-          bidRequestId: req.body.reqId,
-          message: req.body.message
-        });
-
-        newMessage
-          .save()
-          .then( (err, result) => {
-            if(err) {
-              console.error(err.message);        
-            }
-
-          req.flash('success', 'Message sent to Buyer!');
-          res.redirect('/supplier/index')
-        })
-          .catch(console.error);              
-      }
     });
-    if(res) res.redirect('/supplier/index');
+    
+    db.close();
   });
-  //req.originalUrl  
+  
+  if(res) 
+      res.redirect('/supplier/index');
  }
-
 
 
 exports.postProfile = (req, res) => {
   global = 0;
   //console.log(global);
   try {
-  Supplier.findOne({ _id: req.body._id }, (err, doc) => {
+  Supplier.findOne({ _id: req.body._id }, async (err, doc) => {
     if (err) {
       console.error(err);
       res.redirect("back");
@@ -930,85 +797,83 @@ exports.postProfile = (req, res) => {
     //doc.__v = 1;//Last saved version. To be taken into account for future cases of concurrential changes, in case updateOne does not protect us from that problem.
     var price = req.body.price;
     
-    MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
+    if(global++ < 1)
+    await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
       if (err) throw err;
       var dbo = db.db(BASE);
-      var myquery = { _id: doc._id };
-      var newvalues = { $set: doc };
-      dbo
-        .collection("suppliers")
-        .updateOne(myquery, newvalues, function(err, resp0) {
+      
+      await dbo.collection("suppliers").updateOne({ _id: doc._id }, { $set: doc }, function(err, resp0) {
           if (err) {
             return console.error(err.message);
           }
+        });
 
-          console.log("Supplier updated!");
-          var arr = doc.productsServicesOffered;
-          var query = {supplier: doc._id};
-        
-          dbo.collection("capabilities").deleteMany(query, (err, resp1) => {
-            if(err) 
-              return console.error(err.message);
+      console.log("Supplier updated!");
+      var arr = doc.productsServicesOffered;
 
-            var capability = new Capability({
+      await dbo.collection("capabilities").deleteMany({ supplier: doc._id }, (err, resp1) => {
+        if(err) 
+          return console.error(err.message);
+      });
+
+        var capability = new Capability({
+        supplier: doc._id,
+        capabilityDescription: doc.capabilityDescription,
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      });
+
+      await capability.save((err) => {
+        if (err) {
+          return console.error(err.message);
+          }
+      });
+
+      console.log('Capability description saved!');
+
+      await dbo.collection("productservices").deleteMany({ supplier: doc._id }, (err, resp2) => {
+        if(err) 
+          return console.error(err.message);
+      });
+
+      if (Array.isArray(arr))
+        for (var i in arr) {
+          if(!doc.pricesList[i]) continue;
+
+          var productService = new ProductService({
             supplier: doc._id,
-            capabilityDescription: doc.capabilityDescription,
+            productName: arr[i],
+            price: parseFloat(doc.pricesList[i]),
+            currency: doc.currenciesList[i],
             createdAt: Date.now(),
             updatedAt: Date.now()
           });
 
-          capability.save((err) => {
+          await productService.save((err) => {
             if (err) {
               return console.error(err.message);
-              }
-
-            console.log('Capability description saved!');
-            });
+            }
           });
-        
-          dbo.collection("productservices").deleteMany(query, (err, resp2) => {
-            if(err) 
-              return console.error(err.message);
-            
-            if (Array.isArray(arr))
-              for (var i in arr) {
-                if(!doc.pricesList[i]) continue;
-                var productService = new ProductService({
-                  supplier: doc._id,
-                  productName: arr[i],
-                  price: parseFloat(doc.pricesList[i]),
-                  currency: doc.currenciesList[i],
-                  createdAt: Date.now(),
-                  updatedAt: Date.now()
-                });
 
-                productService.save((err) => {
-                  if (err) {
-                    return console.error(err.message);
-                  }
-                  console.log('Product saved!');
-                  
-                  if((i == arr.length-1) && (global++ < 1)) {
-                    console.log('Products offered list saved! Now saving new data to session:');
-                    req.session.supplier = doc;
-                    req.session.id = doc._id;
-                    
-                    req.session.save((err) => {
-                      if(err) {
-                        return console.error(err.message);
-                      }
+          console.log('Product saved!');
+        }
+      
+        console.log('Products offered list saved! Now saving new data to session:');
+        req.session.supplier = doc;
+        req.session.id = doc._id;
 
-                      console.log("User updated and session saved!");
-                      req.flash("success", "Supplier details updated successfully!");
-                      db.close();
-                      return res.redirect("/supplier");
-                    });
-                  }                  
-                });
-              }
-          });
-        });      
+        await req.session.save((err) => {
+          if(err) {
+            return console.error(err.message);
+          }
+        });
+
+      console.log("User updated and session saved!");      
+      db.close();      
     });
+    
+    req.flash("success", "Supplier details updated successfully!");
+    return res.redirect("/supplier");
   })
     .catch(console.error);
   } catch {

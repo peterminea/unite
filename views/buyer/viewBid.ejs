@@ -33,21 +33,21 @@
               error: function() {},
               success: function(data) {                
                 if(!data || !data.length)
-                  return false;                
+                  return false;
                 
                 $('select[id^="statuses_"]')
                   .bind('change', function() {//Difficult DOM jQuery navigation in modals.                  
                   var theVal = $(this).find('option:selected').attr('value');
                   var index = getId($(this).attr('id'));
                   var statusDiv = $(this).parent('div').parent('div').next('div');
-                                   
+
                   ($(this)
                     .parent('div')
                     .prev('div')
                     .find('input[id^="status"]'))
                     .val(theVal);
                   
-                  var x = JSON.parse($('#statusJsonValues_0 span').first().text());
+                  var x = JSON.parse($('[id^="statusJsonValues_"]').first().val());                  
                   
                   if(theVal == x.SUPP_START_DELIVERY) {
                     var amount = $('#price_'+index).val();
@@ -66,7 +66,7 @@
                 $('select[id^="statuses_"]')
                   .each(function(index, el) {
                   for(var i in data) {
-                    var opt = '<option ' + (i >= 5? 'disabled ' : '') + 'style="word-wrap: break-word; width: 100px" title="' + data[i].name +'" value="' + data[i].value + '">' + data[i].name + '</option>';
+                    var opt = '<option ' + (i > x.PAYMENT_DELIVERY_DONE? 'disabled ' : '') + 'style="word-wrap: break-word; width: 100px" title="' + data[i].name +'" value="' + data[i].value + '">' + data[i].name + '</option>';
                     $(el).append(opt);
                     }
                   
@@ -115,9 +115,6 @@
 
   <body id="<%= supplierId %>" id2="<%= buyerId %>">
     <div class="container">
-      <div>  
-        <input type="button" class="btn btn-primary" value="Back" onclick="history.go(-1)">
-      </div>
       <div class="col-md-12">
         <% let i = 0; if (bids != null && bids.length > 0) { for (bid of bids) { i++; %>
         
@@ -260,12 +257,10 @@
                   <div class="form-group selectstatus">
                     <select style="width: 100%" id="statuses_<%= i %>">
                     </select>
-                  </div>
-                  <div style="display: none" id="statusJsonValues_<%= i %>">                      
+                  </div>                  
                     <% if (statusesJson != null) {  %>
-                      <span><%= statusesJson %></span>
-                    <% }  %>
-                  </div>                
+                      <input type="hidden" id="statusJsonValues_<%= i %>" value="<%= statusesJson %>">
+                    <% }  %>                  
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                   <input type="hidden" name="buyer" value="<%= bid.buyer %>">
                   <input type="hidden" name="supplier" value="<%= bid.supplier %>">
@@ -296,7 +291,6 @@
                            && !confirm('Are you sure you want to update Bid Status without any mentions for the Supplier ' + $(this).find('input[name="supplierName"]').val() + '?')) {
                           return false;
                         }
-
                         //return true;
                       });                      
                       
@@ -304,7 +298,7 @@
                         $('#updateBidStatus_'+getId($(this).attr('id'))).removeAttr('disabled');
                       });
                       
-                      var x = JSON.parse($('#statusJsonValues_0 span').first().text());
+                      var x = JSON.parse($('[id^="statusJsonValues_"]').first().val());
                       var stripePublicKey = "<%= stripePublicKey %>";
                       var status = $('#status_'+index).val();
                       
@@ -354,14 +348,16 @@
                             });
                         
                         $('#purchase_'+index).bind('click', function() {
-                          amount = parseInt(amount)*100;
-							            stripeHandler.open({
-                            amount: amount,
-                            currency: currency,
-                            emailAddress: emailAddress,
-                            description: desc
+                          if(confirm('IMPORTANT NOTICE: Unite currently uses the Stripe Payment Gateway in TEST MODE.\nNo real charges are done on you. You must use a fictitious card number like 4242 4242 4242 4242, and also to invent the CCV and the expiry date.\nDo you want to proceed?')) {
+                            amount = parseInt(amount)*100;
+                            stripeHandler.open({
+                              amount: amount,
+                              currency: currency,
+                              emailAddress: emailAddress,
+                              description: desc
+                            });
                           });
-                        });
+                        }
                       } else {
                         $('#purchase_'+index).remove();
                         if(status >= x.PAYMENT_DELIVERY_DONE) {//Beyond the purchase phase.
@@ -376,7 +372,7 @@
      <!-- Buyer=sender, supplier=receiver. -->     
           <div class="container mt-4">
             <div class="form-group">
-              <a href="../../../supplier/chat/<%= bid.buyer %>/<%= bid.supplier %>/<%= bid._id %>/<%= bid.requestName %>/<%= bid.supplierName %>/<%= bid.buyerName %>">
+              <a href="../../../supplier/chatLogin/<%= bid.buyer %>/<%= bid.supplier %>/<%= bid._id %>/<%= bid.requestName %>/<%= bid.supplierName %>/<%= bid.buyerName %>">
                 <button style="float: left" title="Chat" id="chat" class="btn-primary btn">Chat with your supplier</button>
               </a>
               
