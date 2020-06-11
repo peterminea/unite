@@ -1,17 +1,21 @@
 <html>
   <head>
-    <title>Buyer - Chat Login for UNITE</title>
+  <title>Buyer - Chat Login for UNITE</title>
     <meta charset="utf-8">    
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Another cool thing made with Glitch">
+    <meta name="description" content="A cool thing made with Glitch">
     <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
     <link rel="stylesheet" href="/style.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/messages.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">    
+    <script src="/jquery.min.js"></script>
+    <script src="/jquery-ui.min.js"></script>
+    <script src="/popper.min.js"></script>
+    <script src="/bootstrap.min.js"></script>
+    <script src="/sweetalert.min.js"></script>  
+    <script src="/index.min.js"></script>
     <script src="/https.js"></script>
     <script src="/chatUsers.js"></script>
     <script src="/autocomp.js"></script>
@@ -31,8 +35,10 @@
         }
       });
       
-      $('#join').click(function(e) {
-        var x = addUser(null, $('#username').val(), $('#room').val());
+      $('#join').click(function(e) {//alert(1);
+        addUser({id: null, username: $('#username').val(), room: $('#room').val()});
+        $('#room').val('');
+        $('#username').val('');
       });
     });    
     </script>
@@ -60,16 +66,16 @@
             <input type="hidden" name="reqName" id="reqName" value="<%= reqName %>"/>
             <input type="hidden" name="fromName" id="fromName" value="<%= fromName %>"/>
             <input type="hidden" name="toName" id="toName" value="<%= toName %>"/>
-            <input type="text" class="form-control" name="username" placeholder="Choose a username" required>
+            <input type="text" class="form-control" id="username" name="username" placeholder="Choose a username" required>
           </div>
           <div class="form-group mr-2">
             <label>Room</label>
-            <input type="text" class="form-control" name="room" placeholder="Chatroom" required>
+            <input type="text" class="form-control" id="room" name="room" placeholder="Chatroom" required>
           </div>
           <div class="form-group mr-2">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <a href=""><button id="join" class="btn btn-danger">Join Chat!</button></a>
-          </div>        
+          </div>
       </div>      
     </div>    
   </body>  

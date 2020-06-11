@@ -6,27 +6,37 @@
   <title>UNITE - Buyer - View Bid(s)</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Another cool thing made with Glitch">
+  <meta name="description" content="A cool thing made with Glitch">
   <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
   <link rel="stylesheet" href="/style.css">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>    
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
-  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>  
-  <script src="https://checkout.stripe.com/checkout.js"></script>
-  <script src="/autocomp.js"></script>
-  <script src="/https.js"></script>
-  
+  <link rel="stylesheet" href="/messages.css">
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.css">
+  <!--
+  <script src="/jquery.min.js"></script>
+  <script src="/jquery-ui.min.js"></script>
+  <script src="/bootstrap.min.js"></script>
+  <script src="/popper.min.js"></script>  
+  <script src="/sweetalert.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>  
+-->
+  <script src="/jquery.min.js"></script>
+  <script src="/jquery-ui.min.js"></script>
+  <script src="/bootstrap.min.js"></script>
+  <script src="/https.js"></script>  
+  <script src="/autocomp.js"></script>  
   <script type="text/javascript">
     $(document).ready(function() {
       var token = $("input[name='_csrf']").first().val();
       
       $('.cancelForm').submit(function(e) {
         var reason = prompt('Please enter a reason for cancelling this order.');
-        reason && reason.length? $(this).find('input[name="reason"]').val(reason) : return false;
+        if(reason && reason.length)
+          $(this).find('input[name="reason"]').val(reason);
+        else 
+          return false;
       });
       
       //setTimeout({
@@ -40,13 +50,37 @@
               success: function(data) {                
                 if(!data || !data.length)
                   return false;
-                
+                //alert(12);
                 var x = JSON.parse($('[id^="statusJsonValues_"]').first().val());
                 //alert(x.PAYMENT_DELIVERY_DONE + ' ' + $('select[id^="statuses_"]').length);
+                if($('.delete').length) {
+                  $('.delete').bind('click', function() {          
+                    var bidId = $(this).attr('id');
+                    var div1 = $(this).parent('div'), div2 = div1.prev('div');
+
+                    if(confirm('Are you sure you want to remove this bid from your Buyer Dashboard forever?')) {
+                      $.ajax({
+                        url: '/deleteBid',
+                        type: 'POST',
+                        headers: { "X-CSRF-Token": token },
+                        data: {bidId: bidId},
+                        datatype: 'application/json',
+                        error: function() {
+                          alert('Error on AJAX Request!');
+                        },
+                        success: function() {
+                          div2.remove();
+                          div1.remove();
+                          alert('Bid removed by buyer!');
+                        }
+                      });
+                    }
+                  });
+                }
                 
                 setTimeout(function() {
                   $('select[id^="statuses_"]')
-                    .each(function(index, el) {//alert(index);
+                    .each(function(index, el) {
                     for(var i in data) {
                       var opt = '<option ' + (i > x.PAYMENT_DELIVERY_DONE? 'disabled ' : '') + 'style="word-wrap: break-word; width: 100px" title="' + data[i].name +'" value="' + data[i].value + '">' + data[i].name + '</option>';
                       $(el).append(opt);
@@ -64,7 +98,7 @@
                       $(el).attr('title', $(this).find('option:selected').text());                  
 
                   });
-              }, 200);
+              }, 250);
                 
                 $('select[id^="statuses_"]')
                   .bind('change', function() {//Difficult DOM jQuery navigation in modals.                  
@@ -94,40 +128,14 @@
               }
       });
     //}, 40);
-      
-      if($('.delete').length()) {
-        $('.delete').bind('click', function() {          
-          var bidId = $(this).attr('id');
-          var div1 = $(this).parent('div'), div2 = div1.prev('div');
-          
-          if(confirm('Are you sure you want to remove this bid from your Buyer Dashboard forever?')) {
-            $.ajax({
-              url: '/deleteBid',
-              type: 'POST',
-              headers: { "X-CSRF-Token": token },
-              data: {bidId: bidId},
-              datatype: 'application/json',
-              error: function() {
-                alert('Error on AJAX Request!');
-              },
-              success: function() {
-                div2.remove();
-                div1.remove();
-                alert('Bid removed by buyer!');
-              }
-            });
-          }
-        });
-      }      
     });
   </script>
 </head>
 
   <body id="<%= supplierId %>" id2="<%= buyerId %>">
     <div class="container">
-      
+      <br><br>
       <div class="col-md-12">
-        <br><br>
         <% let i = 0; if (bids != null && bids.length > 0) { for (bid of bids) { i++; %>        
         <div>      
           <div class="card mt-4">

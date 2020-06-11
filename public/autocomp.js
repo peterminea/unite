@@ -310,13 +310,13 @@ $(document).ready(function() {
     
     nav.append($str);
   }
-  
+
   $('div.container')
     .first()
-    .prepend('<div><input type="button" class="btn btn-primary" style="float: left"' 
-                                    + ' value="Back" onclick="history.go(-1)">'
-                + '<input type="button" class="btn btn-primary" style="float: right"' 
-                                    + ' value="Forward" onclick="history.go(1)">' 
+    .prepend('<div><button class="back btn btn-primary" style="margin-right: 20px" ' 
+                                    + ' title="Back one page" onclick="history.go(-1)">Back</button>'
+                + '<button class="forward btn btn-primary" style="margin-left: 20px"' 
+                                    + ' title="Forward one page" onclick="history.go(1)">Forward</button>'
                                    +'</div>');
   
   $('input,textarea,span,label,li,button,a,b,p,h1,h2,h3,h4,h5,option')
@@ -325,6 +325,9 @@ $(document).ready(function() {
       $(el).attr('title', $(el).val()? $(el).val() : $(el).text());
     }
   });
+  
+  //$('div.container').not('.text-center')
+    $("body").css({"background-image": "url(https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2FGD.png?v=1591857198052)", "background-repeat": "repeat"})
   
   if(nav) 
     nav.find('span').attr('title', 'Expand/collapse UNITE basic options');

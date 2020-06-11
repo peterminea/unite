@@ -144,7 +144,6 @@ app.get('/messages', (req, res) => {
 });
 
 
-//wire up the server to listen to our port 5000
 server.listen(port, () => {
   console.log("Connected to port: " + port + '.');
 });
@@ -164,28 +163,43 @@ app.post('/messages', (req, res) => {
 let count = 0;
 const {generateMessage, generateSimpleMessage, generateLocationMessage} = require('./public/chatMessages');
 const { addUser, removeUser, getUser, getUsersInRoom } = require('./public/chatUsers');
-console.log(Date.now() + ' ' + new Date() + ' ' + new Date().getTime());
+//console.log(Date.now() + ' ' + new Date() + ' ' + new Date().getTime());
 
 socket.on("connection", (sock) => {
   console.log("User connected!");  
   sock.emit('countUpdated', count);
   
-  sock.on('join', (options, callback) => {
-    console.log('New WebSocket Connection:');
+  sock.on('join', (obj, callback) => {
+    console.log('New WebSocket Connection: ' + obj.username);
     
-    const {error, user} = addUser({ id: socket.id, ...options });
+    var {error, user} = addUser({ id: sock.id, username: obj.username, room: obj.room });//..options
+    console.log(sock.id + ' ' + JSON.stringify(user) + ' ' + error);
+    if(!user) {
+      user = {
+        id: sock.id,
+        username: 'User',
+        room: 'Chamberroom'
+      };
+    }
+    
     if(error) {
       return callback(error);
     }
     
     sock.join(user.room);
-    sock.emit('message', generateSimpleMessage('Admin', 'Welcome to the UNITE chat!'));
-    sock.broadcast.to(user.room).emit('message', generateSimpleMessage('Admin', `We have a new user, ${user.username}, that has joined us in Chat!`));
-    
+    var msg = generateSimpleMessage('Admin', 'Welcome to the UNITE chat!');
+    //console.log(msg);
+    sock.emit('message', msg);   
+    var users = getUsersInRoom(user.room);
+    console.log(users.length + ' ' + users[0].username);
     socket.to(user.room).emit('roomData', {
       room: user.room,
-      users: getUsersInRoom(user.room)
+      users: users
     });
+    
+    msg = generateSimpleMessage('Admin', 'We have a new user, ' + user.username +', that has joined us in Chat!');
+    console.log(msg.username);
+    sock.broadcast.to(user.room).emit('message', msg);
     
     callback();
   });
@@ -200,8 +214,8 @@ socket.on("connection", (sock) => {
   
   sock.on("disconnect", function() {
     console.log("User disconnected!");
-    const user = removeUser(socket.id);
-    
+    var user = removeUser(socket.id);
+    console.log(JSON.stringify(user));
     if(user) {
       socket.to(user.room).emit('message', generateSimpleMessage('Admin', `${user.username} has just left us!`));
       socket.to(user.room).emit('roomData', {
@@ -217,16 +231,18 @@ socket.on("connection", (sock) => {
   });
   
 
-  sock.on("sendMessage", async function(msgData, callback) {
+  sock.on("sendMessage", function(msgData, callback) {
+    //console.log(sock);
     var user = getUser(sock.id);
-    console.log(sock + ' ' + user);
+    
     if(!user) {
       user = {
         id: sock.id,
         username: 'User',
         room: 'Chamberroom'
       };
-    }
+    }    
+
     msgData.time = new Date().getTime();//dateformat(new Date(), 'dddd, mmmm dS, yyyy, h:MM:ss TT');
     
     sock.broadcast.emit("received", {
@@ -240,7 +256,7 @@ socket.on("connection", (sock) => {
     
     var mesg = new Message(msgData);
     //if(msgData.)
-    await mesg.save((err) => {
+    mesg.save((err) => {
       if(err) {
        console.error(err.message);
         throw new Error();
@@ -254,7 +270,15 @@ socket.on("connection", (sock) => {
   
   
   sock.on('sendLocation', (coords, callback) => {console.log(coords);
-    const user = getUser(sock.id);
+    var user = getUser(sock.id);
+    if(!user) {
+      user = {
+        id: sock.id,
+        username: 'User',
+        room: 'Chamberroom'
+      };
+    }
+                                                 
     socket.to(user.room).emit('locationMessage', generateLocationMessage(user.username,  `https://www.google.com/maps?q=${coords.latitude},${coords.longitude}`));
     console.log('https://www.google.com/maps?q=' + coords.latitude + ',' + coords.longitude + '');
     callback();
@@ -262,7 +286,14 @@ socket.on("connection", (sock) => {
   
   
   sock.on("typing", (data) => {
-    const user = getUser(sock.id);
+    var user = getUser(sock.id);
+    if(!user) {
+      user = {
+        id: sock.id,
+        username: 'User',
+        room: 'Chamberroom'
+      };
+    }
     sock.broadcast.to(user.room).emit("notifyTyping", generateSimpleMessage('Admin', `${user.username} is typing...`));
   });
 });
@@ -644,7 +675,7 @@ app.post('/currencyAutocomplete', function(req, res, next) {
         });
       }
       
-      res.jsonp(result);     
+      res.jsonp(result);
     }
   });
 });
@@ -747,7 +778,6 @@ var buildResultSet = function(docs) {
     }
     return result;
    }
-
 
 app.get('/countryAutocompleted', function(req, res) {  
   var regex = new RegExp(req.query["term"], 'i');
