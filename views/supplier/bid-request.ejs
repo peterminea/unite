@@ -15,6 +15,14 @@
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
   <script src="/https.js"></script>
   <script src="/autocomp.js"></script>
+  <script type="text/javascript">
+  $(document).ready(function() {
+    $('.cancelForm').submit(function(e) {
+      var reason = prompt('Please enter a reason for cancelling this order.');
+      reason && reason.length? $(this).find('input[name="reason"]').val(reason) : return false;
+    });
+  });
+  </script>
 </head>
 
 <body>
@@ -295,12 +303,15 @@
 <!-- Supplier=sender, buyer=receiver. -->
         <div class="container mt-4">
           	<div class="form-group">
-							<a href="../chatLogin/<%= supplier._id %>/<%= buyer._id %>/<%= request._id %>/<%= request.requestName %>/<%= buyer.organizationName %>/<%= supplier.companyName %>">
+							<a href="../../../supplier/chatLogin/<%= supplier._id %>/<%= buyer._id %>/<%= request._id %>/<%= request.requestName %>/<%= buyer.organizationName %>/<%= supplier.companyName %>">
                 <button style="float: left" title="Chat" id="chat" class="btn-primary btn">Chat with your buyer</button>
               </a>
-            <form class="cancelForm" action="../../../supplier/cancelBid/" method="POST">
+            <form class="cancelForm" id="cancelBid" action="../../../supplier/cancelBid/" method="POST">
               <input type="hidden" name="bidId" value="<%= request._id %>">
               <input type="hidden" name="requestsName" value="<%= request.requestName %>">
+              <input type="hidden" name="userType" value="Supplier">
+              <input type="hidden" name="cancelType" value="Order Cancellation">
+              <input type="hidden" name="reason" value="">
               <input type="hidden" name="buyersName" value="<%= request.buyerName %>">
               <input type="hidden" name="suppliersName" value="<%= request.supplierName %>">
               <input type="hidden" name="buyersEmail" value="<%= request.buyerEmail %>">

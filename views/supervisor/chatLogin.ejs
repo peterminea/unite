@@ -13,6 +13,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
     <script src="/https.js"></script>
+    <script src="/chatUsers.js"></script>
     <script src="/autocomp.js"></script>
     <script type="text/javascript">
     $(document).ready(function() {
@@ -28,6 +29,10 @@
         } else {
           $('#join').attr('disabled', 'disabled');
         }
+      });
+      
+      $('#join').click(function(e) {
+        addUser(null, $('#username').val(), $('#room').val());
       });
     });    
     </script>

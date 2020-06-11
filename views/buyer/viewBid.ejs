@@ -24,6 +24,12 @@
     $(document).ready(function() {
       var token = $("input[name='_csrf']").first().val();
       
+      $('.cancelForm').submit(function(e) {
+        var reason = prompt('Please enter a reason for cancelling this order.');
+        reason && reason.length? $(this).find('input[name="reason"]').val(reason) : return false;
+      });
+      
+      //setTimeout({
       $.ajax({
               url: "/bidStatuses",
               headers: { "X-CSRF-Token": token },
@@ -34,6 +40,31 @@
               success: function(data) {                
                 if(!data || !data.length)
                   return false;
+                
+                var x = JSON.parse($('[id^="statusJsonValues_"]').first().val());
+                //alert(x.PAYMENT_DELIVERY_DONE + ' ' + $('select[id^="statuses_"]').length);
+                
+                setTimeout(function() {
+                  $('select[id^="statuses_"]')
+                    .each(function(index, el) {//alert(index);
+                    for(var i in data) {
+                      var opt = '<option ' + (i > x.PAYMENT_DELIVERY_DONE? 'disabled ' : '') + 'style="word-wrap: break-word; width: 100px" title="' + data[i].name +'" value="' + data[i].value + '">' + data[i].name + '</option>';
+                      $(el).append(opt);
+                      }
+
+                    //setTimeout(function() {                    
+                      var statusInput = $(el)
+                        .parent('div')
+                        .prev('div')
+                        .find('input[id^="status_"]');                   
+                      $(el)
+                          .find('option[value="' + statusInput.val() + '"]')
+                          .attr({'selected': 'selected'});
+
+                      $(el).attr('title', $(this).find('option:selected').text());                  
+
+                  });
+              }, 200);
                 
                 $('select[id^="statuses_"]')
                   .bind('change', function() {//Difficult DOM jQuery navigation in modals.                  
@@ -46,8 +77,6 @@
                     .prev('div')
                     .find('input[id^="status"]'))
                     .val(theVal);
-                  
-                  var x = JSON.parse($('[id^="statusJsonValues_"]').first().val());                  
                   
                   if(theVal == x.SUPP_START_DELIVERY) {
                     var amount = $('#price_'+index).val();
@@ -62,28 +91,9 @@
                       .find('button[id^="updateBidStatus_"]')
                       .removeAttr('disabled');
                 });
-              
-                $('select[id^="statuses_"]')
-                  .each(function(index, el) {
-                  for(var i in data) {
-                    var opt = '<option ' + (i > x.PAYMENT_DELIVERY_DONE? 'disabled ' : '') + 'style="word-wrap: break-word; width: 100px" title="' + data[i].name +'" value="' + data[i].value + '">' + data[i].name + '</option>';
-                    $(el).append(opt);
-                    }
-                  
-                  //setTimeout(function() {                    
-                    var statusInput = $(el)
-                      .parent('div')
-                      .prev('div')
-                      .find('input[id^="status_"]');                   
-                    $(el)
-                        .find('option[value="' + statusInput.val() + '"]')
-                        .attr({'selected': 'selected'});
-                  
-                    $(el).attr('title', $(this).find('option:selected').text());                  
-                 // }, 300);
-                });
               }
-      });      
+      });
+    //}, 40);
       
       if($('.delete').length()) {
         $('.delete').bind('click', function() {          
@@ -115,9 +125,10 @@
 
   <body id="<%= supplierId %>" id2="<%= buyerId %>">
     <div class="container">
+      
       <div class="col-md-12">
-        <% let i = 0; if (bids != null && bids.length > 0) { for (bid of bids) { i++; %>
-        
+        <br><br>
+        <% let i = 0; if (bids != null && bids.length > 0) { for (bid of bids) { i++; %>        
         <div>      
           <div class="card mt-4">
             <h5 class="card-header bg-dark text-white">From: <%= bid.buyerName %></h5>
@@ -372,13 +383,16 @@
      <!-- Buyer=sender, supplier=receiver. -->     
           <div class="container mt-4">
             <div class="form-group">
-              <a href="../../../supplier/chatLogin/<%= bid.buyer %>/<%= bid.supplier %>/<%= bid._id %>/<%= bid.requestName %>/<%= bid.supplierName %>/<%= bid.buyerName %>">
+              <a href="../../../buyer/chatLogin/<%= bid.buyer %>/<%= bid.supplier %>/<%= bid._id %>/<%= bid.requestName %>/<%= bid.supplierName %>/<%= bid.buyerName %>">
                 <button style="float: left" title="Chat" id="chat" class="btn-primary btn">Chat with your supplier</button>
               </a>
               
               <form class="cancelForm" action="../../../buyer/cancelBid/" method="POST">
                 <input type="hidden" name="bidId" value="<%= bid._id %>">
                 <input type="hidden" name="requestsName" value="<%= bid.requestName %>">
+                <input type="hidden" name="userType" value="Buyer">
+                <input type="hidden" name="cancelType" value="Order Cancellation">
+                <input type="hidden" name="reason" value="">
                 <input type="hidden" name="buyersName" value="<%= bid.buyerName %>">
                 <input type="hidden" name="suppliersName" value="<%= bid.supplierName %>">
                 <input type="hidden" name="buyersEmail" value="<%= bid.buyerEmail %>">

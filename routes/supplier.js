@@ -19,8 +19,9 @@ router.get("/addproduct", isAuth, sessionExit, supplierController.getAddProduct)
 router.get('/resend', /*isAuth,*/ sessionExit, supplierController.getResendToken);
 router.get("/confirmation/:token", sessionExit, supplierController.getConfirmation);
 router.get("/forgotPassword", isAuth, sessionExit, supplierController.getForgotPassword);
-router.get("/chatLogin/:supplierId/:buyerId/:requestId/:requestName/:buyerName/:supplierName", isAuth, sessionExit, supplierController.getChatLogin);
 router.get("/resetPassword/:token", isAuth, sessionExit, supplierController.getResetPasswordToken);
+router.get("/chatLogin/:supplierId/:buyerId/:requestId/:requestName/:buyerName/:supplierName", isAuth, sessionExit, supplierController.getChatLogin);
+router.get("/chat/:from/:to/:username/:room/:requestId/:requestName/:toName/:fromName", isAuth, sessionExit, supplierController.getChat);
 
 router.post("/sign-in", supplierController.postSignIn);
 router.post("/sign-up", supplierController.postSignUp);
@@ -33,6 +34,5 @@ router.post('/resend', /*isAuth,*/ sessionExit, supplierController.postResendTok
 router.post("/forgotPassword", isAuth, sessionExit, supplierController.postForgotPassword);
 router.post("/resetPassword/:token", isAuth, sessionExit, supplierController.postResetPasswordToken);
 router.post("/cancelBid", isAuth, sessionExit, supplierController.postCancelBid);
-router.post("/chatLogin", isAuth, sessionExit, supplierController.postChatLogin);
 
 module.exports = router;
