@@ -6,19 +6,17 @@ const BidStatus = require("../models/bidStatus");
 const ProductService = require("../models/productService");
 const Capability = require("../models/capability");
 const Message = require("../models/message");
-const sgMail = require("@sendgrid/mail");
 const Token = require("../models/supplierToken");
 const assert = require("assert");
 const process = require("process");
 const async = require("async");
 const crypto = require('crypto');
-sgMail.setApiKey(process.env.SENDGRID_API_KEY); //Stored in the *.env file.
 //sgMail.setApiKey('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');
 //process.env.SENDGRID_API_KEY = "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";
 const MongoClient = require("mongodb").MongoClient;
 const ObjectId = require("mongodb").ObjectId;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
-const { sendConfirmationEmail, sendCancellationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail } = require('../public/emails');
+const { sendConfirmationEmail, sendCancellationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
 
 const statusesJson = {
   BUYER_REQUESTED_BID: parseInt(process.env.BUYER_REQ_BID),
@@ -88,6 +86,20 @@ exports.postCancelBid = (req, res) => {
         throw err;
     
       var dbo = db.db(BASE);
+    
+      try {
+        await dbo.collection('cancelreasons').insertOne( {
+          type: req.body.cancelType,
+          userType: req.body.userType,
+          reason: req.body.reason,
+          userName: req.body.suppliersName,
+          createdAt: Date.now()
+        }, function(err, obj) {});
+      }  
+      catch(e) {
+        console.error(e);
+      }
+    
       await dbo.collection("bidrequests").updateOne({ _id: new ObjectId(req.body.bidId) }, { $set: {isCancelled: true, status: parseInt(process.env.SUPP_BID_CANCEL)} }, async function(err, resp) {
         if(err) {
           console.error(err.message);
@@ -97,27 +109,25 @@ exports.postCancelBid = (req, res) => {
           });         
         }
         
-        await sendCancelBidEmail(req, req.body.buyersName, req.body.suppliersName, req.body.buyersEmail, req.body.suppliersEmail, 'Buyer ', 'Supplier ');
+        await sendCancelBidEmail(req, req.body.buyersName, req.body.suppliersName, req.body.buyersEmail, req.body.suppliersEmail, 'Buyer ', 'Supplier ', req.body.reason);
+        res.redirect('back');
       });
     
     db.close();
     });
   } catch {
-    res.redirect('/supplier/index');
-  }
-  
-  res.redirect('back');
+    //res.redirect('/supplier/index');
+  }  
 }
 
 
 exports.getConfirmation = (req, res) => {
   if(!req.session || !req.session.supplierId) {
     req.session = req.session? req.session : {};
-    req.session.supplierId = req.params.token? req.params.token._userId : null;
+    req.session.supplierId = req.params && req.params.token? req.params.token._userId : null;
   }
   
-  res.render("supplier/confirmation", {
-    token: req.params.token });
+  res.render("supplier/confirmation", { token: req.params? req.params.token : null });
 }
 
 exports.getDelete = (req, res) => {
@@ -134,54 +144,68 @@ exports.postDelete = function (req, res, next) {
   try {
     //Delete Supplier's Capabilities first:
     MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-      await db.collection('capabilities').deleteMany({ supplier: id }, function(err, resp) {
+      var dbo = db.db(BASE);
+      
+      try{
+        await dbo.collection('cancelreasons').insertOne( {
+          type: req.body.type,
+          reason: req.body.reason,
+          userType: req.body.userType,
+          userName: req.body.companyName,
+          createdAt: Date.now()
+        }, function(err, obj) {});
+      } catch(e) {
+        console.error(e);
+      }
+      
+      await dbo.collection('capabilities').deleteMany({ supplier: id }, function(err, resp) {
         if(err) {
           throw err;
         }
       });
         
       //Products/Services offered:
-      await db.collection('productservices').deleteMany({ supplier: id }, function(err, resp0) {
+      await dbo.collection('productservices').deleteMany({ supplier: id }, function(err, resp0) {
         if(err) {
             throw err;
           }
       });
 
       //Now delete the messages sent/received by Supplier:
-      await db.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp1) {
+      await dbo.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp1) {
         if(err) {
           throw err;
         }
       });
     
       //The received bids:
-      await db.collection('bidrequests').deleteMany({ supplier: id }, function(err, resp2) {
+      await dbo.collection('bidrequests').deleteMany({ supplier: id }, function(err, resp2) {
         if(err) {
           throw err;
         }
       });
             
       //Remove the possibly existing Supplier Tokens:
-      await db.collection('suppliertokens').deleteMany({ _userId: id }, function(err, resp3) {
+      await dbo.collection('suppliertokens').deleteMany({ _userId: id }, function(err, resp3) {
         if(err) {
           throw err;
         }
       });
 
       //And now, remove the Supplier themselves:
-      await db.collection('suppliers').deleteOne({ _id: id }, function(err, resp4) {
+      await dbo.collection('suppliers').deleteOne({ _id: id }, function(err, resp4) {
         if(err) {
           throw err;
         }
       });
 
       //Finally, send a mail to the ex-Supplier:
-      sendCancellationEmail('Supplier', req, 'received orders, products/services offered, listed capabilities, sent/received messages,');
+      sendCancellationEmail('Supplier', req, 'received orders, products/services offered, listed capabilities, sent/received messages,', req.body.reason);
       db.close();
       return res.redirect("/supplier/sign-in");
     });
   } catch {
-    res.redirect("/supplier");
+    //res.redirect("/supplier");
   }
 }
 
@@ -195,16 +219,9 @@ exports.postConfirmation = async function(req, res, next) {
   await Token.findOne({ token: req.params.token }, async function(err, token) {
     if (!token) {
       req.flash(
-        "We were unable to find a valid token. It may have expired. Please request a new confirmation token."
+        'error', "We were unable to find a valid token. It may have expired. Please request a new confirmation token."
       );
-      
-      if(1==2)
-        return res.status(400).send({
-          type: "not-verified",
-          msg:
-            "We were unable to find a valid token. Your token may have expired."
-        });
-      
+  
       res.redirect("/supplier/resend");
     }
   
@@ -232,13 +249,11 @@ exports.postConfirmation = async function(req, res, next) {
 
         console.log("The account has been verified. Please log in.");
         req.flash('success', "The account has been verified. Please log in.");
-        db.close();              
+        db.close();
+        res.status(200).send("The account has been verified. Please log in.");
       });
     });         
   });
-  
-  if(res) 
-    res.status(200).send("The account has been verified. Please log in.");
 }
 
 
@@ -272,76 +287,19 @@ exports.postResendToken = function(req, res, next) {
 
 
 exports.getSignIn = (req, res) => {
-  if (!req.session.supplierId) {
+  if (!req.session.supplierId || !req.session.supplier.isVerified) {
     return res.render("supplier/sign-in", {
       errorMessage: req.flash("error")
     });
-  } else res.redirect("/supplier");
+  } else 
+    res.redirect("/supplier");
 }
 
 
-exports.postSignIn = (req, res) => {
-  const email = req.body.emailAddress;
-  const password = req.body.password;
-  console.log(email + ' ' + password);
-
-  if (!email) 
-    res.redirect("/supplier/sign-in");
-  else {
-    Supplier.findOne(
-      { 
-      emailAddress: email,
-      password: password 
-      },
-      (err, doc) => {
-        if(err) return console.error(err.message);
-
-        if (!doc) {
-          req.flash("error", "Invalid e-mail address or password.");
-          return res.redirect("/supplier/sign-in");
-        }
-
-        try {
-          bcrypt
-          .compare(password, doc.password)
-          .then((doMatch) => {
-            if (
-              doMatch ||
-              (password === doc.password && email === doc.emailAddress)
-            ) {
-              req.session.supplier = doc;
-              req.session.supplierId = doc._id;
-
-              // Make sure the user has been verified
-              if (!doc.isVerified)
-                return res.status(401).send({
-                  type: "not-verified",
-                  msg:
-                    "Your account has not been verified. Please check your e-mail for instructions."
-                });
-
-              req.session.cookie.originalMaxAge = req.body.remember? null : 7200000;//Two hours.
-              return req.session.save();
-            } else {
-              req.flash("error", "Passwords and e-mail do not match!");
-              res.redirect("/supplier/sign-in");
-            }
-          })
-          .then((err) => {
-            if (err) {
-              console.error(err);
-              res.redirect("/supplier/sign-in");
-            }
-
-            res.redirect("/supplier");
-          })
-          .catch(console.error);
-        } catch {
-          res.redirect("/supplier/sign-in")
-        }       
-      });
-  }
+exports.postSignIn = async (req, res) => {
+  postSignInBody('supplier', req, res);
 }
+
 
 exports.getSignUp = (req, res) => {
   if (!req.session.supplierId)
@@ -392,15 +350,16 @@ exports.postSignUp = async (req, res) => {
           var supplier;
           //Prevent duplicate attempts:
         } else if (global++ < 1) {
-          Supplier.findOne({ emailAddress: req.body.emailAddress }, function(err,  user) {
+          await Supplier.findOne({ emailAddress: req.body.emailAddress }, function(err,  user) {
             if (user)
               return res.status(400).send({
                 msg:
                   "The e-mail address you have entered is already associated with another account."
               });
-            
+          }).catch(console.error);
+          
           try {
-            bcrypt.hash(req.body.password, 10, async function(err, hash) {
+            await bcrypt.hash(req.body.password, 10, async function(err, hash) {
                 supplier = new Supplier({
                   companyName: req.body.companyName,
                   directorsName: req.body.directorsName,
@@ -443,7 +402,7 @@ exports.postSignUp = async (req, res) => {
                   updatedAt: Date.now()
                 });
 
-                await supplier.save((err) => {
+                await supplier.save(async (err) => {
                   if (err) {
                     //req.flash('error', err.message);
                     console.error(err);
@@ -451,10 +410,11 @@ exports.postSignUp = async (req, res) => {
                          msg: err.message
                          });
                   }
+                });
                   
                   req.session.supplier = supplier;
-                  req.session.id = supplier._id;
-                  req.session.save();
+                  req.session.supplierId = supplier._id;
+                  await req.session.save();
                   
                   var capability = new Capability({
                     supplier: supplier._id,
@@ -463,7 +423,7 @@ exports.postSignUp = async (req, res) => {
                     updatedAt: Date.now()
                   });
 
-                  capability.save(function(err) {
+                  await capability.save(function(err) {
                     if(err) {
                       return console.error(err.message);
                       }
@@ -476,15 +436,16 @@ exports.postSignUp = async (req, res) => {
                     token: crypto.randomBytes(16).toString("hex")
                   });
                   
-                  token.save(async function(err) {
+                  await token.save(async function(err) {
                     if (err) {
                       console.error(err.message);
                       return res.status(500).send({
                        msg: err.message
                        });
                         }
+                  });
                     
-                    await sendConfirmationEmail(supplier.emailAddress, "/supplier/confirmation/", token.token, supplier.companyName, req);
+                    await sendConfirmationEmail(supplier.companyName, "/supplier/confirmation/", token.token, req);
                    
                     if (Array.isArray(supplier.productsServicesOffered)) {
                       for (var i in supplier.productsServicesOffered) {
@@ -502,29 +463,18 @@ exports.postSignUp = async (req, res) => {
                             req.flash('error', err.message);
                             return console.error(err.message);
                           }
-
-                          if(i == supplier.productsServicesOffered.length-1) {
-                            console.log('All products saved!');
-
-                          if (res)
-                            res.redirect("/supplier");
-                          }
                         });
-                      }
+                      }                      
+                    console.log('All products saved!');
                     }
-                    
-                   req.flash("success", "Supplier signed up successfully!");
-                   res.redirect("/supplier");
-                  });
-                })
-              });
-            } catch {
-              res.redirect('/supplier/sign-up');
-            }
-          })           
-            .catch(console.error);
-        }
+              
+              req.flash("success", "Supplier signed up successfully!");
+              res.redirect("/supplier/sign-in");
+            });
+       } catch {              
+       }
       }
+    }
   }
 }
 
@@ -537,7 +487,7 @@ exports.getForgotPassword = (req, res) => {
 
 
 exports.getChatLogin = (req, res) => {//We need a username, a room name, and a socket-based ID.
-  res.render("../public/chatLogin", {
+  res.render("supplier/chatLogin", {
     from: req.params.supplierId,
     to: req.params.buyerId,
     fromName: req.params.supplierName,
@@ -548,14 +498,16 @@ exports.getChatLogin = (req, res) => {//We need a username, a room name, and a s
 }
 
 
-exports.postChatLogin = (req, res) => {//Coming from the getLogin above.
-  res.render("/supplier/chat", {
-    from: req.body.from,
-    to: req.body.to,
-    fromName: req.body.fromName,
-    toName: req.body.toName,
-    reqId: req.body.reqId,
-    reqName: req.body.reqName
+exports.getChat = (req, res) => {//Coming from the getLogin above.
+  res.render("supplier/chat", {
+    from: req.params.from,
+    to: req.params.to,
+    username: req.params.username,
+    room: req.params.room,
+    fromName: req.params.fromName,
+    toName: req.params.toName,
+    reqId: req.params.reqId,
+    reqName: req.params.reqName
   });
 }
 
@@ -594,25 +546,23 @@ exports.postForgotPassword = (req, res, next) => {
       }
     ],
     function(err) {
-      if (err) return next(err);
+      if (err) 
+        return next(err);
       res.redirect("/supplier/forgotPassword");
-    }
-  );
+    });
 };
 
 exports.getResetPasswordToken = (req, res) => {
   Supplier.findOne({
       resetPasswordToken: req.params.token,
       resetPasswordExpires: { $gt: Date.now() }
-    },
-    function(err, user) {
+    }, function(err, user) {
       if (!user) {
         req.flash("error", "Password reset token is either invalid or expired.");
         return res.redirect("supplier/forgotPassword");
       }
       res.render("supplier/resetPassword", { token: req.params.token });
-    }
-  );
+    });
 };
 
 exports.postResetPasswordToken = (req, res) => {
@@ -628,8 +578,10 @@ exports.postResetPasswordToken = (req, res) => {
         
     if(req.body.password === req.body.confirm) {
         MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
-          if (err) throw err;
+          if (err) 
+            throw err;
           var dbo = db.db(BASE);
+          
           dbo.collection("suppliers").updateOne({ _id: user._id }, { $set: {password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined} }, function(err, resp) {
             if(err) {
               console.error(err.message);
@@ -734,21 +686,18 @@ exports.postBidRequest = (req, res) => {
       }
       
       req.flash('success', 'Bid status updated successfully!');
-    });
-    
+    });    
     db.close();
   });
-  
-  if(res) 
-      res.redirect('/supplier/index');
+  res.redirect('/supplier/index');
  }
 
 
-exports.postProfile = (req, res) => {
+exports.postProfile = async (req, res) => {
   global = 0;
   //console.log(global);
   try {
-  Supplier.findOne({ _id: req.body._id }, async (err, doc) => {
+  await Supplier.findOne({ _id: req.body._id }, async (err, doc) => {
     if (err) {
       console.error(err);
       res.redirect("back");
@@ -799,7 +748,8 @@ exports.postProfile = (req, res) => {
     
     if(global++ < 1)
     await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-      if (err) throw err;
+      if (err)
+        throw err;
       var dbo = db.db(BASE);
       
       await dbo.collection("suppliers").updateOne({ _id: doc._id }, { $set: doc }, function(err, resp0) {
@@ -810,7 +760,6 @@ exports.postProfile = (req, res) => {
 
       console.log("Supplier updated!");
       var arr = doc.productsServicesOffered;
-
       await dbo.collection("capabilities").deleteMany({ supplier: doc._id }, (err, resp1) => {
         if(err) 
           return console.error(err.message);
@@ -830,12 +779,11 @@ exports.postProfile = (req, res) => {
       });
 
       console.log('Capability description saved!');
-
       await dbo.collection("productservices").deleteMany({ supplier: doc._id }, (err, resp2) => {
         if(err) 
           return console.error(err.message);
       });
-
+      
       if (Array.isArray(arr))
         for (var i in arr) {
           if(!doc.pricesList[i]) continue;
@@ -854,29 +802,27 @@ exports.postProfile = (req, res) => {
               return console.error(err.message);
             }
           });
-
+          db.close();
           console.log('Product saved!');
         }
+      });
       
-        console.log('Products offered list saved! Now saving new data to session:');
-        req.session.supplier = doc;
-        req.session.id = doc._id;
+    console.log('Products offered list saved! Now saving new data to session:');
+    req.session.supplier = doc;
+    req.session.supplierId = doc._id;
 
-        await req.session.save((err) => {
-          if(err) {
-            return console.error(err.message);
-          }
-        });
-
-      console.log("User updated and session saved!");      
-      db.close();      
+    await req.session.save((err) => {
+      if(err) {
+        return console.error(err.message);
+      }
     });
-    
+
+    console.log("User updated and session saved!");
     req.flash("success", "Supplier details updated successfully!");
     return res.redirect("/supplier");
-  })
+    })
     .catch(console.error);
   } catch {
-    res.redirect("/supplier/profile");
+    //res.redirect("/supplier/profile");
   }
 };

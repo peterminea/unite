@@ -17,6 +17,8 @@ router.get('/resend', /*isAuth,*/ sessionExit, supervisorController.getResendTok
 router.get("/confirmation/:token", sessionExit, supervisorController.getConfirmation);
 router.get("/forgotPassword", isAuth, sessionExit, supervisorController.getForgotPassword);
 router.get("/resetPassword/:token", isAuth, sessionExit, supervisorController.getResetPasswordToken);
+router.get("/chatLogin/:supplierId/:buyerId/:requestId/:requestName/:buyerName/:supplierName", isAuth, sessionExit, supervisorController.getChatLogin);
+router.get("/chat/:from/:to/:username/:room/:requestId/:requestName/:toName/:fromName", isAuth, sessionExit, supervisorController.getChat);
 
 router.post("/sign-in", supervisorController.postSignIn);
 router.post("/sign-up", supervisorController.postSignUp);
@@ -26,6 +28,5 @@ router.post('/confirmation/:token', sessionExit, supervisorController.postConfir
 router.post('/resend', /*isAuth,*/ sessionExit, supervisorController.postResendToken);
 router.post("/forgotPassword", isAuth, sessionExit, supervisorController.postForgotPassword);
 router.post("/resetPassword/:token", isAuth, sessionExit, supervisorController.postResetPasswordToken);
-
 
 module.exports = router;

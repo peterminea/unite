@@ -1,5 +1,9 @@
 const sgMail = require('@sendgrid/mail');
+const MongoClient = require('mongodb').MongoClient;
+const bcrypt = require("bcryptjs");
+
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 
 const sendConfirmationEmail = (name, link, token, req) => {
     sgMail.send({
@@ -19,13 +23,14 @@ const sendConfirmationEmail = (name, link, token, req) => {
 };
 
 
-const sendCancellationEmail = (type, req, data) => {//Buyer: placed orders, sent/received messages
+const sendCancellationEmail = (type, req, data, reason) => {//Buyer: placed orders, sent/received messages
   sgMail.send({
     from: 'peter@uniteprocurement.com',
     to: req.body.emailAddress, 
     subject: `UNITE - ${type} Account Deletion Completed`,
     text: 
-      `Hello ${req.body.organizationName},\n\nWe are sorry to see you go from the UNITE Public Procurement Platform!\n\nYour ${type} account has just been terminated and all your data such as ${data} and any user tokens saved by you have also been lost.\nWe hope to see you back in the coming future. If you have improvement suggestions for us, please send them to our e-mail address above.\n\nWith kind regards,\nThe UNITE Public Procurement Platform Team`
+      `Hello ${req.body.organizationName},\n\nWe are sorry to see you go from the UNITE Public Procurement Platform!\n\nYour ${type} account has just been terminated and all your data such as ${data} and any user tokens saved by you have also been lost.\nWe hope to see you back in the coming future. If you have improvement suggestions for us, please send them to our e-mail address above.\n\nWith kind regards,\nThe UNITE Public Procurement Platform Team`,
+    html: reason? '<p style="color: brown; font-size: 12pt; font-weight: bold italic; word-wrap: break-word; font-face: arial"><br>' + reason + '</p>' : null
   }, function (err, resp) {
      if (err ) {
       return console.log(err.message);
@@ -96,7 +101,7 @@ const sendResetPasswordEmail = (user, type, req) => {
 };
 
 
-const sendCancelBidEmail = (req, victim, actor, victimMail, actorMail, victimType, actorType) => {
+const sendCancelBidEmail = (req, victim, actor, victimMail, actorMail, victimType, actorType, reason) => {
         sgMail.send({
           from: "peter@uniteprocurement.com",
           to: victimMail,
@@ -106,7 +111,8 @@ const sendCancelBidEmail = (req, victim, actor, victimMail, actorMail, victimTyp
             ",\n\nWe regret to inform you that your incoming Order named " + req.body.requestsName + " has been cancelled by "
             + "the " + actorType + actor + ".\nPlease contact them at " + actorMail + " for more"
             + " details.\nUNITE apologizes for any inconvenience that this issue may have caused to you."+ "\n\n"
-            + "With kind regards,\nThe UNITE Public Procurement Platform Team"
+            + "With kind regards,\nThe UNITE Public Procurement Platform Team",
+            html: reason? '<p style="color: fuchsia; font-size: 12pt; font-weight: bold italic; word-wrap: break-word; font-face: arial"><br>' + reason + '</p>' : null
           }, function(err) {
             if(err) {
               return console.log(err.message);
@@ -119,4 +125,81 @@ const sendCancelBidEmail = (req, victim, actor, victimMail, actorMail, victimTyp
 };
 
 
-module.exports = { sendConfirmationEmail, sendCancellationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail };
+const postSignInBody = (link, req, res) => {
+  var dbLink = link + 's';
+  const email = req.body.emailAddress;
+  const password = req.body.password;
+  console.log(email + ' ' + password);
+
+  try {
+  if(!email) {
+    req.flash('error', 'No e-mail was given!');
+    res.redirect(`/${link}/sign-in`);
+  }
+  else {
+     MongoClient.connect(URL, {useUnifiedTopology: true},  function(err, db) {
+      if (err)
+        throw err;
+      var dbo = db.db(BASE);
+      
+       dbo.collection(dbLink).findOne({ emailAddress: email, password: password },  (err, doc) => {
+        if(err) 
+          return console.error(err.message);
+
+        if(!doc) {
+          req.flash("error", "Invalid e-mail address or password!");
+          res.redirect(`/${link}/sign-in`);
+        }
+          switch(link) {
+            case 'buyer':
+              req.session.buyer = doc;
+              req.session.buyerId = doc._id;
+              break;
+
+            case 'supervisor':
+              req.session.supervisor = doc;
+              req.session.supervisorId = doc._id;
+              break;
+
+            case 'supplier':
+              req.session.supplier = doc;
+              req.session.supplierId = doc._id;
+              break;
+
+            default:
+              break;
+          }
+         
+          req.session.cookie.originalMaxAge = req.body.remember? null : 7200000;//Two hours.           
+          req.session.save();
+          bcrypt.compare(password, doc.password, (err, doMatch) => {
+            if(err)
+              throw err;
+            
+            if (doMatch ||
+              (password === doc.password && email === doc.emailAddress)
+            ) {
+              // Make sure the user has been verified
+              if (!doc.isVerified)
+                return res.status(401).send({
+                  type: "not-verified",
+                  msg:
+                    "Your account has not been verified. Please check your e-mail for instructions."
+                });
+                
+                db.close();
+                setTimeout(function() {res.redirect(`/${link}`);}, 10);
+            } else {
+              req.flash("error", "Passwords and e-mail do not match!");
+              res.redirect(`/${link}/sign-in`);
+            }
+          })
+        })
+      }).catch(console.error);;
+    }
+  } catch {
+  }
+};
+
+
+module.exports = { sendConfirmationEmail, sendCancellationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody };

@@ -22,6 +22,8 @@
         if(!confirm('Are you sure you want to delete your Supplier account?\nThis will also remove:\n\nYour products/services;\nYour capabilities;\nYour received orders;\nYour user tokens (if any);\nYour message history from UNITE.')) {
           return false;
         }
+        
+        
       });
   });
   </script>
@@ -47,9 +49,15 @@
           </div>
          <div class="form-group">
             <label for="email">Company name*:</label>
-            <input required class="form-control" type="text" name="companyName"></input>
+            <input required class="form-control" type="text" id="companyName" name="companyName"></input>
             <input type="hidden" name="id" value="<%= id %>">
           </div>
+          <div class="form-group">
+            <label for="reason">Reason for deleting account:</label>
+            <textarea required class="form-control" id="reason" name="reason"></textarea>
+          </div>
+          <input type="hidden" name="type" value="User Cancellation">          
+          <input type="hidden" name="userType" value="Supplier">
           <div class="form-group">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <button type="submit" id="delete" title="Delete Account" class="btn btn-primary btn-block btn-lg">Delete Account</button>
@@ -59,3 +67,5 @@
     </div>
   </body>
 </html>
+
+<!-- <input type="hidden" id="userName" name="userName" value=""> -->

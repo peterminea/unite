@@ -162,8 +162,6 @@ app.post('/messages', (req, res) => {
 
 
 let count = 0;
-var x = `${191}, ${192}`;
-console.log(x);
 const {generateMessage, generateSimpleMessage, generateLocationMessage} = require('./public/chatMessages');
 const { addUser, removeUser, getUser, getUsersInRoom } = require('./public/chatUsers');
 console.log(Date.now() + ' ' + new Date() + ' ' + new Date().getTime());
@@ -220,7 +218,15 @@ socket.on("connection", (sock) => {
   
 
   sock.on("sendMessage", async function(msgData, callback) {
-    const user = getUser(sock.id);
+    var user = getUser(sock.id);
+    console.log(sock + ' ' + user);
+    if(!user) {
+      user = {
+        id: sock.id,
+        username: 'User',
+        room: 'Chamberroom'
+      };
+    }
     msgData.time = new Date().getTime();//dateformat(new Date(), 'dddd, mmmm dS, yyyy, h:MM:ss TT');
     
     sock.broadcast.emit("received", {
@@ -242,7 +248,8 @@ socket.on("connection", (sock) => {
     });
     
     socket.to(user.room).emit('message', generateMessage(user.username, msgData));
-    callback();
+    if(typeof callback !== 'undefined')
+      callback();
   });
   
   
@@ -656,7 +663,6 @@ app.get('/currencyGetAutocomplete', function(req, res, next) {
     if(!err) {
       if(data && data.length && data.length > 0) {
         data.forEach( (item) => {
-          console.log(item);
           let obj = {
             id: item._id,
             name: item.value,
@@ -771,7 +777,7 @@ MongoClient.connect(URI, {useUnifiedTopology: true}, (err, client) => {
 
   db = client.db(BASE);//Right connection!
   process.on('uncaughtException', function (err) {
-    console.log(err.message);
+    console.error(err.message);
   });
   
   /* //Database scripting / Manipulating data and datatypes. Askin, please do not delete these ones :) .

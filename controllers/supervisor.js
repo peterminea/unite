@@ -6,11 +6,9 @@ const Token = require('../models/supervisorToken');
 const assert = require('assert');
 const process = require('process');
 const async = require('async');
-const sgMail = require('@sendgrid/mail');
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const MongoClient = require('mongodb').MongoClient;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
-const { sendConfirmationEmail, sendCancellationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail } = require('../public/emails');
+const { sendConfirmationEmail, sendCancellationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
 
 exports.getIndex = (req, res) => {
   if(!req || !req.session) return false;
@@ -19,7 +17,8 @@ exports.getIndex = (req, res) => {
   Buyer.find(
     { organizationUniteID: supervisor.organizationUniteID },
     (err, results) => {
-      if (err) return console.error(err);
+      if (err) 
+        return console.error(err);
       res.render("supervisor/index", {
         supervisor: supervisor,
         buyers: results,
@@ -31,12 +30,12 @@ exports.getIndex = (req, res) => {
 
 
 exports.getConfirmation = (req, res) => {
-  if(!req.session || !req.session.supplierId) {
+  if(!req.session || !req.session.supervisorId) {
     req.session = req.session? req.session : {};
-    req.session.supplierId = req.params.token? req.params.token._userId : null;
+    req.session.supervisorId = req.params && req.params.token? req.params.token._userId : null;
   }
   
-  res.render('supervisor/confirmation', {token: req.params.token});
+  res.render('supervisor/confirmation', { token: req.params? req.params.token : null });
 }
 
 exports.getDelete = (req, res) => {
@@ -47,6 +46,34 @@ exports.getDelete = (req, res) => {
 exports.getResendToken = (req, res) => {
   res.render('supervisor/resend');
 }
+
+
+exports.getChatLogin = (req, res) => {//We need a username, a room name, and a socket-based ID.
+  res.render("supervisor/chatLogin", {
+    from: req.params.supplierId,
+    to: req.params.buyerId,
+    fromName: req.params.supplierName,
+    toName: req.params.buyerName,
+    reqId: req.params.requestId? req.params.requestId : 0,
+    reqName: req.params.requestName? req.params.requestName : 'None'
+  });
+}
+
+
+exports.getChat = (req, res) => {//Coming from the getLogin above.
+  console.log('S');
+  res.render("supplier/chat", {
+    from: req.params.from,
+    to: req.params.to,
+    username: req.params.username,
+    room: req.params.room,
+    fromName: req.params.fromName,
+    toName: req.params.toName,
+    reqId: req.params.reqId,
+    reqName: req.params.reqName
+  });
+}
+
 
 
 async function removeSupervisor(id, req, res, db) {
@@ -84,8 +111,21 @@ exports.postDelete = function (req, res, next) {
   try {
     //Find Supervisor's Buyers first:
     MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-      await db.collection('buyers').find({ organizationUniteID: uniteID }).exec().then( async (buyers) => {
-        
+      var dbo = db.db(BASE);
+      
+      try{
+        await dbo.collection('cancelreasons').insertOne( {
+          type: req.body.type,
+          reason: req.body.reason,
+          userType: req.body.userType,
+          userName: req.body.organizationName,
+          createdAt: Date.now()
+        }, function(err, obj) {});
+      } catch(e) {
+        console.error(e);
+      }
+      
+      await dbo.collection('buyers').find({ organizationUniteID: uniteID }).exec().then( async (buyers) => {        
         if(!buyers || !buyers.length) {//No buyer data, let's directly pass to Supervisor.
           await removeSupervisor(id, req, res, db);
         } else {
@@ -97,52 +137,52 @@ exports.postDelete = function (req, res, next) {
             var req2 = { emailAddress : buyers[i].emailAddress, organizationName : buyers[i].organizationName} ;
             
             //Bids:
-            await db.collection('bidrequests').deleteMany({ buyer: theId }, function(err, resp) {
+            await dbo.collection('bidrequests').deleteMany({ buyer: theId }, function(err, resp) {
               if(err) {
                 throw err;
               }
             });            
 
             //Now delete the messages sent/received by Buyer:
-            await db.collection('messages').deleteMany({ $or: [ { from: theId }, { to: theId } ] }, function(err, resp0) {
+            await dbo.collection('messages').deleteMany({ $or: [ { from: theId }, { to: theId } ] }, function(err, resp0) {
               if(err) {
                 throw err;
               }
             });
 
             //Remove the possibly existing Buyer Tokens:
-            await db.collection('buyertokens').deleteMany({ _userId: theId }, function(err, resp1) {
+            await dbo.collection('buyertokens').deleteMany({ _userId: theId }, function(err, resp1) {
               if(err) {
                 throw err;
               }
             });
 
             //And now, remove the Buyer themselves:
-            await db.collection('buyers').deleteOne({ _id: theId }, function(err, resp2) {
+            await dbo.collection('buyers').deleteOne({ _id: theId }, function(err, resp2) {
               if(err) {
                 throw err;
               }
             });
 
             //Finally, send a mail to the ex-Buyer:
-            sendCancellationEmail('Buyer', req2, 'placed orders, sent/received messages');
+            sendCancellationEmail('Buyer', req2, 'placed orders, sent/received messages', req.body.reason);
             //if(i == len-1) {//All buyers are lost, now let's pass to the Supervisor themselves and remove their data.
             //}
           }
           //Get rid of the Supervisor themselves too.
           removeSupervisor(id, req, res, db);
         }
+        
+        res.redirect("/supervisor");
       });
     });
-  } catch {
-    res.redirect("/supervisor");
+  } catch {    
   }
 }
 
 
 
 exports.postConfirmation = async function (req, res, next) {
-  
   try {
   await Token.findOne({ token: req.params.token }, async function (err, token) {
     if (!token) {
@@ -175,26 +215,24 @@ exports.postConfirmation = async function (req, res, next) {
                     });
                     */
                   }
+                
+                db.close();
+                console.log("The account has been verified. Please log in.");
+                req.flash('success', "The account has been verified. Please log in.");
+                res.redirect('/supervisor/sign-in');
                 });
-            
-            db.close();
             });        
         });
-    
-    console.log("The account has been verified. Please log in.");
-    req.flash('success', "The account has been verified. Please log in.");
     });
   } catch {
-    req.flash('error', 'Error on Verification!');
-    res.redirect('/supervisor/sign-in');
+    //req.flash('error', 'Error on Verification!');
+    //res.redirect('/supervisor/sign-in');
   }
-  
-  res.redirect('/supervisor/sign-in');
 }
 
 
 exports.postResendToken = function (req, res, next) {
-    Supervisor.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
+    Supervisor.findOne({ emailAddress: req.body.emailAddress }, async function (err, user) {
         if (!user) 
           return res.status(400).send({ msg: 'We were unable to find a user with that email.' });
         if (user.isVerified) 
@@ -204,16 +242,16 @@ exports.postResendToken = function (req, res, next) {
           _userId: user._id, token: 
           crypto.randomBytes(16).toString('hex') });
 
-        token.save(async function (err) {
+        await token.save((err) => {
             if (err) { return res.status(500).send({
               msg: err.message 
               }); 
             } 
-
+        });
+      
         await resendTokenEmail(user, token.token, '/supervisor/confirmation/', req);
         return res.status(200).send('A verification email has been sent to ' + user.emailAddress + '.');
-        });
-    });
+        });    
 }
 
 
@@ -316,7 +354,7 @@ exports.postResetPasswordToken = (req, res) => {
 
 
 exports.getSignIn = (req, res) => {
-  if(!req.session.supervisorId)
+  if (!req.session.supervisorId || !req.session.supervisor.isVerified)
     res.render("supervisor/sign-in", {
       errorMessage: req.flash("error")
     });
@@ -334,62 +372,8 @@ exports.getSignUp = (req, res) => {
 }
 
 
-exports.postSignIn = (req, res) => {
-  const email = req.body.emailAddress;
-  const password = req.body.password;
-  const rememberUser = req.body.remember;  
-
-  if(!email) {
-    console.error('E-mail is mandatory!');
-    req.flash("error", "E-mail is mandatory!");
-    res.redirect("/supervisor/sign-in");
-    }
-  else {
-    Supervisor.findOne({ emailAddress: email, password: password}, (err, doc) => {
-      if (err) 
-        return console.error(err);
-      
-      console.log(doc);      
-      if (!doc) {
-        req.flash("error", "Invalid e-mail address or password");
-        return res.redirect("/supervisor/sign-in");
-      }
-
-    try {
-      bcrypt
-        .compare(password, doc.password)
-        .then((doMatch) => {
-          if (doMatch || (password === doc.password && email === doc.emailAddress)) {
-            if (!doc.isVerified) 
-              return res.status(401).send({
-                type: 'not-verified',
-                msg: 'Your account has not been verified. Please check your e-mail for instructions.' });
-            
-            req.session.supervisorId = doc._id;
-            req.session.supervisor = doc;
-            if(!req.session.cookie) {
-              req.session.cookie = {};
-            }
-            
-            req.session.cookie.originalMaxAge = req.body.remember? null : 7200000;
-            req.session.save();
-          } else {
-            req.flash("error", "Passwords and e-mail do not match!");
-            res.redirect("/supervisor/sign-in");
-          }
-        })        
-        .then((err) => {
-          if (err) {
-          console.error(err);
-          res.redirect("/supervisor/sign-in");
-          }
-        })
-        .catch(console.error);
-      } catch {
-        res.redirect("/supervisor/sign-in");
-      }
-    });
-  }
+exports.postSignIn = async (req, res) => {
+  postSignInBody('supervisor', req, res);
 }
 
 
@@ -447,7 +431,7 @@ exports.postSignUp = async (req, res) => {
               }
               
               req.session.supervisor = supervisor;
-              req.session.id = supervisor._id;
+              req.session.supervisorId = supervisor._id;
               req.session.save();
               
               var token = new Token({ 
@@ -462,14 +446,14 @@ exports.postSignUp = async (req, res) => {
                  // });
                 }
 
-                await sendConfirmationEmail(supervisor.emailAddress, "/supervisor/confirmation/", token.token, supervisor.organizationName, req);
+                await sendConfirmationEmail(supervisor.organizationName, "/supervisor/confirmation/", token.token, req);
                 req.flash("success", "Supervisor signed up successfully!");
-                return res.redirect("/supervisor");
+                res.redirect("/supervisor/sign-in");
                 });
               });
             });
           } catch {
-            res.redirect('/supervisor/sign-up');
+            //res.redirect('/supervisor/sign-up');
           }
         });
       }
@@ -483,9 +467,9 @@ exports.getProfile = (req, res) => {
 }
 
 
-exports.postProfile = (req, res) => {
+exports.postProfile = async (req, res) => {
   try {
-  Supervisor.findOne({ _id: req.body._id }, async (err, doc) => {
+  await Supervisor.findOne({ _id: req.body._id }, async (err, doc) => {
     if (err) return console.error(err);
     doc._id = req.body._id;
     doc.organizationName = req.body.organizationName;
@@ -515,26 +499,25 @@ exports.postProfile = (req, res) => {
       await dbo.collection("supervisors").updateOne({ _id: doc._id }, { $set: doc }, function(err, resp) {
         if(err) {
           console.error(err.message);
-          return false;
+          res.redirect('/supervisor/profile');
         }
       });
       
-    db.close();  
-    });
-    
     req.session.supervisor = doc;
-    req.session.id = doc._id;
+    req.session.supervisorId = doc._id;
     await req.session.save((err) => {
       if (err)
         throw err;
-    });
-    
+      });
+    db.close();  
     req.flash("success", "Supervisor details updated successfully!");
     console.log("Supervisor details updated successfully!");
-    return res.redirect("/supervisor");
+    res.redirect("/supervisor");      
+    
+    });
   })
     .catch(console.error);
   } catch {
-    res.redirect('/supervisor/profile');
+    //res.redirect('/supervisor/profile');
   }
 }

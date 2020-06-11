@@ -81,7 +81,7 @@
       </div>
       <div class="card-body">
         <h5 class="card-title">Hello, <%= supervisor.organizationName %>!</h5>
-        <p>With your UNITE ID, new buyers can register on the website and start searching for suppliers. If you change the UNITE ID, please announce your members.</p>
+        <p style="font-family: verdana; font-size: 11pt; color: green">With your UNITE ID, new buyers can register on the website and start searching for suppliers. If you change the UNITE ID, please announce your members.</p>
         <div class="form-group">
           <label>Your Unique Unite ID</label>
           <input type="text" class="form-control" readonly value="<%= supervisor.organizationUniteID %>">
@@ -103,7 +103,6 @@
         </tr>
       </thead>
       <tbody>
-        <% console.log(buyers) %>
         <% let i = 0; for (buyer of buyers) { %>
         <tr id="<%= buyer._id %>">
           <td scope="col"><%= i %></td>
@@ -115,7 +114,7 @@
             <button title="Remove selected Buyer from UNITE" id="process_<%= i %>" class="btn btn-primary">Process</button>
           </td>
           <td scope="col">
-            <a href="../../../supplier/chatLogin/<%= supervisor._id %>/<%= buyer._id %>/0/None/<%= buyer.organizationName %>/(Supervisor)-<%= supervisor.organizationName %>">
+            <a href="../../../supervisor/chatLogin/<%= supervisor._id %>/<%= buyer._id %>/0/None/<%= buyer.organizationName %>/(Supervisor)-<%= supervisor.organizationName %>">
               <button title="Chat with your buyer in UNITE" id="chat_<%= i %>" class="btn btn-primary">Chat</button>
             </a>
           </td>

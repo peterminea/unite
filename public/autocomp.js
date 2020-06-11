@@ -301,7 +301,7 @@ $(document).ready(function() {
       + '<a class="nav-link" href="/antibriberyAgreement" title="Anti-Bribery Agreement">Anti-Bribery</a>'
       + '</li>'
       + '<li class="nav-item">'
-      + '<a class="btn btn-danger" href="?exit=true&home=true" title="Clear user session">Clear Session</a>'
+      + '<a class="btn btn-danger" href="?exit=true&home=true" title="Clear user session/Logout">Logout</a>'
       + '</li>'
       + '</ul>'
       + '<br>'
@@ -319,7 +319,7 @@ $(document).ready(function() {
                                     + ' value="Forward" onclick="history.go(1)">' 
                                    +'</div>');
   
-  $('input,textarea,span,label,li,button,a,b,p,h2,h3,h4,h5,option')
+  $('input,textarea,span,label,li,button,a,b,p,h1,h2,h3,h4,h5,option')
     .each(function(index, el) {//Tooltips in the App.
     if(!$(el).attr('title')) {
       $(el).attr('title', $(el).val()? $(el).val() : $(el).text());
@@ -427,7 +427,4 @@ $(document).ready(function() {
 
     e.preventDefault();
   });
-
-  
-
 });
