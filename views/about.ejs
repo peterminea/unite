@@ -10,8 +10,8 @@
     <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
     <link rel="stylesheet" href="/style.css">
     <link rel="stylesheet" href="/messages.css">
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.css">
+    <link rel="stylesheet" href="/jquery-ui.css">
+    <link rel="stylesheet" href="/bootstrap.min.css">
     <script src="/jquery.min.js"></script>
     <script src="/jquery-ui.min.js"></script>
     <script src="/popper.min.js"></script>
@@ -19,6 +19,14 @@
     <script src="/sweetalert.min.js"></script>
     <script src="/https.js"></script>
     <script src="/autocomp.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+      var id = "<%= userId %>", 
+      name = "<%= userName %>", 
+      type = "<%= userType %>";
+      userInputs(id, name, type, $('ul.mr-auto'));
+    });
+  </script>
 </head>
 
 <body>
@@ -40,10 +48,10 @@
                     <a class="nav-link" href="/about">About <span class="sr-only">(current)</span></a>
                 </li>
               <li class="nav-item">
-                <a class="nav-link" href="termsConditions" title="Terms and Conditions">Terms</a>
+                <a class="nav-link" href="/termsConditions" title="Terms and Conditions">Terms</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="antibriberyAgreement" title="Anti-Bribery Agreement">Anti-Bribery</a>
+                <a class="nav-link" href="/antibriberyAgreement" title="Anti-Bribery Agreement">Anti-Bribery</a>
               </li>
             </ul>
 
@@ -52,7 +60,7 @@
             </a>
         </div>
     </nav>
-    <div class="container text-center">
+    <div class="container terms text-center home">
         <div class="text-center mx-auto">
             <img src="https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2Funite%20(1).png?v=1587898738134" height="100">
         </div>
@@ -70,7 +78,7 @@
     </div>
     <br>
     <div style="margin-top: 0px" title="Welcome to UNITE!" class="customer-form">
-        <p class="text-black text-center">UNITE is a Public Procurement Platform exclusively for governmental procurement of special orders of products and services for crisis response.
+        <p class="term-light text-center">UNITE is a Public Procurement Platform exclusively for governmental procurement of special orders of products and services for crisis response.
             <br>We call it "The Alibaba of urgent public procurement requests."<br><br>
             UNITE is a two-sided platform, connecting public buyers with companies that have the capability and capacity to refocus their activities to supplying goods and services in response to the COVID-19 crisis.<br><br>
             Companies are invited to register on the platform, describing their capability and capacity to manufacture urgently needed products or to supply in-demand services.
@@ -78,18 +86,16 @@
             <br><br>
             Public buyers may access the platform and create a procurement request. Our software matches the procurement request with potential suppliers and facilitates the complete transaction - including initial contact, negotiation. order placement, delivery acceptance, and payment.
         </p>
-      <p class="text-black text-center">
+      <p class="term-light text-center">
         UNITE differentiates itself from other solutions in that it provides a database of companies with capability to refocus operations and in that it automates the process. Other solutions include using existing suppliers and ERP/purchasing system (not suited to abnormal requirements); engagement with the market through contacting individual companies by email, telephone or in person (which is slow); use of other online sales platforms (no visibility of companies' ability to refocus operations); and public buyers’ own knowledge and connections to industry (not widely shared - limited to individuals or local teams).
       </p>
-  </div>
-  
-  <br>
+  </div> 
   <div>
-    <h2>
+    <h4>
       <a href="https://covid-eic.easme-web.eu/solution/unite-public-procurement-platform/about">EIC COVID Platform presence</a>
       <br><br>
       <a href="https://devpost.com/software/unite-government-procurement-platform">DevPost Details</a>
-    </h2>
+    </h4>
   </div>
 </body>
 

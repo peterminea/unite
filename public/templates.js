@@ -42,6 +42,49 @@ const sendCancellationEmail = (type, req, data, reason) => {//Buyer: placed orde
 };
 
 
+const sendCancelBidEmail = (req, victim, actor, victimMail, actorMail, victimType, actorType, reason) => {
+        sgMail.send({
+          from: "peter@uniteprocurement.com",
+          to: victimMail,
+          subject: "Bid request " + req.body.requestsName + " cancelled!",
+          text:
+            "Hello " + victim + 
+            ",\n\nWe regret to inform you that your incoming Order named " + req.body.requestsName + " has been cancelled by "
+            + "the " + actorType + actor + ".\nPlease contact them at " + actorMail + " for more"
+            + " details.\nUNITE apologizes for any inconvenience that this issue may have caused to you."+ "\n\n"
+            + "With kind regards,\nThe UNITE Public Procurement Platform Team",
+            html: reason? '<p style="color: fuchsia; font-size: 12pt; font-weight: bold italic; word-wrap: break-word; font-face: arial"><br>' + reason + '</p>' : null
+          }, function(err) {
+            if(err) {
+              return console.log(err.message);
+            }
+          
+          var msg = "The Bid Request has been cancelled by the " + actorType + actor + '.\n' + victimType + victim + ' has been notified via e-mail about the Order cancellation.';
+          console.log(msg);
+          req.flash('success', msg);
+      });
+};
+
+
+const sendInactivationEmail = (type, req, data, reason) => {
+  sgMail.send({
+    from: 'peter@uniteprocurement.com',
+    to: req.body.emailAddress, 
+    subject: `UNITE - ${type} Account Inactivated`,
+    text: 
+      `Hello ${req.body.organizationName},\n\nYour ${type} account on the UNITE Public Procurement Platform has been inactivated. Some specific data such as ${data} has been deleted from our records. You will be active again at the next login on the Platform. \n\n.We hope to see you back soon. Please remember that your active presence on UNITE means a helping hand to others.\n\nIf you have improvement suggestions for us, please send them to our e-mail address above.\n\nWith kind regards,\nThe UNITE Public Procurement Platform Team`,
+    html: reason? '<p style="color: brown; font-size: 12pt; font-weight: bold italic; word-wrap: break-word; font-face: arial"><br>' + reason + '</p>' : null
+  }, function (err, resp) {
+     if (err ) {
+      return console.log(err.message);
+    }
+
+      console.log('An email about the account inactivation has been sent to ' + req.body.emailAddress + '.');
+      req.flash('success', 'An email about the account inactivation has been sent to ' + req.body.emailAddress + '.\n' + `${type} account inactivated successfully!`);
+    });
+};
+
+
 const resendTokenEmail = (user, token, link, req) => {
   sgMail.send({
     from: 'peter@uniteprocurement.com',
@@ -101,30 +144,6 @@ const sendResetPasswordEmail = (user, type, req) => {
 };
 
 
-const sendCancelBidEmail = (req, victim, actor, victimMail, actorMail, victimType, actorType, reason) => {
-        sgMail.send({
-          from: "peter@uniteprocurement.com",
-          to: victimMail,
-          subject: "Bid request " + req.body.requestsName + " cancelled!",
-          text:
-            "Hello " + victim + 
-            ",\n\nWe regret to inform you that your incoming Order named " + req.body.requestsName + " has been cancelled by "
-            + "the " + actorType + actor + ".\nPlease contact them at " + actorMail + " for more"
-            + " details.\nUNITE apologizes for any inconvenience that this issue may have caused to you."+ "\n\n"
-            + "With kind regards,\nThe UNITE Public Procurement Platform Team",
-            html: reason? '<p style="color: fuchsia; font-size: 12pt; font-weight: bold italic; word-wrap: break-word; font-face: arial"><br>' + reason + '</p>' : null
-          }, function(err) {
-            if(err) {
-              return console.log(err.message);
-            }
-          
-          var msg = "The Bid Request has been cancelled by the " + actorType + actor + '.\n' + victimType + victim + ' has been notified via e-mail about the Order cancellation.';
-          console.log(msg);
-          req.flash('success', msg);
-      });
-};
-
-
 const postSignInBody = (link, req, res) => {
   var dbLink = link + 's';
   const email = req.body.emailAddress;
@@ -142,7 +161,7 @@ const postSignInBody = (link, req, res) => {
         throw err;
       var dbo = db.db(BASE);
       
-       dbo.collection(dbLink).findOne({ emailAddress: email, password: password },  (err, doc) => {
+       dbo.collection(dbLink).findOne( { emailAddress: email, password: password },  (err, doc) => {
         if(err) 
           return console.error(err.message);
 
@@ -172,7 +191,7 @@ const postSignInBody = (link, req, res) => {
          
           req.session.cookie.originalMaxAge = req.body.remember? null : 7200000;//Two hours.           
           req.session.save();
-          bcrypt.compare(password, doc.password, (err, doMatch) => {
+          bcrypt.compare(password, doc.password, async (err, doMatch) => {
             if(err)
               throw err;
             
@@ -186,7 +205,11 @@ const postSignInBody = (link, req, res) => {
                   msg:
                     "Your account has not been verified. Please check your e-mail for instructions."
                 });
-                
+              
+                if(doc.isActive != null && doc.isActive == false) {//Reactivate on login.
+                    await dbo.collection(dbLink).updateOne( { _id: doc._id }, { $set: { isActive: true } }, function(err, obj) {});
+                }
+              
                 db.close();
                 setTimeout(function() {res.redirect(`/${link}`);}, 10);
             } else {
@@ -202,4 +225,4 @@ const postSignInBody = (link, req, res) => {
 };
 
 
-module.exports = { sendConfirmationEmail, sendCancellationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody };
+module.exports = { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody };

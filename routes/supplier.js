@@ -11,6 +11,7 @@ router.get("/", isAuth, sessionExit, supplierController.getIndex);
 router.get("/sign-in", supplierController.getSignIn);
 router.get("/sign-up", supplierController.getSignUp);
 router.get("/profile", isAuth, sessionExit, supplierController.getProfile);
+router.get("/deactivate/:id", isAuth, sessionExit, supplierController.getDeactivate);
 router.get("/delete/:id", isAuth, sessionExit, supplierController.getDelete);
 router.get("/bid-requests", isAuth, sessionExit, supplierController.getBidRequests);
 router.get("/bid-requests/:id", isAuth, sessionExit, supplierController.getBidRequest);//:id=param
@@ -26,6 +27,7 @@ router.get("/chat/:from/:to/:username/:room/:requestId/:requestName/:toName/:fro
 router.post("/sign-in", supplierController.postSignIn);
 router.post("/sign-up", supplierController.postSignUp);
 router.post("/profile", isAuth, sessionExit, supplierController.postProfile);
+router.post("/deactivate", isAuth, sessionExit, supplierController.postDeactivate);
 router.post("/delete", isAuth, sessionExit, supplierController.postDelete);
 router.post("/bid-requests/:id", isAuth, sessionExit, supplierController.postBidRequest);
 router.post("/addproduct", isAuth, sessionExit, supplierController.postAddProduct);

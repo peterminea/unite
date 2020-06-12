@@ -34,6 +34,16 @@ p.term {
   font-size: 14pt;
 }
 
+p.term-light {
+  color: white;
+  font-size: 16pt;
+}
+
+p.term-black {
+  color: black;
+  font-size: 18pt;
+}
+
 .color-primary {
   color: blue;
 }

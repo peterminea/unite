@@ -10,18 +10,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/4.0.1/mustache.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.26.0/moment.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.9.4/qs.min.js"></script>
-
-  <link rel="stylesheet" href="/jquery-ui.css">
-  <link rel="stylesheet" href="/bootstrap.css">
-  <script src="/sweetalert.min.js"></script>  
-  <script src="/jquery.min.js"></script>
-  <script src="/jquery-ui.min.js"></script>
-  <script src="/popper.min.js"></script>  
-  <script src="/bootstrap.min.js"></script>
-  <script src="/index.min.js"></script>  
-  <script src="/mustache.min.js"></script>
-  <script src="/moment.min.js"></script>
-  <script src="/qs.min.js"></script>
  -->
 <!DOCTYPE html>
 <html>
@@ -35,8 +23,8 @@
   <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/messages.css">
-  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/jquery-ui.css">
+  <link rel="stylesheet" href="/bootstrap.min.css">
   <script src="/sweetalert.min.js"></script>  
   <script src="/jquery.min.js"></script>
   <script src="/jquery-ui.min.js"></script>
@@ -81,7 +69,6 @@
       const sidebarTemplate = $('#sidebar-template').text();
       
       const autoscroll = (messageElem) => {
-        //var $messages = $('#messages2')[0];        
         const elem = messageElem? messageElem : $messages;
         const $newMessage = elem.lastElementChild;
         const newMessageStyles = getComputedStyle($newMessage);
@@ -94,7 +81,7 @@
         if(containerHeight - newMessageHeight >= scrollOffset) {
           elem.scrollTop = elem.scrollHeight;
         }        
-      };      
+      };
                                   
       if(reqName.value && reqName.value != 'None') {
           $('<h4 style="color: blue">Chat about the Order "' + reqName.value + '"</h3>').insertBefore($(messageInput));
@@ -120,8 +107,8 @@
           .appendChild(li)
           .append(data.message);
         messages
-          .appendChild(span)
-          .append("From " + data.sender + " to " + data.receiver + " at: " + (data.time));
+          .appendChild(span);
+          $(span).append("From <b><u>" + data.sender + "</u></b> to <b style='color: purple'><u>" + data.receiver + "</u></b> at: " + (data.time));
         }     
                                   
         function addMessages(message) {
@@ -182,7 +169,6 @@
                sender: $('#fromName').val(),
                receiver: $('#toName').val(),
                bidRequestId: !requestId.value || requestId.value.length < 12? null : requestId.value,
-               //bidRequestName: reqName.value == 'None'? null : reqName.value,
                message: $("#message").val()
             }
             
@@ -190,6 +176,7 @@
             sock.emit("sendMessage", msg, (error) => {
               $('#send').removeAttr('disabled');
               if(typeof error !== 'undefined') {
+                  alert(error);
                  $("#message").val("").focus();
                 return false;
               }
@@ -197,7 +184,8 @@
               messages.appendChild(li).append($("#message").val());
               $("#message").val("").focus();
               let span = document.createElement("span");
-              messages.appendChild(span).append("From " + $('#fromName').val() + " to " + $('#toName').val() + ": " + "Just now.");
+              messages.appendChild(span);
+              $(span).append("From <b><u>" + $('#fromName').val() + "</u></b> to <b style='color: purple'><u>" + $('#toName').val() + "</u></b>: " + "Just now.");
               //alert('Message sent! ' + msg);
               autoscroll(messages);
             });
@@ -323,8 +311,8 @@
         <div class="title text-center">
           <span title="Talk" style="font-weight: bold">UNITE Chat - Talk to your partner instantly!</span>
         </div>  
-        <div style="position: center; color: green; font-family: arial; font-size: 12pt; text-decoration: underline; font-weight: bold">
-          <span id="partner1"><b style="color: brown"><%= fromName %></b> and <b style="color: purple"><%= toName %></b> are in chat</span>
+        <div style="position: center; color: green; font-family: arial; font-size: 12pt">
+          <span id="partner1"><b style="color: brown"><u><%= fromName %></u></b> and <b style="color: purple"><u><%= toName %></u></b> are in chat</span>
         </div>
         <br>
         <ul id="messages" class="messages">

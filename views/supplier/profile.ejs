@@ -10,8 +10,8 @@
   <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/messages.css">
-  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/jquery-ui.css">
+  <link rel="stylesheet" href="/bootstrap.min.css">
   <script src="/jquery.min.js"></script>
   <script src="/jquery-ui.min.js"></script>
   <script src="/popper.min.js"></script>
@@ -313,10 +313,11 @@
           class="btn btn-primary btn-block btn-lg">Update Profile</button>
       </form>
         <div class="form-group mr-2">
-          <label>Terminate your account</label>
-          <a href="../delete/<%= profile._id %>"><button class="btn-secondary btn" id="termination" title="Close Account"></a>
+          <a href="delete/<%= profile._id %>"><button class="btn-secondary btn" id="termination" title="Close Account">Delete Account</button></a>
         </div>
-    </div>
+        <div class="form-group mr-2">          
+          <a href="deactivate/<%= profile._id %>"><button class="btn-secondary btn" id="deactivation" title="Temporarily deactivate your Account">Deactivate Account</button></a>
+        </div>
   </div>
 </body>
 
