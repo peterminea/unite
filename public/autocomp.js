@@ -282,6 +282,32 @@ function addProduct(obj, MAX) {
 }
 
 
+function userInputs(id, name, type, ul) {//Home, About, Terms, Antibribery - ensure link to user's profile if they are logged into session.
+    var link = "";
+    
+    switch(type) {
+      case 'Buyer':
+        link = "/buyer";
+        break;
+        
+      case 'Supervisor':
+        link = "/supervisor";
+        break;
+        
+      case 'Supplier':
+        link = "/supplier";
+        break;
+        
+      default:
+        break;
+      }
+   
+    ul.prepend('<li class="nav-item">'
+          +'<a class="nav-link" href="' + link + '">Hello, ' + name + '!</a>'
+       + '</li>');
+}
+
+
 $(document).ready(function() {
   var nav = $('body').find('nav');
   if(nav.length && !(nav.find('div[id="navbarSupportedContent"]').length)) {
@@ -311,20 +337,24 @@ $(document).ready(function() {
     nav.append($str);
   }
 
-  $('div.container')
-    .first()
+  var cnt = $('div.container').first();
+  //alert(history.go(-1));
+  
+  cnt
     .prepend('<div><button class="back btn btn-primary" style="margin-right: 20px" ' 
-                                    + ' title="Back one page" onclick="history.go(-1)">Back</button>'
+                                    + ' title="Go back one page" onclick="history.go(-1)">Back</button>'
                 + '<button class="forward btn btn-primary" style="margin-left: 20px"' 
-                                    + ' title="Forward one page" onclick="history.go(1)">Forward</button>'
+                                    + ' title="Go forward one page" onclick="history.go(1)">Forward</button>'
                                    +'</div>');
   
-  $('input,textarea,span,label,li,button,a,b,p,h1,h2,h3,h4,h5,option')
-    .each(function(index, el) {//Tooltips in the App.
-    if(!$(el).attr('title')) {
-      $(el).attr('title', $(el).val()? $(el).val() : $(el).text());
-    }
-  });
+  if(!cnt.hasClass('terms')) {
+    $('input,textarea,span,label,li,button,a,b,p,h1,h2,h3,h4,h5,option')
+      .each(function(index, el) {//Tooltips in the App.
+      if(!$(el).attr('title')) {
+        $(el).attr('title', $(el).val()? $(el).val() : $(el).text());
+      }
+    });
+  }
   
   //$('div.container').not('.text-center')
     $("body").css({"background-image": "url(https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2FGD.png?v=1591857198052)", "background-repeat": "repeat"})

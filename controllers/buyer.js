@@ -17,7 +17,7 @@ const async = require('async');
 const MongoClient = require('mongodb').MongoClient;
 const ObjectId = require("mongodb").ObjectId;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
-const { sendConfirmationEmail, sendCancellationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
+const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
 
 const statusesJson = {
   BUYER_REQUESTED_BID: parseInt(process.env.BUYER_REQ_BID),
@@ -243,19 +243,55 @@ exports.getDelete = (req, res) => {
   res.render('buyer/delete', {id: req.params.id});
 }
 
+exports.getDeactivate = (req, res) => {
+  res.render('buyer/deactivate', {id: req.params.id});
+}
+
 exports.getResendToken = (req, res) => {
   res.render('buyer/resend');
 }
 
 
+async function removeAssociatedBids(req, dbo, id) {
+  var promise = await BidRequest.find( { buyer: id } ).exec();
+  promise.then(async (bids) => {
+    var complexReason = 'The Buyer deleted their account. More details:\n' + req.body.reason;
+
+    for(var bid of bids) {//One by one.
+      try {
+        await dbo.collection('cancelreasons').insertOne( {
+          type: 'Order Cancellation',
+          userType: req.body.userType,
+          reason: complexReason,
+          userName: req.body.organizationName,
+          createdAt: Date.now()
+        }, function(err, obj) {});
+      }  
+      catch(e) {
+        console.error(e);
+        throw e;
+      }
+
+      await dbo.collection('bidrequests').deleteOne( { _id: bid._id }, function(err, obj) {
+        if(err) {
+          throw err;
+        }
+      });
+
+      req.body.requestsName = bid.requestName;
+      await sendCancelBidEmail(req, bid.suppliersName, bid.buyersName, bid.suppliersEmail, bid.buyersEmail, 'Supplier ', 'Buyer ', complexReason);
+    }
+  });
+}
+
+
 exports.postDelete = async function (req, res, next) {  
   var id = req.body.id;
-  try {
-    //Delete Buyer's Bid Requests first:
+  try {    
     MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
       var dbo = db.db(BASE);
-      
-      try{
+      //A Reason why the User is deleted.
+      try {
         await dbo.collection('cancelreasons').insertOne( {
           type: req.body.type,
           reason: req.body.reason,
@@ -267,11 +303,8 @@ exports.postDelete = async function (req, res, next) {
         console.error(e);
       }
       
-      await dbo.collection('bidrequests').deleteMany({ buyer: id }, function(err, resp) {
-        if(err) {
-          throw err;
-        }        
-      });
+      //Delete Buyer's Bid Requests first:
+      await removeAssociatedBids(req, dbo, id);
 
       //Now delete the messages sent or received by Buyer:
       await dbo.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp0) {
@@ -295,11 +328,50 @@ exports.postDelete = async function (req, res, next) {
       });
     //Finally, send a mail to the ex-Buyer:
     sendCancellationEmail('Buyer', req, 'placed orders, sent/received messages', req.body.reason);
-    db.close();              
-    return res.redirect("/buyer/sign-in");
+    db.close();
+    req.flash('success', 'You have deleted your Buyer account. We hope that you will be back with us!');
+    res.redirect("/buyer/sign-in");
     });
   } catch {
     //res.redirect("/buyer");
+  }
+}
+
+
+exports.postDeactivate = async function (req, res, next) {  
+  var id = req.body.id;
+  try {//Firstly, a Reason why deactivating the account:
+    MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
+      var dbo = db.db(BASE);
+      
+      try{
+        await dbo.collection('cancelreasons').insertOne( {
+          type: req.body.type,
+          reason: req.body.reason,
+          userType: req.body.userType,
+          userName: req.body.organizationName,
+          createdAt: Date.now()
+        }, function(err, obj) {});
+      } catch(e) {
+        console.error(e);
+      }
+      
+      //Delete Buyer's Bid Requests first:
+      await removeAssociatedBids(req, dbo, id);
+
+      //And now, remove the Buyer themselves:
+      await dbo.collection('buyers').updateOne({ _id: id }, { $set: { isActive: false } }, function(err, resp2) {
+        if(err) {
+          throw err;
+        }
+      });
+    //Finally, send a mail to the ex-Buyer:
+    await sendCancellationEmail('Buyer', req, 'placed orders', req.body.reason);
+    db.close();
+    req.flash('success', 'You have deactivated your Buyer account. Logging in will reactivate you.');
+    res.redirect("/buyer/sign-in");
+    });
+  } catch {
   }
 }
 
@@ -331,7 +403,7 @@ exports.postConfirmation = async function (req, res, next) {
                   if (err) 
                     req.flash('error', 'Error on Verification!');    
                   var dbo = db.db(BASE);
-                  await dbo.collection("buyers").updateOne({ _id: user._id }, { $set: {isVerified: true} }, function(err, resp) {
+                  await dbo.collection("buyers").updateOne({ _id: user._id }, { $set: { isVerified: true, isActive: true } }, function(err, resp) {
                     if(err) {
                       return console.error(err.message);
                       /*
@@ -553,6 +625,7 @@ exports.postSignUp = async (req, res) => {
                 emailAddress: req.body.emailAddress,
                 password: req.body.password,          
                 isVerified: false,
+                isActive: false,
                 contactMobileNumber: req.body.contactMobileNumber,
                 address: req.body.address,
                 balance: req.body.balance,
@@ -623,7 +696,8 @@ exports.postProfile = (req, res) => {
       doc.contactName = req.body.contactName;
       doc.emailAddress = req.body.emailAddress;
       doc.password = req.body.password;
-      doc.isVerified = req.body.isVerified;
+      doc.isVerified = true;
+      doc.isActive = true;
       doc.contactMobileNumber = req.body.contactMobileNumber;
       doc.address = req.body.address;
       doc.balance = req.body.balance;

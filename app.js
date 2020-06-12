@@ -262,7 +262,8 @@ socket.on("connection", (sock) => {
         throw new Error();
       }
     });
-    
+    console.log('BAI VADIME');
+    console.log(callback);
     socket.to(user.room).emit('message', generateMessage(user.username, msgData));
     if(typeof callback !== 'undefined')
       callback();
@@ -1029,10 +1030,9 @@ MongoClient.connect(URI, {useUnifiedTopology: true}, (err, client) => {
   productList.push("Product name: 'Paintbrushes', amount: 5, price: 10.");
   productList.push("Product name: 'Frames', amount: 3, price: 15.");
   
-  var myQuery = {}, newValues = { $set: {productsServicesOffered: productsList, amountList: amountList, priceList: priceList, products: productList} };
+  var myQuery = {}, newValues = { $set: { productsServicesOffered: productsList, amountList: amountList, priceList: priceList, products: productList } };
   
   db.collection("bidrequests").updateMany(myQuery, newValues, function(err, obj) {});
-   
   
   //db.collection("bidrequests").updateMany({}, { $set: {itemDescriptionLong: "Pictures on walls in isolation chambers for COVID patients", buyerEmail: "peter.minea@gmail.com", requestName: "Basic Tender Request - May 30th, 2020"} }, function(err, obj) {}); 
   //db.collection("buyers").updateMany({}, { $set: {contactMobileNumber: "0732 060 807"} }, function(err, obj) {});
@@ -1081,6 +1081,10 @@ MongoClient.connect(URI, {useUnifiedTopology: true}, (err, client) => {
       */
   //db.collection("bidrequests").updateMany({}, { $set: {specialMentions: 'Buyer sent you some questions to be answered about the blankets to be used at the South Park Hospital.'} }, function(err, obj) {});
   
+  //db.collection("buyers").updateMany({}, { $set: { isActive: true } }, function(err, obj) {});
+  //db.collection("suppliers").updateMany({}, { $set: { isActive: true } }, function(err, obj) {});
+  
+  db.close();
 });
 // Database configuration and test data saving:
 

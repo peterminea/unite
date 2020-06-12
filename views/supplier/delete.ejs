@@ -3,23 +3,21 @@
 
 <head>
   <meta charset="utf-8">
-  <title>UNITE - Buyer - User Confirmation</title>
+  <title>UNITE - Supplier - User Termination</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="A cool thing made with Glitch">
   <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/messages.css">
-  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/jquery-ui.css">
+  <link rel="stylesheet" href="/bootstrap.min.css">
   <script src="/jquery.min.js"></script>
   <script src="/jquery-ui.min.js"></script>
   <script src="/popper.min.js"></script>
   <script src="/bootstrap.min.js"></script>
-  <script src="/sweetalert.min.js"></script>  
-  <script src="/index.min.js"></script>
+  <script src="/sweetalert.min.js"></script>
   <script src="/https.js"></script>
-  <script src="/chatUsers.js"></script>
   <script src="/autocomp.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
@@ -27,8 +25,6 @@
         if(!confirm('Are you sure you want to delete your Supplier account?\nThis will also remove:\n\nYour products/services;\nYour capabilities;\nYour received orders;\nYour user tokens (if any);\nYour message history from UNITE.')) {
           return false;
         }
-        
-        
       });
   });
   </script>
@@ -36,7 +32,7 @@
 
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
-    <a class="navbar-brand" href="/">UNITE</a>
+    <a class="navbar-brand" href="/">UNITE - Delete Supplier Account</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -58,7 +54,7 @@
             <input type="hidden" name="id" value="<%= id %>">
           </div>
           <div class="form-group">
-            <label for="reason">Reason for deleting account:</label>
+            <label for="reason">Reason for deleting account*:</label>
             <textarea required class="form-control" id="reason" name="reason"></textarea>
           </div>
           <input type="hidden" name="type" value="User Cancellation">          
@@ -72,5 +68,3 @@
     </div>
   </body>
 </html>
-
-<!-- <input type="hidden" id="userName" name="userName" value=""> -->

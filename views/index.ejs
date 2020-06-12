@@ -25,12 +25,8 @@
   <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/messages.css">
-  <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">  
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.css">
--->
-  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
-  
+  <link rel="stylesheet" href="/jquery-ui.css">
+  <link rel="stylesheet" href="/bootstrap.min.css">
   <script src="/jquery.min.js"></script>
   <script src="/jquery-ui.min.js"></script>
   <script src="/popper.min.js"></script>
@@ -38,6 +34,14 @@
   <script src="/sweetalert.min.js"></script>
   <script src="/https.js"></script>
   <script src="/autocomp.js"></script>
+  <script type="text/javascript">
+  $(document).ready(function() {
+    var id = "<%= userId %>", 
+    name = "<%= userName %>", 
+    type = "<%= userType %>";
+    userInputs(id, name, type, $('ul.mr-auto'));
+  });
+  </script>
 </head>
 
 <body>
@@ -59,10 +63,10 @@
           <a class="nav-link" href="/about">About</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="termsConditions" title="Terms and Conditions">Terms</a>
+          <a class="nav-link" href="/termsConditions" title="Terms and Conditions">Terms</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="antibriberyAgreement" title="Anti-Bribery Agreement">Anti-Bribery</a>
+          <a class="nav-link" href="/antibriberyAgreement" title="Anti-Bribery Agreement">Anti-Bribery</a>
         </li>
         <li class="nav-item">
           <a class="btn btn-danger" href="?exit=true&home=true" title="Clear user session">Clear Session</a>
@@ -71,9 +75,9 @@
       <br>
       <button class="btn btn-primary" data-toggle="modal" data-target="#signUpModal">Sign up</button>
     </div>
-  </nav>
-
-  <div class="container text-center">
+  </nav>  
+  
+  <div class="container text-center home">
     <div class="text-center mx-auto" style="margin-bottom: -40px">
       <img src="https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2Funite%20(1).png?v=1587898738134"
         height="200">
@@ -88,7 +92,7 @@
     </span>
     <br><br>
     <span class="mt-5 color-primary font-16pt">Creating a world where governments and companies innovate together to overcome crisis</span>
-    <br>
+    <br><br>
     <a href="https://www.youtube.com/watch?v=WlDSbO3L0xY&feature=emb_logo">
       <b class="mt-5 color-primary font-16pt" style="text-decoration: underline">
       SAVING JOBS, SAVING LIVES!
@@ -125,7 +129,7 @@
     </div>
   </div>
 
-  <div class="modal fade" style="color: lime" id="signUpModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+  <div class="modal fade" style="color: navy" id="signUpModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
     aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">

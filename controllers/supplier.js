@@ -16,7 +16,7 @@ const crypto = require('crypto');
 const MongoClient = require("mongodb").MongoClient;
 const ObjectId = require("mongodb").ObjectId;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
-const { sendConfirmationEmail, sendCancellationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
+const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
 
 const statusesJson = {
   BUYER_REQUESTED_BID: parseInt(process.env.BUYER_REQ_BID),
@@ -134,8 +134,45 @@ exports.getDelete = (req, res) => {
   res.render('buyer/delete', {id: req.params.id});
 }
 
+exports.getDeactivate = (req, res) => {
+  res.render('buyer/deactivate', {id: req.params.id});
+}
+
 exports.getResendToken = (req, res) => {
   res.render("supplier/resend");
+}
+
+
+async function removeAssociatedBids(req, dbo, id) {
+  var promise = await BidRequest.find( { supplier: id } ).exec();
+  promise.then(async (bids) => {
+    var complexReason = 'The Supplier deleted their account. More details:\n' + req.body.reason;
+
+    for(var bid of bids) {//One by one.          
+      try {
+        await dbo.collection('cancelreasons').insertOne( {
+          type: 'Order Cancellation',
+          userType: req.body.userType,
+          reason: complexReason,
+          userName: req.body.companyName,
+          createdAt: Date.now()
+        }, function(err, obj) {});
+      }  
+      catch(e) {
+        console.error(e);
+        throw e;
+      }
+
+      await dbo.collection('bidrequests').deleteOne( { _id: bid._id }, function(err, obj) {
+        if(err) {
+          throw err;
+        }
+      });
+
+      req.body.requestsName = bid.requestName;
+      await sendCancelBidEmail(req, bid.buyersName, bid.suppliersName, bid.buyersEmail, bid.suppliersEmail, 'Buyer ', 'Supplier ', complexReason);
+    }
+  });
 }
 
 
@@ -179,11 +216,7 @@ exports.postDelete = function (req, res, next) {
       });
     
       //The received bids:
-      await dbo.collection('bidrequests').deleteMany({ supplier: id }, function(err, resp2) {
-        if(err) {
-          throw err;
-        }
-      });
+      await removeAssociatedBids(req, dbo, id);
             
       //Remove the possibly existing Supplier Tokens:
       await dbo.collection('suppliertokens').deleteMany({ _userId: id }, function(err, resp3) {
@@ -200,8 +233,62 @@ exports.postDelete = function (req, res, next) {
       });
 
       //Finally, send a mail to the ex-Supplier:
-      sendCancellationEmail('Supplier', req, 'received orders, products/services offered, listed capabilities, sent/received messages,', req.body.reason);
+      sendCancellationEmail('Supplier', req, 'received orders, products/services offered, listed capabilities, sent/received messages', req.body.reason);
       db.close();
+      req.flash('success', 'You have deleted your Supplier account. We hope that you will be back with us!');
+      return res.redirect("/supplier/sign-in");
+    });
+  } catch {
+  }
+}
+
+
+exports.postDeactivate = function (req, res, next) {  
+  var id = req.body.id;
+  try {
+    //Delete Supplier's Capabilities first:
+    MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
+      var dbo = db.db(BASE);
+      
+      try{
+        await dbo.collection('cancelreasons').insertOne( {
+          type: req.body.type,
+          reason: req.body.reason,
+          userType: req.body.userType,
+          userName: req.body.companyName,
+          createdAt: Date.now()
+        }, function(err, obj) {});
+      } catch(e) {
+        console.error(e);
+      }
+      
+      await dbo.collection('capabilities').deleteMany({ supplier: id }, function(err, resp) {
+        if(err) {
+          throw err;
+        }
+      });
+        
+      //Products/Services offered:
+      await dbo.collection('productservices').deleteMany({ supplier: id }, function(err, resp0) {
+        if(err) {
+            throw err;
+          }
+      });    
+    
+      //The received bids:
+      await removeAssociatedBids(req, dbo, id);
+
+      //And now, remove the Supplier themselves:
+      await dbo.collection('suppliers').updaeOne( { _id: id }, { $set: { isActive: false } }, function(err, resp4) {
+        if(err) {
+          throw err;
+        }
+      });
+
+      //Finally, send a mail to the ex-Supplier:
+      await sendCancellationEmail('Supplier', req, 'received orders, products/services offered, listed capabilities', req.body.reason);
+      db.close();
+      req.flash('success', 'You have deactivated your Supplier account. Logging in will reactivate you.');
       return res.redirect("/supplier/sign-in");
     });
   } catch {
@@ -241,7 +328,7 @@ exports.postConfirmation = async function(req, res, next) {
         if (err) throw err;
         var dbo = db.db(BASE);
             
-        await dbo.collection("suppliers").updateOne({ _id: user._id }, { $set: {isVerified: true} }, function(err, resp) {
+        await dbo.collection("suppliers").updateOne({ _id: user._id }, { $set: { isVerified: true, isActive: true } }, function(err, resp) {
               if(err) {
                 res.status(500).send(err.message);
               }
@@ -369,6 +456,7 @@ exports.postSignUp = async (req, res) => {
                   emailAddress: req.body.emailAddress,
                   password: req.body.password,
                   isVerified: false,
+                  isActive: false,
                   registeredCountry: req.body.registeredCountry,
                   companyAddress: req.body.companyAddress,
                   areaCovered: req.body.areaCovered,
@@ -710,7 +798,8 @@ exports.postProfile = async (req, res) => {
     doc.title = req.body.title;
     doc.emailAddress = req.body.emailAddress;
     doc.password = req.body.password;
-    doc.isVerified = req.body.isVerified;
+    doc.isVerified = true;
+    doc.isActive = true;
     doc.companyRegistrationNo = req.body.companyRegistrationNo;
     doc.registeredCountry = req.body.registeredCountry;
     doc.balance = req.body.balance;

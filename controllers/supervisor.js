@@ -2,13 +2,14 @@ const crypto = require('crypto');
 const bcrypt = require("bcryptjs");
 const Supervisor = require("../models/supervisor");
 const Buyer = require("../models/buyer");
+const BidRequest = require("../models/bidRequest");
 const Token = require('../models/supervisorToken');
 const assert = require('assert');
 const process = require('process');
 const async = require('async');
 const MongoClient = require('mongodb').MongoClient;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
-const { sendConfirmationEmail, sendCancellationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
+const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
 
 exports.getIndex = (req, res) => {
   if(!req || !req.session) return false;
@@ -75,7 +76,6 @@ exports.getChat = (req, res) => {//Coming from the getLogin above.
 }
 
 
-
 async function removeSupervisor(id, req, res, db) {
   //Now delete the messages sent/received by Supervisor:
   await db.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp1) {
@@ -104,6 +104,37 @@ async function removeSupervisor(id, req, res, db) {
 }
 
 
+async function removeAssociatedBids(req, dbo, id) {
+  var promise = await BidRequest.find( { buyer: id } ).exec();
+  promise.then(async (bids) => {   
+    for(var bid of bids) {//One by one.
+      try {
+        await dbo.collection('cancelreasons').insertOne( {
+          type: 'Order Cancellation',
+          userType: 'Buyer',
+          reason: req.body.reason,
+          userName: req.body.organizationName,
+          createdAt: Date.now()
+        }, function(err, obj) {});
+      }  
+      catch(e) {
+        console.error(e);
+        throw e;
+      }
+
+      await dbo.collection('bidrequests').deleteOne( { _id: bid._id }, function(err, obj) {
+        if(err) {
+          throw err;
+        }
+      });
+
+      req.body.requestsName = bid.requestName;
+      await sendCancelBidEmail(req, bid.suppliersName, bid.buyersName, bid.suppliersEmail, bid.buyersEmail, 'Supplier ', 'Buyer ', req.body.reason);
+    }
+  });
+}
+
+
 exports.postDelete = function (req, res, next) {  
   var id = req.body.id;
   var uniteID = req.body.uniteID;
@@ -113,7 +144,7 @@ exports.postDelete = function (req, res, next) {
     MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
       var dbo = db.db(BASE);
       
-      try{
+      try {
         await dbo.collection('cancelreasons').insertOne( {
           type: req.body.type,
           reason: req.body.reason,
@@ -125,23 +156,20 @@ exports.postDelete = function (req, res, next) {
         console.error(e);
       }
       
-      await dbo.collection('buyers').find({ organizationUniteID: uniteID }).exec().then( async (buyers) => {        
+      await dbo.collection('buyers').find({ organizationUniteID: uniteID }).exec().then(async (buyers) => {
         if(!buyers || !buyers.length) {//No buyer data, let's directly pass to Supervisor.
           await removeSupervisor(id, req, res, db);
         } else {
           var len = buyers.length;
+          var complexReason = 'Buyer\'s account was deleted because their Supervisor did the same. See more details:\n' + req.body.reason;
           
           //Delete buyers data one by one:
           for(var i in buyers) {
             var theId = buyers[i]._id;
-            var req2 = { emailAddress : buyers[i].emailAddress, organizationName : buyers[i].organizationName} ;
+            var req2 = { body: { reason: complexReason, emailAddress : buyers[i].emailAddress, organizationName : buyers[i].organizationName } };
             
             //Bids:
-            await dbo.collection('bidrequests').deleteMany({ buyer: theId }, function(err, resp) {
-              if(err) {
-                throw err;
-              }
-            });            
+            await removeAssociatedBids(req2, dbo, theId);          
 
             //Now delete the messages sent/received by Buyer:
             await dbo.collection('messages').deleteMany({ $or: [ { from: theId }, { to: theId } ] }, function(err, resp0) {
@@ -165,18 +193,18 @@ exports.postDelete = function (req, res, next) {
             });
 
             //Finally, send a mail to the ex-Buyer:
-            sendCancellationEmail('Buyer', req2, 'placed orders, sent/received messages', req.body.reason);
-            //if(i == len-1) {//All buyers are lost, now let's pass to the Supervisor themselves and remove their data.
-            //}
+            await sendCancellationEmail('Buyer', req2, 'placed orders, sent/received messages', req.body.reason);
           }
           //Get rid of the Supervisor themselves too.
-          removeSupervisor(id, req, res, db);
+          await removeSupervisor(id, req, res, db);
         }
         
-        res.redirect("/supervisor");
+        db.close();
+        req.flash('success', 'You have deleted your Supervisor account. We hope that you and your Buyers will be back with us!');
+        res.redirect("/supervisor/sign-in");
       });
     });
-  } catch {    
+  } catch {
   }
 }
 
@@ -477,7 +505,7 @@ exports.postProfile = async (req, res) => {
     doc.contactName = req.body.contactName;
     doc.emailAddress = req.body.emailAddress;
     doc.password = req.body.password;
-    doc.isVerified = req.body.isVerified;
+    doc.isVerified = true;
     doc.contactMobileNumber = req.body.contactMobileNumber;
     doc.address = req.body.address;
     doc.country = req.body.country;
