@@ -131,11 +131,11 @@ exports.getConfirmation = (req, res) => {
 }
 
 exports.getDelete = (req, res) => {
-  res.render('buyer/delete', {id: req.params.id});
+  res.render('supplier/delete', {id: req.params.id});
 }
 
 exports.getDeactivate = (req, res) => {
-  res.render('buyer/deactivate', {id: req.params.id});
+  res.render('supplier/deactivate', {id: req.params.id});
 }
 
 exports.getResendToken = (req, res) => {
@@ -144,8 +144,8 @@ exports.getResendToken = (req, res) => {
 
 
 async function removeAssociatedBids(req, dbo, id) {
-  var promise = await BidRequest.find( { supplier: id } ).exec();
-  promise.then(async (bids) => {
+  var promise = BidRequest.find( { supplier: id } ).exec();
+  await promise.then(async (bids) => {
     var complexReason = 'The Supplier deleted their account. More details:\n' + req.body.reason;
 
     for(var bid of bids) {//One by one.          

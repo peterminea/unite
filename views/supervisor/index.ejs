@@ -109,6 +109,7 @@
           <th scope="col">Balance</th>
           <th scope="col">isActive</th>
           <th scope="col">Process</th>
+          <th scope="col">Talk</th>
         </tr>
       </thead>
       <tbody>
@@ -129,16 +130,17 @@
           </td>
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" >
         </tr>
-        <% i++; } } else {%>
+        <% i++; } %>
+        </tbody>
+      </table>
+    </div>
+        <% } else {%>
         <div>
           <p style="color: green; font-family: arial">
             Sorry, no buyers with your Organization UNITE ID are currently available. Please wait for their registration.
           </p>          
         </div>
         <% }%>
-      </tbody>
-    </table>
-  </div>
 </body>
 
 </html>

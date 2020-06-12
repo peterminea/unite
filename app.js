@@ -1083,8 +1083,11 @@ MongoClient.connect(URI, {useUnifiedTopology: true}, (err, client) => {
   
   //db.collection("buyers").updateMany({}, { $set: { isActive: true } }, function(err, obj) {});
   //db.collection("suppliers").updateMany({}, { $set: { isActive: true } }, function(err, obj) {});
+  //db.collection("supervisors").updateMany({}, { $set: { contactMobileNumber: '+40 832 065 285' } }, function(err, obj) {});
+  //db.collection("suppliers").updateMany({}, { $set: { contactMobileNumber: '+40 832 065 285' } }, function(err, obj) {});
+  //db.collection("buyers").updateMany({}, { $set: { contactMobileNumber: '+40 832 065 285' } }, function(err, obj) {});
   
-  db.close();
+  //db.close();
 });
 // Database configuration and test data saving:
 

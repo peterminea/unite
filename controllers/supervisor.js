@@ -40,7 +40,7 @@ exports.getConfirmation = (req, res) => {
 }
 
 exports.getDelete = (req, res) => {
-  res.render('buyer/delete', {id: req.params.id});
+  res.render('supervisor/delete', {id: req.params.id});
 }
 
 
@@ -105,8 +105,8 @@ async function removeSupervisor(id, req, res, db) {
 
 
 async function removeAssociatedBids(req, dbo, id) {
-  var promise = await BidRequest.find( { buyer: id } ).exec();
-  promise.then(async (bids) => {   
+  var promise = BidRequest.find( { buyer: id } ).exec();
+  await promise.then(async (bids) => {   
     for(var bid of bids) {//One by one.
       try {
         await dbo.collection('cancelreasons').insertOne( {

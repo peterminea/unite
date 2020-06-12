@@ -12,7 +12,7 @@ const Supervisor = require("../models/supervisor");
 const Supplier = require("../models/supplier");
 const BidRequest = require("../models/bidRequest");
 const BidStatus = require("../models/bidStatus");
-const Reason = require("../models/cancelReason");
+//const Reason = require("../models/cancelReason");
 const async = require('async');
 const MongoClient = require('mongodb').MongoClient;
 const ObjectId = require("mongodb").ObjectId;
@@ -253,8 +253,8 @@ exports.getResendToken = (req, res) => {
 
 
 async function removeAssociatedBids(req, dbo, id) {
-  var promise = await BidRequest.find( { buyer: id } ).exec();
-  promise.then(async (bids) => {
+  var promise = BidRequest.find( { buyer: id } ).exec();
+  await promise.then(async (bids) => {
     var complexReason = 'The Buyer deleted their account. More details:\n' + req.body.reason;
 
     for(var bid of bids) {//One by one.
@@ -607,7 +607,7 @@ exports.postSignUp = async (req, res) => {
       } else {
         var promise = getSupers(req.body.organizationUniteID);
         
-        promise.then(function(supers) {
+        await promise.then(function(supers) {
           if(!supers || supers.length == 0) {
             req.flash("error", "Invalid UNITE ID. Please select an appropriate ID from the list.");
             res.redirect("back");

@@ -25,6 +25,14 @@ body {
  color: #acafea; 
 }
 
+table.members {
+  border: 2px solid black;  
+}
+
+table.members th,td {
+  border: 1px solid black;
+}
+
 input.errorField {
   background-color : red;
 }

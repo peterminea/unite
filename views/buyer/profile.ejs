@@ -30,6 +30,25 @@
         $("input").bind('change', function() {        
           $('#updateProfile').removeAttr('disabled');
         });
+        $('#termination').click(function(e) {
+          $("#dialog").dialog({
+            modal: true,
+            width: 200,
+            height: 200,
+            open: function(event, ui) {
+              
+            },
+            buttons: {
+              Ok: function() {
+                $(this).dialog("close");
+              }
+            }
+          });
+          
+          if(!confirm('Are you sure you want to delete your Buyer account?\nThis will also remove your Bid Requests and the messages you sent in UNITE.\nIf you just want to take a break, you may deactivate your account instead.')) {
+          return false;
+        }
+      });
     });
   </script>
 </head>
@@ -137,12 +156,18 @@
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
         <button type="submit" disabled id="updateProfile" value="Update Profile" class="btn btn-primary btn-block btn-lg">Update Profile</button>
       </form>
+        <br>
         <div class="form-group mr-2">
           <a href="delete/<%= profile._id %>"><button class="btn-secondary btn" id="termination" title="Close Account">Delete Account</button></a>
         </div>
         <div class="form-group mr-2">          
           <a href="deactivate/<%= profile._id %>"><button class="btn-secondary btn" id="deactivation" title="Temporarily deactivate your Account">Deactivate Account</button></a>
         </div>
+      <div id="dialog">
+        <p>
+          Are you sure you want to delete your Buyer account?\nThis will also remove your Bid Requests and the messages you sent in UNITE.\nIf you just want to take a break, you may deactivate your account instead.
+        </p>
+      </div>
     </div>
   </div>
 </body>
