@@ -279,11 +279,12 @@ socket.on("connection", (sock) => {
     }
     
     var mesg = new Message(msgData);
-    //if(msgData.)
+    
     mesg.save((err) => {
       if(err) {
        console.error(err.message);
-        throw new Error();
+        flash('error', err.message);
+        throw err;
       }
     });
     console.log('BAI VADIME');
@@ -389,7 +390,6 @@ var uploadExcel = multer({
 app.post("/uploadfile", upload.single("single"), (req, res, next) => {
   const file = req.file;
   console.log(file);//Can we parse its content here or not?
-  //console.log(1);
   if (!file) {
     const error = new Error("Please upload a file");
     error.httpStatusCode = 400;
@@ -547,6 +547,9 @@ app.post('/countryAutocomplete', function(req, res, next) {
       }
       
       res.jsonp(result);
+    } else {
+      req.flash('error', err.message);
+      throw err;
     }
   });
 });
@@ -574,6 +577,9 @@ app.post('/industryAutocomplete', function(req, res, next) {
       }
       
       res.jsonp(result);     
+    } else {
+      req.flash('error', err.message);
+      throw err;
     }
   });
 });
@@ -581,8 +587,11 @@ app.post('/industryAutocomplete', function(req, res, next) {
 
 app.post('/deleteBid', function(req, res, next) {
   MongoClient.connect(URI, {useUnifiedTopology: true}, function(err, db) {
-    if (err) 
+    if (err) {
+      req.flash('error', err.message);
       throw err;
+    }
+      
     var dbo = db.db(BASE), myquery = { _id: req.body.bidId };
     
     dbo.collection("bidrequests").deleteOne(myquery, function(err, resp) {
@@ -600,9 +609,12 @@ app.post('/deleteBid', function(req, res, next) {
 app.post('/deleteFile', function(req, res, next) {
   //fs2.unlinkSync(req.body.file);
   console.log(req.body.file);
+  
   fs2.unlink(req.body.file, function (err) {
-    if (err) 
+    if (err) {
+      req.flash('error', err.message);
       throw err;
+    }
     //if no error, file has been deleted successfully
     console.log('File deleted!');
     req.flash('success', 'File deleted!');
@@ -615,8 +627,10 @@ app.post('/processFile', function(req, res, next) {
   //fs2.unlinkSync(req.body.file);
   
   fs2.unlink(req.body.file, function (err) {
-    if (err) 
+    if (err) {
+      req.flash('error', err.message);
       throw err;
+    }
     //if no error, file has been deleted successfully
     console.log('File deleted!');
     req.flash('success', 'File deleted!');
@@ -647,6 +661,9 @@ app.get('/industryGetAutocomplete', function(req, res, next) {
       }
       
       res.jsonp(result);     
+    } else {
+      req.flash('error', err.message);
+      throw err;
     }
   });
 });
@@ -672,6 +689,9 @@ app.get('/bidStatuses', function(req, res, next) {
       }
       
       res.jsonp(result);     
+    } else {
+      req.flash('error', err.message);
+      throw err;
     }
   });
 });
@@ -729,6 +749,9 @@ app.get('/uniteIDAutocomplete', function(req, res, next) {
       }
       
       res.jsonp(result);     
+    } else {
+      req.flash('error', err.message);
+      throw err;
     }
   });
 });
@@ -756,6 +779,9 @@ app.post('/uniteIDAutocomplete', function(req, res, next) {
       }
       
       res.jsonp(result);     
+    } else {
+      req.flash('error', err.message);
+      throw err;
     }
   });
 });
@@ -785,6 +811,9 @@ app.post('/currencyAutocomplete', function(req, res, next) {
       }
       
       res.jsonp(result);
+    } else {
+      req.flash('error', err.message);
+      throw err;
     }
   });
 });
@@ -814,6 +843,9 @@ app.get('/currencyGetAutocomplete', function(req, res, next) {
       }
       
       res.jsonp(result);     
+    } else {
+      req.flash('error', err.message);
+      throw err;
     }
   });
 });
@@ -846,6 +878,9 @@ app.get('/prodServiceAutocomplete', function(req, res, next) {
       }
      
       res.jsonp(result);
+    } else {
+      req.flash('error', err.message);
+      throw err;
     }
   });
 });
@@ -875,6 +910,9 @@ app.get('/capabilityInputAutocomplete', function(req, res, next) {
       }
       
       res.jsonp(result);     
+    } else {
+      req.flash('error', err.message);
+      throw err;
     }
   });
 });
@@ -911,12 +949,16 @@ app.get('/countryAutocompleted', function(req, res) {
 
 var db;
 MongoClient.connect(URI, {useUnifiedTopology: true}, (err, client) => {
-  if (err)
-    return console.error(err.message);
+  if (err) {
+    console.error(err.message);    
+    flash('error', err.message);
+    throw err;
+  }
 
   db = client.db(BASE);//Right connection!
   process.on('uncaughtException', function (err) {
     console.error(err.message);
+    flash('error', err.message);
   });
   
   /* //Database scripting / Manipulating data and datatypes. Askin, please do not delete these ones :) .
