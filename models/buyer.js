@@ -77,11 +77,11 @@ const buyerSchema = new Schema({
   },
   deptAgencyGroup: {
     type: String,
-    required: false
+    required: true
   },
   qualification: {
     type: String,
-    required: false
+    required: true
   },  
   country: {
     type: String,

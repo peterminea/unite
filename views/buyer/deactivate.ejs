@@ -22,7 +22,7 @@
   <script type="text/javascript">
     $(document).ready(function() {
       $('#mainForm').submit(function(e) {
-        if(!confirm('Are you sure you want to deactivate your Buyer account?\nThis will also remove your Bid Requests in UNITE. You will be automatically reactivated at the next login.\nWe hope to see you back soon!')) {
+        if(!confirm('Are you sure you want to deactivate your Buyer account?\nThis will remove your placed Bid Requests in UNITE. You will be automatically reactivated at the next login.\nWe hope to see you back soon!')) {
           return false;
         }
       });
@@ -40,7 +40,7 @@
   </nav>
     <div class="container">
        <div class="col-md-12">
-        <form action="/buyer/deactivate/<%= id %>" id="mainForm" method="POST">
+        <form id="mainForm" action="/buyer/deactivate/<%= id %>" method="POST">
           <legend>
             Deactivate Buyer Account - Please fill in the required (*) fields
           </legend>
@@ -62,9 +62,10 @@
           <div class="form-group">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <button type="submit" id="delete" title="Delete Account" class="btn btn-primary btn-block btn-lg">Deactivate Account</button>
-          <div class="form-group">            
-            <textarea disabled style="color: green; font-family: arial; font-size: 14pt">
-              If you temporarily deactivate your Buyer Account, your placed Bids (Orders) have to be cancelled. Corresponding Suppliers will be notified upon bid cancellation. When you activate your account again at login, you will have to place your orders again if you want to do so.
+            <br>
+          <div class="form-group text-center">
+            <textarea disabled rows="8" cols="40" style="color: green; font-family: arial; font-size: 14pt">
+If you temporarily deactivate your Buyer Account, your placed Bids (Orders) have to be cancelled. Corresponding Suppliers will be notified upon bid cancellation. When you activate your account again at login, you will have to place your orders again if you want to do so.
             </textarea>
           </div>
           </div>

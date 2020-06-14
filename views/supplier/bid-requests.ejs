@@ -26,7 +26,7 @@
       var token = $("input[name='_csrf']").val();
       
       if($('.delete').length()) {
-        $('.delete').bind('click', function() {          
+        $('.delete').on('click', function() {          
           var bidId = $(this).attr('id');
           var div1 = $(this).parent('div'), div2 = div1.prev('div');
           

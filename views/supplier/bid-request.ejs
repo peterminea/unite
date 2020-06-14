@@ -23,13 +23,7 @@
   <script src="/autocomp.js"></script>
   <script type="text/javascript">
   $(document).ready(function() {
-    $('.cancelForm').submit(function(e) {
-      var reason = prompt('Please enter a reason for cancelling this order.');
-      if(reason && reason.length)
-        $(this).find('input[name="reason"]').val(reason);
-        else 
-          return false;
-    });
+
   });
   </script>
 </head>
@@ -230,17 +224,16 @@
           var x = JSON.parse($('#statusJsonValues span').first().text());
           
            $('#statuses')
-            .bind('change', function() {
+            .on('change', function() {
             $('#status')        
               .val($(this)
                    .find('option:selected')
                    .attr('value'));
              
-             var that = $(this);
-             
+             var that = $(this);             
              if($('#status').val() == x.BUYER_ACCEPT_PRICE) {
                 $('#acceptBid').show();
-                $('#acceptButton').unbind('click').bind('click', function() {
+                $('#acceptButton').off('click').on('click', function() {
 
                   if(confirm('Are you sure you want to accept this Bid from ' + $('#buyerName').val() + '?')) {
                     $('#status').val(x.SUPP_START_DELIVERY);
@@ -315,19 +308,9 @@
 							<a href="../../../supplier/chatLogin/<%= supplier._id %>/<%= buyer._id %>/<%= request._id %>/<%= request.requestName %>/<%= buyer.organizationName %>/<%= supplier.companyName %>">
                 <button style="float: left" title="Chat" id="chat" class="btn-primary btn">Chat with your buyer</button>
               </a>
-            <form class="cancelForm" id="cancelBid" action="../../../supplier/cancelBid/" method="POST">
-              <input type="hidden" name="bidId" value="<%= request._id %>">
-              <input type="hidden" name="requestsName" value="<%= request.requestName %>">
-              <input type="hidden" name="userType" value="Supplier">
-              <input type="hidden" name="cancelType" value="Order Cancellation">
-              <input type="hidden" name="reason" value="">
-              <input type="hidden" name="buyersName" value="<%= request.buyerName %>">
-              <input type="hidden" name="suppliersName" value="<%= request.supplierName %>">
-              <input type="hidden" name="buyersEmail" value="<%= request.buyerEmail %>">
-              <input type="hidden" name="suppliersEmail" value="<%= request.supplierEmail %>">
-              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-              <button style="float: right" type="submit" id="submitCancel" title="Cancel Order" class="btn-primary btn">Cancel Buyer's Order</button><br>
-            </form>
+              <a href="../../../supplier/cancelBid/<%= request._id %>/<%= request.requestName %>/Supplier/<%= request.buyerName %>/<%= request.supplierName %>/<%= request.buyerEmail %>/<%= request.supplierEmail %>">
+                <button style="float: left" title="Cancel Bid" id="cancelBid" class="btn-primary btn">Cancel Buyer's Order</button>
+              </a>
           </div>
         </div>
       </div>

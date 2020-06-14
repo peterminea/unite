@@ -5,6 +5,7 @@ const BidRequest = require("../models/bidRequest");
 const BidStatus = require("../models/bidStatus");
 const ProductService = require("../models/productService");
 const Capability = require("../models/capability");
+const Industry = require("../models/industry");
 const Message = require("../models/message");
 const Token = require("../models/supplierToken");
 const assert = require("assert");
@@ -78,6 +79,19 @@ exports.postAddProduct = (req, res) => {
 }
 
 
+exports.getCancelBid = (req, res) => {
+  res.render('supplier/cancelBid', {
+    bidId: req.params.bidId,
+    bidName: req.params.bidName,
+    userType: req.params.userType,
+    buyerName: req.params.buyerName,
+    supplierName: req.params.supplierName,
+    buyerEmail: req.params.buyerEmail,
+    supplierEmail: req.params.supplierEmail
+  });  
+}
+
+
 exports.postCancelBid = (req, res) => {
   //BidRequest.findOne({_id: req.params.bidId});
   try {
@@ -88,8 +102,8 @@ exports.postCancelBid = (req, res) => {
       var dbo = db.db(BASE);
     
       try {
-        await dbo.collection('cancelreasons').insertOne( {
-          type: req.body.cancelType,
+        await dbo.collection('bidcancelreasons').insertOne( {
+          title: req.body.cancelTitle,
           userType: req.body.userType,
           reason: req.body.reason,
           userName: req.body.suppliersName,
@@ -131,11 +145,11 @@ exports.getConfirmation = (req, res) => {
 }
 
 exports.getDelete = (req, res) => {
-  res.render('buyer/delete', {id: req.params.id});
+  res.render('supplier/delete', {id: req.params.id});
 }
 
 exports.getDeactivate = (req, res) => {
-  res.render('buyer/deactivate', {id: req.params.id});
+  res.render('supplier/deactivate', {id: req.params.id});
 }
 
 exports.getResendToken = (req, res) => {
@@ -144,14 +158,14 @@ exports.getResendToken = (req, res) => {
 
 
 async function removeAssociatedBids(req, dbo, id) {
-  var promise = await BidRequest.find( { supplier: id } ).exec();
-  promise.then(async (bids) => {
+  var promise = BidRequest.find( { supplier: id } ).exec();
+  await promise.then(async (bids) => {
     var complexReason = 'The Supplier deleted their account. More details:\n' + req.body.reason;
 
     for(var bid of bids) {//One by one.          
       try {
-        await dbo.collection('cancelreasons').insertOne( {
-          type: 'Order Cancellation',
+        await dbo.collection('bidcancelreasons').insertOne( {
+          title: 'Account Deletion',//req.body.reasonTitle,
           userType: req.body.userType,
           reason: complexReason,
           userName: req.body.companyName,
@@ -184,8 +198,8 @@ exports.postDelete = function (req, res, next) {
       var dbo = db.db(BASE);
       
       try{
-        await dbo.collection('cancelreasons').insertOne( {
-          type: req.body.type,
+        await dbo.collection('usercancelreasons').insertOne( {
+          title: req.body.reasonTitle,
           reason: req.body.reason,
           userType: req.body.userType,
           userName: req.body.companyName,
@@ -197,6 +211,7 @@ exports.postDelete = function (req, res, next) {
       
       await dbo.collection('capabilities').deleteMany({ supplier: id }, function(err, resp) {
         if(err) {
+          req.flash('error', err.message);
           throw err;
         }
       });
@@ -204,6 +219,7 @@ exports.postDelete = function (req, res, next) {
       //Products/Services offered:
       await dbo.collection('productservices').deleteMany({ supplier: id }, function(err, resp0) {
         if(err) {
+            req.flash('error', err.message);
             throw err;
           }
       });
@@ -211,6 +227,7 @@ exports.postDelete = function (req, res, next) {
       //Now delete the messages sent/received by Supplier:
       await dbo.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp1) {
         if(err) {
+          req.flash('error', err.message);
           throw err;
         }
       });
@@ -221,6 +238,7 @@ exports.postDelete = function (req, res, next) {
       //Remove the possibly existing Supplier Tokens:
       await dbo.collection('suppliertokens').deleteMany({ _userId: id }, function(err, resp3) {
         if(err) {
+          req.flash('error', err.message);
           throw err;
         }
       });
@@ -228,6 +246,7 @@ exports.postDelete = function (req, res, next) {
       //And now, remove the Supplier themselves:
       await dbo.collection('suppliers').deleteOne({ _id: id }, function(err, resp4) {
         if(err) {
+          req.flash('error', err.message);
           throw err;
         }
       });
@@ -249,9 +268,9 @@ exports.postDeactivate = function (req, res, next) {
     //Delete Supplier's Capabilities first:
     MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
       var dbo = db.db(BASE);
-      
-      try{
-        await dbo.collection('cancelreasons').insertOne( {
+      /*
+      try {
+        await dbo.collection('cancelreasons').insertOne( {//To replace with a possible InactivationReason.
           type: req.body.type,
           reason: req.body.reason,
           userType: req.body.userType,
@@ -260,10 +279,11 @@ exports.postDeactivate = function (req, res, next) {
         }, function(err, obj) {});
       } catch(e) {
         console.error(e);
-      }
+      }*/
       
       await dbo.collection('capabilities').deleteMany({ supplier: id }, function(err, resp) {
         if(err) {
+          req.flash('error', err.message);
           throw err;
         }
       });
@@ -271,6 +291,7 @@ exports.postDeactivate = function (req, res, next) {
       //Products/Services offered:
       await dbo.collection('productservices').deleteMany({ supplier: id }, function(err, resp0) {
         if(err) {
+            req.flash('error', err.message);
             throw err;
           }
       });    
@@ -281,6 +302,7 @@ exports.postDeactivate = function (req, res, next) {
       //And now, remove the Supplier themselves:
       await dbo.collection('suppliers').updaeOne( { _id: id }, { $set: { isActive: false } }, function(err, resp4) {
         if(err) {
+          req.flash('error', err.message);
           throw err;
         }
       });
@@ -325,7 +347,11 @@ exports.postConfirmation = async function(req, res, next) {
       
 
       await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
-        if (err) throw err;
+        if (err) {
+          req.flash('error', err.message);
+          throw err;
+        }
+        
         var dbo = db.db(BASE);
             
         await dbo.collection("suppliers").updateOne({ _id: user._id }, { $set: { isVerified: true, isActive: true } }, function(err, resp) {
@@ -513,6 +539,7 @@ exports.postSignUp = async (req, res) => {
 
                   await capability.save(function(err) {
                     if(err) {
+                      req.flash('error', err.message);
                       return console.error(err.message);
                       }
                     
@@ -526,11 +553,21 @@ exports.postSignUp = async (req, res) => {
                   
                   await token.save(async function(err) {
                     if (err) {
+                      req.flash('error', err.message);
                       console.error(err.message);
                       return res.status(500).send({
                        msg: err.message
                        });
                         }
+                  });
+              
+                  var industry = new Industry({
+                    name: req.body.industry
+                  });
+              
+                  industry.save((err) => {
+                    req.flash('error', err.message);
+                    console.error(err.message);//If that industry already exists.
                   });
                     
                     await sendConfirmationEmail(supplier.companyName, "/supplier/confirmation/", token.token, req);
@@ -556,8 +593,10 @@ exports.postSignUp = async (req, res) => {
                     console.log('All products saved!');
                     }
               
-              req.flash("success", "Supplier signed up successfully!");
-              res.redirect("/supplier/sign-in");
+              req.flash("success", "Supplier signed up successfully! Please confirm your account by visiting " + req.body.emailAddress + '');
+              setTimeout(function() {
+                  res.redirect("/supplier/sign-in");
+                }, 150);
             });
        } catch {              
        }
@@ -783,11 +822,12 @@ exports.postBidRequest = (req, res) => {
 
 exports.postProfile = async (req, res) => {
   global = 0;
-  //console.log(global);
+  
   try {
   await Supplier.findOne({ _id: req.body._id }, async (err, doc) => {
     if (err) {
-      console.error(err);
+      console.error(err.message);
+      req.flash('error', err.message);
       res.redirect("back");
     }
 
@@ -837,12 +877,15 @@ exports.postProfile = async (req, res) => {
     
     if(global++ < 1)
     await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-      if (err)
+      if (err) {
+        req.flash('error', err.message);
         throw err;
+      }
       var dbo = db.db(BASE);
       
       await dbo.collection("suppliers").updateOne({ _id: doc._id }, { $set: doc }, function(err, resp0) {
           if (err) {
+            req.flash('error', err.message);
             return console.error(err.message);
           }
         });
@@ -850,8 +893,10 @@ exports.postProfile = async (req, res) => {
       console.log("Supplier updated!");
       var arr = doc.productsServicesOffered;
       await dbo.collection("capabilities").deleteMany({ supplier: doc._id }, (err, resp1) => {
-        if(err) 
+        if(err) {
+          req.flash('error', err.message);
           return console.error(err.message);
+        }
       });
 
         var capability = new Capability({
@@ -863,14 +908,28 @@ exports.postProfile = async (req, res) => {
 
       await capability.save((err) => {
         if (err) {
+          req.flash('error', err.message);
           return console.error(err.message);
           }
+      });
+      
+      var industry = new Industry({
+        name: doc.industry
+      });
+
+      industry.save((err) => {
+        if(err) {
+          req.flash('error', err.message);
+          return console.error(err.message);//If that industry already exists.
+        }
       });
 
       console.log('Capability description saved!');
       await dbo.collection("productservices").deleteMany({ supplier: doc._id }, (err, resp2) => {
-        if(err) 
+        if(err) {
+          req.flash('error', err.message);
           return console.error(err.message);
+        }
       });
       
       if (Array.isArray(arr))
@@ -888,6 +947,7 @@ exports.postProfile = async (req, res) => {
 
           await productService.save((err) => {
             if (err) {
+              req.flash('error', err.message);
               return console.error(err.message);
             }
           });
@@ -902,13 +962,16 @@ exports.postProfile = async (req, res) => {
 
     await req.session.save((err) => {
       if(err) {
+        req.flash('error', err.message);
         return console.error(err.message);
       }
     });
-
-    console.log("User updated and session saved!");
+    
     req.flash("success", "Supplier details updated successfully!");
-    return res.redirect("/supplier");
+    console.log("User updated and session saved!");
+    setTimeout(function() {
+      return res.redirect("/supplier/profile");
+    }, 150); 
     })
     .catch(console.error);
   } catch {

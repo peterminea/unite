@@ -115,9 +115,9 @@ function getAutocomplete(elem, url, token, isEnter) {
         type: "GET",
         data: req,
         success: function(data) {
-        if(!data || !data.length) {
-            obj.val('');
-            return false;
+        if(!data || !data.length) {//Recommended to disable it for a better user experience. We can add ours as well.
+            //obj.val('');
+            //return false;
           }
           res(data);
           autocomp(obj, data, isEnter);          
@@ -158,8 +158,8 @@ function postAutocomplete(elem, url, token) {
         data: req,
         success: function(data) {
         if(!data || !data.length) {
-            obj.val('');
-            return false;
+            //obj.val('');
+            //return false;
           }
           res(data);
           autocomp(obj, data);
@@ -225,9 +225,26 @@ function postAutocomplete(elem, url, token) {
    }
 
 
-function addProduct(obj, MAX) {
+function removeAllProducts() {
+  $("#prodServices").find('li').remove();
+  $("#prodServicesList").val('');
+  $("#pricesList").val('');
+  $("#currenciesList").val('');
+}
+
+
+function removeAllItems(index) {
+  $("#prodServices_"+index).find('li').remove();
+  $("#hiddenProdServicesList_"+index).val('');
+  $("#amountList_"+index).val('');
+  $("#priceList_"+index).val('');
+}
+
+
+function addProduct(obj) {
   obj.click(function() {
      var elem = $("#prodServices");
+     var MAX = $("#prodServices").attr('MAX');
 
      if(elem.find('li').length >= MAX) {
           alert('You have reached the limit of products to add.');
@@ -308,6 +325,32 @@ function userInputs(id, name, type, ul) {//Home, About, Terms, Antibribery - ens
 }
 
 
+function getCancelReasonTitles(obj, token, url) {//For deleting user accounts and cancelling bids. Types (titles) of reasons, expressed as radio buttons, should be chosen.
+  $.ajax({
+    url: url,//bidCancelReasonTitles or userCancelReasonTitles.
+    type: 'GET',
+    headers: { "X-CSRF-Token": token },
+    datatype: 'application/json',
+    error: function() {
+    },
+    success: function(data) {//data = titles.
+      if(!data || !data.length) {
+        return false;
+      }
+      
+      var str = '<div class="form-group">';
+      str += '<label>Please select an option below and explain it.</label><br>';
+      for(var i in data) {
+        str += '<input type="radio" id="'+i+'" value="' + data[i].name + '"><label for="'+i+'">' + data[i].name + '</label><br>';
+      }
+      
+      str += '</div>';
+      obj.prepend(str);
+    }
+  });
+}
+
+
 $(document).ready(function() {
   var nav = $('body').find('nav');
   if(nav.length && !(nav.find('div[id="navbarSupportedContent"]').length)) {
@@ -317,6 +360,9 @@ $(document).ready(function() {
       + '<li class="nav-item">'
       + '<a class="nav-link" href="/">Home<span class="sr-only">(current)</span></a>'
       + '</li>'
+       + '<li class="nav-item">'
+      + '<a class="nav-link" href="/memberList" title="List of UNITE Members">List of our members</a>'
+      + '</li>'     
       + '<li class="nav-item">'
       + '<a class="nav-link" href="/about">About</a>'
       + '</li>'
@@ -357,7 +403,7 @@ $(document).ready(function() {
   }
   
   //$('div.container').not('.text-center')
-    $("body").css({"background-image": "url(https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2FGD.png?v=1591857198052)", "background-repeat": "repeat"})
+    $("body").css({"background-image": "url(https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2FGD.png?v=1591857198052)", "background-repeat": "repeat"});//That yellow! 
   
   if(nav) 
     nav.find('span').attr('title', 'Expand/collapse UNITE basic options');
@@ -371,12 +417,13 @@ $(document).ready(function() {
   
   var token = $("input[name='_csrf']:first").val();
   
-  $('input.fileupload').bind('change', function() {
+  $('input.fileupload,input.fileexcelupload').bind('change', function() {
     $(this).val()? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
   });
 
   $('.single,.multiple').each(function(index, element) {
-    var val = $(this).prev('.fileupload').attr('value');
+    var isExcel = $(this).prev('input').hasClass('fileexcelupload')? true : false;
+    var val = $(this).prev('input').attr('value');
     var theDiv = $(this).parent('div');
 
     if(val) {
@@ -398,14 +445,15 @@ $(document).ready(function() {
   });
 
   $('.single,.multiple').click(function (e) {
-    var input = $(this).prev('.fileupload');        
+    var isExcel = $(this).prev('input').hasClass('fileexcelupload')? true : false;
+    var input = $(this).prev('input');
     var isMultiple = $(this).hasClass('multiple');
     var formData = new FormData();
     formData.append("_csrf", token);
     formData.append("upload_file", true);
 
     if(isMultiple == false) {
-      formData.append('single', input[0].files[0]);          
+      formData.append('single', input[0].files[0]);
     }
     else {
       $.each(input[0].files, function(i, file) {
@@ -413,7 +461,7 @@ $(document).ready(function() {
       });
     }
 
-    var theUrl = isMultiple == true? "/uploadmultiple" : "/uploadfile";
+    var theUrl = isMultiple == true? "/uploadmultiple" : isExcel? "/uploadExcel" : "/uploadfile";
     var xhr = new XMLHttpRequest();
     xhr.open('POST', theUrl, true);
     xhr.setRequestHeader('X-CSRF-TOKEN', token);
@@ -426,7 +474,30 @@ $(document).ready(function() {
           input.next('input').attr('disabled', 'disabled');
         
           var ob, val, response = JSON.parse(xhr.responseText);
+          //alert(JSON.stringify(response));
           var theDiv = input.parent('div');
+          if(isExcel) {
+            var MAX = $("#prodServices").attr('MAX');//parseInt("<%= MAX_PROD %>");
+            var input2 = $("#prodServiceInput");
+            var prodInput = $("#prodServicesList");
+            var priceInput = $("#pricesList");
+            var currencyInput = $("#currenciesList");
+            
+            if(Array.isArray(response)) {
+              for(var i in response) {//Each Supplier product should come here.
+                var elem = response[i];//Assume that elem fields are called name, price, and currency.
+                var elem2 = $("#prodServices");
+                  if(elem2.find('li').length >= MAX) {
+                     alert('You have reached the limit of products to add.');
+                     return false;
+                   }
+                
+                  elem2.append("<li class='list-group-item'><span>" + elem.name + ' - ' + elem2.price + ' ' + elem2.currency + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
+                  bindRemoveProduct($('.rem').last(), elem2, prodInput, priceInput, currencyInput, input2);
+              }
+            }            
+          } else
+        
           if(isMultiple) {
             var hasDiv = theDiv.next('div').hasClass('fileWrapper');
 

@@ -23,6 +23,7 @@ router.get("/forgotPassword", isAuth, sessionExit, supplierController.getForgotP
 router.get("/resetPassword/:token", isAuth, sessionExit, supplierController.getResetPasswordToken);
 router.get("/chatLogin/:supplierId/:buyerId/:requestId/:requestName/:buyerName/:supplierName", isAuth, sessionExit, supplierController.getChatLogin);
 router.get("/chat/:from/:to/:username/:room/:requestId/:requestName/:toName/:fromName", isAuth, sessionExit, supplierController.getChat);
+router.get("/cancelBid/:bidId/:bidName/:userType/:buyerName/:supplierName/:buyerEmail/:supplierEmail", isAuth, sessionExit, supplierController.getCancelBid);
 
 router.post("/sign-in", supplierController.postSignIn);
 router.post("/sign-up", supplierController.postSignUp);

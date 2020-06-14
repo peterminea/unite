@@ -18,7 +18,7 @@ var storage = multer.diskStorage({
     }
 
     var date = dateformat(new Date(), 'dddd, mmmm dS, yyyy, h:MM:ss TT');//Date.now()
-    var date2 = moment(new Date().getTime()).format('h:mm a');
+    var date2 = moment(new Date().getTime()).format('h:mm:a');
     var filename =  'UNITE-'+ date2 + '-' + file.originalname;
     callback(null, filename);
   }
@@ -26,6 +26,7 @@ var storage = multer.diskStorage({
 
 var uploadFiles = multer({
   storage: storage,
+  
   fileFilter: function (req, file, callback) {
     var ext = path.extname(file.originalname);
     var extArray = ['.png', '.jpg', '.jpeg', '.gif', '.pdf', '.txt', '.docx', '.rtf'];

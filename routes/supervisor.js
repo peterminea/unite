@@ -12,7 +12,7 @@ router.get("/", isAuth, sessionExit, supervisorController.getIndex);
 router.get("/sign-in", supervisorController.getSignIn);
 router.get("/sign-up", supervisorController.getSignUp);
 router.get("/profile", isAuth, sessionExit, supervisorController.getProfile);
-router.get("/delete/:id/:uniteID", isAuth, sessionExit, supervisorController.getDelete);
+router.get("/delete/:id/:organizationUniteID", isAuth, sessionExit, supervisorController.getDelete);
 router.get('/resend', /*isAuth,*/ sessionExit, supervisorController.getResendToken);
 router.get("/confirmation/:token", sessionExit, supervisorController.getConfirmation);
 router.get("/forgotPassword", isAuth, sessionExit, supervisorController.getForgotPassword);

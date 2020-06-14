@@ -17,12 +17,16 @@
   <script src="/popper.min.js"></script>
   <script src="/bootstrap.min.js"></script>
   <script src="/sweetalert.min.js"></script>  
-  <script src="/https.js"></script>  
+  <script src="/https.js"></script>
   <script src="/autocomp.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
+      getCancelReasonTitles($('#mainForm'), $('input[name="_csrf"]').val(), '/userCancelReasonTitles');
+      
       $('#mainForm').submit(function(e) {
-        if(!confirm('Are you sure you want to delete your Buyer account?\nThis will also remove your Bid Requests and the messages you sent in UNITE. If you just want to take a break, you may deactivate your account instead.')) {
+        var radio = $(this).find('input[type="radio"]:checked');
+        radio.attr('name', 'reasonTitle');
+        if(!confirm('You are about to remove all your data from UNITE. This cannot be undone. Please proceed only if you are really sure.')) {
           return false;
         }
       });
@@ -40,10 +44,10 @@
   </nav>
     <div class="container">
        <div class="col-md-12">
-        <form action="/buyer/delete/<%= id %>" id="mainForm" method="POST">
-          <legend>
-            Delete Buyer Account - Please fill in the required (*) fields
-          </legend>
+        <legend>
+          Delete Buyer Account - Please fill in the required (*) fields
+        </legend>
+        <form id="mainForm" action="/buyer/delete/<%= id %>" method="POST">
           <div class="form-group">
             <label for="email">E-mail*:</label>
             <input required class="form-control" type="email" name="emailAddress" autofocus="autofocus"></input>
@@ -55,7 +59,7 @@
           </div>
           <div class="form-group">
             <label for="reason">Reason for deleting account*:</label>
-            <textarea required class="form-control" id="reason" name="reason"></textarea>
+            <textarea required rows="10" cols="50" class="form-control" id="reason" name="reason"></textarea>
           </div>
           <input type="hidden" name="type" value="User Cancellation">          
           <input type="hidden" name="userType" value="Buyer">

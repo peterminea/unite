@@ -37,7 +37,7 @@
       }
     });
         
-    $('#prodServiceInput').bind('change', function() {
+    $('#prodServiceInput').on('change', function() {
       if($(this).val()) {
         $('#addProdService').removeAttr('disabled');
       } else {
@@ -46,7 +46,10 @@
     });
       
      var MAX = parseInt("<%= MAX_PROD %>");
-     addProduct($("#addProdService"), MAX);
+     $("#prodServices").attr('MAX', MAX);
+     addProduct($("#addProdService"));
+     $('<a><span style="color: green; cursor: pointer" id="massRemove">Remove All Products</span></a><br>').insertBefore($("#prodServices"));
+     $('#massRemove').on('click', removeAllProducts);
   });
   </script>
 </head>
@@ -150,7 +153,17 @@
         <div class="form-group">
           <label>Website</label>
           <input type="text" class="form-control" name="website">
-        </div>        
+        </div>
+        <div>
+          <p>
+            You will be able to use an Excel file with your products list, formatted as product name + product price + product currency (3 cells per row), and after you click on the Process button, our system must automatically add the products and build the list on page.
+          </p>
+        </div>
+        <div class="form-group">
+          <label>Please choose your prepared product/service list (*.xls/xlsx, name+price+currency on each row):</label>
+          <input class="form-control fileexcelupload" type="file" id="products" name="products" single>
+          <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Process Excel File" />
+        </div>
         <div class="form-group">
           <label class="col-form-label">Products / Services Offered*</label>
           <br><a href="addproduct">Add new product</a>
@@ -176,7 +189,7 @@
         </div>
         <div class="form-group">
           <label>Relevant Experience*</label>
-          <input type="text" class="form-control" name="relevantExperience" required>
+          <textarea required class="form-control" id="relevantExperience" name="relevantExperience"></textarea>
         </div>
         <div class="form-group">
           <label>Supporting Information</label>
@@ -185,7 +198,7 @@
         
         <div class="form-group">
           <label class="text-muted form-text">
-            You can upload your files to cloud services (e.g. Google Drive) and add the link to the folder here.
+            <!-- You can upload your files to cloud services (e.g. Google Drive) and add the link to the folder here. -->
           </label>
         </div>
         

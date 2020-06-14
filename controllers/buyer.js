@@ -12,7 +12,6 @@ const Supervisor = require("../models/supervisor");
 const Supplier = require("../models/supplier");
 const BidRequest = require("../models/bidRequest");
 const BidStatus = require("../models/bidStatus");
-const Reason = require("../models/cancelReason");
 const async = require('async');
 const MongoClient = require('mongodb').MongoClient;
 const ObjectId = require("mongodb").ObjectId;
@@ -43,8 +42,10 @@ exports.postIndex = (req, res) => {
     const key = req.body.capabilityInput;
 
     Supplier.find({}, (err, suppliers) => {
-      if (err) 
+      if (err) {
+        req.flash('error', err.message);
         return console.error(err);
+      }
 
       const suppliers2 = [];
       for (const supplier of suppliers) {
@@ -120,8 +121,10 @@ exports.postIndex = (req, res) => {
       .save()
       .then((err, result) => {
         if(err) {
+          req.flash('error', err.message);
           throw err;
         }
+      
         req.flash("success", "Bid requested successfully!");
         return res.redirect("/buyer/index");
       })
@@ -181,6 +184,7 @@ exports.postViewBids = (req, res) => {
       var dbo = db.db(BASE);
       dbo.collection("bidrequests").updateOne({ _id: req.body.id }, { $set: {status: req.body.status} }, function(err, resp) {        
         if(err) {
+          req.flash('error', err.message);
           console.error(err.message);
           return false;
         }
@@ -193,17 +197,32 @@ exports.postViewBids = (req, res) => {
 }
 
 
+exports.getCancelBid = (req, res) => {
+  res.render('buyer/cancelBid', {
+    bidId: req.params.bidId,
+    bidName: req.params.bidName,
+    userType: req.params.userType,
+    buyerName: req.params.buyerName,
+    supplierName: req.params.supplierName,
+    buyerEmail: req.params.buyerEmail,
+    supplierEmail: req.params.supplierEmail
+  });
+}
+
+
 exports.postCancelBid = (req, res) => {
   try {
   MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-      if (err) 
+      if (err) {
+        req.flash('error', err.message);
         throw err;
+      }
     
       var dbo = db.db(BASE);
     
       try {
-        await dbo.collection('cancelreasons').insertOne( {
-          type: req.body.cancelType,
+        await dbo.collection('bidcancelreasons').insertOne( {
+          title: req.body.reasonTitle,//Radio!
           userType: req.body.userType,
           reason: req.body.reason,
           userName: req.body.buyersName,
@@ -253,14 +272,14 @@ exports.getResendToken = (req, res) => {
 
 
 async function removeAssociatedBids(req, dbo, id) {
-  var promise = await BidRequest.find( { buyer: id } ).exec();
-  promise.then(async (bids) => {
+  var promise = BidRequest.find( { buyer: id } ).exec();
+  await promise.then(async (bids) => {
     var complexReason = 'The Buyer deleted their account. More details:\n' + req.body.reason;
 
     for(var bid of bids) {//One by one.
       try {
-        await dbo.collection('cancelreasons').insertOne( {
-          type: 'Order Cancellation',
+        await dbo.collection('bidcancelreasons').insertOne( {
+          title: 'User Cancellation',
           userType: req.body.userType,
           reason: complexReason,
           userName: req.body.organizationName,
@@ -274,6 +293,7 @@ async function removeAssociatedBids(req, dbo, id) {
 
       await dbo.collection('bidrequests').deleteOne( { _id: bid._id }, function(err, obj) {
         if(err) {
+          req.flash('error', err.message);
           throw err;
         }
       });
@@ -292,8 +312,8 @@ exports.postDelete = async function (req, res, next) {
       var dbo = db.db(BASE);
       //A Reason why the User is deleted.
       try {
-        await dbo.collection('cancelreasons').insertOne( {
-          type: req.body.type,
+        await dbo.collection('usercancelreasons').insertOne( {
+          title: req.body.reasonTitle,
           reason: req.body.reason,
           userType: req.body.userType,
           userName: req.body.organizationName,
@@ -309,6 +329,7 @@ exports.postDelete = async function (req, res, next) {
       //Now delete the messages sent or received by Buyer:
       await dbo.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp0) {
         if(err) {
+          req.flash('error', err.message);
           throw err;
         }
       });
@@ -316,6 +337,7 @@ exports.postDelete = async function (req, res, next) {
       //Remove the possibly existing Buyer Tokens:
       await dbo.collection('buyertokens').deleteMany({ _userId: id }, function(err, resp1) {
         if(err) {
+          req.flash('error', err.message);
           throw err;
         }
       });
@@ -323,6 +345,7 @@ exports.postDelete = async function (req, res, next) {
       //And now, remove the Buyer themselves:
       await dbo.collection('buyers').deleteOne({ _id: id }, function(err, resp2) {
         if(err) {
+          req.flash('error', err.message);
           throw err;
         }
       });
@@ -343,8 +366,8 @@ exports.postDeactivate = async function (req, res, next) {
   try {//Firstly, a Reason why deactivating the account:
     MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
       var dbo = db.db(BASE);
-      
-      try{
+      /*
+      try {
         await dbo.collection('cancelreasons').insertOne( {
           type: req.body.type,
           reason: req.body.reason,
@@ -354,7 +377,7 @@ exports.postDeactivate = async function (req, res, next) {
         }, function(err, obj) {});
       } catch(e) {
         console.error(e);
-      }
+      }*/
       
       //Delete Buyer's Bid Requests first:
       await removeAssociatedBids(req, dbo, id);
@@ -362,6 +385,7 @@ exports.postDeactivate = async function (req, res, next) {
       //And now, remove the Buyer themselves:
       await dbo.collection('buyers').updateOne({ _id: id }, { $set: { isActive: false } }, function(err, resp2) {
         if(err) {
+          req.flash('error', err.message);
           throw err;
         }
       });
@@ -400,8 +424,11 @@ exports.postConfirmation = async function (req, res, next) {
             msg: 'This user has already been verified.' });           
 
             await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-                  if (err) 
+                  if (err) {
                     req.flash('error', 'Error on Verification!');    
+                    throw err;
+                  }
+                    
                   var dbo = db.db(BASE);
                   await dbo.collection("buyers").updateOne({ _id: user._id }, { $set: { isVerified: true, isActive: true } }, function(err, resp) {
                     if(err) {
@@ -445,7 +472,8 @@ exports.postResendToken = function (req, res, next) {/*
           token: crypto.randomBytes(16).toString('hex') });
  
         token.save(async function (err) {
-            if (err) { 
+            if (err) {
+              req.flash('error', err.message);
               return res.status(500).send(
                 { msg: err.message }); 
             }
@@ -520,8 +548,10 @@ exports.postForgotPassword = (req, res, next) => {
       sendForgotPasswordEmail(user, 'Buyer', "/buyer/reset/", token, req);
     }
   ], function(err) {
-    if(err)
+    if(err) {
+      req.flash('error', err.message);
       return next(err);
+    }
       res.redirect('/buyer/forgotPassword');
   });
 }
@@ -555,8 +585,9 @@ exports.postResetPasswordToken = (req, res) => {
         var dbo = db.db(BASE);
         dbo.collection("buyers").updateOne({ _id: user._id }, { $set: {password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined} }, function(err, resp) {        
           if(err) {
+            req.flash('error', err.message);
             console.error(err.message);
-            return false;
+            throw err;
             }
 
           db.close();
@@ -572,6 +603,11 @@ exports.postResetPasswordToken = (req, res) => {
       sendResetPasswordEmail(user, 'Buyer', req);
     }
   ], function(err) {
+    if(err) {
+      req.flash('error', err.message);
+      throw err;
+    }
+    
       res.redirect('/buyer');
     });
 }
@@ -607,7 +643,7 @@ exports.postSignUp = async (req, res) => {
       } else {
         var promise = getSupers(req.body.organizationUniteID);
         
-        promise.then(function(supers) {
+        await promise.then(function(supers) {
           if(!supers || supers.length == 0) {
             req.flash("error", "Invalid UNITE ID. Please select an appropriate ID from the list.");
             res.redirect("back");
@@ -638,15 +674,18 @@ exports.postSignUp = async (req, res) => {
 
               await buyer.save((err) => {
                 if (err) {
-                   return console.error(err.message);
+                    req.flash('error', err.message);
+                    return console.error(err.message);
                 }
               });
                 
               req.session.buyer = buyer;
               req.session.buyerId = buyer._id;
               await req.session.save((err) => {
-                if(err)
-                  throw new Error();
+                if(err) {
+                  req.flash('error', err.message);
+                  throw err;
+                }
                 });
 
               var token = new Token({ 
@@ -656,16 +695,19 @@ exports.postSignUp = async (req, res) => {
 
               await token.save( async function (err) {
                 if (err) {
-                  return console.error(err.message);
-                  //return res.status(500).send({
-                   // msg: err.message 
-                 // });
+                  req.flash('error', err.message);
+                  console.error(err.message);
+                  return res.status(500).send({
+                    msg: err.message 
+                 });
                 }
               });                
               
               await sendConfirmationEmail(req.body.organizationName, "/buyer/confirmation/", token.token, req);
-              req.flash("success", "Buyer signed up successfully!");
-              res.redirect("/buyer/sign-in");
+              req.flash("success", "Buyer signed up successfully! Please confirm your account by visiting " + req.body.emailAddress + '');
+              setTimeout(function() {
+                res.redirect("/buyer/sign-in");
+              }, 150);
               });
             } catch {
             }
@@ -687,8 +729,10 @@ exports.getProfile = (req, res) => {
 exports.postProfile = (req, res) => {
   try {
     Buyer.findOne({ _id: req.body._id }, (err, doc) => {
-      if (err) 
-        return console.error(err);
+      if (err) {
+        req.flash('error', err.message);
+        return console.error(err.message);
+      }
       
       doc._id = req.body._id;
       doc.organizationName = req.body.organizationName;
@@ -708,13 +752,16 @@ exports.postProfile = (req, res) => {
       doc.updatedAt = Date.now();
 
       MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-        if (err) 
+        if (err) {
+          req.flash('error', err.message);
           throw err;
+        }
         var dbo = db.db(BASE);
         
         await dbo.collection("buyers").updateOne({ _id: doc._id }, { $set: doc }, async function(err, resp) {
           if(err) {
             console.error(err.message);
+            req.flash('error', err.message);
             res.redirect('/buyer/profile');
           }
 
@@ -722,9 +769,12 @@ exports.postProfile = (req, res) => {
           req.session.buyerId = doc._id;
           await req.session.save();          
           db.close();
+          
           req.flash("success", "Buyer details updated successfully!");
           console.log('Buyer details updated successfully!');
-          return res.redirect("/buyer");
+          setTimeout(function() {
+            return res.redirect("/buyer/profile");
+          }, 150);
         });
       });
     })    

@@ -29,10 +29,22 @@
       getAutocomplete('#industry', '/industryGetAutocomplete', token);
       getAutocomplete('#currency', '/currencyGetAutocomplete', token);
       
-      $("input").bind('change', function () {
+      $("input").on('change', function () {
         $('#updateProfile').removeAttr('disabled');
       });
         
+      $("#prodServiceInput").on("paste", function(e){
+          // access the clipboard using the api
+          var pastedData = e.originalEvent.clipboardData.getData('text');
+          alert(pastedData);
+      });
+      
+      
+      function treatPaste(txt) {
+        
+      }
+      
+      
       $('#updateProfile').click(function() {
         if($('#prodServices li').length == 0) {
           var obj = '<p class="productRequired littleNote">You are required to include at least one product or service.</p>';
@@ -41,7 +53,7 @@
         }
       });
 
-    $('#prodServiceInput').bind('change', function() {
+    $('#prodServiceInput').on('change', function() {
       if($(this).val()) {
         $('#addProdService').removeAttr('disabled');
       } else {
@@ -49,8 +61,36 @@
       }
     });
       
-    var MAX = parseInt("<%= MAX_PROD %>");    
-    addProduct($("#addProdService"), MAX);
+        $('#termination').click(function(e) {
+          $("#dialog").dialog({
+            modal: true,
+            width: 300,
+            height: 550,
+            open: function(event, ui) {
+              $('#dialog').append('<p>Are you sure you want to delete your Supplier account?<br>This will also remove:<br>Your products/services;<br>Your capabilities;<br>Your received orders;<br>Your user tokens (if any);<br>Your message history from UNITE.<br><br>If you just want to take a break, you may' + '<a href="deactivate/<%= profile._id %>"'
+                    + ' deactivate your account</a>' +' deactivate your account instead.</p>');
+            },
+            close: function(event, ui) {
+                $('#dialog').text('');
+              },
+            buttons: {
+              OK: function() {
+                setTimeout(function() {
+                  $('#termination').next('form').submit();
+                }, 150);
+                $(this).dialog("close");
+              },              
+              Cancel: function() {
+                $('#dialog').text('');
+                $(this).dialog("close");
+              }
+            }
+          });
+      });
+      
+    var MAX = parseInt("<%= MAX_PROD %>");
+    $("#prodServices").attr('MAX', MAX);
+    addProduct($("#addProdService"));
   });
   </script>
 </head>
@@ -199,7 +239,17 @@
         <div class="form-group">
           <label>Other Social Media URL</label>
           <input type="url" class="form-control" id="otherSocialMediaURL" name="otherSocialMediaURL" value="<%= profile.otherSocialMediaURL %>">
-        </div>        
+        </div>
+        <div>
+          <p>
+            You will be able to use an Excel file with your products list, formatted as product name + product price + product currency (3 cells per row), and after you click on the Process button, our system must automatically add the products and build the list on page.
+          </p>
+        </div>
+        <div class="form-group">
+          <label>Please choose your prepared product/service list (*.xls/xlsx, name+price+currency on each row):</label>
+          <input class="form-control fileexcelupload" type="file" id="products" name="products" single>
+          <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Process Excel File" />
+        </div>
         <div class="form-group">
           <label class="col-form-label">Products / Services Offered*</label>
           <br><a href="addproduct">Add new product</a>
@@ -225,9 +275,10 @@
         <input type="hidden" name="pricesList" id="pricesList" value="<%= profile.pricesList %>">
         <input type="hidden" name="currenciesList" id="currenciesList" value="<%= profile.currenciesList %>">
         </div>
-        
         <script type="text/javascript">
           bindRemoveProduct($('.rem'), $('#prodServices'), $('#prodServicesList'), $('#pricesList'), $('#currenciesList'), $('#prodServiceInput'));
+          $('<a><span style="color: green; cursor: pointer" id="massRemove">Remove All Products</span></a><br>').insertBefore($("#prodServices"));
+          $('#massRemove').on('click', removeAllProducts);
         </script>
         
         <div class="form-group">
@@ -236,7 +287,7 @@
         </div>
         <div class="form-group">
           <label>Relevant Experience*</label>
-          <input type="text" class="form-control" id="relevantExperience" name="relevantExperience" value="<%= profile.relevantExperience %>" required>
+          <textarea required class="form-control" id="relevantExperience" name="relevantExperience"><%= profile.relevantExperience %></textarea>
         </div>
         <div class="form-group">
           <label>Supporting Information</label>
@@ -246,12 +297,12 @@
         <!-- Uploading files field section-->        
         <div class="form-group">
           <label class="text-muted form-text">
-            You can upload your files to cloud services (e.g. Google Drive) and add the link to the folder here.
+           <!-- You can upload your files to cloud services (e.g. Google Drive) and add the link to the folder here. -->
           </label>
         </div>
         
         <div class="form-group">
-          <label>Certificates</label>          
+          <label>Certificates</label>
           <input class="form-control fileupload" type="file" id="certificates" name="certificates" multiple value="<%= profile.certificates %>">
           <input class="form-control multiple btn btn-dark mt-2" type="button" disabled value="Upload Files" />
         </div>
@@ -312,11 +363,17 @@
         <button type="submit" disabled id="updateProfile" value="Update Profile"
           class="btn btn-primary btn-block btn-lg">Update Profile</button>
       </form>
-        <div class="form-group mr-2">
-          <a href="delete/<%= profile._id %>"><button class="btn-secondary btn" id="termination" title="Close Account">Delete Account</button></a>
-        </div>
+        <br><br>
         <div class="form-group mr-2">          
           <a href="deactivate/<%= profile._id %>"><button class="btn-secondary btn" id="deactivation" title="Temporarily deactivate your Account">Deactivate Account</button></a>
+        </div>
+        <div class="form-group mr-2">
+          <br>
+          <button class="btn-secondary btn" id="termination" title="Close Account">Delete Account</button>
+          <form action="delete/<%= profile._id %>">
+          </form>
+        </div>
+        <div id="dialog">
         </div>
   </div>
 </body>

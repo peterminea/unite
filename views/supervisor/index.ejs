@@ -109,12 +109,13 @@
           <th scope="col">Balance</th>
           <th scope="col">isActive</th>
           <th scope="col">Process</th>
+          <th scope="col">Talk</th>
         </tr>
       </thead>
       <tbody>
         <% let i = 0; for (buyer of buyers) { %>
         <tr id="<%= buyer._id %>">
-          <td scope="col"><%= i %></td>
+          <td scope="col"><%= i+1 %></td>
           <td scope="col"><%= buyer.deptAgencyGroup %></td>
           <td scope="col"><%= buyer.contactName %></td>
           <td scope="col">€<%= buyer.balance %></td>
@@ -129,16 +130,17 @@
           </td>
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" >
         </tr>
-        <% i++; } } else {%>
+        <% i++; } %>
+        </tbody>
+      </table>
+    </div>
+        <% } else {%>
         <div>
           <p style="color: green; font-family: arial">
             Sorry, no buyers with your Organization UNITE ID are currently available. Please wait for their registration.
           </p>          
         </div>
         <% }%>
-      </tbody>
-    </table>
-  </div>
 </body>
 
 </html>
