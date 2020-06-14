@@ -10,6 +10,7 @@ const multipleUpload = async (req, res) => {
     return req.files.length == 1? res.send('File has been uploaded!') : res.send('Files have been uploaded!');
   } catch (error) {
     console.log(error);
+    req.flash('error', error.message);    
 
     if (error.code === "LIMIT_UNEXPECTED_FILE") {
       return res.send("Too many files to upload. Please refine your selection.");

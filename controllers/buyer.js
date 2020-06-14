@@ -179,8 +179,11 @@ exports.getViewBids = (req, res) => {
 
 exports.postViewBids = (req, res) => {
   MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {//db or client.
-      if (err) 
+      if (err) {
+        req.flash('error', err.message);
         throw err;
+      }
+    
       var dbo = db.db(BASE);
       dbo.collection("bidrequests").updateOne({ _id: req.body.id }, { $set: {status: req.body.status} }, function(err, resp) {        
         if(err) {
@@ -284,7 +287,12 @@ async function removeAssociatedBids(req, dbo, id) {
           reason: complexReason,
           userName: req.body.organizationName,
           createdAt: Date.now()
-        }, function(err, obj) {});
+        }, function(err, obj) {
+          if(err) {
+            req.flash('error', err.message);
+            throw err;
+          }
+        });
       }  
       catch(e) {
         console.error(e);
@@ -318,9 +326,15 @@ exports.postDelete = async function (req, res, next) {
           userType: req.body.userType,
           userName: req.body.organizationName,
           createdAt: Date.now()
-        }, function(err, obj) {});
+        }, function(err, obj) {
+          if(err) {
+            req.flash('error', err.message);
+            throw err;
+          }
+        });
       } catch(e) {
         console.error(e);
+        req.flash('error', e.message);
       }
       
       //Delete Buyer's Bid Requests first:
@@ -432,12 +446,10 @@ exports.postConfirmation = async function (req, res, next) {
                   var dbo = db.db(BASE);
                   await dbo.collection("buyers").updateOne({ _id: user._id }, { $set: { isVerified: true, isActive: true } }, function(err, resp) {
                     if(err) {
-                      return console.error(err.message);
-                      /*
+                      console.error(err.message);
                       return res.status(500).send({ 
                         msg: err.message 
                       });
-                      */
                     }
                   });
               
@@ -474,8 +486,9 @@ exports.postResendToken = function (req, res, next) {/*
         token.save(async function (err) {
             if (err) {
               req.flash('error', err.message);
-              return res.status(500).send(
-                { msg: err.message }); 
+              return res.status(500).send({
+                msg: err.message 
+              }); 
             }
           
             await resendTokenEmail(user, token.token, '/buyer/confirmation/', req);
@@ -531,11 +544,15 @@ exports.postForgotPassword = (req, res, next) => {
         }
         
         MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
-          if (err) throw err;
+          if (err) {
+            req.flash('error', err.message);
+            throw err;
+          }
           var dbo = db.db(BASE);
           dbo.collection("buyers").updateOne({ _id: user._id }, { $set: {resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000} }, function(err, resp) {        
             if(err) {
               console.error(err.message);
+              req.flash('error', err.message);
               return false;
             }
 
@@ -675,7 +692,8 @@ exports.postSignUp = async (req, res) => {
               await buyer.save((err) => {
                 if (err) {
                     req.flash('error', err.message);
-                    return console.error(err.message);
+                    console.error(err.message);
+                  throw err;
                 }
               });
                 
@@ -731,7 +749,8 @@ exports.postProfile = (req, res) => {
     Buyer.findOne({ _id: req.body._id }, (err, doc) => {
       if (err) {
         req.flash('error', err.message);
-        return console.error(err.message);
+        console.error(err.message);
+        throw err;
       }
       
       doc._id = req.body._id;

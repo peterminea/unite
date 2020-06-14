@@ -125,6 +125,7 @@ async function removeAssociatedBids(req, dbo, id) {
       }  
       catch(e) {
         console.error(e);
+        req.flash('error', e.message);
         throw e;
       }
 
@@ -159,7 +160,10 @@ exports.postDelete = function (req, res, next) {
           userName: req.body.organizationName,
           createdAt: Date.now()
         }, function(err, obj) {
-          req.flash('error', err.message);
+          if(err) {
+            req.flash('error', err.message);
+            throw err;
+          }
         });
       } catch(e) {
         console.error(e);
@@ -252,12 +256,11 @@ exports.postConfirmation = async function (req, res, next) {
             await dbo.collection("supervisors").updateOne({ _id: user._id }, { $set: {isVerified: true} }, function(err, resp) {
                   if(err) {
                     req.flash('error', err.message);
-                    return console.error(err.message);
-                    /*
+                    console.error(err.message);
                     return res.status(500).send({ 
                       msg: err.message 
                     });
-                    */
+                    
                   }
                 
                 db.close();
@@ -323,13 +326,16 @@ exports.postForgotPassword = (req, res, next) => {
         }
         
         MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
-          if (err) throw err;
+          if (err) {
+            req.flash('error', err.message);
+            throw err;
+          }
           var dbo = db.db(BASE);
           dbo.collection("supervisors").updateOne({ _id: user._id }, { $set: {resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000} }, function(err, res) {        
             if(err) {
               req.flash('error', err.message);
               console.error(err.message);
-              return false;
+              throw err;
             }
 
             db.close();
@@ -341,11 +347,14 @@ exports.postForgotPassword = (req, res, next) => {
       sendForgotPasswordEmail(user, 'Supervisor', "/supervisor/reset/", token, req);
     }
   ], function(err) {
-    if(err)
+    if(err) {
       //return next(err);
       req.flash('error', err.message);
       console.error(err);
       res.redirect('/supervisor/forgotPassword');
+    }
+    
+    res.redirect('/supervisor');
   });
 }
 
@@ -379,7 +388,8 @@ exports.postResetPasswordToken = (req, res) => {
           dbo.collection("supervisors").updateOne({ _id: user._id }, { $set: {password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined} }, function(err, resp) {        
             if(err) {
               console.error(err.message);
-              return false;
+              req.flash('error', err.message);
+              throw err;
               }
 
             db.close();
