@@ -30,15 +30,7 @@
   <script type="text/javascript">
     $(document).ready(function() {
       var token = $("input[name='_csrf']").first().val();
-      
-      $('.cancelForm').submit(function(e) {
-        var reason = prompt('Please enter a reason for cancelling this order.');
-        if(reason && reason.length)
-          $(this).find('input[name="reason"]').val(reason);
-        else 
-          return false;
-      });
-      
+
       //setTimeout({
       $.ajax({
               url: "/bidStatuses",
@@ -101,7 +93,7 @@
               }, 250);
                 
                 $('select[id^="statuses_"]')
-                  .bind('change', function() {//Difficult DOM jQuery navigation in modals.                  
+                  .on('change', function() {//Difficult DOM jQuery navigation in modals.                  
                   var theVal = $(this).find('option:selected').attr('value');
                   var index = getId($(this).attr('id'));
                   var statusDiv = $(this).parent('div').parent('div').next('div');
@@ -366,7 +358,7 @@
                               }
                             });
                         
-                        $('#purchase_'+index).bind('click', function() {
+                        $('#purchase_'+index).on('click', function() {
                           if(confirm('IMPORTANT NOTICE: Unite currently uses the Stripe Payment Gateway in TEST MODE.\nNo real charges are done on you. You must use a fictitious card number like 4242 4242 4242 4242, and also to invent the CCV and the expiry date.\nDo you want to proceed?')) {
                             amount = parseInt(amount)*100;
                             stripeHandler.open({
@@ -394,20 +386,9 @@
               <a href="../../../buyer/chatLogin/<%= bid.buyer %>/<%= bid.supplier %>/<%= bid._id %>/<%= bid.requestName %>/<%= bid.supplierName %>/<%= bid.buyerName %>">
                 <button style="float: left" title="Chat" id="chat" class="btn-primary btn">Chat with your supplier</button>
               </a>
-              
-              <form class="cancelForm" action="../../../buyer/cancelBid/" method="POST">
-                <input type="hidden" name="bidId" value="<%= bid._id %>">
-                <input type="hidden" name="requestsName" value="<%= bid.requestName %>">
-                <input type="hidden" name="userType" value="Buyer">
-                <input type="hidden" name="cancelType" value="Order Cancellation">
-                <input type="hidden" name="reason" value="">
-                <input type="hidden" name="buyersName" value="<%= bid.buyerName %>">
-                <input type="hidden" name="suppliersName" value="<%= bid.supplierName %>">
-                <input type="hidden" name="buyersEmail" value="<%= bid.buyerEmail %>">
-                <input type="hidden" name="suppliersEmail" value="<%= bid.supplierEmail %>">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <button style="float: right" type="submit" id="submitCancel" title="Cancel Order" class="btn-primary btn">Cancel your Order</button>
-              </form>
+              <a href="../../../buyer/cancelBid/<%= bid._id %>/<%= bid.requestName %>/Buyer/<%= bid.buyerName %>/<%= bid.supplierName %>/<%= bid.buyerEmail %>/<%= bid.supplierEmail %>">
+                <button style="float: left" title="Cancel Bid" id="cancelBid" class="btn-primary btn">Cancel your Order</button>
+              </a>
             </div>
           </div>
           <div class="modal-footer">

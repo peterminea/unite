@@ -144,7 +144,7 @@
           $('#messages1 p').text('The connections count has been updated! It is ' + count + '.');
         });
       
-        $('#increment').bind('click', function() {
+        $('#increment').on('click', function() {
           console.log('Clicked!');
           sock.emit('increment');
         });

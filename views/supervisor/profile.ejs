@@ -30,9 +30,31 @@
         
         postAutocomplete('#country', '/countryAutocomplete', token);
 
-        $("input").bind('change', function() {        
+        $("input").on('change', function() {        
           $('#updateProfile').removeAttr('disabled');
-        });      
+        });
+        
+        $('#termination').click(function(e) {
+          $("#dialog").dialog({
+            modal: true,
+            width: 300,
+            height: 500,
+            open: function(event, ui) {
+              $('#dialog').append('<p>Are you sure you want to delete your Supervisor account?<br>This will also remove:<br><br>Your associated buyers;<br>All their specific data, like orders, messages, tokens;<br>Your own user tokens (if any);<br>Your message history from UNITE.<br><br>Please be very careful with this option!</p>');
+            },            
+            buttons: {
+              OK: function() {
+                setTimeout(function() {
+                  $('#termination').next('form').submit();
+                }, 150);
+                $(this).dialog("close");
+              },
+              Cancel: function() {
+                $(this).dialog("close");
+              }
+            }
+          });
+      });
   });
   </script>
 </head>
@@ -179,9 +201,12 @@
       </form>
       <br>
         <div class="form-group mr-2">
-          <label>Terminate your account</label>
           <br>
-          <a href="delete/<%= profile._id %>"><button class="btn-secondary btn" id="termination" title="Close Account">Delete Account</button></a>
+          <button class="btn-secondary btn" id="termination" title="Close Account">Delete Account</button>
+          <form action="delete/<%= profile._id %>/<%= profile.organizationUniteID %>">
+          </form>
+        </div>
+        <div id="dialog">
         </div>
     </div>
   </div>  

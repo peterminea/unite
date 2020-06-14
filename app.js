@@ -21,6 +21,7 @@ const socket = socketio(server);
 const BadWords = require('bad-words');
 const crypto = require('crypto');
 const moment = require('moment');
+const http2 = require('http2')
 
 const BASE = process.env.BASE;
 const URI = process.env.MONGODB_URI;
@@ -33,9 +34,11 @@ const stripe = require('stripe')(stripeSecretKey);
 //Classes:
 const BidRequest = require("./models/bidRequest");
 const BidStatus = require("./models/bidStatus");
+const BidCancelReasonTitle = require("./models/bidCancelReasonTitle");
 const Buyer = require("./models/buyer");
 const Supplier = require("./models/supplier");
 const Supervisor = require("./models/supervisor");
+const UserCancelReasonTitle = require("./models/userCancelReasonTitle");
 const Currency = require("./models/currency");
 const Message = require("./models/message");
 const Country = require("./models/country");
@@ -101,6 +104,27 @@ app.use("/supervisor", supervisorRoutes);
 
 //For chatting:
 const port = 5000;
+
+const server2 = http2.createSecureServer({
+  key: fs.readFileSync('localhost-privkey.pem'),
+  cert: fs.readFileSync('localhost-cert.pem')
+});
+
+server2.on('error', (err) => console.error(err));
+
+server2.on('stream', (stream, headers) => {
+  // stream is a Duplex
+  stream.respond({
+    'content-type': 'text/html',
+    ':status': 200
+  });
+  stream.end('<h1>Hello World</h1>');
+});
+
+server2.listen(8443);
+
+
+
 
 app.post('/processBuyer', (req, res) => {
   MongoClient.connect(URI, {useUnifiedTopology: true}, function(err, db) {
@@ -311,12 +335,12 @@ var storage = multer.diskStorage({
   },
   filename: function (req, file, callback) {// + path.extname(file.originalname)
     var date = dateformat(new Date(), 'dddd-mmmm-dS-yyyy-h:MM:ss-TT');//Date.now()
-    var date2 = moment(new Date().getTime()).format('HH:mm:ss a');
+    var date2 = moment(new Date().getTime()).format('HH:mm:ss:a');
     callback(null, file.fieldname + '-' + date2 + '-' + file.originalname);//The name itself.
   }
 });
 
-var extArray = ['.png', '.jpg', '.jpeg', '.gif', '.pdf', '.txt', '.docx', '.rtf'];
+var extArray = ['.png', '.jpg', '.jpeg', '.gif', '.pdf', '.txt', '.docx', '.rtf'], excelArray = ['.xls', '.xlsx'];
  
 var upload = multer({
   storage: storage,
@@ -340,9 +364,32 @@ var upload = multer({
 });
 
 
+var uploadExcel = multer({
+  storage: storage,
+  fileFilter: function (req, file, callback) {
+    var ext = path.extname(file.originalname);
+    var isItIn = false;
+    
+    for(var i in excelArray)
+      if(excelArray.toLowerCase() == excelArray[i].toLowerCase()) {
+        isItIn = true;
+      }
+    if(!isItIn) {
+      return callback(new Error('Please upload an Excel file!'));
+    }
+    
+    callback(null, true);
+  },
+  limits: {
+    fileSize: 2048 * 2048//4 MB
+  }
+});
+
+
 app.post("/uploadfile", upload.single("single"), (req, res, next) => {
   const file = req.file;
-  
+  console.log(file);//Can we parse its content here or not?
+  //console.log(1);
   if (!file) {
     const error = new Error("Please upload a file");
     error.httpStatusCode = 400;
@@ -369,6 +416,42 @@ app.post("/uploadfile", upload.single("single"), (req, res, next) => {
     res.render('error'); 
   });
 });
+
+var xlsx = require('node-xlsx');
+
+app.post("/uploadExcelFile", upload.single("single"), (req, res, next) => {
+  const file = req.file;
+  
+  if (!file) {
+    const error = new Error("Please upload a file");
+    error.httpStatusCode = 400;
+    return next(error);
+  }
+
+  var obj = xlsx.parse(fs.readFileSync(file));
+  console.log(obj.length);
+  //Treat the obj variable as an array of rows
+  res.send(obj);
+});
+
+
+//Uploading multiple files
+app.post("/uploadmultiple",  upload.array("multiple", 12),   (req, res, next) => {
+    const files = req.files;
+    
+    if (!files) {
+      const error = new Error("Please choose maximum 12 files.");
+      error.httpStatusCode = 400;
+      return next(error);
+    }
+  
+    console.log(files);
+    res.send(files);
+  }
+);
+
+//Alternate multiupload:
+app.post("/multipleupload", uploadController.multipleUpload);
 
 
 const sgMail = require('@sendgrid/mail');
@@ -439,24 +522,6 @@ app.post('/purchase', (req, res, next) => {
     });
 });
 
-
-//Uploading multiple files
-app.post("/uploadmultiple",  upload.array("multiple", 12),   (req, res, next) => {
-    const files = req.files;
-    
-    if (!files) {
-      const error = new Error("Please choose maximum 12 files.");
-      error.httpStatusCode = 400;
-      return next(error);
-    }
-  
-    console.log(files);
-    res.send(files);
-  }
-);
-
-//Alternate multiupload:
-app.post("/multipleupload", uploadController.multipleUpload);
 
 //Autocomplete fields:
 const jsonp = require('jsonp');
@@ -534,6 +599,20 @@ app.post('/deleteBid', function(req, res, next) {
 
 app.post('/deleteFile', function(req, res, next) {
   //fs2.unlinkSync(req.body.file);
+  console.log(req.body.file);
+  fs2.unlink(req.body.file, function (err) {
+    if (err) 
+      throw err;
+    //if no error, file has been deleted successfully
+    console.log('File deleted!');
+    req.flash('success', 'File deleted!');
+    res.status(200).end();
+  });
+});
+
+
+app.post('/processFile', function(req, res, next) {
+  //fs2.unlinkSync(req.body.file);
   
   fs2.unlink(req.body.file, function (err) {
     if (err) 
@@ -597,6 +676,35 @@ app.get('/bidStatuses', function(req, res, next) {
   });
 });
 
+
+
+app.get('/bidCancelReasonTitles', async function(req, res, next) {
+  BidCancelReasonTitle.find({}).exec()
+  .then((titles) => {
+    titles.sort(function (a, b) {
+      return a.name.localeCompare(b.name);
+    });
+    
+    res.send(titles, {
+    'Content-Type': 'application/json'
+       }, 200);
+  });
+});
+
+
+
+app.get('/userCancelReasonTitles', async function(req, res, next) {
+  UserCancelReasonTitle.find({}).exec()
+  .then((titles) => {
+    titles.sort(function (a, b) {
+      return a.name.localeCompare(b.name);
+    });
+    
+    res.send(titles, {
+    'Content-Type': 'application/json'
+       }, 200);
+  });  
+});
 
 
 app.get('/uniteIDAutocomplete', function(req, res, next) {

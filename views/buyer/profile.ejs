@@ -27,27 +27,35 @@
       
       postAutocomplete('#country', '/countryAutocomplete', token);
         
-        $("input").bind('change', function() {        
+        $("input").on('change', function() {        
           $('#updateProfile').removeAttr('disabled');
         });
+      
         $('#termination').click(function(e) {
           $("#dialog").dialog({
             modal: true,
-            width: 200,
-            height: 200,
+            width: 300,
+            height: 450,
             open: function(event, ui) {
-              
+              $('#dialog').append('<p>Are you sure you want to delete your Buyer account?<br>This will also remove your Bid Requests and the messages you sent in UNITE.<br>If you just want to take a break, you may' + '<a href="deactivate/<%= profile._id %>"'
+                                  + ' deactivate your account</a>' +' deactivate your account instead.</p>');
+            },
+            close: function(event, ui) {
+                $('#dialog').text('');
             },
             buttons: {
-              Ok: function() {
+              OK: function() {
+                setTimeout(function() {
+                  $('#termination').next('form').submit();
+                }, 150);
+                $(this).dialog("close");
+              },              
+              Cancel: function() {
+                $('#dialog').text('');
                 $(this).dialog("close");
               }
             }
           });
-          
-          if(!confirm('Are you sure you want to delete your Buyer account?\nThis will also remove your Bid Requests and the messages you sent in UNITE.\nIf you just want to take a break, you may deactivate your account instead.')) {
-          return false;
-        }
       });
     });
   </script>
@@ -132,12 +140,12 @@
         <input type="hidden" name="isVerified" id="isVerified" value="<%= profile.isVerified %>">
         <div class="row m-2">
           <div class="form-group mr-2">
-            <label>Department / Agency / Group</label>
-            <input type="text" class="form-control" id="departmentAgencyGroup" name="departmentAgencyGroup" value="<%= profile.deptAgencyGroup %>">
+            <label>Department / Agency / Group*</label>
+            <input required type="text" class="form-control" id="departmentAgencyGroup" name="departmentAgencyGroup" value="<%= profile.deptAgencyGroup %>">
           </div>
           <div class="form-group mr-2">
-            <label>Qualification / Experience</label>
-            <input type="text" class="form-control" id="qualification" name="qualification" value="<%= profile.qualification %>">
+            <label>Qualification / Experience*</label>
+            <textarea required class="form-control" id="qualification" name="qualification" ><%= profile.qualification %></textarea>
           </div>
           <div class="form-group">
           <label>Contact Mobile Number*</label>
@@ -157,17 +165,17 @@
         <button type="submit" disabled id="updateProfile" value="Update Profile" class="btn btn-primary btn-block btn-lg">Update Profile</button>
       </form>
         <br>
-        <div class="form-group mr-2">
-          <a href="delete/<%= profile._id %>"><button class="btn-secondary btn" id="termination" title="Close Account">Delete Account</button></a>
-        </div>
         <div class="form-group mr-2">          
           <a href="deactivate/<%= profile._id %>"><button class="btn-secondary btn" id="deactivation" title="Temporarily deactivate your Account">Deactivate Account</button></a>
         </div>
-      <div id="dialog">
-        <p>
-          Are you sure you want to delete your Buyer account?\nThis will also remove your Bid Requests and the messages you sent in UNITE.\nIf you just want to take a break, you may deactivate your account instead.
-        </p>
-      </div>
+        <div class="form-group mr-2">
+          <br>
+          <button class="btn-secondary btn" id="termination" title="Close Account">Delete Account</button>
+          <form action="delete/<%= profile._id %>">
+          </form>
+        </div>
+        <div id="dialog">
+        </div>
     </div>
   </div>
 </body>

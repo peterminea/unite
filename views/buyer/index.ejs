@@ -72,8 +72,8 @@
         },
         minLength: 3
       });        
-  });    
-  </script> 
+  });
+  </script>
 </head>
 
 <body>
@@ -451,7 +451,7 @@
                     
                     var index = "<%= i %>";
                     
-                    $('#status_'+index).bind('keypress keyon keyup', function(e) {
+                    $('#status_'+index).on('keypress keyon keyup', function(e) {
                       return limitStatus(e);
                     });                    
                     
@@ -493,15 +493,21 @@
                       }
                     });
                     
-                    $('#amount_'+index).bind('change', function() {
+                    $('#amount_'+index).on('change', function() {
                       var id = getId($(this).attr('id'));
                       $('#price_'+id).val($(this).val() * $('#defaultPrice_'+id).val());
                     });
                     
                     var elem = $("#prodServices_"+index);
+                    $('<a><span style="color: green; cursor: pointer" id="massRemove_'+index+'">Remove All Products</span></a><br>').insertBefore(elem);
+                    
+                    var num = index;
+                    $('#massRemove_'+index).on('click', function() {
+                      removeAllItems(num);
+                    });
                     var MAX = parseInt("<%= MAX_PROD %>");
 
-                    $("#addProdService_"+index).bind('click', function() {
+                    $("#addProdService_"+index).on('click', function() {
                       if(elem.find('li').length >= MAX) {
                           alert('You have reached the limit of products to request from the supplier.');
                           return false;

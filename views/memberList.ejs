@@ -63,10 +63,22 @@
       <br>
       <button class="btn btn-primary" data-toggle="modal" data-target="#signUpModal">Sign up</button>
     </div>
-  </nav>  
+  </nav>
     
 <div class="container home">
-  
+  <h1>
+    UNITE FULL LIST OF MEMBERS - Buyers, Supervisors, Suppliers
+  </h1>
+  <br>
+  <div>
+    <p class='term'>
+      Disclaimer: This is a Demo list of members. At this moment they do not represent real economic entities from the world. Any resemblance to any real-life company is unintentional. This list is shown only for Development purposes.
+    </p>
+    <p class='term'>
+      However, in the coming future UNITE will have real members that will be listed. We will limit the amount of specific data to be made publicly available on our platform, according to the GDPR laws and rules. We may also restrict the access of external visitors to data about our members, meaning that you have to join UNITE (remember: business-to-business) to see the said information.
+    </p>
+  </div>
+  <br><br>
   <h3 style="color: green">
     List of UNITE Buyers
   </h3>
@@ -90,7 +102,7 @@
       <tbody>
         <% let i = 0; for (buyer of buyers) { %>
         <tr id="<%= buyer._id %>">
-          <td scope="col"><%= i %></td>
+          <td scope="col"><%= i+1 %></td>
           <td scope="col"><%= buyer.organizationName %></td>
           <td scope="col"><%= buyer.deptAgencyGroup %></td>
           <td scope="col"><%= buyer.contactName %></td>
@@ -136,7 +148,7 @@
       <tbody>
         <% let i = 0; for (supervisor of supervisors) { %>
         <tr id="<%= supervisor._id %>">
-          <td scope="col"><%= i %></td>
+          <td scope="col"><%= i+1 %></td>
           <td scope="col"><%= supervisor.organizationName %></td>
           <td scope="col"><%= supervisor.organizationUniteID %></td>
           <td scope="col"><%= supervisor.contactName %></td>
@@ -188,7 +200,7 @@
       <tbody>
         <% let i = 0; for (supplier of suppliers) { %>
         <tr id="<%= supplier._id %>">
-          <td scope="col"><%= i %></td>
+          <td scope="col"><%= i+1 %></td>
           <td scope="col"><%= supplier.companyName %></td>
           <td scope="col"><%= supplier.directorsName %></td>
           <td scope="col"><%= supplier.contactName %></td>

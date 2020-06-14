@@ -13,7 +13,7 @@
     "express-session": "^1.17.1",
     "bcryptjs": "^2.4.3",
     "csurf": "^1.11.0",
-    "connect-mongodb-session": "^2.3.2",
+    "connect-mongodb-session": "^2.3.3",
     "connect-flash": "^0.1.1",
     "socket.io": "^2.3.0",
     "http": "^0.0.0",
@@ -28,16 +28,18 @@
     "process": "^0.11.10",
     "async": "^3.2.0",
     "fetch": "^1.1.0",
-    "validator": "^13.1.0",
-    "@sendgrid/mail": "^7.1.1",
+    "validator": "^13.1.1",
+    "@sendgrid/mail": "^7.2.0",
     "bufferutil": "^4.0.1",
     "utf-8-validate": "^5.0.2",
-    "stripe": "^8.61.0",
+    "stripe": "^8.62.0",
     "express-validator": "^6.5.0",
     "dateformat": "^3.0.3",
     "socket.io-client": "^2.3.0",
     "bad-words": "^3.0.3",
-    "moment": "^2.26.0"
+    "moment": "^2.26.0",
+    "http2": "^3.3.7",
+    "node-xlsx": "^0.15.0"
   },
   "engines": {
     "node": "12.x"

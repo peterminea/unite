@@ -4,7 +4,6 @@ const router = express.Router();
 const isAuth = require("../middleware/is-auth-buyer");
 const sessionExit = require("../middleware/session-exit");
 const buyerController = require("../controllers/buyer");
-
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
@@ -22,6 +21,7 @@ router.get("/resetPassword/:token", isAuth, sessionExit, buyerController.getRese
 router.get("/viewBid/:supplierId/:buyerId", isAuth, sessionExit, buyerController.getViewBids);
 router.get("/chatLogin/:supplierId/:buyerId/:requestId/:requestName/:buyerName/:supplierName", isAuth, sessionExit, buyerController.getChatLogin);
 router.get("/chat/:from/:to/:username/:room/:requestId/:requestName/:toName/:fromName", isAuth, sessionExit, buyerController.getChat);
+router.get("/cancelBid/:bidId/:bidName/:userType/:buyerName/:supplierName/:buyerEmail/:supplierEmail", isAuth, sessionExit, buyerController.getCancelBid);
 
 router.post("/", isAuth, sessionExit, buyerController.postIndex);
 router.post("/sign-in", buyerController.postSignIn);

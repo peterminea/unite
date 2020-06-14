@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const industrySchema = new Schema({
+const bidCancelReasonTitleSchema = new Schema({
   name: {
     type: String,
     unique: true,
@@ -9,5 +9,4 @@ const industrySchema = new Schema({
   }
 });
 
-industrySchema.index({name: 1}, {unique: true});
-module.exports = mongoose.model('Industry', industrySchema);
+module.exports = mongoose.model('BidCancelReasonTitle', bidCancelReasonTitleSchema);

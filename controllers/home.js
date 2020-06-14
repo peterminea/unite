@@ -63,44 +63,42 @@ exports.getMemberList = async (req, res) => {
     buyers.sort(function (a, b) {
       return a.organizationName.localeCompare(b.organizationName);
     });
-    
-    for(var buyer of buyers) {
-      buys.push(buyer);
+   // buys = buyers;
+   // if(1==2)
+    for(var i in buyers) {
+      buys.push(buyers[i]);
     }
   });
   
-  promise = Supervisor.find({}).exec();
-  await promise.then((sups) => {
+  var promise1 = Supervisor.find({}).exec();
+  await promise1.then((sups) => {
     sups.sort(function (a, b) {
       return a.organizationName.localeCompare(b.organizationName);
     });
-    
-    for(var sup of sups) {
-      //console.log(sup.organizationName);
-      supers.push(sup);
+   // supers = sup;
+   // if(1==2)
+    for(var i in sups) {      
+      supers.push(sups[i]);
     }
   });
 
-  promise = Supplier.find({}).exec();
-  await promise.then((suppliers) => {
+  var promise2 = Supplier.find({}).exec();
+  await promise2.then((suppliers) => {
     suppliers.sort(function (a, b) {
       return a.companyName.localeCompare(b.companyName);
     });
-    
-    for(var sup of suppliers) {
-      supps.push(sup);
+    //supps = suppliers;
+   // if(1==2)
+    for(var i in suppliers) {      
+      supps.push(suppliers[i]);
     }
   });
-  
-  console.log(buys.length + ' ' + supers.length + ' ' + supps.length);
-  for(var sup in supers)
-    console.log(supers.organizationUniteID);
-  
+
   var obj = userData(req);  
   res.render("memberList", {
     buyers: buys,
-    suppliers: supers,
-    supervisors: supps,
+    suppliers: supps,
+    supervisors: supers,
     userId: obj.userId,
     userName: obj.userName,
     userType: obj.userType
