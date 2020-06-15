@@ -30,19 +30,11 @@
     getAutocomplete('#currency', '/currencyGetAutocomplete', token);    
         
     $('.cb').click(function() {
-      if($(':checkbox:checked').length == 2) {
-        $('#submit').removeAttr('disabled');
-      } else {
-        $('#submit').attr('disabled', 'disabled');
-      }
+      $('#submit').prop('disabled', $(':checkbox:checked').length == 2? false : true);
     });
         
     $('#prodServiceInput').on('change', function() {
-      if($(this).val()) {
-        $('#addProdService').removeAttr('disabled');
-      } else {
-        $('#addProdService').attr('disabled', 'disabled');
-      }
+      $('#addProdService').prop('disabled', $(this).val()? false : true);
     });
       
      var MAX = parseInt("<%= MAX_PROD %>");

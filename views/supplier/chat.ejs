@@ -174,7 +174,7 @@
             
             //sock.emit('sendMessage', msg);
             sock.emit("sendMessage", msg, (error) => {
-              $('#send').removeAttr('disabled');
+              $('#send').prop('disabled', false);
               if(typeof error !== 'undefined') {
                   alert(error);
                  $("#message").val("").focus();
@@ -189,7 +189,7 @@
               //alert('Message sent! ' + msg);
               autoscroll(messages);
             });
-            $('#send').attr('disabled', 'disabled');
+            $('#send').prop('disabled', true);
             //sendMessage(obj);//Via AJAX.
         });
       
@@ -226,13 +226,13 @@
         if(!navigator.geolocation) {
           return alert('Geolocation not supported at your endpoint. We are sorry for the inconvenience.');
         }
-        $('#sendLocation').attr('disabled', 'disabled');
+        $('#sendLocation').prop('disabled', true);
         navigator.geolocation.getCurrentPosition((position) => {
           sock.emit('sendLocation', {
             latitude: position.coords? position.coords.latitude : '45,00',
             longitude: position.coords? position.coords.longitude : '25,00'
           }, () => {
-            $('#sendLocation').removeAttr('disabled');
+            $('#sendLocation').prop('disabled', false);
             console.log('Location has been shared!');//Callback means feedback.
         });
       });

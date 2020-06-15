@@ -289,7 +289,7 @@ function addProduct(obj) {
         input.val('');
         $('#price').val('');
         $('#currency').val('');
-        $('#addProdService').attr('disabled', 'disabled');
+        $('#addProdService').prop('disabled', true);
         $('.productRequired').remove();
       } else {
         alert('Please enter valid values for products, prices and currency.');
@@ -299,7 +299,7 @@ function addProduct(obj) {
 }
 
 
-function userInputs(id, name, type, ul) {//Home, About, Terms, Antibribery - ensure link to user's profile if they are logged into session.
+function userInputs(id, role, name, type, ul) {//Home, About, Terms, Antibribery - ensure link to user's profile if they are logged into session.
     var link = "";
     
     switch(type) {
@@ -319,8 +319,9 @@ function userInputs(id, name, type, ul) {//Home, About, Terms, Antibribery - ens
         break;
       }
    
-    ul.prepend('<li class="nav-item">'
-          +'<a class="nav-link" href="' + link + '">Hello, ' + name + '!</a>'
+  if(id)
+    ul.prepend('<li class="nav-item user">'
+          +'<a class="nav-link" title="Hello" href="' + link + '">Hello, ' + name + ' (' + role + ')!</a>'
        + '</li>');
 }
 
@@ -341,50 +342,88 @@ function getCancelReasonTitles(obj, token, url) {//For deleting user accounts an
       var str = '<div class="form-group">';
       str += '<label>Please select an option below and explain it.</label><br>';
       for(var i in data) {
-        str += '<input type="radio" id="'+i+'" value="' + data[i].name + '"><label for="'+i+'">' + data[i].name + '</label><br>';
+        str += '<input type="radio" id="'+i+'" value="' + data[i].name + '">&nbsp;<label for="'+i+'">' + data[i].name + '</label><br>';
       }
       
       str += '</div>';
       obj.prepend(str);
+      $('input[type="radio"]').on('change', function() {
+        $('input[type="radio"]').not(this).prop('checked', false);
+      });
+    }
+  });
+}
+
+
+function getFeedbackSubjects(obj, token, url) {//For deleting user accounts and cancelling bids. Types (titles) of reasons, expressed as radio buttons, should be chosen.
+  $.ajax({
+    url: url,
+    type: 'GET',
+    headers: { "X-CSRF-Token": token },
+    datatype: 'application/json',
+    error: function() {
+    },
+    success: function(data) {//data = subjects.
+      if(!data || !data.length) {
+        return false;
+      }
+      
+      var str = '<div class="form-group">';
+      str += '<label>Please select an option below and explain it*.</label><br>';
+      str += '<select id="subjects"><option></option>';
+      for(var i in data) {
+        str += '<option id="'+i+'" value="' + data[i].name + '">'+ data[i].name + '</option>';
+      }
+      
+      str += '</select></div>';
+      obj.prepend(str);
+      
+      $('#subjects').on('change', function() {
+        $(this).attr('title', $(this).find('option:selected').text());
+      });
+    }
+  });
+}
+
+
+function getFeedbacks(obj, token, url) {//For deleting user accounts and cancelling bids. Types (titles) of reasons, expressed as radio buttons, should be chosen.
+  $.ajax({
+    url: url,
+    type: 'GET',
+    headers: { "X-CSRF-Token": token },
+    datatype: 'application/json',
+    error: function() {
+    },
+    success: function(data) {//data = feedbacks.
+      if(!data || !data.length) {
+        obj.prepend('<p class="term">There are currently no Feedbacks available. Please engage with your users first.</p>')
+        return false;
+      }
+      
+      var str = '';
+      for(var i in data) {
+        str += '<h5>#'+parseInt(1+parseInt(i))+'</h5><div class="form-group" style="border-style: dotted; border-color: green; text-align: center; color: brown; word-wrap: break-word; margin-bottom: 8px">';
+        str += '<label>From:</label><br>';
+        str += '<span id="name_'+i+'"><b>' + data[i].userName + '</b></span><br><br>';
+        str += '<label>E-mail:</label><br>';
+        str += '<span id="email_'+i+'"><b>' + data[i].userEmail + '</b></span><br><br>';
+        str += '<label>Subject:</label><br>';
+        str += '<span id="subject_'+i+'"><b>' + data[i].subject + '</b></span><br><br>';
+        str += '<label>Message: </label><br>';
+        str += '<span style="white-space: pre-line" id="text_'+i+'">' + data[i].message + '</span><br><br>';
+        str += '<label>Date: </label><br>';
+        str += '<span id="date_'+i+'">' + data[i].createdAt + '</span>';
+        str += '</div>';
+      }
+     
+      obj.prepend(str);     
     }
   });
 }
 
 
 $(document).ready(function() {
-  var nav = $('body').find('nav');
-  if(nav.length && !(nav.find('div[id="navbarSupportedContent"]').length)) {
-    
-    var $str = ' <div class="collapse navbar-collapse" id="navbarSupportedContent">'
-      + '<ul class="navbar-nav mr-auto">'
-      + '<li class="nav-item">'
-      + '<a class="nav-link" href="/">Home<span class="sr-only">(current)</span></a>'
-      + '</li>'
-       + '<li class="nav-item">'
-      + '<a class="nav-link" href="/memberList" title="List of UNITE Members">List of our members</a>'
-      + '</li>'     
-      + '<li class="nav-item">'
-      + '<a class="nav-link" href="/about">About</a>'
-      + '</li>'
-      + '<li class="nav-item">'
-      + '<a class="nav-link" href="/termsConditions" title="Terms and Conditions">Terms</a>'
-      + '</li>'
-      + '<li class="nav-item">'
-      + '<a class="nav-link" href="/antibriberyAgreement" title="Anti-Bribery Agreement">Anti-Bribery</a>'
-      + '</li>'
-      + '<li class="nav-item">'
-      + '<a class="btn btn-danger" href="?exit=true&home=true" title="Clear user session/Logout">Logout</a>'
-      + '</li>'
-      + '</ul>'
-      + '<br>'
-      + '<button class="btn btn-primary" data-toggle="modal" data-target="#signUpModal">Sign up</button>'
-      + '</div>';
-    
-    nav.append($str);
-  }
-
   var cnt = $('div.container').first();
-  //alert(history.go(-1));
   
   cnt
     .prepend('<div><button class="back btn btn-primary" style="margin-right: 20px" ' 
@@ -402,15 +441,76 @@ $(document).ready(function() {
     });
   }
   
+  var nav = $('body').find('nav');
+  if(nav.length && !(nav.find('div[id="navbarSupportedContent"]').length)) {
+    var isHome = nav.next('div').hasClass('home');    
+    
+    var $str =
+        ' <div class="collapse navbar-collapse" id="navbarSupportedContent">'
+        + '<ul class="navbar-nav mr-auto">'
+        + '<li class="nav-item">'
+        + '<a class="nav-link" title="Home" href="/">Home</a>'
+        + '</li>'
+        + '<li class="nav-item">'
+        + '<a class="nav-link" href="/memberList" title="List of UNITE Members">List of our members</a>'
+        + '</li>'
+        + '<li class="nav-item">'
+        + '<a class="nav-link" title="About" href="/about">About</a>'
+        + '</li>'
+        + '<li class="nav-item">'
+        + '<a class="nav-link" href="/termsConditions" title="Terms and Conditions">Terms</a>'
+        + '</li>'
+        + '<li class="nav-item">'
+        + '<a class="nav-link" href="/antibriberyAgreement" title="Anti-Bribery Agreement">Anti-Bribery</a>'
+        + '</li>'
+        + '<li class="nav-item logout">'
+        + '<a class="btn btn-danger" href="?exit=true&home=true" title="Clear user session/Logout">Logout</a>'
+        + '</li>'
+        + '</ul>'
+        + '<br>'
+        + '<button class="btn btn-primary" data-toggle="modal" data-target="#signUpModal">Sign up</button>'
+        + '</div>';
+    
+    nav.append($str);
+    
+    if(nav.hasClass('home') || isHome) {
+      var ul = $('#navbarSupportedContent')
+        .find('ul');      
+      
+      $('<li class="nav-item"><a class="nav-link" href="/feedback" title="Feedback/Suggestions">User Feedback</a></li>')
+        .insertBefore('li.logout');
+      
+      var isAdmin = nav.find('input[id="userData"]').attr('isAdmin');
+      if(isAdmin == 'true') {
+        $('<li class="nav-item"><a class="nav-link" href="/viewFeedbacks" title="Check Feedbacks">View Feedbacks</a></li>')
+          .insertBefore('li.logout');
+      }
+      
+      var ind = parseInt(nav.attr('pos'));      
+      
+      if(ul.find('li').first().hasClass('user')) {
+        ind++;
+      }
+      
+      var li = ul.find('li').eq(ind);
+      li.addClass('active');
+      var text = li.find('a').text();
+      li.find('a').text(text + ' (current)');
+    }
+  }
+
+  
   //$('div.container').not('.text-center')
     $("body").css({"background-image": "url(https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2FGD.png?v=1591857198052)", "background-repeat": "repeat"});//That yellow! 
   
-  if(nav) 
+  if(nav)
     nav.find('span').attr('title', 'Expand/collapse UNITE basic options');
   
   $('.cancelForm').submit(function() {
     return confirm('Are you sure you want to cancel this order?');
   });
+  
+
   
   if(!($('.fileupload').length))
     return false;
@@ -418,7 +518,7 @@ $(document).ready(function() {
   var token = $("input[name='_csrf']:first").val();
   
   $('input.fileupload,input.fileexcelupload').bind('change', function() {
-    $(this).val()? $(this).next('input').removeAttr('disabled') : $(this).next('input').attr('disabled', 'disabled');
+    $(this).val()? $(this).next('input').prop('disabled', false) : $(this).next('input').prop('disabled', true);
   });
 
   $('.single,.multiple').each(function(index, element) {
@@ -471,7 +571,7 @@ $(document).ready(function() {
     xhr.send(formData);
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4) {//Success!
-          input.next('input').attr('disabled', 'disabled');
+          input.next('input').prop('disabled', true);
         
           var ob, val, response = JSON.parse(xhr.responseText);
           //alert(JSON.stringify(response));
@@ -497,7 +597,6 @@ $(document).ready(function() {
               }
             }            
           } else
-        
           if(isMultiple) {
             var hasDiv = theDiv.next('div').hasClass('fileWrapper');
 

@@ -4,6 +4,10 @@ const Schema = mongoose.Schema;
 const validator = require('validator');
 
 const supplierSchema = new Schema({
+  role: {
+    type: String,
+    required: true
+  },
   companyName: {
     type: String,
     unique: true,

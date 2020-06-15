@@ -11,5 +11,9 @@ router.get("/about", sessionExit, homeController.getAbout);
 router.get("/antibriberyAgreement", sessionExit, homeController.getAntibriberyAgreement);
 router.get("/termsConditions", sessionExit, homeController.getTermsConditions);
 router.get("/memberList", sessionExit, homeController.getMemberList);
+router.get("/feedback", sessionExit, homeController.getFeedback);
+router.get("/viewFeedbacks", sessionExit, homeController.getViewFeedbacks);
+
+router.post("/feedback", sessionExit, homeController.postFeedback);
 
 module.exports = router;

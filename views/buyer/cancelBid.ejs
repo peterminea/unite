@@ -23,15 +23,16 @@
     $(document).ready(function() {
     getCancelReasonTitles($('#cancelForm'), $('input[name="_csrf"]').val(), '/bidCancelReasonTitles');
     
-    $('#cancelForm').submit(function(e) {
+    $('#cancelForm').submit(function(e) {/*
       var area = $(this).find('textarea[name="reason"]');
-      if(!area.text().length) {
+      
+      if(area.val() == '') {
         var msg = prompt('Please enter a reason for cancelling this order.');
-        if(reason && reason.length)
-          area.text(reason);
+        if(msg && msg.length)
+          area.val(msg);
         else 
           return false;
-      }
+      }*/
 
       var radio = $(this).find('input[type="radio"]:checked');
       radio.attr('name', 'reasonTitle');
@@ -57,7 +58,10 @@
             <input type="hidden" name="bidId" value="<%= bidId %>">
             <input type="hidden" name="requestsName" value="<%= bidName %>">
             <input type="hidden" name="userType" value="<%= userType %>">
-            <textarea required name="reason" rows="10" placeholder="Details on why cancelling..." cols="50"></textarea>
+            <div class="form-group">
+              <label>Details*</label>
+              <textarea required class="form-control" name="reason" rows="10" placeholder="Details on why cancelling..." cols="50"></textarea>
+            </div>
             <input type="hidden" name="buyersName" value="<%= buyerName %>">
             <input type="hidden" name="suppliersName" value="<%= supplierName %>">
             <input type="hidden" name="buyersEmail" value="<%= buyerEmail %>">

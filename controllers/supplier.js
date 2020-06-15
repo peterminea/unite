@@ -490,6 +490,7 @@ exports.postSignUp = async (req, res) => {
           try {
             await bcrypt.hash(req.body.password, 10, async function(err, hash) {
                 supplier = new Supplier({
+                  role: process.env.USER_REGULAR,
                   companyName: req.body.companyName,
                   directorsName: req.body.directorsName,
                   contactName: req.body.contactName,
@@ -865,6 +866,7 @@ exports.postProfile = async (req, res) => {
     }
 
     doc._id = req.body._id;
+    doc.role = req.body.role;
     doc.companyName = req.body.companyName;
     doc.directorsName = req.body.directorsName;
     doc.contactName = req.body.contactName;

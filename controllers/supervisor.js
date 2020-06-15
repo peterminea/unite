@@ -461,6 +461,7 @@ exports.postSignUp = async (req, res) => {
           bcrypt.hash(req.body.password, 10, async function(err, hash) {
           //user = new Promise((resolve, reject) => {
             supervisor = new Supervisor({
+              role: process.env.USER_REGULAR,
               organizationName: req.body.organizationName,
               organizationUniteID: req.body.organizationUniteID,
               contactName: req.body.contactName,
@@ -532,6 +533,7 @@ exports.postProfile = async (req, res) => {
   await Supervisor.findOne({ _id: req.body._id }, async (err, doc) => {
     if (err) return console.error(err);
     doc._id = req.body._id;
+    doc.role = req.body.role;
     doc.organizationName = req.body.organizationName;
     doc.organizationUniteID = req.body.organizationUniteID;
     doc.contactName = req.body.contactName;

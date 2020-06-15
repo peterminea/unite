@@ -30,42 +30,17 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light" style="width: 100% !important;">
+    <nav pos="2" class="navbar navbar-expand-lg navbar-light bg-light" style="width: 100% !important;">
         <a class="navbar-brand" href="#">
             <img src="https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2Funite%20(1).png?v=1587898738134" height="50">
         </a>
+        <input type="hidden" id="userData" isAdmin="<%= isAdmin %>" userRole="<%= role %>">
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                  <a class="nav-link" href="/">Home<span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="/memberList">Full members list</a>
-                </li>
-                <li class="nav-item active">
-                    <a class="nav-link" href="/about">About <span class="sr-only">(current)</span></a>
-                </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/termsConditions" title="Terms and Conditions">Terms</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/antibriberyAgreement" title="Anti-Bribery Agreement">Anti-Bribery</a>
-              </li>
-              <li class="nav-item">
-                <a class="btn btn-danger" href="?exit=true&home=true" title="Clear user session">Clear Session</a>
-              </li>
-            </ul>
-
-            <a href="/">
-                <button class="btn btn-outline-primary">Login</button>
-            </a>
-        </div>
     </nav>
+  
     <div class="container terms text-center home">
         <div class="text-center mx-auto">
             <img src="https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2Funite%20(1).png?v=1587898738134" height="100">
