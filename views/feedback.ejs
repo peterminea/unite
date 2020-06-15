@@ -32,31 +32,21 @@
         }
         
         $('input[name="subject"]').val(option.text());
-/*
-        var area = $('#details');
-        alert(area.val());
-        //if(1==2)
-        if(area.val() == '') {
-          var msg = prompt('Please complete your feedback.');
-          if(msg && msg.length)
-            area.text(msg);
-          else 
-            return false;
-        }*/      
       });
     });
   </script>
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
+  <nav pos="5" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
     <a class="navbar-brand" href="/">UNITE - Platform Feedback</a>
+    <input type="hidden" id="userData" isAdmin="<%= isAdmin %>" userRole="<%= role %>">
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
   </nav>
-    <div class="container">
+    <div class="container home">
        <div class="col-md-12">
         <legend>
           Provide user feedback, suggestions or inquiries - Please fill in the required (*) fields.

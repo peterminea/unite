@@ -7,6 +7,7 @@ dependencies:
   bufferutil: 4.0.1
   connect-flash: 0.1.1
   connect-mongodb-session: 2.3.3
+  cookie-parser: 1.4.5
   csurf: 1.11.0
   dateformat: 3.0.3
   ejs: 3.1.3
@@ -21,7 +22,7 @@ dependencies:
   http2: 3.3.7
   jsonp: 0.2.1
   moment: 2.26.0
-  mongoose: 5.9.18
+  mongoose: 5.9.19
   multer: 1.4.2
   node-xlsx: 0.15.0
   process: 0.11.10
@@ -416,6 +417,15 @@ packages:
       node: '>= 0.6'
     resolution:
       integrity: sha512-hIP3EEPs8tB9AT1L+NUqtwOAps4mk2Zob89MWXMHjHWg9milF/j4osnnQLXBCBFBk/tvIG/tUc9mOUJiPBhPXA==
+  /cookie-parser/1.4.5:
+    dependencies:
+      cookie: 0.4.0
+      cookie-signature: 1.0.6
+    dev: false
+    engines:
+      node: '>= 0.8.0'
+    resolution:
+      integrity: sha512-f13bPUj/gG/5mDr+xLmSxxDsB9DQiTIfhJS/sqjrmfAWiAN+x2O4i/XguTL9yDZ+/IFDanJ+5x7hC4CXT9Tdzw==
   /cookie-signature/1.0.6:
     dev: false
     resolution:
@@ -1106,20 +1116,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-oIixUO+OamkUkwjhAVE18rAMfRJNsNe/Stid/gwHSOfHrOtw9EhAY2AHvdKZ/k/MggcYELFCJz/Sn2pL8b8JMw==
-  /mongodb/3.5.8:
-    dependencies:
-      bl: 2.2.0
-      bson: 1.1.4
-      denque: 1.4.1
-      require_optional: 1.0.1
-      safe-buffer: 5.2.1
-    dev: false
-    engines:
-      node: '>=4'
-    optionalDependencies:
-      saslprep: 1.0.3
-    resolution:
-      integrity: sha512-jz7mR58z66JKL8Px4ZY+FXbgB7d0a0hEGCT7kw8iye46/gsqPrOEpZOswwJ2BQlfzsrCLKdsF9UcaUfGVN2HrQ==
   /mongodb/3.5.9:
     dependencies:
       bl: 2.2.0
@@ -1140,11 +1136,11 @@ packages:
       mongoose: '*'
     resolution:
       integrity: sha512-Yo/7qQU4/EyIS8YDFSeenIvXxZN+ld7YdV9LqFVQJzTLye8unujAWPZ4NWKfFA+RNjh+wvTWKY9Z3E5XM6ZZiQ==
-  /mongoose/5.9.18:
+  /mongoose/5.9.19:
     dependencies:
       bson: 1.1.4
       kareem: 2.3.1
-      mongodb: 3.5.8
+      mongodb: 3.5.9
       mongoose-legacy-pluralize: 1.0.2
       mpath: 0.7.0
       mquery: 3.2.2
@@ -1157,7 +1153,7 @@ packages:
     engines:
       node: '>=4.0.0'
     resolution:
-      integrity: sha512-agZbIuQcN1gZ12BJn6KesA+bgsvoLVjCwhfPw88hggxX8O24SWK4EJwN35GEZKDej9AHUZKNAPgmdeXCVQxviA==
+      integrity: sha512-wJ5FR2ykvyd17MRHA6sku/N1CMaC/kf4CnN357htD48RpzJhW60YDkxPSPLbkLg8Woa+i7jYi0glhzC0EcBcRQ==
   /mpath/0.5.1:
     dev: false
     engines:
@@ -1802,6 +1798,7 @@ specifiers:
   bufferutil: ^4.0.1
   connect-flash: ^0.1.1
   connect-mongodb-session: ^2.3.3
+  cookie-parser: ^1.4.5
   csurf: ^1.11.0
   dateformat: ^3.0.3
   ejs: ^3.1.3
@@ -1816,7 +1813,7 @@ specifiers:
   http2: ^3.3.7
   jsonp: ^0.2.1
   moment: ^2.26.0
-  mongoose: ^5.9.18
+  mongoose: ^5.9.19
   multer: ^1.4.2
   node-xlsx: ^0.15.0
   process: ^0.11.10

@@ -31,7 +31,7 @@ module.exports = function getUserHome(req) {
         break;        
     }
     
-    console.log(role);
+    //console.log(role);
   }
   
   return {userId: userId, role: role, userName: userName, userType: userType};

@@ -319,8 +319,9 @@ function userInputs(id, role, name, type, ul) {//Home, About, Terms, Antibribery
         break;
       }
    
-    ul.prepend('<li class="nav-item">'
-          +'<a class="nav-link" href="' + link + '">Hello, ' + name + ' (' + role + ')!</a>'
+  if(id)
+    ul.prepend('<li class="nav-item user">'
+          +'<a class="nav-link" title="Hello" href="' + link + '">Hello, ' + name + ' (' + role + ')!</a>'
        + '</li>');
 }
 
@@ -368,7 +369,7 @@ function getFeedbackSubjects(obj, token, url) {//For deleting user accounts and 
       }
       
       var str = '<div class="form-group">';
-      str += '<label>Please select an option below and explain it.</label><br>';
+      str += '<label>Please select an option below and explain it*.</label><br>';
       str += '<select id="subjects"><option></option>';
       for(var i in data) {
         str += '<option id="'+i+'" value="' + data[i].name + '">'+ data[i].name + '</option>';
@@ -401,7 +402,7 @@ function getFeedbacks(obj, token, url) {//For deleting user accounts and cancell
       
       var str = '';
       for(var i in data) {
-        str += '<h5>#'+parseInt(1+parseInt(i))+'</h5><div class="form-group" style="border-style: dotted; text-align: center; color: brown; word-wrap: break-word; margin-bottom: 8px">';
+        str += '<h5>#'+parseInt(1+parseInt(i))+'</h5><div class="form-group" style="border-style: dotted; border-color: green; text-align: center; color: brown; word-wrap: break-word; margin-bottom: 8px">';
         str += '<label>From:</label><br>';
         str += '<span id="name_'+i+'"><b>' + data[i].userName + '</b></span><br><br>';
         str += '<label>E-mail:</label><br>';
@@ -422,78 +423,6 @@ function getFeedbacks(obj, token, url) {//For deleting user accounts and cancell
 
 
 $(document).ready(function() {
-  var nav = $('body').find('nav');
-  if(nav.length && !(nav.find('div[id="navbarSupportedContent"]').length)) {
-    var isHome = nav.next('div').hasClass('home');    
-    
-    var $str = isHome? 
-        '<div class="collapse navbar-collapse" id="navbarSupportedContent">'
-        + '<ul class="navbar-nav mr-auto">'
-        + '<li class="nav-item active">'
-        + '<a class="nav-link" href="/">Home<span class="sr-only">(current)</span></a>'
-        + '</li>'
-        + '<li class="nav-item">'
-        + '<a class="nav-link" href="/memberList">Full members list</a>'
-        + '</li>'
-        + '<li class="nav-item">'
-        + '<a class="nav-link" href="/about">About</a>'
-        + '</li>'
-        + '<li class="nav-item">'
-        + '<a class="nav-link" href="/termsConditions" title="Terms and Conditions">Terms</a>'
-        + '</li>'
-        + '<li class="nav-item">'
-        + '<a class="nav-link" href="/antibriberyAgreement" title="Anti-Bribery Agreement">Anti-Bribery</a>'
-        + '</li>'
-        + '<li class="nav-item">'
-        + '<a class="btn btn-danger" href="?exit=true&home=true" title="Clear user session">Clear Session</a>'
-        + '</li>'
-        + '</ul>'
-        + '<br>'
-        + '<button class="btn btn-primary" data-toggle="modal" data-target="#signUpModal">Sign up</button>'
-        + '</div>'
-    
-      : ' <div class="collapse navbar-collapse" id="navbarSupportedContent">'
-        + '<ul class="navbar-nav mr-auto">'
-        + '<li class="nav-item">'
-        + '<a class="nav-link" href="/">Home<span class="sr-only">(current)</span></a>'
-        + '</li>'
-        + '<li class="nav-item">'
-        + '<a class="nav-link" href="/memberList" title="List of UNITE Members">List of our members</a>'
-        + '</li>'
-        + '<li class="nav-item">'
-        + '<a class="nav-link" href="/about">About</a>'
-        + '</li>'
-        + '<li class="nav-item">'
-        + '<a class="nav-link" href="/termsConditions" title="Terms and Conditions">Terms</a>'
-        + '</li>'
-        + '<li class="nav-item">'
-        + '<a class="nav-link" href="/antibriberyAgreement" title="Anti-Bribery Agreement">Anti-Bribery</a>'
-        + '</li>'
-        + '<li class="nav-item">'
-        + '<a class="btn btn-danger" href="?exit=true&home=true" title="Clear user session/Logout">Logout</a>'
-        + '</li>'
-        + '</ul>'
-        + '<br>'
-        + '<button class="btn btn-primary" data-toggle="modal" data-target="#signUpModal">Sign up</button>'
-        + '</div>';
-    
-    nav.append($str);
-    
-    if(nav.hasClass('home')) {
-      var ul = $('#navbarSupportedContent')
-        .find('ul');
-      
-      ul
-        .append('<li class="nav-item"><a class="nav-link" href="/feedback" title="Feedback/Suggestions">User Feedback</a></li>');
-      
-      var isAdmin = nav.find('input[id="userData"]').attr('isAdmin');
-      if(isAdmin == 'true') {
-        ul
-        .append('<li class="nav-item"><a class="nav-link" href="/viewFeedbacks" title="Check Feedbacks">View Feedbacks</a></li>');
-      }
-    }
-  }
-
   var cnt = $('div.container').first();
   
   cnt
@@ -511,6 +440,65 @@ $(document).ready(function() {
       }
     });
   }
+  
+  var nav = $('body').find('nav');
+  if(nav.length && !(nav.find('div[id="navbarSupportedContent"]').length)) {
+    var isHome = nav.next('div').hasClass('home');    
+    
+    var $str =
+        ' <div class="collapse navbar-collapse" id="navbarSupportedContent">'
+        + '<ul class="navbar-nav mr-auto">'
+        + '<li class="nav-item">'
+        + '<a class="nav-link" title="Home" href="/">Home</a>'
+        + '</li>'
+        + '<li class="nav-item">'
+        + '<a class="nav-link" href="/memberList" title="List of UNITE Members">List of our members</a>'
+        + '</li>'
+        + '<li class="nav-item">'
+        + '<a class="nav-link" title="About" href="/about">About</a>'
+        + '</li>'
+        + '<li class="nav-item">'
+        + '<a class="nav-link" href="/termsConditions" title="Terms and Conditions">Terms</a>'
+        + '</li>'
+        + '<li class="nav-item">'
+        + '<a class="nav-link" href="/antibriberyAgreement" title="Anti-Bribery Agreement">Anti-Bribery</a>'
+        + '</li>'
+        + '<li class="nav-item logout">'
+        + '<a class="btn btn-danger" href="?exit=true&home=true" title="Clear user session/Logout">Logout</a>'
+        + '</li>'
+        + '</ul>'
+        + '<br>'
+        + '<button class="btn btn-primary" data-toggle="modal" data-target="#signUpModal">Sign up</button>'
+        + '</div>';
+    
+    nav.append($str);
+    
+    if(nav.hasClass('home') || isHome) {
+      var ul = $('#navbarSupportedContent')
+        .find('ul');      
+      
+      $('<li class="nav-item"><a class="nav-link" href="/feedback" title="Feedback/Suggestions">User Feedback</a></li>')
+        .insertBefore('li.logout');
+      
+      var isAdmin = nav.find('input[id="userData"]').attr('isAdmin');
+      if(isAdmin == 'true') {
+        $('<li class="nav-item"><a class="nav-link" href="/viewFeedbacks" title="Check Feedbacks">View Feedbacks</a></li>')
+          .insertBefore('li.logout');
+      }
+      
+      var ind = parseInt(nav.attr('pos'));      
+      
+      if(ul.find('li').first().hasClass('user')) {
+        ind++;
+      }
+      
+      var li = ul.find('li').eq(ind);
+      li.addClass('active');
+      var text = li.find('a').text();
+      li.find('a').text(text + ' (current)');
+    }
+  }
+
   
   //$('div.container').not('.text-center')
     $("body").css({"background-image": "url(https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2FGD.png?v=1591857198052)", "background-repeat": "repeat"});//That yellow! 

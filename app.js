@@ -47,6 +47,7 @@ const Country = require("./models/country");
 const Industry = require("./models/industry");
 const Capability = require('./models/capability');
 const ProductService = require("./models/productService");
+const cookieParser = require('cookie-parser');
 
 //const MONGODB_URI = "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";//The DB url is actually saved as an Environment variable, it will be easier to use anywhere in the application that way.
 //Syntax: process.env.MONGODB_URI
@@ -69,6 +70,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Session
+app.use(cookieParser('26UNWwbu26FvXZTJQBkf45dLSV7gG9bx'));
 app.use(
   session({
     secret: "26UNWwbu26FvXZTJQBkf45dLSV7gG9bx",

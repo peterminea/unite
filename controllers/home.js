@@ -40,19 +40,21 @@ exports.getFeedback = (req, res) => {
 };
 
 exports.getViewFeedbacks = (req, res) => {
-  //var obj = userData(req);
-  res.render("viewFeedbacks"/*, {
+  var obj = userData(req);
+  res.render("viewFeedbacks", {
     role: obj.role,
     isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
     userName: obj.userName,
     userType: obj.userType
-  }*/);
+  });
 };
 
 exports.getAbout = (req, res) => {
   var obj = userData(req);
   res.render("about", {
+    role: obj.role,
+    isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
     userName: obj.userName,
     userType: obj.userType
@@ -62,6 +64,8 @@ exports.getAbout = (req, res) => {
 exports.getAntibriberyAgreement = (req, res) => {
   var obj = userData(req);
   res.render("antibriberyAgreement", {
+    role: obj.role,
+    isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
     userName: obj.userName,
     userType: obj.userType
@@ -71,6 +75,8 @@ exports.getAntibriberyAgreement = (req, res) => {
 exports.getTermsConditions = (req, res) => {
   var obj = userData(req);
   res.render("termsConditions", {
+    role: obj.role,
+    isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
     userName: obj.userName,
     userType: obj.userType
