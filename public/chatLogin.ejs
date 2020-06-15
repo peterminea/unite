@@ -20,17 +20,17 @@
     <script src="/autocomp.js"></script>
     <script type="text/javascript">
     $(document).ready(function() {
-      $('input.form-control').bind('change', function () {
+      $('input.form-control').on('change', function () {
         if($('#username').val() && $('#room').val()) {
           var string = "../../../../../../../supervisor/chat/";
           string += $('#from').val() + '/' + $('#to').val() + '/' 
           + $('#username').val() + '/' + $('#room').val() + '/' 
           + $('#reqId').val() + '/' + $('#reqName').val() + '/' 
           + $('#toName').val() + '/' + $('#fromName').val();
-          $('#join').removeAttr('disabled');
+          $('#join').prop('disabled', false);
           $('#join').parent('a').attr('href', string);
         } else {
-          $('#join').attr('disabled', 'disabled');
+          $('#join').prop('disabled', true);
         }
       });
     });    

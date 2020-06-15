@@ -42,7 +42,7 @@
             success: function(data) {                
               if(!data || !data.length) {
                 obj.val('');
-                obj.next('.prodButton').attr('disabled', 'disabled');
+                obj.next('.prodButton').prop('disabled', true);
                 return false;
               }
 
@@ -463,7 +463,7 @@
                     
                     sel
                       .find('option[value="' + $('#status_'+index).val() + '"]')
-                      .attr('selected', 'selected');
+                      .prop('selected', true);
                     sel.attr('title', sel.find('option:selected').text());
                     
                     var x = JSON.parse($('#statusJsonValues_'+index+' span:first').text());
@@ -487,7 +487,7 @@
                     $('#prodServiceInput_'+index).change(function() {
                       if($(this).val()) {
                         var id = getId($(this).attr('id'));
-                        $("#addProdService_"+id).removeAttr('disabled');
+                        $("#addProdService_"+id).prop('disabled', false);
                         $('#defaultPrice_'+id).val($(this).attr('price'));
                         $('#currency_'+id).val($(this).attr('currency'));                        
                       }

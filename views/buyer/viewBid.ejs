@@ -85,7 +85,7 @@
                         .find('input[id^="status_"]');                   
                       $(el)
                           .find('option[value="' + statusInput.val() + '"]')
-                          .attr({'selected': 'selected'});
+                          .prop({'selected': true});
 
                       $(el).attr('title', $(this).find('option:selected').text());                  
 
@@ -115,7 +115,7 @@
                   
                   statusDiv
                       .find('button[id^="updateBidStatus_"]')
-                      .removeAttr('disabled');
+                      .prop('disabled', false);
                 });
               }
       });
@@ -306,7 +306,7 @@
                       });                      
                       
                       $("#message_"+index).bind('change', function() {
-                        $('#updateBidStatus_'+getId($(this).attr('id'))).removeAttr('disabled');
+                        $('#updateBidStatus_'+getId($(this).attr('id'))).prop('disabled', false);
                       });
                       
                       var x = JSON.parse($('[id^="statusJsonValues_"]').first().val());
@@ -349,10 +349,10 @@
                                 .then(function(res) {
                                 return res.json();
                               })
-                                .then((data) => {                                
+                                .then((data) => {
                                   $('#purchase_'+that).remove();
                                   $('#status_'+that).val(x.PAYMENT_DELIVERY_DONE);
-                                  $('#statuses_'+that).find('option:eq('+x.PAYMENT_DELIVERY_DONE+')').attr('selected', 'selected');
+                                  $('#statuses_'+that).find('option:eq('+x.PAYMENT_DELIVERY_DONE+')').prop('selected', true);
                                   $('#cartList_'+that).find('li').css({"title": "Already ordered!", "border": "2px"});
                                 });
                               }
@@ -387,7 +387,7 @@
                 <button style="float: left" title="Chat" id="chat" class="btn-primary btn">Chat with your supplier</button>
               </a>
               <a href="../../../buyer/cancelBid/<%= bid._id %>/<%= bid.requestName %>/Buyer/<%= bid.buyerName %>/<%= bid.supplierName %>/<%= bid.buyerEmail %>/<%= bid.supplierEmail %>">
-                <button style="float: left" title="Cancel Bid" id="cancelBid" class="btn-primary btn">Cancel your Order</button>
+                <button style="float: right" title="Cancel Bid" id="cancelBid" class="btn-primary btn">Cancel your Order</button>
               </a>
             </div>
           </div>

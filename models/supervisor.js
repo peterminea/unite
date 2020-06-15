@@ -4,6 +4,10 @@ const Schema = mongoose.Schema;
 const validator = require('validator');
 
 const supervisorSchema = new Schema({
+  role: {
+    type: String,
+    required: true
+  },
   organizationName: {
     type: String,
     unique: true,

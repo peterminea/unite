@@ -28,7 +28,7 @@
       postAutocomplete('#country', '/countryAutocomplete', token);
         
         $("input").on('change', function() {        
-          $('#updateProfile').removeAttr('disabled');
+          $('#updateProfile').prop('disabled', false);
         });
       
         $('#termination').click(function(e) {
@@ -106,6 +106,7 @@
     <div class="smooth-shadow profile-form">
       <form method="POST">
         <input type="hidden" name="_id" value="<%= profile._id %>">
+        <input type="hidden" name="role" value="<%= profile.role %>">
         <input type="hidden" name="balance" id="balance" value="<%= profile.balance %>">
         <input type="hidden" name="createdAt" id="createdAt" value="<%= profile.createdAt %>">
         

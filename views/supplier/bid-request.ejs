@@ -240,7 +240,7 @@
                     
                     that.find('option')
                       .eq(x.SUPP_START_DELIVERY)
-                      .attr('selected', 'selected');
+                      .prop('selected', true);
 
                     $('#updateBidStatus').trigger('click');
                   } else {
@@ -265,10 +265,10 @@
           return true;
           });
           
-          $('#statuses').find('option:gt(' + x.PAYMENT_DELIVERY_DONE + ')').attr('disabled', 'disabled');//Cancel from button and make the content unavailable.
+          $('#statuses').find('option:gt(' + x.PAYMENT_DELIVERY_DONE + ')').prop('disabled', true);//Cancel from button and make the content unavailable.
           $('#statuses')
               .find('option[value="' + $('#status').val() + '"]')
-              .attr({'selected': 'selected'});
+              .prop({'selected': true});
 
             $('#statuses').attr('title', $('#statuses').find('option:selected').text());            
           </script>
@@ -309,7 +309,7 @@
                 <button style="float: left" title="Chat" id="chat" class="btn-primary btn">Chat with your buyer</button>
               </a>
               <a href="../../../supplier/cancelBid/<%= request._id %>/<%= request.requestName %>/Supplier/<%= request.buyerName %>/<%= request.supplierName %>/<%= request.buyerEmail %>/<%= request.supplierEmail %>">
-                <button style="float: left" title="Cancel Bid" id="cancelBid" class="btn-primary btn">Cancel Buyer's Order</button>
+                <button style="float: right" title="Cancel Bid" id="cancelBid" class="btn-primary btn">Cancel Buyer's Order</button>
               </a>
           </div>
         </div>

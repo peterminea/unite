@@ -35,6 +35,8 @@ const stripe = require('stripe')(stripeSecretKey);
 const BidRequest = require("./models/bidRequest");
 const BidStatus = require("./models/bidStatus");
 const BidCancelReasonTitle = require("./models/bidCancelReasonTitle");
+const Feedback = require("./models/feedback");
+const FeedbackSubject = require("./models/feedbackSubject");
 const Buyer = require("./models/buyer");
 const Supplier = require("./models/supplier");
 const Supervisor = require("./models/supervisor");
@@ -727,6 +729,32 @@ app.get('/userCancelReasonTitles', async function(req, res, next) {
 });
 
 
+app.get('/feedbackSubjects', async function(req, res, next) {
+  FeedbackSubject.find({}).exec()
+  .then((subjects) => {
+    subjects.sort(function (a, b) {
+      return a.name.localeCompare(b.name);
+    });
+    
+    res.send(subjects, {
+    'Content-Type': 'application/json'
+       }, 200);
+  });
+});
+
+
+app.get('/feedbacks', async function(req, res, next) {
+  Feedback.find({}).exec()
+  .then((feedbacks) => {
+    feedbacks.sort((a,b) => (a.createdAt > b.createdAt) ? 1 : ((b.createdAt > a.createdAt) ? -1 : 0));
+    
+    res.send(feedbacks, {
+    'Content-Type': 'application/json'
+       }, 200);
+  });
+});
+
+
 app.get('/uniteIDAutocomplete', function(req, res, next) {
   var regex = new RegExp(req.query["term"], 'i');
   var uniteIDFilter = Supervisor.find({organizationUniteID: regex}, {"organizationUniteID": 1})
@@ -1236,6 +1264,10 @@ MongoClient.connect(URI, {useUnifiedTopology: true}, (err, client) => {
   //db.collection("supervisors").updateMany({}, { $set: { contactMobileNumber: '+40 832 065 285' } }, function(err, obj) {});
   //db.collection("suppliers").updateMany({}, { $set: { contactMobileNumber: '+40 832 065 285' } }, function(err, obj) {});
   //db.collection("buyers").updateMany({}, { $set: { contactMobileNumber: '+40 832 065 285' } }, function(err, obj) {});
+  
+  //db.collection("supervisors").updateMany({}, { $set: { role: process.env.USER_REGULAR } }, function(err, obj) {});
+  //db.collection("suppliers").updateMany({}, { $set: { role: process.env.USER_REGULAR } }, function(err, obj) {});
+  //db.collection("buyers").updateMany({}, { $set: { role: process.env.USER_REGULAR } }, function(err, obj) {});
   
   //db.close();
 });

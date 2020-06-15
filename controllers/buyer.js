@@ -230,7 +230,12 @@ exports.postCancelBid = (req, res) => {
           reason: req.body.reason,
           userName: req.body.buyersName,
           createdAt: Date.now()
-        }, function(err, obj) {});
+        }, function(err, obj) {
+            if(err) {
+            req.flash('error', err.message);
+            res.redirect('/buyer/index');
+          }
+        });
       }  
       catch(e) {
         console.error(e);
@@ -672,6 +677,7 @@ exports.postSignUp = async (req, res) => {
         try {
           bcrypt.hash(req.body.password, 10, async function(err, hash) {
               buyer = new Buyer({
+                role: process.env.USER_REGULAR,
                 organizationName: req.body.organizationName,
                 organizationUniteID: req.body.organizationUniteID,
                 contactName: req.body.contactName,
@@ -754,6 +760,7 @@ exports.postProfile = (req, res) => {
       }
       
       doc._id = req.body._id;
+      doc.role = req.body.role;
       doc.organizationName = req.body.organizationName;
       doc.organizationUniteID = req.body.organizationUniteID;
       doc.contactName = req.body.contactName;

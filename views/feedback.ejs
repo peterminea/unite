@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>UNITE - Platform Feedback</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A cool thing made with Glitch">
+  <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/messages.css">
+  <link rel="stylesheet" href="/jquery-ui.css">
+  <link rel="stylesheet" href="/bootstrap.min.css">
+  <script src="/jquery.min.js"></script>
+  <script src="/jquery-ui.min.js"></script>
+  <script src="/popper.min.js"></script>
+  <script src="/bootstrap.min.js"></script>
+  <script src="/sweetalert.min.js"></script>  
+  <script src="/https.js"></script>
+  <script src="/autocomp.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      getFeedbackSubjects($('#feedbackForm'), $('input[name="_csrf"]').val(), '/feedbackSubjects');
+
+      $('#feedbackForm').submit(function(e) {
+        var option = $(this).find('select option:not(:eq(0)):selected');
+        
+        if(!option.length) {
+          alert('Please choose a feedback type from the list.');
+          return false;
+        }
+        
+        $('input[name="subject"]').val(option.text());
+/*
+        var area = $('#details');
+        alert(area.val());
+        //if(1==2)
+        if(area.val() == '') {
+          var msg = prompt('Please complete your feedback.');
+          if(msg && msg.length)
+            area.text(msg);
+          else 
+            return false;
+        }*/      
+      });
+    });
+  </script>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
+    <a class="navbar-brand" href="/">UNITE - Platform Feedback</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </nav>
+    <div class="container">
+       <div class="col-md-12">
+        <legend>
+          Provide user feedback, suggestions or inquiries - Please fill in the required (*) fields.
+        </legend>
+         <br>
+          <form class="feedbackForm" id="feedbackForm" method="POST">
+            <input type="hidden" name="subject">
+            <div class="form-group">
+              <label>Your Name*</label>
+              <input required type="text" class="form-control" id="name" name="name">
+            </div>
+            <div class="form-group">
+              <label>E-mail address*</label>
+              <input required type="email" id="emailAddress" name="emailAddress" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Feedback Details*</label>
+              <textarea required class="form-control" id="details" name="details" rows="10" placeholder="Details..." cols="50"></textarea>
+            </div>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button style="float: right" type="submit" id="submitFeedback" title="Send Feedback" class="btn-primary btn">Send your Feedback</button><br>
+          </form>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,4 +1,3 @@
-
 const crypto = require('crypto');
 const express = require("express");
 const mongoose = require("mongoose");
@@ -21,10 +20,34 @@ exports.getIndex = (req, res) => {
   var obj = userData(req);
   //console.log(obj);
   res.render("index", {
+    role: obj.role,
+    isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
     userName: obj.userName,
     userType: obj.userType
   });
+};
+
+exports.getFeedback = (req, res) => {
+  var obj = userData(req);
+  res.render("feedback", {
+    role: obj.role,
+    isAdmin: obj.role == process.env.USER_ADMIN,
+    userId: obj.userId,
+    userName: obj.userName,
+    userType: obj.userType
+  });
+};
+
+exports.getViewFeedbacks = (req, res) => {
+  //var obj = userData(req);
+  res.render("viewFeedbacks"/*, {
+    role: obj.role,
+    isAdmin: obj.role == process.env.USER_ADMIN,
+    userId: obj.userId,
+    userName: obj.userName,
+    userType: obj.userType
+  }*/);
 };
 
 exports.getAbout = (req, res) => {
@@ -104,3 +127,34 @@ exports.getMemberList = async (req, res) => {
     userType: obj.userType
   });
 }
+
+
+exports.postFeedback = (req, res) => {
+  try {
+    MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
+        if (err) {
+          req.flash('error', err.message);
+          throw err;
+        }
+
+        var dbo = db.db(BASE);
+        await dbo.collection("feedbacks").insertOne({
+          userName: req.body.name,
+          userEmail: req.body.emailAddress,
+          subject: req.body.subject,
+          message: req.body.details,
+          createdAt: Date.now()
+        }, function(err, obj) {
+            if(err) {
+              req.flash('error', err.message);
+              throw err;
+            }
+
+          req.flash('success', 'Feedback successfully sent! We will get back to you.');
+          db.close();
+          res.redirect('/');
+        });
+      });
+    } catch {
+  }
+};
