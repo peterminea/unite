@@ -6,8 +6,8 @@ const dateformat = require("dateformat");
 
 var storage = multer.diskStorage({
   destination: (req, file, callback) => {
-    //callback(null, 'uploads/');
-    callback(null, path.join('${__dirname}/../uploads'));
+    //callback(null, 'public/uploads/');
+    callback(null, path.join('${__dirname}/../public/uploads'));
   },
   filename: (req, file, callback) => {
     const match = ["image/png", "image/jpeg"];

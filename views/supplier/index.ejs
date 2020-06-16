@@ -72,7 +72,9 @@
     <div class="card">
       <h5 class="card-header">Welcome!</h5>
       <div class="card-body">
-        <h5 class="card-title">Hello, <%= supplier.companyName %>!</h5>
+        <h5 class="card-title">Hello, <%= supplier.companyName %>!
+         <img src="<%= supplier.avatar %>" style="height: 20px; width: 20px">
+        </h5>
         <p class="card-text">This is your main page. In order to ensure that you continue to appear in the search results of buyers, please keep your capabilities up-to-date.</p>
         <a href="/supplier/profile" class="btn btn-primary">Edit your profile</a>
       </div>

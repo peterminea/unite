@@ -12,6 +12,7 @@ const Supervisor = require("../models/supervisor");
 const Supplier = require("../models/supplier");
 const BidRequest = require("../models/bidRequest");
 const BidStatus = require("../models/bidStatus");
+const ProductService = require("../models/productService");
 const async = require('async');
 const MongoClient = require('mongodb').MongoClient;
 const ObjectId = require("mongodb").ObjectId;
@@ -28,12 +29,46 @@ const statusesJson = {
   BUYER_CANCELS_BID: parseInt(process.env.BUYER_CANCEL_BID)
 };
 
-exports.getIndex = (req, res) => {
-  if(req.session)
-  res.render("buyer/index", {
-    buyer: req.session? req.session.buyer : null,
-    suppliers: null,
-    success: req.session? req.flash("success") : null
+
+exports.getIndex = async (req, res) => {
+  ProductService.find({}, async (err, products) => {
+    if(!products || !products.length) {
+      return false;
+    }
+    
+    var catalogItems = [];
+    
+    for(var i in products) {
+      var supId = products[i].supplier;
+     
+        await Supplier.findOne({ _id: supId }, function(err, obj) {
+          if (err) {
+            console.log(err.message);
+            throw err;
+          }
+          
+          if(obj)
+          catalogItems.push({
+            productName: products[i].productName,
+            price: products[i].price,
+            currency: products[i].currency,
+            supplier: obj.companyName
+          });
+        });
+    }
+    
+    catalogItems.sort(function (a, b) {
+      return a.supplier.localeCompare(b.supplier);
+    });
+    
+    if(req.session) {
+      res.render("buyer/index", {
+        buyer: req.session? req.session.buyer : null,
+        suppliers: null,
+        catalogItems: catalogItems,
+        success: req.session? req.flash("success") : null
+      });
+    }
   });
 }
 
@@ -652,8 +687,8 @@ exports.postSignUp = async (req, res) => {
     const email_str_arr = email.split("@");
     const domain_str_location = email_str_arr.length - 1;
     const final_domain = email_str_arr[domain_str_location];
-    var prohibitedArray = ["gmail.com", "hotmail.com", "outlook.com", "yandex.com", "yahoo.com", "gmx"];
-    
+    var prohibitedArray = ["gmaid.com", "hotmaix.com", "outloop.com", "yandex.com", "yahuo.com", "gmx"];
+    console.log(final_domain.toLowerCase());
     for(var i = 0; i < prohibitedArray.length; i++)
     if (final_domain.toLowerCase().includes(prohibitedArray[i].toLowerCase())) {
       req.flash("error", "E-mail address must be a custom company domain.");
@@ -665,19 +700,20 @@ exports.postSignUp = async (req, res) => {
       } else {
         var promise = getSupers(req.body.organizationUniteID);
         
-        await promise.then(function(supers) {
-          if(!supers || supers.length == 0) {
+        promise.then(async function(supers) {
+          if((1==2) && (!supers || supers.length == 0)) {
             req.flash("error", "Invalid UNITE ID. Please select an appropriate ID from the list.");
-            res.redirect("back");
-          } else if(global++ < 1) {        
-          Buyer.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
+            res.redirect("/buyer/sign-up");
+          } else if(global++ < 1) {console.log(global);
+          await Buyer.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
             if (user)
-              return res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
+              res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
             var buyer;
         try {
           bcrypt.hash(req.body.password, 10, async function(err, hash) {
               buyer = new Buyer({
                 role: process.env.USER_REGULAR,
+                avatar: req.body.avatar,
                 organizationName: req.body.organizationName,
                 organizationUniteID: req.body.organizationUniteID,
                 contactName: req.body.contactName,
@@ -699,7 +735,7 @@ exports.postSignUp = async (req, res) => {
                 if (err) {
                     req.flash('error', err.message);
                     console.error(err.message);
-                  throw err;
+                    throw err;
                 }
               });
                 
@@ -721,11 +757,11 @@ exports.postSignUp = async (req, res) => {
                 if (err) {
                   req.flash('error', err.message);
                   console.error(err.message);
-                  return res.status(500).send({
+                  res.status(500).send({
                     msg: err.message 
                  });
                 }
-              });                
+              });
               
               await sendConfirmationEmail(req.body.organizationName, "/buyer/confirmation/", token.token, req);
               req.flash("success", "Buyer signed up successfully! Please confirm your account by visiting " + req.body.emailAddress + '');
@@ -760,6 +796,7 @@ exports.postProfile = (req, res) => {
       }
       
       doc._id = req.body._id;
+      doc.avatar = req.body.avatar;
       doc.role = req.body.role;
       doc.organizationName = req.body.organizationName;
       doc.organizationUniteID = req.body.organizationUniteID;
@@ -793,7 +830,7 @@ exports.postProfile = (req, res) => {
 
           req.session.buyer = doc;
           req.session.buyerId = doc._id;
-          await req.session.save();          
+          await req.session.save();
           db.close();
           
           req.flash("success", "Buyer details updated successfully!");

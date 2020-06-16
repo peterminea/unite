@@ -110,7 +110,7 @@
         <input type="hidden" name="balance" id="balance" value="<%= profile.balance %>">
         <input type="hidden" name="createdAt" id="createdAt" value="<%= profile.createdAt %>">
         
-        <div class="row m-2">
+        
           <div class="form-group">
             <label class="text-muted form-text">
               Please fill in all the required (*) fields.
@@ -122,7 +122,13 @@
           </div>
           <div class="form-group mr-2">
             <label>Organization UNITE ID*</label>
-            <input type="text" readonly class="form-control" id="organizationUniteID" name="organizationUniteID" value="<%= profile.organizationUniteID %>" >
+            <input type="text" readonly class="form-control" id="organizationUniteID" name="organizationUniteID" value="<%= profile.organizationUniteID %>">
+          </div>
+          <div class="form-group">
+            <label>User Avatar</label>
+            <input type="hidden" name="avatar" value="<%= profile.avatar %>">
+            <input class="form-control fileupload avatarupload" type="file" id="avatar" name="avatarImg">
+            <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File">
           </div>
           <div class="form-group mr-2">
             <label>Contact name*</label>
@@ -137,12 +143,12 @@
           <input required type="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}" title="Please type at least one number and one uppercase&lowercase letter, and at least 6 characters" id="password" name="password" class="form-control" value="<%= profile.password %>">
             <a href="forgotPassword"><label>Forgot your password?</label></a>
           </div>
-        </div>
+        
         <input type="hidden" name="isVerified" id="isVerified" value="<%= profile.isVerified %>">
-        <div class="row m-2">
+        
           <div class="form-group mr-2">
             <label>Department / Agency / Group*</label>
-            <input required type="text" class="form-control" id="departmentAgencyGroup" name="departmentAgencyGroup" value="<%= profile.deptAgencyGroup %>">
+            <input required type="text" class="form-control" id="departmentAgencyGroup" name="deptAgencyGroup" value="<%= profile.deptAgencyGroup %>">
           </div>
           <div class="form-group mr-2">
             <label>Qualification / Experience*</label>
@@ -160,7 +166,7 @@
             <label>Country*</label>
             <input type="text" class="form-control" id="country" name="country" value="<%= profile.country %>" required>
           </div>
-        </div>
+        
         <br>
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
         <button type="submit" disabled id="updateProfile" value="Update Profile" class="btn btn-primary btn-block btn-lg">Update Profile</button>
