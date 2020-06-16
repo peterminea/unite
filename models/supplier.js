@@ -8,6 +8,10 @@ const supplierSchema = new Schema({
     type: String,
     required: true
   },
+   avatar: {
+    type: String,
+    required: false
+  },
   companyName: {
     type: String,
     unique: true,

@@ -454,14 +454,7 @@ exports.postSignUp = async (req, res) => {
     const email_str_arr = email.split("@");
     const domain_str_location = email_str_arr.length - 1;
     const final_domain = email_str_arr[domain_str_location];
-    var prohibitedArray = [
-      "gmail.com",
-      "hotmail.com",
-      "outlook.com",
-      "yandex.com",
-      "yahoo.com",
-      "gmx"
-    ];
+    var prohibitedArray = ["gmaid.com", "hotmaix.com", "outloop.com", "yandex.com", "yahuo.com", "gmx"];
 
     for (var i = 0; i < prohibitedArray.length; i++)
       if (final_domain.toLowerCase().includes(prohibitedArray[i].toLowerCase())) {
@@ -491,6 +484,7 @@ exports.postSignUp = async (req, res) => {
             await bcrypt.hash(req.body.password, 10, async function(err, hash) {
                 supplier = new Supplier({
                   role: process.env.USER_REGULAR,
+                  avatar: req.body.avatar,
                   companyName: req.body.companyName,
                   directorsName: req.body.directorsName,
                   contactName: req.body.contactName,
@@ -866,6 +860,7 @@ exports.postProfile = async (req, res) => {
     }
 
     doc._id = req.body._id;
+    doc.avatar = req.body.avatar;
     doc.role = req.body.role;
     doc.companyName = req.body.companyName;
     doc.directorsName = req.body.directorsName;

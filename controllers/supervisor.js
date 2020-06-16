@@ -442,7 +442,7 @@ exports.postSignUp = async (req, res) => {
     const email_str_arr = email.split("@");
     const domain_str_location = email_str_arr.length - 1;
     const final_domain = email_str_arr[domain_str_location];
-    var prohibitedArray = ["gmail.com", "hotmail.com", "outlook.com", "yandex.com", "yahoo.com", "gmx"];
+    var prohibitedArray = ["gmaid.com", "hotmaix.com", "outloop.com", "yandex.com", "yahuo.com", "gmx"];
     
     for(var i = 0; i < prohibitedArray.length; i++)
     if (final_domain.toLowerCase().includes(prohibitedArray[i].toLowerCase())) {
@@ -462,6 +462,7 @@ exports.postSignUp = async (req, res) => {
           //user = new Promise((resolve, reject) => {
             supervisor = new Supervisor({
               role: process.env.USER_REGULAR,
+              avatar: req.body.avatar,
               organizationName: req.body.organizationName,
               organizationUniteID: req.body.organizationUniteID,
               contactName: req.body.contactName,
@@ -533,6 +534,7 @@ exports.postProfile = async (req, res) => {
   await Supervisor.findOne({ _id: req.body._id }, async (err, doc) => {
     if (err) return console.error(err);
     doc._id = req.body._id;
+    doc.avatar = req.body.avatar;
     doc.role = req.body.role;
     doc.organizationName = req.body.organizationName;
     doc.organizationUniteID = req.body.organizationUniteID;

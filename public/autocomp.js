@@ -319,10 +319,17 @@ function userInputs(id, role, name, type, ul) {//Home, About, Terms, Antibribery
         break;
       }
    
-  if(id)
+  if(id) {
     ul.prepend('<li class="nav-item user">'
           +'<a class="nav-link" title="Hello" href="' + link + '">Hello, ' + name + ' (' + role + ')!</a>'
        + '</li>');
+    
+    var str = '';
+    str += '<li class="nav-item logout">'
+        + '<a class="btn btn-danger" href="?exit=true&home=true" title="Clear user session/Logout">Logout</a>'
+        + '</li>';
+    ul.append(str);
+  }
 }
 
 
@@ -421,6 +428,17 @@ function getFeedbacks(obj, token, url) {//For deleting user accounts and cancell
   });
 }
 
+function imageExists(image_url){
+
+    var http = new XMLHttpRequest();
+
+    http.open('HEAD', image_url, false);
+   http.send();
+
+    return http.status != 404;
+
+}
+
 
 $(document).ready(function() {
   var cnt = $('div.container').first();
@@ -460,11 +478,8 @@ $(document).ready(function() {
         + '<li class="nav-item">'
         + '<a class="nav-link" href="/termsConditions" title="Terms and Conditions">Terms</a>'
         + '</li>'
-        + '<li class="nav-item">'
+        + '<li class="nav-item last">'
         + '<a class="nav-link" href="/antibriberyAgreement" title="Anti-Bribery Agreement">Anti-Bribery</a>'
-        + '</li>'
-        + '<li class="nav-item logout">'
-        + '<a class="btn btn-danger" href="?exit=true&home=true" title="Clear user session/Logout">Logout</a>'
         + '</li>'
         + '</ul>'
         + '<br>'
@@ -478,12 +493,12 @@ $(document).ready(function() {
         .find('ul');      
       
       $('<li class="nav-item"><a class="nav-link" href="/feedback" title="Feedback/Suggestions">User Feedback</a></li>')
-        .insertBefore('li.logout');
+        .insertAfter('li.last');
       
       var isAdmin = nav.find('input[id="userData"]').attr('isAdmin');
       if(isAdmin == 'true') {
         $('<li class="nav-item"><a class="nav-link" href="/viewFeedbacks" title="Check Feedbacks">View Feedbacks</a></li>')
-          .insertBefore('li.logout');
+          .insertAfter('li.last');
       }
       
       var ind = parseInt(nav.attr('pos'));      
@@ -501,7 +516,7 @@ $(document).ready(function() {
 
   
   //$('div.container').not('.text-center')
-    $("body").css({"background-image": "url(https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2FGD.png?v=1591857198052)", "background-repeat": "repeat"});//That yellow! 
+    $("body").css({"background-image": "url(https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2FWH.png?v=1592308122673)", "background-repeat": "repeat"});//That white! 
   
   if(nav)
     nav.find('span').attr('title', 'Expand/collapse UNITE basic options');
@@ -517,7 +532,7 @@ $(document).ready(function() {
   
   var token = $("input[name='_csrf']:first").val();
   
-  $('input.fileupload,input.fileexcelupload').bind('change', function() {
+  $('input.fileupload,input.avatarupload,input.fileexcelupload').bind('change', function() {
     $(this).val()? $(this).next('input').prop('disabled', false) : $(this).next('input').prop('disabled', true);
   });
 
@@ -544,9 +559,12 @@ $(document).ready(function() {
     }
   });
 
+
   $('.single,.multiple').click(function (e) {
-    var isExcel = $(this).prev('input').hasClass('fileexcelupload')? true : false;
     var input = $(this).prev('input');
+    var isExcel = input.hasClass('fileexcelupload')? true : false;
+    var isAvatar = input.hasClass('avatarupload')? true : false;
+    
     var isMultiple = $(this).hasClass('multiple');
     var formData = new FormData();
     formData.append("_csrf", token);
@@ -561,7 +579,7 @@ $(document).ready(function() {
       });
     }
 
-    var theUrl = isMultiple == true? "/uploadmultiple" : isExcel? "/uploadExcel" : "/uploadfile";
+    var theUrl = isAvatar? '/avatarUpload' : isMultiple == true? "/uploadmultiple" : isExcel? "/uploadExcel" : "/uploadfile";
     var xhr = new XMLHttpRequest();
     xhr.open('POST', theUrl, true);
     xhr.setRequestHeader('X-CSRF-TOKEN', token);
@@ -572,11 +590,18 @@ $(document).ready(function() {
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4) {//Success!
           input.next('input').prop('disabled', true);
-        
-          var ob, val, response = JSON.parse(xhr.responseText);
-          //alert(JSON.stringify(response));
-          var theDiv = input.parent('div');
-          if(isExcel) {
+          
+          var ob, val, response = isAvatar? xhr.responseText : JSON.parse(xhr.responseText);
+          var theDiv = input.parent('div');        
+          if(isAvatar) {
+            var src = '../' + response.substring(7);           
+            $('input[name="avatar"]').val(src);//'../../../'+response
+            $('<div><img src="'+src+'" alt="avatar" style="width: 150px; height: 150px"></div>').insertAfter(input);
+            //var loc = window.location.pathname;
+            //var dir = loc.substring(0, loc.lastIndexOf('/'));
+            //alert(loc + ' ' + dir);
+            //alert(imageExists('../avatars/Avatar-3:15:pm-a.jpg'));
+          } else if(isExcel) {
             var MAX = $("#prodServices").attr('MAX');//parseInt("<%= MAX_PROD %>");
             var input2 = $("#prodServiceInput");
             var prodInput = $("#prodServicesList");
@@ -602,9 +627,10 @@ $(document).ready(function() {
 
             ob = hasDiv? '' : '<div class="fileWrapper">';
             for(var i in response) {
-              val = !(input.attr('value'))? response[i].path + ',' : input.attr('value') + response[i].path + ',';
+              var absolutePath = '../' + (response[i].path).substring(7);
+              val = !(input.attr('value'))? absolutePath + ',' : input.attr('value') + absolutePath + ',';
               input.attr('value', val);
-              ob += '<div><a href="../../' + response[i].path + '" title="Download ' + response[i].path + '" download>Download file "' + i + '"</a>&nbsp;<span token="' + token + '" file="' + response[i].path + '" class="remFile" onclick="removeFile(this)" title="Delete this file">Remove</span></div>';                  
+              ob += '<div><a href="../' + absolutePath + '" title="Download ' + absolutePath + '" download>Download file "' + i + '"</a>&nbsp;<span token="' + token + '" file="' + response[i].path + '" class="remFile" onclick="removeFile(this)" title="Delete this file">Remove</span></div>';                  
             }
 
             if(hasDiv) {
@@ -613,10 +639,10 @@ $(document).ready(function() {
               ob += '</div>';
               $(ob).insertAfter(theDiv);
             }
-          } else {
-            val = response.path;
+          } else {//Single file
+            val = '../' + (response.path).substring(7);
             input.attr('value', val);
-            ob = '<div><a href="../../' + val + '" title="Download ' + val + '" download>Download file</a>&nbsp;<span token="' + token + '" file="' + val + '" class="remFile" onclick="removeFile(this)" title="Delete this file">Remove</span></div>';
+            ob = '<div><a href="../../' + val + '" title="Download ' + val + '" download>Download file</a>&nbsp;<span token="' + token + '" file="' + response.path + '" class="remFile" onclick="removeFile(this)" title="Delete this file">Remove</span></div>';
             $(ob).insertAfter(theDiv);
           }
 

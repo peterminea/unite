@@ -8,7 +8,8 @@ const bodyParser = require("body-parser");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
-const flash = require("connect-flash");
+//const flash = require("flash");
+//const conn_flash = require("connect-flash");
 const multer = require("multer");
 const fs = require("fs-extra");
 const fs2 = require('fs');
@@ -87,7 +88,9 @@ app.use(
 // Password Checking & Protecting
 const csrfProtection = csrf();
 app.use(csrfProtection);
-app.use(flash());
+app.use(require('flash')());
+app.use(require('connect-flash')());
+app.use(require('express-flash')());
 
 app.use((req, res, next) => {
   res.locals.csrfToken = req.csrfToken();
@@ -332,11 +335,12 @@ socket.on("connection", (sock) => {
 //Upload files to DB:
 const ObjectId = require("mongodb").ObjectId;
 const uploadController = require("./controllers/upload");
+const uploadAvatarController = require("./controllers/uploadAvatar");
 
 var storage = multer.diskStorage({
   destination: function (req, file, callback) {
-    callback(null, path.join('${__dirname}/../uploads'));
-    //callback(null, 'uploads/');
+    callback(null, path.join('${__dirname}/../public/uploads'));
+    //callback(null, 'public/uploads/');
   },
   filename: function (req, file, callback) {// + path.extname(file.originalname)
     var date = dateformat(new Date(), 'dddd-mmmm-dS-yyyy-h:MM:ss-TT');//Date.now()
@@ -407,7 +411,7 @@ app.post("/uploadfile", upload.single("single"), (req, res, next) => {
   var tmp_path = req.file.path;
 
   // The original name of the uploaded file stored in the variable "originalname".
-  var target_path = '/uploads/' + req.file.originalname;
+  var target_path = 'public/uploads/' + req.file.originalname;
 
   // A better way to copy the uploaded file.
   var src = fs.createReadStream(tmp_path);
@@ -440,22 +444,39 @@ app.post("/uploadExcelFile", upload.single("single"), (req, res, next) => {
 
 
 //Uploading multiple files
-app.post("/uploadmultiple",  upload.array("multiple", 12),   (req, res, next) => {
+app.post("/uploadmultiple",  upload.array("multiple", 10),   (req, res, next) => {
     const files = req.files;
     
     if (!files) {
-      const error = new Error("Please choose maximum 12 files.");
+      const error = new Error("Please choose maximum 10 files.");
       error.httpStatusCode = 400;
       return next(error);
     }
   
     console.log(files);
     res.send(files);
-  }
-);
+  }, (error, req, res, next) => {
+    res.status(400).send({error: error.message});
+});
+
 
 //Alternate multiupload:
-app.post("/multipleupload", uploadController.multipleUpload);
+app.post("/multipleupload", uploadController.multipleUpload, (req, res, next) => {
+  console.log(req.files);
+}, (error, req, res, next) => {
+  res.status(400).send({error: error.message});
+});
+
+
+app.post("/avatarUpload", uploadAvatarController.avatarUpload, (req, res, next) => {
+  console.log(req);
+  //console.log(req.file.buffer);
+  //console.log(JSON.stringify(req.body));
+  //req.avatar = req.file.buffer;
+  res.send();
+}, (error, req, res, next) => {
+  res.status(400).send({error: error.message});
+});
 
 
 const sgMail = require('@sendgrid/mail');
@@ -570,7 +591,7 @@ app.post('/industryAutocomplete', function(req, res, next) {
     
     if(!err) {
       if(data && data.length && data.length > 0) {
-        data.forEach(item=>{
+        data.forEach((item) => {
           let obj = {
             id: item._id,
             name: item.name
