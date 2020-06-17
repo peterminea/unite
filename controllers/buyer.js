@@ -31,45 +31,15 @@ const statusesJson = {
 
 
 exports.getIndex = async (req, res) => {
-  ProductService.find({}, async (err, products) => {
-    if(!products || !products.length) {
-      return false;
-    }
-    
-    var catalogItems = [];
-    
-    for(var i in products) {
-      var supId = products[i].supplier;
-     
-        await Supplier.findOne({ _id: supId }, function(err, obj) {
-          if (err) {
-            console.log(err.message);
-            throw err;
-          }
-          
-          if(obj)
-          catalogItems.push({
-            productName: products[i].productName,
-            price: products[i].price,
-            currency: products[i].currency,
-            supplier: obj.companyName
-          });
-        });
-    }
-    
-    catalogItems.sort(function (a, b) {
-      return a.supplier.localeCompare(b.supplier);
-    });
-    
-    if(req.session) {
+     if(req.session) {
       res.render("buyer/index", {
+        message: req.flash('info', 'Please wait while we are loading the list of available products (The Catalog)...'),
         buyer: req.session? req.session.buyer : null,
         suppliers: null,
-        catalogItems: catalogItems,
+        //catalogItems: catalogItems,
         success: req.session? req.flash("success") : null
       });
     }
-  });
 }
 
 exports.postIndex = (req, res) => {
@@ -710,7 +680,10 @@ exports.postSignUp = async (req, res) => {
               res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
             var buyer;
         try {
-          bcrypt.hash(req.body.password, 10, async function(err, hash) {
+          bcrypt.hash(req.body.password, 16, async function(err, hash) {
+            
+              console.log(hash);
+            
               buyer = new Buyer({
                 role: process.env.USER_REGULAR,
                 avatar: req.body.avatar,

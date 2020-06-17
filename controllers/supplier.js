@@ -481,7 +481,7 @@ exports.postSignUp = async (req, res) => {
           }).catch(console.error);
           
           try {
-            await bcrypt.hash(req.body.password, 10, async function(err, hash) {
+            await bcrypt.hash(req.body.password, 16, async function(err, hash) {
                 supplier = new Supplier({
                   role: process.env.USER_REGULAR,
                   avatar: req.body.avatar,
@@ -515,6 +515,12 @@ exports.postSignUp = async (req, res) => {
                   qualityManagementPolicy: req.body.qualityManagementPolicy,
                   occupationalSafetyAndHealthPolicy: req.body.occupationalSafetyAndHealthPolicy,
                   otherRelevantFiles: req.body.otherRelevantFiles,
+                  certificatesIds: req.body.certificatesIds,
+                  antibriberyPolicyId: req.body.antibriberyPolicyId,
+                  environmentPolicyId: req.body.environmentPolicyId,
+                  qualityManagementPolicyId: req.body.qualityManagementPolicyId,
+                  occupationalSafetyAndHealthPolicyId: req.body.occupationalSafetyAndHealthPolicyId,
+                  otherRelevantFilesIds: req.body.otherRelevantFilesIds,
                   balance: req.body.balance,
                   facebookURL: req.body.facebookURL,
                   instagramURL: req.body.instagramURL,
@@ -893,6 +899,12 @@ exports.postProfile = async (req, res) => {
     doc.qualityManagementPolicy = req.body.qualityManagementPolicy;
     doc.occupationalSafetyAndHealthPolicy = req.body.occupationalSafetyAndHealthPolicy;
     doc.otherRelevantFiles = req.body.otherRelevantFiles;
+    doc.certificatesIds = req.body.certificatesIds;
+    doc.antibriberyPolicyId = req.body.antibriberyPolicyId;
+    doc.environmentPolicyId = req.body.environmentPolicyId;
+    doc.qualityManagementPolicyId = req.body.qualityManagementPolicyId;
+    doc.occupationalSafetyAndHealthPolicyId = req.body.occupationalSafetyAndHealthPolicyId;
+    doc.otherRelevantFilesIds = req.body.otherRelevantFilesIds;
     doc.facebookURL = req.body.facebookURL;
     doc.instagramURL = req.body.instagramURL;
     doc.twitterURL = req.body.twitterURL;
@@ -929,21 +941,23 @@ exports.postProfile = async (req, res) => {
           console.error(err.message);
           throw err;
         }
-      });
+ 
+          var capability = new Capability({
+          supplier: doc._id,
+          capabilityDescription: doc.capabilityDescription,
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        });
 
-        var capability = new Capability({
-        supplier: doc._id,
-        capabilityDescription: doc.capabilityDescription,
-        createdAt: Date.now(),
-        updatedAt: Date.now()
-      });
-
-      await capability.save((err) => {
-        if (err) {
-          req.flash('error', err.message);
-          console.error(err.message);
-          throw err;
-          }
+        capability.save((err) => {
+          if (err) {
+            req.flash('error', err.message);
+            console.error(err.message);
+            throw err;
+            }
+        });
+        
+         console.log('Capability description saved!');
       });
       
       var industry = new Industry({
@@ -958,15 +972,14 @@ exports.postProfile = async (req, res) => {
         }
       });
 
-      console.log('Capability description saved!');
+     
       await dbo.collection("productservices").deleteMany({ supplier: doc._id }, (err, resp2) => {
         if(err) {
           req.flash('error', err.message);
           console.error(err.message);
           throw err;
         }
-      });
-      
+        
       if (Array.isArray(arr))
         for (var i in arr) {
           if(!doc.pricesList[i]) 
@@ -981,7 +994,7 @@ exports.postProfile = async (req, res) => {
             updatedAt: Date.now()
           });
 
-          await productService.save((err) => {
+          productService.save((err) => {
             if (err) {
               req.flash('error', err.message);
               console.error(err.message);
@@ -989,11 +1002,13 @@ exports.postProfile = async (req, res) => {
             }
           });
           
-          db.close();
           console.log('Product saved!');
         }
-      });
       
+      db.close();
+      });
+    });
+ 
     console.log('Products offered list saved! Now saving new data to session:');
     req.session.supplier = doc;
     req.session.supplierId = doc._id;

@@ -21,6 +21,11 @@
   <script src="/autocomp.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
+      var id = "<%= userId %>", 
+      role = "<%= role %>", 
+      name = "<%= userName %>", 
+      type = "<%= userType %>";
+      userInputs(id, role, name, type, $('ul.mr-auto'));
       getFeedbacks($('#main'), $('input[name="_csrf"]').val(), '/feedbacks');
     });
   </script>

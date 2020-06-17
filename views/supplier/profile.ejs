@@ -96,38 +96,12 @@
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <nav user="supplier" class="navbar navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="/supplier">Supplier - UNITE</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="/">Home<span class="sr-only">(current)</span></a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/supplier">Dashboard <span class="sr-only">(current)</span></a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/supplier/bid-requests">Bid Requests</a>
-        </li>
-      </ul>
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link" href="/supplier/balance">Balance: €<%= profile.balance %>&nbsp;</a>
-        </li>
-        <li class="nav-item active">
-          <a class="btn btn-primary" href="/supplier/profile">Profile</a>
-        </li>
-        <br>
-        <li class="nav-item">
-          <a class="btn btn-danger" href="?exit=true">Logout</a>
-        </li>
-      </ul>
-    </div>
   </nav>
 
   <div class="container">
@@ -308,36 +282,42 @@
         
         <div class="form-group">
           <label>Certificates</label>
+          <input type="hidden" class="fileId" name="certificatesIds" value="<%= profile.certificatesIds %>">
           <input class="form-control fileupload" type="file" id="certificates" name="certificates" multiple value="<%= profile.certificates %>">
           <input class="form-control multiple btn btn-dark mt-2" type="button" disabled value="Upload Files" />
         </div>
 
         <div class="form-group">
           <label>Antibribery policy</label>
+          <input type="hidden" class="fileId" name="antibriberyPolicyId" value="<%= profile.antibriberyPolicyId %>">
           <input class="form-control fileupload" type="file" id="antibriberyPolicy" name="antibriberyPolicy" value="<%= profile.antibriberyPolicy %>"/>
           <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
         </div>
 
         <div class="form-group">
           <label>Environment policy</label>
+          <input type="hidden" class="fileId" name="environmentPolicyId" value="<%= profile.environmentPolicyId %>">
           <input class="form-control fileupload" type="file" id="environmentPolicy" name="environmentPolicy" value="<%= profile.environmentPolicy %>"/>
           <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
         </div>
 
         <div class="form-group">
           <label>Quality management policy</label>
+          <input type="hidden" class="fileId" name="qualityManagementPolicyId" value="<%= profile.qualityManagementPolicyId %>">
           <input class="form-control fileupload" type="file" id="qualityManagementPolicy" name="qualityManagementPolicy" value="<%= profile.qualityManagementPolicy %>"/>
           <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
         </div>
 
         <div class="form-group">
           <label>Occupational Safety and Health</label>
+          <input type="hidden" class="fileId" name="occupationalSafetyAndHealthPolicyId" value="<%= profile.occupationalSafetyAndHealthPolicyId %>">
           <input class="form-control fileupload" type="file" id="occupationalSafetyAndHealthPolicy" name="occupationalSafetyAndHealthPolicy" value="<%= profile.occupationalSafetyAndHealthPolicy %>"/>
           <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
         </div>
 
         <div class="form-group">
           <label>Other relevant files</label>
+          <input type="hidden" class="fileId" name="otherRelevantFilesIds" value="<%= profile.otherRelevantFilesIds %>">
           <input class="form-control fileupload" type="file" id="otherRelevantFiles" name="otherRelevantFiles" multiple value="<%= profile.otherRelevantFiles %>">
           <input class="form-control multiple btn btn-dark mt-2" type="button" disabled value="Upload Files" />
         </div>

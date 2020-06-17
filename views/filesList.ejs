@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- We will also implement payment (via an Escrow system) in the platform, as well as agreement policies, should the UNITE project go further.-->
+<head>
+  <meta charset="utf-8">
+  <title>UNITE - Underserved Needs in Times of Emergency - Member List</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A cool thing made with Glitch">
+  <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/messages.css">
+  <link rel="stylesheet" href="/jquery-ui.css">
+  <link rel="stylesheet" href="/bootstrap.min.css">
+  <script src="/jquery.min.js"></script>
+  <script src="/jquery-ui.min.js"></script>
+  <script src="/popper.min.js"></script>
+  <script src="/bootstrap.min.js"></script>
+  <script src="/sweetalert.min.js"></script>
+  <script src="/https.js"></script>
+  <script src="/autocomp.js"></script>
+  <script type="text/javascript">
+  $(document).ready(function() {
+      var id = "<%= userId %>", 
+      role = "<%= role %>", 
+      name = "<%= userName %>", 
+      type = "<%= userType %>";
+      userInputs(id, role, name, type, $('ul.mr-auto'));
+    
+    $('.download,.delete').css({'cursor': 'pointer', 'color': 'lime', 'font-weight': 'bold'});
+    
+    $('.download,.delete').on('click', function() {
+      takeAction($(this), $('input[name="_csrf"]').val(), $(this).parent('td').parent('tr'));
+    });
+    
+  });
+  </script>
+</head>
+  
+  <body>
+  <nav pos="7" class="navbar navbar-expand-lg navbar-light bg-light" style="width: 100% !important;">
+    <a class="navbar-brand" href="#">
+      <img src="https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2Funite%20(1).png?v=1587898738134"
+        height="50">
+    </a>
+    <input type="hidden" id="userData" isAdmin="<%= isAdmin %>" userRole="<%= role %>">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </nav>
+    
+<div class="container home">
+  <h1>
+    UNITE FULL LIST OF DATABASE FILES
+  </h1>
+  <br>
+  <div>
+    <p class='term'>
+      Disclaimer: This is a Demo list of uploaded files to our Database.
+    </p>
+    <p class='term'>
+      In the future, we may also provide a list of saved Avatars to our Database. They will have different tables from those that are currently allocated to regularly uploaded files.
+    </p>
+  </div>
+  <br><br>
+  <h3 style="color: green">
+    List of UNITE Files
+  </h3>
+  <br>
+<% if(files != null && files.length > 0) {%>
+  <div class="container form-group mt-4" style="text-align: center">
+    <table id="files" class="table table-striped table-hover table-condensed files">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">File name</th>
+          <th scope="col">File Size</th>
+          <th scope="col">Upload Date</th>
+          <th scope="col">Download File</th>
+          <th scope="col">Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% let i = 0; for (file of files) { %>
+        <tr id="<%= file._id %>">
+          <td scope="col"><%= i+1 %></td>
+          <td scope="col"><%= file.filename %></td>
+          <td scope="col"><%= file.length %></td>
+          <td scope="col"><%= file.uploadDate %></td>
+          <td><span class="download">Get file</span></td>
+          <td><span class="delete">Remove</span></td>
+        </tr>
+        <% i++; } %>
+        </tbody>
+      </table>
+    </div>
+        <% } else {%>
+        <div>
+          <p style="color: green; font-family: arial">
+            Sorry, no files here.
+          </p>          
+        </div>
+        <% }%>  
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    </div>
+    
+  </body>
+  
+</html>

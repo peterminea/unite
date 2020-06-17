@@ -131,8 +131,6 @@ server2.on('stream', (stream, headers) => {
 server2.listen(8443);
 
 
-
-
 app.post('/processBuyer', (req, res) => {
   MongoClient.connect(URI, {useUnifiedTopology: true}, function(err, db) {
     if (err) 
@@ -290,7 +288,7 @@ socket.on("connection", (sock) => {
     mesg.save((err) => {
       if(err) {
        console.error(err.message);
-        flash('error', err.message);
+        //flash('error', err.message);
         throw err;
       }
     });
@@ -332,11 +330,265 @@ socket.on("connection", (sock) => {
 });
 
 
-//Upload files to DB:
+//Buyers should load a Catalog of Products by clicking on a button in their Index page:
+app.get('/loadProductsCatalog', (req, res) => {
+ProductService.find({}, async (err, products) => {
+    if(!products || !products.length) {
+      return false;
+    }
+    
+    var catalogItems = [];
+    
+    for(var i in products) {
+      var supId = products[i].supplier;
+     
+        await Supplier.findOne({ _id: supId }, function(err, obj) {
+          if (err) {
+            console.log(err.message);
+            throw err;
+          }
+          
+          if(obj)
+          catalogItems.push({
+            productName: products[i].productName,
+            price: products[i].price,
+            currency: products[i].currency,
+            supplier: obj.companyName
+          });
+        });
+    }
+    
+    catalogItems.sort(function (a, b) {
+      return a.supplier.localeCompare(b.supplier);
+    });
+    
+    //console.log(JSON.stringify(catalogItems));
+    res.json(catalogItems);
+  });
+});
+
+//Upload files to DB & to Glitch:
 const ObjectId = require("mongodb").ObjectId;
 const uploadController = require("./controllers/upload");
 const uploadAvatarController = require("./controllers/uploadAvatar");
+//Upload to DB:
+const conn = mongoose.createConnection(URI, {useNewUrlParser: true, useUnifiedTopology: true});
 
+const GridFsStorage = require('multer-gridfs-storage');
+const Grid = require('gridfs-stream');
+//new mongoose.mongo.GridFSBucket(conn.db);
+var methodOverride = require('method-override');
+app.use(methodOverride('_method'));
+
+let gfs;
+
+conn.once('open', () => {
+  gfs = Grid(conn.db, mongoose.mongo);  
+  //gfs = new mongoose.mongo.GridFSBucket(conn.db, {    bucketName: "uploads"  });
+  //console.log(gfs);
+  
+  //gfs.collection('uploads');
+  
+});
+
+const theStorage = new GridFsStorage({
+  url: process.env.MONGODB_URI,
+  options: {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  },
+  file: (req, file) => {
+    return new Promise((resolve, reject) => {
+      crypto.randomBytes(16, (err, buf) => {
+        if(err) {
+          return reject(err);
+        }
+       
+        const filename = buf.toString('hex') + path.extname(file.originalname);
+        const fileInfo = {
+          originalname: file.originalname,
+          filename: filename,
+          bucketName: 'uploads'
+        };
+        
+        console.log(fileInfo);
+        resolve(fileInfo);
+      });
+    });
+  }
+});
+
+
+var extArray = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.pdf', '.txt', '.doc', '.docx', '.rtf'], excelArray = ['.xls', '.xlsx'];
+const uploadBase = multer({
+  storage: theStorage,
+  fileFilter: function (req, file, callback) {
+    var ext = path.extname(file.originalname);
+    var isItIn = false;
+    
+    for(var i in extArray)
+      if(ext.toLowerCase() == extArray[i].toLowerCase()) {
+        isItIn = true;
+        break;
+      }
+    
+    if(!isItIn) {
+      return callback(new Error('Extension forbidden!'));
+    }
+    
+    callback(null, true);
+  },
+  limits: {
+    fileSize: 2048 * 2048//4 MB
+  }
+});
+
+
+app.post('/uploadBaseSingle', uploadBase.single('single'), (req, res, next) => {
+  res.json({file: req.file});
+});
+
+
+app.post('/uploadBaseMultiple', uploadBase.array('multiple', 10), (req, res, next) => {
+  res.json({files: req.files});
+});
+
+
+app.get('/files', (req, res) => {//Load files list (data)
+  gfs.files.find().toArray((err, files) => {
+    if(!files || !files.length) {
+      return res.status(404).json({
+        err: 'No files exist!'
+      });
+      
+      return res.json(files);
+    }
+  });
+});
+
+
+app.get('/files/:filename', (req, res) => {//Load single file (data)
+  gfs.files.findOne({ filename: req.params.filename }, (err, file) => {
+    if(!file || !file.length) {
+      return res.status(404).json({
+        err: 'No file exists!'
+      });
+      
+      return res.json(file);
+    }
+  });
+});
+
+
+app.get('/download/:id', (req, res) => {//General download, like when clicking on a file.
+  console.log(req.params.id);
+  var id = new ObjectId(req.params.id);
+  //console.log(gfs);
+  gfs.createReadStream({ _id: mongoose.Types.ObjectId(req.params.id) }, (err, found) => {
+      console.log(found);
+    if(1==2)
+      if(err || !found) {
+        res.status(404).send('File Not Found!');
+        //return false;
+        }
+    
+      gfs.openDownloadStreamByName(req.params.id).pipe(res);
+      //var readstream = gfs.createReadStream({ _id: mongoose.Types.ObjectId(req.params.id) });      
+      //readstream.pipe(res);
+    });
+});
+
+
+app.get('/image/:filename', (req, res) => {//Download image file.
+  gfs.files.findOne({ filename: req.params.filename }, (err, file) => {
+    if(!file || !file.length) {
+      return res.status(404).json({
+        err: 'No file exists!'
+      });
+    }
+      
+      var type = file.contentType;
+      if(type === 'image/jpeg' || type === 'img/png') {//Down-Load.
+        const readstream = gfs.createReadStream(file.filename);
+        readstream.pipe(res);
+      } else {
+        res.status(404).json({
+          err: 'This is not an image.'
+        });
+      }
+      
+      return res.json(file);
+    
+  });
+});
+
+
+app.get('/loadFiles', (req, res) => {
+  gfs.files.find().toArray((err, files) => {//Load files list with isImage flag.
+  if(!files || !files.length) {
+    res.render('/filesList', {files: false});
+    } else {
+      files.map((file) => {
+        if(file.contentType === 'image/jpeg' || file.contentType === 'img/png') {
+          file.isImage = true;
+        } else {
+          file.isImage = false;
+        }
+      });
+      
+      res.json(files);
+      //res.render('/filesList', {files: files});
+    }
+  });
+});
+
+
+/*
+<% if(files) { %>
+  <% files.forEach(function(file) { %>
+  <div class="card card-body mb-3">
+    <% if(file.isImage) {%>
+    <img src="image/<%= file.filename %>" alt="">
+    <% } else { %>
+    <%= file.filename %>
+    <% } %>
+    <form method="POST" action="/files/<%= file._id %>?_method=DELETE">
+      <button class="btn btn-danger btn-block mt-4">Delete file</button>
+    </form>
+  </div>
+  <% }) %>
+<% } else { %>
+  <p style="color: green; text-decoration: italic">No files to show.</p>
+<% } %>
+*/
+
+
+app.delete('/files/:id', (req, res) => {//Remove a file.  
+  var id = new ObjectId(req.params.id);
+  
+  gfs.exist({ _id: id }, (err, file) => {
+    console.log(file);
+    if(1==2)
+    if (err || !file) {
+        res.status(404).send('File Not Found!');
+        return;
+      }
+    
+    gfs.remove({_id: req.params.id, root: 'uploads'}, (err, gridStore) => {
+      if(err) {
+        return res.status(404).json({err: err});
+      }
+
+      console.log('File deleted!');
+      req.flash('success', 'File deleted!');
+      //res.json('File deleted!');
+      res.redirect('/filesList');
+    });
+  });
+});
+
+
+//Upload files to Glitch:
 var storage = multer.diskStorage({
   destination: function (req, file, callback) {
     callback(null, path.join('${__dirname}/../public/uploads'));
@@ -349,7 +601,6 @@ var storage = multer.diskStorage({
   }
 });
 
-var extArray = ['.png', '.jpg', '.jpeg', '.gif', '.pdf', '.txt', '.docx', '.rtf'], excelArray = ['.xls', '.xlsx'];
  
 var upload = multer({
   storage: storage,
@@ -360,6 +611,7 @@ var upload = multer({
     for(var i in extArray)
       if(ext.toLowerCase() == extArray[i].toLowerCase()) {
         isItIn = true;
+        break;
       }
     if(!isItIn) {
       return callback(new Error('Extension forbidden!'));
@@ -382,6 +634,7 @@ var uploadExcel = multer({
     for(var i in excelArray)
       if(excelArray.toLowerCase() == excelArray[i].toLowerCase()) {
         isItIn = true;
+        break;
       }
     if(!isItIn) {
       return callback(new Error('Please upload an Excel file!'));
@@ -425,8 +678,8 @@ app.post("/uploadfile", upload.single("single"), (req, res, next) => {
   });
 });
 
-var xlsx = require('node-xlsx');
 
+var xlsx = require('node-xlsx');
 app.post("/uploadExcelFile", upload.single("single"), (req, res, next) => {
   const file = req.file;
   
@@ -444,7 +697,7 @@ app.post("/uploadExcelFile", upload.single("single"), (req, res, next) => {
 
 
 //Uploading multiple files
-app.post("/uploadmultiple",  upload.array("multiple", 10),   (req, res, next) => {
+app.post("/uploadmultiple",  upload.array("multiple", 10), (req, res, next) => {
     const files = req.files;
     
     if (!files) {
@@ -647,7 +900,7 @@ app.post('/deleteFile', function(req, res, next) {
   });
 });
 
-
+/*
 app.post('/processFile', function(req, res, next) {
   //fs2.unlinkSync(req.body.file);
   
@@ -661,7 +914,7 @@ app.post('/processFile', function(req, res, next) {
     req.flash('success', 'File deleted!');
     res.status(200).end();
   });
-});
+});*/
 
 
 app.get('/industryGetAutocomplete', function(req, res, next) {
@@ -1002,14 +1255,14 @@ var db;
 MongoClient.connect(URI, {useUnifiedTopology: true}, (err, client) => {
   if (err) {
     console.error(err.message);    
-    flash('error', err.message);
+    //flash('error', err.message);
     throw err;
   }
 
   db = client.db(BASE);//Right connection!
   process.on('uncaughtException', function (err) {
     console.error(err.message);
-    flash('error', err.message);
+    //flash('error', err.message);
   });
   
   /* //Database scripting / Manipulating data and datatypes. Askin, please do not delete these ones :) .

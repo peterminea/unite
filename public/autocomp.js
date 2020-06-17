@@ -43,7 +43,7 @@ function treatDiv(div, isMulti, val, input) {
 }
 
 
-function removeFile(obj) {
+function removeFile(obj) {//remove from Glitch
   var token = $(obj).attr('token');
   var file = $(obj).attr('file');  
   var div = $(obj).parent('div');
@@ -67,6 +67,66 @@ function removeFile(obj) {
     },
     success: function(data) {
       treatDiv(div, isMulti, val, input);
+      //alert('File removed!');
+    }
+  });
+}
+
+
+function deleteFile(obj) {//remove from Database
+  var token = $(obj).attr('token');
+  var file = $(obj).attr('file');  
+  var div = $(obj).parent('div');
+  var isMulti = div.parent('div').hasClass('fileWrapper');
+  
+  var input = isMulti? 
+      div.parent('div').prev('div').find('.fileupload') : div.prev('div').find('.fileupload');
+  //alert(file + ' ' + token + ' ' + div.length + ' ' + input.length);
+  var val = input.attr('value');
+  //var isMulti = val.charAt(val.length-1) == ','? true : false;
+  
+  $.ajax({
+    url: '/files/'+file,
+    type: 'DELETE',
+    headers: { "X-CSRF-Token": token },
+    data: {_method: 'delete'},
+    datatype: 'application/json',
+    error: function() {
+      //alert('Error on AJAX Request!');
+      treatDiv(div, isMulti, val, input);
+    },
+    success: function(data) {
+      treatDiv(div, isMulti, val, input);
+      //alert('File removed!');
+    }
+  });
+}
+
+
+function downloadFile(obj) {//remove from Database
+  var token = $(obj).attr('token');
+  var file = $(obj).attr('file');
+  var div = $(obj).parent('div');
+  var isMulti = div.parent('div').hasClass('fileWrapper');
+  
+  var input = isMulti? 
+      div.parent('div').prev('div').find('.fileupload') : div.prev('div').find('.fileupload');
+  //alert(file + ' ' + token + ' ' + div.length + ' ' + input.length);
+  var val = input.attr('value');
+  //var isMulti = val.charAt(val.length-1) == ','? true : false;
+  
+  $.ajax({
+    url: '/download/'+file,
+    type: 'GET',
+    headers: { "X-CSRF-Token": token },
+    //data: {_method: 'delete'},
+    datatype: 'application/json',
+    error: function() {
+      //alert('Error on AJAX Request!');
+      //treatDiv(div, isMulti, val, input);
+    },
+    success: function(data) {
+      //treatDiv(div, isMulti, val, input);
       //alert('File removed!');
     }
   });
@@ -429,14 +489,44 @@ function getFeedbacks(obj, token, url) {//For deleting user accounts and cancell
 }
 
 function imageExists(image_url){
+  var http = new XMLHttpRequest();
+  http.open('HEAD', image_url, false);
+  http.send();
+  return http.status != 404;
+}
 
-    var http = new XMLHttpRequest();
 
-    http.open('HEAD', image_url, false);
-   http.send();
+function treatLastLi() {
+  var nextLi = $('li.last').next('li');
+  $('li.last').removeClass('last');
+  nextLi.addClass('last');
+}
 
-    return http.status != 404;
 
+function takeAction(obj, token, tr) {//alert(tr.length);
+  var fileId = tr.attr('id');
+  var isDownload = obj.hasClass('download')? true : false;
+  //alert(isDownload);
+  
+  var url = isDownload? '/download/' : '/files/';
+  var type = isDownload? 'GET' : 'DELETE';
+  var data = isDownload? null : {_method: 'delete'};
+  
+  $.ajax({
+    url: url+fileId,
+    type: type,
+    data: data,
+    headers: { "X-CSRF-Token": token },
+    datatype: 'application/json',
+    error: function() {
+      alert('Error!');
+    },
+    success: function(data) {
+      if(!isDownload)
+        tr.remove();
+      
+    }
+  });
 }
 
 
@@ -460,7 +550,7 @@ $(document).ready(function() {
   }
   
   var nav = $('body').find('nav');
-  if(nav.length && !(nav.find('div[id="navbarSupportedContent"]').length)) {
+  if(nav.length && nav.next('div').hasClass('home')) {
     var isHome = nav.next('div').hasClass('home');    
     
     var $str =
@@ -497,7 +587,11 @@ $(document).ready(function() {
       
       var isAdmin = nav.find('input[id="userData"]').attr('isAdmin');
       if(isAdmin == 'true') {
+        treatLastLi();
         $('<li class="nav-item"><a class="nav-link" href="/viewFeedbacks" title="Check Feedbacks">View Feedbacks</a></li>')
+          .insertAfter('li.last');
+        treatLastLi();
+        $('<li class="nav-item"><a class="nav-link" href="/filesList" title="View DB File List">View Files from DB</a></li>')
           .insertAfter('li.last');
       }
       
@@ -512,6 +606,45 @@ $(document).ready(function() {
       var text = li.find('a').text();
       li.find('a').text(text + ' (current)');
     }
+  } else {
+    if(nav.length) {
+      //nav.find('div[id="navbarSupportedContent"]').remove();
+      var user = nav.attr('user');
+      
+      var str = '<div class="collapse navbar-collapse" id="navbarSupportedContent">' 
+        + '<ul class="navbar-nav mr-auto">'
+        + '<li class="nav-item"><a class="nav-link" href="/">Home<span class="sr-only"></span></a> </li>'
+        + '<li class="nav-item"><a class="nav-link" href="/'+user+'">Dashboard <span class="sr-only"></span></a></li>'
+        + (user == 'supervisor'? '' : '<li class="nav-item"><a class="nav-link" href="/'+user+'/balance">Balance <span class="sr-only"></span></a></li>')
+        + (user == 'supplier'? '<li class="nav-item"><a class="nav-link" href="/'+user+'/bid-requests">Bid Requests</a></li>' : '')
+        + '<li class="nav-item active"> <a class="btn btn-primary" href="/'+user+'/profile">Profile</a></li><br>'
+        + '<li class="nav-item"><a class="btn btn-danger" title="Logout" href="?exit=true">Logout</a></li></ul></div>';
+      
+      //alert(str);
+      nav.append(str);
+    }
+    
+    /*
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home<span class="sr-only"></span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/supervisor">Dashboard <span class="sr-only"></span></a>
+        </li>
+      </ul>
+      <ul class="navbar-nav">
+        <li class="nav-item active">
+          <a class="btn btn-primary" href="/supervisor/profile">Profile</a>
+        </li>
+        <br>
+        <li class="nav-item" style="margin-left: 0px;">
+          <a class="btn btn-danger" href="?exit=true">Logout</a>
+        </li>
+      </ul>
+    </div>
+    */
   }
 
   
@@ -537,23 +670,29 @@ $(document).ready(function() {
   });
 
   $('.single,.multiple').each(function(index, element) {
-    var isExcel = $(this).prev('input').hasClass('fileexcelupload')? true : false;
-    var val = $(this).prev('input').attr('value');
+    var input = $(this).prev('input');
+    var prevInput = input.prev('input');
+    
+    var isExcel = input.hasClass('fileexcelupload')? true : false;
+    var val = input.attr('value'), fileId = prevInput.attr('value');
     var theDiv = $(this).parent('div');
 
     if(val) {
       if(val.charAt(val.length-1) == ',') {//Multi
-        var newVal = val.substring(0, val.length-1);
-        newVal = newVal.split(',');
+        val = val.substring(0, val.length-1);
+        val = val.split(',');
+        fileId = fileId.substring(0, fileId.length-1);
+        fileId = fileId.split(',');
+        
         var ob = '<div class="fileWrapper">';
-        for(var i in newVal) {
-          ob += '<div><a href="../../' + newVal[i] + '" title="Download ' + newVal[i] + '" download>Download file "' + i + '"</a>&nbsp;<span token="' + token + '" file="' + newVal[i] + '" class="remFile" onclick="removeFile(this)" title="Delete this file">Remove</span></div>';              
+        for(var i in val) {
+          ob += '<div><a href="' + val[i] + '" file="' + fileId[i] + '" title="Download ' + val[i] + '" onclick="downloadFile(this)">Download file "' + i + '"</a>&nbsp;<span token="' + token + '" file="' + fileId[i] + '" class="remFile" onclick="deleteFile(this)" title="Delete the ' + val + ' file">Remove</span></div>';              
         }
 
         ob += '</div>';
         $(ob).insertAfter(theDiv);
       } else {
-        var ob = '<div><a href="../../' + val + '" title="Download ' + newVal[i] + '" download>Download file</a>&nbsp;<span token="' + token + '" file="' + val + '" class="remFile" onclick="removeFile(this)" title="Delete this file">Remove</span></div>';            
+        var ob = '<div><a href="' + val + '" file="' + fileId + '" title="Download ' + val + '" onclick="downloadFile(this)">Download file</a>&nbsp;<span token="' + token + '" file="' + fileId + '" class="remFile" onclick="deleteFile(this)" title="Delete the ' + val + ' file">Remove</span></div>';            
         $(ob).insertAfter(theDiv);
       }
     }
@@ -579,7 +718,7 @@ $(document).ready(function() {
       });
     }
 
-    var theUrl = isAvatar? '/avatarUpload' : isMultiple == true? "/uploadmultiple" : isExcel? "/uploadExcel" : "/uploadfile";
+    var theUrl = isAvatar? '/avatarUpload' : isMultiple == true? "/uploadBaseMultiple" : isExcel? "/uploadExcel" : "/uploadBaseSingle";//uploadmultiple versus uploadfile.
     var xhr = new XMLHttpRequest();
     xhr.open('POST', theUrl, true);
     xhr.setRequestHeader('X-CSRF-TOKEN', token);
@@ -590,11 +729,14 @@ $(document).ready(function() {
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4) {//Success!
           input.next('input').prop('disabled', true);
-          
+          var prevInput = input.prev('input');
+        
+          alert(Array.isArray(xhr.responseText)?(xhr.responseText.file) : xhr.responseText);
           var ob, val, response = isAvatar? xhr.responseText : JSON.parse(xhr.responseText);
-          var theDiv = input.parent('div');        
+          var theDiv = input.parent('div');
+        
           if(isAvatar) {
-            var src = '../' + response.substring(7);           
+            var src = '../' + response.substring(7);         
             $('input[name="avatar"]').val(src);//'../../../'+response
             $('<div><img src="'+src+'" alt="avatar" style="width: 150px; height: 150px"></div>').insertAfter(input);
             //var loc = window.location.pathname;
@@ -620,17 +762,18 @@ $(document).ready(function() {
                   elem2.append("<li class='list-group-item'><span>" + elem.name + ' - ' + elem2.price + ' ' + elem2.currency + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
                   bindRemoveProduct($('.rem').last(), elem2, prodInput, priceInput, currencyInput, input2);
               }
-            }            
-          } else
-          if(isMultiple) {
+            }
+          } else if(isMultiple) {//response.file.filename, originalname, fieldname, 
             var hasDiv = theDiv.next('div').hasClass('fileWrapper');
-
             ob = hasDiv? '' : '<div class="fileWrapper">';
             for(var i in response) {
-              var absolutePath = '../' + (response[i].path).substring(7);
-              val = !(input.attr('value'))? absolutePath + ',' : input.attr('value') + absolutePath + ',';
+              var absolutePath = response[i].path? '../' + response[i].path.substring(7) : response[i].file.originalname;
+              val = !(input.attr('value') && input.attr('value').length)? absolutePath + ',' : input.attr('value') + absolutePath + ',';
               input.attr('value', val);
-              ob += '<div><a href="../' + absolutePath + '" title="Download ' + absolutePath + '" download>Download file "' + i + '"</a>&nbsp;<span token="' + token + '" file="' + response[i].path + '" class="remFile" onclick="removeFile(this)" title="Delete this file">Remove</span></div>';                  
+              var file = response[i].path? response[i].path : response[i].file.id;
+              prevInput.attr('value', !(prevInput.val() && prevInput.val().length)? file + ',' : prevInput.val() + file + ',');
+              
+              ob += '<div><a href="' + absolutePath + '" file="' + file + '" title="Download ' + absolutePath + '" onclick="downloadFile(this)">Download file "' + i + '"</a>&nbsp;<span token="' + token + '" file="' + file + '" class="remFile" onclick="deleteFile(this)" title="Delete the '+ absolutePath +' file">Remove</span></div>';
             }
 
             if(hasDiv) {
@@ -640,9 +783,12 @@ $(document).ready(function() {
               $(ob).insertAfter(theDiv);
             }
           } else {//Single file
-            val = '../' + (response.path).substring(7);
-            input.attr('value', val);
-            ob = '<div><a href="../../' + val + '" title="Download ' + val + '" download>Download file</a>&nbsp;<span token="' + token + '" file="' + response.path + '" class="remFile" onclick="removeFile(this)" title="Delete this file">Remove</span></div>';
+            val = response.path? '../' + response.path.substring(7) : response.file.originalname;
+            input.attr('value', val);            
+            var file = response.path? response.path : response.file.id;
+            prevInput.attr('value', file);
+            
+            ob = '<div><a href="' + val + '" file="' + file + '" title="Download ' + val + '" onclick="downloadFile(this)">Download file</a>&nbsp;<span token="' + token + '" file="' + file + '" class="remFile" onclick="deleteFile(this)" title="Delete the '+ val +' file">Remove</span></div>';
             $(ob).insertAfter(theDiv);
           }
 

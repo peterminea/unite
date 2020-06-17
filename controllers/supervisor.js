@@ -458,7 +458,7 @@ exports.postSignUp = async (req, res) => {
               return res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
         var supervisor;
         try {
-          bcrypt.hash(req.body.password, 10, async function(err, hash) {
+          bcrypt.hash(req.body.password, 16, async function(err, hash) {
           //user = new Promise((resolve, reject) => {
             supervisor = new Supervisor({
               role: process.env.USER_REGULAR,
@@ -478,6 +478,12 @@ exports.postSignUp = async (req, res) => {
               qualityManagementPolicy: req.body.qualityManagementPolicy,
               occupationalSafetyAndHealthPolicy: req.body.occupationalSafetyAndHealthPolicy,
               otherRelevantFiles: req.body.otherRelevantFiles,
+              certificatesIds: req.body.certificatesIds,
+              antibriberyPolicyId: req.body.antibriberyPolicyId,
+              environmentPolicyId: req.body.environmentPolicyId,
+              qualityManagementPolicyId: req.body.qualityManagementPolicyId,
+              occupationalSafetyAndHealthPolicyId: req.body.occupationalSafetyAndHealthPolicyId,
+              otherRelevantFilesIds: req.body.otherRelevantFilesIds,
               UNITETermsAndConditions: true,
               antibriberyAgreement: true,
               createdAt: Date.now(),
@@ -551,6 +557,12 @@ exports.postProfile = async (req, res) => {
     doc.qualityManagementPolicy = req.body.qualityManagementPolicy;
     doc.occupationalSafetyAndHealthPolicy = req.body.occupationalSafetyAndHealthPolicy;
     doc.otherRelevantFiles = req.body.otherRelevantFiles;
+    doc.certificatesIds = req.body.certificatesIds;
+    doc.antibriberyPolicyId = req.body.antibriberyPolicyId;
+    doc.environmentPolicyId = req.body.environmentPolicyId;
+    doc.qualityManagementPolicyId = req.body.qualityManagementPolicyId;
+    doc.occupationalSafetyAndHealthPolicyId = req.body.occupationalSafetyAndHealthPolicyId;
+    doc.otherRelevantFilesIds = req.body.otherRelevantFilesIds;
     doc.UNITETermsAndConditions = req.body.UNITETermsAndConditions == 'on'? true : false;
     doc.antibriberyAgreement = req.body.antibriberyAgreement == 'on'? true : false;
     doc.createdAt = req.body.createdAt;

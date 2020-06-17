@@ -28,6 +28,38 @@ exports.getIndex = (req, res) => {
   });
 };
 
+exports.getFilesList = (req, res) => {
+  var obj = userData(req);
+  const conn = mongoose.createConnection(URL, {useNewUrlParser: true, useUnifiedTopology: true});
+  const Grid = require('gridfs-stream');
+  let gfs;
+  
+  conn.once('open', () => {
+    gfs = Grid(conn.db, mongoose.mongo);
+    gfs.collection('uploads');
+    //console.log(gfs);
+    
+    gfs.files.find().toArray((err, files) => {//console.log(files);                                              
+      if(!files || !files.length) {
+        return res.status(404).json({
+          err: 'No files exist!'
+        });
+      }
+
+      //console.log(obj);
+      res.render("filesList", {
+        role: obj.role,
+        files: files,
+        isAdmin: obj.role == process.env.USER_ADMIN,
+        userId: obj.userId,
+        userName: obj.userName,
+        userType: obj.userType
+      });
+        //return res.json(files);
+    });
+  });
+};
+
 exports.getFeedback = (req, res) => {
   var obj = userData(req);
   res.render("feedback", {

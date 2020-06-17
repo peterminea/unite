@@ -21,9 +21,10 @@
   <script type="text/javascript">
     $(document).ready(function() {
       var id = "<%= userId %>", 
+      role = "<%= role %>", 
       name = "<%= userName %>", 
       type = "<%= userType %>";
-      userInputs(id, name, type, $('ul.mr-auto'));
+      userInputs(id, role, name, type, $('ul.mr-auto'));
     });
   </script>
 </head>
