@@ -194,7 +194,31 @@ const supplierSchema = new Schema({
   otherRelevantFiles:  {
     type: String,
     required: false
+  },
+  certificatesIds: {
+    type: String,
+    required: false
+  },
+  antibriberyPolicyId: {
+    type: String,
+    required: false
+  },
+  environmentPolicyId:{
+    type: String,
+    required: false
+  },
+  qualityManagementPolicyId: {
+    type: String,
+    required: false
   },  
+  occupationalSafetyAndHealthPolicyId: {
+    type: String,
+    required: false
+  },
+  otherRelevantFilesIds:  {
+    type: String,
+    required: false
+  },
   // UNITE Agreements
   UNITETermsAndConditions: {
     type: Boolean, // Force to true with popup

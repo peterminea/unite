@@ -20,12 +20,16 @@ dependencies:
   flash: 1.1.0
   form-data: 3.0.0
   fs-extra: 9.0.1
+  gridfs: 1.0.0
+  gridfs-stream: 1.1.1
   http: 0.0.0
   http2: 3.3.7
   jsonp: 0.2.1
+  method-override: 3.0.0
   moment: 2.26.0
   mongoose: 5.9.19
   multer: 1.4.2
+  multer-gridfs-storage: 4.1.0
   node-xlsx: 0.15.0
   process: 0.11.10
   socket.io: 2.3.0
@@ -578,6 +582,12 @@ packages:
     dev: false
     resolution:
       integrity: sha1-U4tm8+5izRq1HsMjgp0flIDHS+s=
+  /end-of-stream/1.4.4:
+    dependencies:
+      once: 1.4.0
+    dev: false
+    resolution:
+      integrity: sha512-+uw1inIHVPQoaVuHzRyXd21icM+cnt4CzD5rW+NC1wjOUSTOs+Te7FOv7AhN7vS9x/oIyhLP5PR1H+phQAHu5Q==
   /engine.io-client/3.4.3:
     dependencies:
       component-emitter: 1.3.0
@@ -781,6 +791,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-irKyntO2ilz7Gom/mOf2nX8aAgo=
+  /flushwritable/1.0.0:
+    dev: false
+    resolution:
+      integrity: sha1-PjKNj95BKtR+c44751C00pAENJg=
   /follow-redirects/1.5.10:
     dependencies:
       debug: 3.1.0
@@ -840,6 +854,20 @@ packages:
     dev: false
     resolution:
       integrity: sha512-WjKPNJF79dtJAVniUlGGWHYGz2jWxT6VhN/4m1NdkbZ2nOsEF+cI1Edgql5zCRhs/VsQYRvrXctxktVXZUkixw==
+  /gridfs-stream/1.1.1:
+    dependencies:
+      flushwritable: 1.0.0
+    dev: false
+    engines:
+      node: '>= 0.4.2'
+    resolution:
+      integrity: sha1-PdOhAOwgIaGBKC9utGcJY2B034k=
+  /gridfs/1.0.0:
+    dependencies:
+      gridfs-stream: 1.1.1
+    dev: false
+    resolution:
+      integrity: sha1-/nXyzoF9AHhQP8YOHLtmWsiOpHc=
   /has-binary2/1.0.3:
     dependencies:
       isarray: 2.0.1
@@ -856,6 +884,12 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-tdRU3CGZriJWmfNGfloH87lVuv0=
+  /has-own-prop/2.0.0:
+    dev: false
+    engines:
+      node: '>=8'
+    resolution:
+      integrity: sha512-Pq0h+hvsVm6dDEa8x82GnLSYHOzNDt7f0ddFa3FqcQlgzEiptPqL+XrOJNavjOzSYiYWIrgeVYYgGlLmnxwilQ==
   /has-symbols/1.0.1:
     dev: false
     engines:
@@ -955,6 +989,10 @@ packages:
       node: '>= 0.4'
     resolution:
       integrity: sha512-YZc5EwyO4f2kWCax7oegfuSr9mFz1ZvieNYBEjmukLxgXfBUbxAWGVF7GZf0zidYtoBl3WvC07YK0wT76a+Rtw==
+  /is-generator/1.0.3:
+    dev: false
+    resolution:
+      integrity: sha1-wUwhBX7TbjKNuANHlmxpP4hjifM=
   /is-nan/1.3.0:
     dependencies:
       define-properties: 1.1.3
@@ -963,6 +1001,10 @@ packages:
       node: '>= 0.4'
     resolution:
       integrity: sha512-z7bbREymOqt2CCaZVly8aC4ML3Xhfi0ekuOnjO2L8vKdl+CttdVoGZQhd4adMFAsxQ5VeRVwORs4tU8RH+HFtQ==
+  /is-promise/4.0.0:
+    dev: false
+    resolution:
+      integrity: sha512-hvpoI6korhJMnej285dSg6nu1+e6uxs7zG3BYAm5byqDsgJNWwxzM6z6iZiAgQR4TJ30JmBTOwqZUw3WlyH3AQ==
   /is-regex/1.0.5:
     dependencies:
       has: 1.0.3
@@ -1034,6 +1076,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-4j8/nE+Pvd6HJSnBBxhXoIblzO8=
+  /lodash.isplainobject/4.0.6:
+    dev: false
+    resolution:
+      integrity: sha1-fFJqUtibRcRcxpC4gWO+BJf1UMs=
   /lodash.set/4.3.2:
     dev: false
     resolution:
@@ -1064,6 +1110,17 @@ packages:
     dev: false
     resolution:
       integrity: sha1-sAqqVW3YtEVoFQ7J0blT8/kMu2E=
+  /method-override/3.0.0:
+    dependencies:
+      debug: 3.1.0
+      methods: 1.1.2
+      parseurl: 1.3.3
+      vary: 1.1.2
+    dev: false
+    engines:
+      node: '>= 0.10'
+    resolution:
+      integrity: sha512-IJ2NNN/mSl9w3kzWB92rcdHpz+HjkxhDJWNDBqSlas+zQdP8wBiJzITPg08M/k2uVvMow7Sk41atndNtt/PHSA==
   /methods/1.1.2:
     dev: false
     engines:
@@ -1130,6 +1187,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-oIixUO+OamkUkwjhAVE18rAMfRJNsNe/Stid/gwHSOfHrOtw9EhAY2AHvdKZ/k/MggcYELFCJz/Sn2pL8b8JMw==
+  /mongodb-uri/0.9.7:
+    dev: false
+    engines:
+      node: '>= 0.6.0'
+    resolution:
+      integrity: sha1-D3ca0W9IOuZfQoeWlCjp+8SqYYE=
   /mongodb/3.5.9:
     dependencies:
       bl: 2.2.0
@@ -1204,6 +1267,22 @@ packages:
     dev: false
     resolution:
       integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
+  /multer-gridfs-storage/4.1.0:
+    dependencies:
+      has-own-prop: 2.0.0
+      is-generator: 1.0.3
+      is-promise: 4.0.0
+      lodash.isplainobject: 4.0.6
+      mongodb: 3.5.9
+      mongodb-uri: 0.9.7
+      pump: 3.0.0
+    dev: false
+    engines:
+      node: '>=10'
+    peerDependencies:
+      multer: '>=1 <2'
+    resolution:
+      integrity: sha512-SceXee5s0NDNCvrQb9qbmTKNJ5aSGkmDMmOGW7/hvVZgHgC11noiW4IPhv3BB0CHUC7sNs9pFyJQttV0jp9uiQ==
   /multer/1.4.2:
     dependencies:
       append-field: 1.0.0
@@ -1293,6 +1372,12 @@ packages:
       node: '>= 0.8'
     resolution:
       integrity: sha512-pZAE+FJLoyITytdqK0U5s+FIpjN0JP3OzFi/u8Rx+EV5/W+JTWGXG8xFzevE7AjBfDqHv/8vL8qQsIhHnqRkrA==
+  /once/1.4.0:
+    dependencies:
+      wrappy: 1.0.2
+    dev: false
+    resolution:
+      integrity: sha1-WDsap3WWHUsROsF9nFC6753Xa9E=
   /parseqs/0.0.5:
     dependencies:
       better-assert: 1.0.2
@@ -1345,6 +1430,13 @@ packages:
     dev: false
     resolution:
       integrity: sha512-RIdOzyoavK+hA18OGGWDqUTsCLhtA7IcZ/6NCs4fFJaHBDab+pDDmDIByWFRQJq2Cd7r1OoQxBGKOaztq+hjIQ==
+  /pump/3.0.0:
+    dependencies:
+      end-of-stream: 1.4.4
+      once: 1.4.0
+    dev: false
+    resolution:
+      integrity: sha512-LwZy+p3SFs1Pytd/jYct4wpv49HiYCqd9Rlc5ZVdk0V+8Yzv6jR5Blk3TRmPL1ft69TxP0IMZGJ+WPFU2BFhww==
   /qs/6.7.0:
     dev: false
     engines:
@@ -1754,6 +1846,10 @@ packages:
       node: '>= 0.4'
     resolution:
       integrity: sha512-KT6okrd1tE6JdZAy3o2VhMoYPh3+J6EMZLyrxBQsZflI1QCZIxMrIYLkosd8Twf+YfknVIHmYQPgJt238p8dnQ==
+  /wrappy/1.0.2:
+    dev: false
+    resolution:
+      integrity: sha1-tSQ9jz7BqjXxNkYFvA0QNuMKtp8=
   /ws/6.1.4:
     dependencies:
       async-limiter: 1.0.1
@@ -1825,12 +1921,16 @@ specifiers:
   flash: ^1.1.0
   form-data: ^3.0.0
   fs-extra: ^9.0.1
+  gridfs: ^1.0.0
+  gridfs-stream: ^1.1.1
   http: ^0.0.0
   http2: ^3.3.7
   jsonp: ^0.2.1
+  method-override: ^3.0.0
   moment: ^2.26.0
   mongoose: ^5.9.19
   multer: ^1.4.2
+  multer-gridfs-storage: ^4.1.0
   node-xlsx: ^0.15.0
   process: ^0.11.10
   socket.io: ^2.3.0

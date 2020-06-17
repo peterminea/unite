@@ -50,6 +50,22 @@ table.products {
 table.products th,td {
   border: 1.25px solid navy;
   padding: 1px;
+  font-weight: bold;
+  width: 100%
+}
+
+table.files {
+  border: 2.25px solid fuchsia;
+  width: 100%;
+  background-color: teal;
+  margin-left: auto;
+  margin-right: auto
+}
+
+table.files th,td {
+  border: 1.5px solid purple;
+  padding: 1px;
+  font-weight: bold;
   width: 100%
 }
 

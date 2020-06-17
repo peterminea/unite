@@ -7,6 +7,7 @@ const homeController = require("../controllers/home");
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 router.get("/", sessionExit, homeController.getIndex);
+router.get("/filesList", sessionExit, homeController.getFilesList);
 router.get("/about", sessionExit, homeController.getAbout);
 router.get("/antibriberyAgreement", sessionExit, homeController.getAntibriberyAgreement);
 router.get("/termsConditions", sessionExit, homeController.getTermsConditions);
