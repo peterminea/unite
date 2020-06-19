@@ -24,8 +24,9 @@
       var id = "<%= userId %>", 
       role = "<%= role %>", 
       name = "<%= userName %>", 
+      avatar = "<%= avatar %>", 
       type = "<%= userType %>";
-      userInputs(id, role, name, type, $('ul.mr-auto'));
+      userInputs(id, role, avatar, name, type, $('ul.mr-auto'));
       getFeedbacks($('#main'), $('input[name="_csrf"]').val(), '/feedbacks');
     });
   </script>

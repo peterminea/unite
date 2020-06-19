@@ -44,7 +44,7 @@ var uploadFiles = multer({
     callback(null, true);
   },
   limits: {
-    fileSize: 2048 * 2048 //4 MB
+    fileSize: 1024 * 1024 //1 MB
   }  
 }).array("multiple", 10);
 var uploadFilesMiddleware = util.promisify(uploadFiles);
