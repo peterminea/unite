@@ -806,10 +806,10 @@ exports.postProfile = (req, res) => {
           await req.session.save();
           db.close();
           
-          req.flash("success", "Buyer details updated successfully!");
           console.log('Buyer details updated successfully!');
           setTimeout(function() {
-            return res.redirect("/buyer/profile");
+            req.flash("success", "Buyer details updated successfully!");
+            res.redirect("/buyer/profile");
           }, 150);
         });
       });

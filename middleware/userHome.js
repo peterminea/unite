@@ -1,38 +1,39 @@
 module.exports = function getUserHome(req) {
   var ses = req.session? req.session : null;
-  var userId = null, role = null, userName = null, userType = null;
+  var userId = null, role = null, userName = null, userType = null, avatar = null;
   
   if(ses) {
-    userId = ses.buyerId? 
-        ses.buyerId : ses.supervisorId? 
-        ses.supervisorId : ses.supplierId? 
+    userId = ses.buyerId && ses.buyer? 
+        ses.buyerId : ses.supervisorId && ses.supervisor? 
+        ses.supervisorId : ses.supplierId && ses.supplier? 
         ses.supplierId : null;
     
     switch(userId) {
       case ses.buyerId:
         userType = 'Buyer';
-        userName = ses.buyer? ses.buyer.organizationName : null;
-        role = ses.buyer? ses.buyer.role : null;
+        userName = ses.buyer.organizationName;
+        role = ses.buyer.role;
+        avatar = ses.buyer.avatar;
         break;
         
       case ses.supervisorId:
         userType = 'Supervisor';
-        userName = ses.supervisor? ses.supervisor.organizationName : null;
-        role = ses.supervisor? ses.supervisor.role : null;
+        userName = ses.supervisor.organizationName;
+        role = ses.supervisor.role;
+        avatar = ses.supervisor.avatar;
         break;
         
       case ses.supplierId:
         userType = 'Supplier';
-        userName = ses.supplier? ses.supplier.companyName : null;
-        role = ses.supplier? ses.supplier.role : null;
+        userName = ses.supplier.companyName;
+        role = ses.supplier.role;
+        avatar = ses.supplier.avatar;
         break;
       
       default:
         break;        
     }
-    
-    //console.log(role);
   }
   
-  return {userId: userId, role: role, userName: userName, userType: userType};
+  return {userId: userId, role: role, avatar: avatar, userName: userName, userType: userType};
 }

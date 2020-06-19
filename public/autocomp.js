@@ -39,6 +39,7 @@ function treatDiv(div, isMulti, val, input) {
       input.val('');
     }
   
+  input.trigger('change');//Enable Profile button!
   div.remove();
 }
 
@@ -53,13 +54,13 @@ function removeFile(obj) {//remove from Glitch
       div.parent('div').prev('div').find('.fileupload') : div.prev('div').find('.fileupload');
   //alert(file + ' ' + token + ' ' + div.length + ' ' + input.length);
   var val = input.attr('value');
-  //var isMulti = val.charAt(val.length-1) == ','? true : false;
+  //var isMulti = val.charAt(val.length-1) == ','? true : false;  
   
   $.ajax({
     url: '/deleteFile',
     type: 'POST',
     headers: { "X-CSRF-Token": token },
-    data: {file: file},
+    data: {file: 'public/' + file.substring(3)},
     datatype: 'application/json',
     error: function() {
       //alert('Error on AJAX Request!');
@@ -359,7 +360,7 @@ function addProduct(obj) {
 }
 
 
-function userInputs(id, role, name, type, ul) {//Home, About, Terms, Antibribery - ensure link to user's profile if they are logged into session.
+function userInputs(id, role, avatar, name, type, ul) {//Home, About, Terms, Antibribery - ensure link to user's profile if they are logged into session.
     var link = "";
     
     switch(type) {
@@ -381,7 +382,8 @@ function userInputs(id, role, name, type, ul) {//Home, About, Terms, Antibribery
    
   if(id) {
     ul.prepend('<li class="nav-item user">'
-          +'<a class="nav-link" title="Hello" href="' + link + '">Hello, ' + name + ' (' + role + ')!</a>'
+          +'<a class="nav-link" title="Hello" href="' + link + '">Hello, ' + name + ' (' + role + ')!' 
+               + (avatar? '<img src="'+ avatar +'" title="Profile image" style="height: 20px; width: 50px"' : '') + '</a>'
        + '</li>');
     
     var str = '';
@@ -524,7 +526,9 @@ function takeAction(obj, token, tr) {//alert(tr.length);
     success: function(data) {
       if(!isDownload)
         tr.remove();
-      
+      if(data && data.message) {
+        alert(data.message);
+      }
     }
   });
 }
@@ -595,7 +599,7 @@ $(document).ready(function() {
           .insertAfter('li.last');
       }
       
-      var ind = parseInt(nav.attr('pos'));      
+      var ind = parseInt(nav.attr('pos'));
       
       if(ul.find('li').first().hasClass('user')) {
         ind++;
@@ -619,32 +623,17 @@ $(document).ready(function() {
         + (user == 'supplier'? '<li class="nav-item"><a class="nav-link" href="/'+user+'/bid-requests">Bid Requests</a></li>' : '')
         + '<li class="nav-item active"> <a class="btn btn-primary" href="/'+user+'/profile">Profile</a></li><br>'
         + '<li class="nav-item"><a class="btn btn-danger" title="Logout" href="?exit=true">Logout</a></li></ul></div>';
-      
-      //alert(str);
+     
       nav.append(str);
+      
+      if(nav.attr('pos')) {
+        var ind = parseInt(nav.attr('pos')), ul = $('#navbarSupportedContent').find('ul');
+        var li = ul.find('li').eq(ind);
+        li.addClass('active');
+        var text = li.find('a').text();
+        li.find('a').text(text + ' (current)');
+      }
     }
-    
-    /*
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="/">Home<span class="sr-only"></span></a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/supervisor">Dashboard <span class="sr-only"></span></a>
-        </li>
-      </ul>
-      <ul class="navbar-nav">
-        <li class="nav-item active">
-          <a class="btn btn-primary" href="/supervisor/profile">Profile</a>
-        </li>
-        <br>
-        <li class="nav-item" style="margin-left: 0px;">
-          <a class="btn btn-danger" href="?exit=true">Logout</a>
-        </li>
-      </ul>
-    </div>
-    */
   }
 
   
@@ -656,8 +645,7 @@ $(document).ready(function() {
   
   $('.cancelForm').submit(function() {
     return confirm('Are you sure you want to cancel this order?');
-  });
-  
+  });  
 
   
   if(!($('.fileupload').length))
@@ -671,30 +659,37 @@ $(document).ready(function() {
 
   $('.single,.multiple').each(function(index, element) {
     var input = $(this).prev('input');
-    var prevInput = input.prev('input');
-    
-    var isExcel = input.hasClass('fileexcelupload')? true : false;
-    var val = input.attr('value'), fileId = prevInput.attr('value');
+    var prevInput = input.prev('input');    
+    var isExcel = input.hasClass('fileexcelupload')? true : false;    
+    var val = input.attr('value'), fileId = prevInput.val();
     var theDiv = $(this).parent('div');
-
-    if(val) {
-      if(val.charAt(val.length-1) == ',') {//Multi
-        val = val.substring(0, val.length-1);
-        val = val.split(',');
-        fileId = fileId.substring(0, fileId.length-1);
-        fileId = fileId.split(',');
-        
-        var ob = '<div class="fileWrapper">';
-        for(var i in val) {
-          ob += '<div><a href="' + val[i] + '" file="' + fileId[i] + '" title="Download ' + val[i] + '" onclick="downloadFile(this)">Download file "' + i + '"</a>&nbsp;<span token="' + token + '" file="' + fileId[i] + '" class="remFile" onclick="deleteFile(this)" title="Delete the ' + val + ' file">Remove</span></div>';              
-        }
-
-        ob += '</div>';
-        $(ob).insertAfter(theDiv);
-      } else {
-        var ob = '<div><a href="' + val + '" file="' + fileId + '" title="Download ' + val + '" onclick="downloadFile(this)">Download file</a>&nbsp;<span token="' + token + '" file="' + fileId + '" class="remFile" onclick="deleteFile(this)" title="Delete the ' + val + ' file">Remove</span></div>';            
-        $(ob).insertAfter(theDiv);
+    input.attr('value', fileId);
+    if(!fileId || !fileId.length)
+        return false;
+    
+    var isMulti = false;
+    
+    if(val.charAt(val.length-1) == ',') {
+      var newVal = val.substring(0, val.length-1);
+      if(newVal.indexOf(',') != -1) {
+        isMulti = true;
+        val = newVal.split(',');
+        newVal = fileId.substring(0, fileId.length-1);
+        fileId = newVal.split(',');
       }
+    }
+    
+    if(isMulti) {//Multi
+      var ob = '<div class="fileWrapper">';
+      for(var i in val) {
+        ob += '<div><a href="' + fileId[i] + '" file="' + fileId[i] + '" title="Download ' + val[i] + '" style="color: blue; cursor: pointer" download>Download file "' + i + '"</a>&nbsp;<span token="' + token + '" file="' + fileId[i] + '" class="remFile" onclick="removeFile(this)" title="Delete the ' + val + ' file">Remove</span></div>';
+      }
+
+      ob += '</div>';
+      $(ob).insertAfter(theDiv);
+    } else {
+      var ob = '<div><a href="' + fileId + '" file="' + fileId + '" title="Download ' + val + '" style="color: blue; cursor: pointer" download>Download file</a>&nbsp;<span token="' + token + '" file="' + fileId + '" class="remFile" onclick="removeFile(this)" title="Delete the ' + val + ' file">Remove</span></div>';
+      $(ob).insertAfter(theDiv);
     }
   });
 
@@ -718,7 +713,7 @@ $(document).ready(function() {
       });
     }
 
-    var theUrl = isAvatar? '/avatarUpload' : isMultiple == true? "/uploadBaseMultiple" : isExcel? "/uploadExcel" : "/uploadBaseSingle";//uploadmultiple versus uploadfile.
+    var theUrl = isAvatar? '/avatarUpload' : isMultiple == true? "/uploadMultiple" : isExcel? "/uploadExcel" : "/uploadFile";//uploadmultiple versus uploadfile.
     var xhr = new XMLHttpRequest();
     xhr.open('POST', theUrl, true);
     xhr.setRequestHeader('X-CSRF-TOKEN', token);
@@ -728,11 +723,13 @@ $(document).ready(function() {
     xhr.send(formData);
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4) {//Success!
+          //alert(xhr.responseText);
           input.next('input').prop('disabled', true);
           var prevInput = input.prev('input');
         
-          alert(Array.isArray(xhr.responseText)?(xhr.responseText.file) : xhr.responseText);
+          //alert(Array.isArray(xhr.responseText)?(xhr.responseText.file) : xhr.responseText);
           var ob, val, response = isAvatar? xhr.responseText : JSON.parse(xhr.responseText);
+          
           var theDiv = input.parent('div');
         
           if(isAvatar) {
@@ -749,17 +746,20 @@ $(document).ready(function() {
             var prodInput = $("#prodServicesList");
             var priceInput = $("#pricesList");
             var currencyInput = $("#currenciesList");
-            
+            response = xhr.responseText;
+            alert(xhr.responseText);
             if(Array.isArray(response)) {
               for(var i in response) {//Each Supplier product should come here.
-                var elem = response[i];//Assume that elem fields are called name, price, and currency.
+                if(!i) 
+                  continue;
+                var elem = response[i];//Assume that elem fields are called name, price, and currency.                
                 var elem2 = $("#prodServices");
                   if(elem2.find('li').length >= MAX) {
                      alert('You have reached the limit of products to add.');
                      return false;
                    }
-                
-                  elem2.append("<li class='list-group-item'><span>" + elem.name + ' - ' + elem2.price + ' ' + elem2.currency + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
+
+                  elem2.append("<li class='list-group-item'><span>" + elem[0] + ' - ' + elem[1] + ' ' + elem[2] + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
                   bindRemoveProduct($('.rem').last(), elem2, prodInput, priceInput, currencyInput, input2);
               }
             }
@@ -768,12 +768,12 @@ $(document).ready(function() {
             ob = hasDiv? '' : '<div class="fileWrapper">';
             for(var i in response) {
               var absolutePath = response[i].path? '../' + response[i].path.substring(7) : response[i].file.originalname;
-              val = !(input.attr('value') && input.attr('value').length)? absolutePath + ',' : input.attr('value') + absolutePath + ',';
+              val = !(input.attr('value') && input.attr('value').length)? absolutePath + '' : input.attr('value') + absolutePath + '';
               input.attr('value', val);
               var file = response[i].path? response[i].path : response[i].file.id;
-              prevInput.attr('value', !(prevInput.val() && prevInput.val().length)? file + ',' : prevInput.val() + file + ',');
+              prevInput.attr('value', !(prevInput.val() && prevInput.val().length)? val + '' : prevInput.val() + val + '');//file
               
-              ob += '<div><a href="' + absolutePath + '" file="' + file + '" title="Download ' + absolutePath + '" onclick="downloadFile(this)">Download file "' + i + '"</a>&nbsp;<span token="' + token + '" file="' + file + '" class="remFile" onclick="deleteFile(this)" title="Delete the '+ absolutePath +' file">Remove</span></div>';
+              ob += '<div><a href="' + absolutePath + '" file="' + file + '" title="Download ' + absolutePath + '" style="color: blue; cursor: pointer" download>Download file "' + i + '"</a>&nbsp;<span token="' + token + '" file="' + file + '" class="remFile" onclick="removeFile(this)" title="Delete the '+ absolutePath +' file">Remove</span></div>';
             }
 
             if(hasDiv) {
@@ -784,11 +784,11 @@ $(document).ready(function() {
             }
           } else {//Single file
             val = response.path? '../' + response.path.substring(7) : response.file.originalname;
-            input.attr('value', val);            
+            input.attr('value', val);
             var file = response.path? response.path : response.file.id;
-            prevInput.attr('value', file);
+            prevInput.attr('value', val);//file
             
-            ob = '<div><a href="' + val + '" file="' + file + '" title="Download ' + val + '" onclick="downloadFile(this)">Download file</a>&nbsp;<span token="' + token + '" file="' + file + '" class="remFile" onclick="deleteFile(this)" title="Delete the '+ val +' file">Remove</span></div>';
+            ob = '<div><a href="' + val + '" file="' + file + '" title="Download ' + val + '" style="color: blue; cursor: pointer" download>Download file</a>&nbsp;<span token="' + token + '" file="' + file + '" class="remFile" onclick="removeFile(this)" title="Delete the '+ val +' file">Remove</span></div>';
             $(ob).insertAfter(theDiv);
           }
 

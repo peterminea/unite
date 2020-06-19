@@ -509,12 +509,12 @@ exports.postSignUp = async (req, res) => {
                   capabilityDescription: req.body.capabilityDescription,
                   relevantExperience: req.body.relevantExperience,
                   supportingInformation: req.body.supportingInformation,
-                  certificates: req.body.certificates,
-                  antibriberyPolicy: req.body.antibriberyPolicy,
-                  environmentPolicy: req.body.environmentPolicy,
-                  qualityManagementPolicy: req.body.qualityManagementPolicy,
-                  occupationalSafetyAndHealthPolicy: req.body.occupationalSafetyAndHealthPolicy,
-                  otherRelevantFiles: req.body.otherRelevantFiles,
+                  certificates: req.body.certificatesIds,
+                  antibriberyPolicy: req.body.antibriberyPolicyId,
+                  environmentPolicy: req.body.environmentPolicyId,
+                  qualityManagementPolicy: req.body.qualityManagementPolicyId,
+                  occupationalSafetyAndHealthPolicy: req.body.occupationalSafetyAndHealthPolicyId,
+                  otherRelevantFiles: req.body.otherRelevantFilesIds,
                   certificatesIds: req.body.certificatesIds,
                   antibriberyPolicyId: req.body.antibriberyPolicyId,
                   environmentPolicyId: req.body.environmentPolicyId,
@@ -893,12 +893,12 @@ exports.postProfile = async (req, res) => {
     doc.capabilityDescription = req.body.capabilityDescription;
     doc.relevantExperience = req.body.relevantExperience;
     doc.supportingInformation = req.body.supportingInformation;
-    doc.certificates = req.body.certificates;
-    doc.antibriberyPolicy = req.body.antibriberyPolicy;
-    doc.environmentPolicy = req.body.environmentPolicy;
-    doc.qualityManagementPolicy = req.body.qualityManagementPolicy;
-    doc.occupationalSafetyAndHealthPolicy = req.body.occupationalSafetyAndHealthPolicy;
-    doc.otherRelevantFiles = req.body.otherRelevantFiles;
+    doc.certificates = req.body.certificatesIds;
+    doc.antibriberyPolicy = req.body.antibriberyPolicyId;
+    doc.environmentPolicy = req.body.environmentPolicyId;
+    doc.qualityManagementPolicy = req.body.qualityManagementPolicyId;
+    doc.occupationalSafetyAndHealthPolicy = req.body.occupationalSafetyAndHealthPolicyId;
+    doc.otherRelevantFiles = req.body.otherRelevantFilesIds;
     doc.certificatesIds = req.body.certificatesIds;
     doc.antibriberyPolicyId = req.body.antibriberyPolicyId;
     doc.environmentPolicyId = req.body.environmentPolicyId;
@@ -916,6 +916,7 @@ exports.postProfile = async (req, res) => {
     doc.updatedAt = Date.now();
     //doc.__v = 1;//Last saved version. To be taken into account for future cases of concurrential changes, in case updateOne does not protect us from that problem.
     var price = req.body.price;
+    console.log(doc);
     
     if(global++ < 1)
     await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
@@ -1019,12 +1020,12 @@ exports.postProfile = async (req, res) => {
         console.error(err.message);
         throw err;
       }
-    });
+    });   
     
-    req.flash("success", "Supplier details updated successfully!");
     console.log("User updated and session saved!");
     setTimeout(function() {
-      return res.redirect("/supplier/profile");
+      req.flash("success", "Supplier details updated successfully!");
+      res.redirect("/supplier/profile");
     }, 150); 
     })
     .catch(console.error);

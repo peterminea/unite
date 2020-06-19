@@ -472,12 +472,12 @@ exports.postSignUp = async (req, res) => {
               contactMobileNumber: req.body.contactMobileNumber,
               address: req.body.address,
               country: req.body.country,
-              certificates: req.body.certificates,
-              antibriberyPolicy: req.body.antibriberyPolicy,
-              environmentPolicy: req.body.environmentPolicy,
-              qualityManagementPolicy: req.body.qualityManagementPolicy,
-              occupationalSafetyAndHealthPolicy: req.body.occupationalSafetyAndHealthPolicy,
-              otherRelevantFiles: req.body.otherRelevantFiles,
+              certificates: req.body.certificatesIds,
+              antibriberyPolicy: req.body.antibriberyPolicyId,
+              environmentPolicy: req.body.environmentPolicyId,
+              qualityManagementPolicy: req.body.qualityManagementPolicyId,
+              occupationalSafetyAndHealthPolicy: req.body.occupationalSafetyAndHealthPolicyId,
+              otherRelevantFiles: req.body.otherRelevantFilesIds,
               certificatesIds: req.body.certificatesIds,
               antibriberyPolicyId: req.body.antibriberyPolicyId,
               environmentPolicyId: req.body.environmentPolicyId,
@@ -535,10 +535,14 @@ exports.getProfile = (req, res) => {
 }
 
 
-exports.postProfile = async (req, res) => {
+exports.postProfile = (req, res) => {
   try {
-  await Supervisor.findOne({ _id: req.body._id }, async (err, doc) => {
-    if (err) return console.error(err);
+  Supervisor.findOne({ _id: req.body._id }, (err, doc) => {
+    if (err) {
+      console.error(err);
+      throw err;
+    }
+    
     doc._id = req.body._id;
     doc.avatar = req.body.avatar;
     doc.role = req.body.role;
@@ -551,12 +555,12 @@ exports.postProfile = async (req, res) => {
     doc.contactMobileNumber = req.body.contactMobileNumber;
     doc.address = req.body.address;
     doc.country = req.body.country;
-    doc.certificates = req.body.certificates;
-    doc.antibriberyPolicy = req.body.antibriberyPolicy;
-    doc.environmentPolicy = req.body.environmentPolicy;
-    doc.qualityManagementPolicy = req.body.qualityManagementPolicy;
-    doc.occupationalSafetyAndHealthPolicy = req.body.occupationalSafetyAndHealthPolicy;
-    doc.otherRelevantFiles = req.body.otherRelevantFiles;
+    doc.certificates = req.body.certificatesIds;
+    doc.antibriberyPolicy = req.body.antibriberyPolicyId;
+    doc.environmentPolicy = req.body.environmentPolicyId;
+    doc.qualityManagementPolicy = req.body.qualityManagementPolicyId;
+    doc.occupationalSafetyAndHealthPolicy = req.body.occupationalSafetyAndHealthPolicyId;
+    doc.otherRelevantFiles = req.body.otherRelevantFilesId;
     doc.certificatesIds = req.body.certificatesIds;
     doc.antibriberyPolicyId = req.body.antibriberyPolicyId;
     doc.environmentPolicyId = req.body.environmentPolicyId;
@@ -568,35 +572,37 @@ exports.postProfile = async (req, res) => {
     doc.createdAt = req.body.createdAt;
     doc.updatedAt = Date.now();
 
-    await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
+    MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {//db or client.
       if (err) {
         req.flash('error', err.message);
         throw err;
       }
       
       var dbo = db.db(BASE);
-      await dbo.collection("supervisors").updateOne({ _id: doc._id }, { $set: doc }, function(err, resp) {
+      dbo.collection("supervisors").updateOne({ _id: doc._id }, { $set: doc }, function(err, resp) {
         if(err) {
           req.flash('error', err.message);
           console.error(err.message);
           res.redirect('/supervisor/profile');
-        }
-      });
+        }      
       
-    req.session.supervisor = doc;
-    req.session.supervisorId = doc._id;
-    await req.session.save((err) => {
-      if (err) {
-        req.flash('error', err.message);
-        throw err;
-      }
+      req.session.supervisor = doc;
+      req.session.supervisorId = doc._id;
+      req.session.save((err) => {
+        if (err) {
+          req.flash('error', err.message);
+          throw err;
+          }
+        });
+
+      db.close();
+      req.flash("success", "Supervisor details updated successfully!");
+      console.log("Supervisor details updated successfully!");
+
+      setTimeout(function() {
+        res.redirect("/supervisor/profile");
+      }, 150);
       });
-    db.close();  
-    req.flash("success", "Supervisor details updated successfully!");
-    console.log("Supervisor details updated successfully!");
-    setTimeout(function() {
-      return res.redirect("/supervisor/profile");
-    }, 150);
     });
   })
     .catch(console.error);

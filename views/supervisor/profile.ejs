@@ -60,7 +60,7 @@
 </head>
 
 <body>
-  <nav user="supervisor" class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <nav pos="2" user="supervisor" class="navbar navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="/supervisor">Supervisor - UNITE</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -100,7 +100,7 @@
 
         <div class="form-group">
           <label for="exampleInputEmail">Email address*</label>
-          <input type="email" class="form-control" id="emailAddress" name="email" required value="<%= profile.emailAddress %>">
+          <input type="email" class="form-control" id="emailAddress" name="emailAddress" required value="<%= profile.emailAddress %>">
         </div>
         <div class="form-group">
           <label>Password</label>
@@ -173,7 +173,7 @@
         <!--Mandatory check of agreements -->
           <div class="form-group">
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="uniteTermsAndConditions" <%= profile.UNITETermsAndConditions ? "checked" : "" %> required>
+              <input class="form-check-input" type="checkbox" name="UNITETermsAndConditions" id="uniteTermsAndConditions" <%= profile.UNITETermsAndConditions ? "checked" : "" %> required>
               <label class="form-check-label" for="uniteTermsAndConditions">
                 <a href="../termsConditions">UNITE Terms And Conditions</a>
               </label>
@@ -181,7 +181,7 @@
           </div>
           <div class="form-group">
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="antibriberyAgreement" <%= profile.antibriberyAgreement ? "checked" : "" %> required>
+              <input class="form-check-input" type="checkbox" name="antibriberyAgreement" id="antibriberyAgreement" <%= profile.antibriberyAgreement ? "checked" : "" %> required>
               <label class="form-check-label" for="antibriberyAgreement">
                 <a href="../antibriberyAgreement">Antibribery Agreement </a>
               </label>

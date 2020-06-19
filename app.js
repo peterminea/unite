@@ -387,7 +387,7 @@ conn.once('open', () => {
   //gfs = new mongoose.mongo.GridFSBucket(conn.db, {    bucketName: "uploads"  });
   //console.log(gfs);
   
-  //gfs.collection('uploads');
+  gfs.collection('uploads');
   
 });
 
@@ -479,11 +479,153 @@ app.get('/files/:filename', (req, res) => {//Load single file (data)
   });
 });
 
+/*
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect(URI, function(err, db) {
+  var bucket = new GridFSBucket(db, { bucketName: 'uploads' });
+  var CHUNKS_COLL = 'uploads.chunks';
+  var FILES_COLL = 'uploads.files';
+  var readStream = fs.createReadStream('./LICENSE');
+
+  var uploadStream = bucket.openUploadStream('test.dat');
+
+  var license = fs.readFileSync('./LICENSE');
+  var id = uploadStream.id;
+
+  uploadStream.once('finish', function() {
+    var downloadStream = bucket.openDownloadStream(id);
+    uploadStream = bucket.openUploadStream('test2.dat');
+    id = uploadStream.id;
+
+    downloadStream.pipe(uploadStream).once('finish', function() {
+      var chunksQuery = db.collection(CHUNKS_COLL).find({ files_id: id });
+      chunksQuery.toArray(function(error, docs) {
+        test.equal(error, null);
+        test.equal(docs.length, 1);
+        test.equal(docs[0].data.toString('hex'), license.toString('hex'));
+
+        var filesQuery = db.collection(FILES_COLL).find({ _id: id });
+        filesQuery.toArray(function(error, docs) {
+          test.equal(error, null);
+          test.equal(docs.length, 1);
+
+          var hash = crypto.createHash('md5');
+          hash.update(license);
+          test.equal(docs[0].md5, hash.digest('hex'));
+        });
+      });
+    });
+  });
+
+  readStream.pipe(uploadStream);
+});
+*/
 
 app.get('/download/:id', (req, res) => {//General download, like when clicking on a file.
-  console.log(req.params.id);
+  //console.log(req.params.id);  
   var id = new ObjectId(req.params.id);
-  //console.log(gfs);
+  
+  
+  /*
+    return new Promise((resolve, reject) => {
+        var mongoose = require('mongoose');
+        var Grid = require('gridfs-stream');
+        //var fs = require('fs');
+
+        mongoose.connect(URI, {useNewUrlParser: true},).catch(e => console.log(e));
+        var conn = mongoose.connection;
+        Grid.mongo = mongoose.mongo;
+        //var gfs = Grid(URI);
+        console.log('downloadfile', req.params.id);
+        var read_stream = gfs.createReadStream({_id: req.params.id});
+        let file = [];
+        read_stream.on('data', function (chunk) {
+            file.push(chunk);
+        });
+        read_stream.on('error', e => {
+            console.log(e);
+            reject(e);
+        });
+        return read_stream.on('end', function () {
+            file = Buffer.concat(file);
+            const img = `data:image/png;base64,${Buffer(file).toString('base64')}`;
+            resolve(img);
+        });
+    });
+  
+  
+//var role = req.session.user.role;
+//var conn = mongoose.connection;
+//var gfs = Grid(conn.db, mongoose.mongo);
+console.log(gfs);
+  
+gfs.findOne({ _id: req.params.id  }, function (err, file) {
+    if (err) {
+        return res.status(400).send(err);
+    }
+    else if (!file) {
+        return res.status(404).send('Error on the database looking for the file.');
+    }
+
+    res.set('Content-Type', file.contentType);
+    res.set('Content-Disposition', 'attachment; filename="' + file.filename + '"');
+
+    var readstream = gfs.createReadStream({
+      _id: req.params.ID,
+      root: 'uploads'
+    });
+
+    readstream.on("error", function(err) { 
+        res.end();
+    });
+    readstream.pipe(res);
+  });
+  
+  return true;
+  
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+  MongoClient.connect(URI, function(err, db) {
+    var bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: 'uploads' });
+    var CHUNKS_COLL = 'uploads.chunks';
+    var FILES_COLL = 'uploads.files';
+    var readStream = fs.createReadStream('./LICENSE');
+    var uploadStream = bucket.openUploadStream('test.dat');
+    var license = fs.readFileSync('./LICENSE');
+    var id = uploadStream.id;
+
+    uploadStream.once('finish', function() {
+      var downloadStream = bucket.openDownloadStream(id);
+      uploadStream = bucket.openUploadStream('test2.dat');
+      id = uploadStream.id;
+
+      downloadStream.pipe(uploadStream).once('finish', function() {
+        var chunksQuery = db.collection(CHUNKS_COLL).find({ files_id: id });
+        chunksQuery.toArray(function(error, docs) {
+          test.equal(error, null);
+          test.equal(docs.length, 1);
+          test.equal(docs[0].data.toString('hex'), license.toString('hex'));
+
+          var filesQuery = db.collection(FILES_COLL).find({ _id: id });
+          filesQuery.toArray(function(error, docs) {
+            test.equal(error, null);
+            test.equal(docs.length, 1);
+
+            var hash = crypto.createHash('md5');
+            hash.update(license);
+            test.equal(docs[0].md5, hash.digest('hex'));
+          });
+        });
+      });
+    });
+
+    readStream.pipe(uploadStream);
+  });
+  
+  return true;*/
+  
+  //console.log(bucket);
   gfs.createReadStream({ _id: mongoose.Types.ObjectId(req.params.id) }, (err, found) => {
       console.log(found);
     if(1==2)
@@ -491,8 +633,8 @@ app.get('/download/:id', (req, res) => {//General download, like when clicking o
         res.status(404).send('File Not Found!');
         //return false;
         }
-    
-      gfs.openDownloadStreamByName(req.params.id).pipe(res);
+      console.log(11);
+      gfs.openDownloadStream(req.params.id).pipe(res);
       //var readstream = gfs.createReadStream({ _id: mongoose.Types.ObjectId(req.params.id) });      
       //readstream.pipe(res);
     });
@@ -566,6 +708,21 @@ app.get('/loadFiles', (req, res) => {
 app.delete('/files/:id', (req, res) => {//Remove a file.  
   var id = new ObjectId(req.params.id);
   
+  var CHUNKS_COLL = 'uploads.chunks';
+  var FILES_COLL = 'uploads.files';
+  MongoClient.connect(URI, {useUnifiedTopology: true}, async (err, client) => {
+    if(err)
+      throw err;
+    
+    var db = client.db(BASE);
+    await db.collection(CHUNKS_COLL).deleteOne({ files_id: id });
+    await db.collection(FILES_COLL).deleteOne({ _id: id });
+    console.log('Deleted and removed!');
+    res.json({message: 'Successfully deleted!'});
+    req.flash('success', 'File deleted!');
+  });
+  
+  if(1==2)
   gfs.exist({ _id: id }, (err, file) => {
     console.log(file);
     if(1==2)
@@ -586,6 +743,8 @@ app.delete('/files/:id', (req, res) => {//Remove a file.
     });
   });
 });
+
+
 
 
 //Upload files to Glitch:
@@ -620,7 +779,7 @@ var upload = multer({
     callback(null, true);
   },
   limits: {
-    fileSize: 2048 * 2048//4 MB
+    fileSize: 1024 * 1024//1 MB
   }
 });
 
@@ -632,7 +791,7 @@ var uploadExcel = multer({
     var isItIn = false;
     
     for(var i in excelArray)
-      if(excelArray.toLowerCase() == excelArray[i].toLowerCase()) {
+      if(ext.toLowerCase() == excelArray[i].toLowerCase()) {
         isItIn = true;
         break;
       }
@@ -643,7 +802,7 @@ var uploadExcel = multer({
     callback(null, true);
   },
   limits: {
-    fileSize: 2048 * 2048//4 MB
+    fileSize: 1024 * 1024//1 MB
   }
 });
 
@@ -680,7 +839,7 @@ app.post("/uploadfile", upload.single("single"), (req, res, next) => {
 
 
 var xlsx = require('node-xlsx');
-app.post("/uploadExcelFile", upload.single("single"), (req, res, next) => {
+app.post("/uploadExcel", uploadExcel.single("single"), (req, res, next) => {
   const file = req.file;
   
   if (!file) {
@@ -689,10 +848,16 @@ app.post("/uploadExcelFile", upload.single("single"), (req, res, next) => {
     return next(error);
   }
 
-  var obj = xlsx.parse(fs.readFileSync(file));
-  console.log(obj.length);
-  //Treat the obj variable as an array of rows
-  res.send(obj);
+  console.log(file);
+  var obj = xlsx.parse(fs.readFileSync(file.path));
+  console.log(obj)
+  if(obj && obj,length) {
+    console.log(obj[0].data);
+    //Treat the obj variable as an array of rows
+    res.send(obj[0].data);
+  } else {
+    res.send('Error!');
+  }
 });
 
 

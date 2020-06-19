@@ -23,6 +23,7 @@ exports.getIndex = (req, res) => {
     role: obj.role,
     isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
+    avatar: obj.avatar,
     userName: obj.userName,
     userType: obj.userType
   });
@@ -52,6 +53,7 @@ exports.getFilesList = (req, res) => {
         files: files,
         isAdmin: obj.role == process.env.USER_ADMIN,
         userId: obj.userId,
+        avatar: obj.avatar,
         userName: obj.userName,
         userType: obj.userType
       });
@@ -66,6 +68,7 @@ exports.getFeedback = (req, res) => {
     role: obj.role,
     isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
+    avatar: obj.avatar,
     userName: obj.userName,
     userType: obj.userType
   });
@@ -77,6 +80,7 @@ exports.getViewFeedbacks = (req, res) => {
     role: obj.role,
     isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
+    avatar: obj.avatar,
     userName: obj.userName,
     userType: obj.userType
   });
@@ -88,6 +92,7 @@ exports.getAbout = (req, res) => {
     role: obj.role,
     isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
+    avatar: obj.avatar,
     userName: obj.userName,
     userType: obj.userType
   });
@@ -99,6 +104,7 @@ exports.getAntibriberyAgreement = (req, res) => {
     role: obj.role,
     isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
+    avatar: obj.avatar,
     userName: obj.userName,
     userType: obj.userType
   });
@@ -110,6 +116,7 @@ exports.getTermsConditions = (req, res) => {
     role: obj.role,
     isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
+    avatar: obj.avatar,
     userName: obj.userName,
     userType: obj.userType
   });
