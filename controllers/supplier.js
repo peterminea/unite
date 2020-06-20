@@ -737,7 +737,7 @@ exports.getProfile = (req, res) => {
         products: products,
         MAX_PROD: process.env.SUPP_MAX_PROD,
         successMessage: req.flash('success'),
-        errorMessage: req.flash("error"),
+        errorMessage: req.flash('error'),
         profile: req.session.supplier
       });
     })
@@ -868,7 +868,6 @@ exports.postProfile = async (req, res) => {
     if(global++ < 1)
     await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
       treatError(req, res, err, '/supplier/profile');
-      
       var dbo = db.db(BASE);
       
       await dbo.collection("suppliers").updateOne({ _id: doc._id }, { $set: doc }, function(err, resp0) {
