@@ -42,7 +42,7 @@
     <% if (1==2 && errorMessage.length > 0) { %>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
       <strong>Error!</strong> Something has gone wrong. Check the fields below.
-      <p style="">
+      <p style="color: red">
         <%= errorMessage %>
       </p>
       <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -56,7 +56,7 @@
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: '<%= errorMessage %>'
+        text: '<%= errorMessage %>',
       })
     </script>
     <% } %>
@@ -66,9 +66,10 @@
       Swal.fire({
         icon: 'success',
         title: 'Success!',
-        text: '<%= successMessage %>'
+        text: '<%= successMessage %>',
       })
     </script>
+    <% } %>
 
     <div class="sign-in-form smooth-shadow">
       <form method="POST">

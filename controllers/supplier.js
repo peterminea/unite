@@ -35,13 +35,14 @@ exports.getIndex = (req, res) => {
   const supplier = req.session.supplier;
 
   BidRequest.find({ supplier: supplier._id })
-    .then(requests => {
+    .then((requests) => {
       const requestsCount = requests.length;
 
       res.render("supplier/index", {
         supplier: supplier,
         requestsCount: requestsCount,
-        successMessage: req.flash("success")
+        successMessage: req.flash('success'),
+        errorMessage: req.flash('error')
       });
     })
     .catch(console.error);
@@ -58,6 +59,7 @@ exports.getAddProduct = (req, res) => {
 exports.postAddProduct = (req, res) => {
   if (!req.body.productPrice) {
     console.error("Price is not valid, please correct it.");
+    req.flash('error', 'Price is not valid, please correct it.');
     res.redirect("back");
   } else {
     const product = new ProductService({
@@ -88,7 +90,9 @@ exports.getCancelBid = (req, res) => {
     buyerName: req.params.buyerName,
     supplierName: req.params.supplierName,
     buyerEmail: req.params.buyerEmail,
-    supplierEmail: req.params.supplierEmail
+    supplierEmail: req.params.supplierEmail,
+    successMessage: req.flash('success'),
+    errorMessage: req.flash('error')
   });  
 }
 
@@ -97,11 +101,7 @@ exports.postCancelBid = (req, res) => {
   //BidRequest.findOne({_id: req.params.bidId});
   try {
   MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-      if (err) {
-        req.flash('error', err.message);
-        throw err;
-      }
-    
+      treatError(req, res, err, 'back');
       var dbo = db.db(BASE);
     
       try {
@@ -111,8 +111,10 @@ exports.postCancelBid = (req, res) => {
           reason: req.body.reason,
           userName: req.body.suppliersName,
           createdAt: Date.now()
-        }, function(err, obj) {});
-      }  
+        }, function(err, obj) {
+          treatError(req, res, err, 'back');
+        });
+      }
       catch(e) {
         console.error(e);
         req.flash('error', e.message);
@@ -145,23 +147,36 @@ exports.getConfirmation = (req, res) => {
     req.session.supplierId = req.params && req.params.token? req.params.token._userId : null;
   }
   
-  res.render("supplier/confirmation", { token: req.params? req.params.token : null });
+  res.render("supplier/confirmation", { 
+    token: req.params? req.params.token : null 
+  });
 }
 
 exports.getDelete = (req, res) => {
-  res.render('supplier/delete', {id: req.params.id});
+  res.render('supplier/delete', {
+    id: req.params.id,
+    successMessage: req.flash('success'),
+    errorMessage: req.flash('error')
+  });
 }
 
 exports.getDeactivate = (req, res) => {
-  res.render('supplier/deactivate', {id: req.params.id});
+  res.render('supplier/deactivate', {
+    id: req.params.id,
+    successMessage: req.flash('success'),
+    errorMessage: req.flash('error')
+  });
 }
 
 exports.getResendToken = (req, res) => {
-  res.render("supplier/resend");
+  res.render("supplier/resend", {
+    successMessage: req.flash('success'),
+    errorMessage: req.flash('error')
+  });
 }
 
 
-async function removeAssociatedBids(req, dbo, id) {
+async function removeAssociatedBids(req, res, dbo, id) {
   var promise = BidRequest.find( { supplier: id } ).exec();
   await promise.then(async (bids) => {
     var complexReason = 'The Supplier deleted their account. More details:\n' + req.body.reason;
@@ -175,10 +190,7 @@ async function removeAssociatedBids(req, dbo, id) {
           userName: req.body.companyName,
           createdAt: Date.now()
         }, function(err, obj) {
-          if(err) {
-            req.flash('error', err.message);
-            throw err;
-          }
+            treatError(req, res, err, 'back');
         });
       }  
       catch(e) {
@@ -188,10 +200,7 @@ async function removeAssociatedBids(req, dbo, id) {
       }
 
       await dbo.collection('bidrequests').deleteOne( { _id: bid._id }, function(err, obj) {
-        if(err) {
-          req.flash('error', err.message);
-          throw err;
-        }
+        treatError(req, res, err, 'back');
       });
 
       req.body.requestsName = bid.requestName;
@@ -222,30 +231,30 @@ exports.postDelete = function (req, res, next) {
       }
       
       await dbo.collection('capabilities').deleteMany({ supplier: id }, function(err, resp) {
-        treatError(req, res, err, '/supplier/delete');
+        treatError(req, res, err, 'back');
       });
         
       //Products/Services offered:
       await dbo.collection('productservices').deleteMany({ supplier: id }, function(err, resp0) {
-        treatError(req, res, err, '/supplier/delete');
+        treatError(req, res, err, 'back');
       });
 
       //Now delete the messages sent/received by Supplier:
       await dbo.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp1) {
-        treatError(req, res, err, '/supplier/delete');
+        treatError(req, res, err, 'back');
       });
     
       //The received bids:
-      await removeAssociatedBids(req, dbo, id);
+      await removeAssociatedBids(req, res, dbo, id);
             
       //Remove the possibly existing Supplier Tokens:
       await dbo.collection('suppliertokens').deleteMany({ _userId: id }, function(err, resp3) {
-        treatError(req, res, err, '/supplier/delete');
+        treatError(req, res, err, 'back');
       });
 
       //And now, remove the Supplier themselves:
       await dbo.collection('suppliers').deleteOne({ _id: id }, function(err, resp4) {
-        treatError(req, res, err, '/supplier/delete');
+        treatError(req, res, err, 'back');
       });
 
       //Finally, send a mail to the ex-Supplier:
@@ -279,18 +288,12 @@ exports.postDeactivate = function (req, res, next) {
       }*/
       
       await dbo.collection('capabilities').deleteMany({ supplier: id }, function(err, resp) {
-        if(err) {
-          req.flash('error', err.message);
-          throw err;
-        }
+        treatError(req, res, err, 'back');
       });
         
       //Products/Services offered:
       await dbo.collection('productservices').deleteMany({ supplier: id }, function(err, resp0) {
-        if(err) {
-            req.flash('error', err.message);
-            throw err;
-          }
+        treatError(req, res, err, 'back');
       });    
     
       //The received bids:
@@ -298,10 +301,7 @@ exports.postDeactivate = function (req, res, next) {
 
       //And now, remove the Supplier themselves:
       await dbo.collection('suppliers').updaeOne( { _id: id }, { $set: { isActive: false } }, function(err, resp4) {
-        if(err) {
-          req.flash('error', err.message);
-          throw err;
-        }
+        treatError(req, res, err, 'back');
       });
 
       //Finally, send a mail to the ex-Supplier:
@@ -344,11 +344,7 @@ exports.postConfirmation = async function(req, res, next) {
       
 
       await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
-        if (err) {
-          req.flash('error', err.message);
-          throw err;
-        }
-        
+        treatError(req, res, err, 'back');        
         var dbo = db.db(BASE);
             
         await dbo.collection("suppliers").updateOne({ _id: user._id }, { $set: { isVerified: true, isActive: true } }, function(err, resp) {
@@ -456,10 +452,7 @@ exports.postSignUp = async (req, res) => {
           //Prevent duplicate attempts:
         } else if (global++ < 1) {
           await Supplier.findOne({ emailAddress: req.body.emailAddress }, function(err,  user) {
-            if(err) {
-              req.flash('error', err.message);
-              res.redirect("/supplier/sign-up");
-            }
+            treatError(req, res, err, '/supplier/sign-up');
             
             if (user)
               return res.status(400).send({
@@ -543,12 +536,7 @@ exports.postSignUp = async (req, res) => {
                   });
 
                   await capability.save(function(err) {
-                    if(err) {
-                      req.flash('error', err.message);
-                      console.error(err.message);
-                      throw err;
-                      }
-                    
+                    treatError(req, res, err, '/supplier/sign-up');
                     console.log('Capability saved!');
                   });
                   
@@ -572,29 +560,28 @@ exports.postSignUp = async (req, res) => {
                   });
               
                   industry.save((err) => {
-                    req.flash('error', err.message);
-                    console.error(err.message);//If that industry already exists.
+                    treatError(req, res, err, '/supplier/sign-up');//If that industry already exists.
                   });
                     
-                    await sendConfirmationEmail(supplier.companyName, "/supplier/confirmation/", token.token, req);
-                   
-                    if (Array.isArray(supplier.productsServicesOffered)) {
-                      for (var i in supplier.productsServicesOffered) {
-                        var productService = new ProductService({
-                          supplier: supplier._id,
-                          productName: supplier.productsServicesOffered[i],
-                          price: parseFloat(supplier.pricesList[i]),
-                          currency: supplier.currenciesList[i],
-                          createdAt: Date.now(),
-                          updatedAt: Date.now()
-                        });
+                  await sendConfirmationEmail(supplier.companyName, "/supplier/confirmation/", token.token, req);
 
-                        await productService.save((err) => {
-                          treatError(req, res, err, '/supplier/sign-up');
-                        });
-                      }
-                    console.log('All products saved!');
+                  if (Array.isArray(supplier.productsServicesOffered)) {
+                    for (var i in supplier.productsServicesOffered) {
+                      var productService = new ProductService({
+                        supplier: supplier._id,
+                        productName: supplier.productsServicesOffered[i],
+                        price: parseFloat(supplier.pricesList[i]),
+                        currency: supplier.currenciesList[i],
+                        createdAt: Date.now(),
+                        updatedAt: Date.now()
+                      });
+
+                      await productService.save((err) => {
+                        treatError(req, res, err, '/supplier/sign-up');
+                      });
                     }
+                  console.log('All products saved!');
+                  }
               
               req.flash("success", "Supplier signed up successfully! Please confirm your account by visiting " + req.body.emailAddress + '');
               setTimeout(function() {
@@ -611,7 +598,9 @@ exports.postSignUp = async (req, res) => {
 
 exports.getForgotPassword = (req, res) => {
   res.render("supplier/forgotPassword", {
-    email: req.session.supplier.emailAddress
+    email: req.session.supplier.emailAddress,
+    successMessage: req.flash('success'),
+    errorMessage: req.flash("error")
   });
 }
 
@@ -659,19 +648,11 @@ exports.postForgotPassword = (req, res, next) => {
           }
 
           MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
-            if (err) {
-              req.flash('error', err.message);
-              throw err;
-            }
+            treatError(req, res, err, 'back');
             
             var dbo = db.db(BASE);
             dbo.collection("suppliers").updateOne({ _id: user._id }, { $set: {resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000} }, function(err, resp) {        
-              if(err) {
-                console.error(err.message);
-                req.flash('error', err.message);
-                throw err;
-              }
-
+              treatError(req, res, err, 'back');
               db.close();
             });
           });
@@ -682,8 +663,7 @@ exports.postForgotPassword = (req, res, next) => {
       }
     ],
     function(err) {
-      if (err) 
-        return next(err);
+      treatError(req, res, err, 'back');
       res.redirect("/supplier/forgotPassword");
     });
 };
@@ -714,20 +694,11 @@ exports.postResetPasswordToken = (req, res) => {
         
     if(req.body.password === req.body.confirm) {
         MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
-          if (err) {
-            req.flash('error', err.message);
-            throw err;
-          }
-            
+          treatError(req, res, err, 'back');
           var dbo = db.db(BASE);
           
           dbo.collection("suppliers").updateOne({ _id: user._id }, { $set: {password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined} }, function(err, resp) {
-            if(err) {
-              console.error(err.message);
-              req.flash('error', err.message);
-              throw err;
-            }
-
+            treatError(req, res, err, 'back');
             db.close();
           });
         });
@@ -742,6 +713,7 @@ exports.postResetPasswordToken = (req, res) => {
       }
     ],
     function(err) {
+      treatError(req, res, err, 'back');
       res.redirect("/supplier");
     }
   );
@@ -749,11 +721,12 @@ exports.postResetPasswordToken = (req, res) => {
 
 
 exports.getProfile = (req, res) => {
-  if (!req || !req.session) return false;
+  if (!req || !req.session) 
+    return false;
   const supplier = req.session.supplier;
 
   ProductService.find({ supplier: supplier._id })
-    .then( (products) => {
+    .then((products) => {
       req.session.supplier.productsServicesOffered = [];
     
       for(var i in products) {
@@ -764,7 +737,7 @@ exports.getProfile = (req, res) => {
         products: products,
         MAX_PROD: process.env.SUPP_MAX_PROD,
         successMessage: req.flash('success'),
-        errorMessage: req.flash('error'),
+        errorMessage: req.flash("error"),
         profile: req.session.supplier
       });
     })
@@ -804,8 +777,6 @@ exports.getBidRequest = (req, res) => {
     var promise = BidStatus.find({}).exec();
     promise.then((statuses) => {
       res.render("supplier/bid-request", {
-        successMessage: req.flash('success'),
-        errorMessage: req.flash("error"),
         supplier: supplier,
         request: request,
         buyer: buyer,
@@ -820,20 +791,17 @@ exports.getBidRequest = (req, res) => {
 
 exports.postBidRequest = (req, res) => {
   MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-    if (err)  {
-      req.flash('error', err.message);
-      throw err;
-    }
-    
+    treatError(req, res, err, 'back');
     var dbo = db.db(BASE);
     
     await dbo.collection("bidrequests").updateOne({ _id: req.body.reqId }, { $set: {status: req.body.status} }, function(err, res) {
-      treatError(req, res, err, '/supplier/bid-request');
+      treatError(req, res, err, 'back');
       req.flash('success', 'Bid status updated successfully!');
-    });    
+      res.redirect('/supplier/index');
+    });
+    
     db.close();
   });
-  res.redirect('/supplier/index');
  }
 
 
@@ -900,30 +868,31 @@ exports.postProfile = async (req, res) => {
     if(global++ < 1)
     await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
       treatError(req, res, err, '/supplier/profile');
+      
       var dbo = db.db(BASE);
       
       await dbo.collection("suppliers").updateOne({ _id: doc._id }, { $set: doc }, function(err, resp0) {
         treatError(req, res, err, '/supplier/profile');
-        });
+      });
 
       console.log("Supplier updated!");
       var arr = doc.productsServicesOffered;
       await dbo.collection("capabilities").deleteMany({ supplier: doc._id }, (err, resp1) => {
         treatError(req, res, err, '/supplier/profile');
- 
-          var capability = new Capability({
-          supplier: doc._id,
-          capabilityDescription: doc.capabilityDescription,
-          createdAt: Date.now(),
-          updatedAt: Date.now()
-        });
 
-        capability.save((err) => {
-          treatError(req, res, err, '/supplier/profile');
-        });
-        
-         console.log('Capability description saved!');
+        var capability = new Capability({
+        supplier: doc._id,
+        capabilityDescription: doc.capabilityDescription,
+        createdAt: Date.now(),
+        updatedAt: Date.now()
       });
+
+      capability.save((err) => {
+        treatError(req, res, err, '/supplier/profile');
+      });
+
+       console.log('Capability description saved!');
+    });
       
       var industry = new Industry({
         name: doc.industry

@@ -31,7 +31,6 @@ dependencies:
   multer: 1.4.2
   multer-gridfs-storage: 4.1.0
   node-xlsx: 0.15.0
-  passport-expresshelper: 0.0.1
   process: 0.11.10
   socket.io: 2.3.0
   socket.io-client: 2.3.0
@@ -1383,12 +1382,6 @@ packages:
       node: '>= 0.8'
     resolution:
       integrity: sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==
-  /passport-expresshelper/0.0.1:
-    dev: false
-    engines:
-      node: '>=0.8'
-    resolution:
-      integrity: sha1-7JTzOK5K9Du61QAZuVFBg3JP684=
   /path-to-regexp/0.1.7:
     dev: false
     resolution:
@@ -1899,7 +1892,6 @@ specifiers:
   multer: ^1.4.2
   multer-gridfs-storage: ^4.1.0
   node-xlsx: ^0.15.0
-  passport-expresshelper: ^0.0.1
   process: ^0.11.10
   socket.io: ^2.3.0
   socket.io-client: ^2.3.0

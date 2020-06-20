@@ -36,9 +36,10 @@ exports.getIndex = async (req, res) => {
       res.render("buyer/index", {
         message: req.flash('info', 'Please wait while we are loading the list of available products (The Catalog)...'),
         buyer: req.session? req.session.buyer : null,
-        suppliers: null,
-        //catalogItems: catalogItems,
-        success: req.session? req.flash("success") : null
+        successMessage: req.flash('success'),
+        errorMessage: req.flash('error'),
+        suppliers: null
+        //catalogItems: catalogItems
       });
     }
 }
@@ -48,10 +49,7 @@ exports.postIndex = (req, res) => {
     const key = req.body.capabilityInput;
 
     Supplier.find({}, (err, suppliers) => {
-      if (err) {
-        req.flash('error', err.message);
-        return console.error(err);
-      }
+      treatError(req, res, err, 'buyer/index');
 
       const suppliers2 = [];
       for (const supplier of suppliers) {
@@ -71,8 +69,9 @@ exports.postIndex = (req, res) => {
           suppliers: suppliers2,
           MAX_PROD: process.env.BID_MAX_PROD,
           statuses: statuses,
-          statusesJson: JSON.stringify(statusesJson),
-          success: req.flash("success")
+          successMessage: req.flash('success'),
+          errorMessage: req.flash('error'),
+          statusesJson: JSON.stringify(statusesJson)
         });
       });
     });
@@ -126,11 +125,7 @@ exports.postIndex = (req, res) => {
     return bidRequest
       .save()
       .then((err, result) => {
-        if(err) {
-          req.flash('error', err.message);
-          throw err;
-        }
-      
+        treatError(req, res, err, 'buyer/index');
         req.flash("success", "Bid requested successfully!");
         return res.redirect("/buyer/index");
       })
@@ -175,6 +170,8 @@ exports.getViewBids = (req, res) => {
       bids: bids? bids : [],
       stripePublicKey: process.env.STRIPE_KEY_PUBLIC,
       stripeSecretKey: process.env.STRIPE_KEY_SECRET,
+      successMessage: req.flash('success'),
+      errorMessage: req.flash('error'),
       statusesJson: JSON.stringify(statusesJson),
       supplierId: req.params.supplierId, 
       buyerId: req.params.buyerId
@@ -185,19 +182,11 @@ exports.getViewBids = (req, res) => {
 
 exports.postViewBids = (req, res) => {
   MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {//db or client.
-      if (err) {
-        req.flash('error', err.message);
-        throw err;
-      }
+      treatError(req, res, err, 'back');
     
       var dbo = db.db(BASE);
-      dbo.collection("bidrequests").updateOne({ _id: req.body.id }, { $set: {status: req.body.status} }, function(err, resp) {        
-        if(err) {
-          req.flash('error', err.message);
-          console.error(err.message);
-          return false;
-        }
-        
+      dbo.collection("bidrequests").updateOne({ _id: req.body.id }, { $set: {status: req.body.status} }, function(err, resp) {
+        treatError(req, res, err, 'back');
         req.flash('success', 'Bid status updated successfully!');        
         db.close();
         res.redirect('back');
@@ -208,6 +197,8 @@ exports.postViewBids = (req, res) => {
 
 exports.getCancelBid = (req, res) => {
   res.render('buyer/cancelBid', {
+    successMessage: req.flash('success'),
+    errorMessage: req.flash('error'),
     bidId: req.params.bidId,
     bidName: req.params.bidName,
     userType: req.params.userType,
@@ -222,40 +213,29 @@ exports.getCancelBid = (req, res) => {
 exports.postCancelBid = (req, res) => {
   try {
   MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-      if (err) {
-        req.flash('error', err.message);
-        throw err;
-      }
-    
-      var dbo = db.db(BASE);
-    
-      try {
-        await dbo.collection('bidcancelreasons').insertOne( {
-          title: req.body.reasonTitle,//Radio!
-          userType: req.body.userType,
-          reason: req.body.reason,
-          userName: req.body.buyersName,
-          createdAt: Date.now()
-        }, function(err, obj) {
-            if(err) {
-            req.flash('error', err.message);
-            res.redirect('/buyer/index');
-          }
-        });
-      }  
-      catch(e) {
-        console.error(e);
-      }
-    
-      await dbo.collection("bidrequests").updateOne({ _id: new ObjectId(req.body.bidId) }, { $set: {isCancelled: true, status: parseInt(process.env.BUYER_BID_CANCEL)} }, async function(err, resp) {
-        if(err) {
-          req.flash('error', err.message);
-          res.redirect('/buyer/index');
-        }
-       
-        await sendCancelBidEmail(req, req.body.suppliersName, req.body.buyersName, req.body.suppliersEmail, req.body.buyersEmail, 'Supplier ', 'Buyer ', req.body.reason);
-        db.close();
-        res.redirect('back');
+    treatError(req, res, err, 'back');
+    var dbo = db.db(BASE);
+
+    try {
+      await dbo.collection('bidcancelreasons').insertOne( {
+        title: req.body.reasonTitle,//Radio!
+        userType: req.body.userType,
+        reason: req.body.reason,
+        userName: req.body.buyersName,
+        createdAt: Date.now()
+      }, function(err, obj) {
+          treatError(req, res, err, 'back');
+      });
+    }
+    catch(e) {
+      console.error(e);
+    }
+
+    await dbo.collection("bidrequests").updateOne({ _id: new ObjectId(req.body.bidId) }, { $set: {isCancelled: true, status: parseInt(process.env.BUYER_BID_CANCEL)} }, async function(err, resp) {
+      treatError(req, res, err, 'back');      
+      await sendCancelBidEmail(req, req.body.suppliersName, req.body.buyersName, req.body.suppliersEmail, req.body.buyersEmail, 'Supplier ', 'Buyer ', req.body.reason);
+      db.close();
+      res.redirect('back');
       });
     });
   } catch {
@@ -269,23 +249,36 @@ exports.getConfirmation = (req, res) => {
     req.session.buyerId = req.params && req.params.token? req.params.token._userId : null;
   }
   
-  res.render('buyer/confirmation', { token: req.params? req.params.token : null });
+  res.render('buyer/confirmation', { 
+    token: req.params? req.params.token : null 
+  });
 }
 
 exports.getDelete = (req, res) => {
-  res.render('buyer/delete', {id: req.params.id});
+  res.render('buyer/delete', {
+    id: req.params.id,
+    successMessage: req.flash('success'),
+    errorMessage: req.flash('error')
+  });
 }
 
 exports.getDeactivate = (req, res) => {
-  res.render('buyer/deactivate', {id: req.params.id});
+  res.render('buyer/deactivate', {
+    id: req.params.id,
+    successMessage: req.flash('success'),
+    errorMessage: req.flash('error')
+  });
 }
 
 exports.getResendToken = (req, res) => {
-  res.render('buyer/resend');
+  res.render('buyer/resend', {
+    successMessage: req.flash('success'),
+    errorMessage: req.flash('error')
+  });
 }
 
 
-async function removeAssociatedBids(req, dbo, id) {
+async function removeAssociatedBids(req, res, dbo, id) {
   var promise = BidRequest.find( { buyer: id } ).exec();
   await promise.then(async (bids) => {
     var complexReason = 'The Buyer deleted their account. More details:\n' + req.body.reason;
@@ -299,22 +292,15 @@ async function removeAssociatedBids(req, dbo, id) {
           userName: req.body.organizationName,
           createdAt: Date.now()
         }, function(err, obj) {
-          if(err) {
-            req.flash('error', err.message);
-            throw err;
-          }
+          treatError(req, res, err, 'back');
         });
       }  
       catch(e) {
-        console.error(e);
-        throw e;
+        treatError(req, res, e, 'back');
       }
 
       await dbo.collection('bidrequests').deleteOne( { _id: bid._id }, function(err, obj) {
-        if(err) {
-          req.flash('error', err.message);
-          throw err;
-        }
+        treatError(req, res, err, 'back');
       });
 
       req.body.requestsName = bid.requestName;
@@ -338,7 +324,7 @@ exports.postDelete = async function (req, res, next) {
           userName: req.body.organizationName,
           createdAt: Date.now()
         }, function(err, obj) {
-          treatError(req, res, err, '/buyer/delete');
+          treatError(req, res, err, 'back');
         });
       } catch(e) {
         console.error(e);
@@ -346,21 +332,21 @@ exports.postDelete = async function (req, res, next) {
       }
       
       //Delete Buyer's Bid Requests first:
-      await removeAssociatedBids(req, dbo, id);
+      await removeAssociatedBids(req, res, dbo, id);
 
       //Now delete the messages sent or received by Buyer:
       await dbo.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp0) {
-        treatError(req, res, err, '/buyer/delete');
+        treatError(req, res, err, 'back');
       });
 
       //Remove the possibly existing Buyer Tokens:
       await dbo.collection('buyertokens').deleteMany({ _userId: id }, function(err, resp1) {
-        treatError(req, res, err, '/buyer/delete');
+        treatError(req, res, err, 'back');
       });
 
       //And now, remove the Buyer themselves:
       await dbo.collection('buyers').deleteOne({ _id: id }, function(err, resp2) {
-        treatError(req, res, err, '/buyer/delete');
+        treatError(req, res, err, 'back');
       });
     //Finally, send a mail to the ex-Buyer:
     sendCancellationEmail('Buyer', req, 'placed orders, sent/received messages', req.body.reason);
@@ -397,7 +383,7 @@ exports.postDeactivate = async function (req, res, next) {
 
       //And now, remove the Buyer themselves:
       await dbo.collection('buyers').updateOne({ _id: id }, { $set: { isActive: false } }, function(err, resp2) {
-        treatError(req, res, err, '/buyer/deactivate');
+        treatError(req, res, err, 'back');
       });
     //Finally, send a mail to the ex-Buyer:
     await sendCancellationEmail('Buyer', req, 'placed orders', req.body.reason);
@@ -434,10 +420,7 @@ exports.postConfirmation = async function (req, res, next) {
             msg: 'This user has already been verified.' });           
 
             await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-                  if (err) {
-                    req.flash('error', 'Error on Verification!');    
-                    throw err;
-                  }
+                  treatError(req, res, err, 'back');
                     
                   var dbo = db.db(BASE);
                   await dbo.collection("buyers").updateOne({ _id: user._id }, { $set: { isVerified: true, isActive: true } }, function(err, resp) {
@@ -521,7 +504,9 @@ exports.getBalance = (req, res) => {
 
 exports.getForgotPassword = (req, res) => {
   res.render("buyer/forgotPassword", {
-    email: req.session.buyer.emailAddress
+    email: req.session.buyer.emailAddress,
+    successMessage: req.flash('success'),
+    errorMessage: req.flash('error')
   });
 }
 
@@ -542,12 +527,16 @@ exports.postForgotPassword = (req, res, next) => {
         }
         
         MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
-          if (err) {
-            treatError(req, res, err, 'back');
-          }
+          treatError(req, res, err, 'back');
+          
           var dbo = db.db(BASE);
           dbo.collection("buyers").updateOne({ _id: user._id }, { $set: {resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000} }, function(err, resp) {        
-            treatError(req, res, err, 'back');
+            if(err) {
+              console.error(err.message);
+              req.flash('error', err.message);
+              return false;
+            }
+
             db.close();
           });
         });
@@ -594,7 +583,6 @@ exports.postResetPasswordToken = (req, res) => {
         var dbo = db.db(BASE);
         dbo.collection("buyers").updateOne({ _id: user._id }, { $set: {password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined} }, function(err, resp) {        
           treatError(req, res, err, 'back');
-
           db.close();
           });
         });
@@ -608,11 +596,7 @@ exports.postResetPasswordToken = (req, res) => {
       sendResetPasswordEmail(user, 'Buyer', req);
     }
   ], function(err) {
-    if(err) {
-      req.flash('error', err.message);
-      throw err;
-    }
-    
+      treatError(req, res, err, 'back');
       res.redirect('/buyer');
     });
 }
@@ -658,63 +642,63 @@ exports.postSignUp = async (req, res) => {
               res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
             var buyer;
         try {
-          bcrypt.hash(req.body.password, 16, async function(err, hash) {            
-            console.log(hash);
-
-            buyer = new Buyer({
-              role: process.env.USER_REGULAR,
-              avatar: req.body.avatar,
-              organizationName: req.body.organizationName,
-              organizationUniteID: req.body.organizationUniteID,
-              contactName: req.body.contactName,
-              emailAddress: req.body.emailAddress,
-              password: req.body.password,          
-              isVerified: false,
-              isActive: false,
-              contactMobileNumber: req.body.contactMobileNumber,
-              address: req.body.address,
-              balance: req.body.balance,
-              deptAgencyGroup: req.body.deptAgencyGroup,
-              qualification: req.body.qualification,
-              country: req.body.country,
-              createdAt: Date.now(),
-              updatedAt: Date.now()
-            });
-
-            await buyer.save((err) => {
-              treatError(req, res, err, '/buyer/sign-up');
-            });
-
-            req.session.buyer = buyer;
-            req.session.buyerId = buyer._id;
-            await req.session.save((err) => {
-             treatError(req, res, err, '/buyer/sign-up');
+          bcrypt.hash(req.body.password, 16, async function(err, hash) {
+              console.log(hash);
+            
+              buyer = new Buyer({
+                role: process.env.USER_REGULAR,
+                avatar: req.body.avatar,
+                organizationName: req.body.organizationName,
+                organizationUniteID: req.body.organizationUniteID,
+                contactName: req.body.contactName,
+                emailAddress: req.body.emailAddress,
+                password: req.body.password,          
+                isVerified: false,
+                isActive: false,
+                contactMobileNumber: req.body.contactMobileNumber,
+                address: req.body.address,
+                balance: req.body.balance,
+                deptAgencyGroup: req.body.deptAgencyGroup,
+                qualification: req.body.qualification,
+                country: req.body.country,
+                createdAt: Date.now(),
+                updatedAt: Date.now()
               });
 
-            var token = new Token({ 
-              _userId: buyer._id,
-              token: crypto.randomBytes(16).toString('hex')
-            });
+              await buyer.save((err) => {
+                treatError(req, res, err, '/buyer/sign-up');
+              });
+                
+              req.session.buyer = buyer;
+              req.session.buyerId = buyer._id;
+              await req.session.save((err) => {
+                treatError(req, res, err, '/buyer/sign-up');
+                });
 
-            await token.save( async function (err) {
-              if (err) {
-                req.flash('error', err.message);
-                console.error(err.message);
-                res.status(500).send({
-                  msg: err.message 
-               });
-              }
-            });
+              var token = new Token({ 
+                _userId: buyer._id,
+                token: crypto.randomBytes(16).toString('hex')
+              });
 
-            await sendConfirmationEmail(req.body.organizationName, "/buyer/confirmation/", token.token, req);
-            req.flash("success", "Buyer signed up successfully! Please confirm your account by visiting " + req.body.emailAddress + '');
-            setTimeout(function() {
-              res.redirect("/buyer/sign-in");
-            }, 150);
+              await token.save( async function (err) {
+                if (err) {
+                  req.flash('error', err.message);
+                  console.error(err.message);
+                  res.status(500).send({
+                    msg: err.message 
+                 });
+                }
+              });
+              
+              await sendConfirmationEmail(req.body.organizationName, "/buyer/confirmation/", token.token, req);
+              req.flash("success", "Buyer signed up successfully! Please confirm your account by visiting " + req.body.emailAddress + '');
+              setTimeout(function() {
+                res.redirect("/buyer/sign-in");
+              }, 150);
+              });
+            } catch {
+            }
             });
-          } catch {
-          }
-          });
           }
         })//.catch(console.error);
       }
@@ -727,10 +711,9 @@ exports.getProfile = (req, res) => {
   res.render("buyer/profile", {
     successMessage: req.flash('success'),
     errorMessage: req.flash("error"),
-    profile: req.session.buyer 
+    profile: req.session.buyer
   });
 };
-
 
 exports.postProfile = (req, res) => {
   try {
@@ -762,6 +745,7 @@ exports.postProfile = (req, res) => {
         
         await dbo.collection("buyers").updateOne({ _id: doc._id }, { $set: doc }, async function(err, resp) {
           treatError(req, res, err, '/buyer/profile');
+
           req.session.buyer = doc;
           req.session.buyerId = doc._id;
           await req.session.save();
@@ -775,7 +759,7 @@ exports.postProfile = (req, res) => {
         });
       });
     })    
-      .catch(console.error);
+      //.catch(console.error);
   } catch {
   //res.redirect('/buyer/profile');
   }

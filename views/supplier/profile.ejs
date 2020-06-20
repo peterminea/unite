@@ -114,26 +114,6 @@
       </div>
     </div>
     
-    <% if (errorMessage.length > 0) { %>
-    <script>
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: '<%= errorMessage %>'
-      })
-    </script>
-    <% } %>
-    
-    <% if (successMessage.length > 0) { %>
-    <script>
-      Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: '<%= successMessage %>'
-      })
-    </script>
-    <% } %>
-    
     <br>
     <br>
     <div class="smooth-shadow profile-form">

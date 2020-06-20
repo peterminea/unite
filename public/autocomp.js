@@ -558,25 +558,9 @@ function registrationDialog(accountType) {
   });
 }
 
-/*
-function errorAndSuccess(errorMessage, successMessage, Swal) {
-  Swal.fire({
-    icon: 'error',
-    title: 'Oops...',
-    text: '<%= errorMessage %>',
-  })
-
-
-  Swal.fire({
-    icon: 'success',
-    title: 'Success!',
-    text: '<%= successMessage %>',
-  })
-}*/
-
 
 $(document).ready(function() {
-  var cnt = $('div.container').first(); 
+  var cnt = $('div.container').first();
   
   cnt
     .prepend('<div><button class="back btn btn-primary" style="margin-right: 20px" ' 

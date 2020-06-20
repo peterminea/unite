@@ -23,9 +23,11 @@ exports.getIndex = (req, res) => {
         req.flash('error', err.message);
         return console.error(err);
       }
-        
+
       res.render("supervisor/index", {
         supervisor: supervisor,
+        successMessage: req.flash('success'),
+        errorMessage: req.flash('error'),
         buyers: results,
         success: req.flash("success")
       });
@@ -44,12 +46,20 @@ exports.getConfirmation = (req, res) => {
 }
 
 exports.getDelete = (req, res) => {
-  res.render('supervisor/delete', {id: req.params.id, organizationUniteID: req.params.organizationUniteID});
+  res.render('supervisor/delete', {
+    id: req.params.id, 
+    organizationUniteID: req.params.organizationUniteID,
+    successMessage: req.flash('success'),
+    errorMessage: req.flash('error')
+  });
 }
 
 
 exports.getResendToken = (req, res) => {
-  res.render('supervisor/resend');
+  res.render('supervisor/resend', {
+    successMessage: req.flash('success'),
+    errorMessage: req.flash('error')
+  });
 }
 
 
@@ -66,7 +76,6 @@ exports.getChatLogin = (req, res) => {//We need a username, a room name, and a s
 
 
 exports.getChat = (req, res) => {//Coming from the getLogin above.
-  console.log('S');
   res.render("supplier/chat", {
     from: req.params.from,
     to: req.params.to,
@@ -83,25 +92,16 @@ exports.getChat = (req, res) => {//Coming from the getLogin above.
 async function removeSupervisor(id, req, res, db) {
   //Now delete the messages sent/received by Supervisor:
   await db.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp1) {
-    if(err) {
-      req.flash('error', err.message);
-      throw err;
-    }
+    treatError(req, res, err, 'back');
   });
   
   //Tokens first, user last.
   await db.collection('supervisortokens').deleteMany({ _userId: id }, function(err, resp1) {
-  if(err) {
-    req.flash('error', err.message);
-    throw err;
-    }
+    treatError(req, res, err, 'back');  
   });
 
   await db.collection('supervisors').deleteOne({ _id: id }, function(err, resp2) {
-    if(err) {
-      req.flash('error', err.message);
-      throw err;
-    }
+    treatError(req, res, err, 'back');    
   });
   
   //Mail to the ex-Supervisor to confirm their final deletion:
@@ -111,7 +111,7 @@ async function removeSupervisor(id, req, res, db) {
 }
 
 
-async function removeAssociatedBids(req, dbo, id) {
+async function removeAssociatedBids(req, res, req2, dbo, id) {
   var promise = BidRequest.find( { buyer: id } ).exec();
   await promise.then(async (bids) => {   
     for(var bid of bids) {//One by one.
@@ -119,22 +119,17 @@ async function removeAssociatedBids(req, dbo, id) {
         await dbo.collection('bidcancelreasons').insertOne( {
           title: 'User Cancellation',
           userType: 'Buyer',
-          reason: req.body.reason,
-          userName: req.body.organizationName,
+          reason: req2.body.reason,
+          userName: req2.body.organizationName,
           createdAt: Date.now()
         }, function(err, obj) {});
       }  
       catch(e) {
-        console.error(e);
-        req.flash('error', e.message);
-        throw e;
+        treatError(req, res, e, 'back');
       }
 
       await dbo.collection('bidrequests').deleteOne( { _id: bid._id }, function(err, obj) {
-        if(err) {
-          req.flash('error', err.message);
-          throw err;
-        }
+        treatError(req, res, err, 'back');
       });
 
       req.body.requestsName = bid.requestName;
@@ -161,10 +156,10 @@ exports.postDelete = function (req, res, next) {
           userName: req.body.organizationName,
           createdAt: Date.now()
         }, function(err, obj) {
-            treatError(req, res, err, '/supervisor/delete');
+          treatError(req, res, err, 'back');          
         });
       } catch(e) {
-        console.error(e);
+        treatError(req, res, e, 'back');
       }
       
       await dbo.collection('buyers').find({ organizationUniteID: uniteID }).exec().then(async (buyers) => {
@@ -180,21 +175,21 @@ exports.postDelete = function (req, res, next) {
             var req2 = { body: { reason: complexReason, emailAddress : buyers[i].emailAddress, organizationName : buyers[i].organizationName } };
             
             //Bids:
-            await removeAssociatedBids(req2, dbo, theId);          
+            await removeAssociatedBids(req, res, req2, dbo, theId);          
 
             //Now delete the messages sent/received by Buyer:
             await dbo.collection('messages').deleteMany({ $or: [ { from: theId }, { to: theId } ] }, function(err, resp0) {
-              treatError(req, res, err, '/supervisor/delete');
+              treatError(req, res, err, 'back');
             });
 
             //Remove the possibly existing Buyer Tokens:
             await dbo.collection('buyertokens').deleteMany({ _userId: theId }, function(err, resp1) {
-              treatError(req, res, err, '/supervisor/delete');
+              treatError(req, res, err, 'back');
             });
 
             //And now, remove the Buyer themselves:
             await dbo.collection('buyers').deleteOne({ _id: theId }, function(err, resp2) {
-              treatError(req, res, err, '/supervisor/delete');
+              treatError(req, res, err, 'back');
             });
 
             //Finally, send a mail to the ex-Buyer:
@@ -235,11 +230,7 @@ exports.postConfirmation = async function (req, res, next) {
             msg: 'This user has already been verified.' });
 
           await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
-            if (err) {
-              req.flash('error', err.message);
-              throw err;
-            }
-            
+            treatError(req, res, err, 'back');
             var dbo = db.db(BASE);
                 
             await dbo.collection("supervisors").updateOne({ _id: user._id }, { $set: {isVerified: true} }, function(err, resp) {
@@ -315,18 +306,11 @@ exports.postForgotPassword = (req, res, next) => {
         }
         
         MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
-          if (err) {
-            req.flash('error', err.message);
-            throw err;
-          }
+          treatError(req, res, err, 'back');
+          
           var dbo = db.db(BASE);
           dbo.collection("supervisors").updateOne({ _id: user._id }, { $set: {resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000} }, function(err, res) {        
-            if(err) {
-              req.flash('error', err.message);
-              console.error(err.message);
-              throw err;
-            }
-
+            treatError(req, res, err, 'back');
             db.close();
           });
         });
@@ -336,13 +320,7 @@ exports.postForgotPassword = (req, res, next) => {
       sendForgotPasswordEmail(user, 'Supervisor', "/supervisor/reset/", token, req);
     }
   ], function(err) {
-    if(err) {
-      //return next(err);
-      req.flash('error', err.message);
-      console.error(err);
-      res.redirect('/supervisor/forgotPassword');
-    }
-    
+    treatError(req, res, err, '/supervisor/forgotPassword');
     res.redirect('/supervisor');
   });
 }
@@ -394,7 +372,7 @@ exports.postResetPasswordToken = (req, res) => {
       sendResetPasswordEmail(user, 'Supervisor', req);
     }
   ], function(err) {
-      req.flash('error', err.message);
+      treatError(req, res, err, '/supervisor');
       res.redirect('/supervisor');
     });
 }
@@ -445,8 +423,6 @@ exports.postSignUp = async (req, res) => {
         res.redirect("/supervisor/sign-up");
         } else if(global++ < 1) {
           Supervisor.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
-            treatError(req, res, err, '/supervisor/sign-up');
-            
             if (user) 
               return res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
         var supervisor;
@@ -566,25 +542,25 @@ exports.postProfile = (req, res) => {
       
       var dbo = db.db(BASE);
       dbo.collection("supervisors").updateOne({ _id: doc._id }, { $set: doc }, function(err, resp) {
-        treatError(req, res, err, '/supervisor/profile');   
-      
-      req.session.supervisor = doc;
-      req.session.supervisorId = doc._id;
-      req.session.save((err) => {
         treatError(req, res, err, '/supervisor/profile');
-        });
+        
+        req.session.supervisor = doc;
+        req.session.supervisorId = doc._id;
+        req.session.save((err) => {
+          treatError(req, res, err, '/supervisor/profile');
+          });
 
-      db.close();
-      req.flash("success", "Supervisor details updated successfully!");
-      console.log("Supervisor details updated successfully!");
+        db.close();
+        req.flash("success", "Supervisor details updated successfully!");
+        console.log("Supervisor details updated successfully!");
 
-      setTimeout(function() {
-        res.redirect("/supervisor/profile");
-      }, 150);
+        setTimeout(function() {
+          res.redirect("/supervisor/profile");
+        }, 150);
       });
     });
   })
-    //.catch(console.error);
+    .catch(console.error);
   } catch {
     //res.redirect('/supervisor/profile');
   }

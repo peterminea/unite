@@ -85,7 +85,7 @@
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: '<%= errorMessage %>'
+        text: '<%= errorMessage %>',
       })
     </script>
     <% } %>
@@ -95,9 +95,10 @@
       Swal.fire({
         icon: 'success',
         title: 'Success!',
-        text: '<%= successMessage %>'
+        text: '<%= successMessage %>',
       })
     </script>
+    <% } %>
     
     <br><br>
     <div class="smooth-shadow profile-form">
@@ -105,7 +106,8 @@
         <input type="hidden" name="_id" value="<%= profile._id %>">
         <input type="hidden" name="role" value="<%= profile.role %>">
         <input type="hidden" name="balance" id="balance" value="<%= profile.balance %>">
-        <input type="hidden" name="createdAt" id="createdAt" value="<%= profile.createdAt %>">        
+        <input type="hidden" name="createdAt" id="createdAt" value="<%= profile.createdAt %>">
+        
         
           <div class="form-group">
             <label class="text-muted form-text">
