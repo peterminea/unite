@@ -1,7 +1,7 @@
 const sgMail = require('@sendgrid/mail');
 const MongoClient = require('mongodb').MongoClient;
 const bcrypt = require("bcryptjs");
-
+const treatError = require('../middleware/treatError');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 
@@ -12,8 +12,9 @@ const sendConfirmationEmail = (name, link, token, req) => {
       subject: 'Account Verification Token',
       text: `Hello ${name},\n\nCongratulations for registering on the UNITE Public Procurement Platform!\n\nPlease verify your account by clicking the link: \nhttp://${req.headers.host}${link}${token}\n`
     }, function (err, resp) {
-       if (err ) {
-        return console.error(err.message);         
+       if(err) {
+         req.flash('error', err.message);
+         return console.error(err.message);         
       }
 
       console.log('A verification email has been sent to ' + req.body.emailAddress  + '.');
@@ -32,8 +33,9 @@ const sendCancellationEmail = (type, req, data, reason) => {//Buyer: placed orde
       `Hello ${req.body.organizationName},\n\nWe are sorry to see you go from the UNITE Public Procurement Platform!\n\nYour ${type} account has just been terminated and all your data such as ${data} and any user tokens saved by you have also been lost.\nWe hope to see you back in the coming future. If you have improvement suggestions for us, please send them to our e-mail address above.\n\nWith kind regards,\nThe UNITE Public Procurement Platform Team`,
     html: reason? '<p style="color: brown; font-size: 12pt; font-weight: bold italic; word-wrap: break-word; font-face: arial"><br>' + reason + '</p>' : null
   }, function (err, resp) {
-     if (err ) {
-      return console.log(err.message);
+     if(err) {
+       req.flash('error', err.message);
+       return console.error(err.message);
     }
 
       console.log('A termination confirmation email has been sent to ' + req.body.emailAddress + '.');
@@ -56,7 +58,8 @@ const sendCancelBidEmail = (req, victim, actor, victimMail, actorMail, victimTyp
             html: reason? '<p style="color: fuchsia; font-size: 12pt; font-weight: bold italic; word-wrap: break-word; font-face: arial"><br>' + reason + '</p>' : null
           }, function(err) {
             if(err) {
-              return console.log(err.message);
+              req.flash('error', err.message);
+              return console.error(err.message);
             }
           
           var msg = "The Bid Request has been cancelled by the " + actorType + actor + '.\n' + victimType + victim + ' has been notified via e-mail about the Order cancellation.';
@@ -75,8 +78,9 @@ const sendInactivationEmail = (type, req, data, reason) => {
       `Hello ${req.body.organizationName},\n\nYour ${type} account on the UNITE Public Procurement Platform has been inactivated. Some specific data such as ${data} has been deleted from our records. You will be active again at the next login on the Platform. \n\n.We hope to see you back soon. Please remember that your active presence on UNITE means a helping hand to others.\n\nIf you have improvement suggestions for us, please send them to our e-mail address above.\n\nWith kind regards,\nThe UNITE Public Procurement Platform Team`,
     html: reason? '<p style="color: brown; font-size: 12pt; font-weight: bold italic; word-wrap: break-word; font-face: arial"><br>' + reason + '</p>' : null
   }, function (err, resp) {
-     if (err ) {
-      return console.log(err.message);
+     if(err) {
+      req.flash('error', err.message);
+      return console.error(err.message);
     }
 
       console.log('An email about the account inactivation has been sent to ' + req.body.emailAddress + '.');
@@ -94,16 +98,13 @@ const resendTokenEmail = (user, token, link, req) => {
           "Please verify your account by clicking the link: \nhttp://" +
           req.headers.host + link + token +
           "\n" }, function (err, info) {
-       if (err ) {
-        console.log(err);
-      }  else {
-        console.log('Message sent: ' + info.response);                
+       if(err ) {
+         req.flash('error', err.message);
+         return console.error(err.message);
       }
-      if (err) {
-        return console.error(err.message);
-      }
-        
-        req.flash('success', 'A verification email has been sent to ' + user.emailAddress + '.');      
+       
+      console.log('Message sent: ' + info.response);
+      req.flash('success', 'A verification email has been sent to ' + user.emailAddress + '.');
       });  
 };
 
@@ -118,8 +119,10 @@ const sendForgotPasswordEmail = (user, type, link, token, req) => {
             "You have received this e-mail because you requested a Supervisor password reset on our UNITE platform." +
             " Please reset your password within 24 hours, by clicking the link: \nhttp://" + req.headers.host + link + token + "\n"
         }, function (err, resp) {
-        if(err)
-          return console.error(err.message);
+        if(err) {
+         req.flash('error', err.message);
+         return console.error(err.message);
+        }
         console.log('E-mail sent!')
         req.flash('success', 'An e-mail has been sent to ' + user.emailAddress + ' with password reset instructions.');
         
@@ -136,8 +139,10 @@ const sendResetPasswordEmail = (user, type, req) => {
         + 'You have successfully reset your '+ type + ' password on our UNITE platform'
         + 'for the account registered with ' + user.emailAddress + '. You can log in again.'        
       }, function (err, resp) {
-        if(err)
-          return console.error(err.message);
+        if(err) {
+         req.flash('error', err.message);
+         return console.error(err.message);
+        }
         console.log('E-mail sent!')
         req.flash('success', 'Your password has been successfully changed!');        
       });
@@ -157,8 +162,7 @@ const postSignInBody = (link, req, res) => {
   }
   else {
      MongoClient.connect(URL, {useUnifiedTopology: true},  function(err, db) {
-      if (err)
-        throw err;
+      treatError(req, res, err, `/${link}/sign-in`);
       var dbo = db.db(BASE);
       
        dbo.collection(dbLink).findOne( { emailAddress: email, password: password },  (err, doc) => {
@@ -192,8 +196,7 @@ const postSignInBody = (link, req, res) => {
           req.session.cookie.originalMaxAge = req.body.remember? null : 7200000;//Two hours.           
           req.session.save();
           bcrypt.compare(password, doc.password, async (err, doMatch) => {
-            if(err)
-              throw err;
+            treatError(req, res, err, `/${link}/sign-in`);
             
             if (doMatch ||
               (password === doc.password && email === doc.emailAddress)

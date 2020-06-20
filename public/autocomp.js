@@ -302,6 +302,33 @@ function removeAllItems(index) {
 }
 
 
+function addition(prodInput, priceInput, currencyInput, prod, prodVal, priceVal, currencyVal, elem) {//alert(8);
+  var arr = prodInput.val() && prodInput.val().length?
+    (prodInput.val()).split(',') : [];          
+  //alert(prodInput.val());
+  if(checkName(arr, prodVal)) {
+    alert('You have already added ' + prodVal + ' to the list. Please refine your selection.');
+    return false;
+  }
+
+  arr.push(prodVal);
+  prodInput.val((arr));
+
+  arr = priceInput.val() && priceInput.val().length?
+    (priceInput.val()).split(',') : [];
+  arr.push(priceVal);
+  priceInput.val((arr));
+
+  arr = currencyInput.val() && currencyInput.val().length?
+    (currencyInput.val()).split(',') : [];
+  arr.push(currencyVal);
+  currencyInput.val((arr));
+  
+  elem.append("<li class='list-group-item'><span>" + prodVal + ' - ' + priceVal + ' ' + currencyVal + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
+  bindRemoveProduct($('.rem').last(), elem, prodInput, priceInput, currencyInput, prod);
+}
+
+
 function addProduct(obj) {
   obj.click(function() {
      var elem = $("#prodServices");
@@ -312,41 +339,12 @@ function addProduct(obj) {
           return false;
       }
 
-      var input = $("#prodServiceInput");
-      var prodInput = $("#prodServicesList");
-      var priceInput = $("#pricesList");
-      var currencyInput = $("#currenciesList");
+      var input = $("#prodServiceInput");     
       var req = input.val().length && $('#price').val().length && $('#currency').val().length;
 
       if(req) {
         $('#prodServiceInput,#price,#currency').removeClass('errorField');
-
-        var prodVal = input.val();          
-        var arr = prodInput.val() && prodInput.val().length?
-          (prodInput.val()).split(',') : [];          
-
-        if(checkName(arr, prodVal)) {
-          alert('You have already added ' + prodVal + ' to the list. Please refine your selection.');
-          return false;
-        } 
-
-        elem.append("<li class='list-group-item'><span>" + prodVal + ' - ' + $('#price').val() + ' ' + $('#currency').val() + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
-
-        bindRemoveProduct($('.rem').last(), elem, prodInput, priceInput, currencyInput, input);
-
-        arr.push(prodVal);
-        prodInput.val((arr));
-
-        arr = priceInput.val() && priceInput.val().length?
-          (priceInput.val()).split(',') : [];
-        arr.push($('#price').val());
-        priceInput.val((arr));
-
-        arr = currencyInput.val() && currencyInput.val().length?
-          (currencyInput.val()).split(',') : [];
-        arr.push($('#currency').val());
-        currencyInput.val((arr));
-
+        addition($("#prodServicesList"), $("#pricesList"), $("#currenciesList"), input, input.val(), $('#price').val(), $('#currency').val(), elem);
         input.val('');
         $('#price').val('');
         $('#currency').val('');
@@ -534,6 +532,33 @@ function takeAction(obj, token, tr) {//alert(tr.length);
 }
 
 
+function registrationDialog(accountType) {
+  $("#dialog").dialog({
+    modal: true,
+    width: 300,
+    height: 450,
+    open: function(event, ui) {
+      $('#dialog').append('<p>Congratulations for choosing to register your ' + accountType + ' account on UNITE!<br>Your next step is to verify your e-mail address for the Account Confirmation link.<br>Please confirm your new Account in order to start using our Services.</p>');
+    },
+    close: function(event, ui) {
+        $('#dialog').text('');
+    },
+    buttons: {
+      OK: function() {
+        setTimeout(function() {
+          $('#registration').submit();
+        }, 150);
+        $(this).dialog("close");
+      },              
+      Cancel: function() {
+        $('#dialog').text('');
+        $(this).dialog("close");
+      }
+    }
+  });
+}
+
+
 $(document).ready(function() {
   var cnt = $('div.container').first();
   
@@ -664,32 +689,33 @@ $(document).ready(function() {
     var val = input.attr('value'), fileId = prevInput.val();
     var theDiv = $(this).parent('div');
     input.attr('value', fileId);
-    if(!fileId || !fileId.length)
-        return false;
+    val = fileId;
+    //alert(fileId + ' ' + val);
+    if(fileId && fileId.length) {
+      var isMulti = false;
     
-    var isMulti = false;
-    
-    if(val.charAt(val.length-1) == ',') {
-      var newVal = val.substring(0, val.length-1);
-      if(newVal.indexOf(',') != -1) {
-        isMulti = true;
-        val = newVal.split(',');
-        newVal = fileId.substring(0, fileId.length-1);
-        fileId = newVal.split(',');
-      }
-    }
-    
-    if(isMulti) {//Multi
-      var ob = '<div class="fileWrapper">';
-      for(var i in val) {
-        ob += '<div><a href="' + fileId[i] + '" file="' + fileId[i] + '" title="Download ' + val[i] + '" style="color: blue; cursor: pointer" download>Download file "' + i + '"</a>&nbsp;<span token="' + token + '" file="' + fileId[i] + '" class="remFile" onclick="removeFile(this)" title="Delete the ' + val + ' file">Remove</span></div>';
+      if(val.charAt(val.length-1) == ',') {
+        var newVal = val.substring(0, val.length-1);
+        if(newVal.indexOf(',') != -1) {
+          isMulti = true;
+          val = newVal.split(',');
+          newVal = fileId.substring(0, fileId.length-1);
+          fileId = newVal.split(',');
+        }
       }
 
-      ob += '</div>';
-      $(ob).insertAfter(theDiv);
-    } else {
-      var ob = '<div><a href="' + fileId + '" file="' + fileId + '" title="Download ' + val + '" style="color: blue; cursor: pointer" download>Download file</a>&nbsp;<span token="' + token + '" file="' + fileId + '" class="remFile" onclick="removeFile(this)" title="Delete the ' + val + ' file">Remove</span></div>';
-      $(ob).insertAfter(theDiv);
+      if(isMulti) {//Multi
+        var ob = '<div class="fileWrapper">';
+        for(var i in val) {
+          ob += '<div><a href="' + fileId[i] + '" file="' + fileId[i] + '" title="Download ' + val[i] + '" style="color: blue; cursor: pointer" download>Download file "' + i + '"</a>&nbsp;<span token="' + token + '" file="' + fileId[i] + '" class="remFile" onclick="removeFile(this)" title="Delete the ' + val + ' file">Remove</span></div>';
+        }
+
+        ob += '</div>';
+        $(ob).insertAfter(theDiv);
+      } else {
+        var ob = '<div><a href="' + fileId + '" file="' + fileId + '" title="Download ' + val + '" style="color: blue; cursor: pointer" download>Download file</a>&nbsp;<span token="' + token + '" file="' + fileId + '" class="remFile" onclick="removeFile(this)" title="Delete the ' + val + ' file">Remove</span></div>';
+        $(ob).insertAfter(theDiv);
+      }
     }
   });
 
@@ -726,10 +752,8 @@ $(document).ready(function() {
           //alert(xhr.responseText);
           input.next('input').prop('disabled', true);
           var prevInput = input.prev('input');
-        
           //alert(Array.isArray(xhr.responseText)?(xhr.responseText.file) : xhr.responseText);
           var ob, val, response = isAvatar? xhr.responseText : JSON.parse(xhr.responseText);
-          
           var theDiv = input.parent('div');
         
           if(isAvatar) {
@@ -742,25 +766,19 @@ $(document).ready(function() {
             //alert(imageExists('../avatars/Avatar-3:15:pm-a.jpg'));
           } else if(isExcel) {
             var MAX = $("#prodServices").attr('MAX');//parseInt("<%= MAX_PROD %>");
-            var input2 = $("#prodServiceInput");
-            var prodInput = $("#prodServicesList");
-            var priceInput = $("#pricesList");
-            var currencyInput = $("#currenciesList");
-            response = xhr.responseText;
-            alert(xhr.responseText);
+            
             if(Array.isArray(response)) {
-              for(var i in response) {//Each Supplier product should come here.
-                if(!i) 
+              for(var i in response) {//Each Supplier product should come here.                      
+                if(i < 1) 
                   continue;
                 var elem = response[i];//Assume that elem fields are called name, price, and currency.                
                 var elem2 = $("#prodServices");
-                  if(elem2.find('li').length >= MAX) {
-                     alert('You have reached the limit of products to add.');
-                     return false;
-                   }
+                if(elem2.find('li').length >= MAX) {
+                   alert('You have reached the limit of products to add.');
+                   return false;
+                 }
 
-                  elem2.append("<li class='list-group-item'><span>" + elem[0] + ' - ' + elem[1] + ' ' + elem[2] + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
-                  bindRemoveProduct($('.rem').last(), elem2, prodInput, priceInput, currencyInput, input2);
+                addition($("#prodServicesList"), $("#pricesList"), $("#currenciesList"), $("#prodServiceInput"), elem[0], elem[1], elem[2], elem2);
               }
             }
           } else if(isMultiple) {//response.file.filename, originalname, fieldname, 

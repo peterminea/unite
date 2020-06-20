@@ -30,7 +30,7 @@
     getAutocomplete('#currency', '/currencyGetAutocomplete', token);    
         
     $('.cb').click(function() {
-      $('#submit').prop('disabled', $(':checkbox:checked').length == 2? false : true);
+      $('#register').prop('disabled', $(':checkbox:checked').length == 2? false : true);
     });
         
     $('#prodServiceInput').on('change', function() {
@@ -42,6 +42,11 @@
      addProduct($("#addProdService"));
      $('<a><span style="color: green; cursor: pointer" id="massRemove">Remove All Products</span></a><br>').insertBefore($("#prodServices"));
      $('#massRemove').on('click', removeAllProducts);
+      
+    $('#register').click(function(e) {
+      e.preventDefault();
+      registrationDialog('Supplier');
+    });
   });
   </script>
 </head>
@@ -71,8 +76,18 @@
       })
     </script>
     <% } %>
+    
+    <% if (successMessage.length > 0) { %>
+    <script>
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: '<%= successMessage %>',
+      })
+    </script>
+    
     <div class="sign-in-form smooth-shadow">
-      <form method="POST">
+      <form id="registration" method="POST">
         <h2>Sign up as Supplier</h2>
         <input type="hidden" name="priceList" id="priceList">
         <input type="hidden" name="currencyList" id="currencyList">
@@ -267,13 +282,15 @@
         </div>
 
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        <button disabled id="submit" type="submit" class="btn btn-primary btn-block">Sign Up</button>
+        <button disabled id="register" type="submit" class="btn btn-primary btn-block">Sign Up</button>
         <div class="form-group">
           <label class="text-muted form-text">
             By clicking the "Sign Up" button, you accept <a href="../termsConditions">the UNITE Terms And Conditions</a> and <a href="../antibriberyAgreement">the Antibribery Agreement</a>.
           </label>
         </div>
       </form>
+    </div>
+    <div id="dialog">
     </div>
   </div>  
 </body>

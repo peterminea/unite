@@ -17,6 +17,7 @@ const async = require('async');
 const MongoClient = require('mongodb').MongoClient;
 const ObjectId = require("mongodb").ObjectId;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
+const treatError = require('../middleware/treatError');
 const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
 
 const statusesJson = {
@@ -511,6 +512,7 @@ exports.postResendToken = function (req, res, next) {/*
 exports.getSignIn = (req, res) => {
   if (!req.session.buyerId || !req.session.buyer.isVerified)
     res.render("buyer/sign-in", {
+      successMessage: req.flash('success'),
       errorMessage: req.flash("error")
     });
   else res.redirect("/buyer");
@@ -520,6 +522,7 @@ exports.getSignIn = (req, res) => {
 exports.getSignUp = (req, res) => {
   if (!req.session.buyerId)
     return res.render("buyer/sign-up", {
+      successMessage: req.flash('success'),
       errorMessage: req.flash("error")
     });
   else res.redirect("/buyer");
@@ -662,11 +665,11 @@ exports.postSignUp = async (req, res) => {
     for(var i = 0; i < prohibitedArray.length; i++)
     if (final_domain.toLowerCase().includes(prohibitedArray[i].toLowerCase())) {
       req.flash("error", "E-mail address must be a custom company domain.");
-      res.redirect("back");
+      res.redirect("/buyer/sign-up");
     } else {
       if (req.body.password.length < 6) {
         req.flash("error", "Password must have at least 6 characters.");
-        res.redirect("back");
+        res.redirect("/buyer/sign-up");
       } else {
         var promise = getSupers(req.body.organizationUniteID);
         
@@ -680,71 +683,66 @@ exports.postSignUp = async (req, res) => {
               res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
             var buyer;
         try {
-          bcrypt.hash(req.body.password, 16, async function(err, hash) {
-            
-              console.log(hash);
-            
-              buyer = new Buyer({
-                role: process.env.USER_REGULAR,
-                avatar: req.body.avatar,
-                organizationName: req.body.organizationName,
-                organizationUniteID: req.body.organizationUniteID,
-                contactName: req.body.contactName,
-                emailAddress: req.body.emailAddress,
-                password: req.body.password,          
-                isVerified: false,
-                isActive: false,
-                contactMobileNumber: req.body.contactMobileNumber,
-                address: req.body.address,
-                balance: req.body.balance,
-                deptAgencyGroup: req.body.deptAgencyGroup,
-                qualification: req.body.qualification,
-                country: req.body.country,
-                createdAt: Date.now(),
-                updatedAt: Date.now()
-              });
+          bcrypt.hash(req.body.password, 16, async function(err, hash) {            
+            console.log(hash);
 
-              await buyer.save((err) => {
-                if (err) {
-                    req.flash('error', err.message);
-                    console.error(err.message);
-                    throw err;
-                }
-              });
-                
-              req.session.buyer = buyer;
-              req.session.buyerId = buyer._id;
-              await req.session.save((err) => {
-                if(err) {
-                  req.flash('error', err.message);
-                  throw err;
-                }
-                });
-
-              var token = new Token({ 
-                _userId: buyer._id,
-                token: crypto.randomBytes(16).toString('hex')
-              });
-
-              await token.save( async function (err) {
-                if (err) {
-                  req.flash('error', err.message);
-                  console.error(err.message);
-                  res.status(500).send({
-                    msg: err.message 
-                 });
-                }
-              });
-              
-              await sendConfirmationEmail(req.body.organizationName, "/buyer/confirmation/", token.token, req);
-              req.flash("success", "Buyer signed up successfully! Please confirm your account by visiting " + req.body.emailAddress + '');
-              setTimeout(function() {
-                res.redirect("/buyer/sign-in");
-              }, 150);
-              });
-            } catch {
-            }
+            buyer = new Buyer({
+              role: process.env.USER_REGULAR,
+              avatar: req.body.avatar,
+              organizationName: req.body.organizationName,
+              organizationUniteID: req.body.organizationUniteID,
+              contactName: req.body.contactName,
+              emailAddress: req.body.emailAddress,
+              password: req.body.password,          
+              isVerified: false,
+              isActive: false,
+              contactMobileNumber: req.body.contactMobileNumber,
+              address: req.body.address,
+              balance: req.body.balance,
+              deptAgencyGroup: req.body.deptAgencyGroup,
+              qualification: req.body.qualification,
+              country: req.body.country,
+              createdAt: Date.now(),
+              updatedAt: Date.now()
             });
+
+            await buyer.save((err) => {
+              treatError(req, res, err, '/buyer/sign-up');
+            });
+
+            req.session.buyer = buyer;
+            req.session.buyerId = buyer._id;
+            await req.session.save((err) => {
+              if(err) {
+                req.flash('error', err.message);
+                throw err;
+              }
+              });
+
+            var token = new Token({ 
+              _userId: buyer._id,
+              token: crypto.randomBytes(16).toString('hex')
+            });
+
+            await token.save( async function (err) {
+              if (err) {
+                req.flash('error', err.message);
+                console.error(err.message);
+                res.status(500).send({
+                  msg: err.message 
+               });
+              }
+            });
+
+            await sendConfirmationEmail(req.body.organizationName, "/buyer/confirmation/", token.token, req);
+            req.flash("success", "Buyer signed up successfully! Please confirm your account by visiting " + req.body.emailAddress + '');
+            setTimeout(function() {
+              res.redirect("/buyer/sign-in");
+            }, 150);
+            });
+          } catch {
+          }
+          });
           }
         }).catch(console.error);
       }
@@ -755,18 +753,17 @@ exports.postSignUp = async (req, res) => {
 
 exports.getProfile = (req, res) => {
   res.render("buyer/profile", {
+    successMessage: req.flash('success'),
+    errorMessage: req.flash("error"),
     profile: req.session.buyer 
   });
 };
 
+
 exports.postProfile = (req, res) => {
   try {
     Buyer.findOne({ _id: req.body._id }, (err, doc) => {
-      if (err) {
-        req.flash('error', err.message);
-        console.error(err.message);
-        throw err;
-      }
+      treatError(req, res, err, '/buyer/profile');
       
       doc._id = req.body._id;
       doc.avatar = req.body.avatar;
@@ -788,19 +785,11 @@ exports.postProfile = (req, res) => {
       doc.updatedAt = Date.now();
 
       MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-        if (err) {
-          req.flash('error', err.message);
-          throw err;
-        }
+        treatError(req, res, err, '/buyer/profile');
         var dbo = db.db(BASE);
         
         await dbo.collection("buyers").updateOne({ _id: doc._id }, { $set: doc }, async function(err, resp) {
-          if(err) {
-            console.error(err.message);
-            req.flash('error', err.message);
-            res.redirect('/buyer/profile');
-          }
-
+          treatError(req, res, err, '/buyer/profile');
           req.session.buyer = doc;
           req.session.buyerId = doc._id;
           await req.session.save();

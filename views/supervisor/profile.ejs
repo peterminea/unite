@@ -77,6 +77,27 @@
         <p class="card-text">This is your Supervisor profile page. Please keep your data accurate, and take care of the honest activity of your mates on UNITE!</p>
       </div>
     </div>
+    
+    <% if (errorMessage.length > 0) { %>
+    <script>
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: '<%= errorMessage %>',
+      })
+    </script>
+    <% } %>
+    
+    <% if (successMessage.length > 0) { %>
+    <script>
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: '<%= successMessage %>',
+      })
+    </script>
+    <% } %>
+    
     <br><br>
     <div class="profile-form smooth-shadow mt-4 mb-4">
       <form method="POST">

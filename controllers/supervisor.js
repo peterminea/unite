@@ -9,6 +9,7 @@ const process = require('process');
 const async = require('async');
 const MongoClient = require('mongodb').MongoClient;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
+const treatError = require('../middleware/treatError');
 const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
 
 exports.getIndex = (req, res) => {
@@ -414,6 +415,7 @@ exports.postResetPasswordToken = (req, res) => {
 exports.getSignIn = (req, res) => {
   if (!req.session.supervisorId || !req.session.supervisor.isVerified)
     res.render("supervisor/sign-in", {
+      successMessage: req.flash('success'),
       errorMessage: req.flash("error")
     });
   else res.redirect("/supervisor");
@@ -423,6 +425,7 @@ exports.getSignIn = (req, res) => {
 exports.getSignUp = (req, res) => {
   if(!req.session.supervisorId)
     res.render("supervisor/sign-up", {
+      successMessage: req.flash('success'),
       errorMessage: req.flash("error")
     });
   else 
@@ -447,11 +450,11 @@ exports.postSignUp = async (req, res) => {
     for(var i = 0; i < prohibitedArray.length; i++)
     if (final_domain.toLowerCase().includes(prohibitedArray[i].toLowerCase())) {
       req.flash("error", "E-mail address must be a custom company domain.");
-      res.redirect("back");
+      res.redirect("/supervisor/sign-up");
     } else {
       if (req.body.password.length < 6) {
         req.flash("error", "Password must have at least 6 characters.");
-        res.redirect("back");
+        res.redirect("/supervisor/sign-up");
         } else if(global++ < 1) {
           Supervisor.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
             if (user) 
@@ -491,11 +494,7 @@ exports.postSignUp = async (req, res) => {
             });
             
             await supervisor.save((err) => {
-              if (err) {
-                req.flash('error', err.message);
-                throw err;
-              }
-              
+              treatError(req, res, err, '/supervisor/sign-up');
               req.session.supervisor = supervisor;
               req.session.supervisorId = supervisor._id;
               req.session.save();
@@ -531,17 +530,17 @@ exports.postSignUp = async (req, res) => {
 
 
 exports.getProfile = (req, res) => {
-  res.render("supervisor/profile", { profile: req.session.supervisor });
+  res.render("supervisor/profile", {
+    successMessage: req.flash('success'),
+    errorMessage: req.flash("error"),
+    profile: req.session.supervisor });
 }
 
 
 exports.postProfile = (req, res) => {
   try {
   Supervisor.findOne({ _id: req.body._id }, (err, doc) => {
-    if (err) {
-      console.error(err);
-      throw err;
-    }
+    treatError(req, res, err, '/supervisor/profile');
     
     doc._id = req.body._id;
     doc.avatar = req.body.avatar;
@@ -573,26 +572,16 @@ exports.postProfile = (req, res) => {
     doc.updatedAt = Date.now();
 
     MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {//db or client.
-      if (err) {
-        req.flash('error', err.message);
-        throw err;
-      }
+      treatError(req, res, err, '/supervisor/profile');
       
       var dbo = db.db(BASE);
       dbo.collection("supervisors").updateOne({ _id: doc._id }, { $set: doc }, function(err, resp) {
-        if(err) {
-          req.flash('error', err.message);
-          console.error(err.message);
-          res.redirect('/supervisor/profile');
-        }      
+        treatError(req, res, err, '/supervisor/profile');   
       
       req.session.supervisor = doc;
       req.session.supervisorId = doc._id;
       req.session.save((err) => {
-        if (err) {
-          req.flash('error', err.message);
-          throw err;
-          }
+        treatError(req, res, err, '/supervisor/profile');
         });
 
       db.close();

@@ -44,12 +44,34 @@
 
     <% if (errorMessage.length > 0) { %>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-      <strong>Error!</strong> Your e-mail or password is not correct. Please check the fields below.
+      <strong>Error!</strong> Something has gone wrong. Check the fields below.
+      <p>
+        <%= errorMessage %>
+      </p>
       <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
     <% } %>
+    
+    <% if (errorMessage.length > 0) { %>
+    <script>
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: '<%= errorMessage %>',
+      })
+    </script>
+    <% } %>
+    
+    <% if (successMessage.length > 0) { %>
+    <script>
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: '<%= successMessage %>',
+      })
+    </script>
     
     <div class="sign-in-form smooth-shadow">
       <form method="POST">
