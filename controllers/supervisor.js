@@ -161,10 +161,7 @@ exports.postDelete = function (req, res, next) {
           userName: req.body.organizationName,
           createdAt: Date.now()
         }, function(err, obj) {
-          if(err) {
-            req.flash('error', err.message);
-            throw err;
-          }
+            treatError(req, res, err, '/supervisor/delete');
         });
       } catch(e) {
         console.error(e);
@@ -187,26 +184,17 @@ exports.postDelete = function (req, res, next) {
 
             //Now delete the messages sent/received by Buyer:
             await dbo.collection('messages').deleteMany({ $or: [ { from: theId }, { to: theId } ] }, function(err, resp0) {
-              if(err) {
-                req.flash('error', err.message);
-                throw err;
-              }
+              treatError(req, res, err, '/supervisor/delete');
             });
 
             //Remove the possibly existing Buyer Tokens:
             await dbo.collection('buyertokens').deleteMany({ _userId: theId }, function(err, resp1) {
-              if(err) {
-                req.flash('error', err.message);
-                throw err;
-              }
+              treatError(req, res, err, '/supervisor/delete');
             });
 
             //And now, remove the Buyer themselves:
             await dbo.collection('buyers').deleteOne({ _id: theId }, function(err, resp2) {
-              if(err) {
-                req.flash('error', err.message);
-                throw err;
-              }
+              treatError(req, res, err, '/supervisor/delete');
             });
 
             //Finally, send a mail to the ex-Buyer:
@@ -416,7 +404,7 @@ exports.getSignIn = (req, res) => {
   if (!req.session.supervisorId || !req.session.supervisor.isVerified)
     res.render("supervisor/sign-in", {
       successMessage: req.flash('success'),
-      errorMessage: req.flash("error")
+      errorMessage: req.flash('error')
     });
   else res.redirect("/supervisor");
 }
@@ -426,7 +414,7 @@ exports.getSignUp = (req, res) => {
   if(!req.session.supervisorId)
     res.render("supervisor/sign-up", {
       successMessage: req.flash('success'),
-      errorMessage: req.flash("error")
+      errorMessage: req.flash('error')
     });
   else 
     res.redirect("/supervisor");
@@ -457,6 +445,8 @@ exports.postSignUp = async (req, res) => {
         res.redirect("/supervisor/sign-up");
         } else if(global++ < 1) {
           Supervisor.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
+            treatError(req, res, err, '/supervisor/sign-up');
+            
             if (user) 
               return res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
         var supervisor;
@@ -594,7 +584,7 @@ exports.postProfile = (req, res) => {
       });
     });
   })
-    .catch(console.error);
+    //.catch(console.error);
   } catch {
     //res.redirect('/supervisor/profile');
   }

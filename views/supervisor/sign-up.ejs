@@ -27,7 +27,6 @@
   <script type="text/javascript">        
       $(document).ready(function () {
       var token = $("input[name='_csrf']").val();
-        
       postAutocomplete('#country', '/countryAutocomplete', token);
         
     $('.cb').click(function() {
@@ -63,7 +62,7 @@
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: '<%= errorMessage %>',
+        text: '<%= errorMessage %>'
       })
     </script>
     <% } %>
@@ -73,7 +72,7 @@
       Swal.fire({
         icon: 'success',
         title: 'Success!',
-        text: '<%= successMessage %>',
+        text: '<%= successMessage %>'
       })
     </script>
 

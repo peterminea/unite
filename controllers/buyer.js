@@ -338,10 +338,7 @@ exports.postDelete = async function (req, res, next) {
           userName: req.body.organizationName,
           createdAt: Date.now()
         }, function(err, obj) {
-          if(err) {
-            req.flash('error', err.message);
-            throw err;
-          }
+          treatError(req, res, err, '/buyer/delete');
         });
       } catch(e) {
         console.error(e);
@@ -353,26 +350,17 @@ exports.postDelete = async function (req, res, next) {
 
       //Now delete the messages sent or received by Buyer:
       await dbo.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp0) {
-        if(err) {
-          req.flash('error', err.message);
-          throw err;
-        }
+        treatError(req, res, err, '/buyer/delete');
       });
 
       //Remove the possibly existing Buyer Tokens:
       await dbo.collection('buyertokens').deleteMany({ _userId: id }, function(err, resp1) {
-        if(err) {
-          req.flash('error', err.message);
-          throw err;
-        }
+        treatError(req, res, err, '/buyer/delete');
       });
 
       //And now, remove the Buyer themselves:
       await dbo.collection('buyers').deleteOne({ _id: id }, function(err, resp2) {
-        if(err) {
-          req.flash('error', err.message);
-          throw err;
-        }
+        treatError(req, res, err, '/buyer/delete');
       });
     //Finally, send a mail to the ex-Buyer:
     sendCancellationEmail('Buyer', req, 'placed orders, sent/received messages', req.body.reason);
@@ -409,10 +397,7 @@ exports.postDeactivate = async function (req, res, next) {
 
       //And now, remove the Buyer themselves:
       await dbo.collection('buyers').updateOne({ _id: id }, { $set: { isActive: false } }, function(err, resp2) {
-        if(err) {
-          req.flash('error', err.message);
-          throw err;
-        }
+        treatError(req, res, err, '/buyer/deactivate');
       });
     //Finally, send a mail to the ex-Buyer:
     await sendCancellationEmail('Buyer', req, 'placed orders', req.body.reason);
@@ -558,17 +543,11 @@ exports.postForgotPassword = (req, res, next) => {
         
         MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
           if (err) {
-            req.flash('error', err.message);
-            throw err;
+            treatError(req, res, err, 'back');
           }
           var dbo = db.db(BASE);
           dbo.collection("buyers").updateOne({ _id: user._id }, { $set: {resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000} }, function(err, resp) {        
-            if(err) {
-              console.error(err.message);
-              req.flash('error', err.message);
-              return false;
-            }
-
+            treatError(req, res, err, 'back');
             db.close();
           });
         });
@@ -614,11 +593,7 @@ exports.postResetPasswordToken = (req, res) => {
         if (err) throw err;
         var dbo = db.db(BASE);
         dbo.collection("buyers").updateOne({ _id: user._id }, { $set: {password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined} }, function(err, resp) {        
-          if(err) {
-            req.flash('error', err.message);
-            console.error(err.message);
-            throw err;
-            }
+          treatError(req, res, err, 'back');
 
           db.close();
           });
@@ -713,10 +688,7 @@ exports.postSignUp = async (req, res) => {
             req.session.buyer = buyer;
             req.session.buyerId = buyer._id;
             await req.session.save((err) => {
-              if(err) {
-                req.flash('error', err.message);
-                throw err;
-              }
+             treatError(req, res, err, '/buyer/sign-up');
               });
 
             var token = new Token({ 
@@ -744,7 +716,7 @@ exports.postSignUp = async (req, res) => {
           }
           });
           }
-        }).catch(console.error);
+        })//.catch(console.error);
       }
     }
   }

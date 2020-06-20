@@ -222,26 +222,17 @@ exports.postDelete = function (req, res, next) {
       }
       
       await dbo.collection('capabilities').deleteMany({ supplier: id }, function(err, resp) {
-        if(err) {
-          req.flash('error', err.message);
-          throw err;
-        }
+        treatError(req, res, err, '/supplier/delete');
       });
         
       //Products/Services offered:
       await dbo.collection('productservices').deleteMany({ supplier: id }, function(err, resp0) {
-        if(err) {
-            req.flash('error', err.message);
-            throw err;
-          }
+        treatError(req, res, err, '/supplier/delete');
       });
 
       //Now delete the messages sent/received by Supplier:
       await dbo.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp1) {
-        if(err) {
-          req.flash('error', err.message);
-          throw err;
-        }
+        treatError(req, res, err, '/supplier/delete');
       });
     
       //The received bids:
@@ -249,18 +240,12 @@ exports.postDelete = function (req, res, next) {
             
       //Remove the possibly existing Supplier Tokens:
       await dbo.collection('suppliertokens').deleteMany({ _userId: id }, function(err, resp3) {
-        if(err) {
-          req.flash('error', err.message);
-          throw err;
-        }
+        treatError(req, res, err, '/supplier/delete');
       });
 
       //And now, remove the Supplier themselves:
       await dbo.collection('suppliers').deleteOne({ _id: id }, function(err, resp4) {
-        if(err) {
-          req.flash('error', err.message);
-          throw err;
-        }
+        treatError(req, res, err, '/supplier/delete');
       });
 
       //Finally, send a mail to the ex-Supplier:
@@ -992,7 +977,7 @@ exports.postProfile = async (req, res) => {
       res.redirect("/supplier/profile");
     }, 150); 
     })
-    .catch(console.error);
+    //.catch(console.error);
   } catch {
     //res.redirect("/supplier/profile");
   }

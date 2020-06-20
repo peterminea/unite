@@ -42,7 +42,7 @@
       </a>
     </div>
 
-    <% if (errorMessage.length > 0) { %>
+    <% if (1==2 && errorMessage.length > 0) { %>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
       <strong>Error!</strong> Something has gone wrong. Check the fields below.
       <p>
@@ -59,7 +59,7 @@
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: '<%= errorMessage %>',
+        text: '<%= errorMessage %>'
       })
     </script>
     <% } %>
@@ -69,7 +69,7 @@
       Swal.fire({
         icon: 'success',
         title: 'Success!',
-        text: '<%= successMessage %>',
+        text: '<%= successMessage %>'
       })
     </script>
     

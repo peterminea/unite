@@ -27,7 +27,9 @@
 
     postAutocomplete('.country', '/countryAutocomplete', token);
     getAutocomplete('#industry', '/industryGetAutocomplete', token);
-    getAutocomplete('#currency', '/currencyGetAutocomplete', token);    
+    getAutocomplete('#currency', '/currencyGetAutocomplete', token); 
+      
+    //errorAndSuccess(errorMessage, successMessage, Swal);
         
     $('.cb').click(function() {
       $('#register').prop('disabled', $(':checkbox:checked').length == 2? false : true);
@@ -72,7 +74,7 @@
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: '<%= errorMessage %>',
+        text: '<%= errorMessage %>'
       })
     </script>
     <% } %>
@@ -82,7 +84,7 @@
       Swal.fire({
         icon: 'success',
         title: 'Success!',
-        text: '<%= successMessage %>',
+        text: '<%= successMessage %>'
       })
     </script>
     
