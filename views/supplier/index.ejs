@@ -24,15 +24,25 @@
 </head>
 
 <body>
-  <% if (successMessage.length > 0) { %>
-  <script>
-    Swal.fire({
-      icon: 'success',
-      title: 'Good Job!',
-      text: '<%= successMessage %>',
-    })
-  </script>
-  <% } %>
+    <% if (errorMessage.length > 0) { %>
+    <script>
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: '<%= errorMessage %>'
+      })
+    </script>
+    <% } %>
+    
+    <% if (successMessage.length > 0) { %>
+    <script>
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: '<%= successMessage %>'
+      })
+    </script>
+    <% } %>
   <nav pos="1" user="supplier" class="navbar navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="/supplier">Supplier - UNITE</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"

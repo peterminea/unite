@@ -54,6 +54,25 @@
   </nav>
     <div class="container">
       <br><br>
+      <% if (errorMessage.length > 0) { %>
+      <script>
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: '<%= errorMessage %>'
+        })
+      </script>
+      <% } %>
+
+      <% if (successMessage.length > 0) { %>
+      <script>
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: '<%= successMessage %>'
+        })
+      </script>
+      <% } %>
       <div>
         <h1 style="color: blue; font-family: verdana; text-decoration: underline">
           Join the Chat Room
