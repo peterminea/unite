@@ -559,6 +559,23 @@ function registrationDialog(accountType) {
 }
 
 
+function errorSuccess(Swal, errorMessage, successMessage) {
+  if (errorMessage.length > 0) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: errorMessage
+    })
+
+  if (successMessage.length > 0) {    
+    Swal.fire({
+      icon: 'success',
+      title: 'Success!',
+      text: successMessage
+    });
+}
+
+
 $(document).ready(function() {
   var cnt = $('div.container').first();
   

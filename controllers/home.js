@@ -37,8 +37,7 @@ exports.getFilesList = (req, res) => {
   
   conn.once('open', () => {
     gfs = Grid(conn.db, mongoose.mongo);
-    gfs.collection('uploads');
-    //console.log(gfs);
+    gfs.collection('uploads');    
     
     gfs.files.find().toArray((err, files) => {//console.log(files);                                              
       if(!files || !files.length) {
