@@ -5,4 +5,5 @@ module.exports = (req, res, err, page) => {
   console.error(err.message);
   req.flash('error', err.message);
   res.redirect(page);
+  throw err;
 };
