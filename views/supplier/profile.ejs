@@ -96,6 +96,25 @@
 </head>
 
 <body>
+    <% if (errorMessage.length > 0) { %>
+    <script>
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: '<%= errorMessage %>'
+      })
+    </script>
+    <% } %>
+    
+    <% if (successMessage.length > 0) { %>
+    <script>
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: '<%= successMessage %>'
+      })
+    </script>
+    <% } %>
   <nav pos="4" user="supplier" class="navbar navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="/supplier">Supplier - UNITE</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
@@ -104,7 +123,7 @@
     </button>
   </nav>
 
-  <div class="container">
+  <div class="container">    
     <br><br>
     <div class="card">
       <h5 class="card-header">Welcome!</h5>
@@ -113,6 +132,7 @@
         <p class="card-text">This is your profile page. In order to ensure that you continue to appear in the search results of buyers, please keep your capabilities up-to-date.</p>
       </div>
     </div>
+    
     <br>
     <br>
     <div class="smooth-shadow profile-form">

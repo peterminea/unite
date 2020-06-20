@@ -31,7 +31,12 @@
       postAutocomplete('#country', '/countryAutocomplete', token);
         
     $('.cb').click(function() {
-      $('#submit').prop('disabled', $(':checkbox:checked').length == 2? false : true);
+      $('#register').prop('disabled', $(':checkbox:checked').length == 2? false : true);
+    });
+        
+    $('#register').click(function(e) {
+      e.preventDefault();
+      registrationDialog('Supervisor');
     });
   });
   </script>  
@@ -58,13 +63,23 @@
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: '<%= errorMessage %>',
+        text: '<%= errorMessage %>'
+      })
+    </script>
+    <% } %>
+    
+    <% if (successMessage.length > 0) { %>
+    <script>
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: '<%= successMessage %>'
       })
     </script>
     <% } %>
 
     <div class="sign-in-form smooth-shadow">
-      <form method="POST">
+      <form id="registration" method="POST">
         <h2>Sign up as Supervisor</h2>
         <div class="form-group">
           <label class="text-muted form-text">
@@ -177,13 +192,15 @@
         </div>
 
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" >
-        <button disabled id="submit" type="submit" class="btn btn-primary btn-block">Sign Up</button>
+        <button disabled id="register" type="submit" class="btn btn-primary btn-block">Sign Up</button>
         <div class="form-group">
           <label class="text-muted form-text">
             By clicking the "Sign Up" button, you accept <a href="../termsConditions">the UNITE Terms And Conditions</a> and <a href="../antibriberyAgreement">the Antibribery Agreement</a>.
           </label>
         </div>
       </form>
+    </div>
+    <div id="dialog">
     </div>
   </div>   
   

@@ -26,6 +26,11 @@
         var token = $("input[name='_csrf']").val();
         getAutocomplete('#organizationUniteID', '/uniteIDAutocomplete', token);
         postAutocomplete('#country', '/countryAutocomplete', token);
+        
+        $('#register').click(function(e) {
+          e.preventDefault();
+          registrationDialog('Buyer');
+      });
   });
   </script>  
 </head>
@@ -51,13 +56,23 @@
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: '<%= errorMessage %>',
+        text: '<%= errorMessage %>'
+      })
+    </script>
+    <% } %>
+    
+    <% if (successMessage.length > 0) { %>
+    <script>
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: '<%= successMessage %>'
       })
     </script>
     <% } %>
 
     <div class="sign-in-form smooth-shadow">
-      <form method="POST">
+      <form id="registration" method="POST">
         <h2>Sign up as Buyer</h2>
           <div class="form-group">
             <label class="text-muted form-text">
@@ -115,9 +130,11 @@
             <input type="text" class="form-control" id="country" name="country" required>
           </div>
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-        <button type="submit" class="btn btn-primary btn-block">Sign Up</button>        
+        <button type="submit" id="register" class="btn btn-primary btn-block">Sign Up</button>        
       </form>
-    </div>    
+    </div>  
+    <div id="dialog">
+    </div>
   </div>
 </body>
 

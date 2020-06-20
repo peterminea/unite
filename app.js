@@ -109,6 +109,12 @@ app.use("/supplier", supplierRoutes);
 app.use("/buyer", buyerRoutes);
 app.use("/supervisor", supervisorRoutes);
 
+app.dynamicHelpers({
+  flash: function(req, res){
+    return req.flash();
+  }
+});
+
 //For chatting:
 const port = 5000;
 
@@ -847,11 +853,11 @@ app.post("/uploadExcel", uploadExcel.single("single"), (req, res, next) => {
     error.httpStatusCode = 400;
     return next(error);
   }
-
-  console.log(file);
+  
   var obj = xlsx.parse(fs.readFileSync(file.path));
-  console.log(obj)
-  if(obj && obj,length) {
+  fs2.unlinkSync(file);
+  
+  if(obj && obj.length) {
     console.log(obj[0].data);
     //Treat the obj variable as an array of rows
     res.send(obj[0].data);

@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
+const treatError = require('../middleware/treatError');
 
 const sendConfirmationEmail = (name, link, token, req) => {
     sgMail.send({
@@ -13,12 +14,12 @@ const sendConfirmationEmail = (name, link, token, req) => {
       text: `Hello ${name},\n\nCongratulations for registering on the UNITE Public Procurement Platform!\n\nPlease verify your account by clicking the link: \nhttp://${req.headers.host}${link}${token}\n`
     }, function (err, resp) {
        if (err ) {
-        return console.error(err.message);         
+        console.error(err.message);         
+         throw err;
       }
 
       console.log('A verification email has been sent to ' + req.body.emailAddress  + '.');
       req.flash('success', 'A verification email has been sent to ' + req.body.emailAddress + '.\n');
-      //req.flash("success", "Buyer signed up successfully!");        
     });
 };
 
@@ -157,8 +158,7 @@ const postSignInBody = (link, req, res) => {
   }
   else {
      MongoClient.connect(URL, {useUnifiedTopology: true},  function(err, db) {
-      if (err)
-        throw err;
+      treatError(req, res, err, `/${link}/sign-in`);
       var dbo = db.db(BASE);
       
        dbo.collection(dbLink).findOne( { emailAddress: email, password: password },  (err, doc) => {
@@ -192,13 +192,11 @@ const postSignInBody = (link, req, res) => {
           req.session.cookie.originalMaxAge = req.body.remember? null : 7200000;//Two hours.           
           req.session.save();
           bcrypt.compare(password, doc.password, async (err, doMatch) => {
-            if(err)
-              throw err;
+            treatError(req, res, err, `/${link}/sign-in`);
             
             if (doMatch ||
               (password === doc.password && email === doc.emailAddress)
             ) {
-              // Make sure the user has been verified
               if (!doc.isVerified)
                 return res.status(401).send({
                   type: "not-verified",
@@ -211,14 +209,16 @@ const postSignInBody = (link, req, res) => {
                 }
               
                 db.close();
-                setTimeout(function() {res.redirect(`/${link}`);}, 10);
+                setTimeout(function() {
+                  res.redirect(`/${link}`);
+                }, 10);
             } else {
               req.flash("error", "Passwords and e-mail do not match!");
               res.redirect(`/${link}/sign-in`);
             }
           })
         })
-      }).catch(console.error);;
+      })//.catch(console.error);;
     }
   } catch {
   }
