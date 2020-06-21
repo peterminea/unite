@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>UNITE - Remove User as Admin</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A cool thing made with Glitch">
+  <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/messages.css">
+  <link rel="stylesheet" href="/jquery-ui.css">
+  <link rel="stylesheet" href="/bootstrap.min.css">
+  <script src="/jquery.min.js"></script>
+  <script src="/jquery-ui.min.js"></script>
+  <script src="/popper.min.js"></script>
+  <script src="/bootstrap.min.js"></script>
+  <script src="/sweetalert.min.js"></script>
+  <script src="/https.js"></script>
+  <script src="/autocomp.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      getCancelReasonTitles($('#mainForm'), $('input[name="_csrf"]').val(), '/userCancelReasonTitles');
+      
+      $('#mainForm').submit(function(e) {
+        var radio = $(this).find('input[type="radio"]:checked');
+        radio.attr('name', 'reasonTitle');
+        if(!confirm('You are about to remove all this User data from UNITE. This cannot be undone. Please proceed only if you are really sure.')) {
+          return false;
+        }
+      });
+  });
+  </script>
+</head>
+
+<body>
+  <nav user="supplier" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
+    <a class="navbar-brand" href="/">UNITE - Delete Supplier Account</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </nav>
+    <div class="container">
+    <% if (errorMessage.length > 0) { %>
+    <script>
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: '<%= errorMessage %>'
+      })
+    </script>
+    <% } %>
+    
+    <% if (successMessage.length > 0) { %>
+    <script>
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: '<%= successMessage %>'
+      })
+    </script>
+    <% } %>
+       <div class="col-md-12">
+        <legend>
+          Delete User Account - Please fill in the required (*) fields
+        </legend>
+        <form id="mainForm" method="POST">
+          <div class="form-group">
+            <label for="reason">Reason for deleting account*:</label>
+            <textarea required rows="10" cols="50" class="form-control" id="reason" name="reason"></textarea>
+          </div>
+          <input type="hidden" name="type" value="User Cancellation by Admin">
+          <input type="hidden" name="id" value="<%= deleteId %>">
+          <input type="hidden" name="userType" value="<%= deleteType %>">
+          <input type="hidden" name="emailAddress" value="<%= emailAddress %>">
+          <input type="hidden" name="name" value="<%= name %>">
+          <input type="hidden" name="uniteID" value="<%= uniteID %>">
+          <div class="form-group">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button type="submit" id="delete" title="Delete User" class="btn btn-primary btn-block btn-lg">Delete User</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

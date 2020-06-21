@@ -558,7 +558,7 @@ function registrationDialog(accountType) {
   });
 }
 
-/*
+
 function errorSuccess(Swal, errorMessage, successMessage) {
   if (errorMessage.length > 0) {
     Swal.fire({
@@ -573,7 +573,7 @@ function errorSuccess(Swal, errorMessage, successMessage) {
       title: 'Success!',
       text: successMessage
     });
-}*/
+}
 
 
 $(document).ready(function() {

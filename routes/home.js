@@ -14,7 +14,9 @@ router.get("/termsConditions", sessionExit, homeController.getTermsConditions);
 router.get("/memberList", sessionExit, homeController.getMemberList);
 router.get("/feedback", sessionExit, homeController.getFeedback);
 router.get("/viewFeedbacks", sessionExit, homeController.getViewFeedbacks);
+router.get("/deleteUser/:id/:type/:name/:uniteID/:email", sessionExit, homeController.getDeleteUser);
 
 router.post("/feedback", sessionExit, homeController.postFeedback);
+router.post("/deleteUser", sessionExit, homeController.postDeleteUser);
 
 module.exports = router;

@@ -19,6 +19,7 @@ const ObjectId = require("mongodb").ObjectId;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
+const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 
 const statusesJson = {
   BUYER_REQUESTED_BID: parseInt(process.env.BUYER_REQ_BID),
@@ -176,95 +177,9 @@ exports.getResendToken = (req, res) => {
 }
 
 
-async function removeAssociatedBids(req, res, dbo, id) {
-  var promise = BidRequest.find( { supplier: id } ).exec();
-  await promise.then(async (bids) => {
-    var complexReason = 'The Supplier deleted their account. More details:\n' + req.body.reason;
-
-    for(var bid of bids) {//One by one.          
-      try {
-        await dbo.collection('bidcancelreasons').insertOne( {
-          title: 'Account Deletion',//req.body.reasonTitle,
-          userType: req.body.userType,
-          reason: complexReason,
-          userName: req.body.companyName,
-          createdAt: Date.now()
-        }, function(err, obj) {
-            treatError(req, res, err, 'back');
-        });
-      }  
-      catch(e) {
-        console.error(e);
-        req.flash('error', e.message);
-        throw e;
-      }
-
-      await dbo.collection('bidrequests').deleteOne( { _id: bid._id }, function(err, obj) {
-        treatError(req, res, err, 'back');
-      });
-
-      req.body.requestsName = bid.requestName;
-      await sendCancelBidEmail(req, bid.buyersName, bid.suppliersName, bid.buyersEmail, bid.suppliersEmail, 'Buyer ', 'Supplier ', complexReason);
-    }
-  });
-}
-
-
 exports.postDelete = function (req, res, next) {  
   var id = req.body.id;
-  try {
-    //Delete Supplier's Capabilities first:
-    MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-      var dbo = db.db(BASE);
-      
-      try{
-        await dbo.collection('usercancelreasons').insertOne( {
-          title: req.body.reasonTitle,
-          reason: req.body.reason,
-          userType: req.body.userType,
-          userName: req.body.companyName,
-          createdAt: Date.now()
-        }, function(err, obj) {});
-      } catch(e) {
-        console.error(e);
-        req.flash('error', e.message);
-      }
-      
-      await dbo.collection('capabilities').deleteMany({ supplier: id }, function(err, resp) {
-        treatError(req, res, err, 'back');
-      });
-        
-      //Products/Services offered:
-      await dbo.collection('productservices').deleteMany({ supplier: id }, function(err, resp0) {
-        treatError(req, res, err, 'back');
-      });
-
-      //Now delete the messages sent/received by Supplier:
-      await dbo.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp1) {
-        treatError(req, res, err, 'back');
-      });
-    
-      //The received bids:
-      await removeAssociatedBids(req, res, dbo, id);
-            
-      //Remove the possibly existing Supplier Tokens:
-      await dbo.collection('suppliertokens').deleteMany({ _userId: id }, function(err, resp3) {
-        treatError(req, res, err, 'back');
-      });
-
-      //And now, remove the Supplier themselves:
-      await dbo.collection('suppliers').deleteOne({ _id: id }, function(err, resp4) {
-        treatError(req, res, err, 'back');
-      });
-
-      //Finally, send a mail to the ex-Supplier:
-      sendCancellationEmail('Supplier', req, 'received orders, products/services offered, listed capabilities, sent/received messages', req.body.reason);
-      db.close();
-      req.flash('success', 'You have deleted your Supplier account. We hope that you will be back with us!');
-      return res.redirect("/supplier/sign-in");
-    });
-  } catch {
-  }
+  supplierDelete(req, res, id);
 }
 
 
@@ -297,7 +212,7 @@ exports.postDeactivate = function (req, res, next) {
       });    
     
       //The received bids:
-      await removeAssociatedBids(req, dbo, id);
+      await removeAssociatedSuppBids(req, dbo, id);
 
       //And now, remove the Supplier themselves:
       await dbo.collection('suppliers').updaeOne( { _id: id }, { $set: { isActive: false } }, function(err, resp4) {
@@ -737,7 +652,7 @@ exports.getProfile = (req, res) => {
         products: products,
         MAX_PROD: process.env.SUPP_MAX_PROD,
         successMessage: req.flash('success'),
-        errorMessage: req.flash('error'),
+        errorMessage: req.flash("error"),
         profile: req.session.supplier
       });
     })
@@ -868,6 +783,7 @@ exports.postProfile = async (req, res) => {
     if(global++ < 1)
     await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
       treatError(req, res, err, '/supplier/profile');
+      
       var dbo = db.db(BASE);
       
       await dbo.collection("suppliers").updateOne({ _id: doc._id }, { $set: doc }, function(err, resp0) {

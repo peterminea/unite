@@ -12,7 +12,9 @@ const Supplier = require("../models/supplier");
 const ProductService = require("../models/productService");
 const Capability = require("../models/capability");
 const Message = require("../models/message")
+const treatError = require('../middleware/treatError');
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
+const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 
 var userData = require('../middleware/userHome');
 
@@ -28,6 +30,28 @@ exports.getIndex = (req, res) => {
     userType: obj.userType
   });
 };
+
+
+exports.getDeleteUser = (req, res) => {
+  //var obj = userData(req);
+  //console.log(obj);
+  res.render("deleteUser", {
+    //role: obj.role,
+    //isAdmin: obj.role == process.env.USER_ADMIN,
+    //userId: obj.userId,
+    //avatar: obj.avatar,
+    deleteId: req.params.id,
+    deleteType: req.params.type,
+    name: req.params.name,
+    uniteID: req.params.uniteID,
+    emailAddress: req.params.email,
+    successMessage: req.flash('success'),
+    errorMessage: req.flash('error')
+    //userName: obj.userName,
+    //userType: obj.userType
+  });
+};
+
 
 exports.getFilesList = (req, res) => {
   var obj = userData(req);
@@ -176,10 +200,7 @@ exports.getMemberList = async (req, res) => {
 exports.postFeedback = (req, res) => {
   try {
     MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
-        if (err) {
-          req.flash('error', err.message);
-          throw err;
-        }
+       treatError(req, res, err, 'back');
 
         var dbo = db.db(BASE);
         await dbo.collection("feedbacks").insertOne({
@@ -189,16 +210,41 @@ exports.postFeedback = (req, res) => {
           message: req.body.details,
           createdAt: Date.now()
         }, function(err, obj) {
-            if(err) {
-              req.flash('error', err.message);
-              throw err;
-            }
-
-          req.flash('success', 'Feedback successfully sent! We will get back to you.');
-          db.close();
-          res.redirect('/');
+            treatError(req, res, err, 'back');
+            req.flash('success', 'Feedback successfully sent! We will get back to you.');
+            db.close();
+            res.redirect('/');
         });
       });
     } catch {
+  }
+};
+
+
+exports.postDeleteUser = async (req, res) => {  
+  var id = req.body.deleteId, type = req.body.userType;
+  
+  switch(type) {
+    case process.env.USER_BUYER:
+      req.body.organizationName = req.body.name;
+      await buyerDelete(req, res, id);
+      res.redirect('/memberList');
+      break;
+      
+    case process.env.USER_SPV:
+      req.body.organizationName = req.body.name;
+      req.body.organizationUniteID = req.body.uniteID;
+      await supervisorDelete(req, res, id, req.body.organizationUniteID);
+      res.redirect('/memberList');
+      break;
+      
+    case process.env.USER_SUPPLIER:
+      req.body.companyName = req.body.name;
+      await supplierDelete(req, res, id);
+      res.redirect('/memberList');
+      break;
+      
+    default:
+      break;
   }
 };
