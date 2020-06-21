@@ -72,9 +72,10 @@
           <th scope="col">Contact Name</th>
           <th scope="col">Email Address</th>
           <th width="100%" scope="col">Contact Mobile Number</th>
-          <th scope="col">Country</th>          
+          <th scope="col">Country</th>
           <th scope="col">Qualification</th>
           <th scope="col">isActive</th>
+          <th scope="col">Delete</th>
         </tr>
       </thead>
       <tbody>
@@ -89,6 +90,7 @@
           <td scope="col"><%= buyer.country %></td>
           <td scope="col"><%= buyer.qualification %></td>
           <td scope="col"><%= buyer.isActive %></td>
+          <td scope="col"><a href="deleteUser/<%= buyer._id %>/Buyer/<%= buyer.organizationName %>/None/<%= buyer.emailAddress %>"><span class="adminDelete">Remove User</span></a></td>
         </tr>
         <% i++; } %>
         </tbody>
@@ -98,7 +100,7 @@
         <div>
           <p style="color: green; font-family: arial">
             Sorry, no buyers here.
-          </p>          
+          </p>
         </div>
         <% }%>
   <br>
@@ -120,7 +122,8 @@
           <th scope="col">Contact Name</th>
           <th scope="col">Email Address</th>
           <th scope="col">Contact Mobile Number</th>
-          <th scope="col">Country</th>          
+          <th scope="col">Country</th>
+          <th scope="col">Delete</th>
         </tr>
       </thead>
       <tbody>
@@ -133,6 +136,7 @@
           <td scope="col"><%= supervisor.emailAddress %></td>
           <td scope="col"><%= supervisor.contactMobileNumber %></td>
           <td scope="col"><%= supervisor.country %></td>
+          <td scope="col"><a href="deleteUser/<%= supervisor._id %>/Supervisor/<%= supervisor.organizationName %>/<%= supervisor.organizationUniteID %>/<%= supervisor.emailAddress %>"><span class="adminDelete">Remove User</span></a></td>
         </tr>
         <% i++; } %>
         </tbody>
@@ -173,6 +177,7 @@
           <th scope="col">Industry</th>
           <th scope="col">Capability Description</th>
           <th scope="col">isActive</th>
+          <th scope="col">Delete</th>
         </tr>
       </thead>
       <tbody>
@@ -192,6 +197,7 @@
           <td scope="col"><%= supplier.industry %></td>
           <td scope="col"><%= supplier.capabilityDescription %></td>
           <td scope="col"><%= supplier.isActive %></td>
+          <td scope="col"><a href="deleteUser/<%= supplier._id %>/Supplier/<%= supplier.companyName %>/None/<%= supplier.emailAddress %>"><span class="adminDelete">Remove User</span></a></td>
         </tr>
         <% i++; } %>
         </tbody>

@@ -19,6 +19,7 @@ const ObjectId = require("mongodb").ObjectId;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
+const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 
 const statusesJson = {
   BUYER_REQUESTED_BID: parseInt(process.env.BUYER_REQ_BID),
@@ -143,7 +144,7 @@ exports.getChatLogin = (req, res) => {//We need a username, a room name, and a s
     fromName: req.params.supplierName,
     toName: req.params.buyerName,
     reqId: req.params.requestId? req.params.requestId : 0,
-    reqName: req.params.requestName? req.params.requestName : 'None'
+    reqName: req.params.requestName? req.params.requestName : 'None',
   });
 }
 
@@ -228,7 +229,7 @@ exports.postCancelBid = (req, res) => {
       });
     }
     catch(e) {
-      console.error(e);
+      treatError(req, res, e, 'back');
     }
 
     await dbo.collection("bidrequests").updateOne({ _id: new ObjectId(req.body.bidId) }, { $set: {isCancelled: true, status: parseInt(process.env.BUYER_BID_CANCEL)} }, async function(err, resp) {
@@ -278,85 +279,9 @@ exports.getResendToken = (req, res) => {
 }
 
 
-async function removeAssociatedBids(req, res, dbo, id) {
-  var promise = BidRequest.find( { buyer: id } ).exec();
-  await promise.then(async (bids) => {
-    var complexReason = 'The Buyer deleted their account. More details:\n' + req.body.reason;
-
-    for(var bid of bids) {//One by one.
-      try {
-        await dbo.collection('bidcancelreasons').insertOne( {
-          title: 'User Cancellation',
-          userType: req.body.userType,
-          reason: complexReason,
-          userName: req.body.organizationName,
-          createdAt: Date.now()
-        }, function(err, obj) {
-          treatError(req, res, err, 'back');
-        });
-      }  
-      catch(e) {
-        treatError(req, res, e, 'back');
-      }
-
-      await dbo.collection('bidrequests').deleteOne( { _id: bid._id }, function(err, obj) {
-        treatError(req, res, err, 'back');
-      });
-
-      req.body.requestsName = bid.requestName;
-      await sendCancelBidEmail(req, bid.suppliersName, bid.buyersName, bid.suppliersEmail, bid.buyersEmail, 'Supplier ', 'Buyer ', complexReason);
-    }
-  });
-}
-
-
 exports.postDelete = async function (req, res, next) {  
   var id = req.body.id;
-  try {    
-    MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-      var dbo = db.db(BASE);
-      //A Reason why the User is deleted.
-      try {
-        await dbo.collection('usercancelreasons').insertOne( {
-          title: req.body.reasonTitle,
-          reason: req.body.reason,
-          userType: req.body.userType,
-          userName: req.body.organizationName,
-          createdAt: Date.now()
-        }, function(err, obj) {
-          treatError(req, res, err, 'back');
-        });
-      } catch(e) {
-        console.error(e);
-        req.flash('error', e.message);
-      }
-      
-      //Delete Buyer's Bid Requests first:
-      await removeAssociatedBids(req, res, dbo, id);
-
-      //Now delete the messages sent or received by Buyer:
-      await dbo.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp0) {
-        treatError(req, res, err, 'back');
-      });
-
-      //Remove the possibly existing Buyer Tokens:
-      await dbo.collection('buyertokens').deleteMany({ _userId: id }, function(err, resp1) {
-        treatError(req, res, err, 'back');
-      });
-
-      //And now, remove the Buyer themselves:
-      await dbo.collection('buyers').deleteOne({ _id: id }, function(err, resp2) {
-        treatError(req, res, err, 'back');
-      });
-    //Finally, send a mail to the ex-Buyer:
-    sendCancellationEmail('Buyer', req, 'placed orders, sent/received messages', req.body.reason);
-    db.close();
-    req.flash('success', 'You have deleted your Buyer account. We hope that you will be back with us!');
-    res.redirect("/buyer/sign-in");
-    });
-  } catch {
-    //res.redirect("/buyer");
-  }
+  buyerDelete(req, res, id);
 }
 
 
@@ -365,21 +290,9 @@ exports.postDeactivate = async function (req, res, next) {
   try {//Firstly, a Reason why deactivating the account:
     MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
       var dbo = db.db(BASE);
-      /*
-      try {
-        await dbo.collection('cancelreasons').insertOne( {
-          type: req.body.type,
-          reason: req.body.reason,
-          userType: req.body.userType,
-          userName: req.body.organizationName,
-          createdAt: Date.now()
-        }, function(err, obj) {});
-      } catch(e) {
-        console.error(e);
-      }*/
-      
+
       //Delete Buyer's Bid Requests first:
-      await removeAssociatedBids(req, dbo, id);
+      await removeAssociatedBuyerBids(req, dbo, id);
 
       //And now, remove the Buyer themselves:
       await dbo.collection('buyers').updateOne({ _id: id }, { $set: { isActive: false } }, function(err, resp2) {

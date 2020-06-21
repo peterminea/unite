@@ -11,25 +11,23 @@ const MongoClient = require('mongodb').MongoClient;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
+const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 
 exports.getIndex = (req, res) => {
-  if(!req || !req.session) return false;
+  if(!req || !req.session) 
+    return false;
   const supervisor = req.session.supervisor;
 
   Buyer.find(
     { organizationUniteID: supervisor.organizationUniteID },
     (err, results) => {
-      if (err) {
-        req.flash('error', err.message);
-        return console.error(err);
-      }
+      treatError(req, res, err, 'back');
 
       res.render("supervisor/index", {
         supervisor: supervisor,
         successMessage: req.flash('success'),
         errorMessage: req.flash('error'),
-        buyers: results,
-        success: req.flash("success")
+        buyers: results
       });
     }
   );
@@ -42,7 +40,9 @@ exports.getConfirmation = (req, res) => {
     req.session.supervisorId = req.params && req.params.token? req.params.token._userId : null;
   }
   
-  res.render('supervisor/confirmation', { token: req.params? req.params.token : null });
+  res.render('supervisor/confirmation', {
+    token: req.params? req.params.token : null 
+  });
 }
 
 exports.getDelete = (req, res) => {
@@ -122,7 +122,9 @@ async function removeAssociatedBids(req, res, req2, dbo, id) {
           reason: req2.body.reason,
           userName: req2.body.organizationName,
           createdAt: Date.now()
-        }, function(err, obj) {});
+        }, function(err, obj) {
+          treatError(req, res, e, 'back');
+        });
       }  
       catch(e) {
         treatError(req, res, e, 'back');
@@ -142,70 +144,7 @@ async function removeAssociatedBids(req, res, req2, dbo, id) {
 exports.postDelete = function (req, res, next) {  
   var id = req.body.id;
   var uniteID = req.body.organizationUniteID;
-  
-  try {
-    //Find Supervisor's Buyers first:
-    MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-      var dbo = db.db(BASE);
-      
-      try {
-        await dbo.collection('usercancelreasons').insertOne( {
-          title: req.body.reasonTitle,
-          reason: req.body.reason,
-          userType: req.body.userType,
-          userName: req.body.organizationName,
-          createdAt: Date.now()
-        }, function(err, obj) {
-          treatError(req, res, err, 'back');          
-        });
-      } catch(e) {
-        treatError(req, res, e, 'back');
-      }
-      
-      await dbo.collection('buyers').find({ organizationUniteID: uniteID }).exec().then(async (buyers) => {
-        if(!buyers || !buyers.length) {//No buyer data, let's directly pass to Supervisor.
-          await removeSupervisor(id, req, res, db);
-        } else {
-          var len = buyers.length;
-          var complexReason = 'Buyer\'s account was deleted because their Supervisor did the same. See more details:\n' + req.body.reason;
-          
-          //Delete buyers data one by one:
-          for(var i in buyers) {
-            var theId = buyers[i]._id;
-            var req2 = { body: { reason: complexReason, emailAddress : buyers[i].emailAddress, organizationName : buyers[i].organizationName } };
-            
-            //Bids:
-            await removeAssociatedBids(req, res, req2, dbo, theId);          
-
-            //Now delete the messages sent/received by Buyer:
-            await dbo.collection('messages').deleteMany({ $or: [ { from: theId }, { to: theId } ] }, function(err, resp0) {
-              treatError(req, res, err, 'back');
-            });
-
-            //Remove the possibly existing Buyer Tokens:
-            await dbo.collection('buyertokens').deleteMany({ _userId: theId }, function(err, resp1) {
-              treatError(req, res, err, 'back');
-            });
-
-            //And now, remove the Buyer themselves:
-            await dbo.collection('buyers').deleteOne({ _id: theId }, function(err, resp2) {
-              treatError(req, res, err, 'back');
-            });
-
-            //Finally, send a mail to the ex-Buyer:
-            await sendCancellationEmail('Buyer', req2, 'placed orders, sent/received messages', req.body.reason);
-          }
-          //Get rid of the Supervisor themselves too.
-          await removeSupervisor(id, req, res, db);
-        }
-        
-        db.close();
-        req.flash('success', 'You have deleted your Supervisor account. We hope that you and your Buyers will be back with us!');
-        res.redirect("/supervisor/sign-in");
-      });
-    });
-  } catch {
-  }
+  supervisorDelete(req, res, id, uniteID);
 }
 
 
