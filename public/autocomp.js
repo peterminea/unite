@@ -560,6 +560,7 @@ function registrationDialog(accountType) {
 
 
 function errorSuccess(Swal, errorMessage, successMessage) {
+  alert(Swal);
   if (errorMessage.length > 0) {
     Swal.fire({
       icon: 'error',
@@ -657,7 +658,6 @@ $(document).ready(function() {
     }
   } else {
     if(nav.length) {
-      //nav.find('div[id="navbarSupportedContent"]').remove();
       var user = nav.attr('user');
       
       var str = '<div class="collapse navbar-collapse" id="navbarSupportedContent">' 
