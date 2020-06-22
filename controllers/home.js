@@ -33,9 +33,9 @@ exports.getIndex = (req, res) => {
 
 
 exports.getDeleteUser = (req, res) => {
-  //var obj = userData(req);
+  var obj = userData(req);
   res.render("deleteUser", {
-    //role: obj.role,
+    role: obj.role,
     //isAdmin: obj.role == process.env.USER_ADMIN,
     //userId: obj.userId,
     //avatar: obj.avatar,
@@ -187,6 +187,9 @@ exports.getMemberList = async (req, res) => {
   var obj = userData(req);  
   res.render("memberList", {
     buyers: buys,
+    role: obj.role,
+    isAdmin: obj.isAdmin,
+    avatar: obj.avatar,
     suppliers: supps,
     supervisors: supers,
     userId: obj.userId,
