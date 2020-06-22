@@ -565,14 +565,17 @@ function errorSuccess(Swal, errorMessage, successMessage) {
       icon: 'error',
       title: 'Oops...',
       text: errorMessage
-    })
+    });
+  }
+    
 
-  if (successMessage.length > 0) {    
+  if (successMessage.length > 0) {
     Swal.fire({
       icon: 'success',
       title: 'Success!',
       text: successMessage
     });
+  }
 }
 
 
@@ -604,10 +607,7 @@ $(document).ready(function() {
         + '<ul class="navbar-nav mr-auto">'
         + '<li class="nav-item">'
         + '<a class="nav-link" title="Home" href="/">Home</a>'
-        + '</li>'
-        + '<li class="nav-item">'
-        + '<a class="nav-link" href="/memberList" title="List of UNITE Members">List of our members</a>'
-        + '</li>'
+        + '</li>'        
         + '<li class="nav-item">'
         + '<a class="nav-link" title="About" href="/about">About</a>'
         + '</li>'
@@ -626,7 +626,7 @@ $(document).ready(function() {
     
     if(nav.hasClass('home') || isHome) {
       var ul = $('#navbarSupportedContent')
-        .find('ul');      
+        .find('ul');
       
       $('<li class="nav-item"><a class="nav-link" href="/feedback" title="Feedback/Suggestions">User Feedback</a></li>')
         .insertAfter('li.last');
@@ -635,6 +635,9 @@ $(document).ready(function() {
       if(isAdmin == 'true') {
         treatLastLi();
         $('<li class="nav-item"><a class="nav-link" href="/viewFeedbacks" title="Check Feedbacks">View Feedbacks</a></li>')
+          .insertAfter('li.last');
+        treatLastLi();
+        $('<li class="nav-item"><a class="nav-link" href="/memberList" title="List of UNITE Members">List of our members</a></li>')
           .insertAfter('li.last');
         treatLastLi();
         $('<li class="nav-item"><a class="nav-link" href="/filesList" title="View DB File List">View Files from DB</a></li>')

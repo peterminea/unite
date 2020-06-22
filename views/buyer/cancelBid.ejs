@@ -23,17 +23,7 @@
     $(document).ready(function() {
     getCancelReasonTitles($('#cancelForm'), $('input[name="_csrf"]').val(), '/bidCancelReasonTitles');
     
-    $('#cancelForm').submit(function(e) {/*
-      var area = $(this).find('textarea[name="reason"]');
-      
-      if(area.val() == '') {
-        var msg = prompt('Please enter a reason for cancelling this order.');
-        if(msg && msg.length)
-          area.val(msg);
-        else 
-          return false;
-      }*/
-
+    $('#cancelForm').submit(function(e) {
       var radio = $(this).find('input[type="radio"]:checked');
       radio.attr('name', 'reasonTitle');
       });

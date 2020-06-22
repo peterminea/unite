@@ -109,12 +109,6 @@ app.use("/supplier", supplierRoutes);
 app.use("/buyer", buyerRoutes);
 app.use("/supervisor", supervisorRoutes);
 
-app.dynamicHelpers({
-  flash: function(req, res){
-    return req.flash();
-  }
-});
-
 //For chatting:
 const port = 5000;
 
