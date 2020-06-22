@@ -26,12 +26,32 @@
       name = "<%= userName %>", 
       avatar = "<%= avatar %>", 
       type = "<%= userType %>";
-      userInputs(id, role, avatar, name, type, $('ul.mr-auto'));
+      userInputs(id, role, avatar, name, type, $('ul.mr-auto'));      
+      //errorSuccess(Swal, < %= errorMessage %>, < %= successMessage %>);
   });
   </script>
 </head>
   
   <body>
+    <% if (errorMessage.length > 0) { %>
+    <script>
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: '<%= errorMessage %>'
+      })
+    </script>
+    <% } %>
+    
+    <% if (successMessage.length > 0) { %>
+    <script>
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: '<%= successMessage %>'
+      })
+    </script>
+    <% } %>
   <nav pos="1" class="navbar navbar-expand-lg navbar-light bg-light" style="width: 100% !important;">
     <a class="navbar-brand" href="#">
       <img src="https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2Funite%20(1).png?v=1587898738134"
