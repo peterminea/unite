@@ -205,7 +205,7 @@ exports.getMemberList = async (req, res) => {
   res.render("memberList", {
     buyers: buys,
     role: obj.role,
-    isAdmin: obj.isAdmin,
+    isAdmin: obj.role == process.env.USER_ADMIN,
     avatar: obj.avatar,
     suppliers: supps,
     supervisors: supers,
@@ -220,15 +220,15 @@ exports.getMemberList = async (req, res) => {
 
 exports.postFeedback = (req, res) => {
   try {
+    //Bad Words:
+    const filter = new BadWords();
+    if(filter.isProfane(req.body.details)) {
+      req.flash('error', 'We do not promote profanity here on UNITE. Please use an educated language. The feedback will not be posted otherwise. Thank you for understanding!');
+      return res.redirect('/feedback')
+    }
+    
     MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
        treatError(req, res, err, 'back');
-        //Bad Words:
-        const filter = new BadWords();
-        if(filter.isProfane(req.body.details)) {
-          req.flash('error', 'We do not promote profanily on UNITE. Please use an educated language. The feedback will not be posted otherwise. Thank you for understanding!');
-          res.redirect('/feedback')
-        }
-
         var dbo = db.db(BASE);
         await dbo.collection("feedbacks").insertOne({
           userName: req.body.name,

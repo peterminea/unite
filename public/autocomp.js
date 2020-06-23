@@ -378,7 +378,7 @@ function userInputs(id, role, avatar, name, type, ul) {//Home, About, Terms, Ant
         break;
       }
    
-  if(id) {
+  if(id) {//We are logged in!
     ul.prepend('<li class="nav-item user">'
           +'<a class="nav-link" title="Hello" href="' + link + '">Hello, ' + name + ' (' + role + ')!' 
                + (avatar? '<img src="'+ avatar +'" title="Profile image" style="height: 20px; width: 50px"' : '') + '</a>'
@@ -386,9 +386,12 @@ function userInputs(id, role, avatar, name, type, ul) {//Home, About, Terms, Ant
     
     var str = '';
     str += '<li class="nav-item logout">'
-        + '<a class="btn btn-danger" href="?exit=true&home=true" title="Clear user session/Logout">Logout</a>'
+        + '<a class="btn btn-danger" style="margin-right: 10px" href="?exit=true&home=true" title="Clear user session/Logout">Logout</a>'
         + '</li>';
     ul.append(str);
+    
+    //navbarSupportedContent
+    $('.signup').hide();
   }
 }
 
@@ -629,7 +632,7 @@ $(document).ready(function() {
   
   var nav = $('body').find('nav');
   if(nav.length && nav.next('div').hasClass('home')) {
-    var isHome = nav.next('div').hasClass('home');    
+    //var isHome = nav.next('div').hasClass('home');    
     
     var $str =
         ' <div class="collapse navbar-collapse" id="navbarSupportedContent">'
@@ -648,12 +651,12 @@ $(document).ready(function() {
         + '</li>'
         + '</ul>'
         + '<br>'
-        + '<button class="btn btn-primary" data-toggle="modal" data-target="#signUpModal">Sign up</button>'
+        + '<button class="signup btn btn-primary" data-toggle="modal" data-target="#signUpModal">Sign up</button>'
         + '</div>';
     
     nav.append($str);
     
-    if(nav.hasClass('home') || isHome) {
+    //if(nav.hasClass('home') || isHome) {
       var ul = $('#navbarSupportedContent')
         .find('ul');
       
@@ -661,6 +664,7 @@ $(document).ready(function() {
         .insertAfter('li.last');
       
       var isAdmin = nav.find('input[id="userData"]').attr('isAdmin');
+      
       if(isAdmin == 'true') {
         treatLastLi();
         $('<li class="nav-item"><a class="nav-link" href="/viewFeedbacks" title="Check Feedbacks">View Feedbacks</a></li>')
@@ -683,7 +687,7 @@ $(document).ready(function() {
       li.addClass('active');
       var text = li.find('a').text();
       li.find('a').text(text + ' (current)');
-    }
+    //}
   } else {
     if(nav.length) {
       var user = nav.attr('user');
@@ -694,7 +698,7 @@ $(document).ready(function() {
         + '<li class="nav-item"><a class="nav-link" href="/'+user+'">Dashboard <span class="sr-only"></span></a></li>'
         + (user == 'supervisor'? '' : '<li class="nav-item"><a class="nav-link" href="/'+user+'/balance">Balance <span class="sr-only"></span></a></li>')
         + (user == 'supplier'? '<li class="nav-item"><a class="nav-link" href="/'+user+'/bid-requests">Bid Requests</a></li>' : '')
-        + '<li class="nav-item active"> <a class="btn btn-primary" href="/'+user+'/profile">Profile</a></li><br>'
+        + '<li class="nav-item active"><a class="btn btn-primary" style="margin-right: 10px" href="/'+user+'/profile">Profile</a></li><br>'
         + '<li class="nav-item"><a class="btn btn-danger" title="Logout" href="?exit=true">Logout</a></li></ul></div>';
      
       nav.append(str);
