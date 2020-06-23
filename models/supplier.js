@@ -84,6 +84,10 @@ const supplierSchema = new Schema({
       }
     }
   },
+  currency: {
+    type: String,
+    required: true
+  },
   companyAddress: {
     type: String,
     required: true

@@ -18,6 +18,7 @@
   <script src="/bootstrap.min.js"></script>
   <script src="/sweetalert.min.js"></script>  
   <script src="/index.min.js"></script>
+  <script src="http://openexchangerates.github.io/money.js/money.min.js"></script>
   <script src="/https.js"></script>
   <script src="/chatUsers.js"></script>
   <script src="/autocomp.js"></script>
@@ -26,10 +27,11 @@
       var token = $("input[name='_csrf']").val();
       getAutocomplete('#search', '/capabilityInputAutocomplete', token, true);
       
-      $('#loadCatalog').on('click', function() {alert('You will have to wait for some seconds. Please click to continue.');
+      $('#loadCatalog').on('click', function() {        
         if($('div.suppliersLive').length)
           return false;
         
+        alert('You will have to wait for some seconds. Please click to continue.');
         var that = $(this);
         
         $.ajax({
@@ -181,7 +183,7 @@
             data-toggle="modal">Request a Bid</button>
           <button class="btn btn-dark" style="float: right" data-target="#comp_<%= i %>"
             data-toggle="modal">Supplier Details</button>
-          <a href="../buyer/viewBid/<%= supplier._id %>/<%= buyer._id %>"><button class="btn btn-dark" style="margin-right: 10px; float: right">View Bid(s)</button></a>
+          <a href="../buyer/viewBid/<%= supplier._id %>/<%= buyer._id %>/<%= buyer.balance %>"><button class="btn btn-dark" style="margin-right: 10px; float: right">View Bid(s)</button></a>
         </div>
 
         <!-- Modal view of Supplier Details (read-only mode) -->

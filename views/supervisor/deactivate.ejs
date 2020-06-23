@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>UNITE - Buyer - User Deactivation</title>
+  <title>UNITE - Supervisor - User Deactivation</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="A cool thing made with Glitch">
@@ -32,7 +32,7 @@
 
 <body>
   <nav user="buyer" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
-    <a class="navbar-brand" href="/">UNITE - Deactivate Buyer Account</a>
+    <a class="navbar-brand" href="/">UNITE - Deactivate Supervisor Account</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -59,9 +59,9 @@
     </script>
     <% } %>
        <div class="col-md-12">
-        <form id="mainForm" action="/buyer/deactivate/<%= id %>" method="POST">
+        <form id="mainForm" action="/supervisor/deactivate/<%= id %>" method="POST">
           <legend>
-            Deactivate Buyer Account - Please fill in the required (*) fields
+            Deactivate Supervisor Account - Please fill in the required (*) fields
           </legend>
           <div class="form-group">
             <label for="email">E-mail*:</label>
@@ -70,21 +70,22 @@
          <div class="form-group">
             <label for="email">Organization name*:</label>
             <input required class="form-control" type="text" name="organizationName"></input>
-            <input type="hidden" name="id" value="<%= id %>">
+           <input type="hidden" name="id" value="<%= id %>">
+            <input type="hidden" name="uniteID" value="<%= uniteId %>">
           </div>
           <div class="form-group">
             <label for="reason">Reason for deactivating account*:</label>
             <textarea required class="form-control" id="reason" name="reason"></textarea>
           </div>
           <input type="hidden" name="type" value="User Deactivation">          
-          <input type="hidden" name="userType" value="Buyer">
+          <input type="hidden" name="userType" value="Supervisor">
           <div class="form-group">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <button type="submit" id="deactivate" title="Deactivate Account" class="btn btn-primary btn-block btn-lg">Deactivate Account</button>
             <br>
           <div class="form-group text-center">
             <textarea disabled rows="8" cols="40" style="color: green; font-family: arial; font-size: 14pt">
-If you temporarily deactivate your Buyer Account, your placed Bids (Orders) have to be cancelled. Corresponding Suppliers will be notified upon bid cancellation. When you activate your account again at login, you will have to place your orders again if you want to do so.
+If you choose to temporarily deactivate your Supervisor Account, please make sure you have no active Buyers on UNITE. It is not recommended to leave your corresponding Buyers without any surveillance/supervising upon them. Doing so may encourage them to engage in unlawful activities, so please consider making this decision very carefully.
             </textarea>
           </div>
           </div>

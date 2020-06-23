@@ -21,7 +21,7 @@
   <script src="/autocomp.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-      getCancelReasonTitles($('#mainForm'), $('input[name="_csrf"]').val(), '/userCancelReasonTitles');
+      getCancelReasonTitles($('#mainForm'), $('input[name="_csrf"]').val(), '/adminCancelReasonTitles');
 
       $('#mainForm').submit(function(e) {
         var radio = $(this).find('input[type="radio"]:checked');

@@ -52,7 +52,7 @@ const sendCancelBidEmail = (req, victim, actor, victimMail, actorMail, victimTyp
             "Hello " + victim + 
             ",\n\nWe regret to inform you that your incoming Order named " + req.body.requestsName + " has been cancelled by "
             + "the " + actorType + actor + ".\nPlease contact them at " + actorMail + " for more"
-            + " details.\nUNITE apologizes for any inconvenience that this issue may have caused to you."+ "\n\n"
+            + " details.\nUNITE apologizes for any inconvenience that this issue may have caused to you. We will refund the Buyer's balance within a few working days."+ "\n\n"
             + "With kind regards,\nThe UNITE Public Procurement Platform Team",
             html: reason? '<p style="color: fuchsia; font-size: 12pt; font-weight: bold italic; word-wrap: break-word; font-face: arial"><br>' + reason + '</p>' : null
           }, function(err) {

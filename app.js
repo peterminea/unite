@@ -41,6 +41,7 @@ const FeedbackSubject = require("./models/feedbackSubject");
 const Buyer = require("./models/buyer");
 const Supplier = require("./models/supplier");
 const Supervisor = require("./models/supervisor");
+const AdminCancelReasonTitle = require("./models/adminCancelReasonTitle");
 const UserCancelReasonTitle = require("./models/userCancelReasonTitle");
 const Currency = require("./models/currency");
 const Message = require("./models/message");
@@ -89,8 +90,8 @@ app.use(
 const csrfProtection = csrf();
 app.use(csrfProtection);
 app.use(require('flash')());
-app.use(require('connect-flash')());
-app.use(require('express-flash')());
+//app.use(require('connect-flash')());
+//app.use(require('express-flash')());
 
 app.use((req, res, next) => {
   res.locals.csrfToken = req.csrfToken();
@@ -919,7 +920,7 @@ app.post('/purchase', (req, res, next) => {
     //source: req.body.stripeTokenId,
     currency: req.body.currency.toLowerCase()
   }))
-    .then((charge) => {
+    .then(async(charge) => {
       console.log('Payment successful!\n' + charge);      
       const response = {
         headers,
@@ -929,6 +930,23 @@ app.post('/purchase', (req, res, next) => {
           charge: charge
         })
       };
+    
+  //Update the Balance:
+  await MongoClient.connect(URI, {useUnifiedTopology: true}, (err, client) => {
+    if (err) {
+      console.error(err.message);    
+      //flash('error', err.message);
+      return res.status(500).send({ msg: err.message });
+    }
+
+    db = client.db(BASE);//Right connection!
+    db.collection("buyers").updateOne( { _id: req.body.buyerId }, { $set: { balance: req.body.newBalance } }, function(err, obj) {
+      if(err) {
+        console.error(err.message);
+        return res.status(500).send({ msg: err.message });
+      }
+    });
+  });
     
     //Send an e-mail to user:
     var mailOptions = {
@@ -1158,6 +1176,20 @@ app.get('/bidCancelReasonTitles', async function(req, res, next) {
 
 app.get('/userCancelReasonTitles', async function(req, res, next) {
   UserCancelReasonTitle.find({}).exec()
+  .then((titles) => {
+    titles.sort(function (a, b) {
+      return a.name.localeCompare(b.name);
+    });
+    
+    res.send(titles, {
+    'Content-Type': 'application/json'
+       }, 200);
+  });  
+});
+
+
+app.get('/adminCancelReasonTitles', async function(req, res, next) {
+  AdminCancelReasonTitle.find({}).exec()
   .then((titles) => {
     titles.sort(function (a, b) {
       return a.name.localeCompare(b.name);
@@ -1417,6 +1449,7 @@ app.get('/countryAutocompleted', function(req, res) {
 });*/
 
 var db;
+if(1==2)
 MongoClient.connect(URI, {useUnifiedTopology: true}, (err, client) => {
   if (err) {
     console.error(err.message);    
@@ -1710,7 +1743,10 @@ MongoClient.connect(URI, {useUnifiedTopology: true}, (err, client) => {
   //db.collection("suppliers").updateMany({}, { $set: { role: process.env.USER_REGULAR } }, function(err, obj) {});
   //db.collection("buyers").updateMany({}, { $set: { role: process.env.USER_REGULAR } }, function(err, obj) {});
   
-  //db.close();
+  //db.collection("suppliers").updateMany({}, { $set: { currency: 'EUR' } }, function(err, obj) {});
+  //db.collection("buyers").updateMany({}, { $set: { currency: 'EUR' } }, function(err, obj) {});
+  
+  db.close();
 });
 // Database configuration and test data saving:
 

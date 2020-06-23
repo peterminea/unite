@@ -81,7 +81,13 @@ const buyerSchema = new Schema({
         throw new Error('Balance must be 0 or positive');
       }
     },
+    required: true,
     default: 0
+  },
+  currency: {
+    type: String,
+    required: true,
+    default: 'EUR'
   },
   deptAgencyGroup: {
     type: String,

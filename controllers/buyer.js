@@ -175,7 +175,8 @@ exports.getViewBids = (req, res) => {
       errorMessage: req.flash('error'),
       statusesJson: JSON.stringify(statusesJson),
       supplierId: req.params.supplierId, 
-      buyerId: req.params.buyerId
+      buyerId: req.params.buyerId,
+      balance: req.params.balance
     });
   });
 }
@@ -411,7 +412,10 @@ exports.getSignUp = (req, res) => {
 
 
 exports.getBalance = (req, res) => {
-  res.render("buyer/balance", { balance: req.session.buyer.balance });
+  res.render("buyer/balance", { 
+    balance: req.session.buyer.balance,
+    currency: req.session.buyer.currency
+  });
 }
 
 
@@ -571,6 +575,7 @@ exports.postSignUp = async (req, res) => {
                 contactMobileNumber: req.body.contactMobileNumber,
                 address: req.body.address,
                 balance: req.body.balance,
+                currency: req.body.currency,
                 deptAgencyGroup: req.body.deptAgencyGroup,
                 qualification: req.body.qualification,
                 country: req.body.country,
@@ -646,6 +651,7 @@ exports.postProfile = (req, res) => {
       doc.contactMobileNumber = req.body.contactMobileNumber;
       doc.address = req.body.address;
       doc.balance = req.body.balance;
+      doc.currency = req.body.currency;
       doc.deptAgencyGroup = req.body.deptAgencyGroup;
       doc.qualification = req.body.qualification;
       doc.country = req.body.country;

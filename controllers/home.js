@@ -62,7 +62,7 @@ exports.getFilesList = (req, res) => {
     gfs = Grid(conn.db, mongoose.mongo);
     gfs.collection('uploads');    
     
-    gfs.files.find().toArray((err, files) => {//console.log(files);                                              
+    gfs.files.find().toArray((err, files) => {
       if(!files || !files.length) {
         return res.status(404).json({
           err: 'No files exist!'
@@ -73,6 +73,8 @@ exports.getFilesList = (req, res) => {
       res.render("filesList", {
         role: obj.role,
         files: files,
+        successMessage: req.flash('success'),
+        errorMessage: req.flash('error'),
         isAdmin: obj.role == process.env.USER_ADMIN,
         userId: obj.userId,
         avatar: obj.avatar,

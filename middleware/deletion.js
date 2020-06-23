@@ -240,7 +240,6 @@ const supervisorDelete = (req, res, id, uniteID) => {
     });
   } catch {
   }
-
 };
 
 

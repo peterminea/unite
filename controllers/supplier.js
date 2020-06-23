@@ -188,6 +188,7 @@ exports.postDeactivate = function (req, res, next) {
   try {
     //Delete Supplier's Capabilities first:
     MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
+      treatError(req, res, err, 'back');
       var dbo = db.db(BASE);
       /*
       try {
@@ -214,8 +215,8 @@ exports.postDeactivate = function (req, res, next) {
       //The received bids:
       await removeAssociatedSuppBids(req, dbo, id);
 
-      //And now, remove the Supplier themselves:
-      await dbo.collection('suppliers').updaeOne( { _id: id }, { $set: { isActive: false } }, function(err, resp4) {
+      //And now, deactivate the Supplier themselves:
+      await dbo.collection('suppliers').updateOne( { _id: id }, { $set: { isActive: false } }, function(err, resp4) {
         treatError(req, res, err, 'back');
       });
 
@@ -418,6 +419,7 @@ exports.postSignUp = async (req, res) => {
                   occupationalSafetyAndHealthPolicyId: req.body.occupationalSafetyAndHealthPolicyId,
                   otherRelevantFilesIds: req.body.otherRelevantFilesIds,
                   balance: req.body.balance,
+                  currency: req.body.currency,
                   facebookURL: req.body.facebookURL,
                   instagramURL: req.body.instagramURL,
                   twitterURL: req.body.twitterURL,
@@ -673,8 +675,12 @@ exports.getBidRequests = (req, res) => {
     .catch(console.error);
 };
 
+
 exports.getBalance = (req, res) => {
-  res.render("supplier/balance", { balance: req.session.supplier.balance });
+  res.render("supplier/balance", { 
+    balance: req.session.supplier.balance,
+    currency: req.session.supplier.currency
+  });
 }
 
 
@@ -741,6 +747,7 @@ exports.postProfile = async (req, res) => {
     doc.companyRegistrationNo = req.body.companyRegistrationNo;
     doc.registeredCountry = req.body.registeredCountry;
     doc.balance = req.body.balance;
+    doc.currency = req.body.currency;
     doc.companyAddress = req.body.companyAddress;
     doc.areaCovered = req.body.areaCovered;
     doc.contactMobileNumber = req.body.contactMobileNumber;

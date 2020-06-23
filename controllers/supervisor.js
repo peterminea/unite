@@ -45,6 +45,17 @@ exports.getConfirmation = (req, res) => {
   });
 }
 
+
+exports.getDeactivate = (req, res) => {
+  res.render('supervisor/deactivate', {
+    id: req.params.id, 
+    uniteId: req.params.organizationUniteID,
+    successMessage: req.flash('success'),
+    errorMessage: req.flash('error')
+  });
+}
+
+
 exports.getDelete = (req, res) => {
   res.render('supervisor/delete', {
     id: req.params.id, 
@@ -89,56 +100,32 @@ exports.getChat = (req, res) => {//Coming from the getLogin above.
 }
 
 
-async function removeSupervisor(id, req, res, db) {
-  //Now delete the messages sent/received by Supervisor:
-  await db.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp1) {
-    treatError(req, res, err, 'back');
-  });
+exports.postDeactivate = (req, res) => {
+  var id = req.body.id, uniteId = req.body.uniteID;
   
-  //Tokens first, user last.
-  await db.collection('supervisortokens').deleteMany({ _userId: id }, function(err, resp1) {
-    treatError(req, res, err, 'back');  
-  });
-
-  await db.collection('supervisors').deleteOne({ _id: id }, function(err, resp2) {
-    treatError(req, res, err, 'back');    
-  });
-  
-  //Mail to the ex-Supervisor to confirm their final deletion:
-  sendCancellationEmail('Supervisor', req, 'sent/received messages and all your associated Buyers, including their personal data such as placed orders, sent/received messages');
-  db.close();
-  return res.redirect("/supervisor/sign-in");
-}
-
-
-async function removeAssociatedBids(req, res, req2, dbo, id) {
-  var promise = BidRequest.find( { buyer: id } ).exec();
-  await promise.then(async (bids) => {   
-    for(var bid of bids) {//One by one.
-      try {
-        await dbo.collection('bidcancelreasons').insertOne( {
-          title: 'User Cancellation',
-          userType: 'Buyer',
-          reason: req2.body.reason,
-          userName: req2.body.organizationName,
-          createdAt: Date.now()
-        }, function(err, obj) {
-          treatError(req, res, e, 'back');
-        });
-      }  
-      catch(e) {
-        treatError(req, res, e, 'back');
-      }
-
-      await dbo.collection('bidrequests').deleteOne( { _id: bid._id }, function(err, obj) {
+  var prom = Buyer.find({organizationUniteID: uniteId, isActive: true}).exec();
+  prom.then((buyers) => {
+    if(buyers && buyers.length) {
+      req.flash('error', 'You have at least one active Buyer associated to your Supervisor account. It is not advisable to deactivate your account at this time.');
+      return res.redirect('/supervisor/profile');
+    }
+    
+    try {
+      MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
         treatError(req, res, err, 'back');
+        var dbo = db.db(BASE);
+        //And now, deactivate the Supplier themselves:
+        await dbo.collection('supervisors').updateOne( { _id: id }, { $set: { isActive: false } }, function(err, resp) {
+          treatError(req, res, err, 'back');
+          req.flash('success', 'Supervisor successfully deactivated. You will re-become active at your next login.');
+          return res.redirect('/supervisor/sign-in');
+        });        
       });
-
-      req.body.requestsName = bid.requestName;
-      await sendCancelBidEmail(req, bid.suppliersName, bid.buyersName, bid.suppliersEmail, bid.buyersEmail, 'Supplier ', 'Buyer ', req.body.reason);
+    }
+    catch {
     }
   });
-}
+};
 
 
 exports.postDelete = function (req, res, next) {  
@@ -146,7 +133,6 @@ exports.postDelete = function (req, res, next) {
   var uniteID = req.body.organizationUniteID;
   supervisorDelete(req, res, id, uniteID);
 }
-
 
 
 exports.postConfirmation = async function (req, res, next) {

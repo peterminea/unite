@@ -27,13 +27,13 @@
       
       postAutocomplete('.country', '/countryAutocomplete', token);
       getAutocomplete('#industry', '/industryGetAutocomplete', token);
-      getAutocomplete('#currency', '/currencyGetAutocomplete', token);
+      getAutocomplete('.currency', '/currencyGetAutocomplete', token);
       
       $("input").on('change', function () {
         $('#updateProfile').removeAttr('disabled');
       });
         
-      $("#prodServiceInput").on("paste", function(e){
+      $("#prodServiceInput").on("paste", function(e) {
           // access the clipboard using the api
           var pastedData = e.originalEvent.clipboardData.getData('text');
           alert(pastedData);
@@ -46,11 +46,8 @@
       
       
       $('#updateProfile').click(function() {
-        if($('#prodServices li').length == 0) {
-          var obj = '<p class="productRequired littleNote">You are required to include at least one product or service.</p>';
-          $(obj).insertBefore($(this));
+        if(!supplierValidateFields())
           return false;
-        }
       });
 
     $('#prodServiceInput').on('change', function() {
@@ -192,6 +189,10 @@
           <input type="tel" class="form-control" title="Please write the number as +XX XXX XXX XXX" pattern="\+[0-9]{2} [0-9]{3} [0-9]{3} [0-9]{3}" id="contactMobileNumber" placeholder="+XX XXX XXX XXX" name="contactMobileNumber" value="<%= profile.contactMobileNumber %>" required>
         </div>
         <div class="form-group">
+          <label>Preferred Currency (Default: Euro)*</label>
+          <input type="text" class="currency" class="form-control" placeholder="" title="Currency" name="currency" value="EUR" required>
+        </div>
+        <div class="form-group">
           <label>Country*</label>
           <input type="text" class="form-control country" id="country" name="country" value="<%= profile.country %>" required>
         </div>
@@ -205,8 +206,7 @@
         </div>
         <div class="form-group">
           <label>Last Year Turnover*</label>
-          <input type="money" class="form-control" id="lastYearTurnover" name="lastYearTurnover"
-            value="<%= profile.lastYearTurnover %>" required>
+          <input type="money" class="form-control" id="lastYearTurnover" name="lastYearTurnover" value="<%= profile.lastYearTurnover %>" required>
         </div>
         <div class="form-group">
           <label>Website</label>
@@ -234,7 +234,7 @@
         </div>
         <div>
           <p>
-            You will be able to use an Excel file with your products list, formatted as product name + product price + product currency (3 cells per row), and after you click on the Process button, our system must automatically add the products and build the list on page.
+            You can use an Excel file with your products list, formatted as product name + product price + product currency (3 cells per row), and after you click on the Process button, our system must automatically add the products and build the list on page.
           </p>
         </div>
         <div class="form-group">
@@ -249,7 +249,7 @@
             <input type="text" class="form-control prodInput" placeholder="Product*" title="Add Product/Service" id="prodServiceInput">
             <br>
             <input type="number" min="0.1" step="0.1" placeholder="Price*" class="form-control" title="Price" id="price">
-            <input type="text" class="form-control" placeholder="Currency*" title="Currency" id="currency">
+            <input type="text" class="form-control" placeholder="Currency*" title="Currency" class="currency" id="currency">
             <div class="input-group-append">
               <button class="btn btn-outline-secondary" type="button" disabled id="addProdService">Add</button>
             </div>
@@ -258,14 +258,14 @@
           <ul class="list-group" id="prodServices">
             <% let i = 0; if (products != null) { for (product of products) { i++; %>
             <li class='list-group-item'>
-              <span><%= product.productName %> - <%= product.price %>&nbsp;<%= product.currency %></span>
+              <span class='product'><%= product.productName %> - <%= product.price %>&nbsp;<%= product.currency %></span>
               <span class='rem'>&nbsp;(Remove)</span>
             </li>
             <% } }%>
           </ul>
           <input type="hidden" required id="prodServicesList" name="productsServicesOffered" value="<%= profile.productsServicesOffered %>">
-        <input type="hidden" name="pricesList" id="pricesList" value="<%= profile.pricesList %>">
-        <input type="hidden" name="currenciesList" id="currenciesList" value="<%= profile.currenciesList %>">
+          <input type="hidden" name="pricesList" id="pricesList" value="<%= profile.pricesList %>">
+          <input type="hidden" name="currenciesList" id="currenciesList" value="<%= profile.currenciesList %>">
         </div>
         <script type="text/javascript">
           bindRemoveProduct($('.rem'), $('#prodServices'), $('#prodServicesList'), $('#pricesList'), $('#currenciesList'), $('#prodServiceInput'));
@@ -298,7 +298,7 @@
           <input type="hidden" name="avatar" value="<%= profile.avatar %>">
           <input class="form-control fileupload avatarupload" type="file" id="avatar" name="avatarImg">
           <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
-        </div>        
+        </div>
         
         <div class="form-group">
           <label>Certificates</label>

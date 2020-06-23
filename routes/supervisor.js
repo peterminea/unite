@@ -12,6 +12,7 @@ router.get("/", isAuth, sessionExit, supervisorController.getIndex);
 router.get("/sign-in", supervisorController.getSignIn);
 router.get("/sign-up", supervisorController.getSignUp);
 router.get("/profile", isAuth, sessionExit, supervisorController.getProfile);
+router.get("/deactivate/:id/:organizationUniteID", isAuth, sessionExit, supervisorController.getDeactivate);
 router.get("/delete/:id/:organizationUniteID", isAuth, sessionExit, supervisorController.getDelete);
 router.get('/resend', /*isAuth,*/ sessionExit, supervisorController.getResendToken);
 router.get("/confirmation/:token", sessionExit, supervisorController.getConfirmation);
@@ -23,6 +24,7 @@ router.get("/chat/:from/:to/:username/:room/:requestId/:requestName/:toName/:fro
 router.post("/sign-in", supervisorController.postSignIn);
 router.post("/sign-up", supervisorController.postSignUp);
 router.post('/profile', isAuth, sessionExit, supervisorController.postProfile);
+router.post("/deactivate", isAuth, sessionExit, supervisorController.postDeactivate);
 router.post("/delete", isAuth, sessionExit, supervisorController.postDelete);
 router.post('/confirmation/:token', sessionExit, supervisorController.postConfirmation);
 router.post('/resend', /*isAuth,*/ sessionExit, supervisorController.postResendToken);
