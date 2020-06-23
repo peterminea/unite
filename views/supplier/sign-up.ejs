@@ -27,7 +27,8 @@
 
       postAutocomplete('.country', '/countryAutocomplete', token);
       getAutocomplete('#industry', '/industryGetAutocomplete', token);
-      getAutocomplete('.currency', '/currencyGetAutocomplete', token);    
+      getAutocomplete('.currency', '/currencyGetAutocomplete', token);
+      errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
 
       $('.cb').click(function() {
         $('#register').prop('disabled', $(':checkbox:checked').length == 2? false : true);
@@ -57,25 +58,6 @@
 </head>
 
 <body>
-    <% if (errorMessage != null && errorMessage.length > 0) { %>
-    <script>
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: '<%= errorMessage %>'
-      })
-    </script>
-    <% } %>
-    
-    <% if (successMessage != null && successMessage.length > 0) { %>
-    <script>
-      Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: '<%= successMessage %>'
-      })
-    </script>
-    <% } %>
   <nav user="supplier" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
     <a class="navbar-brand" href="/">UNITE</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"

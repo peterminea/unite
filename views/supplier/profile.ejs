@@ -28,11 +28,13 @@
       postAutocomplete('.country', '/countryAutocomplete', token);
       getAutocomplete('#industry', '/industryGetAutocomplete', token);
       getAutocomplete('.currency', '/currencyGetAutocomplete', token);
+      errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       
       $("input,textarea").on('change', function () {
         $('#updateProfile').removeAttr('disabled');
       });
-        
+      
+      /*
       $("#prodServiceInput").on("paste", function(e) {
           // access the clipboard using the api
           var pastedData = e.originalEvent.clipboardData.getData('text');
@@ -42,8 +44,7 @@
       
       function treatPaste(txt) {
         
-      }
-      
+      }*/      
       
       $('#updateProfile').click(function() {
         if(!supplierValidateFields())
@@ -93,25 +94,6 @@
 </head>
 
 <body>
-    <% if (errorMessage != null && errorMessage.length > 0) { %>
-    <script>
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: '<%= errorMessage %>'
-      })
-    </script>
-    <% } %>
-    
-    <% if (successMessage != null && successMessage.length > 0) { %>
-    <script>
-      Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: '<%= successMessage %>'
-      })
-    </script>
-    <% } %>
   <nav pos="4" user="supplier" class="navbar navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="/supplier">Supplier - UNITE</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"

@@ -29,6 +29,7 @@
       userInputs(id, role, avatar, name, type, $('ul.mr-auto'));
       
       getFeedbackSubjects($('#feedbackForm'), $('input[name="_csrf"]').val(), '/feedbackSubjects');
+      errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
 
       $('#feedbackForm').submit(function(e) {
         var option = $(this).find('select option:not(:eq(0)):selected');
@@ -45,25 +46,6 @@
 </head>
 
 <body>
-    <% if (errorMessage != null && errorMessage.length > 0) { %>
-    <script>
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: '<%= errorMessage %>'
-      })
-    </script>
-    <% } %>
-    
-    <% if (successMessage != null && successMessage.length > 0) { %>
-    <script>
-      Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: '<%= successMessage %>'
-      })
-    </script>
-    <% } %>
   <nav pos="4" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
     <a class="navbar-brand" href="/">UNITE - Platform Feedback</a>
     <input type="hidden" id="userData" isAdmin="<%= isAdmin %>" userRole="<%= role %>">

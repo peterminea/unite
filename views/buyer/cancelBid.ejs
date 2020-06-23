@@ -21,36 +21,18 @@
   <script src="/autocomp.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-    getCancelReasonTitles($('#cancelForm'), $('input[name="_csrf"]').val(), '/bidCancelReasonTitles');
+      getCancelReasonTitles($('#cancelForm'), $('input[name="_csrf"]').val(), '/bidCancelReasonTitles');
+      errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
     
-    $('#cancelForm').submit(function(e) {
-      var radio = $(this).find('input[type="radio"]:checked');
-      radio.attr('name', 'reasonTitle');
-      });
+      $('#cancelForm').submit(function(e) {
+        var radio = $(this).find('input[type="radio"]:checked');
+        radio.attr('name', 'reasonTitle');
+        });
     });
   </script>
 </head>
 
 <body>
-    <% if (errorMessage != null && errorMessage.length > 0) { %>
-    <script>
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: '<%= errorMessage %>'
-      })
-    </script>
-    <% } %>
-    
-    <% if (successMessage != null && successMessage.length > 0) { %>
-    <script>
-      Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: '<%= successMessage %>'
-      })
-    </script>
-    <% } %>
   <nav user="buyer" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
     <a class="navbar-brand" href="/">UNITE - Cancel your Order</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"

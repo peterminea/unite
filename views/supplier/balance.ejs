@@ -24,6 +24,7 @@
   <script type="text/javascript">
     $(document).ready(function() {
       getAutocomplete('#currency', '/currencyGetAutocomplete', token);
+      //errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
 
       $('#currency').on('change', function() {
         $('#balance').val(fx.convert($('#defaultBalance').val(), {from: $('#defaultCurrency').val(), to: $(this).val()}));

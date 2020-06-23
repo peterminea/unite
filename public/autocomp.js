@@ -591,7 +591,6 @@ function registrationDialog(accountType) {
 
 
 function errorSuccess(Swal, errorMessage, successMessage) {
-  alert(Swal);
   if (errorMessage.length > 0) {
     Swal.fire({
       icon: 'error',
