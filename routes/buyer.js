@@ -18,7 +18,7 @@ router.get("/confirmation/:token", sessionExit, buyerController.getConfirmation)
 router.get('/resend', /*isAuth,*/ sessionExit, buyerController.getResendToken);
 router.get("/forgotPassword", isAuth, sessionExit, buyerController.getForgotPassword);
 router.get("/resetPassword/:token", isAuth, sessionExit, buyerController.getResetPasswordToken);
-router.get("/viewBid/:supplierId/:buyerId", isAuth, sessionExit, buyerController.getViewBids);
+router.get("/viewBid/:supplierId/:buyerId/:balance", isAuth, sessionExit, buyerController.getViewBids);
 router.get("/chatLogin/:supplierId/:buyerId/:requestId/:requestName/:buyerName/:supplierName", isAuth, sessionExit, buyerController.getChatLogin);
 router.get("/chat/:from/:to/:username/:room/:requestId/:requestName/:toName/:fromName", isAuth, sessionExit, buyerController.getChat);
 router.get("/cancelBid/:bidId/:bidName/:userType/:buyerName/:supplierName/:buyerEmail/:supplierEmail", isAuth, sessionExit, buyerController.getCancelBid);

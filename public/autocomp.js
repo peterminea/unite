@@ -324,7 +324,7 @@ function addition(prodInput, priceInput, currencyInput, prod, prodVal, priceVal,
   arr.push(currencyVal);
   currencyInput.val((arr));
   
-  elem.append("<li class='list-group-item'><span>" + prodVal + ' - ' + priceVal + ' ' + currencyVal + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
+  elem.append("<li class='list-group-item'><span class='product'>" + prodVal + ' - ' + priceVal + ' ' + currencyVal + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
   bindRemoveProduct($('.rem').last(), elem, prodInput, priceInput, currencyInput, prod);
 }
 
@@ -529,6 +529,34 @@ function takeAction(obj, token, tr) {//alert(tr.length);
       }
     }
   });
+}
+
+
+function supplierValidateFields() {
+  if($('#prodServices li').length == 0) {
+    var obj = '<p class="productRequired littleNote">You are required to include at least one product or service.</p>';
+    $(obj).insertBefore($(this));
+    return false;
+  }
+
+  var preferred = $('.currency').first().val();
+  var isChanged = false;
+  $('span.product').each(function(ind, elem) {
+    var text = $(this).text();
+    var last = text.lastIndexOf(' ');
+    var curr = text.substring(last+1);
+    //alert(curr);
+    if(preferred != curr) {
+      isChanged = true;
+      return false;
+    }    
+  });
+
+  if(isChanged && !confirm('One or more of your products have a different currency from the default you entered ('+ preferred +'). Conversion rates may apply if you continue. Please confirm or cancel.')) {
+    return false;
+  }
+  
+  return true;
 }
 
 

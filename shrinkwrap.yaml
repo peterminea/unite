@@ -14,7 +14,6 @@ dependencies:
   express: 4.17.1
   express-flash: 0.0.2
   express-session: 1.17.1
-  express-validator: 6.6.0
   fetch: 1.1.0
   fileupload: 1.0.0
   flash: 1.1.0
@@ -27,7 +26,8 @@ dependencies:
   jsonp: 0.2.1
   method-override: 3.0.0
   moment: 2.27.0
-  mongoose: 5.9.19
+  money: 0.2.0
+  mongoose: 5.9.20
   multer: 1.4.2
   multer-gridfs-storage: 4.1.0
   node-xlsx: 0.15.0
@@ -704,15 +704,6 @@ packages:
       node: '>= 0.8.0'
     resolution:
       integrity: sha512-UbHwgqjxQZJiWRTMyhvWGvjBQduGCSBDhhZXYenziMFjxst5rMV+aJZ6hKPHZnPyHGsrqRICxtX8jtEbm/z36Q==
-  /express-validator/6.6.0:
-    dependencies:
-      lodash: 4.17.15
-      validator: 13.1.1
-    dev: false
-    engines:
-      node: '>= 8.0.0'
-    resolution:
-      integrity: sha512-xcephfzFbUssJph/nOSKIdx+I+8GRz5by/8rOIKL6gJikKKKJjnwYH5TG1nIDB6kEalUtZMbOFuSNOp/HHY84Q==
   /express/4.17.1:
     dependencies:
       accepts: 1.3.7
@@ -1091,10 +1082,6 @@ packages:
       '1': rhino
     resolution:
       integrity: sha1-j1dWDIO1n8JwvT1WG2kAQ0MOJVE=
-  /lodash/4.17.15:
-    dev: false
-    resolution:
-      integrity: sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
   /media-typer/0.3.0:
     dev: false
     engines:
@@ -1173,6 +1160,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-al0MUK7cpIcglMv3YF13qSgdAIqxHTO7brRtaz3DlSULbqfazqkc5kEjNrLDOM7fsjshoFIihnU8snrP7zUvhQ==
+  /money/0.2.0:
+    dev: false
+    resolution:
+      integrity: sha1-fq2i3xAJ35NfoY1PsdYg3azOAsI=
   /mongodb-uri/0.9.7:
     dev: false
     engines:
@@ -1199,7 +1190,7 @@ packages:
       mongoose: '*'
     resolution:
       integrity: sha512-Yo/7qQU4/EyIS8YDFSeenIvXxZN+ld7YdV9LqFVQJzTLye8unujAWPZ4NWKfFA+RNjh+wvTWKY9Z3E5XM6ZZiQ==
-  /mongoose/5.9.19:
+  /mongoose/5.9.20:
     dependencies:
       bson: 1.1.4
       kareem: 2.3.1
@@ -1216,7 +1207,7 @@ packages:
     engines:
       node: '>=4.0.0'
     resolution:
-      integrity: sha512-wJ5FR2ykvyd17MRHA6sku/N1CMaC/kf4CnN357htD48RpzJhW60YDkxPSPLbkLg8Woa+i7jYi0glhzC0EcBcRQ==
+      integrity: sha512-vRP6Csu2obzSl3ed7kTQMrolBNgweiRJ/eBU1PSe/rJfjqWS1oqDE2D1ZPGxkVOsKXs7Gyd84GAXerj8IB2UWg==
   /mpath/0.5.1:
     dev: false
     engines:
@@ -1875,7 +1866,6 @@ specifiers:
   express: ^4.17.1
   express-flash: ^0.0.2
   express-session: ^1.17.1
-  express-validator: ^6.6.0
   fetch: ^1.1.0
   fileupload: ^1.0.0
   flash: ^1.1.0
@@ -1888,7 +1878,8 @@ specifiers:
   jsonp: ^0.2.1
   method-override: ^3.0.0
   moment: ^2.27.0
-  mongoose: ^5.9.19
+  money: ^0.2.0
+  mongoose: ^5.9.20
   multer: ^1.4.2
   multer-gridfs-storage: ^4.1.0
   node-xlsx: ^0.15.0

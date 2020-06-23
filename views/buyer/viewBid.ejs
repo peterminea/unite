@@ -13,11 +13,7 @@
   <link rel="stylesheet" href="/jquery-ui.css">
   <link rel="stylesheet" href="/bootstrap.min.css">
   <!--
-  <script src="/jquery.min.js"></script>
-  <script src="/jquery-ui.min.js"></script>
-  <script src="/bootstrap.min.js"></script>
   <script src="/popper.min.js"></script>  
-  <script src="/sweetalert.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>  
@@ -25,6 +21,8 @@
   <script src="/jquery.min.js"></script>
   <script src="/jquery-ui.min.js"></script>
   <script src="/bootstrap.min.js"></script>
+  <script src="/money.min.js"></script>
+  <script src="/sweetalert2@9.min.js"></script>
   <script src="/https.js"></script>  
   <script src="/autocomp.js"></script>  
   <script type="text/javascript">
@@ -124,8 +122,8 @@
   </script>
 </head>
 
-  <body id="<%= supplierId %>" id2="<%= buyerId %>">
-    <% if (errorMessage.length > 0) { %>
+<body id="<%= supplierId %>" id2="<%= buyerId %>">
+    <% if (errorMessage != null && errorMessage.length > 0) { %>
     <script>
       Swal.fire({
         icon: 'error',
@@ -135,7 +133,7 @@
     </script>
     <% } %>
     
-    <% if (successMessage.length > 0) { %>
+    <% if (successMessage != null && successMessage.length > 0) { %>
     <script>
       Swal.fire({
         icon: 'success',
@@ -151,7 +149,7 @@
       <span class="navbar-toggler-icon"></span>
     </button>
   </nav>
-    
+    <input type="hidden" id="balance" value="<%= balance %>">
     <div class="container">
       <br><br>
       <div class="col-md-12">
@@ -343,6 +341,18 @@
                       if($('#status_'+index).val() == x.SUPP_STARTED_DELIVERY) {//Ready to pay -> STRIPE in action!
                         var amount = $('#price_'+index).val();//Not to be confused with the number of items!
                         var currency = $('#currency_'+index).val();
+                        var balance = $('#balance').val();
+                        if(amount > balance) {
+                          alert('Your current balance is not enough for completing this purchase. Please add some more funds to your account.');
+                          Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Your current balance is not enough for completing this purchase. Please add some more funds to your account.'
+                          });
+                          return false;
+                        }
+                        
+                        var newBalance = balance - amount;                        
                         var from = "<%= bid.supplierName %>",
                         to = "<%= bid.buyerName %>",
                         desc = "<%= bid.requestName %>",
@@ -367,6 +377,8 @@
                                 body: JSON.stringify({
                                   stripeTokenId: token.id,
                                   token: token,
+                                  buyerId: "<%= buyerId %>",
+                                  newBalance: newBalance,
                                   emailAddress: emailAddress,//Buyer's e-mail.
                                   description: "Order - " + desc,
                                   amount: parseInt(amount),

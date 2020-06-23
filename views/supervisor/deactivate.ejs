@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>UNITE - Supplier - User Termination</title>
+  <title>UNITE - Supervisor - User Deactivation</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="A cool thing made with Glitch">
@@ -17,20 +17,16 @@
   <script src="/popper.min.js"></script>
   <script src="/bootstrap.min.js"></script>
   <script src="/sweetalert2@9.min.js"></script>
-  <script src="/https.js"></script>
+  <script src="/https.js"></script>  
   <script src="/autocomp.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-      getCancelReasonTitles($('#mainForm'), $('input[name="_csrf"]').val(), '/userCancelReasonTitles');
-      
       $('#mainForm').submit(function(e) {
-        var radio = $(this).find('input[type="radio"]:checked');
-        radio.attr('name', 'reasonTitle');
-        if(!confirm('You are about to remove all your data from UNITE. This cannot be undone. Please proceed only if you are really sure.')) {
+        if(!confirm('Are you sure you want to deactivate your Buyer account?\nThis will remove your placed Bid Requests in UNITE. You will be automatically reactivated at the next login.\nWe hope to see you back soon!')) {
           return false;
         }
       });
-  });
+    });
   </script>
 </head>
 
@@ -54,8 +50,8 @@
       })
     </script>
     <% } %>
-  <nav user="supplier" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
-    <a class="navbar-brand" href="/">UNITE - Delete Supplier Account</a>
+  <nav user="buyer" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
+    <a class="navbar-brand" href="/">UNITE - Deactivate Supervisor Account</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -63,28 +59,35 @@
   </nav>
     <div class="container">
        <div class="col-md-12">
-        <legend>
-          Delete Supplier Account - Please fill in the required (*) fields
-        </legend>
-        <form id="mainForm" action="/supplier/delete/<%= id %>" method="POST">          
+        <form id="mainForm" action="/supervisor/deactivate/<%= id %>" method="POST">
+          <legend>
+            Deactivate Supervisor Account - Please fill in the required (*) fields
+          </legend>
           <div class="form-group">
             <label for="email">E-mail*:</label>
             <input required class="form-control" type="email" name="emailAddress" autofocus="autofocus"></input>
           </div>
          <div class="form-group">
-            <label for="email">Company name*:</label>
-            <input required class="form-control" type="text" id="companyName" name="companyName"></input>
-            <input type="hidden" name="id" value="<%= id %>">
+            <label for="email">Organization name*:</label>
+            <input required class="form-control" type="text" name="organizationName"></input>
+           <input type="hidden" name="id" value="<%= id %>">
+            <input type="hidden" name="uniteID" value="<%= uniteId %>">
           </div>
           <div class="form-group">
-            <label for="reason">Reason for deleting account*:</label>
-            <textarea required rows="10" cols="50" class="form-control" id="reason" name="reason"></textarea>
+            <label for="reason">Reason for deactivating account*:</label>
+            <textarea required class="form-control" id="reason" name="reason"></textarea>
           </div>
-          <input type="hidden" name="type" value="User Cancellation">          
-          <input type="hidden" name="userType" value="Supplier">
+          <input type="hidden" name="type" value="User Deactivation">          
+          <input type="hidden" name="userType" value="Supervisor">
           <div class="form-group">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button type="submit" id="delete" title="Delete Account" class="btn btn-primary btn-block btn-lg">Delete Account</button>
+            <button type="submit" id="deactivate" title="Deactivate Account" class="btn btn-primary btn-block btn-lg">Deactivate Account</button>
+            <br>
+          <div class="form-group text-center">
+            <textarea disabled rows="8" cols="40" style="color: green; font-family: arial; font-size: 14pt">
+If you choose to temporarily deactivate your Supervisor Account, please make sure you have no active Buyers on UNITE. It is not recommended to leave your corresponding Buyers without any surveillance/supervising upon them. Doing so may encourage them to engage in unlawful activities, so please consider making this decision very carefully.
+            </textarea>
+          </div>
           </div>
         </form>
       </div>

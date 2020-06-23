@@ -13,6 +13,8 @@ const ProductService = require("../models/productService");
 const Capability = require("../models/capability");
 const Message = require("../models/message")
 const treatError = require('../middleware/treatError');
+const BadWords = require('bad-words');
+const search = require('../middleware/searchFlash');
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 
@@ -34,6 +36,9 @@ exports.getIndex = (req, res) => {
 
 exports.getDeleteUser = (req, res) => {
   var obj = userData(req);
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render("deleteUser", {
     role: obj.role,
     //isAdmin: obj.role == process.env.USER_ADMIN,
@@ -44,8 +49,8 @@ exports.getDeleteUser = (req, res) => {
     name: req.params.name,
     uniteID: req.params.uniteID,
     emailAddress: req.params.email,
-    successMessage: req.flash('success'),
-    errorMessage: req.flash('error')
+    successMessage: success,
+    errorMessage: error
     //userName: obj.userName,
     //userType: obj.userType
   });
@@ -54,6 +59,8 @@ exports.getDeleteUser = (req, res) => {
 
 exports.getFilesList = (req, res) => {
   var obj = userData(req);
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
   const conn = mongoose.createConnection(URL, {useNewUrlParser: true, useUnifiedTopology: true});
   const Grid = require('gridfs-stream');
   let gfs;
@@ -62,7 +69,7 @@ exports.getFilesList = (req, res) => {
     gfs = Grid(conn.db, mongoose.mongo);
     gfs.collection('uploads');    
     
-    gfs.files.find().toArray((err, files) => {//console.log(files);                                              
+    gfs.files.find().toArray((err, files) => {
       if(!files || !files.length) {
         return res.status(404).json({
           err: 'No files exist!'
@@ -73,6 +80,8 @@ exports.getFilesList = (req, res) => {
       res.render("filesList", {
         role: obj.role,
         files: files,
+        successMessage: success,
+        errorMessage: error,
         isAdmin: obj.role == process.env.USER_ADMIN,
         userId: obj.userId,
         avatar: obj.avatar,
@@ -86,9 +95,14 @@ exports.getFilesList = (req, res) => {
 
 exports.getFeedback = (req, res) => {
   var obj = userData(req);
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render("feedback", {
     role: obj.role,
     isAdmin: obj.role == process.env.USER_ADMIN,
+    successMessage: success,
+    errorMessage: error,
     userId: obj.userId,
     avatar: obj.avatar,
     userName: obj.userName,
@@ -183,8 +197,11 @@ exports.getMemberList = async (req, res) => {
       supps.push(suppliers[i]);
     }
   });
-
+  
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
   var obj = userData(req);  
+  
   res.render("memberList", {
     buyers: buys,
     role: obj.role,
@@ -193,8 +210,8 @@ exports.getMemberList = async (req, res) => {
     suppliers: supps,
     supervisors: supers,
     userId: obj.userId,
-    successMessage: req.flash('success'),
-    errorMessage: req.flash('error'),
+    successMessage: success,
+    errorMessage: error,
     userName: obj.userName,
     userType: obj.userType
   });
@@ -205,6 +222,12 @@ exports.postFeedback = (req, res) => {
   try {
     MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
        treatError(req, res, err, 'back');
+        //Bad Words:
+        const filter = new BadWords();
+        if(filter.isProfane(req.body.details)) {
+          req.flash('error', 'We do not promote profanily on UNITE. Please use an educated language. The feedback will not be posted otherwise. Thank you for understanding!');
+          res.redirect('/feedback')
+        }
 
         var dbo = db.db(BASE);
         await dbo.collection("feedbacks").insertOne({
@@ -215,9 +238,9 @@ exports.postFeedback = (req, res) => {
           createdAt: Date.now()
         }, function(err, obj) {
             treatError(req, res, err, 'back');
-            req.flash('success', 'Feedback successfully sent! We will get back to you.');
+            req.flash('success', 'Feedback successfully sent! Thanks for your opinion. We will get back to you.');
             db.close();
-            res.redirect('/');
+            res.redirect('/feedback');
         });
       });
     } catch {

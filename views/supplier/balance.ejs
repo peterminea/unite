@@ -15,12 +15,21 @@
   <script src="/jquery.min.js"></script>
   <script src="/jquery-ui.min.js"></script>
   <script src="/popper.min.js"></script>
-  <script src="/bootstrap.min.js"></script>
-  <script src="/sweetalert.min.js"></script>  
+  <script src="/bootstrap.min.js"></script>  
   <script src="/index.min.js"></script>
+  <script src="/sweetalert2@9.min.js"></script>
   <script src="/https.js"></script>
-  <script src="/chatUsers.js"></script>
+  <script src="/money.min.js"></script>
   <script src="/autocomp.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      getAutocomplete('#currency', '/currencyGetAutocomplete', token);
+
+      $('#currency').on('change', function() {
+        $('#balance').val(fx.convert($('#defaultBalance').val(), {from: $('#defaultCurrency').val(), to: $(this).val()}));
+      });
+    });
+  </script>
 </head>
 
 <body>
@@ -34,12 +43,22 @@
     <div class="container">
       <div class="smooth-shadow profile-form">
       <form method="POST">
-        <div class="row m-2">          
+        <div class="row m-2">
+          <div>
+            <p>
+              You can make currency conversions here, in order to see what the equivalent of your current balance would be, if translated into other national currencies.
+            </p>
+          </div>
           <div class="form-group mr-2">
-            <label>Current Supplier Balance</label>
+            <label>Current Buyer Balance</label>
+            <input type="hidden" id="defaultBalance" value="<%= balance %>">
+            <input type="hidden" id="defaultCurrency" value="<%= currency %>">
             <input type="text" class="form-control" id="balance" name="balance" value="<%= balance %>" readonly>
+            &nbsp;
+            <input type="text" class="form-control" id="currency" name="currency" value="<%= currency %>">
           </div>
         </div>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         </form>
       </div>
     </div>  

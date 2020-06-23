@@ -12,15 +12,12 @@
   <link rel="stylesheet" href="/messages.css">
   <link rel="stylesheet" href="/jquery-ui.css">
   <link rel="stylesheet" href="/bootstrap.min.css">
-  <script src="/sweetalert.min.js"></script>  
   <script src="/jquery.min.js"></script>
   <script src="/jquery-ui.min.js"></script>
   <script src="/popper.min.js"></script>
   <script src="/bootstrap.min.js"></script>
-  <script src="/mustache.min.js"></script>
-  <script src="/moment.min.js"></script>
-  <script src="/qs.min.js"></script>
   <script src="/index.min.js"></script>
+  <script src="/sweetalert2@9.min.js"></script>
   <script src="/https.js"></script>
   <script src="/autocomp.js"></script>
   
@@ -60,7 +57,7 @@
 </head>
 
 <body>
-    <% if (errorMessage.length > 0) { %>
+    <% if (errorMessage != null && errorMessage.length > 0) { %>
     <script>
       Swal.fire({
         icon: 'error',
@@ -70,7 +67,7 @@
     </script>
     <% } %>
     
-    <% if (successMessage.length > 0) { %>
+    <% if (successMessage != null && successMessage.length > 0) { %>
     <script>
       Swal.fire({
         icon: 'success',
@@ -209,18 +206,20 @@
         <br>       
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" >
         <button type="submit" disabled id="updateProfile" value="Update Profile" class="btn btn-primary btn-block btn-lg">Update Profile</button>
-      </form>
-      <br>
+        </form>
+        <br>
         <div class="form-group mr-2">
-          <br>
-          <button class="btn-secondary btn" id="termination" title="Close Account">Delete Account</button>
-          <form action="delete/<%= profile._id %>/<%= profile.organizationUniteID %>">
-          </form>
+        <br>
+        <div class="form-group mr-2">          
+          <a href="deactivate/<%= profile._id %>/<%= profile.organizationUniteID %>"><button class="btn-secondary btn" id="deactivation" title="Temporarily deactivate your Account">Deactivate Account</button></a>
         </div>
-        <div id="dialog">
-        </div>
+        <button class="btn-secondary btn" id="termination" title="Close Account">Delete Account</button>
+        <form action="delete/<%= profile._id %>/<%= profile.organizationUniteID %>">
+        </form>
+      </div>
+      <div id="dialog">
+      </div>
     </div>
   </div>  
 </body>
-
 </html>

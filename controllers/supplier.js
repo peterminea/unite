@@ -18,6 +18,7 @@ const MongoClient = require("mongodb").MongoClient;
 const ObjectId = require("mongodb").ObjectId;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
+const search = require('../middleware/searchFlash');
 const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 
@@ -32,8 +33,11 @@ const statusesJson = {
 };
 
 exports.getIndex = (req, res) => {
-  if (!req || !req.session) return false;
+  if (!req || !req.session) 
+    return false;
   const supplier = req.session.supplier;
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
 
   BidRequest.find({ supplier: supplier._id })
     .then((requests) => {
@@ -42,8 +46,8 @@ exports.getIndex = (req, res) => {
       res.render("supplier/index", {
         supplier: supplier,
         requestsCount: requestsCount,
-        successMessage: req.flash('success'),
-        errorMessage: req.flash('error')
+        successMessage: success,
+        errorMessage: error
       });
     })
     .catch(console.error);
@@ -51,8 +55,13 @@ exports.getIndex = (req, res) => {
 
 
 exports.getAddProduct = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render("supplier/addProduct", {
-    supplierId: req.session.supplier._id
+    supplierId: req.session.supplier._id,
+    successMessage: success,
+    errorMessage: error
   });
 }
 
@@ -84,6 +93,9 @@ exports.postAddProduct = (req, res) => {
 
 
 exports.getCancelBid = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render('supplier/cancelBid', {
     bidId: req.params.bidId,
     bidName: req.params.bidName,
@@ -92,8 +104,8 @@ exports.getCancelBid = (req, res) => {
     supplierName: req.params.supplierName,
     buyerEmail: req.params.buyerEmail,
     supplierEmail: req.params.supplierEmail,
-    successMessage: req.flash('success'),
-    errorMessage: req.flash('error')
+    successMessage: success,
+    errorMessage: error
   });  
 }
 
@@ -148,31 +160,45 @@ exports.getConfirmation = (req, res) => {
     req.session.supplierId = req.params && req.params.token? req.params.token._userId : null;
   }
   
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render("supplier/confirmation", { 
-    token: req.params? req.params.token : null 
+    token: req.params? req.params.token : null,
+    successMessage: success,
+    errorMessage: error
   });
 }
 
 exports.getDelete = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render('supplier/delete', {
     id: req.params.id,
-    successMessage: req.flash('success'),
-    errorMessage: req.flash('error')
+    successMessage: success,
+    errorMessage: error
   });
 }
 
 exports.getDeactivate = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render('supplier/deactivate', {
     id: req.params.id,
-    successMessage: req.flash('success'),
-    errorMessage: req.flash('error')
+    successMessage: success,
+    errorMessage: error
   });
 }
 
 exports.getResendToken = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render("supplier/resend", {
-    successMessage: req.flash('success'),
-    errorMessage: req.flash('error')
+    successMessage: success,
+    errorMessage: error
   });
 }
 
@@ -188,6 +214,7 @@ exports.postDeactivate = function (req, res, next) {
   try {
     //Delete Supplier's Capabilities first:
     MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
+      treatError(req, res, err, 'back');
       var dbo = db.db(BASE);
       /*
       try {
@@ -214,8 +241,8 @@ exports.postDeactivate = function (req, res, next) {
       //The received bids:
       await removeAssociatedSuppBids(req, dbo, id);
 
-      //And now, remove the Supplier themselves:
-      await dbo.collection('suppliers').updaeOne( { _id: id }, { $set: { isActive: false } }, function(err, resp4) {
+      //And now, deactivate the Supplier themselves:
+      await dbo.collection('suppliers').updateOne( { _id: id }, { $set: { isActive: false } }, function(err, resp4) {
         treatError(req, res, err, 'back');
       });
 
@@ -309,9 +336,12 @@ exports.postResendToken = function(req, res, next) {
 
 exports.getSignIn = (req, res) => {
   if (!req.session.supplierId || !req.session.supplier.isVerified) {
+    var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+    req.session.flash = [];
+    
     return res.render("supplier/sign-in", {
-      successMessage: req.flash('success'),
-      errorMessage: req.flash("error")
+      successMessage: success,
+      errorMessage: error
     });
   } else 
     res.redirect("/supplier");
@@ -324,11 +354,14 @@ exports.postSignIn = async (req, res) => {
 
 
 exports.getSignUp = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   if (!req.session.supplierId)
     return res.render("supplier/sign-up", {
       MAX_PROD: process.env.SUPP_MAX_PROD,
-      successMessage: req.flash('success'),
-      errorMessage: req.flash("error")
+      successMessage: success,
+      errorMessage: error
     });
   else res.redirect("/supplier");
 };
@@ -418,6 +451,7 @@ exports.postSignUp = async (req, res) => {
                   occupationalSafetyAndHealthPolicyId: req.body.occupationalSafetyAndHealthPolicyId,
                   otherRelevantFilesIds: req.body.otherRelevantFilesIds,
                   balance: req.body.balance,
+                  currency: req.body.currency,
                   facebookURL: req.body.facebookURL,
                   instagramURL: req.body.instagramURL,
                   twitterURL: req.body.twitterURL,
@@ -512,10 +546,13 @@ exports.postSignUp = async (req, res) => {
 
 
 exports.getForgotPassword = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render("supplier/forgotPassword", {
     email: req.session.supplier.emailAddress,
-    successMessage: req.flash('success'),
-    errorMessage: req.flash("error")
+    successMessage: success,
+    errorMessage: error
   });
 }
 
@@ -584,6 +621,9 @@ exports.postForgotPassword = (req, res, next) => {
 };
 
 exports.getResetPasswordToken = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   Supplier.findOne({
       resetPasswordToken: req.params.token,
       resetPasswordExpires: { $gt: Date.now() }
@@ -592,7 +632,11 @@ exports.getResetPasswordToken = (req, res) => {
         req.flash("error", "Password reset token is either invalid or expired.");
         return res.redirect("supplier/forgotPassword");
       }
-      res.render("supplier/resetPassword", { token: req.params.token });
+      res.render("supplier/resetPassword", { 
+        token: req.params.token,
+        successMessage: success,
+        errorMessage: error
+      });
     });
 };
 
@@ -648,11 +692,14 @@ exports.getProfile = (req, res) => {
         req.session.supplier.productsServicesOffered.push(products[i].productName);
       }
     
+      var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+      req.session.flash = [];
+      
       res.render("supplier/profile", {
         products: products,
         MAX_PROD: process.env.SUPP_MAX_PROD,
-        successMessage: req.flash('success'),
-        errorMessage: req.flash("error"),
+        successMessage: success,
+        errorMessage: error,
         profile: req.session.supplier
       });
     })
@@ -662,10 +709,14 @@ exports.getProfile = (req, res) => {
 
 exports.getBidRequests = (req, res) => {
   const supplier = req.session.supplier;
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
 
   BidRequest.find({ supplier: supplier._id })
     .then(requests => {
       res.render("supplier/bid-requests", {
+        successMessage: success,
+        errorMessage: error,
         supplier: supplier,
         requests: requests
       });
@@ -673,8 +724,12 @@ exports.getBidRequests = (req, res) => {
     .catch(console.error);
 };
 
+
 exports.getBalance = (req, res) => {
-  res.render("supplier/balance", { balance: req.session.supplier.balance });
+  res.render("supplier/balance", { 
+    balance: req.session.supplier.balance,
+    currency: req.session.supplier.currency
+  });
 }
 
 
@@ -682,6 +737,8 @@ exports.getBidRequest = (req, res) => {
   const supplier = req.session.supplier;
   let request;
   const id = req.params.id;
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
 
   BidRequest.findOne({ _id: id })
     .then( (reqresult) => {
@@ -695,6 +752,8 @@ exports.getBidRequest = (req, res) => {
         supplier: supplier,
         request: request,
         buyer: buyer,
+        successMessage: success,
+        errorMessage: error,
         statuses: statuses,
         statusesJson: JSON.stringify(statusesJson)
         });
@@ -741,6 +800,7 @@ exports.postProfile = async (req, res) => {
     doc.companyRegistrationNo = req.body.companyRegistrationNo;
     doc.registeredCountry = req.body.registeredCountry;
     doc.balance = req.body.balance;
+    doc.currency = req.body.currency;
     doc.companyAddress = req.body.companyAddress;
     doc.areaCovered = req.body.areaCovered;
     doc.contactMobileNumber = req.body.contactMobileNumber;
@@ -778,7 +838,7 @@ exports.postProfile = async (req, res) => {
     doc.updatedAt = Date.now();
     //doc.__v = 1;//Last saved version. To be taken into account for future cases of concurrential changes, in case updateOne does not protect us from that problem.
     var price = req.body.price;
-    console.log(doc);
+    //console.log(doc);
     
     if(global++ < 1)
     await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
@@ -816,7 +876,13 @@ exports.postProfile = async (req, res) => {
       industry.save((err) => {
         treatError(req, res, err, '/supplier/profile');
       });
-
+      
+      console.log('Now saving new data to session:');
+      req.session.supplier = doc;
+      req.session.supplierId = doc._id;
+      await req.session.save((err) => {
+        treatError(req, res, err, '/supplier/profile');
+      });   
      
       await dbo.collection("productservices").deleteMany({ supplier: doc._id }, (err, resp2) => {
         treatError(req, res, err, '/supplier/profile');
@@ -841,28 +907,20 @@ exports.postProfile = async (req, res) => {
           
           console.log('Product saved!');
         }
-      
-      db.close();
+        
+        console.log('Products offered list saved!');
+        console.log("User updated and session saved!");
+        db.close();
+        setTimeout(function() {
+          req.flash("success", "Supplier details updated successfully!");
+          console.log('Supplier details updated successfully!');
+          res.redirect("/supplier/profile");
+        }, 500);
       });
     });
- 
-    console.log('Products offered list saved! Now saving new data to session:');
-    req.session.supplier = doc;
-    req.session.supplierId = doc._id;
-
-    await req.session.save((err) => {
-      treatError(req, res, err, '/supplier/profile');
-    });   
-    
-    console.log("User updated and session saved!");
-    setTimeout(function() {
-      req.flash("success", "Supplier details updated successfully!");
-      console.log('Supplier details updated successfully!');
-      res.redirect("/supplier/profile");
-    }, 150); 
     })
     //.catch(console.error);
   } catch {
-    //res.redirect("/supplier/profile");
+    // return res.redirect("/supplier/profile");
   }
 };

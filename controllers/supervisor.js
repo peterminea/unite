@@ -10,6 +10,7 @@ const async = require('async');
 const MongoClient = require('mongodb').MongoClient;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
+const search = require('../middleware/searchFlash');
 const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 
@@ -22,11 +23,13 @@ exports.getIndex = (req, res) => {
     { organizationUniteID: supervisor.organizationUniteID },
     (err, results) => {
       treatError(req, res, err, 'back');
+      var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+      req.session.flash = [];
 
       res.render("supervisor/index", {
         supervisor: supervisor,
-        successMessage: req.flash('success'),
-        errorMessage: req.flash('error'),
+        successMessage: success,
+        errorMessage: error,
         buyers: results
       });
     }
@@ -40,25 +43,50 @@ exports.getConfirmation = (req, res) => {
     req.session.supervisorId = req.params && req.params.token? req.params.token._userId : null;
   }
   
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render('supervisor/confirmation', {
-    token: req.params? req.params.token : null 
+    token: req.params? req.params.token : null,
+    successMessage: success,
+    errorMessage: error
   });
 }
 
+
+exports.getDeactivate = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
+  res.render('supervisor/deactivate', {
+    id: req.params.id, 
+    uniteId: req.params.organizationUniteID,
+    successMessage: success,
+    errorMessage: error
+  });
+}
+
+
 exports.getDelete = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render('supervisor/delete', {
     id: req.params.id, 
     organizationUniteID: req.params.organizationUniteID,
-    successMessage: req.flash('success'),
-    errorMessage: req.flash('error')
+    successMessage: success,
+    errorMessage: error
   });
 }
 
 
 exports.getResendToken = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render('supervisor/resend', {
-    successMessage: req.flash('success'),
-    errorMessage: req.flash('error')
+    successMessage: success,
+    errorMessage: error
   });
 }
 
@@ -89,56 +117,32 @@ exports.getChat = (req, res) => {//Coming from the getLogin above.
 }
 
 
-async function removeSupervisor(id, req, res, db) {
-  //Now delete the messages sent/received by Supervisor:
-  await db.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp1) {
-    treatError(req, res, err, 'back');
-  });
+exports.postDeactivate = (req, res) => {
+  var id = req.body.id, uniteId = req.body.uniteID;
   
-  //Tokens first, user last.
-  await db.collection('supervisortokens').deleteMany({ _userId: id }, function(err, resp1) {
-    treatError(req, res, err, 'back');  
-  });
-
-  await db.collection('supervisors').deleteOne({ _id: id }, function(err, resp2) {
-    treatError(req, res, err, 'back');    
-  });
-  
-  //Mail to the ex-Supervisor to confirm their final deletion:
-  sendCancellationEmail('Supervisor', req, 'sent/received messages and all your associated Buyers, including their personal data such as placed orders, sent/received messages');
-  db.close();
-  return res.redirect("/supervisor/sign-in");
-}
-
-
-async function removeAssociatedBids(req, res, req2, dbo, id) {
-  var promise = BidRequest.find( { buyer: id } ).exec();
-  await promise.then(async (bids) => {   
-    for(var bid of bids) {//One by one.
-      try {
-        await dbo.collection('bidcancelreasons').insertOne( {
-          title: 'User Cancellation',
-          userType: 'Buyer',
-          reason: req2.body.reason,
-          userName: req2.body.organizationName,
-          createdAt: Date.now()
-        }, function(err, obj) {
-          treatError(req, res, e, 'back');
-        });
-      }  
-      catch(e) {
-        treatError(req, res, e, 'back');
-      }
-
-      await dbo.collection('bidrequests').deleteOne( { _id: bid._id }, function(err, obj) {
+  var prom = Buyer.find({organizationUniteID: uniteId, isActive: true}).exec();
+  prom.then((buyers) => {
+    if(buyers && buyers.length) {
+      req.flash('error', 'You have at least one active Buyer associated to your Supervisor account. It is not advisable to deactivate your account at this time.');
+      return res.redirect('/supervisor/profile');
+    }
+    
+    try {
+      MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
         treatError(req, res, err, 'back');
+        var dbo = db.db(BASE);
+        //And now, deactivate the Supplier themselves:
+        await dbo.collection('supervisors').updateOne( { _id: id }, { $set: { isActive: false } }, function(err, resp) {
+          treatError(req, res, err, 'back');
+          req.flash('success', 'Supervisor successfully deactivated. You will re-become active at your next login.');
+          return res.redirect('/supervisor/sign-in');
+        });        
       });
-
-      req.body.requestsName = bid.requestName;
-      await sendCancelBidEmail(req, bid.suppliersName, bid.buyersName, bid.suppliersEmail, bid.buyersEmail, 'Supplier ', 'Buyer ', req.body.reason);
+    }
+    catch {
     }
   });
-}
+};
 
 
 exports.postDelete = function (req, res, next) {  
@@ -146,7 +150,6 @@ exports.postDelete = function (req, res, next) {
   var uniteID = req.body.organizationUniteID;
   supervisorDelete(req, res, id, uniteID);
 }
-
 
 
 exports.postConfirmation = async function (req, res, next) {
@@ -223,7 +226,12 @@ exports.postResendToken = function (req, res, next) {
 
 
 exports.getForgotPassword = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render("supervisor/forgotPassword", {
+    successMessage: success,
+    errorMessage: error,
     email: req.session.supervisor.emailAddress//We pre-fill the e-mail field with the address.
   });
 }
@@ -266,12 +274,19 @@ exports.postForgotPassword = (req, res, next) => {
 
 
 exports.getResetPasswordToken = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   Supervisor.findOne({resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() }}, function(err, user) {
     if(!user) {
       req.flash('error', 'Password reset token is either invalid or expired.');
       return res.redirect('/supervisor/forgotPassword');
     }
-    res.render('supervisor/resetPassword', {token: req.params.token});
+    res.render('supervisor/resetPassword', {
+      token: req.params.token,
+      successMessage: success,
+      errorMessage: error
+    });
   });
 }
 
@@ -289,15 +304,10 @@ exports.postResetPasswordToken = (req, res) => {
         
     if(req.body.password === req.body.confirm) {
         MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
-          if (err) throw err;
+          treatError(req, res, err, 'back');
           var dbo = db.db(BASE);
           dbo.collection("supervisors").updateOne({ _id: user._id }, { $set: {password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined} }, function(err, resp) {        
-            if(err) {
-              console.error(err.message);
-              req.flash('error', err.message);
-              throw err;
-              }
-
+            treatError(req, res, err, 'back');
             db.close();
             });
           });
@@ -318,20 +328,26 @@ exports.postResetPasswordToken = (req, res) => {
 
 
 exports.getSignIn = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   if (!req.session.supervisorId || !req.session.supervisor.isVerified)
     res.render("supervisor/sign-in", {
-      successMessage: req.flash('success'),
-      errorMessage: req.flash('error')
+      successMessage: success,
+      errorMessage: error
     });
   else res.redirect("/supervisor");
 }
 
 
 exports.getSignUp = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   if(!req.session.supervisorId)
     res.render("supervisor/sign-up", {
-      successMessage: req.flash('success'),
-      errorMessage: req.flash('error')
+      successMessage: success,
+      errorMessage: error
     });
   else 
     res.redirect("/supervisor");
@@ -435,9 +451,12 @@ exports.postSignUp = async (req, res) => {
 
 
 exports.getProfile = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render("supervisor/profile", {
-    successMessage: req.flash('success'),
-    errorMessage: req.flash("error"),
+    successMessage: success,
+    errorMessage: error,
     profile: req.session.supervisor });
 }
 
@@ -495,7 +514,7 @@ exports.postProfile = (req, res) => {
 
         setTimeout(function() {
           res.redirect("/supervisor/profile");
-        }, 150);
+        }, 500);
       });
     });
   })
