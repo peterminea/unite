@@ -16,7 +16,7 @@
   <script src="/jquery-ui.min.js"></script>
   <script src="/popper.min.js"></script>
   <script src="/bootstrap.min.js"></script>
-  <script src="/sweetalert.min.js"></script>
+  <script src="/sweetalert2@9.min.js"></script>
   <script src="/https.js"></script>
   <script src="/autocomp.js"></script>
   <script type="text/javascript">
@@ -35,15 +35,7 @@
 </head>
 
 <body>
-  <nav user="supplier" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
-    <a class="navbar-brand" href="/">UNITE - Delete User Account - Admin</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-  </nav>
-    <div class="container">
-    <% if (errorMessage.length > 0) { %>
+    <% if (errorMessage != null && errorMessage.length > 0) { %>
     <script>
       Swal.fire({
         icon: 'error',
@@ -53,7 +45,7 @@
     </script>
     <% } %>
     
-    <% if (successMessage.length > 0) { %>
+    <% if (successMessage != null && successMessage.length > 0) { %>
     <script>
       Swal.fire({
         icon: 'success',
@@ -62,6 +54,14 @@
       })
     </script>
     <% } %>
+  <nav user="supplier" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
+    <a class="navbar-brand" href="/">UNITE - Delete User Account - Admin</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </nav>
+    <div class="container">
        <div class="col-md-12">
         <legend>
           Delete User Account - Please fill in the required (*) fields

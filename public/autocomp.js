@@ -542,17 +542,21 @@ function supplierValidateFields() {
   var preferred = $('.currency').first().val();
   var isChanged = false;
   $('span.product').each(function(ind, elem) {
-    var last = $(this).val().lastIndexOf(' ');
-    var curr = $(this).val().substring(last+1);
+    var text = $(this).text();
+    var last = text.lastIndexOf(' ');
+    var curr = text.substring(last+1);
+    //alert(curr);
     if(preferred != curr) {
       isChanged = true;
       return false;
-    }
+    }    
   });
 
-  if(isChanged && !confirm('One or more of your products have a different currency from the default you entered('+ preferred +'). Conversion rates may apply if you continue. Please confirm or cancel.')) {
+  if(isChanged && !confirm('One or more of your products have a different currency from the default you entered ('+ preferred +'). Conversion rates may apply if you continue. Please confirm or cancel.')) {
     return false;
   }
+  
+  return true;
 }
 
 

@@ -8,8 +8,6 @@ const bodyParser = require("body-parser");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
-//const flash = require("flash");
-//const conn_flash = require("connect-flash");
 const multer = require("multer");
 const fs = require("fs-extra");
 const fs2 = require('fs');
@@ -130,6 +128,8 @@ server2.on('stream', (stream, headers) => {
 });
 
 server2.listen(8443);
+
+//throw new Error();
 
 
 app.post('/processBuyer', (req, res) => {
@@ -744,8 +744,6 @@ app.delete('/files/:id', (req, res) => {//Remove a file.
     });
   });
 });
-
-
 
 
 //Upload files to Glitch:

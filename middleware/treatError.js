@@ -1,9 +1,9 @@
-module.exports = (req, res, err, page) => {
+module.exports = async (req, res, err, page) => {
   if(!err)
     return false;
   
   console.error(err.message);
   req.flash('error', err.message);
-  res.redirect(page);
+  await res.redirect(page);
   throw err;
 };

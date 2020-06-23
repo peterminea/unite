@@ -18,6 +18,7 @@ const MongoClient = require('mongodb').MongoClient;
 const ObjectId = require("mongodb").ObjectId;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
+const search = require('../middleware/searchFlash');
 const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 
@@ -34,11 +35,14 @@ const statusesJson = {
 
 exports.getIndex = async (req, res) => {
      if(req.session) {
+      var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+      req.session.flash = [];
+       
       res.render("buyer/index", {
         message: req.flash('info', 'Please wait while we are loading the list of available products (The Catalog)...'),
         buyer: req.session? req.session.buyer : null,
-        successMessage: req.flash('success'),
-        errorMessage: req.flash('error'),
+        successMessage: success,
+        errorMessage: error,
         suppliers: null
         //catalogItems: catalogItems
       });
@@ -64,14 +68,17 @@ exports.postIndex = (req, res) => {
       }
       
     var promise = BidStatus.find({}).exec();
+    var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+    req.session.flash = [];
+      
     promise.then((statuses) => {
         res.render("buyer/index", {
           buyer: req.session.buyer,
           suppliers: suppliers2,
           MAX_PROD: process.env.BID_MAX_PROD,
           statuses: statuses,
-          successMessage: req.flash('success'),
-          errorMessage: req.flash('error'),
+          successMessage: success,
+          errorMessage: error,
           statusesJson: JSON.stringify(statusesJson)
         });
       });
@@ -165,14 +172,16 @@ exports.getChat = (req, res) => {//Coming from the getLogin above.
 
 exports.getViewBids = (req, res) => {
   var promise = BidRequest.find({supplier: req.params.supplierId, buyer: req.params.buyerId}).exec();
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
   
   promise.then((bids) => {
     res.render("buyer/viewBid", {
       bids: bids? bids : [],
       stripePublicKey: process.env.STRIPE_KEY_PUBLIC,
       stripeSecretKey: process.env.STRIPE_KEY_SECRET,
-      successMessage: req.flash('success'),
-      errorMessage: req.flash('error'),
+      successMessage: success,
+      errorMessage: error,
       statusesJson: JSON.stringify(statusesJson),
       supplierId: req.params.supplierId, 
       buyerId: req.params.buyerId,
@@ -198,9 +207,12 @@ exports.postViewBids = (req, res) => {
 
 
 exports.getCancelBid = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render('buyer/cancelBid', {
-    successMessage: req.flash('success'),
-    errorMessage: req.flash('error'),
+    successMessage: success,
+    errorMessage: error,
     bidId: req.params.bidId,
     bidName: req.params.bidName,
     userType: req.params.userType,
@@ -251,31 +263,45 @@ exports.getConfirmation = (req, res) => {
     req.session.buyerId = req.params && req.params.token? req.params.token._userId : null;
   }
   
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render('buyer/confirmation', { 
-    token: req.params? req.params.token : null 
+    token: req.params? req.params.token : null,
+    successMessage: success,
+    errorMessage: error
   });
 }
 
 exports.getDelete = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render('buyer/delete', {
     id: req.params.id,
-    successMessage: req.flash('success'),
-    errorMessage: req.flash('error')
+    successMessage: success,
+    errorMessage: error
   });
 }
 
 exports.getDeactivate = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render('buyer/deactivate', {
     id: req.params.id,
-    successMessage: req.flash('success'),
-    errorMessage: req.flash('error')
+    successMessage: success,
+    errorMessage: error
   });
 }
 
 exports.getResendToken = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render('buyer/resend', {
-    successMessage: req.flash('success'),
-    errorMessage: req.flash('error')
+    successMessage: success,
+    errorMessage: error
   });
 }
 
@@ -392,20 +418,26 @@ exports.postResendToken = function (req, res, next) {/*
 
 
 exports.getSignIn = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   if (!req.session.buyerId || !req.session.buyer.isVerified)
     res.render("buyer/sign-in", {
-      successMessage: req.flash('success'),
-      errorMessage: req.flash("error")
+      successMessage: success,
+      errorMessage: error
     });
   else res.redirect("/buyer");
 }
 
 
 exports.getSignUp = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   if (!req.session.buyerId)
     return res.render("buyer/sign-up", {
-      successMessage: req.flash('success'),
-      errorMessage: req.flash("error")
+      successMessage: success,
+      errorMessage: error
     });
   else res.redirect("/buyer");
 }
@@ -420,10 +452,13 @@ exports.getBalance = (req, res) => {
 
 
 exports.getForgotPassword = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render("buyer/forgotPassword", {
     email: req.session.buyer.emailAddress,
-    successMessage: req.flash('success'),
-    errorMessage: req.flash('error')
+    successMessage: success,
+    errorMessage: error
   });
 }
 
@@ -478,7 +513,15 @@ exports.getResetPasswordToken = (req, res) => {
       req.flash('error', 'Password reset token is either invalid or expired.');
       return res.redirect('/forgotPassword');
     }
-    res.render('buyer/resetPassword', {token: req.params.token});
+
+    var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+    req.session.flash = [];
+    
+    res.render('buyer/resetPassword', {
+      token: req.params.token,
+      successMessage: success,
+      errorMessage: error
+    });
   });
 }
 
@@ -626,9 +669,12 @@ exports.postSignUp = async (req, res) => {
 
 
 exports.getProfile = (req, res) => {
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render("buyer/profile", {
-    successMessage: req.flash('success'),
-    errorMessage: req.flash("error"),
+    successMessage: success,
+    errorMessage: error,
     profile: req.session.buyer
   });
 };
@@ -674,7 +720,7 @@ exports.postProfile = (req, res) => {
           setTimeout(function() {
             req.flash("success", "Buyer details updated successfully!");
             res.redirect("/buyer/profile");
-          }, 150);
+          }, 500);
         });
       });
     })    

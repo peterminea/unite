@@ -16,7 +16,7 @@
   <script src="/jquery-ui.min.js"></script>
   <script src="/popper.min.js"></script>
   <script src="/bootstrap.min.js"></script>
-  <script src="/sweetalert.min.js"></script>  
+  <script src="/sweetalert2@9.min.js"></script>
   <script src="/index.min.js"></script>
   <script src="/https.js"></script>
   <script src="/chatUsers.js"></script>
@@ -29,7 +29,7 @@
       getAutocomplete('#industry', '/industryGetAutocomplete', token);
       getAutocomplete('.currency', '/currencyGetAutocomplete', token);
       
-      $("input").on('change', function () {
+      $("input,textarea").on('change', function () {
         $('#updateProfile').removeAttr('disabled');
       });
         
@@ -93,7 +93,7 @@
 </head>
 
 <body>
-    <% if (errorMessage.length > 0) { %>
+    <% if (errorMessage != null && errorMessage.length > 0) { %>
     <script>
       Swal.fire({
         icon: 'error',
@@ -103,7 +103,7 @@
     </script>
     <% } %>
     
-    <% if (successMessage.length > 0) { %>
+    <% if (successMessage != null && successMessage.length > 0) { %>
     <script>
       Swal.fire({
         icon: 'success',
@@ -258,7 +258,7 @@
           <ul class="list-group" id="prodServices">
             <% let i = 0; if (products != null) { for (product of products) { i++; %>
             <li class='list-group-item'>
-              <span class='product'><%= product.productName %> - <%= product.price %>&nbsp;<%= product.currency %></span>
+              <span class='product'><%= product.productName %> - <%= product.price %> <%= product.currency %></span>
               <span class='rem'>&nbsp;(Remove)</span>
             </li>
             <% } }%>

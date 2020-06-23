@@ -123,7 +123,6 @@ const sendForgotPasswordEmail = (user, type, link, token, req) => {
           return console.error(err.message);
         console.log('E-mail sent!')
         req.flash('success', 'An e-mail has been sent to ' + user.emailAddress + ' with password reset instructions.');
-        
       });
 };
 

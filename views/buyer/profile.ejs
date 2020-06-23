@@ -16,8 +16,8 @@
   <script src="/jquery-ui.min.js"></script>
   <script src="/popper.min.js"></script>
   <script src="/bootstrap.min.js"></script>
-  <script src="/sweetalert.min.js"></script>  
   <script src="/index.min.js"></script>
+  <script src="/sweetalert2@9.min.js"></script>
   <script src="/https.js"></script>
   <script src="/chatUsers.js"></script>
   <script src="/autocomp.js"></script>
@@ -27,7 +27,7 @@
       
       postAutocomplete('#country', '/countryAutocomplete', token);
         
-        $("input").on('change', function() {        
+        $("input,textarea").on('change', function() {        
           $('#updateProfile').prop('disabled', false);
         });
       
@@ -62,6 +62,25 @@
 </head>
 
 <body>
+    <% if (errorMessage != null && errorMessage.length > 0) { %>
+    <script>
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: '<%= errorMessage %>'
+      })
+    </script>
+    <% } %>
+    
+    <% if (successMessage != null && successMessage.length > 0) { %>
+    <script>
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: '<%= successMessage %>'
+      })
+    </script>
+    <% } %>
   <nav pos="3" user="buyer" class="navbar navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="/buyer">Your Buyer Profile - UNITE</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
@@ -79,27 +98,7 @@
         <p class="card-text">This is your profile page. Please keep your data accurate, and you will have good luck with finding your needed suppliers!</p>
       </div>
     </div>
-    
-    <% if (errorMessage.length > 0) { %>
-    <script>
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: '<%= errorMessage %>'
-      })
-    </script>
-    <% } %>
-    
-    <% if (successMessage.length > 0) { %>
-    <script>
-      Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: '<%= successMessage %>'
-      })
-    </script>
-    <% } %>
-    
+
     <br><br>
     <div class="smooth-shadow profile-form">
       <form method="POST">
