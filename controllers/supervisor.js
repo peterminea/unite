@@ -22,7 +22,8 @@ exports.getIndex = (req, res) => {
   Buyer.find(
     { organizationUniteID: supervisor.organizationUniteID },
     (err, results) => {
-      treatError(req, res, err, 'back');
+      if(treatError(req, res, err, 'back'))
+        return false;
       var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
       req.session.flash = [];
 
@@ -129,11 +130,13 @@ exports.postDeactivate = (req, res) => {
     
     try {
       MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-        treatError(req, res, err, 'back');
+        if(treatError(req, res, err, 'back'))
+          return false;
         var dbo = db.db(BASE);
         //And now, deactivate the Supplier themselves:
         await dbo.collection('supervisors').updateOne( { _id: id }, { $set: { isActive: false } }, function(err, resp) {
-          treatError(req, res, err, 'back');
+          if(treatError(req, res, err, 'back'))
+            return false;
           req.flash('success', 'Supervisor successfully deactivated. You will re-become active at your next login.');
           return res.redirect('/supervisor/sign-in');
         });        
@@ -157,7 +160,7 @@ exports.postConfirmation = async function (req, res, next) {
   await Token.findOne({ token: req.params.token }, async function (err, token) {
     if (!token) {
       req.flash('error', 'We were unable to find a valid token. It may have expired. Please request a new token.');
-      res.redirect('/supervisor/resend');
+      return res.redirect('/supervisor/resend');
     }
 
     await Supervisor.findOne({ _id: token._userId, emailAddress: req.body.emailAddress }, async function (err, user) {
@@ -172,7 +175,8 @@ exports.postConfirmation = async function (req, res, next) {
             msg: 'This user has already been verified.' });
 
           await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
-            treatError(req, res, err, 'back');
+            if(treatError(req, res, err, 'back'))
+              return false;
             var dbo = db.db(BASE);
                 
             await dbo.collection("supervisors").updateOne({ _id: user._id }, { $set: {isVerified: true} }, function(err, resp) {
@@ -188,14 +192,14 @@ exports.postConfirmation = async function (req, res, next) {
                 db.close();
                 console.log("The account has been verified. Please log in.");
                 req.flash('success', "The account has been verified. Please log in.");
-                res.redirect('/supervisor/sign-in');
+                return res.redirect('/supervisor/sign-in');
                 });
             });        
         });
     });
   } catch {
     //req.flash('error', 'Error on Verification!');
-    //res.redirect('/supervisor/sign-in');
+    //return res.redirect('/supervisor/sign-in');
   }
 }
 
@@ -253,11 +257,13 @@ exports.postForgotPassword = (req, res, next) => {
         }
         
         MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
-          treatError(req, res, err, 'back');
+          if(treatError(req, res, err, 'back'))
+            return false;
           
           var dbo = db.db(BASE);
           dbo.collection("supervisors").updateOne({ _id: user._id }, { $set: {resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000} }, function(err, res) {        
-            treatError(req, res, err, 'back');
+            if(treatError(req, res, err, 'back'))
+              return false;
             db.close();
           });
         });
@@ -267,8 +273,9 @@ exports.postForgotPassword = (req, res, next) => {
       sendForgotPasswordEmail(user, 'Supervisor', "/supervisor/reset/", token, req);
     }
   ], function(err) {
-    treatError(req, res, err, '/supervisor/forgotPassword');
-    res.redirect('/supervisor');
+    if(treatError(req, res, err, '/supervisor/forgotPassword'))
+      return false;
+    return res.redirect('/supervisor');
   });
 }
 
@@ -304,10 +311,12 @@ exports.postResetPasswordToken = (req, res) => {
         
     if(req.body.password === req.body.confirm) {
         MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
-          treatError(req, res, err, 'back');
+          if(treatError(req, res, err, 'back'))
+            return false;
           var dbo = db.db(BASE);
           dbo.collection("supervisors").updateOne({ _id: user._id }, { $set: {password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined} }, function(err, resp) {        
-            treatError(req, res, err, 'back');
+            if(treatError(req, res, err, 'back'))
+              return false;
             db.close();
             });
           });
@@ -321,8 +330,9 @@ exports.postResetPasswordToken = (req, res) => {
       sendResetPasswordEmail(user, 'Supervisor', req);
     }
   ], function(err) {
-      treatError(req, res, err, '/supervisor');
-      res.redirect('/supervisor');
+      if(treatError(req, res, err, '/supervisor'))
+        return false;
+      return res.redirect('/supervisor');
     });
 }
 
@@ -336,7 +346,8 @@ exports.getSignIn = (req, res) => {
       successMessage: success,
       errorMessage: error
     });
-  else res.redirect("/supervisor");
+  else 
+    return res.redirect("/supervisor");
 }
 
 
@@ -350,7 +361,7 @@ exports.getSignUp = (req, res) => {
       errorMessage: error
     });
   else 
-    res.redirect("/supervisor");
+    return res.redirect("/supervisor");
 }
 
 
@@ -371,11 +382,11 @@ exports.postSignUp = async (req, res) => {
     for(var i = 0; i < prohibitedArray.length; i++)
     if (final_domain.toLowerCase().includes(prohibitedArray[i].toLowerCase())) {
       req.flash("error", "E-mail address must be a custom company domain.");
-      res.redirect("/supervisor/sign-up");
+      return res.redirect("/supervisor/sign-up");
     } else {
       if (req.body.password.length < 6) {
         req.flash("error", "Password must have at least 6 characters.");
-        res.redirect("/supervisor/sign-up");
+        return res.redirect("/supervisor/sign-up");
         } else if(global++ < 1) {
           Supervisor.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
             if (user) 
@@ -415,7 +426,8 @@ exports.postSignUp = async (req, res) => {
             });
             
             await supervisor.save((err) => {
-              treatError(req, res, err, '/supervisor/sign-up');
+              if(treatError(req, res, err, '/supervisor/sign-up'))
+                return false;
               req.session.supervisor = supervisor;
               req.session.supervisorId = supervisor._id;
               req.session.save();
@@ -436,8 +448,8 @@ exports.postSignUp = async (req, res) => {
                 await sendConfirmationEmail(supervisor.organizationName, "/supervisor/confirmation/", token.token, req);
                 req.flash("success", "Supervisor signed up successfully! Please confirm your account by visiting " + req.body.emailAddress + '');
                 setTimeout(function() {
-                  res.redirect("/supervisor/sign-in");
-                }, 150);
+                  return res.redirect("/supervisor/sign-in");
+                }, 250);
                 });
               });
             });
@@ -464,7 +476,8 @@ exports.getProfile = (req, res) => {
 exports.postProfile = (req, res) => {
   try {
   Supervisor.findOne({ _id: req.body._id }, (err, doc) => {
-    treatError(req, res, err, '/supervisor/profile');
+    if(treatError(req, res, err, '/supervisor/profile'))
+      return false;
     
     doc._id = req.body._id;
     doc.avatar = req.body.avatar;
@@ -496,16 +509,19 @@ exports.postProfile = (req, res) => {
     doc.updatedAt = Date.now();
 
     MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {//db or client.
-      treatError(req, res, err, '/supervisor/profile');
+      if(treatError(req, res, err, '/supervisor/profile'))
+        return false;
       
       var dbo = db.db(BASE);
       dbo.collection("supervisors").updateOne({ _id: doc._id }, { $set: doc }, function(err, resp) {
-        treatError(req, res, err, '/supervisor/profile');
+        if(treatError(req, res, err, '/supervisor/profile'))
+          return false;
         
         req.session.supervisor = doc;
         req.session.supervisorId = doc._id;
         req.session.save((err) => {
-          treatError(req, res, err, '/supervisor/profile');
+          if(treatError(req, res, err, '/supervisor/profile'))
+            return false;
           });
 
         db.close();
@@ -513,13 +529,13 @@ exports.postProfile = (req, res) => {
         console.log("Supervisor details updated successfully!");
 
         setTimeout(function() {
-          res.redirect("/supervisor/profile");
-        }, 500);
+          return res.redirect("/supervisor/profile");
+        }, 400);
       });
     });
   })
     .catch(console.error);
   } catch {
-    //res.redirect('/supervisor/profile');
+    //return res.redirect('/supervisor/profile');
   }
 }

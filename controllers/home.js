@@ -228,7 +228,8 @@ exports.postFeedback = (req, res) => {
     }
     
     MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
-       treatError(req, res, err, 'back');
+       if(treatError(req, res, err, 'back'))
+         return false;
         var dbo = db.db(BASE);
         await dbo.collection("feedbacks").insertOne({
           userName: req.body.name,
@@ -237,10 +238,12 @@ exports.postFeedback = (req, res) => {
           message: req.body.details,
           createdAt: Date.now()
         }, function(err, obj) {
-            treatError(req, res, err, 'back');
+            if(treatError(req, res, err, 'back'))
+              return false;
+          
             req.flash('success', 'Feedback successfully sent! Thanks for your opinion. We will get back to you.');
             db.close();
-            res.redirect('/feedback');
+            return res.redirect('/feedback');
         });
       });
     } catch {
@@ -255,20 +258,20 @@ exports.postDeleteUser = async (req, res) => {
     case process.env.USER_BUYER:
       req.body.organizationName = req.body.name;
       await buyerDelete(req, res, id);
-      res.redirect('/memberList');
+      return res.redirect('/memberList');
       break;
       
     case process.env.USER_SPV:
       req.body.organizationName = req.body.name;
       req.body.organizationUniteID = req.body.uniteID;
       await supervisorDelete(req, res, id, req.body.organizationUniteID);
-      res.redirect('/memberList');
+      return res.redirect('/memberList');
       break;
       
     case process.env.USER_SUPPLIER:
       req.body.companyName = req.body.name;
       await supplierDelete(req, res, id);
-      res.redirect('/memberList');
+      return res.redirect('/memberList');
       break;
       
     default:
