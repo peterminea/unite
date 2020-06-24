@@ -248,6 +248,62 @@ function postAutocomplete(elem, url, token) {
 }
 
 
+function getCurrenciesList(elem, url, token) {//For <select> drop-down currencies.
+  var obj = $('' + elem + '');
+  
+  $.ajax({
+    url: url,
+    headers: { "X-CSRF-Token": token },
+    datatype: 'jsonp',
+    type: "GET",
+    //data: req,
+    success: function(data) {
+    if(!data || !data.length) {
+        //obj.val('');
+        return false;
+      }
+      
+      //obj.append('<option></option>');
+      for(var i in data) {
+        var opt = '<option ' + 'style="word-wrap: break-word; width: 50px" title="' + data[i].value +'" value="' + data[i].name + '">' + data[i].name + '</option>';
+        obj.append(opt);
+      }
+      //res(data);
+      //autocomp(obj, data, isEnter);          
+    },
+    error: function(err) {
+      alert(err);
+    }
+  });
+}
+
+
+function initBaseRates(fx, elem) {
+  if(typeof fx == 'undefined')
+    return false;
+  
+  setTimeout(function() {
+    fx.base = 'EUR';
+    fx.rates = {
+      "EUR" : 1, // eg. 1 USD === 0.745101 EUR
+      "GBP" : 0.91, // etc...
+      "CHF" : 1.07,
+      "CAD" : 1.53,
+      "AUD" : 1.64,
+      "TRL" : 7.74,
+      "SEK" : 10.53,
+      "NOK" : 10.81,
+      "USD" : 1.13,        // always include the base rate (1:1)
+      "RON" : 4.84
+      /* etc */
+    }
+    //alert($('#currency').find('option[value="' + fx.base + '"]').length);
+    $(''+elem+'').find('option[value="' + fx.base + '"]').attr('selected', 'selected');
+    $(''+elem+'').trigger('change');
+  }, 400);
+}
+
+
   function bindRemoveProduct(obj, elem, prodInput, priceInput, currencyInput, prodServiceInput) {
     obj.bind('click', function() {
       var li = $(this).parent('li');
@@ -347,7 +403,7 @@ function addProduct(obj) {
         addition($("#prodServicesList"), $("#pricesList"), $("#currenciesList"), input, input.val(), $('#price').val(), $('#currency').val(), elem);
         input.val('');
         $('#price').val('');
-        $('#currency').val('');
+        //$('#currency').val('');
         $('#addProdService').prop('disabled', true);
         $('.productRequired').remove();
       } else {
@@ -535,11 +591,25 @@ function takeAction(obj, token, tr) {//alert(tr.length);
 }
 
 
-function supplierValidateFields() {
+function supplierValidateFields(prodList, priceList, currList, fx, defaultCurr, newCurr) {
   if($('#prodServices li').length == 0) {
     var obj = '<p class="productRequired littleNote">You are required to include at least one product or service.</p>';
     $(obj).insertBefore($(this));
     return false;
+  }
+  
+  if(prodList && prodList.length) {
+    var arr = prodList.split(','), arr1 = priceList.split(','), arr2 = currList.split(',');
+
+    for(var i in arr1) {
+      var price = fx.convert(arr1[i], {from: defaultCurr, to: newCurr});
+      arr1[i] = parseFloat(price).toFixed(2);
+      arr2[i] = newCurr;
+    }
+    
+    $('#prodServicesList').val(arr);
+    $('#pricesList').val(arr1);
+    $('#currenciesList').val(arr2);
   }
 
   var preferred = $('.currency').first().val();
@@ -552,7 +622,7 @@ function supplierValidateFields() {
     if(preferred != curr) {
       isChanged = true;
       return false;
-    }    
+    }
   });
 
   if(isChanged && !confirm('One or more of your products have a different currency from the default you entered ('+ preferred +'). Conversion rates may apply if you continue. Please confirm or cancel.')) {
@@ -591,7 +661,6 @@ function registrationDialog(accountType) {
 
 
 function errorSuccess(Swal, errorMessage, successMessage) {
-  alert(Swal);
   if (errorMessage.length > 0) {
     Swal.fire({
       icon: 'error',

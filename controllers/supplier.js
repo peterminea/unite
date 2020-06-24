@@ -70,7 +70,7 @@ exports.postAddProduct = (req, res) => {
   if (!req.body.productPrice) {
     console.error("Price is not valid, please correct it.");
     req.flash('error', 'Price is not valid, please correct it.');
-    res.redirect("back");
+    return res.redirect("back");
   } else {
     const product = new ProductService({
       supplier: req.body._id,
@@ -114,7 +114,8 @@ exports.postCancelBid = (req, res) => {
   //BidRequest.findOne({_id: req.params.bidId});
   try {
   MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-      treatError(req, res, err, 'back');
+      if(treatError(req, res, err, 'back'))
+        return false;
       var dbo = db.db(BASE);
     
       try {
@@ -125,7 +126,8 @@ exports.postCancelBid = (req, res) => {
           userName: req.body.suppliersName,
           createdAt: Date.now()
         }, function(err, obj) {
-          treatError(req, res, err, 'back');
+          if(treatError(req, res, err, 'back'))
+            return false;
         });
       }
       catch(e) {
@@ -143,13 +145,13 @@ exports.postCancelBid = (req, res) => {
         }
         
         await sendCancelBidEmail(req, req.body.buyersName, req.body.suppliersName, req.body.buyersEmail, req.body.suppliersEmail, 'Buyer ', 'Supplier ', req.body.reason);
-        res.redirect('back');
+        return res.redirect('back');
       });
     
     db.close();
     });
   } catch {
-    //res.redirect('/supplier/index');
+    //return res.redirect('/supplier/index');
   }  
 }
 
@@ -214,7 +216,8 @@ exports.postDeactivate = function (req, res, next) {
   try {
     //Delete Supplier's Capabilities first:
     MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-      treatError(req, res, err, 'back');
+      if(treatError(req, res, err, 'back'))
+        return false;
       var dbo = db.db(BASE);
       /*
       try {
@@ -230,12 +233,14 @@ exports.postDeactivate = function (req, res, next) {
       }*/
       
       await dbo.collection('capabilities').deleteMany({ supplier: id }, function(err, resp) {
-        treatError(req, res, err, 'back');
+        if(treatError(req, res, err, 'back'))
+          return false;
       });
         
       //Products/Services offered:
       await dbo.collection('productservices').deleteMany({ supplier: id }, function(err, resp0) {
-        treatError(req, res, err, 'back');
+        if(treatError(req, res, err, 'back'))
+          return false;
       });    
     
       //The received bids:
@@ -243,7 +248,8 @@ exports.postDeactivate = function (req, res, next) {
 
       //And now, deactivate the Supplier themselves:
       await dbo.collection('suppliers').updateOne( { _id: id }, { $set: { isActive: false } }, function(err, resp4) {
-        treatError(req, res, err, 'back');
+        if(treatError(req, res, err, 'back'))
+          return false;
       });
 
       //Finally, send a mail to the ex-Supplier:
@@ -253,7 +259,7 @@ exports.postDeactivate = function (req, res, next) {
       return res.redirect("/supplier/sign-in");
     });
   } catch {
-    //res.redirect("/supplier");
+    //return res.redirect("/supplier");
   }
 }
 
@@ -270,7 +276,7 @@ exports.postConfirmation = async function(req, res, next) {
         'error', "We were unable to find a valid token. It may have expired. Please request a new confirmation token."
       );
   
-      res.redirect("/supplier/resend");
+      return res.redirect("/supplier/resend");
     }
   
     await Supplier.findOne({ _id: token._userId, emailAddress: req.body.emailAddress }, async function (err, user) {
@@ -286,7 +292,8 @@ exports.postConfirmation = async function(req, res, next) {
       
 
       await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
-        treatError(req, res, err, 'back');        
+        if(treatError(req, res, err, 'back'))
+          return false;
         var dbo = db.db(BASE);
             
         await dbo.collection("suppliers").updateOne({ _id: user._id }, { $set: { isVerified: true, isActive: true } }, function(err, resp) {
@@ -344,7 +351,7 @@ exports.getSignIn = (req, res) => {
       errorMessage: error
     });
   } else 
-    res.redirect("/supplier");
+    return res.redirect("/supplier");
 }
 
 
@@ -363,7 +370,8 @@ exports.getSignUp = (req, res) => {
       successMessage: success,
       errorMessage: error
     });
-  else res.redirect("/supplier");
+  else 
+    return res.redirect("/supplier");
 };
 
 
@@ -391,16 +399,17 @@ exports.postSignUp = async (req, res) => {
     for (var i = 0; i < prohibitedArray.length; i++)
       if (final_domain.toLowerCase().includes(prohibitedArray[i].toLowerCase())) {
         req.flash("error", "E-mail address must belong to a custom company domain.");
-        res.redirect("/supplier/sign-up"); //supplier/sign-up
+        return res.redirect("/supplier/sign-up"); //supplier/sign-up
       } else {
         if (req.body.password.length < 6) {
           req.flash("error", "Password must have at least 6 characters.");
-          res.redirect("/supplier/sign-up");
+          return res.redirect("/supplier/sign-up");
           var supplier;
           //Prevent duplicate attempts:
         } else if (global++ < 1) {
           await Supplier.findOne({ emailAddress: req.body.emailAddress }, function(err,  user) {
-            treatError(req, res, err, '/supplier/sign-up');
+            if(treatError(req, res, err, '/supplier/sign-up'))
+              return false;
             
             if (user)
               return res.status(400).send({
@@ -485,7 +494,8 @@ exports.postSignUp = async (req, res) => {
                   });
 
                   await capability.save(function(err) {
-                    treatError(req, res, err, '/supplier/sign-up');
+                    if(treatError(req, res, err, '/supplier/sign-up'))
+                      return false;
                     console.log('Capability saved!');
                   });
                   
@@ -509,7 +519,8 @@ exports.postSignUp = async (req, res) => {
                   });
               
                   industry.save((err) => {
-                    treatError(req, res, err, '/supplier/sign-up');//If that industry already exists.
+                    if(treatError(req, res, err, '/supplier/sign-up'))
+                      return false;//If that industry already exists.
                   });
                     
                   await sendConfirmationEmail(supplier.companyName, "/supplier/confirmation/", token.token, req);
@@ -526,16 +537,17 @@ exports.postSignUp = async (req, res) => {
                       });
 
                       await productService.save((err) => {
-                        treatError(req, res, err, '/supplier/sign-up');
+                        if(treatError(req, res, err, '/supplier/sign-up'))
+                          return false;
                       });
                     }
+                    
                   console.log('All products saved!');
+                  req.flash("success", "Supplier signed up successfully! Please confirm your account by visiting " + req.body.emailAddress + '');
+                  setTimeout(function() {
+                      return res.redirect("/supplier/sign-in");
+                    }, 250);
                   }
-              
-              req.flash("success", "Supplier signed up successfully! Please confirm your account by visiting " + req.body.emailAddress + '');
-              setTimeout(function() {
-                  res.redirect("/supplier/sign-in");
-                }, 150);
             });
        } catch {              
        }
@@ -600,11 +612,13 @@ exports.postForgotPassword = (req, res, next) => {
           }
 
           MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
-            treatError(req, res, err, 'back');
+            if(treatError(req, res, err, 'back'))
+              return false;
             
             var dbo = db.db(BASE);
             dbo.collection("suppliers").updateOne({ _id: user._id }, { $set: {resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000} }, function(err, resp) {        
-              treatError(req, res, err, 'back');
+              if(treatError(req, res, err, 'back'))
+                return false;
               db.close();
             });
           });
@@ -615,8 +629,9 @@ exports.postForgotPassword = (req, res, next) => {
       }
     ],
     function(err) {
-      treatError(req, res, err, 'back');
-      res.redirect("/supplier/forgotPassword");
+      if(treatError(req, res, err, 'back'))
+        return false;
+      return res.redirect("/supplier/forgotPassword");
     });
 };
 
@@ -653,11 +668,13 @@ exports.postResetPasswordToken = (req, res) => {
         
     if(req.body.password === req.body.confirm) {
         MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
-          treatError(req, res, err, 'back');
+          if(treatError(req, res, err, 'back'))
+            return false;
           var dbo = db.db(BASE);
           
           dbo.collection("suppliers").updateOne({ _id: user._id }, { $set: {password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined} }, function(err, resp) {
-            treatError(req, res, err, 'back');
+            if(treatError(req, res, err, 'back'))
+              return false;
             db.close();
           });
         });
@@ -672,8 +689,9 @@ exports.postResetPasswordToken = (req, res) => {
       }
     ],
     function(err) {
-      treatError(req, res, err, 'back');
-      res.redirect("/supplier");
+      if(treatError(req, res, err, 'back'))
+        return false;
+      return res.redirect("/supplier");
     }
   );
 }
@@ -728,6 +746,7 @@ exports.getBidRequests = (req, res) => {
 exports.getBalance = (req, res) => {
   res.render("supplier/balance", { 
     balance: req.session.supplier.balance,
+    appId: process.env.EXCH_RATES_APP_ID,
     currency: req.session.supplier.currency
   });
 }
@@ -765,13 +784,15 @@ exports.getBidRequest = (req, res) => {
 
 exports.postBidRequest = (req, res) => {
   MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-    treatError(req, res, err, 'back');
+    if(treatError(req, res, err, 'back'))
+      return false;
     var dbo = db.db(BASE);
     
     await dbo.collection("bidrequests").updateOne({ _id: req.body.reqId }, { $set: {status: req.body.status} }, function(err, res) {
-      treatError(req, res, err, 'back');
+      if(treatError(req, res, err, 'back'))
+        return false;
       req.flash('success', 'Bid status updated successfully!');
-      res.redirect('/supplier/index');
+      return res.redirect('/supplier/index');
     });
     
     db.close();
@@ -784,7 +805,8 @@ exports.postProfile = async (req, res) => {
   
   try {
   await Supplier.findOne({ _id: req.body._id }, async (err, doc) => {
-    treatError(req, res, err, '/supplier/profile');
+    if(treatError(req, res, err, '/supplier/profile'))
+      return false;
 
     doc._id = req.body._id;
     doc.avatar = req.body.avatar;
@@ -842,18 +864,21 @@ exports.postProfile = async (req, res) => {
     
     if(global++ < 1)
     await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-      treatError(req, res, err, '/supplier/profile');
+      if(treatError(req, res, err, '/supplier/profile'))
+        return false;
       
       var dbo = db.db(BASE);
       
       await dbo.collection("suppliers").updateOne({ _id: doc._id }, { $set: doc }, function(err, resp0) {
-        treatError(req, res, err, '/supplier/profile');
+        if(treatError(req, res, err, '/supplier/profile'))
+          return false;
       });
 
       console.log("Supplier updated!");
       var arr = doc.productsServicesOffered;
       await dbo.collection("capabilities").deleteMany({ supplier: doc._id }, (err, resp1) => {
-        treatError(req, res, err, '/supplier/profile');
+        if(treatError(req, res, err, '/supplier/profile'))
+          return false;
 
         var capability = new Capability({
         supplier: doc._id,
@@ -863,7 +888,8 @@ exports.postProfile = async (req, res) => {
       });
 
       capability.save((err) => {
-        treatError(req, res, err, '/supplier/profile');
+        if(treatError(req, res, err, '/supplier/profile'))
+          return false;
       });
 
        console.log('Capability description saved!');
@@ -874,18 +900,21 @@ exports.postProfile = async (req, res) => {
       });
 
       industry.save((err) => {
-        treatError(req, res, err, '/supplier/profile');
+        if(treatError(req, res, err, '/supplier/profile'))
+          return false;
       });
       
       console.log('Now saving new data to session:');
       req.session.supplier = doc;
       req.session.supplierId = doc._id;
       await req.session.save((err) => {
-        treatError(req, res, err, '/supplier/profile');
+        if(treatError(req, res, err, '/supplier/profile'))
+          return false;
       });   
      
       await dbo.collection("productservices").deleteMany({ supplier: doc._id }, (err, resp2) => {
-        treatError(req, res, err, '/supplier/profile');
+        if(treatError(req, res, err, '/supplier/profile'))
+          return false;
         
       if (Array.isArray(arr))
         for (var i in arr) {
@@ -902,7 +931,8 @@ exports.postProfile = async (req, res) => {
           });
 
           productService.save((err) => {
-            treatError(req, res, err, '/supplier/profile');
+            if(treatError(req, res, err, '/supplier/profile'))
+              return false;
           });
           
           console.log('Product saved!');
@@ -914,13 +944,13 @@ exports.postProfile = async (req, res) => {
         setTimeout(function() {
           req.flash("success", "Supplier details updated successfully!");
           console.log('Supplier details updated successfully!');
-          res.redirect("/supplier/profile");
-        }, 500);
+          return res.redirect("/supplier/profile");
+        }, 400);
       });
     });
     })
     //.catch(console.error);
   } catch {
-    // return res.redirect("/supplier/profile");
+    //return res.redirect("/supplier/profile");
   }
 };

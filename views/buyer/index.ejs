@@ -26,6 +26,7 @@
     $(document).ready(function() {
       var token = $("input[name='_csrf']").val();
       getAutocomplete('#search', '/capabilityInputAutocomplete', token, true);
+      errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       
       $('#loadCatalog').on('click', function() {        
         if($('div.suppliersLive').length)
@@ -119,26 +120,6 @@
 </head>
 
 <body>
-    <% if (errorMessage != null && errorMessage.length > 0) { %>
-    <script>
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: '<%= errorMessage %>'
-      })
-    </script>
-    <% } %>
-    
-    <% if (successMessage != null && successMessage.length > 0) { %>
-    <script>
-      Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: '<%= successMessage %>'
-      })
-    </script>
-    <% } %>
-
   <nav pos="1" user="buyer" class="navbar navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="/buyer">Buyer - UNITE</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"

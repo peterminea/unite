@@ -5,5 +5,5 @@ module.exports = async (req, res, err, page) => {
   console.error(err.message);
   req.flash('error', err.message);
   await res.redirect(page);
-  throw err;
+  return true;
 };

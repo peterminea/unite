@@ -18,15 +18,41 @@
   <script src="/bootstrap.min.js"></script>
   <script src="/index.min.js"></script>
   <script src="/sweetalert2@9.min.js"></script>
-  <script src="/https.js"></script>  
-  <script src="http://openexchangerates.github.io/money.js/money.min.js"></script>
+  <script src="/https.js"></script>
+  <script src="/money.min.js"></script>
+  <script type="text/javascript">
+      // Load exchange rates data via AJAX:
+    if(1==2)
+      $.getJSON(
+        // NB: using Open Exchange Rates here, but you can use any source!
+          'https://openexchangerates.org/api/latest.json?app_id=' + <%= appId %> + '',
+          function(data) {
+              // Check money.js has finished loading:
+              if ( typeof fx !== "undefined" && fx.rates ) {
+                  fx.rates = data.rates;
+                  fx.base = data.base;
+              } else {
+                  // If not, apply to fxSetup global:
+                  var fxSetup = {
+                      rates : data.rates,
+                      base : data.base
+                  }
+              }
+          }
+      );
+  </script>
   <script src="/autocomp.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-      getAutocomplete('#currency', '/currencyGetAutocomplete', token);
-
-      $('#currency').on('change', function() {
-        $('#balance').val(fx.convert($('#defaultBalance').val(), {from: $('#defaultCurrency').val(), to: $(this).val()}));
+      $('#balance').val(parseFloat($('#defaultBalance').val()).toFixed(2) + ' ' + $('#defaultCurrency').val());
+      //getAutocomplete('#currency', '/currencyGetAutocomplete', $('#token').val());//For inputs.
+      getCurrenciesList('#currency', '/currencyGetAutocomplete', $('#token').val());//For selects.
+      //errorSuccess(Swal, '< %= errorMessage %>', '< %= successMessage %>');
+      initBaseRates(fx, '#currency');
+      
+      $('#currency').on('change', function() {        
+        var val = fx.convert($('#defaultBalance').val(), {from: $('#defaultCurrency').val(), to: $(this).val()});
+        $('#balance').val(val.toFixed(2) + ' ' + $(this).val());
       });
     });
   </script>
@@ -53,12 +79,14 @@
             <label>Current Buyer Balance</label>
             <input type="hidden" id="defaultBalance" value="<%= balance %>">
             <input type="hidden" id="defaultCurrency" value="<%= currency %>">
-            <input type="text" class="form-control" id="balance" name="balance" value="<%= balance %>" readonly>
-            &nbsp;
-            <input type="text" class="form-control" id="currency" name="currency" value="<%= currency %>">
+            <input type="text" class="form-control" id="balance" name="balance" value="<%= balance %> <%= currency %>" readonly>
+            <br>
+            <label>Select other currency and convert your balance:</label>
+            <br>
+            <select type="text" class="form-control" id="currency" name="currency" value="<%= currency %>">
           </div>
         </div>
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="_csrf" id="token" value="<%= csrfToken %>">
         </form>
       </div>
     </div>

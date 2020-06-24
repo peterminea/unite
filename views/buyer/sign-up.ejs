@@ -26,6 +26,7 @@
         var token = $("input[name='_csrf']").val();
         getAutocomplete('#organizationUniteID', '/uniteIDAutocomplete', token);
         postAutocomplete('#country', '/countryAutocomplete', token);
+        errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
         
         $('#register').click(function(e) {
           e.preventDefault();
@@ -36,25 +37,6 @@
 </head>
   
 <body>
-    <% if (errorMessage != null && errorMessage.length > 0) { %>
-    <script>
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: '<%= errorMessage %>'
-      })
-    </script>
-    <% } %>
-    
-    <% if (successMessage != null && successMessage.length > 0) { %>
-    <script>
-      Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: '<%= successMessage %>'
-      })
-    </script>
-    <% } %>
   <nav user="buyer" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
     <a class="navbar-brand" href="/">Buyer - UNITE</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
