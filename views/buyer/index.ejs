@@ -32,7 +32,14 @@
         if($('div.suppliersLive').length)
           return false;
         
-        alert('You will have to wait for some seconds. Please click to continue.');
+        Swal.fire({
+          icon: 'info',
+          title: 'Information',
+          timer: 1800,
+          text: 'Please wait a while until the Catalog of Products is loaded...'
+        });
+        
+        //alert('You will have to wait for some seconds. Please click to continue.');
         var that = $(this);
         
         $.ajax({
@@ -529,7 +536,12 @@
 
                     $("#addProdService_"+index).on('click', function() {
                       if(elem.find('li').length >= MAX) {
-                          alert('You have reached the limit of products to request from the supplier.');
+                          Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'You have reached the limit of ' + MAX + ' products to request from the supplier.'
+                          });
+                        
                           return false;
                       }
                       
@@ -537,7 +549,12 @@
                       $('#status_'+ id).trigger('change');                      
                       var amount = $('#amount_'+id);                      
                       if(!amount.val() || amount.val() < 1) {
-                        alert('Please select an amount first.');
+                        Swal.fire({
+                          icon: 'warning',
+                          title: 'Attention',                          
+                          text: 'Please select an amount of products first.'
+                        });
+                       
                         return false;
                       }
 
@@ -586,7 +603,11 @@
                           
                           var arr = prodInput.val() && prodInput.val().length? (prodInput.val()).split(',') : [];
                           if(checkName(arr, prodVal)) {
-                            alert('You have already added ' + prodVal + ' to the list. Please refine your selection.');
+                            Swal.fire({
+                              icon: 'error',
+                              title: 'Error!',
+                              text: 'You have already added ' + prodVal + ' to the list. Please refine your selection.'
+                            });
                             return false;
                           }
                           
@@ -605,7 +626,12 @@
                           $('#totalAmount_'+id).val(parseInt($('#totalAmount_'+id).val()) + parseInt(amountVal));
                           $(input).val('');//.removeAttr('price');                         
                         } else {
-                            alert('Please enter valid data for the product to be added.');
+                            Swal.fire({
+                              icon: 'warning',
+                              title: 'Attention',
+                              text: 'Please enter valid product data.'
+                            });
+                          
                             input.addClass('errorField');
                             //$('#prodServiceInput,#price,#currency').addClass('errorField');
                         }

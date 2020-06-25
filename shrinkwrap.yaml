@@ -36,6 +36,7 @@ dependencies:
   socket.io-client: 2.3.0
   ssl: 1.0.0
   stripe: 8.67.0
+  sweetalert: 2.1.2
   token: 0.1.0
   utf-8-validate: 5.0.2
   validator: 13.1.1
@@ -1394,6 +1395,10 @@ packages:
       node: '>= 0.6.0'
     resolution:
       integrity: sha1-czIwDoQBYb2j5podHZGn1LwW8YI=
+  /promise-polyfill/6.1.0:
+    dev: false
+    resolution:
+      integrity: sha1-36lpQ+qcEh/KTem1hoyznTRy4Fc=
   /proxy-addr/2.0.6:
     dependencies:
       forwarded: 0.1.2
@@ -1691,6 +1696,13 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==
+  /sweetalert/2.1.2:
+    dependencies:
+      es6-object-assign: 1.1.0
+      promise-polyfill: 6.1.0
+    dev: false
+    resolution:
+      integrity: sha512-iWx7X4anRBNDa/a+AdTmvAzQtkN1+s4j/JJRWlHpYE8Qimkohs8/XnFcWeYHH2lMA8LRCa5tj2d244If3S/hzA==
   /to-array/0.1.4:
     dev: false
     resolution:
@@ -1888,6 +1900,7 @@ specifiers:
   socket.io-client: ^2.3.0
   ssl: ^1.0.0
   stripe: ^8.67.0
+  sweetalert: ^2.1.2
   token: ^0.1.0
   utf-8-validate: ^5.0.2
   validator: ^13.1.1
