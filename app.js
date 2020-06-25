@@ -1732,6 +1732,7 @@ MongoClient.connect(URI, {useUnifiedTopology: true}, (err, client) => {
   //db.collection("bidrequests").updateMany({}, { $set: {specialMentions: 'Buyer sent you some questions to be answered about the blankets to be used at the South Park Hospital.'} }, function(err, obj) {});
   
   //db.collection("buyers").updateMany({}, { $set: { isActive: true } }, function(err, obj) {});
+  //db.collection("supervisors").updateMany({}, { $set: { isActive: true } }, function(err, obj) {});
   //db.collection("suppliers").updateMany({}, { $set: { isActive: true } }, function(err, obj) {});
   //db.collection("supervisors").updateMany({}, { $set: { contactMobileNumber: '+40 832 065 285' } }, function(err, obj) {});
   //db.collection("suppliers").updateMany({}, { $set: { contactMobileNumber: '+40 832 065 285' } }, function(err, obj) {});

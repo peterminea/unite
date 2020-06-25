@@ -29,13 +29,13 @@ dependencies:
   money: 0.2.0
   mongoose: 5.9.20
   multer: 1.4.2
-  multer-gridfs-storage: 4.1.0
+  multer-gridfs-storage: 4.2.0
   node-xlsx: 0.15.0
   process: 0.11.10
   socket.io: 2.3.0
   socket.io-client: 2.3.0
   ssl: 1.0.0
-  stripe: 8.64.0
+  stripe: 8.66.0
   token: 0.1.0
   utf-8-validate: 5.0.2
   validator: 13.1.1
@@ -67,10 +67,10 @@ packages:
       node: 6.* || 8.* || >=10.*
     resolution:
       integrity: sha512-iAA4LCd4eBpBVsYVgHPUd1B9CSwDVS/LNApT4Wn79nikAEfkJCT2n3BipU6CO2vPYUJNRQiStJ55RfdKe9Hulg==
-  /@types/node/14.0.13:
+  /@types/node/14.0.14:
     dev: false
     resolution:
-      integrity: sha512-rouEWBImiRaSJsVA+ITTFM6ZxibuAlTuNOCyxVbwreu6k6+ujs7DfnU9o+PShFhET78pMBl3eH+AGSI5eOTkPA==
+      integrity: sha512-syUgf67ZQpaJj01/tRTknkMNoBBLWJOBODF0Zm4NrXmiSuxjymFrxnTu1QVYRubhVkRcZLYZG8STTwJRdVm/WQ==
   /accepts/1.3.7:
     dependencies:
       mime-types: 2.1.27
@@ -1244,7 +1244,7 @@ packages:
     dev: false
     resolution:
       integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
-  /multer-gridfs-storage/4.1.0:
+  /multer-gridfs-storage/4.2.0:
     dependencies:
       has-own-prop: 2.0.0
       is-generator: 1.0.3
@@ -1259,7 +1259,7 @@ packages:
     peerDependencies:
       multer: '>=1 <2'
     resolution:
-      integrity: sha512-SceXee5s0NDNCvrQb9qbmTKNJ5aSGkmDMmOGW7/hvVZgHgC11noiW4IPhv3BB0CHUC7sNs9pFyJQttV0jp9uiQ==
+      integrity: sha512-N2/QlZVsHUGSNmHx367+j2u8MpuZHxb0AEu9wsqNH0ROusSlcl7ERBt6en+IuHv4kAnrLNE4CTNo1yYHoUb7YA==
   /multer/1.4.2:
     dependencies:
       append-field: 1.0.0
@@ -1674,15 +1674,15 @@ packages:
     dev: false
     resolution:
       integrity: sha512-n/ShnvDi6FHbbVfviro+WojiFzv+s8MPMHBczVePfUpDJLwoLT0ht1l4YwBCbi8pJAveEEdnkHyPyTP/mzRfwg==
-  /stripe/8.64.0:
+  /stripe/8.66.0:
     dependencies:
-      '@types/node': 14.0.13
+      '@types/node': 14.0.14
       qs: 6.9.4
     dev: false
     engines:
       node: ^8.1 || >=10.*
     resolution:
-      integrity: sha512-d/QrqyPnf8B4a5itP/LcqM9SWhOAVTzTwvvx0mTWG3xaXKZ1WeftNlwF0V1X+6HkG7mJ5cjesxsmW0/LYY8+BA==
+      integrity: sha512-Sn5+mC08JZ1sf1yrCE6ukUddWOFgiMFu/fxSaodA3/magTsIEC8fAXWly9LCJ2rYgGU2T4eca93GXTRtlsgOzQ==
   /supports-color/5.5.0:
     dependencies:
       has-flag: 3.0.0
@@ -1881,13 +1881,13 @@ specifiers:
   money: ^0.2.0
   mongoose: ^5.9.20
   multer: ^1.4.2
-  multer-gridfs-storage: ^4.1.0
+  multer-gridfs-storage: ^4.2.0
   node-xlsx: ^0.15.0
   process: ^0.11.10
   socket.io: ^2.3.0
   socket.io-client: ^2.3.0
   ssl: ^1.0.0
-  stripe: ^8.64.0
+  stripe: ^8.66.0
   token: ^0.1.0
   utf-8-validate: ^5.0.2
   validator: ^13.1.1

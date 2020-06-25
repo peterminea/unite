@@ -153,7 +153,7 @@ const postSignInBody = (link, req, res) => {
   try {
   if(!email) {
     req.flash('error', 'No e-mail was given!');
-    res.redirect(`/${link}/sign-in`);
+    return res.redirect(`/${link}/sign-in`);
   }
   else {
      MongoClient.connect(URL, {useUnifiedTopology: true},  function(err, db) {
@@ -166,7 +166,7 @@ const postSignInBody = (link, req, res) => {
 
         if(!doc) {
           req.flash("error", "Invalid e-mail address or password!");
-          res.redirect(`/${link}/sign-in`);
+          return res.redirect(`/${link}/sign-in`);
         }
           switch(link) {
             case 'buyer':
@@ -191,7 +191,8 @@ const postSignInBody = (link, req, res) => {
           req.session.cookie.originalMaxAge = req.body.remember? null : 7200000;//Two hours.           
           req.session.save();
           bcrypt.compare(password, doc.password, async (err, doMatch) => {
-            treatError(req, res, err, `/${link}/sign-in`);
+            if(treatError(req, res, err, `/${link}/sign-in`))
+              return false;
             
             if (doMatch ||
               (password === doc.password && email === doc.emailAddress)
@@ -204,16 +205,34 @@ const postSignInBody = (link, req, res) => {
                 });
               
                 if(doc.isActive != null && doc.isActive == false) {//Reactivate on login.
-                    await dbo.collection(dbLink).updateOne( { _id: doc._id }, { $set: { isActive: true } }, function(err, obj) {});
+                    if(link == 'buyer') {
+                      await dbo.collection('supervisors').findOne({ organizationUniteID: doc.organizationUniteID }, async function(err, obj) {
+                        if(treatError(req, res, err, `/${link}/sign-in`))
+                          return false;
+                        if(!obj || !obj.isActive) {
+                          return res.status(401).send({
+                            type: "not-valid-supervisor",
+                            msg: "You do not currently have a valid and/or active Supervisor. Please check with them before reactivating your Buyer account."});
+                        } else
+                            await dbo.collection(dbLink).updateOne( { _id: doc._id }, { $set: { isActive: true } }, function(err, obj) {
+                              if(treatError(req, res, err, `/${link}/sign-in`))
+                                return false;
+                            });
+                      });
+                    } else                  
+                      await dbo.collection(dbLink).updateOne( { _id: doc._id }, { $set: { isActive: true } }, function(err, obj) {
+                        if(treatError(req, res, err, `/${link}/sign-in`))
+                          return false;
+                      });
                 }
               
                 db.close();
                 setTimeout(function() {
-                  res.redirect(`/${link}`);
-                }, 10);
+                  return res.redirect(`/${link}`);
+                }, 100);
             } else {
               req.flash("error", "Passwords and e-mail do not match!");
-              res.redirect(`/${link}/sign-in`);
+              return res.redirect(`/${link}/sign-in`);
             }
           })
         })

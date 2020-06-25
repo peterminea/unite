@@ -607,6 +607,10 @@ exports.postSignUp = async (req, res) => {
         var promise = getSupers(req.body.organizationUniteID);
         
         promise.then(async function(supers) {
+          if(supers && supers.length && !(supers[0].isActive)) {
+            req.flash('error', 'Your Supervisor is currently not active. Please contact them.');
+            return res.redirect("/buyer/sign-up");
+          } else 
           if((1==2) && (!supers || supers.length == 0)) {
             req.flash("error", "Invalid UNITE ID. Please select an appropriate ID from the list.");
             return res.redirect("/buyer/sign-up");

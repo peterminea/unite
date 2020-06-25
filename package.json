@@ -29,7 +29,7 @@
     "@sendgrid/mail": "^7.2.0",
     "bufferutil": "^4.0.1",
     "utf-8-validate": "^5.0.2",
-    "stripe": "^8.64.0",
+    "stripe": "^8.66.0",
     "dateformat": "^3.0.3",
     "socket.io": "^2.3.0",
     "socket.io-client": "^2.3.0",
@@ -44,10 +44,9 @@
     "connect-flash": "^0.1.1",
     "gridfs": "^1.0.0",
     "gridfs-stream": "^1.1.1",
-    "multer-gridfs-storage": "^4.1.0",
+    "multer-gridfs-storage": "^4.2.0",
     "method-override": "^3.0.0",
     "money": "^0.2.0"
-    
   },
   "engines": {
     "node": "12.x"

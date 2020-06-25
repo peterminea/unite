@@ -404,6 +404,7 @@ exports.postSignUp = async (req, res) => {
               emailAddress: req.body.emailAddress,
               password: req.body.password,
               isVerified: false,
+              isActive: false,
               contactMobileNumber: req.body.contactMobileNumber,
               address: req.body.address,
               country: req.body.country,
@@ -488,6 +489,7 @@ exports.postProfile = (req, res) => {
     doc.emailAddress = req.body.emailAddress;
     doc.password = req.body.password;
     doc.isVerified = true;
+    doc.isActive = true;
     doc.contactMobileNumber = req.body.contactMobileNumber;
     doc.address = req.body.address;
     doc.country = req.body.country;
