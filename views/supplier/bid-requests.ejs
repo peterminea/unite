@@ -40,12 +40,20 @@
               data: {bidId: bidId},
               datatype: 'application/json',
               error: function() {
-                alert('Error on AJAX Request!');
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error!',
+                  text: 'Error on AJAX Request!'
+                });
               },
               success: function() {
                 div2.remove();
                 div1.remove();
-                alert('Bid removed by supplier!');
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Done!',
+                  text: 'You cancelled this order from the Buyer.'
+                });
               }
             });
           }

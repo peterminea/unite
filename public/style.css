@@ -73,6 +73,12 @@ input.errorField {
   background-color : red;
 }
 
+span.fileName {
+  color: navy;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
 p.term {
   color: navy;
   font-size: 14pt;

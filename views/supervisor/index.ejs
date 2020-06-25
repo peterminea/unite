@@ -24,6 +24,11 @@
     $(document).ready(function() {
       var token = $("input[name^='_csrf']").first().val();
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
+
+      if($('th').length) {
+        $('th').css({cursor: 'pointer'}).attr('title', 'Sort');
+        $('th').on('click', sortTable);
+      }
       
       $('button[id^="process"]').click(function(e) {
         var tr = $(this).parent('tr');
@@ -37,7 +42,6 @@
               type: "POST",
               data: {id: id},
               success: function(data) {
-                //res(data);
                 tr.remove();
                 alert('The Buyer has been removed!');
               },

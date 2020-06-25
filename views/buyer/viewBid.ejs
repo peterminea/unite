@@ -12,12 +12,6 @@
   <link rel="stylesheet" href="/messages.css">
   <link rel="stylesheet" href="/jquery-ui.css">
   <link rel="stylesheet" href="/bootstrap.min.css">
-  <!--
-  <script src="/popper.min.js"></script>  
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>  
--->
   <script src="/jquery.min.js"></script>
   <script src="/jquery-ui.min.js"></script>
   <script src="/bootstrap.min.js"></script>
@@ -41,7 +35,7 @@
               success: function(data) {                
                 if(!data || !data.length)
                   return false;
-                //alert(12);
+                
                 var x = JSON.parse($('[id^="statusJsonValues_"]').first().val());
                 //alert(x.PAYMENT_DELIVERY_DONE + ' ' + $('select[id^="statuses_"]').length);
                 if($('.delete').length) {
@@ -57,12 +51,20 @@
                         data: {bidId: bidId},
                         datatype: 'application/json',
                         error: function() {
-                          alert('Error on AJAX Request!');
+                        Swal.fire({
+                          icon: 'error',
+                          title: 'Error!',
+                          text: 'Error on AJAX Request!'
+                        });
                         },
                         success: function() {
                           div2.remove();
                           div1.remove();
-                          alert('Bid removed by buyer!');
+                          Swal.fire({
+                            icon: 'success',
+                            title: 'Done!',
+                            text: 'You cancelled this order.'
+                          });
                         }
                       });
                     }
@@ -325,10 +327,11 @@
                         var currency = $('#currency_'+index).val();
                         var balance = $('#balance').val();
                         if(amount > balance) {
-                          alert('Your current balance is not enough for completing this purchase. Please add some more funds to your account.');
+                          //alert('Your current balance is not enough for completing this purchase. Please add some more funds to your account.');
                           Swal.fire({
                             icon: 'error',
-                            title: 'Oops...',
+                            confirmButtonColor: '#335577',
+                            title: 'Error!',
                             text: 'Your current balance is not enough for completing this purchase. Please add some more funds to your account.'
                           });
                           return false;

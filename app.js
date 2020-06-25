@@ -1081,6 +1081,20 @@ app.post('/deleteFile', function(req, res, next) {
   });
 });
 
+
+app.post('/exists', function(req, res) {
+  const path = req.body.path;
+
+  fs2.access(path, fs.F_OK, (err) => {
+    if(err) {
+      console.error(err);
+      throw err;
+    }
+    
+    return res.json({exists: true});
+  });
+});
+
 /*
 app.post('/processFile', function(req, res, next) {
   //fs2.unlinkSync(req.body.file);

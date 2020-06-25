@@ -22,28 +22,23 @@ var autocomp = function(obj, data, enter) {//Not suitable for modals.
 }
 
 
-function sortTable() {//memberList, 0, 0 or 1
+function sortTable() {//Ascending or descending. Each <th> column tag is involved.
   var table, rows, switching, i, x, y, colIndex, shouldSwitch;
   table = $(this).closest('table');  
-  colIndex = table.find('th').index($(this));
-  //alert(table.length + ' ' + colIndex);
+  colIndex = table.find('th').index($(this));  
   table = table[0];
-  //table = $(''+elem+'')[0];
   switching = true;
-  /*Make a loop that will continue until
-  no switching has been done:*/
+  /*Make a loop that will continue until no switching has been done:*/
   var asc = 0;
   while (switching) {
     //start by saying: no switching is done:
     switching = false;
     rows = table.rows;
-    /*Loop through all table rows (except the
-    first, which contains table headers):*/
+    /*Loop through all table rows (except the first, which contains table headers):*/
     for (i = 1; i < (rows.length - 1); i++) {
       //start by saying there should be no switching:
       shouldSwitch = false;
-      /*Get the two elements you want to compare,
-      one from current row and one from the next:*/
+      /*Get the two elements you want to compare, one from current row and one from the next:*/
       x = rows[i].getElementsByTagName("TD")[colIndex];
       y = rows[i + 1].getElementsByTagName("TD")[colIndex];
       //check if the two rows should switch place:
@@ -53,23 +48,22 @@ function sortTable() {//memberList, 0, 0 or 1
         break;
       }
     }
-    if (shouldSwitch) {
+    if(shouldSwitch) {
       asc = 1;
-      /*If a switch has been marked, make the switch
-      and mark that a switch has been done:*/
+      /*If a switch has been marked, make the switch and mark that a switch has been done:*/
       rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
       switching = true;
     }
   }
   
-  if(asc == 0) {//Already sorted, let's sort back.
+  if(asc == 0) {//Already ASC sorted, let's sort back.
     switching = true;
     
     while (switching) {
       switching = false;
       rows = table.rows;
      
-      for (i = 1; i < (rows.length - 1); i++) {        
+      for (i = 1; i < (rows.length - 1); i++) {
         shouldSwitch = false;       
         x = rows[i].getElementsByTagName("TD")[colIndex];
         y = rows[i + 1].getElementsByTagName("TD")[colIndex];
@@ -79,7 +73,7 @@ function sortTable() {//memberList, 0, 0 or 1
           break;
         }
       }
-      if (shouldSwitch) {
+      if(shouldSwitch) {
         asc = 1;       
         rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
         switching = true;
@@ -97,7 +91,6 @@ function treatDiv(div, isMulti, val, input) {
       val2 = val2.split(',');      
       val2.splice(newIndex, 1);      
       input.attr('value', (val2 && val2.length)? val2.toString() + ',' : '');
-      //var text = (val2 && val2.length)? val2.length + ' files' : '';
       
       if(!val2 || !val2.length)
         input.val('');;
@@ -111,7 +104,7 @@ function treatDiv(div, isMulti, val, input) {
 }
 
 
-function removeFile(obj) {//remove from Glitch
+function removeFile(obj, Swal) {//remove from Glitch 
   var token = $(obj).attr('token');
   var file = $(obj).attr('file');  
   var div = $(obj).parent('div');
@@ -119,23 +112,52 @@ function removeFile(obj) {//remove from Glitch
   
   var input = isMulti? 
       div.parent('div').prev('div').find('.fileupload') : div.prev('div').find('.fileupload');
-  //alert(file + ' ' + token + ' ' + div.length + ' ' + input.length);
   var val = input.attr('value');
-  //var isMulti = val.charAt(val.length-1) == ','? true : false;  
   
-  $.ajax({
-    url: '/deleteFile',
-    type: 'POST',
-    headers: { "X-CSRF-Token": token },
-    data: {file: 'public/' + file.substring(3)},
-    datatype: 'application/json',
-    error: function() {
-      //alert('Error on AJAX Request!');
-      treatDiv(div, isMulti, val, input);
+  const SwalCustom = Swal.mixin({
+    customClass: {
+      confirmButton: 'btn btn-success',
+      cancelButton: 'btn btn-danger'
     },
-    success: function(data) {
-      treatDiv(div, isMulti, val, input);
-      //alert('File removed!');
+    buttonsStyling: true
+  });
+  
+  SwalCustom.fire({
+    title: 'Are you sure?',
+    text: "You will not be able to revert the file deletion!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#445544',
+    cancelButtonColor: '#d33d33',
+    confirmButtonText: 'I understand!'//,
+    //reverseButtons: true
+  }).then((result) => {
+    if(result.value) {//OK pressed. Undefined if Cancel.
+      //return false;
+      $.ajax({
+        url: '/deleteFile',
+        type: 'POST',
+        headers: { "X-CSRF-Token": token },
+        data: {file: 'public/' + file.substring(3)},
+        datatype: 'application/json',
+        error: function() {
+          //alert('Error on AJAX Request!');
+          treatDiv(div, isMulti, val, input);
+          SwalCustom.fire({
+            title: 'Deleted!',
+            text: 'The file has been deleted.',
+            icon: 'success'
+          });
+        },
+        success: function(data) {
+          treatDiv(div, isMulti, val, input);
+          SwalCustom.fire({
+            title: 'Deleted!',
+            text: 'The file has been deleted.',
+            icon: 'success'
+          });
+        }
+      });      
     }
   });
 }
@@ -149,7 +171,6 @@ function deleteFile(obj) {//remove from Database
   
   var input = isMulti? 
       div.parent('div').prev('div').find('.fileupload') : div.prev('div').find('.fileupload');
-  //alert(file + ' ' + token + ' ' + div.length + ' ' + input.length);
   var val = input.attr('value');
   //var isMulti = val.charAt(val.length-1) == ','? true : false;
   
@@ -179,9 +200,7 @@ function downloadFile(obj) {//remove from Database
   
   var input = isMulti? 
       div.parent('div').prev('div').find('.fileupload') : div.prev('div').find('.fileupload');
-  //alert(file + ' ' + token + ' ' + div.length + ' ' + input.length);
   var val = input.attr('value');
-  //var isMulti = val.charAt(val.length-1) == ','? true : false;
   
   $.ajax({
     url: '/download/'+file,
@@ -243,7 +262,7 @@ function getAutocomplete(elem, url, token, isEnter) {
         type: "GET",
         data: req,
         success: function(data) {
-        if(!data || !data.length) {//Recommended to disable it for a better user experience. We can add ours as well.
+        if(!data || !data.length) {//Recommended to disable it for a better user experience. We can add our items as well.
             //obj.val('');
             //return false;
           }
@@ -364,7 +383,7 @@ function initBaseRates(fx, elem) {
       "RON" : 4.84
       /* etc */
     }
-    //alert($('#currency').find('option[value="' + fx.base + '"]').length);
+    
     $(''+elem+'').find('option[value="' + fx.base + '"]').attr('selected', 'selected');
     $(''+elem+'').trigger('change');
   }, 400);
@@ -425,12 +444,17 @@ function removeAllItems(index) {
 }
 
 
-function addition(prodInput, priceInput, currencyInput, prod, prodVal, priceVal, currencyVal, elem) {//alert(8);
+function addition(prodInput, priceInput, currencyInput, prod, prodVal, priceVal, currencyVal, elem) {
   var arr = prodInput.val() && prodInput.val().length?
     (prodInput.val()).split(',') : [];          
-  //alert(prodInput.val());
+  
   if(checkName(arr, prodVal)) {
-    alert('You have already added ' + prodVal + ' to the list. Please refine your selection.');
+    Swal.fire({
+      icon: 'error',
+      title: 'Error!',
+      text: 'You have already added ' + prodVal + ' to the list. Please refine your selection.'
+    });
+    //alert('You have already added ' + prodVal + ' to the list. Please refine your selection.');
     return false;
   }
 
@@ -458,8 +482,12 @@ function addProduct(obj) {
      var MAX = $("#prodServices").attr('MAX');
 
      if(elem.find('li').length >= MAX) {
-          alert('You have reached the limit of products to add.');
-          return false;
+        Swal.fire({
+          icon: 'error',
+          title: 'Error!',
+          text: 'You have reached the limit of ' + MAX + ' products to add.'
+        });
+        return false;
       }
 
       var input = $("#prodServiceInput");     
@@ -474,7 +502,12 @@ function addProduct(obj) {
         $('#addProdService').prop('disabled', true);
         $('.productRequired').remove();
       } else {
-        alert('Please enter valid values for products, prices and currency.');
+        Swal.fire({
+          icon: 'warning',
+          title: 'Warning',
+          text: 'Please enter valid values for products, prices and currency.'
+          });
+        //alert('Please enter valid values for products, prices and currency.');
         $('#prodServiceInput,#price,#currency').addClass('errorField');
       }
     });
@@ -632,8 +665,6 @@ function treatLastLi() {
 function takeAction(obj, token, tr) {//alert(tr.length);
   var fileId = tr.attr('id');
   var isDownload = obj.hasClass('download')? true : false;
-  //alert(isDownload);
-  
   var url = isDownload? '/download/' : '/files/';
   var type = isDownload? 'GET' : 'DELETE';
   var data = isDownload? null : {_method: 'delete'};
@@ -645,13 +676,21 @@ function takeAction(obj, token, tr) {//alert(tr.length);
     headers: { "X-CSRF-Token": token },
     datatype: 'application/json',
     error: function() {
-      alert('Error!');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: 'Error on AJAX call!'
+      });
     },
     success: function(data) {
       if(!isDownload)
         tr.remove();
       if(data && data.message) {
-        alert(data.message);
+        Swal.fire({
+          icon: 'info',
+          title: 'Information',
+          text: data.message
+        });        
       }
     }
   });
@@ -685,7 +724,7 @@ function supplierValidateFields(prodList, priceList, currList, fx, defaultCurr, 
     var text = $(this).text();
     var last = text.lastIndexOf(' ');
     var curr = text.substring(last+1);
-    //alert(curr);
+  
     if(preferred != curr) {
       isChanged = true;
       return false;
@@ -731,7 +770,7 @@ function errorSuccess(Swal, errorMessage, successMessage) {
   if (errorMessage.length > 0) {
     Swal.fire({
       icon: 'error',
-      title: 'Oops...',
+      title: 'Error!',
       text: errorMessage
     });
   }
@@ -744,6 +783,47 @@ function errorSuccess(Swal, errorMessage, successMessage) {
       text: successMessage
     });
   }
+}
+
+
+function fileExists(absolutePath, isMulti, ob, theDiv, fileId, i, val, token) {
+    $.ajax({
+      url: '/exists',
+      type: 'POST',
+      headers: { "X-CSRF-Token": token },
+      data: {path: absolutePath},
+      datatype: 'application/json',
+      error: function() {
+        Swal.fire({
+          title: 'Not found!',
+          text: 'Your file, ' + absolutePath + ', was not found.',
+          icon: 'error'
+        });
+      },
+      success: function(data) {
+        if(!data || !data.exists) {
+          Swal.fire({
+            title: 'Not found!',
+            text: 'Your file, ' + absolutePath + ', was not found.',
+            icon: 'error'
+          });
+          return false;
+        }
+        
+        var displayName = fileId.substring(fileId.lastIndexOf('/')+1);
+        if(isMulti) {          
+          ob += '<div><span class="fileName">' + displayName + '</span>&nbsp;<a href="' + fileId + '" file="' + fileId + '" title="Download ' + val[i] + '" style="color: blue; cursor: pointer" download>Download file</a>&nbsp;<span token="' + token + '" file="' + fileId + '" class="remFile" onclick="removeFile(this,Swal)" title="Delete the ' + val[i] + ' file">Remove</span></div>';
+          if(i == val.length-1) {
+            ob += '</div>';
+            if(ob.contains('href'))
+              $(ob).insertAfter(theDiv);                
+          }
+        } else {
+          ob += '<div><span class="fileName">' + displayName + '</span>&nbsp;<a href="' + fileId + '" file="' + fileId + '" title="Download ' + val + '" style="color: blue; cursor: pointer" download>Download file</a>&nbsp;<span token="' + token + '" file="' + fileId + '" class="remFile" onclick="removeFile(this,Swal)" title="Delete the ' + val + ' file">Remove</span></div>';
+          $(ob).insertAfter(theDiv);
+        }
+      }
+    });
 }
 
 
@@ -878,7 +958,7 @@ $(document).ready(function() {
     var theDiv = $(this).parent('div');
     input.attr('value', fileId);
     val = fileId;
-    //alert(fileId + ' ' + val);
+    
     if(fileId && fileId.length) {
       var isMulti = false;
     
@@ -895,14 +975,11 @@ $(document).ready(function() {
       if(isMulti) {//Multi
         var ob = '<div class="fileWrapper">';
         for(var i in val) {
-          ob += '<div><a href="' + fileId[i] + '" file="' + fileId[i] + '" title="Download ' + val[i] + '" style="color: blue; cursor: pointer" download>Download file "' + i + '"</a>&nbsp;<span token="' + token + '" file="' + fileId[i] + '" class="remFile" onclick="removeFile(this)" title="Delete the ' + val + ' file">Remove</span></div>';
+          fileExists('public/' + fileId[i].substring(3), isMulti, ob, theDiv, fileId[i], i, val, token);
         }
-
-        ob += '</div>';
-        $(ob).insertAfter(theDiv);
       } else {
-        var ob = '<div><a href="' + fileId + '" file="' + fileId + '" title="Download ' + val + '" style="color: blue; cursor: pointer" download>Download file</a>&nbsp;<span token="' + token + '" file="' + fileId + '" class="remFile" onclick="removeFile(this)" title="Delete the ' + val + ' file">Remove</span></div>';
-        $(ob).insertAfter(theDiv);
+        var ob = '';
+        fileExists('public/' + fileId.substring(3), false, ob, theDiv, fileId, 0, val, token);
       }
     }
   });
@@ -962,7 +1039,11 @@ $(document).ready(function() {
                 var elem = response[i];//Assume that elem fields are called name, price, and currency.                
                 var elem2 = $("#prodServices");
                 if(elem2.find('li').length >= MAX) {
-                   alert('You have reached the limit of products to add.');
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'You have reached the limit of ' + MAX + ' products to add.'
+                    });
                    return false;
                  }
 
@@ -979,7 +1060,7 @@ $(document).ready(function() {
               var file = response[i].path? response[i].path : response[i].file.id;
               prevInput.attr('value', !(prevInput.val() && prevInput.val().length)? val + '' : prevInput.val() + val + '');//file
               
-              ob += '<div><a href="' + absolutePath + '" file="' + file + '" title="Download ' + absolutePath + '" style="color: blue; cursor: pointer" download>Download file "' + i + '"</a>&nbsp;<span token="' + token + '" file="' + file + '" class="remFile" onclick="removeFile(this)" title="Delete the '+ absolutePath +' file">Remove</span></div>';
+              ob += '<div><a href="' + absolutePath + '" file="' + file + '" title="Download ' + absolutePath + '" style="color: blue; cursor: pointer" download>Download file "' + i + '"</a>&nbsp;<span token="' + token + '" file="' + file + '" class="remFile" onclick="removeFile(this,Swal)" title="Delete the '+ absolutePath +' file">Remove</span></div>';
             }
 
             if(hasDiv) {
@@ -994,7 +1075,7 @@ $(document).ready(function() {
             var file = response.path? response.path : response.file.id;
             prevInput.attr('value', val);//file
             
-            ob = '<div><a href="' + val + '" file="' + file + '" title="Download ' + val + '" style="color: blue; cursor: pointer" download>Download file</a>&nbsp;<span token="' + token + '" file="' + file + '" class="remFile" onclick="removeFile(this)" title="Delete the '+ val +' file">Remove</span></div>';
+            ob = '<div><a href="' + val + '" file="' + file + '" title="Download ' + val + '" style="color: blue; cursor: pointer" download>Download file</a>&nbsp;<span token="' + token + '" file="' + file + '" class="remFile" onclick="removeFile(this,Swal)" title="Delete the '+ val +' file">Remove</span></div>';
             $(ob).insertAfter(theDiv);
           }
 

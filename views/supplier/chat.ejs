@@ -11,8 +11,7 @@
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/messages.css">
   <link rel="stylesheet" href="/jquery-ui.css">
-  <link rel="stylesheet" href="/bootstrap.min.css">
-  <script src="/sweetalert.min.js"></script>  
+  <link rel="stylesheet" href="/bootstrap.min.css">  
   <script src="/jquery.min.js"></script>
   <script src="/jquery-ui.min.js"></script>
   <script src="/popper.min.js"></script>
@@ -22,6 +21,7 @@
   <script src="/qs.min.js"></script>
   <script src="/index.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
+  <script src="/sweetalert2@9.min.js"></script>
   <script src="/https.js"></script>
   <script src="/chatUsers.js"></script>
   <script src="/autocomp.js"></script>
@@ -211,7 +211,11 @@
       
       $('#sendLocation').bind('click', function() {
         if(!navigator.geolocation) {
-          return alert('Geolocation not supported at your endpoint. We are sorry for the inconvenience.');
+          return Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'Geolocation not supported at your endpoint. We are sorry for the inconvenience.'
+          });
         }
         $('#sendLocation').prop('disabled', true);
         navigator.geolocation.getCurrentPosition((position) => {
@@ -232,7 +236,7 @@
 
     sock.on('message', (message) => {
       $(messages).append(message);
-      alert(JSON.stringify(message) + ' ' + messageTemplate);
+      //alert(JSON.stringify(message) + ' ' + messageTemplate);
 
       const html = Mustache.render(messageTemplate, {
         username: message.username,
@@ -240,7 +244,7 @@
         createdAt: moment(message.createdAt).format('HH:mm:ss A')
       });
       
-      alert(html);
+      //alert(html);
       $($messages).append(html);
       autoscroll();
     });      
