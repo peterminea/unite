@@ -138,12 +138,11 @@ exports.postCancelBid = (req, res) => {
       await dbo.collection("bidrequests").updateOne({ _id: new ObjectId(req.body.bidId) }, { $set: {isCancelled: true, status: parseInt(process.env.SUPP_BID_CANCEL)} }, async function(err, resp) {
         if(err) {
           console.error(err.message);
-          
           return res.status(500).send({ 
             msg: err.message 
           });         
         }
-        
+
         await sendCancelBidEmail(req, req.body.buyersName, req.body.suppliersName, req.body.buyersEmail, req.body.suppliersEmail, 'Buyer ', 'Supplier ', req.body.reason);
         return res.redirect('back');
       });
