@@ -16,6 +16,7 @@ const treatError = require('../middleware/treatError');
 const BadWords = require('bad-words');
 const search = require('../middleware/searchFlash');
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
+const fs = require("fs");
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 
 var userData = require('../middleware/userHome');
@@ -57,6 +58,37 @@ exports.getDeleteUser = (req, res) => {
 };
 
 
+function getFiles(folder) {/*
+  console.log(folder);
+  fs.readdir(folder, (err, files) => {//  console.log(err);
+    files.forEach((file) => {
+      //console.log(file);
+    });
+  });*/
+
+  var t = fs.readdirSync(folder, {withFileTypes: true})
+  .filter(item => !item.isDirectory())
+  .map((item) => item.name);
+
+  var fileData = [];
+    t.forEach((file) => {
+      var name = folder+'/'+file;
+      var stats = fs.statSync(name);
+      var fileSizeInBytes = stats["size"];
+      var obj = {
+        path: name,
+        name: file,
+        folder: folder,
+        size: stats['size'],
+        date: stats['birthtime']
+      };
+      fileData.push(obj);
+    });
+ 
+  return fileData;
+}
+
+
 exports.getFilesList = (req, res) => {
   var obj = userData(req);
   var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
@@ -69,12 +101,15 @@ exports.getFilesList = (req, res) => {
     gfs = Grid(conn.db, mongoose.mongo);
     gfs.collection('uploads');    
     
-    gfs.files.find().toArray((err, files) => {
+    gfs.files.find().toArray(async (err, files) => {
       if(!files || !files.length) {
         return res.status(404).json({
           err: 'No files exist!'
         });
       }
+      
+      var uploads = await getFiles('public/uploads');
+      var avatars = await getFiles('public/avatars');
 
       //console.log(obj);
       res.render("filesList", {
@@ -83,6 +118,8 @@ exports.getFilesList = (req, res) => {
         successMessage: success,
         errorMessage: error,
         isAdmin: obj.role == process.env.USER_ADMIN,
+        uploads: uploads,
+        avatars: avatars,
         userId: obj.userId,
         avatar: obj.avatar,
         userName: obj.userName,

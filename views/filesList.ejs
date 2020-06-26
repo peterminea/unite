@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>UNITE - Underserved Needs in Times of Emergency - DB Files List</title>
+  <title>UNITE - Underserved Needs in Times of Emergency - Uploaded Files List</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="A cool thing made with Glitch">
@@ -31,12 +31,17 @@
       $('th').css({cursor: 'pointer'}).attr('title', 'Sort');
       $('th').on('click', sortTable);
     }
+    var token = $('input[name="_csrf"]').val();
+    $('.downloadFile,.deleteFile').attr('token', token);
+    $('.deleteFile').on('click', function() {
+      removeFile(this, Swal);
+    });
     
-    $('.download,.delete').css({'cursor': 'pointer', 'color': 'lime', 'font-weight': 'bold'});
+    $('.download,.delete,.downloadFile,.deleteFile').css({'cursor': 'pointer', 'color': 'lime', 'font-weight': 'bold'});
     errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
     
     $('.download,.delete').on('click', function() {
-      takeAction($(this), $('input[name="_csrf"]').val(), $(this).parent('td').parent('tr'));
+      takeAction($(this), token, $(this).parent('td').parent('tr'));
     });
     
   });
@@ -62,15 +67,15 @@
   <br>
   <div>
     <p class='term'>
-      Disclaimer: This is a Demo list of uploaded files to our Database.
+      Disclaimer: This is a Demo list of files that are uploaded to our App folders and Database.
     </p>
     <p class='term'>
-      In the future, we may also provide a list of saved Avatars to our Database. They will have different tables from those that are currently allocated to regularly uploaded files.
+      We include Avatars and user-specific files that are uploaded. For practical reasons, we prefer uploading files to dedicated folders of the application hosting space, and not to the DB itself - currently the database only contains a few uploaded files.<br>Note: Only Site Administrators can access these lists. So, guys, what we get to see here - it is only for us!
     </p>
   </div>
   <br><br>
   <h3 style="color: green">
-    List of UNITE Files
+    List of UNITE Database Files
   </h3>
   <br>
 <% if(files != null && files.length > 0) {%>
@@ -103,10 +108,92 @@
         <% } else {%>
         <div>
           <p style="color: green; font-family: arial">
-            Sorry, no files here.
-          </p>          
+            Sorry, no DB files here.
+          </p>
         </div>
         <% }%>  
+  <br><br>
+  <h3 style="color: green">
+    List of UNITE Upload Files
+  </h3>
+  <br>
+<% if(uploads != null && uploads.length > 0) {%>
+  <div class="container form-group mt-4" style="text-align: center">
+    <table id="files" class="table table-striped table-hover table-condensed files">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">File name</th>
+          <th scope="col">File folder</th>
+          <th scope="col">File Size (bytes)</th>
+          <th scope="col">Upload Date</th>
+          <th scope="col">Download File</th>
+          <th scope="col">Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% let i = 0; for (file of uploads) { %>
+        <tr id="<%= file._id %>">
+          <td scope="col"><%= i+1 %></td>
+          <td scope="col"><%= file.name %></td>
+          <td scope="col"><%= file.folder %></td>
+          <td scope="col"><%= file.size %></td>
+          <td scope="col"><%= file.date %></td>
+          <td><a href="../<%= file.path.substring(7) %>" title="Download <%= file.name %>" class="downloadFile" download>Download file</a></td>
+          <td><span name="<%= file.path %>" class="deleteFile">Remove</span></td>
+        </tr>
+        <% i++; } %>
+        </tbody>
+      </table>
+    </div>
+        <% } else {%>
+        <div>
+          <p style="color: green; font-family: arial">
+            Sorry, no Uploaded files here.
+          </p>
+        </div>
+        <% }%>
+  <br><br>
+  <h3 style="color: green">
+    List of UNITE Avatar Files
+  </h3>
+  <br>
+<% if(avatars != null && avatars.length > 0) {%>
+  <div class="container form-group mt-4" style="text-align: center">
+    <table id="files" class="table table-striped table-hover table-condensed files">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">File name</th>
+          <th scope="col">File folder</th>
+          <th scope="col">File Size (bytes)</th>
+          <th scope="col">Upload Date</th>
+          <th scope="col">Download File</th>
+          <th scope="col">Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% let i = 0; for (file of avatars) { %>
+        <tr id="<%= file._id %>">
+          <td scope="col"><%= i+1 %></td>
+          <td scope="col"><%= file.name %></td>
+          <td scope="col"><%= file.folder %></td>
+          <td scope="col"><%= file.size %></td>
+          <td scope="col"><%= file.date %></td>
+          <td><a href="../<%= file.path.substring(7) %>" title="Download <%= file.name %>" class="downloadFile" download>Download file</a></td>
+          <td><span name="<%= file.path %>" class="deleteFile">Remove</span></td>
+        </tr>
+        <% i++; } %>
+        </tbody>
+      </table>
+    </div>
+        <% } else {%>
+        <div>
+          <p style="color: green; font-family: arial">
+            Sorry, no Avatar files here.
+          </p>          
+        </div>
+        <% }%> 
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     </div>
     
