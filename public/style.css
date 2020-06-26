@@ -8,6 +8,7 @@ body {
 .remFile {
   font-size: 12pt;
   cursor: pointer;
+  text-decoration: underline;
   color: #88cc44
 }
 

@@ -27,7 +27,6 @@
       name = "<%= userName %>", 
       type = "<%= userType %>";
       userInputs(id, role, avatar, name, type, $('ul.mr-auto'));
-      
       getFeedbackSubjects($('#feedbackForm'), $('input[name="_csrf"]').val(), '/feedbackSubjects');
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
 
