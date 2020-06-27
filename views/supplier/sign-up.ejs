@@ -21,6 +21,7 @@
   <script src="/money.min.js"></script>
   <script src="/https.js"></script>
   <script src="/chatUsers.js"></script>
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   <script src="/autocomp.js"></script>
   <script type="text/javascript">
     $(document).ready(function () {
@@ -33,7 +34,7 @@
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       initBaseRates(fx, '.currency');
       $('.currency').css('width', '100px');
-      var defaultCurr = "EUR";
+      var defaultCurr = "<%= SUPP_DEFAULT_CURR %>";
       
       $('.currency').on('change', function () {
         var val = $(this).val();
@@ -43,6 +44,13 @@
           //return true;
         
         //Re-make the list of products accordingly, with the new currency.
+        $('#prodServices').find('li').each(function(index, elem) {
+          var price = parseFloat($(this).find('.price').text()), currency = $(this).find('.currency').text();          
+          var newPrice = fx.convert(price, {from: currency, to: val});
+          $(this).find('.price').text(newPrice);
+          $(this).find('.currency').text(val);
+        });
+        /*
         var prodList = $('#prodServicesList').val(), priceList = $('#pricesList').val(), currList = $('#currenciesList').val();
         if(prodList && prodList.length) {
           var arr = prodList.split(','), arr1 = priceList.split(',');//, arr2 = currList.split(',');
@@ -55,7 +63,7 @@
             var span = li.find('.product');
             span.text(newDesc);
           }
-        }
+        }*/
       });
 
       $('.cb').click(function() {
@@ -75,7 +83,7 @@
         $('#register').click(function(e) {
           e.preventDefault();
 
-          if(!supplierValidateFields($('#prodServicesList').val(), $('#pricesList').val(), $('#currenciesList').val(), fx, defaultCurr, $('#currency').val()))
+          if(!supplierValidateFields(/*$('#prodServicesList').val(), $('#pricesList').val(), $('#currenciesList').val(), */fx, defaultCurr, $('#currency').val()))
             return false;
 
           registrationDialog('Supplier');
@@ -301,6 +309,7 @@
         </div>
 
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="g-recaptcha" data-sitekey="<%= captchaSiteKey %>"></div>
         <button disabled id="register" type="submit" class="btn btn-primary btn-block">Sign Up</button>
         <div class="form-group">
           <label class="text-muted form-text">

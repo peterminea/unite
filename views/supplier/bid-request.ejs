@@ -73,6 +73,10 @@
 									<label>Buyer's Email address</label>
 									<input type="email" class="form-control" value="<%= buyer.emailAddress %>" disabled>
 								</div>
+                <div class="form-group">
+									<label>Buyer's Currency</label>
+									<input type="text" class="form-control" value="<%= buyer.currency %>" disabled>
+								</div>
 								<div class="form-group">
 									<label>Buyer's Department / Agency / Group</label>
 									<input type="text" class="form-control" value="<%= buyer.deptAgencyGroup %>" disabled>
@@ -112,7 +116,7 @@
 					<label>Products / Services Offered</label>
 					<ul class="list-group">
             <% for (h in products) { %>
-            <li class="list-group-item"><%= amounts[h] %>*<%= products[h] %> - <%= prices[h] %> <%= request.currency %></li>
+            <li class="list-group-item"><%= amounts[h] %>*<%= products[h] %> - <%= prices[h] %> <%= request.supplierCurrency %></li>
             <% } %>
           </ul>
 				</div>
@@ -168,11 +172,15 @@
         <div class="form-group">
 					<label>Price</label>
 					<% l = 0; for(m in request.priceList) {l += request.priceList[m];} %>
-          <input type="text" title="Total order price" value="<%= l %> <%= request.currency %>" class="form-control" id="price" name="price" readonly>
+          <input type="text" title="Total order price" value="<%= l %> <%= request.supplierCurrency %>" class="form-control" id="price" name="price" readonly>
 				</div>
         <div class="form-group">
-					<label>Currency</label>
-					<input type="hidden" class="form-control" readonly value="<%= request.currency %>">
+					<label>Currency (yours):</label>
+					<input type="hidden" class="form-control" readonly value="<%= request.supplierCurrency %>">
+				</div>
+        <div class="form-group">
+					<label>Currency (Buyer's original):</label>
+					<input type="hidden" class="form-control" readonly value="<%= request.buyerCurrency %>">
 				</div>
         <div class="form-group">
 					<label>Status</label>

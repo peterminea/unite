@@ -34,6 +34,7 @@
       initBaseRates(fx, '.currency');
       $('.currency').css('width', '100px');
       var defaultCurr = "<%= profile.currency %>";
+      //var defaultCurr = "<%= DEFAULT_CURR %>";
       
       $('.currency').on('change', function () {
         var val = $(this).val();
@@ -43,18 +44,26 @@
           //return true;
         
         //Re-make the list of products accordingly, with the new currency.
+        $('#prodServices').find('li').each(function(index, elem) {
+          var price = parseFloat($(this).find('.price').text()), currency = $(this).find('.currency').text();          
+          var newPrice = fx.convert(price, {from: currency, to: val});
+          $(this).find('.price').text(newPrice);
+          $(this).find('.currency').text(val);
+        });
+        /*
         var prodList = $('#prodServicesList').val(), priceList = $('#pricesList').val(), currList = $('#currenciesList').val();
         if(prodList && prodList.length) {
           var arr = prodList.split(','), arr1 = priceList.split(',');//, arr2 = currList.split(',');
           
           for(var i in arr1) {
+            //fx.convert($('#defaultBalance').val(), {from: $('#defaultCurrency').val(), to: $(this).val()});
             var price = fx.convert(arr1[i], {from: defaultCurr, to: val});
             var newDesc = arr[i] + ' - ' + parseFloat(price).toFixed(1) + ' ' + val;
             var li = $('#prodServices').find('li').eq(i);
             var span = li.find('.product');
             span.text(newDesc);
           }
-        }
+        }*/
       });
       
       $("input,textarea,select").on('change', function () {
@@ -72,7 +81,7 @@
       }*/      
       
       $('#updateProfile').click(function() {
-        if(!supplierValidateFields($('#prodServicesList').val(), $('#pricesList').val(), $('#currenciesList').val(), fx, defaultCurr, $('#currency').val()))
+        if(!supplierValidateFields(/*$('#prodServicesList').val(), $('#pricesList').val(), $('#currenciesList').val(), */fx, defaultCurr, $('#currency').val()))
           return false;
       });
 
@@ -127,7 +136,7 @@
     </button>
   </nav>
 
-  <div class="container">    
+  <div class="container">
     <br><br>
     <div class="card">
       <h5 class="card-header">Welcome!</h5>
@@ -266,7 +275,7 @@
           <ul class="list-group" id="prodServices">
             <% let i = 0; if (products != null) { for (product of products) { i++; %>
             <li class='list-group-item'>
-              <span class='product'><%= product.productName %> - <%= product.price %> <%= product.currency %></span>
+              <span class='product'><%= product.productName %></span> - <span class='price'><%= product.price %></span> <span class='currency'><%= product.currency %></span>
               <span class='rem'>&nbsp;(Remove)</span>
             </li>
             <% } }%>
@@ -276,7 +285,7 @@
           <input type="hidden" name="currenciesList" id="currenciesList" value="<%= profile.currenciesList %>">
         </div>
         <script type="text/javascript">
-          bindRemoveProduct($('.rem'), $('#prodServices'), $('#prodServicesList'), $('#pricesList'), $('#currenciesList'), $('#prodServiceInput'));
+          bindRemoveProduct($('.rem'), /*$('#prodServices'), $('#prodServicesList'), $('#pricesList'), $('#currenciesList'),*/ $('#prodServiceInput'));
           $('<a><span style="color: green; cursor: pointer" id="massRemove">Remove All Products</span></a><br>').insertBefore($("#prodServices"));
           $('#massRemove').on('click', removeAllProducts);
         </script>
@@ -294,7 +303,7 @@
           <input type="text" class="form-control" id="supportingInformation" name="supportingInformation" value="<%= profile.supportingInformation %>">
         </div>
 
-        <!-- Uploading files field section-->        
+        <!-- Uploading files field section-->
         <div class="form-group">
           <label class="text-muted form-text">
            <!-- You can upload your files to cloud services (e.g. Google Drive) and add the link to the folder here. -->

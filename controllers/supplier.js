@@ -22,6 +22,7 @@ const search = require('../middleware/searchFlash');
 var Recaptcha = require('express-recaptcha').RecaptchaV3;
 const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
+const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 
 const statusesJson = {
   BUYER_REQUESTED_BID: parseInt(process.env.BUYER_REQ_BID),
@@ -347,6 +348,7 @@ exports.getSignIn = (req, res) => {
     req.session.flash = [];
     
     return res.render("supplier/sign-in", {
+      captchaSiteKey: captchaSiteKey,
       successMessage: success,
       errorMessage: error
     });
@@ -367,6 +369,8 @@ exports.getSignUp = (req, res) => {
   if (!req.session.supplierId)
     return res.render("supplier/sign-up", {
       MAX_PROD: process.env.SUPP_MAX_PROD,
+      DEFAULT_CURR: process.env.SUPP_DEFAULT_CURR,
+      captchaSiteKey: captchaSiteKey,
       successMessage: success,
       errorMessage: error
     });
@@ -716,6 +720,7 @@ exports.getProfile = (req, res) => {
       res.render("supplier/profile", {
         products: products,
         MAX_PROD: process.env.SUPP_MAX_PROD,
+        DEFAULT_CURR: process.env.SUPP_DEFAULT_CURR,
         successMessage: success,
         errorMessage: error,
         profile: req.session.supplier

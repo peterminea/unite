@@ -19,9 +19,11 @@ const ObjectId = require("mongodb").ObjectId;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const search = require('../middleware/searchFlash');
-var Recaptcha = require('express-recaptcha').RecaptchaV3;
+var Recaptcha = require('express-recaptcha').RecaptchaV2;
 const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
+const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
+
 
 const statusesJson = {
   BUYER_REQUESTED_BID: parseInt(process.env.BUYER_REQ_BID),
@@ -51,7 +53,7 @@ exports.getIndex = async (req, res) => {
 }
 
 exports.postIndex = (req, res) => {
-  if (req.body.capabilityInput) {//req.term for Autocomplete
+  if (req.body.capabilityInput) {//req.term for Autocomplete - We started the search and become able to place a Bid Request.
     const key = req.body.capabilityInput;
 
     Supplier.find({}, (err, suppliers) => {
@@ -78,6 +80,7 @@ exports.postIndex = (req, res) => {
           buyer: req.session.buyer,
           suppliers: suppliers2,
           MAX_PROD: process.env.BID_MAX_PROD,
+          BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
           statuses: statuses,
           successMessage: success,
           errorMessage: error,
@@ -85,7 +88,7 @@ exports.postIndex = (req, res) => {
         });
       });
     });
-  } else if (req.body.itemDescription) {//New Bid Request
+  } else if (req.body.itemDescription) {//New Bid Request placed
     var productList = (req.body.productsServicesOffered);
     var amountList = (req.body.amountList);
     var priceList = (req.body.priceList);
@@ -97,7 +100,7 @@ exports.postIndex = (req, res) => {
     var products = [];
     
     for(var i in productList) {
-      products.push('Product name: \'' + productList[i] + '\', amount: ' + parseInt(amountList[i]) + ', price: ' + parseFloat(priceList[i]) + '.');
+      products.push('Product name: \'' + productList[i] + '\', amount: ' + parseInt(amountList[i]) + ', price: ' + parseFloat(priceList[i]) + ' ' + req.body.buyerCurrency + '.');
     }
     
     const bidRequest = new BidRequest({
@@ -122,7 +125,8 @@ exports.postIndex = (req, res) => {
       status: req.body.status,
       price: req.body.price,
       isCancelled: false,
-      currency: req.body.currency,
+      buyerCurrency: req.body.buyerCurrency,
+      supplierCurrency: req.body.supplierCurrency,
       specialMentions: req.body.specialMentions? 
         req.body.specialMentions 
           : req.body.buyerName + ' has sent a new Order to ' + req.body.supplierName + ', and the price is ' + req.body.price + ' ' + req.body.currency + '.',
@@ -434,6 +438,7 @@ exports.getSignIn = (req, res) => {
   
   if (!req.session.buyerId || !req.session.buyer.isVerified)
     return res.render("buyer/sign-in", {
+      captchaSiteKey: captchaSiteKey,
       successMessage: success,
       errorMessage: error
     });
@@ -448,6 +453,7 @@ exports.getSignUp = (req, res) => {
   
   if (!req.session.buyerId)
     return res.render("buyer/sign-up", {
+      captchaSiteKey: captchaSiteKey,
       successMessage: success,
       errorMessage: error
     });

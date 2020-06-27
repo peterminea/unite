@@ -14,6 +14,7 @@ const search = require('../middleware/searchFlash');
 var Recaptcha = require('express-recaptcha').RecaptchaV3;
 const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
+const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 
 exports.getIndex = (req, res) => {
   if(!req || !req.session) 
@@ -344,6 +345,7 @@ exports.getSignIn = (req, res) => {
   
   if (!req.session.supervisorId || !req.session.supervisor.isVerified)
     res.render("supervisor/sign-in", {
+      captchaSiteKey: captchaSiteKey,
       successMessage: success,
       errorMessage: error
     });
@@ -358,6 +360,7 @@ exports.getSignUp = (req, res) => {
   
   if(!req.session.supervisorId)
     res.render("supervisor/sign-up", {
+      captchaSiteKey: captchaSiteKey,
       successMessage: success,
       errorMessage: error
     });

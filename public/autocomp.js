@@ -408,6 +408,36 @@ function getCurrenciesList(elem, url, token) {//For <select> drop-down currencie
 }
 
 
+function getProductsList(elem, url, token) {//For <select> drop-down currencies.
+  var obj = $('' + elem + '');
+  
+  $.ajax({
+    url: url,
+    headers: { "X-CSRF-Token": token },
+    datatype: 'jsonp',
+    type: "GET",
+    //data: req,
+    success: function(data) {
+    if(!data || !data.length) {
+        //obj.val('');
+        return false;
+      }
+      
+      obj.append('<option></option>');
+      for(var i in data) {
+        var opt = '<option ' + 'style="word-wrap: break-word; width: 50px" price="' + data[i].price + '" currency="' + data[i].currency + '" title="' + data[i].name +'" value="' + data[i].name + '">' + data[i].name + '</option>';
+        obj.append(opt);
+      }
+      //res(data);
+      //autocomp(obj, data, isEnter);          
+    },
+    error: function(err) {
+      alert(err);
+    }
+  });
+}
+
+
 function initBaseRates(fx, elem) {
   if(typeof fx == 'undefined')
     return false;
@@ -434,9 +464,9 @@ function initBaseRates(fx, elem) {
 }
 
 
-  function bindRemoveProduct(obj, elem, prodInput, priceInput, currencyInput, prodServiceInput) {
+  function bindRemoveProduct(obj, /*elem, prodInput, priceInput, currencyInput,*/ prodServiceInput) {
     obj.bind('click', function() {
-      var li = $(this).parent('li');
+      var li = $(this).parent('li');/*
       var newIndex = elem.find('li').index(li);
 
       var arr = prodInput.val() && prodInput.val().length? 
@@ -464,7 +494,7 @@ function initBaseRates(fx, elem) {
         currencyInput.val(arr);
       } else {
         currencyInput.val('');
-      }            
+      }*/
 
       prodServiceInput.trigger('change');
       li.remove();
@@ -472,7 +502,7 @@ function initBaseRates(fx, elem) {
    }
 
 
-function removeAllProducts() {
+function removeAllProducts() {//Supplier products
   $("#prodServices").find('li').remove();
   $("#prodServicesList").val('');
   $("#pricesList").val('');
@@ -480,7 +510,7 @@ function removeAllProducts() {
 }
 
 
-function removeAllItems(index) {
+function removeAllItems(index) {//Bi items
   $("#prodServices_"+index).find('li').remove();
   $("#hiddenProdServicesList_"+index).val('');
   $("#amountList_"+index).val('');
@@ -488,8 +518,8 @@ function removeAllItems(index) {
 }
 
 
-function addition(prodInput, priceInput, currencyInput, prod, prodVal, priceVal, currencyVal, elem) {
-  var arr = prodInput.val() && prodInput.val().length?
+function addition(/*prodInput, priceInput, currencyInput,*/ prod, prodVal, priceVal, currencyVal, elem) {
+  /*var arr = prodInput.val() && prodInput.val().length?
     (prodInput.val()).split(',') : [];          
   
   if(checkName(arr, prodVal)) {
@@ -498,7 +528,7 @@ function addition(prodInput, priceInput, currencyInput, prod, prodVal, priceVal,
       title: 'Error!',
       text: 'You have already added ' + prodVal + ' to the list. Please refine your selection.'
     });
-    //alert('You have already added ' + prodVal + ' to the list. Please refine your selection.');
+    
     return false;
   }
 
@@ -513,10 +543,26 @@ function addition(prodInput, priceInput, currencyInput, prod, prodVal, priceVal,
   arr = currencyInput.val() && currencyInput.val().length?
     (currencyInput.val()).split(',') : [];
   arr.push(currencyVal);
-  currencyInput.val((arr));
+  currencyInput.val((arr));*/
   
-  elem.append("<li class='list-group-item'><span class='product'>" + prodVal + ' - ' + priceVal + ' ' + currencyVal + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
-  bindRemoveProduct($('.rem').last(), elem, prodInput, priceInput, currencyInput, prod);
+  var isPresent = false;
+  elem.find('.product').each(function() {
+    if($(this).text() == prodVal) {
+      isPresent = true;
+      return false;
+    }
+  });
+  
+  if(isPresent) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error!',
+      text: 'You have already added ' + prodVal + ' to the list. Please refine your selection.'
+    });
+  } else {
+    elem.append("<li class='list-group-item'><span class='product'>" + prodVal + '</span> - <span class="price">' + priceVal + '</span> <span class="currency">' + currencyVal + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
+      bindRemoveProduct($('.rem').last(), /*elem, prodInput, priceInput, currencyInput,*/ prod);  
+  }
 }
 
 
@@ -539,7 +585,7 @@ function addProduct(obj) {
 
       if(req) {
         $('#prodServiceInput,#price,#currency').removeClass('errorField');
-        addition($("#prodServicesList"), $("#pricesList"), $("#currenciesList"), input, input.val(), $('#price').val(), $('#currency').val(), elem);
+        addition(/*$("#prodServicesList"), $("#pricesList"), $("#currenciesList"), */input, input.val(), $('#price').val(), $('#currency').val(), elem);
         input.val('');
         $('#price').val('');
         //$('#currency').val('');
@@ -712,7 +758,7 @@ function supplierValidateFields(prodList, priceList, currList, fx, defaultCurr, 
     $(obj).insertBefore($(this));
     return false;
   }
-  
+  /*
   if(prodList && prodList.length) {
     var arr = prodList.split(','), arr1 = priceList.split(','), arr2 = currList.split(',');
 
@@ -725,14 +771,24 @@ function supplierValidateFields(prodList, priceList, currList, fx, defaultCurr, 
     $('#prodServicesList').val(arr);
     $('#pricesList').val(arr1);
     $('#currenciesList').val(arr2);
-  }
+  }*/
+  
+  var arr = [], arr1 = [], arr2 = [];
+  
+  $('#prodServices li').each(function(index, el) {
+    var product = $(this).find('.product'), price = $(this).find('.price'), currency = $(this).find('.currency');
+    //var newPrice = fx.convert(parseFloat(price.text()), {from: defaultCurr, to: newCurr});
+    arr.push(product);
+    arr1.push(price);
+    arr2.push(currency);    
+  });
 
   var preferred = $('.currency').first().val();
   var isChanged = false;
-  $('span.product').each(function(ind, elem) {
-    var text = $(this).text();
-    var last = text.lastIndexOf(' ');
-    var curr = text.substring(last+1);
+  $('span.currency').each(function(ind, elem) {
+    var curr = $(this).text();
+    //var last = text.lastIndexOf(' ');
+    //var curr = text.substring(last+1);
   
     if(preferred != curr) {
       isChanged = true;
@@ -744,6 +800,9 @@ function supplierValidateFields(prodList, priceList, currList, fx, defaultCurr, 
     return false;
   }
   
+  $('#prodServicesList').val(arr);
+  $('#pricesList').val(arr1);
+  $('#currenciesList').val(arr2);
   return true;
 }
 
@@ -1056,7 +1115,7 @@ $(document).ready(function() {
                    return false;
                  }
 
-                addition($("#prodServicesList"), $("#pricesList"), $("#currenciesList"), $("#prodServiceInput"), elem[0], elem[1], elem[2], elem2);
+                addition(/*$("#prodServicesList"), $("#pricesList"), $("#currenciesList"),*/ $("#prodServiceInput"), elem[0], elem[1], elem[2], elem2);
               }
             }
           } else if(isMultiple) {//response.file.filename, originalname, fieldname, 

@@ -1829,6 +1829,7 @@ if (1 == 2)
     //db.collection("bidrequests").updateMany({}, { $set: {supplierEmail: "peter.minea@gmail.com", isCancelled: false} }, function(err, obj) {});
 
     //db.collection("bidrequests").updateMany({}, { $set: {price: parseFloat("31.00")} }, function(err, obj) {});
+    
 
     /*
   db.collection('bidrequests')
@@ -1866,7 +1867,7 @@ if (1 == 2)
         db.collection('productservices').updateOne({_id: x._id}, {$set: {price: parseFloat(x.price + 0.5)} });
       });      
       */
-    //db.collection("bidrequests").updateMany({}, { $set: {specialMentions: 'Buyer sent you some questions to be answered about the blankets to be used at the South Park Hospital.'} }, function(err, obj) {});
+    //db.collection("bidrequests").updateMany({}, { $set: { specialMentions: 'Buyer sent you some questions to be answered about the blankets to be used at the South Park Hospital.'} }, function(err, obj) {});
 
     //db.collection("buyers").updateMany({}, { $set: { isActive: true } }, function(err, obj) {});
     //db.collection("supervisors").updateMany({}, { $set: { isActive: true } }, function(err, obj) {});
@@ -1881,6 +1882,7 @@ if (1 == 2)
 
     //db.collection("suppliers").updateMany({}, { $set: { currency: 'EUR' } }, function(err, obj) {});
     //db.collection("buyers").updateMany({}, { $set: { currency: 'EUR' } }, function(err, obj) {});
+    //db.collection("bidrequests").updateMany({}, { $set: { buyerCurrency: 'EUR', supplierCurrency: 'EUR' } }, function(err, obj) {});
 
     db.close();
   });
