@@ -48,7 +48,11 @@ const bidRequestSchema = new Schema({
     },
     required: true
   },
-  currency: {
+  buyerCurrency: {
+    type: String,
+    required: true,
+  },
+  supplierCurrency: {
     type: String,
     required: true,
   },

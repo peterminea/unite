@@ -215,7 +215,7 @@
                     <label>Products / Services Offered</label>
                     <ul id="cartList_<%= i %>" class="list-group">
                       <% for (h in products) { %>
-                      <li class="list-group-item"><%= amounts[h] %>*<%= products[h] %> - <%= prices[h] %> <%= bid.currency %></li>
+                      <li class="list-group-item"><%= amounts[h] %>*<%= products[h] %> - <%= prices[h] %> <%= bid.supplierCurrency %></li>
                       <% } %>
                     </ul>
                   </div>
@@ -266,9 +266,10 @@
                    <div class="form-group">
                     <label class="col-form-label">Price</label>
                      <% l = 0; for(m in bid.priceList) {l += bid.priceList[m];} %>
-                    <input type="text" title="Total order price" value="<%= l %> <%= bid.currency %>" class="form-control" id="price_<%= i %>" name="price" disabled>
-                     <input type="hidden" value="<%= bid.currency %>" id="currency_<%= i %>" name="currency"></span>
-                     <input type="hidden" id="defaultPrice_<%= i %>" value="1">
+                    <input type="text" title="Total order price" value="<%= l %> <%= bid.supplierCurrency %>" class="form-control" id="price_<%= i %>" name="price" disabled>
+                     <input type="hidden" value="<%= bid.buyerCurrency %>" id="currency1_<%= i %>" name="buyerCurrency"></span>
+                    <input type="hidden" value="<%= bid.supplierCurrency %>" id="currency_<%= i %>" name="supplierCurrency"></span>
+                    <input type="hidden" id="defaultPrice_<%= i %>" value="1">
                   </div>
                    <div class="form-group">
                     <label class="col-form-label">Status*</label>

@@ -50,7 +50,7 @@
       //errorSuccess(Swal, '< %= errorMessage %>', '< %= successMessage %>');
       initBaseRates(fx, '#currency');
       
-      $('#currency').on('change', function() {        
+      $('#currency').on('change', function() {
         var val = fx.convert($('#defaultBalance').val(), {from: $('#defaultCurrency').val(), to: $(this).val()});
         $('#balance').val(val.toFixed(2) + ' ' + $(this).val());
       });

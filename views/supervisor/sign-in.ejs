@@ -19,6 +19,7 @@
   <script src="/index.min.js"></script>
   <script src="/sweetalert2@9.min.js"></script>
   <script src="/https.js"></script>
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   <script src="/autocomp.js"></script>
   <script type="text/javascript">
   $(document).ready(function() {
@@ -71,7 +72,8 @@
           <input type="checkbox" class="form-check-input" name="remember" id="remember">          
             <label style="color: green" class="form-check-label" for="remember">Remember me (?)</label>          
         </div>
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+        <div class="g-recaptcha" data-sitekey="<%= captchaSiteKey %>"></div>
         <button type="submit" class="btn btn-primary btn-block btn-lg">Submit</button>
       </form>
     </div>
