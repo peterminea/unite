@@ -18,6 +18,7 @@
   <script src="/bootstrap.min.js"></script>
   <script src="/sweetalert2@9.min.js"></script>  
   <script src="/https.js"></script>
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   <script src="/autocomp.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
@@ -31,6 +32,10 @@
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
 
       $('#feedbackForm').submit(function(e) {
+        var formData = new FormData(document.getElementById('feedbackForm'));
+        var captchaResponse = formData.get('g-recaptcha-response');
+        $('input[name="captchaResponse"]').val(captchaResponse);
+        
         var option = $(this).find('select option:not(:eq(0)):selected');
         
         if(!option.length) {
@@ -74,6 +79,8 @@
               <textarea required class="form-control" id="details" name="details" rows="10" placeholder="Details..." cols="50"></textarea>
             </div>
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <div class="g-recaptcha" data-sitekey="<%= captchaSiteKey %>"></div>
+            <input type="hidden" name="captchaResponse">
             <button style="float: right" type="submit" id="submitFeedback" title="Send Feedback" class="btn-primary btn">Send your Feedback</button><br>
           </form>
       </div>

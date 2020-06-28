@@ -23,6 +23,8 @@ var Recaptcha = require('express-recaptcha').RecaptchaV3;
 const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
+const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
+const fetch = require('node-fetch');
 
 const statusesJson = {
   BUYER_REQUESTED_BID: parseInt(process.env.BUYER_REQ_BID),
@@ -357,7 +359,7 @@ exports.getSignIn = (req, res) => {
 }
 
 
-exports.postSignIn = (req, res) => {
+exports.postSignIn = async (req, res) => {
   postSignInBody('supplier', req, res);
 }
 
@@ -393,171 +395,180 @@ function prel(req, isNumber) {
 
 let global = 0;
 exports.postSignUp = async (req, res) => {
-  if (req.body.emailAddress) {
-    const email = req.body.emailAddress;
-    const email_str_arr = email.split("@");
-    const domain_str_location = email_str_arr.length - 1;
-    const final_domain = email_str_arr[domain_str_location];
-    var prohibitedArray = ["gmaid.com", "hotmaix.com", "outloop.com", "yandex.com", "yahuo.com", "gmx"];
+  const captchaVerified = await fetch('https://www.google.com/recaptcha/api/siteverify?secret=' + captchaSecretKey + '&response=' + req.body.captchaResponse, {method: 'POST'})
+  .then((res0) => res0.json());
+  
+  console.log(captchaVerified);
+  if(((req.body.captchaResponse).length == 0) || captchaVerified.success === true) {
+    if(req.body.emailAddress) {
+      const email = req.body.emailAddress;
+      const email_str_arr = email.split("@");
+      const domain_str_location = email_str_arr.length - 1;
+      const final_domain = email_str_arr[domain_str_location];
+      var prohibitedArray = ["gmaid.com", "hotmaix.com", "outloop.com", "yandex.com", "yahuo.com", "gmx"];
 
-    for (var i = 0; i < prohibitedArray.length; i++)
-      if (final_domain.toLowerCase().includes(prohibitedArray[i].toLowerCase())) {
-        req.flash("error", "E-mail address must belong to a custom company domain.");
-        return res.redirect("/supplier/sign-up"); //supplier/sign-up
-      } else {
-        if (req.body.password.length < 6) {
-          req.flash("error", "Password must have at least 6 characters.");
-          return res.redirect("/supplier/sign-up");
-          var supplier;
-          //Prevent duplicate attempts:
-        } else if (global++ < 1) {
-          await Supplier.findOne({ emailAddress: req.body.emailAddress }, function(err,  user) {
-            if(treatError(req, res, err, '/supplier/sign-up'))
-              return false;
-            
-            if (user)
-              return res.status(400).send({
-                msg:
-                  "The e-mail address you have entered is already associated with another account."
-              });
-          }).catch(console.error);
-          
-          try {
-            await bcrypt.hash(req.body.password, 16, async function(err, hash) {
-                supplier = new Supplier({
-                  role: process.env.USER_REGULAR,
-                  avatar: req.body.avatar,
-                  companyName: req.body.companyName,
-                  directorsName: req.body.directorsName,
-                  contactName: req.body.contactName,
-                  title: req.body.title,
-                  companyRegistrationNo: req.body.companyRegistrationNo,
-                  emailAddress: req.body.emailAddress,
-                  password: req.body.password,
-                  isVerified: false,
-                  isActive: false,
-                  registeredCountry: req.body.registeredCountry,
-                  companyAddress: req.body.companyAddress,
-                  areaCovered: req.body.areaCovered,
-                  contactMobileNumber: req.body.contactMobileNumber,
-                  country: req.body.country,
-                  industry: req.body.industry,
-                  employeeNumbers: req.body.employeeNumbers,
-                  lastYearTurnover: req.body.lastYearTurnover,
-                  website: req.body.website,
-                  productsServicesOffered: prel(req.body.productsServicesOffered),
-                  pricesList: prel(req.body.pricesList, true),
-                  currenciesList: prel(req.body.currenciesList),
-                  capabilityDescription: req.body.capabilityDescription,
-                  relevantExperience: req.body.relevantExperience,
-                  supportingInformation: req.body.supportingInformation,
-                  certificates: req.body.certificatesIds,
-                  antibriberyPolicy: req.body.antibriberyPolicyId,
-                  environmentPolicy: req.body.environmentPolicyId,
-                  qualityManagementPolicy: req.body.qualityManagementPolicyId,
-                  occupationalSafetyAndHealthPolicy: req.body.occupationalSafetyAndHealthPolicyId,
-                  otherRelevantFiles: req.body.otherRelevantFilesIds,
-                  certificatesIds: req.body.certificatesIds,
-                  antibriberyPolicyId: req.body.antibriberyPolicyId,
-                  environmentPolicyId: req.body.environmentPolicyId,
-                  qualityManagementPolicyId: req.body.qualityManagementPolicyId,
-                  occupationalSafetyAndHealthPolicyId: req.body.occupationalSafetyAndHealthPolicyId,
-                  otherRelevantFilesIds: req.body.otherRelevantFilesIds,
-                  balance: req.body.balance,
-                  currency: req.body.currency,
-                  facebookURL: req.body.facebookURL,
-                  instagramURL: req.body.instagramURL,
-                  twitterURL: req.body.twitterURL,
-                  linkedinURL: req.body.linkedinURL,
-                  otherSocialMediaURL: req.body.otherSocialMediaURL,
-                  UNITETermsAndConditions: true,//We assume that user was constrainted to check them.
-                  antibriberyAgreement: true,
-                  createdAt: Date.now(),
-                  updatedAt: Date.now()
-                });
+      for (var i = 0; i < prohibitedArray.length; i++)
+        if (final_domain.toLowerCase().includes(prohibitedArray[i].toLowerCase())) {
+          req.flash("error", "E-mail address must belong to a custom company domain.");
+          return res.redirect("/supplier/sign-up"); //supplier/sign-up
+        } else {
+          if (req.body.password.length < 6) {
+            req.flash("error", "Password must have at least 6 characters.");
+            return res.redirect("/supplier/sign-up");
+            var supplier;
+            //Prevent duplicate attempts:
+          } else if (global++ < 1) {
+            await Supplier.findOne({ emailAddress: req.body.emailAddress }, function(err,  user) {
+              if(treatError(req, res, err, '/supplier/sign-up'))
+                return false;
 
-                await supplier.save(async (err) => {
-                  if (err) {
-                    req.flash('error', err.message);
-                    console.error(err);
-                     return res.status(500).send({
-                         msg: err.message
-                         });
-                  }
+              if (user)
+                return res.status(400).send({
+                  msg:
+                    "The e-mail address you have entered is already associated with another account."
                 });
-                  
-                  req.session.supplier = supplier;
-                  req.session.supplierId = supplier._id;
-                  await req.session.save();
-                  
-                  var capability = new Capability({
-                    supplier: supplier._id,
-                    capabilityDescription: supplier.capabilityDescription,
+            }).catch(console.error);
+
+            try {
+              await bcrypt.hash(req.body.password, 16, async function(err, hash) {
+                  supplier = new Supplier({
+                    role: process.env.USER_REGULAR,
+                    avatar: req.body.avatar,
+                    companyName: req.body.companyName,
+                    directorsName: req.body.directorsName,
+                    contactName: req.body.contactName,
+                    title: req.body.title,
+                    companyRegistrationNo: req.body.companyRegistrationNo,
+                    emailAddress: req.body.emailAddress,
+                    password: req.body.password,
+                    isVerified: false,
+                    isActive: false,
+                    registeredCountry: req.body.registeredCountry,
+                    companyAddress: req.body.companyAddress,
+                    areaCovered: req.body.areaCovered,
+                    contactMobileNumber: req.body.contactMobileNumber,
+                    country: req.body.country,
+                    industry: req.body.industry,
+                    employeeNumbers: req.body.employeeNumbers,
+                    lastYearTurnover: req.body.lastYearTurnover,
+                    website: req.body.website,
+                    productsServicesOffered: prel(req.body.productsServicesOffered),
+                    pricesList: prel(req.body.pricesList, true),
+                    currenciesList: prel(req.body.currenciesList),
+                    capabilityDescription: req.body.capabilityDescription,
+                    relevantExperience: req.body.relevantExperience,
+                    supportingInformation: req.body.supportingInformation,
+                    certificates: req.body.certificatesIds,
+                    antibriberyPolicy: req.body.antibriberyPolicyId,
+                    environmentPolicy: req.body.environmentPolicyId,
+                    qualityManagementPolicy: req.body.qualityManagementPolicyId,
+                    occupationalSafetyAndHealthPolicy: req.body.occupationalSafetyAndHealthPolicyId,
+                    otherRelevantFiles: req.body.otherRelevantFilesIds,
+                    certificatesIds: req.body.certificatesIds,
+                    antibriberyPolicyId: req.body.antibriberyPolicyId,
+                    environmentPolicyId: req.body.environmentPolicyId,
+                    qualityManagementPolicyId: req.body.qualityManagementPolicyId,
+                    occupationalSafetyAndHealthPolicyId: req.body.occupationalSafetyAndHealthPolicyId,
+                    otherRelevantFilesIds: req.body.otherRelevantFilesIds,
+                    balance: req.body.balance,
+                    currency: req.body.currency,
+                    facebookURL: req.body.facebookURL,
+                    instagramURL: req.body.instagramURL,
+                    twitterURL: req.body.twitterURL,
+                    linkedinURL: req.body.linkedinURL,
+                    otherSocialMediaURL: req.body.otherSocialMediaURL,
+                    UNITETermsAndConditions: true,//We assume that user was constrainted to check them.
+                    antibriberyAgreement: true,
                     createdAt: Date.now(),
                     updatedAt: Date.now()
                   });
 
-                  await capability.save(function(err) {
-                    if(treatError(req, res, err, '/supplier/sign-up'))
-                      return false;
-                    console.log('Capability saved!');
-                  });
-                  
-                  var token = new Token({
-                    _userId: supplier._id,
-                    token: crypto.randomBytes(16).toString("hex")
-                  });
-                  
-                  await token.save(async function(err) {
+                  await supplier.save(async (err) => {
                     if (err) {
                       req.flash('error', err.message);
-                      console.error(err.message);
-                      return res.status(500).send({
-                        msg: err.message
-                       });
-                        }
-                  });
-              
-                  var industry = new Industry({
-                    name: req.body.industry
-                  });
-              
-                  industry.save((err) => {
-                    if(treatError(req, res, err, '/supplier/sign-up'))
-                      return false;//If that industry already exists.
-                  });
-                    
-                  await sendConfirmationEmail(supplier.companyName, "/supplier/confirmation/", token.token, req);
-
-                  if (Array.isArray(supplier.productsServicesOffered)) {
-                    for (var i in supplier.productsServicesOffered) {
-                      var productService = new ProductService({
-                        supplier: supplier._id,
-                        productName: supplier.productsServicesOffered[i],
-                        price: parseFloat(supplier.pricesList[i]),
-                        currency: supplier.currenciesList[i],
-                        createdAt: Date.now(),
-                        updatedAt: Date.now()
-                      });
-
-                      await productService.save((err) => {
-                        if(treatError(req, res, err, '/supplier/sign-up'))
-                          return false;
-                      });
+                      console.error(err);
+                       return res.status(500).send({
+                           msg: err.message
+                           });
                     }
-                    
-                  console.log('All products saved!');
-                  req.flash("success", "Supplier signed up successfully! Please confirm your account by visiting " + req.body.emailAddress + '');
-                  setTimeout(function() {
-                      return res.redirect("/supplier/sign-in");
-                    }, 250);
-                  }
-            });
-       } catch {              
-       }
+                  });
+
+                    req.session.supplier = supplier;
+                    req.session.supplierId = supplier._id;
+                    await req.session.save();
+
+                    var capability = new Capability({
+                      supplier: supplier._id,
+                      capabilityDescription: supplier.capabilityDescription,
+                      createdAt: Date.now(),
+                      updatedAt: Date.now()
+                    });
+
+                    await capability.save(function(err) {
+                      if(treatError(req, res, err, '/supplier/sign-up'))
+                        return false;
+                      console.log('Capability saved!');
+                    });
+
+                    var token = new Token({
+                      _userId: supplier._id,
+                      token: crypto.randomBytes(16).toString("hex")
+                    });
+
+                    await token.save(async function(err) {
+                      if (err) {
+                        req.flash('error', err.message);
+                        console.error(err.message);
+                        return res.status(500).send({
+                          msg: err.message
+                         });
+                          }
+                    });
+
+                    var industry = new Industry({
+                      name: req.body.industry
+                    });
+
+                    industry.save((err) => {
+                      if(treatError(req, res, err, '/supplier/sign-up'))
+                        return false;//If that industry already exists.
+                    });
+
+                    await sendConfirmationEmail(supplier.companyName, "/supplier/confirmation/", token.token, req);
+
+                    if (Array.isArray(supplier.productsServicesOffered)) {
+                      for (var i in supplier.productsServicesOffered) {
+                        var productService = new ProductService({
+                          supplier: supplier._id,
+                          productName: supplier.productsServicesOffered[i],
+                          price: parseFloat(supplier.pricesList[i]),
+                          currency: supplier.currenciesList[i],
+                          createdAt: Date.now(),
+                          updatedAt: Date.now()
+                        });
+
+                        await productService.save((err) => {
+                          if(treatError(req, res, err, '/supplier/sign-up'))
+                            return false;
+                        });
+                      }
+
+                    console.log('All products saved!');
+                    req.flash("success", "Supplier signed up successfully! Please confirm your account by visiting " + req.body.emailAddress + '');
+                    setTimeout(function() {
+                        return res.redirect("/supplier/sign-in");
+                      }, 250);
+                    }
+              });
+         } catch {              
+         }
+        }
       }
     }
-  }
+  } else {
+      req.flash('error', 'Captcha failed!')
+      res.redirect('back');
+    }
 }
 
 

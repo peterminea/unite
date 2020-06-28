@@ -15,6 +15,8 @@ var Recaptcha = require('express-recaptcha').RecaptchaV3;
 const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
+const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
+const fetch = require('node-fetch');
 
 exports.getIndex = (req, res) => {
   if(!req || !req.session) 
@@ -376,94 +378,103 @@ exports.postSignIn = (req, res) => {
 
 let global = 0;
 exports.postSignUp = async (req, res) => {
-  if (req.body.emailAddress) {
-    const email = req.body.emailAddress;
-    const email_str_arr = email.split("@");
-    const domain_str_location = email_str_arr.length - 1;
-    const final_domain = email_str_arr[domain_str_location];
-    var prohibitedArray = ["gmaid.com", "hotmaix.com", "outloop.com", "yandex.com", "yahuo.com", "gmx"];
-    
-    for(var i = 0; i < prohibitedArray.length; i++)
-    if (final_domain.toLowerCase().includes(prohibitedArray[i].toLowerCase())) {
-      req.flash("error", "E-mail address must be a custom company domain.");
-      return res.redirect("/supervisor/sign-up");
-    } else {
-      if (req.body.password.length < 6) {
-        req.flash("error", "Password must have at least 6 characters.");
-        return res.redirect("/supervisor/sign-up");
-        } else if(global++ < 1) {
-          Supervisor.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
-            if (user) 
-              return res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
-        var supervisor;
-        try {
-          bcrypt.hash(req.body.password, 16, async function(err, hash) {
-          //user = new Promise((resolve, reject) => {
-            supervisor = new Supervisor({
-              role: process.env.USER_REGULAR,
-              avatar: req.body.avatar,
-              organizationName: req.body.organizationName,
-              organizationUniteID: req.body.organizationUniteID,
-              contactName: req.body.contactName,
-              emailAddress: req.body.emailAddress,
-              password: req.body.password,
-              isVerified: false,
-              isActive: false,
-              contactMobileNumber: req.body.contactMobileNumber,
-              address: req.body.address,
-              country: req.body.country,
-              certificates: req.body.certificatesIds,
-              antibriberyPolicy: req.body.antibriberyPolicyId,
-              environmentPolicy: req.body.environmentPolicyId,
-              qualityManagementPolicy: req.body.qualityManagementPolicyId,
-              occupationalSafetyAndHealthPolicy: req.body.occupationalSafetyAndHealthPolicyId,
-              otherRelevantFiles: req.body.otherRelevantFilesIds,
-              certificatesIds: req.body.certificatesIds,
-              antibriberyPolicyId: req.body.antibriberyPolicyId,
-              environmentPolicyId: req.body.environmentPolicyId,
-              qualityManagementPolicyId: req.body.qualityManagementPolicyId,
-              occupationalSafetyAndHealthPolicyId: req.body.occupationalSafetyAndHealthPolicyId,
-              otherRelevantFilesIds: req.body.otherRelevantFilesIds,
-              UNITETermsAndConditions: true,
-              antibriberyAgreement: true,
-              createdAt: Date.now(),
-              updatedAt: Date.now()
-            });
-            
-            await supervisor.save((err) => {
-              if(treatError(req, res, err, '/supervisor/sign-up'))
-                return false;
-              req.session.supervisor = supervisor;
-              req.session.supervisorId = supervisor._id;
-              req.session.save();
-              
-              var token = new Token({ 
-                _userId: supervisor._id,
-                token: crypto.randomBytes(16).toString('hex') });
-              
-              token.save(async function (err) {
-                if (err) {
-                  req.flash('error', err.message);
-                  console.error(err.message);
-                  return res.status(500).send({
-                    msg: err.message 
-                  });
-                }
+  const captchaVerified = await fetch('https://www.google.com/recaptcha/api/siteverify?secret=' + captchaSecretKey + '&response=' + req.body.captchaResponse, {method: 'POST'})
+  .then((res0) => res0.json());
+  
+  console.log(captchaVerified);
+  if(((req.body.captchaResponse).length == 0) || captchaVerified.success === true) {
+    if(req.body.emailAddress) {
+      const email = req.body.emailAddress;
+      const email_str_arr = email.split("@");
+      const domain_str_location = email_str_arr.length - 1;
+      const final_domain = email_str_arr[domain_str_location];
+      var prohibitedArray = ["gmaid.com", "hotmaix.com", "outloop.com", "yandex.com", "yahuo.com", "gmx"];
 
-                await sendConfirmationEmail(supervisor.organizationName, "/supervisor/confirmation/", token.token, req);
-                req.flash("success", "Supervisor signed up successfully! Please confirm your account by visiting " + req.body.emailAddress + '');
-                setTimeout(function() {
-                  return res.redirect("/supervisor/sign-in");
-                }, 250);
+      for(var i = 0; i < prohibitedArray.length; i++)
+      if (final_domain.toLowerCase().includes(prohibitedArray[i].toLowerCase())) {
+        req.flash("error", "E-mail address must be a custom company domain.");
+        return res.redirect("/supervisor/sign-up");
+      } else {
+        if (req.body.password.length < 6) {
+          req.flash("error", "Password must have at least 6 characters.");
+          return res.redirect("/supervisor/sign-up");
+          } else if(global++ < 1) {
+            Supervisor.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
+              if (user) 
+                return res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
+          var supervisor;
+          try {
+            bcrypt.hash(req.body.password, 16, async function(err, hash) {
+            //user = new Promise((resolve, reject) => {
+              supervisor = new Supervisor({
+                role: process.env.USER_REGULAR,
+                avatar: req.body.avatar,
+                organizationName: req.body.organizationName,
+                organizationUniteID: req.body.organizationUniteID,
+                contactName: req.body.contactName,
+                emailAddress: req.body.emailAddress,
+                password: req.body.password,
+                isVerified: false,
+                isActive: false,
+                contactMobileNumber: req.body.contactMobileNumber,
+                address: req.body.address,
+                country: req.body.country,
+                certificates: req.body.certificatesIds,
+                antibriberyPolicy: req.body.antibriberyPolicyId,
+                environmentPolicy: req.body.environmentPolicyId,
+                qualityManagementPolicy: req.body.qualityManagementPolicyId,
+                occupationalSafetyAndHealthPolicy: req.body.occupationalSafetyAndHealthPolicyId,
+                otherRelevantFiles: req.body.otherRelevantFilesIds,
+                certificatesIds: req.body.certificatesIds,
+                antibriberyPolicyId: req.body.antibriberyPolicyId,
+                environmentPolicyId: req.body.environmentPolicyId,
+                qualityManagementPolicyId: req.body.qualityManagementPolicyId,
+                occupationalSafetyAndHealthPolicyId: req.body.occupationalSafetyAndHealthPolicyId,
+                otherRelevantFilesIds: req.body.otherRelevantFilesIds,
+                UNITETermsAndConditions: true,
+                antibriberyAgreement: true,
+                createdAt: Date.now(),
+                updatedAt: Date.now()
+              });
+
+              await supervisor.save((err) => {
+                if(treatError(req, res, err, '/supervisor/sign-up'))
+                  return false;
+                req.session.supervisor = supervisor;
+                req.session.supervisorId = supervisor._id;
+                req.session.save();
+
+                var token = new Token({ 
+                  _userId: supervisor._id,
+                  token: crypto.randomBytes(16).toString('hex') });
+
+                token.save(async function (err) {
+                  if (err) {
+                    req.flash('error', err.message);
+                    console.error(err.message);
+                    return res.status(500).send({
+                      msg: err.message 
+                    });
+                  }
+
+                  await sendConfirmationEmail(supervisor.organizationName, "/supervisor/confirmation/", token.token, req);
+                  req.flash("success", "Supervisor signed up successfully! Please confirm your account by visiting " + req.body.emailAddress + '');
+                  setTimeout(function() {
+                    return res.redirect("/supervisor/sign-in");
+                  }, 250);
+                  });
                 });
               });
-            });
-          } catch {
-          }
-        });
+            } catch {
+            }
+          });
+        }
       }
     }
-  }
+  } else {
+      req.flash('error', 'Captcha failed!')
+      res.redirect('back');
+    }
 }
 
 

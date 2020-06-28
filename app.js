@@ -426,12 +426,12 @@ const Grid = require("gridfs-stream");
 var methodOverride = require("method-override");
 app.use(methodOverride("_method"));
 
-let gfs;
+let gfs, gfs2;
 
 conn.once("open", () => {
   gfs = Grid(conn.db, mongoose.mongo);
-  //gfs = new mongoose.mongo.GridFSBucket(conn.db, {    bucketName: "uploads"  });
-  //console.log(gfs);
+  gfs2 = new mongoose.mongo.GridFSBucket(conn.db, { bucketName: "uploads" });
+  //console.log(gfs2.s.db);
 
   gfs.collection("uploads");
 });
@@ -695,6 +695,10 @@ var MongoClient = require('mongodb').MongoClient,
         }
       console.log(11);
       gfs.openDownloadStream(req.params.id).pipe(res);
+          let readStream = gfs.createReadStream({
+        filename: req.params.filename,
+        root: 'uploads'
+    });
       //var readstream = gfs.createReadStream({ _id: mongoose.Types.ObjectId(req.params.id) });
       //readstream.pipe(res);
     }

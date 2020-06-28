@@ -68,6 +68,9 @@
       
         $('#register').click(function(e) {
           e.preventDefault();
+          var formData = new FormData(document.getElementById('registration'));
+          var captchaResponse = formData.get('g-recaptcha-response');
+          $('input[name="captchaResponse"]').val(captchaResponse);
 
           if(!supplierValidateFields(fx, defaultCurr, $('#currency').val()))
             return false;
@@ -296,6 +299,7 @@
 
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <div class="g-recaptcha" data-sitekey="<%= captchaSiteKey %>"></div>
+        <input type="hidden" name="captchaResponse">
         <button disabled id="register" type="submit" class="btn btn-primary btn-block">Sign Up</button>
         <div class="form-group">
           <label class="text-muted form-text">
