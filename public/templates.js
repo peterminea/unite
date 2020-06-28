@@ -5,6 +5,8 @@ const bcrypt = require("bcryptjs");
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
+const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
+const fetch = require('node-fetch');
 
 const sendConfirmationEmail = (name, link, token, req) => {
     sgMail.send({
@@ -144,103 +146,112 @@ const sendResetPasswordEmail = (user, type, req) => {
 };
 
 
-const postSignInBody = (link, req, res) => {
+const postSignInBody = async (link, req, res) => {
   var dbLink = link + 's';
   const email = req.body.emailAddress;
   const password = req.body.password;
   console.log(email + ' ' + password);
-
-  try {
-  if(!email) {
-    req.flash('error', 'No e-mail was given!');
-    return res.redirect(`/${link}/sign-in`);
-  }
-  else {
-     MongoClient.connect(URL, {useUnifiedTopology: true},  function(err, db) {
-      if(treatError(req, res, err, `/${link}/sign-in`)) 
-        return false;
-       
-      var dbo = db.db(BASE);
-      console.log(dbLink);
-       dbo.collection(dbLink).findOne( { emailAddress: email, password: password },  (err, doc) => {
-        if(err) 
-          return console.error(err.message);
-
-        if(!doc) {
-          req.flash("error", "Invalid e-mail address or password!");
-          return res.redirect(`/${link}/sign-in`);
-        }
-          switch(link) {
-            case 'buyer':
-              req.session.buyer = doc;
-              req.session.buyerId = doc._id;
-              break;
-
-            case 'supervisor':
-              req.session.supervisor = doc;
-              req.session.supervisorId = doc._id;
-              break;
-
-            case 'supplier':
-              req.session.supplier = doc;
-              req.session.supplierId = doc._id;
-              break;
-
-            default:
-              break;
-          }
-         
-          req.session.cookie.originalMaxAge = req.body.remember? null : 7200000;//Two hours.           
-          req.session.save();
-          bcrypt.compare(password, doc.password, async (err, doMatch) => {
-            if(treatError(req, res, err, `/${link}/sign-in`))
-              return false;
-            
-            if (doMatch ||
-              (password === doc.password && email === doc.emailAddress)
-            ) {
-              if (!doc.isVerified)
-                return res.status(401).send({
-                  type: "not-verified",
-                  msg:
-                    "Your account has not been verified. Please check your e-mail for instructions."
-                });
-              
-                if(doc.isActive != null && doc.isActive == false) {//Reactivate on login.
-                    if(link == 'buyer') {
-                      await dbo.collection('supervisors').findOne({ organizationUniteID: doc.organizationUniteID }, async function(err, obj) {
-                        if(treatError(req, res, err, `/${link}/sign-in`))
-                          return false;
-                        if(!obj || !obj.isActive) {
-                          return res.status(401).send({
-                            type: "not-valid-supervisor",
-                            msg: "You do not currently have a valid and/or active Supervisor. Please check with them before reactivating your Buyer account."});
-                        } else
-                            await dbo.collection(dbLink).updateOne( { _id: doc._id }, { $set: { isActive: true } }, function(err, obj) {
-                              if(treatError(req, res, err, `/${link}/sign-in`))
-                                return false;
-                            });
-                      });
-                    } else                  
-                      await dbo.collection(dbLink).updateOne( { _id: doc._id }, { $set: { isActive: true } }, function(err, obj) {
-                        if(treatError(req, res, err, `/${link}/sign-in`))
-                          return false;
-                      });
-                }
-              
-                db.close();
-                setTimeout(function() {
-                  return res.redirect(`/${link}`);
-                }, 100);
-            } else {
-              req.flash("error", "Passwords and e-mail do not match!");
-              return res.redirect(`/${link}/sign-in`);
-            }
-          })
-        })
-      })//.catch(console.error);;
+  const captchaVerified = await fetch('https://www.google.com/recaptcha/api/siteverify?secret=' + captchaSecretKey + '&response=' + req.body.captchaResponse, {method: 'POST'})
+  .then((res0) => res0.json());
+  
+  console.log((req.body.captchaResponse).length);
+  console.log(captchaVerified);
+  if(((req.body.captchaResponse).length == 0) || captchaVerified.success === true) {//The 0 length means that we are inside the development environment, and not on the domain itself (platform.publicprocurement.com).
+    try {
+    if(!email) {
+      req.flash('error', 'No e-mail was given!');
+      return res.redirect(`/${link}/sign-in`);
     }
-  } catch {
+    else {
+       MongoClient.connect(URL, {useUnifiedTopology: true},  function(err, db) {
+        if(treatError(req, res, err, `/${link}/sign-in`)) 
+          return false;
+
+        var dbo = db.db(BASE);
+        console.log(dbLink);
+         dbo.collection(dbLink).findOne( { emailAddress: email, password: password },  (err, doc) => {
+          if(err) 
+            return console.error(err.message);
+
+          if(!doc) {
+            req.flash("error", "Invalid e-mail address or password!");
+            return res.redirect(`/${link}/sign-in`);
+          }
+            switch(link) {
+              case 'buyer':
+                req.session.buyer = doc;
+                req.session.buyerId = doc._id;
+                break;
+
+              case 'supervisor':
+                req.session.supervisor = doc;
+                req.session.supervisorId = doc._id;
+                break;
+
+              case 'supplier':
+                req.session.supplier = doc;
+                req.session.supplierId = doc._id;
+                break;
+
+              default:
+                break;
+            }
+
+            req.session.cookie.originalMaxAge = req.body.remember? null : 7200000;//Two hours.           
+            req.session.save();
+            bcrypt.compare(password, doc.password, async (err, doMatch) => {
+              if(treatError(req, res, err, `/${link}/sign-in`))
+                return false;
+
+              if (doMatch ||
+                (password === doc.password && email === doc.emailAddress)
+              ) {
+                if (!doc.isVerified)
+                  return res.status(401).send({
+                    type: "not-verified",
+                    msg:
+                      "Your account has not been verified. Please check your e-mail for instructions."
+                  });
+
+                  if(doc.isActive != null && doc.isActive == false) {//Reactivate on login.
+                      if(link == 'buyer') {
+                        await dbo.collection('supervisors').findOne({ organizationUniteID: doc.organizationUniteID }, async function(err, obj) {
+                          if(treatError(req, res, err, `/${link}/sign-in`))
+                            return false;
+                          if(!obj || !obj.isActive) {
+                            return res.status(401).send({
+                              type: "not-valid-supervisor",
+                              msg: "You do not currently have a valid and/or active Supervisor. Please check with them before reactivating your Buyer account."});
+                          } else
+                              await dbo.collection(dbLink).updateOne( { _id: doc._id }, { $set: { isActive: true } }, function(err, obj) {
+                                if(treatError(req, res, err, `/${link}/sign-in`))
+                                  return false;
+                              });
+                        });
+                      } else                  
+                        await dbo.collection(dbLink).updateOne( { _id: doc._id }, { $set: { isActive: true } }, function(err, obj) {
+                          if(treatError(req, res, err, `/${link}/sign-in`))
+                            return false;
+                        });
+                  }
+
+                  db.close();
+                  setTimeout(function() {
+                    return res.redirect(`/${link}`);
+                  }, 100);
+              } else {
+                req.flash("error", "Passwords and e-mail do not match!");
+                return res.redirect(`/${link}/sign-in`);
+              }
+            })
+          })
+        })//.catch(console.error);;
+      }
+    } catch {
+    }
+  } else {
+      req.flash('error', 'Captcha failed!')
+      res.redirect('back');
   }
 };
 

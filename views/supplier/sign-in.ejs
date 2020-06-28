@@ -25,6 +25,12 @@
   <script type="text/javascript">
     $(document).ready(function () {
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
+                   
+      $('#login').on('submit', function() {
+        var formData = new FormData(document.getElementById('login'));
+        var captchaResponse = formData.get('g-recaptcha-response');
+        $('input[name="captchaResponse"]').val(captchaResponse);
+      });
     });
   </script>
 </head>
@@ -58,7 +64,7 @@
     <% } %>
     
     <div class="sign-in-form smooth-shadow">
-      <form method="POST">
+      <form id="login" method="POST">
         <h2 class="text-center">Sign in as Supplier</h2>
         <div class="form-group">
           <label for="emailAddress">Email address</label>
@@ -75,6 +81,7 @@
         <br>
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <div class="g-recaptcha" data-sitekey="<%= captchaSiteKey %>"></div>
+        <input type="hidden" name="captchaResponse">
         <button type="submit" class="btn btn-primary btn-block btn-lg">Submit</button>
       </form>
     </div>

@@ -18,6 +18,9 @@ const search = require('../middleware/searchFlash');
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const fs = require("fs");
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
+const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
+const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
+const fetch = require('node-fetch');
 
 var userData = require('../middleware/userHome');
 
@@ -150,6 +153,7 @@ exports.getFeedback = (req, res) => {
 exports.getViewFeedbacks = (req, res) => {
   var obj = userData(req);
   res.render("viewFeedbacks", {
+    captchaSiteKey: captchaSiteKey,
     role: obj.role,
     isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
@@ -255,35 +259,44 @@ exports.getMemberList = async (req, res) => {
 }
 
 
-exports.postFeedback = (req, res) => {
-  try {
-    //Bad Words:
-    const filter = new BadWords();
-    if(filter.isProfane(req.body.details)) {
-      req.flash('error', 'We do not promote profanity here on UNITE. Please use an educated language. The feedback will not be posted otherwise. Thank you for understanding!');
-      return res.redirect('/feedback')
-    }
-    
-    MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
-       if(treatError(req, res, err, 'back'))
-         return false;
-        var dbo = db.db(BASE);
-        await dbo.collection("feedbacks").insertOne({
-          userName: req.body.name,
-          userEmail: req.body.emailAddress,
-          subject: req.body.subject,
-          message: req.body.details,
-          createdAt: Date.now()
-        }, function(err, obj) {
-            if(treatError(req, res, err, 'back'))
-              return false;
-          
-            req.flash('success', 'Feedback successfully sent! Thanks for your opinion. We will get back to you.');
-            db.close();
-            return res.redirect('/feedback');
+exports.postFeedback = async (req, res) => {
+  const captchaVerified = await fetch('https://www.google.com/recaptcha/api/siteverify?secret=' + captchaSecretKey + '&response=' + req.body.captchaResponse, {method: 'POST'})
+  .then((res0) => res0.json());
+  
+  console.log(captchaVerified);
+  if(((req.body.captchaResponse).length == 0) || captchaVerified.success === true) {
+    try {
+      //Bad Words:
+      const filter = new BadWords();
+      if(filter.isProfane(req.body.details)) {
+        req.flash('error', 'We do not promote profanity here on UNITE. Please use an educated language. The feedback will not be posted otherwise. Thank you for understanding!');
+        return res.redirect('/feedback')
+      }
+
+      MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
+         if(treatError(req, res, err, 'back'))
+           return false;
+          var dbo = db.db(BASE);
+          await dbo.collection("feedbacks").insertOne({
+            userName: req.body.name,
+            userEmail: req.body.emailAddress,
+            subject: req.body.subject,
+            message: req.body.details,
+            createdAt: Date.now()
+          }, function(err, obj) {
+              if(treatError(req, res, err, 'back'))
+                return false;
+
+              req.flash('success', 'Feedback successfully sent! Thanks for your opinion. We will get back to you.');
+              db.close();
+              return res.redirect('/feedback');
+          });
         });
-      });
-    } catch {
+      } catch {
+    }
+  } else {
+      req.flash('error', 'Captcha failed!')
+      res.redirect('back');
   }
 };
 

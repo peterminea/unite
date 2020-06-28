@@ -23,7 +23,8 @@ var Recaptcha = require('express-recaptcha').RecaptchaV2;
 const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
-
+const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
+const fetch = require('node-fetch');
 
 const statusesJson = {
   BUYER_REQUESTED_BID: parseInt(process.env.BUYER_REQ_BID),
@@ -583,7 +584,7 @@ exports.postResetPasswordToken = (req, res) => {
 }
 
 
-exports.postSignIn =  (req, res) => {
+exports.postSignIn = (req, res) => {
   postSignInBody('buyer', req, res);
 }
 
@@ -595,103 +596,112 @@ function getSupers(id) {
 }
 
 exports.postSignUp = async (req, res) => {
-  if (req.body.emailAddress) {
-    const email = req.body.emailAddress;
-    const email_str_arr = email.split("@");
-    const domain_str_location = email_str_arr.length - 1;
-    const final_domain = email_str_arr[domain_str_location];
-    var prohibitedArray = ["gmaid.com", "hotmaix.com", "outloop.com", "yandex.com", "yahuo.com", "gmx"];
-    console.log(final_domain.toLowerCase());
-    for(var i = 0; i < prohibitedArray.length; i++)
-    if (final_domain.toLowerCase().includes(prohibitedArray[i].toLowerCase())) {
-      req.flash("error", "E-mail address must be a custom company domain.");
-      return res.redirect("/buyer/sign-up");
-    } else {
-      if (req.body.password.length < 6) {
-        req.flash("error", "Password must have at least 6 characters.");
+  const captchaVerified = await fetch('https://www.google.com/recaptcha/api/siteverify?secret=' + captchaSecretKey + '&response=' + req.body.captchaResponse, {method: 'POST'})
+  .then((res0) => res0.json());
+  
+  console.log(captchaVerified);
+  if(((req.body.captchaResponse).length == 0) || captchaVerified.success === true) {
+    if(req.body.emailAddress) {
+      const email = req.body.emailAddress;
+      const email_str_arr = email.split("@");
+      const domain_str_location = email_str_arr.length - 1;
+      const final_domain = email_str_arr[domain_str_location];
+      var prohibitedArray = ["gmaid.com", "hotmaix.com", "outloop.com", "yandex.com", "yahuo.com", "gmx"];
+      console.log(final_domain.toLowerCase());
+      for(var i = 0; i < prohibitedArray.length; i++)
+      if (final_domain.toLowerCase().includes(prohibitedArray[i].toLowerCase())) {
+        req.flash("error", "E-mail address must be a custom company domain.");
         return res.redirect("/buyer/sign-up");
       } else {
-        var promise = getSupers(req.body.organizationUniteID);
-        
-        promise.then(async function(supers) {
-          if(supers && supers.length && !(supers[0].isActive)) {
-            req.flash('error', 'Your Supervisor is currently not active. Please contact them.');
-            return res.redirect("/buyer/sign-up");
-          } else 
-          if((1==2) && (!supers || supers.length == 0)) {
-            req.flash("error", "Invalid UNITE ID. Please select an appropriate ID from the list.");
-            return res.redirect("/buyer/sign-up");
-          } else if(global++ < 1) {console.log(global);
-          await Buyer.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
-            if (user)
-              return res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
-            var buyer;
-        try {
-          bcrypt.hash(req.body.password, 16, async function(err, hash) {
-              console.log(hash);
-            
-              buyer = new Buyer({
-                role: process.env.USER_REGULAR,
-                avatar: req.body.avatar,
-                organizationName: req.body.organizationName,
-                organizationUniteID: req.body.organizationUniteID,
-                contactName: req.body.contactName,
-                emailAddress: req.body.emailAddress,
-                password: req.body.password,          
-                isVerified: false,
-                isActive: false,
-                contactMobileNumber: req.body.contactMobileNumber,
-                address: req.body.address,
-                balance: req.body.balance,
-                currency: req.body.currency,
-                deptAgencyGroup: req.body.deptAgencyGroup,
-                qualification: req.body.qualification,
-                country: req.body.country,
-                createdAt: Date.now(),
-                updatedAt: Date.now()
-              });
+        if (req.body.password.length < 6) {
+          req.flash("error", "Password must have at least 6 characters.");
+          return res.redirect("/buyer/sign-up");
+        } else {
+          var promise = getSupers(req.body.organizationUniteID);
 
-              await buyer.save((err) => {
-                if(treatError(req, res, err, '/buyer/sign-up'))
-                  return false;
-              });
-                
-              req.session.buyer = buyer;
-              req.session.buyerId = buyer._id;
-              await req.session.save((err) => {
-                if(treatError(req, res, err, '/buyer/sign-up'))
-                  return false;
+          promise.then(async function(supers) {
+            if(supers && supers.length && !(supers[0].isActive)) {
+              req.flash('error', 'Your Supervisor is currently not active. Please contact them.');
+              return res.redirect("/buyer/sign-up");
+            } else 
+            if((1==2) && (!supers || supers.length == 0)) {
+              req.flash("error", "Invalid UNITE ID. Please select an appropriate ID from the list.");
+              return res.redirect("/buyer/sign-up");
+            } else if(global++ < 1) {console.log(global);
+            await Buyer.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
+              if (user)
+                return res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
+              var buyer;
+          try {
+            bcrypt.hash(req.body.password, 16, async function(err, hash) {
+                console.log(hash);
+
+                buyer = new Buyer({
+                  role: process.env.USER_REGULAR,
+                  avatar: req.body.avatar,
+                  organizationName: req.body.organizationName,
+                  organizationUniteID: req.body.organizationUniteID,
+                  contactName: req.body.contactName,
+                  emailAddress: req.body.emailAddress,
+                  password: req.body.password,          
+                  isVerified: false,
+                  isActive: false,
+                  contactMobileNumber: req.body.contactMobileNumber,
+                  address: req.body.address,
+                  balance: req.body.balance,
+                  currency: req.body.currency,
+                  deptAgencyGroup: req.body.deptAgencyGroup,
+                  qualification: req.body.qualification,
+                  country: req.body.country,
+                  createdAt: Date.now(),
+                  updatedAt: Date.now()
                 });
 
-              var token = new Token({ 
-                _userId: buyer._id,
-                token: crypto.randomBytes(16).toString('hex')
-              });
+                await buyer.save((err) => {
+                  if(treatError(req, res, err, '/buyer/sign-up'))
+                    return false;
+                });
 
-              await token.save( async function (err) {
-                if (err) {
-                  req.flash('error', err.message);
-                  console.error(err.message);
-                  return res.status(500).send({
-                    msg: err.message 
-                 });
-                }
+                req.session.buyer = buyer;
+                req.session.buyerId = buyer._id;
+                await req.session.save((err) => {
+                  if(treatError(req, res, err, '/buyer/sign-up'))
+                    return false;
+                  });
+
+                var token = new Token({ 
+                  _userId: buyer._id,
+                  token: crypto.randomBytes(16).toString('hex')
+                });
+
+                await token.save( async function (err) {
+                  if (err) {
+                    req.flash('error', err.message);
+                    console.error(err.message);
+                    return res.status(500).send({
+                      msg: err.message 
+                   });
+                  }
+                });
+
+                await sendConfirmationEmail(req.body.organizationName, "/buyer/confirmation/", token.token, req);
+                req.flash("success", "Buyer signed up successfully! Please confirm your account by visiting " + req.body.emailAddress + '');
+                setTimeout(function() {
+                  return res.redirect("/buyer/sign-in");
+                }, 250);
+                });
+              } catch {
+              }
               });
-              
-              await sendConfirmationEmail(req.body.organizationName, "/buyer/confirmation/", token.token, req);
-              req.flash("success", "Buyer signed up successfully! Please confirm your account by visiting " + req.body.emailAddress + '');
-              setTimeout(function() {
-                return res.redirect("/buyer/sign-in");
-              }, 250);
-              });
-            } catch {
             }
-            });
-          }
-        })//.catch(console.error);
+          })//.catch(console.error);
+        }
       }
     }
-  }
+  } else {
+      req.flash('error', 'Captcha failed!')
+      res.redirect('back');
+    }
 }
 
 
