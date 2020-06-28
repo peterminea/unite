@@ -357,7 +357,7 @@ exports.getSignIn = (req, res) => {
 }
 
 
-exports.postSignIn = async (req, res) => {
+exports.postSignIn = (req, res) => {
   postSignInBody('supplier', req, res);
 }
 
@@ -713,7 +713,7 @@ exports.getProfile = (req, res) => {
       for(var i in products) {
         req.session.supplier.productsServicesOffered.push(products[i].productName);
       }
-    
+    console.log(products);
       var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
       req.session.flash = [];
       
