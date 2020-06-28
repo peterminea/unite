@@ -157,9 +157,11 @@ const postSignInBody = (link, req, res) => {
   }
   else {
      MongoClient.connect(URL, {useUnifiedTopology: true},  function(err, db) {
-      treatError(req, res, err, `/${link}/sign-in`);
+      if(treatError(req, res, err, `/${link}/sign-in`)) 
+        return false;
+       
       var dbo = db.db(BASE);
-      
+      console.log(dbLink);
        dbo.collection(dbLink).findOne( { emailAddress: email, password: password },  (err, doc) => {
         if(err) 
           return console.error(err.message);

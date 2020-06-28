@@ -467,34 +467,7 @@ function initBaseRates(fx, elem) {
   function bindRemoveProduct(obj, /*elem, prodInput, priceInput, currencyInput,*/ prodServiceInput) {
     obj.bind('click', function() {
       var li = $(this).parent('li');/*
-      var newIndex = elem.find('li').index(li);
-
-      var arr = prodInput.val() && prodInput.val().length? 
-          (prodInput.val()).split(',') : [];             
-      if(arr.length) {
-        arr.splice(newIndex, 1);
-        prodInput.val(arr);
-      } else {
-        prodInput.val('');
-      }
-
-      arr = priceInput.val() && priceInput.val().length? 
-          (priceInput.val()).split(',') : [];             
-      if(arr.length) {
-        arr.splice(newIndex, 1);
-        priceInput.val(arr);
-      } else {
-        priceInput.val('');
-      }
-
-      arr = currencyInput.val() && currencyInput.val().length? 
-          (currencyInput.val()).split(',') : [];             
-      if(arr.length) {
-        arr.splice(newIndex, 1);
-        currencyInput.val(arr);
-      } else {
-        currencyInput.val('');
-      }*/
+      var newIndex = elem.find('li').index(li);*/
 
       prodServiceInput.trigger('change');
       li.remove();
@@ -510,7 +483,7 @@ function removeAllProducts() {//Supplier products
 }
 
 
-function removeAllItems(index) {//Bi items
+function removeAllItems(index) {//Bid items
   $("#prodServices_"+index).find('li').remove();
   $("#hiddenProdServicesList_"+index).val('');
   $("#amountList_"+index).val('');
@@ -518,33 +491,7 @@ function removeAllItems(index) {//Bi items
 }
 
 
-function addition(/*prodInput, priceInput, currencyInput,*/ prod, prodVal, priceVal, currencyVal, elem) {
-  /*var arr = prodInput.val() && prodInput.val().length?
-    (prodInput.val()).split(',') : [];          
-  
-  if(checkName(arr, prodVal)) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Error!',
-      text: 'You have already added ' + prodVal + ' to the list. Please refine your selection.'
-    });
-    
-    return false;
-  }
-
-  arr.push(prodVal);
-  prodInput.val((arr));
-
-  arr = priceInput.val() && priceInput.val().length?
-    (priceInput.val()).split(',') : [];
-  arr.push(priceVal);
-  priceInput.val((arr));
-
-  arr = currencyInput.val() && currencyInput.val().length?
-    (currencyInput.val()).split(',') : [];
-  arr.push(currencyVal);
-  currencyInput.val((arr));*/
-  
+function addition(/*prodInput, priceInput, currencyInput,*/ prod, prodVal, priceVal, currencyVal, elem) {  
   var isPresent = false;
   elem.find('.product').each(function() {
     if($(this).text() == prodVal) {
@@ -561,7 +508,7 @@ function addition(/*prodInput, priceInput, currencyInput,*/ prod, prodVal, price
     });
   } else {
     elem.append("<li class='list-group-item'><span class='product'>" + prodVal + '</span> - <span class="price">' + priceVal + '</span> <span class="currency">' + currencyVal + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
-      bindRemoveProduct($('.rem').last(), /*elem, prodInput, priceInput, currencyInput,*/ prod);  
+      bindRemoveProduct($('.rem').last(), prod);  
   }
 }
 
@@ -585,7 +532,7 @@ function addProduct(obj) {
 
       if(req) {
         $('#prodServiceInput,#price,#currency').removeClass('errorField');
-        addition(/*$("#prodServicesList"), $("#pricesList"), $("#currenciesList"), */input, input.val(), $('#price').val(), $('#currency').val(), elem);
+        addition(input, input.val(), $('#price').val(), $('#currency').val(), elem);
         input.val('');
         $('#price').val('');
         //$('#currency').val('');
@@ -1115,7 +1062,7 @@ $(document).ready(function() {
                    return false;
                  }
 
-                addition(/*$("#prodServicesList"), $("#pricesList"), $("#currenciesList"),*/ $("#prodServiceInput"), elem[0], elem[1], elem[2], elem2);
+                addition($("#prodServiceInput"), elem[0], elem[1], elem[2], elem2);
               }
             }
           } else if(isMultiple) {//response.file.filename, originalname, fieldname, 

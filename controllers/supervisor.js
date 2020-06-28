@@ -369,7 +369,7 @@ exports.getSignUp = (req, res) => {
 }
 
 
-exports.postSignIn = async (req, res) => {
+exports.postSignIn = (req, res) => {
   postSignInBody('supervisor', req, res);
 }
 

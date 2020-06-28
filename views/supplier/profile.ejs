@@ -29,42 +29,26 @@
       postAutocomplete('.country', '/countryAutocomplete', token);
       getAutocomplete('#industry', '/industryGetAutocomplete', token);
       getAutocomplete('#currency', '/currencyGetAutocomplete', token);
-      getCurrenciesList('.currency', '/currencyGetAutocomplete', token);
+      getCurrenciesList('select.currency', '/currencyGetAutocomplete', token);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
-      initBaseRates(fx, '.currency');
-      $('.currency').css('width', '100px');
+      initBaseRates(fx, 'select.currency');
+      $('select.currency').css('width', '100px');
       var defaultCurr = "<%= profile.currency %>";
-      //var defaultCurr = "<%= DEFAULT_CURR %>";
+      //var defaultCurr = "< %= DEFAULT_CURR %>";
       
-      $('.currency').on('change', function () {
+      $('select.currency').on('change', (function () {
         var val = $(this).val();
         $('input[name="currency"]').val(val);
-        $('#currency').val(val);
-        //if(val == defaultCurr)
-          //return true;
+        $('#currency').val(val);        
         
         //Re-make the list of products accordingly, with the new currency.
         $('#prodServices').find('li').each(function(index, elem) {
-          var price = parseFloat($(this).find('.price').text()), currency = $(this).find('.currency').text();          
+          var price = parseFloat($(this).find('.price').text()), currency = $(this).find('.currency').text();
           var newPrice = fx.convert(price, {from: currency, to: val});
-          $(this).find('.price').text(newPrice);
-          $(this).find('.currency').text(val);
+          $(this).find('.price').text(newPrice.toFixed(2));
+          $(this).find('span.currency').text(val);
         });
-        /*
-        var prodList = $('#prodServicesList').val(), priceList = $('#pricesList').val(), currList = $('#currenciesList').val();
-        if(prodList && prodList.length) {
-          var arr = prodList.split(','), arr1 = priceList.split(',');//, arr2 = currList.split(',');
-          
-          for(var i in arr1) {
-            //fx.convert($('#defaultBalance').val(), {from: $('#defaultCurrency').val(), to: $(this).val()});
-            var price = fx.convert(arr1[i], {from: defaultCurr, to: val});
-            var newDesc = arr[i] + ' - ' + parseFloat(price).toFixed(1) + ' ' + val;
-            var li = $('#prodServices').find('li').eq(i);
-            var span = li.find('.product');
-            span.text(newDesc);
-          }
-        }*/
-      });
+      }));
       
       $("input,textarea,select").on('change', function () {
         $('#updateProfile').removeAttr('disabled');
@@ -81,7 +65,7 @@
       }*/      
       
       $('#updateProfile').click(function() {
-        if(!supplierValidateFields(/*$('#prodServicesList').val(), $('#pricesList').val(), $('#currenciesList').val(), */fx, defaultCurr, $('#currency').val()))
+        if(!supplierValidateFields(fx, defaultCurr, $('#currency').val()))
           return false;
       });
 
@@ -285,7 +269,7 @@
           <input type="hidden" name="currenciesList" id="currenciesList" value="<%= profile.currenciesList %>">
         </div>
         <script type="text/javascript">
-          bindRemoveProduct($('.rem'), /*$('#prodServices'), $('#prodServicesList'), $('#pricesList'), $('#currenciesList'),*/ $('#prodServiceInput'));
+          bindRemoveProduct($('.rem'), $('#prodServiceInput'));
           $('<a><span style="color: green; cursor: pointer" id="massRemove">Remove All Products</span></a><br>').insertBefore($("#prodServices"));
           $('#massRemove').on('click', removeAllProducts);
         </script>
