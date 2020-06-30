@@ -156,7 +156,7 @@ const postSignInBody = async (link, req, res) => {
   
   console.log((req.body.captchaResponse).length);
   console.log(captchaVerified);
-  if(((req.body.captchaResponse).length == 0) || captchaVerified.success === true) {//The 0 length means that we are inside the development environment, and not on the domain itself (platform.publicprocurement.com).
+  if(((req.body.captchaResponse).length == 0) || captchaVerified.success === true) {//The 0 length means that we are inside the development environment, and not on the domain itself (platform.uniteprocurement.com). This applies only to us developers :) .
     try {
     if(!email) {
       req.flash('error', 'No e-mail was given!');

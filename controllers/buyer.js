@@ -153,7 +153,12 @@ exports.postIndex = (req, res) => {
 
 
 exports.getChatLogin = (req, res) => {//We need a username, a room name, and a socket-based ID.
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render("buyer/chatLogin", {
+    successMessage: success,
+    errorMessage: error,
     from: req.params.supplierId,
     to: req.params.buyerId,
     fromName: req.params.supplierName,
@@ -165,7 +170,12 @@ exports.getChatLogin = (req, res) => {//We need a username, a room name, and a s
 
 
 exports.getChat = (req, res) => {//Coming from the getLogin above.
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
   res.render("supplier/chat", {
+    successMessage: success,
+    errorMessage: error,
     from: req.params.from,
     to: req.params.to,
     username: req.params.username,

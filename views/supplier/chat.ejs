@@ -27,6 +27,8 @@
   <script src="/autocomp.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
+      errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
+      
       const token = $("input[name='_csrf']").val();
       const sock = io();
      
@@ -48,7 +50,7 @@
         id: sock.id,
         username: username.value,
         room: room.value
-      }      
+      }
       
       //Templating:
       const messageTemplate = $('#message-template').text();
@@ -85,6 +87,16 @@
         $(this).toggleClass('btn-plus');
         $(".chat_window").hide();   
         $('.back').trigger('click');
+      });
+      
+      $('.maximize').on('click', function() {
+        if($(this).hasClass('maxClick')) {
+          $(this).removeClass('maxClick');
+          $('.chat_window').css({'height': '640px', 'max-width': '800px'});
+        } else {
+          $(this).addClass('maxClick');
+           $('.chat_window').css({'height': '720px', 'max-width': '1024px'});
+        }
       });
       
       function putMessages(messages, data) {
@@ -282,25 +294,6 @@
 </head>
   
 <body>
-    <% if (errorMessage.length > 0) { %>
-    <script>
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: '<%= errorMessage %>'
-      })
-    </script>
-    <% } %>
-    
-    <% if (successMessage.length > 0) { %>
-    <script>
-      Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: '<%= successMessage %>'
-      })
-    </script>
-    <% } %>
   <nav user="supplier" class="navbar navbar-expand-lg navbar-dark bg-dark" style="position: absolute; width: 100% !important;">
     <a class="navbar-brand" href="/">UNITE</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
