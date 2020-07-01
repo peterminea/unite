@@ -221,7 +221,7 @@
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Item Description (Long)*</label>
-                    <textarea disabled class="form-control" name="itemDescriptionLong" value="<%= bid.itemDescriptionLong %>"><%= bid.itemDescriptionLong %></textarea>
+                    <textarea disabled class="form-control" name="itemDescriptionLong"><%= bid.itemDescriptionLong %></textarea>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Item Description URL (Long)</label>
@@ -240,15 +240,15 @@
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Delivery Location*</label>
-                    <textarea disabled class="form-control" value="<%= bid.deliveryLocation %>" name="deliveryLocation"><%= bid.deliveryLocation %></textarea>
+                    <textarea disabled class="form-control" name="deliveryLocation"><%= bid.deliveryLocation %></textarea>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Delivery Requirements*</label>
-                    <textarea disabled class="form-control" value="<%= bid.deliveryRequirements %>" name="deliveryRequirements"><%= bid.deliveryRequirements %></textarea>
+                    <textarea disabled class="form-control" name="deliveryRequirements"><%= bid.deliveryRequirements %></textarea>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Compliance Requirements*</label>
-                    <textarea disabled class="form-control" value="<%= bid.complianceRequirements %>" name="complianceRequirements"><%= bid.complianceRequirements %></textarea>
+                    <textarea disabled class="form-control" name="complianceRequirements"><%= bid.complianceRequirements %></textarea>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Compliance Requirements URL</label>
@@ -261,7 +261,15 @@
                   </div>
                    <div class="form-group">
                     <label class="col-form-label">Other Requirements</label>
-                    <textarea disabled class="form-control" value="<%= bid.otherRequirements %>" name="otherRequirements"><%= bid.otherRequirements %></textarea>
+                    <textarea disabled class="form-control" name="otherRequirements"><%= bid.otherRequirements %></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Date Created:</label>
+                    <textarea disabled class="form-control" name="deliveryRequirements"><%= bid.createdAt %></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Date of Expiration:</label>
+                    <textarea disabled class="form-control" name="deliveryRequirements"><%= bid.expiryDate %></textarea>
                   </div>
                    <div class="form-group">
                     <label class="col-form-label">Price</label>
