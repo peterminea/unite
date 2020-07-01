@@ -170,6 +170,14 @@
 					<textarea class="form-control" disabled><%= request.otherRequirements %></textarea>
 				</div>
         <div class="form-group">
+          <label class="col-form-label">Date Created:</label>
+          <textarea disabled class="form-control" name="deliveryRequirements"><%= request.createdAt %></textarea>
+        </div>
+        <div class="form-group">
+          <label class="col-form-label">Date of Expiration:</label>
+          <textarea disabled class="form-control" name="deliveryRequirements"><%= request.expiryDate %></textarea>
+        </div>
+        <div class="form-group">
 					<label>Price</label>
 					<% l = 0; for(m in request.priceList) {l += request.priceList[m];} %>
           <input type="text" title="Total order price" value="<%= l %> <%= request.supplierCurrency %>" class="form-control" id="price" name="price" readonly>

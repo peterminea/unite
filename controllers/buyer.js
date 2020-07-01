@@ -133,6 +133,7 @@ exports.postIndex = (req, res) => {
           : req.body.buyerName + ' has sent a new Order to ' + req.body.supplierName + ', and the price is ' + req.body.price + ' ' + req.body.currency + '.',
       createdAt: req.body.createdAt? req.body.createdAt : Date.now(),
       updatedAt: Date.now(),
+      expiryDate: Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION,
       buyer: req.body.buyer,
       supplier: req.body.supplier
     });

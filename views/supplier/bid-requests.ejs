@@ -85,6 +85,7 @@
 				<p class="card-text">					
           <span class='requestData'>From: <b><u><%= request.buyerName %></u></b> </span><br>
           <span class='requestData'>Amount: <b><u><%= request.amount %></u></b> </span><br>
+          <span class='requestData'>Expires: <b><u><%= request.expiryDate %></u></b> </span><br>
 					<span class='requestData'>Delivery Location: <b><u><%= request.deliveryLocation %></u></b></span>
 				</p>
         <% if(request.isCancelled == true) { %>
