@@ -20,7 +20,7 @@ router.get("/forgotPassword", isAuth, sessionExit, buyerController.getForgotPass
 router.get("/resetPassword/:token", isAuth, sessionExit, buyerController.getResetPasswordToken);
 router.get("/viewBid/:supplierId/:buyerId/:balance", isAuth, sessionExit, buyerController.getViewBids);
 router.get("/chatLogin/:supplierId/:buyerId/:requestId/:requestName/:buyerName/:supplierName", isAuth, sessionExit, buyerController.getChatLogin);
-router.get("/chat/:from/:to/:username/:room/:requestId/:requestName/:toName/:fromName", isAuth, sessionExit, buyerController.getChat);
+router.get("/chat/:from/:to/:username/:room/:reqId/:reqName/:toName/:fromName", isAuth, sessionExit, buyerController.getChat);
 router.get("/cancelBid/:bidId/:bidName/:userType/:buyerName/:supplierName/:buyerEmail/:supplierEmail", isAuth, sessionExit, buyerController.getCancelBid);
 
 router.post("/", isAuth, sessionExit, buyerController.postIndex);

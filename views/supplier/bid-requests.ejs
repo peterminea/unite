@@ -78,13 +78,14 @@
 		<% for (request of requests) { %>
 		<div class="card mt-4">
 			<div class="card-header">
-				Bid Request
+				<i>Bid Request from Buyer</i>
 			</div>
 			<div class="card-body">
 				<h4 class="card-title"><%= request.itemDescription %></h4>
-				<p class="card-text">
-					Amount: <%= request.amount %> <br>
-					Delivery Location: <%= request.deliveryLocation %>
+				<p class="card-text">					
+          <span class='requestData'>From: <b><u><%= request.buyerName %></u></b> </span><br>
+          <span class='requestData'>Amount: <b><u><%= request.amount %></u></b> </span><br>
+					<span class='requestData'>Delivery Location: <b><u><%= request.deliveryLocation %></u></b></span>
 				</p>
         <% if(request.isCancelled == true) { %>
           <div class="card mt-4">

@@ -22,6 +22,12 @@ body {
   font-style:italic;
 }
 
+span.requestData {
+  color: green;
+  font-size: 10pt;
+  font-family: verdana;
+}
+
 ::placeholder {
  color: #acafea; 
 }

@@ -92,11 +92,13 @@
       $('.maximize').on('click', function() {
         if($(this).hasClass('maxClick')) {
           $(this).removeClass('maxClick');
-          $('.chat_window').css({'height': '640px', 'max-width': '800px'});
+          $('.chat_window').css({'height': '576px', 'max-width': '800px'});
         } else {
           $(this).addClass('maxClick');
-           $('.chat_window').css({'height': '720px', 'max-width': '1024px'});
+           $('.chat_window').css({'height': '700px', 'max-width': '1024px'});
         }
+        
+        $('.chat_window').css('width', 'calc(100% - 20px)');
       });
       
       function putMessages(messages, data) {
@@ -179,13 +181,13 @@
                  $("#message").val("").focus();
                 return false;
               }
+              
               let li = document.createElement("li");
               messages.appendChild(li).append($("#message").val());
               $("#message").val("").focus();
               let span = document.createElement("span");
               messages.appendChild(span);
               $(span).append("From <b><u>" + $('#fromName').val() + "</u></b> to <b style='color: purple'><u>" + $('#toName').val() + "</u></b>: " + "Just now.");
-              //alert('Message sent! ' + msg);
               autoscroll(messages);
             });
             $('#send').prop('disabled', true);
@@ -216,7 +218,6 @@
         sock.emit("stopTyping", "");
       });
       
-      
       sock.on("notifyStopTyping", (e) => {
         typing.innerText = "";
       });
@@ -239,31 +240,25 @@
             console.log('Location has been shared!');//Callback means feedback.
         });
       });
-    });
-                                  
+    });                         
       
-    //user = addUser({id: sock.id, username: user.username, room: user.room});       
-    //alert(Qs.parse(location.search, {ignoreQueryPrefix: true}));
+    //user = addUser({id: sock.id, username: user.username, room: user.room});
     const object = {username: user.username, room: user.room};
 
     sock.on('message', (message) => {
       $(messages).append(message);
-      //alert(JSON.stringify(message) + ' ' + messageTemplate);
-
+      
       const html = Mustache.render(messageTemplate, {
         username: message.username,
         message: message.text,
         createdAt: moment(message.createdAt).format('HH:mm:ss A')
       });
-      
-      //alert(html);
+   
       $($messages).append(html);
       autoscroll();
-    });      
-      
-    return false;
+    });
+  
     sock.emit('join', object, (error) => {
-      console.log(object.username + ' ' + error);
       if(error) {
         alert(error);
         location.href = '/';
@@ -271,16 +266,17 @@
     });
       
     sock.on('roomData', ({ room, users }) => {
-      alert(room + '\n' + users);
+      //alert(room + '\n' + users);
       const html = Mustache.render(sidebarTemplate, {
         room, users
       });
-      $('#sidebar').text(html);
+      
+      $('#sidebar').append(html);
     });
       
     sock.on('locationMessage', (message) => {
-      console.log(url);
-      const html= Mustache.render(locationMessageTemplate, {
+      alert(url);
+      const html = Mustache.render(locationMessageTemplate, {
         username: message.username,
         url: message.url,
         createdAt: moment(message.createdAt).format('HH:mm:ss A')
@@ -302,71 +298,72 @@
     </button>
   </nav>
   <br><br>
-  <div class="container">      
-      <div class="top_menu">          
-        <div class="buttons">
-          <div class="button close" title="Close"></div>
-          <div class="button minimize" title="Minimize"></div>
-          <div class="button maximize" title="Maximize"></div>
-        </div>          
+  <div class="top_menu">          
+    <div class="buttons" style="float: left">
+      <div class="button minimize" title="Minimize"></div>
+      <div class="button maximize" title="Maximize"></div>
+      <div class="button close" title="Close"></div>
+    </div>          
+  </div>
+<div class="container">
+    <br>
+    <div class="chat_window">
+      <div class="title text-center">
+        <span title="Talk" style="font-weight: bold">UNITE Chat - Talk to your partner instantly!</span>
+      </div>  
+      <div style="position: center; color: green; font-family: arial; font-size: 12pt">
+        <span id="partner1"><b style="color: brown"><u><%= fromName %></u></b> and <b style="color: purple"><u><%= toName %></u></b> are in chat</span>
       </div>
-      <div class="chat_window">
-        <div class="title text-center">
-          <span title="Talk" style="font-weight: bold">UNITE Chat - Talk to your partner instantly!</span>
-        </div>  
-        <div style="position: center; color: green; font-family: arial; font-size: 12pt">
-          <span id="partner1"><b style="color: brown"><u><%= fromName %></u></b> and <b style="color: purple"><u><%= toName %></u></b> are in chat</span>
+      <br>
+      <ul id="messages" class="messages">
+      </ul>
+      <form id="message-form">
+        <div class="message_input_wrapper">
+          <input type="hidden" name="from" id="from" value="<%= from %>"/>
+          <input type="hidden" name="to" id="to" value="<%= to %>"/>
+          <input type="hidden" name="reqId" id="reqId" value="<%= reqId %>"/>
+          <input type="hidden" name="reqName" id="reqName" value="<%= reqName %>"/>
+          <input type="hidden" name="fromName" id="fromName" value="<%= fromName %>"/>
+          <input type="hidden" name="username" id="username" value="<%= username %>"/>
+          <input type="hidden" name="room" id="room" value="<%= room %>"/>
+          <input type="hidden" name="toName" id="toName" value="<%= toName %>"/>
+          <div class="form-group">
+            <input id="message" name="message" style="width: 100%" class="message_input" title="Press Send or Enter to send" required autocomplete="on" placeholder="Type your message here">
+          </div>
         </div>
-        <br>
-        <ul id="messages" class="messages">
-        </ul>
-        <form id="message-form">
-          <div class="message_input_wrapper">
-            <input type="hidden" name="from" id="from" value="<%= from %>"/>
-            <input type="hidden" name="to" id="to" value="<%= to %>"/>
-            <input type="hidden" name="reqId" id="reqId" value="<%= reqId %>"/>
-            <input type="hidden" name="reqName" id="reqName" value="<%= reqName %>"/>
-            <input type="hidden" name="fromName" id="fromName" value="<%= fromName %>"/>
-            <input type="hidden" name="username" id="username" value="<%= username %>"/>
-            <input type="hidden" name="room" id="room" value="<%= room %>"/>
-            <input type="hidden" name="toName" id="toName" value="<%= toName %>"/>
-            <div class="form-group">
-              <input id="message" name="message" style="width: 100%" class="message_input" title="Press Send or Enter to send" required autocomplete="on" placeholder="Type your message here">
-            </div>
-          </div>
-          <div class="form-group">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button id="send" type='submit' class="btn btn-primary send_message">Send</button>
-          </div>
-          <div class="form-group">
-          <button class="btn btn-secondary" style="float: left" title="Send your geographic location" style="color: blue; cursor: pointer" id="sendLocation">
-            Send Location
-          </button>          
-          </div>
-        </form>
         <div class="form-group">
-        <button class="btn btn-primary" title="Increment Connections" id="increment" style="float: right">
-          Increment
-        </button>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button id="send" type='submit' class="btn btn-primary send_message">Send</button>
         </div>
-        <br><br>
-        <div class="form-group align-center">
-          <div id="messages1" style="display: inline; color: fuchsia">
-            <p>
-            </p>
-          </div>
+        <div class="form-group">
+        <button class="btn btn-secondary" style="float: left" title="Send your geographic location" style="color: blue; cursor: pointer" id="sendLocation">
+          Send Location
+        </button>          
         </div>
-        <div class="bottom_wrapper clearfix">
-          <br>
-            <input type='hidden' id="name" class="form-control" placeholder=”Name”>
-          <br>
-          <i id="typing"></i>
-          </div>      
+      </form>
+      <div class="form-group">
+      <button class="btn btn-primary" title="Increment Connections" id="increment" style="float: right">
+        Increment
+      </button>
+      </div>
+      <br><br>
+      <div class="form-group align-center">
+        <div id="messages1" style="display: inline; color: fuchsia">
+          <p>
+          </p>
         </div>
+      </div>
+      <div class="bottom_wrapper clearfix">
+        <br>
+          <input type='hidden' id="name" class="form-control" placeholder=”Name”>
+        <br>
+        <i id="typing"></i>
+        </div>      
+      </div>
+  </div>
     <div>
       <div id="sidebar" class="chat_sidebar">
     </div>
-  </div>
     <div class="chat">
       <div class="chat_sidebar">
       </div>
@@ -397,13 +394,12 @@
   <script id="sidebar-template" type="text/html">
     <h2 class="room-title">{{room}}</h2>
     <h3 class="list-title">User List</h3>
-    <ul class="users">
+    <ol class="users">
       {{#users}}
         <li>{{username}}</li>
       {{/users}}
-    </ul>
+    </ol>
   </script>
-    
 </div>
 </body>
 </html>

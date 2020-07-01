@@ -19,7 +19,7 @@ router.get("/confirmation/:token", sessionExit, supervisorController.getConfirma
 router.get("/forgotPassword", isAuth, sessionExit, supervisorController.getForgotPassword);
 router.get("/resetPassword/:token", isAuth, sessionExit, supervisorController.getResetPasswordToken);
 router.get("/chatLogin/:supplierId/:buyerId/:requestId/:requestName/:buyerName/:supplierName", isAuth, sessionExit, supervisorController.getChatLogin);
-router.get("/chat/:from/:to/:username/:room/:requestId/:requestName/:toName/:fromName", isAuth, sessionExit, supervisorController.getChat);
+router.get("/chat/:from/:to/:username/:room/:reqId/:reqName/:toName/:fromName", isAuth, sessionExit, supervisorController.getChat);
 
 router.post("/sign-in", supervisorController.postSignIn);
 router.post("/sign-up", supervisorController.postSignUp);

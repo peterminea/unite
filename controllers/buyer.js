@@ -464,6 +464,7 @@ exports.getSignUp = (req, res) => {
   
   if (!req.session.buyerId)
     return res.render("buyer/sign-up", {
+      DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
       captchaSiteKey: captchaSiteKey,
       successMessage: success,
       errorMessage: error
@@ -720,6 +721,7 @@ exports.getProfile = (req, res) => {
   req.session.flash = [];
   
   res.render("buyer/profile", {
+    DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
     successMessage: success,
     errorMessage: error,
     profile: req.session.buyer

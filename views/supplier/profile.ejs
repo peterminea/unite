@@ -29,26 +29,11 @@
       postAutocomplete('.country', '/countryAutocomplete', token);
       getAutocomplete('#industry', '/industryGetAutocomplete', token);
       getAutocomplete('#currency', '/currencyGetAutocomplete', token);
-      getCurrenciesList('select.currency', '/currencyGetAutocomplete', token);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
+      getCurrenciesList('select.currency', '/currencyGetAutocomplete', token);
       initBaseRates(fx, 'select.currency');
       $('select.currency').css('width', '100px');
       var defaultCurr = "<%= profile.currency %>";
-      //var defaultCurr = "< %= DEFAULT_CURR %>";
-      
-      $('select.currency').on('change', (function () {
-        var val = $(this).val();
-        $('input[name="currency"]').val(val);
-        $('#currency').val(val);        
-        
-        //Re-make the list of products accordingly, with the new currency.
-        $('#prodServices').find('li').each(function(index, elem) {
-          var price = parseFloat($(this).find('.price').text()), currency = $(this).find('.currency').text();
-          var newPrice = fx.convert(price, {from: currency, to: val});
-          $(this).find('.price').text(newPrice.toFixed(2));
-          $(this).find('span.currency').text(val);
-        });
-      }));
       
       $("input,textarea,select").on('change', function () {
         $('#updateProfile').removeAttr('disabled');
@@ -192,7 +177,7 @@
           <label>Preferred Currency (Default: Euro)*</label>
           <input type="hidden" name="currency" value="<%= profile.currency %>" required><br>
           <select class="currency" class="form-control" title="Currency" value="<%= profile.currency %>" required></select>
-        </div>        
+        </div>
         <div class="form-group">
           <label>Country*</label>
           <input type="text" class="form-control country" id="country" name="country" value="<%= profile.country %>" required>
