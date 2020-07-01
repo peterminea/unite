@@ -846,9 +846,9 @@ $(document).ready(function() {
   var cnt = $('div.container').first();
   
   cnt
-    .prepend('<div><button class="back btn btn-primary" style="margin-right: 20px" ' 
+    .prepend('<div><button class="back btn btn-primary" style=" margin-right: 50px" ' 
                                     + ' title="Go back one page" onclick="history.go(-1)">Back</button>'
-                + '<button class="forward btn btn-primary" style="margin-left: 20px"' 
+                + '<button class="forward btn btn-primary" style=" margin-left: 50px"' 
                                     + ' title="Go forward one page" onclick="history.go(1)">Forward</button>'
                                    +'</div>');
   
@@ -943,7 +943,6 @@ $(document).ready(function() {
       }
     }
   }
-
   
   //$('div.container').not('.text-center')
     $("body").css({"background-image": "url(https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2FWH.png?v=1592308122673)", "background-repeat": "repeat"});//That white! 
@@ -953,8 +952,24 @@ $(document).ready(function() {
   
   $('.cancelForm').submit(function() {
     return confirm('Are you sure you want to cancel this order?');
-  });  
+  });
+  
+  $('select.currency').on('change', function() {
+    var val = $(this).val();
+    $('input[name="currency"]').val(val);
+    $('#currency').val(val);
 
+    //Re-make the list of products accordingly, with the new currency.
+    if(!($('#prodServices').length))
+      return false;
+    
+    $('#prodServices').find('li').each(function(index, elem) {
+      var price = parseFloat($(this).find('.price').text()), currency = $(this).find('.currency').text();
+      var newPrice = fx.convert(price, {from: currency, to: val});
+      $(this).find('.price').text(newPrice.toFixed(2));
+      $(this).find('span.currency').text(val);
+    });
+  });
   
   if(!($('.fileupload').length))
     return false;

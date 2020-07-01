@@ -234,7 +234,6 @@ socket.on("connection", sock => {
 
     sock.join(user.room);
     var msg = generateSimpleMessage("Admin", "Welcome to the UNITE chat!");
-    //console.log(msg);
     sock.emit("message", msg);
     var users = getUsersInRoom(user.room);
     console.log(users.length + " " + users[0].username);
@@ -261,7 +260,7 @@ socket.on("connection", sock => {
 
   sock.on("disconnect", function() {
     console.log("User disconnected!");
-    var user = removeUser(socket.id);
+    var user = removeUser(sock.id);
     console.log(JSON.stringify(user));
     if (user) {
       socket

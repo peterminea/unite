@@ -26,6 +26,9 @@
       var token = $("input[name='_csrf']").val();
       postAutocomplete('#country', '/countryAutocomplete', token);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
+      getCurrenciesList('select.currency', '/currencyGetAutocomplete', token);
+      initBaseRates(fx, 'select.currency');
+      $('select.currency').css('width', '100px');
         
         $("input,textarea").on('change', function() {        
           $('#updateProfile').prop('disabled', false);
@@ -38,7 +41,7 @@
             height: 450,
             open: function(event, ui) {
               $('#dialog').append('<p>Are you sure you want to delete your Buyer account?<br>This will also remove your Bid Requests and the messages you sent in UNITE.<br>If you just want to take a break, you may' + '<a href="deactivate/<%= profile._id %>"'
-                                  + ' deactivate your account</a>' +' deactivate your account instead.</p>');
+ + ' deactivate your account</a>' +' deactivate your account instead.</p>');
             },
             close: function(event, ui) {
                 $('#dialog').text('');
@@ -120,10 +123,8 @@
           <label>Password</label>
           <input required type="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}" title="Please type at least one number and one uppercase&lowercase letter, and at least 6 characters" id="password" name="password" class="form-control" value="<%= profile.password %>">
             <a href="forgotPassword"><label>Forgot your password?</label></a>
-          </div>
-        
-        <input type="hidden" name="isVerified" id="isVerified" value="<%= profile.isVerified %>">
-        
+          </div>        
+          <input type="hidden" name="isVerified" id="isVerified" value="<%= profile.isVerified %>">        
           <div class="form-group mr-2">
             <label>Department / Agency / Group*</label>
             <input required type="text" class="form-control" id="departmentAgencyGroup" name="deptAgencyGroup" value="<%= profile.deptAgencyGroup %>">
@@ -138,7 +139,8 @@
           </div>
           <div class="form-group">
             <label>Preferred Currency (Default: Euro)*</label>
-            <input type="text" id="currency" class="form-control" placeholder="" title="Currency" name="currency" value="EUR" required>
+            <input type="hidden" name="currency" value="<%= profile.currency %>" required><br>
+            <select class="currency" class="form-control" title="Currency" value="<%= profile.currency %>" required></select>
           </div>
           <div class="form-group mr-2">
             <label>Address*</label>

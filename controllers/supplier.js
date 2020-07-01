@@ -586,7 +586,7 @@ exports.getForgotPassword = (req, res) => {
 
 exports.getChatLogin = (req, res) => {//We need a username, a room name, and a socket-based ID.
   var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
-  req.session.flash = [];
+  req.session.flash = [];  
   
   res.render("supplier/chatLogin", {
     successMessage: success,
@@ -604,6 +604,7 @@ exports.getChatLogin = (req, res) => {//We need a username, a room name, and a s
 exports.getChat = (req, res) => {//Coming from the getLogin above.
   var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
+  console.log(req.params.reqName);
   
   res.render("supplier/chat", {
     successMessage: success,
