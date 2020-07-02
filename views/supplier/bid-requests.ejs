@@ -75,7 +75,7 @@
 	<div class="container"><br><br></div>
 
 	<div class="container">    
-		<% for (request of requests) { %>
+		<% if(requests.length > 0) { for (request of requests) { %>
 		<div class="card mt-4">
 			<div class="card-header">
 				<i>Bid Request from Buyer</i>
@@ -85,7 +85,7 @@
 				<p class="card-text">					
           <span class='requestData'>From: <b><u><%= request.buyerName %></u></b> </span><br>
           <span class='requestData'>Amount: <b><u><%= request.amount %></u></b> </span><br>
-          <span class='requestData'>Expires: <b><u><%= request.expiryDate %></u></b> </span><br>
+          <span class='requestData'>Expires: <b><u><%= request.expiryDateFormatted %></u></b> </span><br>
 					<span class='requestData'>Delivery Location: <b><u><%= request.deliveryLocation %></u></b></span>
 				</p>
         <% if(request.isCancelled == true) { %>
@@ -93,14 +93,23 @@
             <p>
               This bid was cancelled upon <% if(request.status == 5) { %> your <% } else { %> Buyer's <% } %> decision. You can remove the bid completely.
             </p>
-            <button class="btn btn-primary ml-2 delete" style="float: right" id="<%= request._id %>">Delete Bid</button>
+            <button class="btn btn-primary ml-2 delete" style="float: right" id="<%= request._id %>">Delete Request</button>
           </div>
         <% } else { %>
 				<a href="/supplier/bid-requests/<%= request._id %>" class="btn btn-primary" style="float: right;">Details</a>
        <% } %> 
 			</div>
 		</div>
-		<% } %>
+		<% } } if(expiredRequests.length > 0) { for(request of expiredRequests) { %>
+      <div class="card mt-4">
+        <p>
+          The <%= request.requestName %> request expired, its limit date was <%= request.expiryDateFormatted %>. You can remove the bid request completely.
+        </p>
+        <button class="btn btn-primary ml-2 delete" style="float: right" id="<%= request._id %>">Delete Request</button>
+      </div>
+    <% } } if(requests.length + expiredRequests.length == 0) { %>
+      <p style="font-size: 12pt; font-weight: bold; color: navy">You have not received any bid requests as a supplier. If you prefer, you may update your product offer from your Profile page.</p>
+    <% } %>
     <input type="hidden" name="_csrf" value="< %= csrfToken %>">
 	</div>
 

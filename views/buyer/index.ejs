@@ -30,8 +30,7 @@
       getCurrenciesList('.buyerCurrency', '/currencyGetAutocomplete', token);//Preferred currency for Buyer.
       getProductsList('.productsList', '/prodServiceAutocomplete', token);
       
-      initBaseRates(fx, '.buyerCurrency');
-      var suppCurrency = '<%= supplier.currency %>';
+      initBaseRates(fx, '.buyerCurrency');      
       var defaultBidCurrency = '<%= BID_DEFAULT_CURR %>';
       
       $('.placeBid').on('click', function() {
@@ -58,7 +57,7 @@
         elem.find('li').each(function() {
           arr.push($(this).find('.product').text());
           arr1.push($(this).attr('amount'));
-          var val = fx.convert(parseFloat($(this).attr('bigPrice')), {from: $(this).find('.currency').text(), to: suppCurrency});
+          var val = fx.convert(parseFloat($(this).attr('bigPrice')), {from: $(this).find('.currency').text(), to: elem.attr('suppCurrency')});
           arr2.push(val);
         });
         
@@ -71,6 +70,7 @@
         var curr = $(this).val();
         var id = $(this).attr('index');
         var elem = $("#prodServices_"+id);
+        var suppCurrency = elem.attr('suppCurrency');
         
         if(curr != suppCurrency) {
           Swal.fire({
@@ -254,7 +254,7 @@
       <h5 class="card-header">Welcome!</h5>
       <div class="card-body">
         <h5 class="card-title">Hello, <%= buyer.organizationName %>!
-          <% if(buyer.avatar != null) { %>
+          <% if(buyer.avatar != null && buyer.avatar.length > 0) { %>
            <img src="<%= buyer.avatar %>" style="height: 20px; width: 20px">
           <% } %>
         </h5>
@@ -558,7 +558,7 @@
                       </p>
                     </div>
                     <br>
-                    <ul class="list-group" id="prodServices_<%= i %>">
+                    <ul class="list-group" suppCurrency="<%= supplier.currency %>" id="prodServices_<%= i %>">
                     </ul>
                     <input type="hidden" required id="hiddenProdServicesList_<%= i %>" name="productsServicesOffered" value="">
                     <input type="hidden" required id="amountList_<%= i %>" name="amountList" value="">

@@ -12,6 +12,7 @@ const multer = require("multer");
 const fs = require("fs-extra");
 const fs2 = require("fs");
 const dateformat = require("dateformat");
+const { basicFormat, customFormat, normalFormat } = require('./middleware/dateConversions');
 const process = require("process");
 const MongoClient = require("mongodb").MongoClient;
 const app = express();
@@ -1585,9 +1586,9 @@ app.get('/countryAutocompleted', function(req, res) {
       }
    });
 });*/
-
+//console.log(dateformat(new Date(), "dddd, mmmm dS yyyy, h:MM:ss TT"));
 var db;
-if (1 == 2)
+//if (1 == 2)
   MongoClient.connect(URI, { useUnifiedTopology: true }, (err, client) => {
     if (err) {
       console.error(err.message);
@@ -1886,10 +1887,22 @@ if (1 == 2)
     //db.collection("suppliers").updateMany({}, { $set: { currency: 'EUR' } }, function(err, obj) {});
     //db.collection("buyers").updateMany({}, { $set: { currency: 'EUR' } }, function(err, obj) {});
     //db.collection("bidrequests").updateMany({}, { $set: { buyerCurrency: 'EUR', supplierCurrency: 'EUR' } }, function(err, obj) {});
-
-    db.close();
+   //db.collection("bidrequests").updateMany({}, { $set: { expiryDate: new Date(Date.now() + 90*86400000).toISOString().replace(/T/, ' '). replace(/\..+/, '') } }, function(err, obj) {});
+   //db.collection("bidrequests").updateMany({}, { $set: { expiryDate: new Date(Date.now() + 90*86400000), expiryDateFormatted: customFormat(new Date(Date.now() + 90*86400000)) } }, function(err, obj) {});
+    
+    //var dateValues = { $set: { createdAt: (new Date(Date.now())), updatedAt: new Date(Date.now()), createdAtFormatted: normalFormat(new Date(Date.now())), updatedAtFormatted: normalFormat(new Date(Date.now())) } };
+    //db.collection("bidrequests").updateMany({}, dateValues, function(err, obj) {});
+    //db.collection("buyers").updateMany({}, dateValues, function(err, obj) {});
+    //db.collection("supervisors").updateMany({}, dateValues, function(err, obj) {});
+    //db.collection("suppliers").updateMany({}, dateValues, function(err, obj) {});
+ //db.close();
   });
 // Database configuration and test data saving:
+//console.log(Date.now());
+//console.log(Date.now() + 90*86400000);
+//console.log(new Date(Date.now() + 90*86400000).toISOString());
+
+//.replace(/T/, ' '). replace(/\..+/, '')  
 
 mongoose
   .connect(URI, {

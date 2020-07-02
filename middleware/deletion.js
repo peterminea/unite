@@ -17,7 +17,7 @@ async function removeSupervisor(id, req, res, db) {
   
   //Tokens first, user last.
   await db.collection('supervisortokens').deleteMany({ _userId: id }, function(err, resp1) {
-    treatError(req, res, err, 'back');  
+    treatError(req, res, err, 'back');
   });
 
   await db.collection('supervisors').deleteOne({ _id: id }, function(err, resp2) {

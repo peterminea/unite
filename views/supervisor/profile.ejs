@@ -168,6 +168,12 @@
           <input class="form-control fileupload" type="file" id="otherRelevantFiles" name="otherRelevantFiles" multiple value="<%= profile.otherRelevantFiles %>">
           <input class="form-control multiple btn btn-dark mt-2" type="button" disabled value="Upload Files" />
         </div>
+        
+        <div class="form-group">
+          <label>Date Created</label>
+          <input type="text" disabled class="form-control" id="dateCreated" name="createdAtFormatted" value="<%= profile.createdAtFormatted %>">
+        </div>
+        
         <!--Mandatory check of agreements -->
           <div class="form-group">
             <div class="form-check">

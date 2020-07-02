@@ -126,6 +126,18 @@ const bidRequestSchema = new Schema({
     type: Date,
     default: Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION
   },
+  createdAtFormatted: {
+    type: String,
+    required: true
+  },
+  updatedAtFormatted: {
+    type: String,
+    required: false
+  },
+  expiryDateFormatted: {
+    type: String,
+    required: true
+  },
   
   buyer: {
     type: Schema.Types.ObjectId, // Buyer's object id -> It will be generated from current session

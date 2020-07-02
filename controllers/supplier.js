@@ -10,6 +10,7 @@ const Message = require("../models/message");
 const Token = require("../models/supplierToken");
 const assert = require("assert");
 const process = require("process");
+const { basicFormat, customFormat, normalFormat } = require("../middleware/dateConversions");
 const async = require("async");
 const crypto = require('crypto');
 //sgMail.setApiKey('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');
@@ -480,7 +481,9 @@ exports.postSignUp = async (req, res) => {
                     UNITETermsAndConditions: true,//We assume that user was constrainted to check them.
                     antibriberyAgreement: true,
                     createdAt: Date.now(),
-                    updatedAt: Date.now()
+                    updatedAt: Date.now(),
+                    createdAtFormatted: normalFormat(Date.now()),
+                    updatedAtFormatted: normalFormat(Date.now())
                   });
 
                   await supplier.save(async (err) => {
@@ -726,6 +729,7 @@ exports.postResetPasswordToken = (req, res) => {
 exports.getProfile = (req, res) => {
   if (!req || !req.session) 
     return false;
+  
   const supplier = req.session.supplier;
 
   ProductService.find({ supplier: supplier._id })
@@ -758,12 +762,23 @@ exports.getBidRequests = (req, res) => {
   req.session.flash = [];
 
   BidRequest.find({ supplier: supplier._id })
-    .then(requests => {
+    .then((requests) => {
+    
+      var validBids = [], expiredBids = [];
+      if(requests && requests.length) {
+        for(var i in requests) {
+          var date = Date.now();
+          var bidDate = requests[i].expiryDate;
+          bidDate > date? validBids.push(requests[i]) : expiredBids.push(requests[i]);
+        }
+    }
+    
       res.render("supplier/bid-requests", {
         successMessage: success,
         errorMessage: error,
         supplier: supplier,
-        requests: requests
+        requests: validBids,
+        expiredRequests: expiredBids
       });
     })
     .catch(console.error);
@@ -885,6 +900,9 @@ exports.postProfile = async (req, res) => {
     doc.antibriberyAgreement = req.body.antibriberyAgreement == "on" ? true : false;
     doc.createdAt = req.body.createdAt;
     doc.updatedAt = Date.now();
+    doc.createdAtFormatted = normalFormat(req.body.createdAt);
+    doc.updatedAtFormatted = normalFormat(Date.now());
+    
     //doc.__v = 1;//Last saved version. To be taken into account for future cases of concurrential changes, in case updateOne does not protect us from that problem.
     var price = req.body.price;
     //console.log(doc);

@@ -108,6 +108,14 @@ const buyerSchema = new Schema({
   updatedAt: {
     type: Date,
     default: Date.now()
+  },
+  createdAtFormatted: {
+    type: String,
+    required: true
+  },
+  updatedAtFormatted: {
+    type: String,
+    required: false
   }
 });
 
