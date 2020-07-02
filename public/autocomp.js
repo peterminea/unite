@@ -87,6 +87,21 @@ function sortTable() {//Ascending or descending. Each <th> column tag is involve
 }
 
 
+function treatError(data, message) {
+    if(data && data.message) {//Error!
+      Swal.fire({
+        icon: 'error',
+        title: `Error on ${message}!`,
+        text: data.message
+      });
+
+      return true;
+    }
+  
+  return false;
+}
+
+
 function takeAction(obj, token, tr) {
   var fileId = tr.attr('id');
   var isDownload = obj.hasClass('download')? true : false;
@@ -194,6 +209,10 @@ function removeFile(obj, Swal) {//remove from Glitch
           });
         },
         success: function(data) {
+          if(treatError(data, 'deleting file')) {
+            return false;
+          }
+          
           tr? tr.remove() : treatDiv(div, isMulti, val, input);
           SwalCustom.fire({
             title: 'Deleted!',
@@ -229,6 +248,10 @@ function deleteFile(obj) {//remove from Database
       treatDiv(div, isMulti, val, input);
     },
     success: function(data) {
+      if(treatError(data, 'deletion')) {
+        return false;
+      }
+      
       treatDiv(div, isMulti, val, input);
       //alert('File removed!');
     }
@@ -257,6 +280,9 @@ function downloadFile(obj) {//download from Database
       //treatDiv(div, isMulti, val, input);
     },
     success: function(data) {
+      if(treatError(data, 'downloading file')) {
+        return false;
+      }
       //treatDiv(div, isMulti, val, input);
       //alert('File removed!');
     }
@@ -388,11 +414,11 @@ function getCurrenciesList(elem, url, token) {//For <select> drop-down currencie
     type: "GET",
     //data: req,
     success: function(data) {
-    if(!data || !data.length) {
+    if(!data || !data.length || treatError(data, 'loading currencies')) {
         //obj.val('');
         return false;
       }
-      
+
       //obj.append('<option></option>');
       for(var i in data) {
         var opt = '<option ' + 'style="word-wrap: break-word; width: 50px" title="' + data[i].value +'" value="' + data[i].name + '">' + data[i].name + '</option>';
@@ -418,11 +444,11 @@ function getProductsList(elem, url, token) {//For <select> drop-down currencies.
     type: "GET",
     //data: req,
     success: function(data) {
-    if(!data || !data.length) {
+    if(!data || !data.length || treatError(data, 'retrieving products')) {
         //obj.val('');
         return false;
       }
-      
+
       obj.append('<option></option>');
       for(var i in data) {
         var opt = '<option ' + 'style="word-wrap: break-word; width: 50px" price="' + data[i].price + '" currency="' + data[i].currency + '" title="' + data[i].name +'" value="' + data[i].name + '">' + data[i].name + '</option>';
@@ -598,10 +624,10 @@ function getCancelReasonTitles(obj, token, url) {//For deleting user accounts an
     error: function() {
     },
     success: function(data) {//data = titles.
-      if(!data || !data.length) {
+      if(!data || !data.length || treatError(data, 'getting Cancellation Reasons')) {
         return false;
       }
-      
+
       var str = '<div class="form-group">';
       str += '<label>Please select an option below and explain it.</label><br>';
       for(var i in data) {
@@ -627,7 +653,7 @@ function getFeedbackSubjects(obj, token, url) {//For deleting user accounts and 
     error: function() {
     },
     success: function(data) {//data = subjects.
-      if(!data || !data.length) {
+      if(!data || !data.length || treatError(data, 'getting Feedback Subjects')) {
         return false;
       }
       
@@ -658,7 +684,7 @@ function getFeedbacks(obj, token, url) {//For deleting user accounts and cancell
     error: function() {
     },
     success: function(data) {//data = feedbacks.
-      if(!data || !data.length) {
+      if(!data || !data.length || treatError(data, 'getting Feedbacks')) {
         obj.prepend('<p class="term">There are currently no Feedbacks available. Please engage with your users first.</p>')
         return false;
       }

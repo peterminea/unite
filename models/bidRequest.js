@@ -138,7 +138,11 @@ const bidRequestSchema = new Schema({
     type: String,
     required: true
   },
-  
+  isExpired: {
+    type: Boolean,
+    //required: true,
+    default: false
+  },
   buyer: {
     type: Schema.Types.ObjectId, // Buyer's object id -> It will be generated from current session
     required: true

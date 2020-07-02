@@ -21,7 +21,7 @@ const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const search = require('../middleware/searchFlash');
 var Recaptcha = require('express-recaptcha').RecaptchaV2;
-const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
+const { sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
@@ -128,6 +128,7 @@ exports.postIndex = (req, res) => {
       status: req.body.status,
       price: req.body.price,
       isCancelled: false,
+      isExpired: false,
       buyerCurrency: req.body.buyerCurrency,
       supplierCurrency: req.body.supplierCurrency,
       specialMentions: req.body.specialMentions? 
@@ -196,10 +197,8 @@ exports.getChat = (req, res) => {//Coming from the getLogin above.
 
 exports.getViewBids = (req, res) => {
   var promise = BidRequest.find({supplier: req.params.supplierId, buyer: req.params.buyerId}).exec();
-  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
-  req.session.flash = [];
   
-  promise.then((bids) => {
+  promise.then(async (bids) => {
     //Verify bids:
     
     var validBids = [], expiredBids = [];
@@ -213,6 +212,9 @@ exports.getViewBids = (req, res) => {
     
     console.log(validBids.length);
     console.log(expiredBids.length);
+    await sendExpiredBidEmails(req, res, expiredBids);
+    var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+    req.session.flash = [];
     
     res.render("buyer/viewBid", {
       bids: validBids,

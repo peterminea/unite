@@ -57,7 +57,11 @@
                           text: 'Error on AJAX Request!'
                         });
                         },
-                        success: function() {
+                        success: function(data) {
+                          if(treatError(data, 'deleting the Bid Request')) {
+                            return false;
+                          }
+                          
                           div2.remove();
                           div1.remove();
                           Swal.fire({

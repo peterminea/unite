@@ -872,6 +872,7 @@ var uploadExcel = multer({
   }
 });
 
+
 app.post("/uploadfile", upload.single("single"), (req, res, next) => {
   const file = req.file;
   console.log(file); //Can we parse its content here or not?
@@ -902,6 +903,7 @@ app.post("/uploadfile", upload.single("single"), (req, res, next) => {
   });
 });
 
+
 var xlsx = require("node-xlsx");
 app.post("/uploadExcel", uploadExcel.single("single"), (req, res, next) => {
   const file = req.file;
@@ -915,7 +917,7 @@ app.post("/uploadExcel", uploadExcel.single("single"), (req, res, next) => {
   var obj = xlsx.parse(fs.readFileSync(file.path));
   fs2.unlinkSync(file);
 
-  if (obj && obj.length) {
+  if(obj && obj.length) {
     console.log(obj[0].data);
     //Treat the obj variable as an array of rows
     res.send(obj[0].data);
@@ -924,11 +926,9 @@ app.post("/uploadExcel", uploadExcel.single("single"), (req, res, next) => {
   }
 });
 
+
 //Uploading multiple files
-app.post(
-  "/uploadmultiple",
-  upload.array("multiple", 10),
-  (req, res, next) => {
+app.post("/uploadmultiple", upload.array("multiple", 10), (req, res, next) => {
     const files = req.files;
 
     if (!files) {
@@ -945,11 +945,9 @@ app.post(
   }
 );
 
+
 //Alternate multiupload:
-app.post(
-  "/multipleupload",
-  uploadController.multipleUpload,
-  (req, res, next) => {
+app.post("/multipleupload", uploadController.multipleUpload, (req, res, next) => {
     console.log(req.files);
   },
   (error, req, res, next) => {
@@ -957,10 +955,8 @@ app.post(
   }
 );
 
-app.post(
-  "/avatarUpload",
-  uploadAvatarController.avatarUpload,
-  (req, res, next) => {
+
+app.post("/avatarUpload", uploadAvatarController.avatarUpload, (req, res, next) => {
     console.log(req);
     //console.log(req.file.buffer);
     //console.log(JSON.stringify(req.body));
@@ -971,6 +967,7 @@ app.post(
     res.status(400).send({ error: error.message });
   }
 );
+
 
 const sgMail = require("@sendgrid/mail");
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -1064,7 +1061,7 @@ app.post("/purchase", (req, res, next) => {
         res.json(response);
       });
     })
-    .catch(err => {
+    .catch((err) => {
       console.log("Payment failed! Please repeat the operation.\n" + err);
       /*const response = {
         headers,
@@ -1104,7 +1101,8 @@ app.post("/countryAutocomplete", function(req, res, next) {
 
       res.jsonp(result);
     } else {
-      req.flash("error", err.message);
+      //req.flash("error", err.message);
+      console.error(err.message);
       throw err;
     }
   });
@@ -1133,8 +1131,11 @@ app.post("/industryAutocomplete", function(req, res, next) {
 
       res.jsonp(result);
     } else {
-      req.flash("error", err.message);
+      //res.json(err);
+      console.error(err.message);
       throw err;
+      //req.flash("error", err.message);
+      //res.redirect('back');
     }
   });
 });
@@ -1142,17 +1143,21 @@ app.post("/industryAutocomplete", function(req, res, next) {
 app.post("/deleteBid", function(req, res, next) {
   MongoClient.connect(URI, { useUnifiedTopology: true }, function(err, db) {
     if (err) {
-      req.flash("error", err.message);
-      throw err;
+      //req.flash("error", err.message);
+      console.error(err.message);
+      res.json(err);
+      //res.redirect('back');
     }
 
-    var dbo = db.db(BASE),
-      myquery = { _id: req.body.bidId };
+    var dbo = db.db(BASE), myquery = { _id: req.body.bidId };
 
     dbo.collection("bidrequests").deleteOne(myquery, function(err, resp) {
       if (err) {
         console.error(err.message);
-        //return false;
+        db.close();
+        res.json(err);
+        //req.flash("error", err.message);
+        //res.redirect('back');
       }
 
       db.close();
@@ -1167,7 +1172,7 @@ app.post("/deleteFile", function(req, res, next) {
   fs2.unlink(req.body.file, function(err) {
     if (err) {
       req.flash("error", err.message);
-      throw err;
+      res.json(err);
     }
     //if no error, file has been deleted successfully
     console.log("File deleted!");
@@ -1182,7 +1187,8 @@ app.post("/exists", function(req, res) {
   fs2.access(path, fs.F_OK, err => {
     if (err) {
       console.error(err);
-      throw err;
+      res.json(err);
+      //throw err;
     }
 
     return res.json({ exists: true });
@@ -1230,6 +1236,7 @@ app.get("/industryGetAutocomplete", function(req, res, next) {
     } else {
       req.flash("error", err.message);
       throw err;
+      //res.json(err);
     }
   });
 });
@@ -1240,7 +1247,7 @@ app.get("/bidStatuses", function(req, res, next) {
   statusFilter.exec(function(err, data) {
     var result = [];
 
-    if (!err) {
+    if(!err) {
       if (data && data.length && data.length > 0) {
         data.forEach(item => {
           let obj = {
@@ -1256,7 +1263,7 @@ app.get("/bidStatuses", function(req, res, next) {
       res.jsonp(result);
     } else {
       req.flash("error", err.message);
-      throw err;
+      res.json(err);
     }
   });
 });
@@ -1264,7 +1271,7 @@ app.get("/bidStatuses", function(req, res, next) {
 app.get("/bidCancelReasonTitles", async function(req, res, next) {
   BidCancelReasonTitle.find({})
     .exec()
-    .then(titles => {
+    .then((titles) => {
       titles.sort(function(a, b) {
         return a.name.localeCompare(b.name);
       });
@@ -1282,7 +1289,7 @@ app.get("/bidCancelReasonTitles", async function(req, res, next) {
 app.get("/userCancelReasonTitles", async function(req, res, next) {
   UserCancelReasonTitle.find({})
     .exec()
-    .then(titles => {
+    .then((titles) => {
       titles.sort(function(a, b) {
         return a.name.localeCompare(b.name);
       });
@@ -1301,7 +1308,7 @@ app.get("/userCancelReasonTitles", async function(req, res, next) {
 app.get("/adminCancelReasonTitles", async function(req, res, next) {
   AdminCancelReasonTitle.find({})
     .exec()
-    .then(titles => {
+    .then((titles) => {
       titles.sort(function(a, b) {
         return a.name.localeCompare(b.name);
       });
@@ -1319,7 +1326,7 @@ app.get("/adminCancelReasonTitles", async function(req, res, next) {
 
 app.post('/getFiles', function(req, res) {  
   fs2.readdir(req.body.folder, (err, files) => {  
-    files.forEach(file => {
+    files.forEach((file) => {
       console.log(file);
     });
     res.json(files);
@@ -1330,7 +1337,7 @@ app.post('/getFiles', function(req, res) {
 app.get("/feedbackSubjects", async function(req, res, next) {
   FeedbackSubject.find({})
     .exec()
-    .then(subjects => {
+    .then((subjects) => {
       subjects.sort(function(a, b) {
         return a.name.localeCompare(b.name);
       });
@@ -1895,6 +1902,7 @@ var db;
     //db.collection("buyers").updateMany({}, dateValues, function(err, obj) {});
     //db.collection("supervisors").updateMany({}, dateValues, function(err, obj) {});
     //db.collection("suppliers").updateMany({}, dateValues, function(err, obj) {});
+    //db.collection("bidrequests").updateMany({}, { $set: { isExpired: false } }, function(err, obj) {});
  //db.close();
   });
 // Database configuration and test data saving:

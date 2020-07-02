@@ -21,7 +21,7 @@ const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const search = require('../middleware/searchFlash');
 var Recaptcha = require('express-recaptcha').RecaptchaV3;
-const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
+const { sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
@@ -758,11 +758,9 @@ exports.getProfile = (req, res) => {
 
 exports.getBidRequests = (req, res) => {
   const supplier = req.session.supplier;
-  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
-  req.session.flash = [];
-
+  
   BidRequest.find({ supplier: supplier._id })
-    .then((requests) => {
+    .then(async (requests) => {
     
       var validBids = [], expiredBids = [];
       if(requests && requests.length) {
@@ -773,15 +771,19 @@ exports.getBidRequests = (req, res) => {
         }
     }
     
-      res.render("supplier/bid-requests", {
-        successMessage: success,
-        errorMessage: error,
-        supplier: supplier,
-        requests: validBids,
-        expiredRequests: expiredBids
-      });
-    })
-    .catch(console.error);
+    await sendExpiredBidEmails(req, res, expiredBids);
+    var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+    req.session.flash = [];
+    
+    res.render("supplier/bid-requests", {
+      successMessage: success,
+      errorMessage: error,
+      supplier: supplier,
+      requests: validBids,
+      expiredRequests: expiredBids
+    });
+  })
+  .catch(console.error);
 };
 
 
