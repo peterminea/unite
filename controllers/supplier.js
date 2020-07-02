@@ -10,6 +10,7 @@ const Message = require("../models/message");
 const Token = require("../models/supplierToken");
 const assert = require("assert");
 const process = require("process");
+const { basicFormat, customFormat, normalFormat } = require("../middleware/dateConversions");
 const async = require("async");
 const crypto = require('crypto');
 //sgMail.setApiKey('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');
@@ -20,7 +21,7 @@ const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const search = require('../middleware/searchFlash');
 var Recaptcha = require('express-recaptcha').RecaptchaV3;
-const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
+const { sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
@@ -480,7 +481,9 @@ exports.postSignUp = async (req, res) => {
                     UNITETermsAndConditions: true,//We assume that user was constrainted to check them.
                     antibriberyAgreement: true,
                     createdAt: Date.now(),
-                    updatedAt: Date.now()
+                    updatedAt: Date.now(),
+                    createdAtFormatted: normalFormat(Date.now()),
+                    updatedAtFormatted: normalFormat(Date.now())
                   });
 
                   await supplier.save(async (err) => {
@@ -726,6 +729,7 @@ exports.postResetPasswordToken = (req, res) => {
 exports.getProfile = (req, res) => {
   if (!req || !req.session) 
     return false;
+  
   const supplier = req.session.supplier;
 
   ProductService.find({ supplier: supplier._id })
@@ -754,19 +758,32 @@ exports.getProfile = (req, res) => {
 
 exports.getBidRequests = (req, res) => {
   const supplier = req.session.supplier;
-  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
-  req.session.flash = [];
-
+  
   BidRequest.find({ supplier: supplier._id })
-    .then(requests => {
-      res.render("supplier/bid-requests", {
-        successMessage: success,
-        errorMessage: error,
-        supplier: supplier,
-        requests: requests
-      });
-    })
-    .catch(console.error);
+    .then(async (requests) => {
+    
+      var validBids = [], expiredBids = [];
+      if(requests && requests.length) {
+        for(var i in requests) {
+          var date = Date.now();
+          var bidDate = requests[i].expiryDate;
+          bidDate > date? validBids.push(requests[i]) : expiredBids.push(requests[i]);
+        }
+    }
+    
+    await sendExpiredBidEmails(req, res, expiredBids);
+    var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+    req.session.flash = [];
+    
+    res.render("supplier/bid-requests", {
+      successMessage: success,
+      errorMessage: error,
+      supplier: supplier,
+      requests: validBids,
+      expiredRequests: expiredBids
+    });
+  })
+  .catch(console.error);
 };
 
 
@@ -885,6 +902,9 @@ exports.postProfile = async (req, res) => {
     doc.antibriberyAgreement = req.body.antibriberyAgreement == "on" ? true : false;
     doc.createdAt = req.body.createdAt;
     doc.updatedAt = Date.now();
+    doc.createdAtFormatted = normalFormat(req.body.createdAt);
+    doc.updatedAtFormatted = normalFormat(Date.now());
+    
     //doc.__v = 1;//Last saved version. To be taken into account for future cases of concurrential changes, in case updateOne does not protect us from that problem.
     var price = req.body.price;
     //console.log(doc);

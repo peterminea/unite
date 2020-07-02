@@ -69,6 +69,30 @@ const sendCancelBidEmail = (req, victim, actor, victimMail, actorMail, victimTyp
 };
 
 
+function sendExpiredBidEmail(req, bid, mail, name, type) {
+        sgMail.send({
+          from: "peter@uniteprocurement.com",
+          to: mail,
+          subject: "Bid request " + bid.requestName + " expired!",
+          text:
+            "Hello " + name + 
+            ",\n\nWe regret to inform you that your " + type + " Order named " + bid.requestName + " has expired.\n"
+            + "Its expiration date was " + bid.expiryDateFormatted + ".\n"
+            + `The bid was sent by ${bid.buyerName} to ${bid.supplierName}, on ${bid.createdAtFormatted}.\n\n`
+            + "UNITE apologizes for any inconvenience that this issue may have caused to you. You can remove the expired bid from your profile in case you have not obtained a prolongation letter."+ "\n\n"
+            + "With kind regards,\nThe UNITE Public Procurement Platform Team"
+          }, function(err) {
+            if(err) {
+              console.log(err.message);
+              req.flash('error', err.message);
+              return false;
+            }
+          
+          req.flash('success', `Expiry notification about the Bid Request ${bid.requestName} successfully sent to ${mail}!`);
+      });
+};
+
+
 const sendInactivationEmail = (type, req, data, reason) => {
   sgMail.send({
     from: 'peter@uniteprocurement.com',
@@ -256,4 +280,24 @@ const postSignInBody = async (link, req, res) => {
 };
 
 
-module.exports = { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody };
+const sendExpiredBidEmails = (req, res, expiredBids) => {
+  if(expiredBids.length) {
+    for(var i in expiredBids) {
+      if(expiredBids[i].isExpired == false) {
+        MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {//db or client.
+          if(treatError(req, res, err, 'back'))
+            return false;
+
+          var dbo = db.db(BASE);
+          dbo.collection("bidrequests").updateOne({ _id: expiredBids[i]._id }, { $set: {isExpired: true} }, function(err, resp) {
+            sendExpiredBidEmail(req, expiredBids[i], expiredBids[i].buyerEmail, expiredBids[i].buyerName, 'outgoing');
+            sendExpiredBidEmail(req, expiredBids[i], expiredBids[i].supplierEmail, expiredBids[i].supplierName, 'incoming');
+          });
+        });
+      }
+    }
+  }
+};
+
+
+module.exports = { sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody };

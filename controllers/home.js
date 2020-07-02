@@ -26,7 +26,7 @@ var userData = require('../middleware/userHome');
 
 exports.getIndex = (req, res) => {
   var obj = userData(req);
-  //console.log(obj);
+
   res.render("index", {
     role: obj.role,
     isAdmin: obj.role == process.env.USER_ADMIN,

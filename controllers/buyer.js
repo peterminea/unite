@@ -13,6 +13,7 @@ const Supplier = require("../models/supplier");
 const BidRequest = require("../models/bidRequest");
 const BidStatus = require("../models/bidStatus");
 const ProductService = require("../models/productService");
+const { basicFormat, customFormat, normalFormat } = require("../middleware/dateConversions");
 const async = require('async');
 const MongoClient = require('mongodb').MongoClient;
 const ObjectId = require("mongodb").ObjectId;
@@ -20,7 +21,7 @@ const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const search = require('../middleware/searchFlash');
 var Recaptcha = require('express-recaptcha').RecaptchaV2;
-const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
+const { sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
@@ -45,6 +46,7 @@ exports.getIndex = async (req, res) => {
       res.render("buyer/index", {
         message: req.flash('info', 'Please wait while we are loading the list of available products (The Catalog)...'),
         buyer: req.session? req.session.buyer : null,
+        BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
         successMessage: success,
         errorMessage: error,
         suppliers: null
@@ -126,6 +128,7 @@ exports.postIndex = (req, res) => {
       status: req.body.status,
       price: req.body.price,
       isCancelled: false,
+      isExpired: false,
       buyerCurrency: req.body.buyerCurrency,
       supplierCurrency: req.body.supplierCurrency,
       specialMentions: req.body.specialMentions? 
@@ -134,6 +137,9 @@ exports.postIndex = (req, res) => {
       createdAt: req.body.createdAt? req.body.createdAt : Date.now(),
       updatedAt: Date.now(),
       expiryDate: Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION,
+      createdAtFormatted: req.body.createdAt? normalFormat(req.body.createdAt) : normalFormat(Date.now()),
+      updatedAtFormatted: normalFormat(Date.now()),
+      expiryDateFormatted: customFormat(Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION),
       buyer: req.body.buyer,
       supplier: req.body.supplier
     });
@@ -191,12 +197,28 @@ exports.getChat = (req, res) => {//Coming from the getLogin above.
 
 exports.getViewBids = (req, res) => {
   var promise = BidRequest.find({supplier: req.params.supplierId, buyer: req.params.buyerId}).exec();
-  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
-  req.session.flash = [];
   
-  promise.then((bids) => {
+  promise.then(async (bids) => {
+    //Verify bids:
+    
+    var validBids = [], expiredBids = [];
+    if(bids && bids.length) {
+      for(var i in bids) {
+        var date = Date.now();
+        var bidDate = bids[i].expiryDate;
+        bidDate > date? validBids.push(bids[i]) : expiredBids.push(bids[i]);
+      }
+    }
+    
+    console.log(validBids.length);
+    console.log(expiredBids.length);
+    await sendExpiredBidEmails(req, res, expiredBids);
+    var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+    req.session.flash = [];
+    
     res.render("buyer/viewBid", {
-      bids: bids? bids : [],
+      bids: validBids,
+      expiredBids: expiredBids,
       stripePublicKey: process.env.STRIPE_KEY_PUBLIC,
       stripeSecretKey: process.env.STRIPE_KEY_SECRET,
       successMessage: success,
@@ -666,7 +688,9 @@ exports.postSignUp = async (req, res) => {
                   qualification: req.body.qualification,
                   country: req.body.country,
                   createdAt: Date.now(),
-                  updatedAt: Date.now()
+                  updatedAt: Date.now(),
+                  createdAtFormatted: normalFormat(Date.now()),
+                  updatedAtFormatted: normalFormat(Date.now())
                 });
 
                 await buyer.save((err) => {
@@ -718,6 +742,9 @@ exports.postSignUp = async (req, res) => {
 
 
 exports.getProfile = (req, res) => {
+  if (!req || !req.session) 
+    return false;
+  
   var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   
@@ -754,6 +781,8 @@ exports.postProfile = (req, res) => {
       doc.country = req.body.country;
       doc.createdAt = req.body.createdAt;
       doc.updatedAt = Date.now();
+      doc.createdAtFormatted = normalFormat(req.body.createdAt);
+      doc.updatedAtFormatted = normalFormat(Date.now());
 
       MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
         if(treatError(req, res, err, '/buyer/profile'))

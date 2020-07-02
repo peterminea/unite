@@ -6,13 +6,14 @@ const BidRequest = require("../models/bidRequest");
 const Token = require('../models/supervisorToken');
 const assert = require('assert');
 const process = require('process');
+const { basicFormat, customFormat, normalFormat } = require("../middleware/dateConversions");
 const async = require('async');
 const MongoClient = require('mongodb').MongoClient;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const search = require('../middleware/searchFlash');
 var Recaptcha = require('express-recaptcha').RecaptchaV3;
-const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
+const { sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../public/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
@@ -444,7 +445,9 @@ exports.postSignUp = async (req, res) => {
                 UNITETermsAndConditions: true,
                 antibriberyAgreement: true,
                 createdAt: Date.now(),
-                updatedAt: Date.now()
+                updatedAt: Date.now(),
+                createdAtFormatted: normalFormat(Date.now()),
+                updatedAtFormatted: normalFormat(Date.now())
               });
 
               await supervisor.save((err) => {
@@ -489,6 +492,9 @@ exports.postSignUp = async (req, res) => {
 
 
 exports.getProfile = (req, res) => {
+  if (!req || !req.session) 
+    return false;
+  
   var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   
@@ -534,6 +540,8 @@ exports.postProfile = (req, res) => {
     doc.antibriberyAgreement = req.body.antibriberyAgreement == 'on'? true : false;
     doc.createdAt = req.body.createdAt;
     doc.updatedAt = Date.now();
+    doc.createdAtFormatted = normalFormat(req.body.createdAt);
+    doc.updatedAtFormatted = normalFormat(Date.now());
 
     MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {//db or client.
       if(treatError(req, res, err, '/supervisor/profile'))

@@ -57,7 +57,11 @@
                           text: 'Error on AJAX Request!'
                         });
                         },
-                        success: function() {
+                        success: function(data) {
+                          if(treatError(data, 'deleting the Bid Request')) {
+                            return false;
+                          }
+                          
                           div2.remove();
                           div1.remove();
                           Swal.fire({
@@ -155,7 +159,7 @@
         <% if(bid.isCancelled == true) { %>
           <div class="card mt-4">
             <p>
-              This bid was cancelled upon <% if(bid.status == 6) { %> your <% } else { %> Supplier's <% } %> decision. You can remove the bid completely.
+              The <%= bid.requestName %> bid was cancelled upon <% if(bid.status == 6) { %> your <% } else { %> Supplier's <% } %> decision. You can remove the bid completely.
             </p>
             <button class="btn btn-primary ml-2 delete" style="float: right" id="<%= bid._id %>">Delete Bid</button>
           </div>
@@ -265,11 +269,11 @@
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Date Created:</label>
-                    <textarea disabled class="form-control" name="deliveryRequirements"><%= bid.createdAt %></textarea>
+                    <textarea disabled class="form-control" name="deliveryRequirements"><%= bid.createdAtFormatted %></textarea>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Date of Expiration:</label>
-                    <textarea disabled class="form-control" name="deliveryRequirements"><%= bid.expiryDate %></textarea>
+                    <textarea disabled class="form-control" name="deliveryRequirements"><%= bid.expiryDateFormatted %></textarea>
                   </div>
                    <div class="form-group">
                     <label class="col-form-label">Price</label>
@@ -431,7 +435,14 @@
     </div>
   </div>
         
-    <% } } } else { %>
+    <% } } } i = 0; if (expiredBids != null && expiredBids.length > 0) { for (bid of expiredBids) { i++;  %>
+      <div class="card mt-4">
+        <p>
+          The <%= bid.requestName %> request expired, its limit date was <%= bid.expiryDateFormatted %>. You can remove the bid request completely.
+        </p>
+        <button class="btn btn-primary ml-2 delete" style="float: right" id="<%= bid._id %>">Delete Bid</button>
+      </div>
+  <% } } if(expiredBids.length == 0 && bids.length == 0)  { %>
     <p style="font-size: 12pt; font-weight: bold; color: purple">You have not placed any bids to this supplier. If you prefer, you may do so at any time.</p>
     <% } %>
   </div>
