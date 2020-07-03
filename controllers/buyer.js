@@ -210,8 +210,15 @@ exports.getViewBids = (req, res) => {
       }
     }
     
-    console.log(validBids.length);
-    console.log(expiredBids.length);
+    var totalPrice = 0, expiredPrice = 0;
+    for(var i in validBids) {
+      totalPrice += validBids[i].price;
+    }
+    
+    for(var i in expiredBids) {
+      expiredPrice += expiredBids[i].price;
+    }
+
     await sendExpiredBidEmails(req, res, expiredBids);
     var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
     req.session.flash = [];
@@ -223,6 +230,7 @@ exports.getViewBids = (req, res) => {
       stripeSecretKey: process.env.STRIPE_KEY_SECRET,
       successMessage: success,
       errorMessage: error,
+      totalPrice: totalPrice,
       statusesJson: JSON.stringify(statusesJson),
       supplierId: req.params.supplierId, 
       buyerId: req.params.buyerId,

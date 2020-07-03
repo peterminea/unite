@@ -141,7 +141,13 @@
     <div class="container">
       <br><br>
       <div class="col-md-12">
-        <% let i = 0; if (bids != null && bids.length > 0) { for (bid of bids) { i++; %>        
+        <% let i = 0; if (bids != null && bids.length > 0) { %>
+        <div>
+          <p>
+            You currently have placed a number of <span class='bidLength'><%= bids.length %></span> bids. Their total price is: <span class='totalPrice'><%= totalPrice %></span>
+          </p>
+        </div>
+        <% for (bid of bids) { i++; %>        
         <div>      
           <div class="card mt-4">
             <h5 class="card-header bg-dark text-white">From: <%= bid.buyerName %></h5>
@@ -434,14 +440,18 @@
       </div>
     </div>
   </div>
-        
     <% } } } i = 0; if (expiredBids != null && expiredBids.length > 0) { for (bid of expiredBids) { i++;  %>
-      <div class="card mt-4">
-        <p>
-          The <%= bid.requestName %> request expired, its limit date was <%= bid.expiryDateFormatted %>. You can remove the bid request completely.
-        </p>
-        <button class="btn btn-primary ml-2 delete" style="float: right" id="<%= bid._id %>">Delete Bid</button>
-      </div>
+    <br>
+      <h3 style="color: green">
+        The following ones are Bid Requests that have expired. We advise you to delete them.
+      </h3>
+    <hr>
+    <div class="card mt-4">
+      <p>
+        The <%= bid.requestName %> request expired, its limit date was <%= bid.expiryDateFormatted %>. You can remove the bid request completely.
+      </p>
+      <button class="btn btn-primary ml-2 delete" style="float: right" id="<%= bid._id %>">Delete Bid</button>
+    </div>
   <% } } if(expiredBids.length == 0 && bids.length == 0)  { %>
     <p style="font-size: 12pt; font-weight: bold; color: purple">You have not placed any bids to this supplier. If you prefer, you may do so at any time.</p>
     <% } %>

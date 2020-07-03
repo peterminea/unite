@@ -101,6 +101,11 @@
 			</div>
 		</div>
 		<% } } if(expiredRequests.length > 0) { for(request of expiredRequests) { %>
+      <br>
+        <h3 style="color: green">
+          The following ones are Bid Requests that have expired. We advise you to delete them.
+        </h3>
+      <hr>
       <div class="card mt-4">
         <p>
           The <%= request.requestName %> request expired, its limit date was <%= request.expiryDateFormatted %>. You can remove the bid request completely.
