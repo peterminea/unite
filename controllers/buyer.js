@@ -26,6 +26,7 @@ const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, superv
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
 const fetch = require('node-fetch');
+var oxr = require('open-exchange-rates'),	fx = require('money'), initConversions = require('../middleware/exchangeRates');
 
 const statusesJson = {
   BUYER_REQUESTED_BID: parseInt(process.env.BUYER_REQ_BID),
@@ -201,23 +202,36 @@ exports.getViewBids = (req, res) => {
   promise.then(async (bids) => {
     //Verify bids:
     
-    var validBids = [], expiredBids = [];
+    var validBids = [], cancelledBids = [], expiredBids = [];
     if(bids && bids.length) {
       for(var i in bids) {
         var date = Date.now();
         var bidDate = bids[i].expiryDate;
-        bidDate > date? validBids.push(bids[i]) : expiredBids.push(bids[i]);
+        bidDate > date? 
+          (bids[i].isCancelled == true? validBids.push(bids[i]) : cancelledBids.push(bids[i]))
+        : expiredBids.push(bids[i]);
       }
     }
     
-    var totalPrice = 0, expiredPrice = 0;
-    for(var i in validBids) {
-      totalPrice += validBids[i].price;
+    var totalPrice = 0, validPrice = 0, cancelledPrice = 0, expiredPrice = 0;
+    
+    for(var i in validBids) {      
+      validPrice += validBids[i].price;
     }
+    
+    totalPrice = validPrice;
+    
+    for(var i in cancelledBids) {
+      cancelledPrice += cancelledPrice[i].price;
+    }
+    
+    totalPrice += cancelledPrice;
     
     for(var i in expiredBids) {
       expiredPrice += expiredBids[i].price;
     }
+    
+    totalPrice += expiredPrice;
 
     await sendExpiredBidEmails(req, res, expiredBids);
     var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
@@ -225,14 +239,20 @@ exports.getViewBids = (req, res) => {
     
     res.render("buyer/viewBid", {
       bids: validBids,
+      cancelledBids: cancelledBids,
       expiredBids: expiredBids,
+      totalBidLength: bids && bids.length? bids.length : 0,
       stripePublicKey: process.env.STRIPE_KEY_PUBLIC,
       stripeSecretKey: process.env.STRIPE_KEY_SECRET,
       successMessage: success,
       errorMessage: error,
       totalPrice: totalPrice,
+      validPrice: validPrice,
+      expiredPrice: expiredPrice,
+      cancelledPrice: cancelledPrice,
+      currency: req.params.currency,      
       statusesJson: JSON.stringify(statusesJson),
-      supplierId: req.params.supplierId, 
+      supplierId: req.params.supplierId,
       buyerId: req.params.buyerId,
       balance: req.params.balance
     });
@@ -246,7 +266,7 @@ exports.postViewBids = (req, res) => {
         return false;
     
       var dbo = db.db(BASE);
-      dbo.collection("bidrequests").updateOne({ _id: req.body.id }, { $set: {status: req.body.status} }, function(err, resp) {
+      dbo.collection("bidrequests").updateOne({ _id: req.body.id }, { $set: { status: req.body.status } }, function(err, resp) {
         if(treatError(req, res, err, 'back'))
           return false;
         req.flash('success', 'Bid status updated successfully!');        
