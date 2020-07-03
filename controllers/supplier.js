@@ -779,19 +779,22 @@ exports.getBidRequests = (req, res) => {
     var totalPrice = 0, validPrice = 0, cancelledPrice = 0, expiredPrice = 0;
     
     for(var i in validBids) {
-      validPrice += fx(parseFloat(validBids[i].price)).from(validBids[i].currency).to(supplier.currency);
+      //validPrice += fx(parseFloat(validBids[i].price)).from(validBids[i].currency).to(supplier.currency);
+      validPrice += parseFloat(validBids[i].price);
     }
     
     totalPrice = validPrice;
     
     for(var i in cancelledBids) {
-      cancelledPrice += fx(parseFloat(cancelledBids[i].price)).from(cancelledBids[i].currency).to(supplier.currency);
+      //cancelledPrice += fx(parseFloat(cancelledBids[i].price)).from(cancelledBids[i].currency).to(supplier.currency);
+      cancelledPrice += parseFloat(cancelledBids[i].price);
     }
     
     totalPrice += cancelledPrice;
     
     for(var i in expiredBids) {
-      expiredPrice += fx(parseFloat(expiredBids[i].price)).from(expiredBids[i].currency).to(supplier.currency);
+      //expiredPrice += fx(parseFloat(expiredBids[i].price)).from(expiredBids[i].currency).to(supplier.currency);
+      expiredPrice += parseFloat(expiredBids[i].price);
     }
     
     totalPrice += expiredPrice;
@@ -807,6 +810,7 @@ exports.getBidRequests = (req, res) => {
       expiredPrice: expiredPrice,
       cancelledPrice: cancelledPrice,
       totalBidLength: requests && requests.length? requests.length : 0,
+      supplierCancelBidStatus: process.env.SUPP_CANCEL_BID,
       requests: validBids,
       cancelledRequests: cancelledBids,
       expiredRequests: expiredBids

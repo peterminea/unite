@@ -22,6 +22,7 @@ router.get("/viewBid/:supplierId/:buyerId/:currency/:balance", isAuth, sessionEx
 router.get("/chatLogin/:supplierId/:buyerId/:requestId/:requestName/:buyerName/:supplierName", isAuth, sessionExit, buyerController.getChatLogin);
 router.get("/chat/:from/:to/:username/:room/:reqId/:reqName/:toName/:fromName", isAuth, sessionExit, buyerController.getChat);
 router.get("/cancelBid/:bidId/:bidName/:userType/:buyerName/:supplierName/:buyerEmail/:supplierEmail", isAuth, sessionExit, buyerController.getCancelBid);
+router.get("/bidCatalog/:buyerId/:buyerName", isAuth, sessionExit, buyerController.getBidCatalog);
 
 router.post("/", isAuth, sessionExit, buyerController.postIndex);
 router.post("/sign-in", buyerController.postSignIn);

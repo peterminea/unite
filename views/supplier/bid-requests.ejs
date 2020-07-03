@@ -106,7 +106,7 @@
     <% for(request of cancelledRequests) { %>
       <div class="card mt-4">
         <p>
-          This bid was cancelled upon <% if(request.status == 5) { %> your <% } else { %> Buyer's <% } %> decision. You can remove the bid completely.
+          This bid was cancelled upon <% if(request.status == supplierCancelBidStatus) { %> your <% } else { %> Buyer's <% } %> decision. You can remove the bid completely.
         </p>
         <button class="btn btn-primary ml-2 delete" style="float: right" id="<%= request._id %>">Delete Request</button>
       </div>
@@ -126,7 +126,7 @@
     <% } } if(totalbidLength == 0) { %>
       <p style="font-size: 12pt; font-weight: bold; color: navy">You have not received any bid requests as a supplier. If you prefer, you may update your product offer from your Profile page.</p>
     <% } else { %>
-    <p style="font-size: 12pt; font-weight: bold; color: navy">You have received a total of <%= totalBidLength %> bid requests. Their total price was <%= totalPrice %> <%= supplier.currency %>.</p>
+    <p style="font-size: 12pt; font-weight: bold; color: navy">You received a total of <%= totalBidLength %> bid requests. Their total price is <%= totalPrice %> <%= supplier.currency %>.</p>
     <% } %>
     <input type="hidden" name="_csrf" value="< %= csrfToken %>">
 	</div>

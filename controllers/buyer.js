@@ -40,18 +40,31 @@ const statusesJson = {
 
 
 exports.getIndex = async (req, res) => {
-     if(req.session) {
-      var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
-      req.session.flash = [];
+     if(req.session) {       
+      var promise = BidRequest.find({buyer: req.session.buyer? req.session.buyer._id : null}).exec();
        
-      res.render("buyer/index", {
-        message: req.flash('info', 'Please wait while we are loading the list of available products (The Catalog)...'),
-        buyer: req.session? req.session.buyer : null,
-        BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
-        successMessage: success,
-        errorMessage: error,
-        suppliers: null
-        //catalogItems: catalogItems
+      promise.then((bids) => {
+        var totalBidsPrice = 0;
+        if(bids && bids.length) {
+          for(var i in bids) {
+            totalBidsPrice += fx(parseFloat(bids[i].price)).from(bids[i].supplierCurrency).to(process.env.BID_DEFAULT_CURR);
+          }
+        }
+        
+        var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+        req.session.flash = [];
+
+        res.render("buyer/index", {
+          message: req.flash('info', 'Please wait while we are loading the list of available products (The Catalog)...'),
+          buyer: req.session? req.session.buyer : null,
+          BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+          bidsLength: bids && bids.length? bids.length : null,
+          totalBidsPrice: totalBidsPrice,
+          successMessage: success,
+          errorMessage: error,
+          suppliers: null
+          //catalogItems: catalogItems
+        });
       });
     }
 }
@@ -76,19 +89,31 @@ exports.postIndex = (req, res) => {
       }
       
     var promise = BidStatus.find({}).exec();
-    var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
-    req.session.flash = [];
-      
     promise.then((statuses) => {
-        res.render("buyer/index", {
-          buyer: req.session.buyer,
-          suppliers: suppliers2,
-          MAX_PROD: process.env.BID_MAX_PROD,
-          BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
-          statuses: statuses,
-          successMessage: success,
-          errorMessage: error,
-          statusesJson: JSON.stringify(statusesJson)
+      var promise2 = BidRequest.find({buyer: req.session.buyer? req.session.buyer._id : null}).exec();
+
+        promise2.then((bids) => {
+          var totalBidsPrice = 0;
+          if(bids && bids.length) {
+            for(var i in bids) {
+              totalBidsPrice += fx(parseFloat(bids[i].price)).from(bids[i].supplierCurrency).to(process.env.BID_DEFAULT_CURR);
+            }
+          }
+      
+          var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+          req.session.flash = [];
+          res.render("buyer/index", {
+            buyer: req.session.buyer,
+            suppliers: suppliers2,
+            MAX_PROD: process.env.BID_MAX_PROD,
+            BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+            bidsLength: bids && bids.length? bids.length : null,
+            totalBidsPrice: totalBidsPrice,
+            statuses: statuses,
+            successMessage: success,
+            errorMessage: error,
+            statusesJson: JSON.stringify(statusesJson)
+          });
         });
       });
     });
@@ -134,7 +159,7 @@ exports.postIndex = (req, res) => {
       supplierCurrency: req.body.supplierCurrency,
       specialMentions: req.body.specialMentions? 
         req.body.specialMentions 
-          : req.body.buyerName + ' has sent a new Order to ' + req.body.supplierName + ', and the price is ' + req.body.price + ' ' + req.body.currency + '.',
+          : req.body.buyerName + ' has sent a new Order to ' + req.body.supplierName + ', and the price is ' + req.body.price + ' ' + req.body.supplierCurrency + '.',
       createdAt: req.body.createdAt? req.body.createdAt : Date.now(),
       updatedAt: Date.now(),
       expiryDate: Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION,
@@ -157,6 +182,31 @@ exports.postIndex = (req, res) => {
   } else {
     res.redirect("/buyer");
   }
+}
+
+
+exports.getBidCatalog = (req, res) => {
+  MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
+    if(treatError(req, res, err, 'back'))
+      return false;
+
+      var dbo = db.db(BASE);
+      dbo.collection("bidrequests").find({ buyer: req.params.buyerId }).toArray(function(err, bids) {
+        if(err) {
+          console.error(err.message);
+          return res.status(500).send({ 
+            msg: err.message 
+          });
+        }
+        
+        db.close();
+        
+        res.render('buyer/bidCatalog', {
+          buyerName: req.params.buyerName,
+          bids: bids
+        });
+      });
+  });  
 }
 
 
@@ -201,7 +251,6 @@ exports.getViewBids = (req, res) => {
   
   promise.then(async (bids) => {
     //Verify bids:
-    
     var validBids = [], cancelledBids = [], expiredBids = [];
     if(bids && bids.length) {
       for(var i in bids) {
@@ -212,28 +261,29 @@ exports.getViewBids = (req, res) => {
         : expiredBids.push(bids[i]);
       }
     }
-    
+
+    await sendExpiredBidEmails(req, res, expiredBids);
+    await initConversions(oxr, fx);
     var totalPrice = 0, validPrice = 0, cancelledPrice = 0, expiredPrice = 0;
     
-    for(var i in validBids) {      
-      validPrice += validBids[i].price;
+    for(var i in validBids) {
+      validPrice += fx(parseFloat(validBids[i].price)).from(validBids[i].supplierCurrency).to(req.params.currency);
     }
     
     totalPrice = validPrice;
     
     for(var i in cancelledBids) {
-      cancelledPrice += cancelledPrice[i].price;
+      cancelledPrice += fx(parseFloat(cancelledBids[i].price)).from(cancelledBids[i].supplierCurrency).to(req.params.currency);
     }
     
     totalPrice += cancelledPrice;
     
     for(var i in expiredBids) {
-      expiredPrice += expiredBids[i].price;
+      expiredPrice += fx(parseFloat(expiredBids[i].price)).from(expiredBids[i].supplierCurrency).to(req.params.currency);
     }
     
     totalPrice += expiredPrice;
-
-    await sendExpiredBidEmails(req, res, expiredBids);
+    
     var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
     req.session.flash = [];
     
@@ -242,6 +292,7 @@ exports.getViewBids = (req, res) => {
       cancelledBids: cancelledBids,
       expiredBids: expiredBids,
       totalBidLength: bids && bids.length? bids.length : 0,
+      buyerCancelBidStatus: process.env.BUYER_CANCEL_BID,
       stripePublicKey: process.env.STRIPE_KEY_PUBLIC,
       stripeSecretKey: process.env.STRIPE_KEY_SECRET,
       successMessage: success,
@@ -250,7 +301,7 @@ exports.getViewBids = (req, res) => {
       validPrice: validPrice,
       expiredPrice: expiredPrice,
       cancelledPrice: cancelledPrice,
-      currency: req.params.currency,      
+      currency: req.params.currency,
       statusesJson: JSON.stringify(statusesJson),
       supplierId: req.params.supplierId,
       buyerId: req.params.buyerId,

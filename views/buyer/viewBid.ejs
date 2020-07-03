@@ -440,7 +440,7 @@
   <% for(bid of cancelledBids) { i++; %>
     <div class="card mt-4">
       <p>
-        The <%= bid.requestName %> bid was cancelled upon <% if(bid.status == 6) { %> your <% } else { %> Supplier's <% } %> decision. You can remove the bid completely.
+        The <%= bid.requestName %> bid was cancelled upon <% if(bid.status == buyerCancelBidStatus) { %> your <% } else { %> Supplier's <% } %> decision. You can remove the bid completely.
       </p>
       <button class="btn btn-primary ml-2 delete" style="float: right" id="<%= bid._id %>">Delete Bid</button>
     </div>
@@ -460,7 +460,7 @@
   <% } } if(totalBidLength == 0)  { %>
       <p style="font-size: 12pt; font-weight: bold; color: purple">You have not placed any bids to this supplier. If you prefer, you may do so at any time.</p>
     <% } else { %>
-      <p style="font-size: 12pt; font-weight: bold; color: navy">You have received a total of <%= totalBidLength %> bid requests. Their total price is <%= totalPrice %> <%= currency %>.</p>
+      <p style="font-size: 12pt; font-weight: bold; color: navy">You placed a total of <%= totalBidLength %> bid requests to this supplier. Their total price is <%= totalPrice %> <%= currency %>.</p>
     <% } %>
   </div>
   </div>

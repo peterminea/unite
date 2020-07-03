@@ -12,7 +12,7 @@ module.exports = async (oxr, fx) => {
     });  
   }
   else {
-      fx.base = 'EUR';
+      fx.base = process.env.BID_DEFAULT_CURR;
       fx.rates = {
         "EUR" : 1, // eg. 1 USD === 0.745101 EUR
         "GBP" : 0.91, // etc...
