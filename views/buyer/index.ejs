@@ -53,17 +53,20 @@
         var amountInput = $("#amountList_"+id);
         var priceInput = $("#priceList_"+id);
         var arr = [], arr1 = [], arr2 = [];
+        var totalPriceConverted = 0;
         
         elem.find('li').each(function() {
           arr.push($(this).find('.product').text());
           arr1.push($(this).attr('amount'));
           var val = fx.convert(parseFloat($(this).attr('bigPrice')), {from: $(this).find('.currency').text(), to: elem.attr('suppCurrency')});
           arr2.push(val);
+          totalPriceConverted += parseFloat(val).toFixed(2);
         });
         
         prodInput.val(arr);
         amountInput.val(arr1);
         priceInput.val(arr2);
+        $('#price_'+id).val(totalPriceConverted);
       });
 
       $('.buyerCurrency').on('change', function() {
@@ -261,6 +264,16 @@
         <p class="card-text">You can send bid requests to suppliers from here.</p>
       </div>
     </div>
+    
+    <% if(bidsLength != null) { %>
+      <div class="mt-4">
+        <p class='term'>
+          You have made a total of <%= bidsLength %> bids, their overall price (expressed in your currency) is <%= parseFloat(totalBidsPrice).toFixed(2) %> <%= BID_DEFAULT_CURR %>.
+        </p>
+        <a href="../buyer/bidCatalog/<%= buyer._id %>/<%= buyer.organizationName %>"><b>Load full table of Bids</b></a>
+      </div>
+    <% } %>
+    
     <form class="my-2 my-lg-2" method="POST">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
       <input class="form-control mr-sm-2" type="search" id="search" placeholder="Search Capabilites" aria-label="Search" name="capabilityInput">

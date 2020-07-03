@@ -26,6 +26,7 @@ const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, superv
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
 const fetch = require('node-fetch');
+var oxr = require('open-exchange-rates'),	fx = require('money'), initConversions = require('../middleware/exchangeRates');
 
 const statusesJson = {
   BUYER_REQUESTED_BID: parseInt(process.env.BUYER_REQ_BID),
@@ -762,16 +763,41 @@ exports.getBidRequests = (req, res) => {
   BidRequest.find({ supplier: supplier._id })
     .then(async (requests) => {
     
-      var validBids = [], expiredBids = [];
+      var validBids = [], cancelledBids = [], expiredBids = [];
       if(requests && requests.length) {
         for(var i in requests) {
           var date = Date.now();
           var bidDate = requests[i].expiryDate;
-          bidDate > date? validBids.push(requests[i]) : expiredBids.push(requests[i]);
+          bidDate > date? 
+            (requests[i].isCancelled == true? validBids.push(requests[i]) : cancelledBids.push(requests[i]))
+          : expiredBids.push(requests[i]);
         }
-    }
+      }
     
     await sendExpiredBidEmails(req, res, expiredBids);
+    await initConversions(oxr, fx);
+    var totalPrice = 0, validPrice = 0, cancelledPrice = 0, expiredPrice = 0;
+    
+    for(var i in validBids) {
+      //validPrice += fx(parseFloat(validBids[i].price)).from(validBids[i].currency).to(supplier.currency);
+      validPrice += parseFloat(validBids[i].price);
+    }
+    
+    totalPrice = validPrice;
+    
+    for(var i in cancelledBids) {
+      //cancelledPrice += fx(parseFloat(cancelledBids[i].price)).from(cancelledBids[i].currency).to(supplier.currency);
+      cancelledPrice += parseFloat(cancelledBids[i].price);
+    }
+    
+    totalPrice += cancelledPrice;
+    
+    for(var i in expiredBids) {
+      //expiredPrice += fx(parseFloat(expiredBids[i].price)).from(expiredBids[i].currency).to(supplier.currency);
+      expiredPrice += parseFloat(expiredBids[i].price);
+    }
+    
+    totalPrice += expiredPrice;
     var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
     req.session.flash = [];
     
@@ -779,7 +805,14 @@ exports.getBidRequests = (req, res) => {
       successMessage: success,
       errorMessage: error,
       supplier: supplier,
+      totalPrice: totalPrice,
+      validPrice: validPrice,
+      expiredPrice: expiredPrice,
+      cancelledPrice: cancelledPrice,
+      totalBidLength: requests && requests.length? requests.length : 0,
+      supplierCancelBidStatus: process.env.SUPP_CANCEL_BID,
       requests: validBids,
+      cancelledRequests: cancelledBids,
       expiredRequests: expiredBids
     });
   })

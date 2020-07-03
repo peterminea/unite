@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Buyer's Balance</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A cool thing made with Glitch">
+  <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/messages.css">
+  <link rel="stylesheet" href="/jquery-ui.css">
+  <link rel="stylesheet" href="/bootstrap.min.css">
+  <script src="/jquery.min.js"></script>
+  <script src="/jquery-ui.min.js"></script>
+  <script src="/popper.min.js"></script>
+  <script src="/bootstrap.min.js"></script>
+  <script src="/index.min.js"></script>
+  <script src="/sweetalert2@9.min.js"></script>
+  <script src="/https.js"></script>
+  <script src="/money.min.js"></script>
+  <script src="/autocomp.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {      
+      //getCurrenciesList('#currency', '/currencyGetAutocomplete', $('#token').val());//For selects.
+      //errorSuccess(Swal, '< %= errorMessage %>', '< %= successMessage %>');
+      initBaseRates(fx, '#currency');
+    });
+  </script>
+  </head>
+
+<body>
+  <nav pis="2" user="buyer" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
+    <a class="navbar-brand" href="/">UNITE</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </nav>
+  <div class="container">
+  <h1>
+    FULL LIST OF BUYER BIDS - <%= buyerName %>
+  </h1>
+  <br>
+  <div>
+    <p class='term'>
+      This is the whole list of bid requests (Tender Requests) that have been placed by the "<%= buyerName %>" UNITE Buyer by now. It includes bids of any status (valid, expired, cancelled), and also their prices, given in supplier's agreed currency.
+    </p>
+    <p class='term'>
+      We mayt also convert each bid's price to the default currency of the Bid Request. We assume that suppliers may use different national currencies from those of the buyers, so then we apply conversion rates.
+    </p>
+  </div>
+  <br><br>
+  <h3 style="color: teal">
+    Full table of your Buyer Bids
+  </h3>
+  <br>
+<% if(bids != null && bids.length > 0) {%>
+  <div class="container form-group mt-4" style="text-align: center">
+    <table id="buyers" class="table table-striped table-hover table-condensed members">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Bid name</th>
+          <th scope="col">Supplier name</th>
+          <th scope="col">Total price</th>
+          <th scope="col">Currency</th>
+          <th scope="col">Expiry date</th>
+          <th scope="col">Creation date</th>
+          <th scope="col">Cancelled</th>
+          <th scope="col">Expired</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% let i = 0; for (bid of bids) { %>
+        <tr id="<%= bid._id %>">
+          <td scope="col"><%= i+1 %></td>
+          <td scope="col"><%= bid.requestName %></td>
+          <td scope="col"><%= bid.supplierName %></td>
+          <td scope="col"><%= bid.price %></td>
+          <td scope="col"><%= bid.supplierCurrency %></td>
+          <td scope="col"><%= bid.expiryDateFormatted %></td>
+          <td scope="col"><%= bid.createdAtFormatted %></td>
+          <td scope="col"><%= bid.isCancelled %></td>
+          <td scope="col"><%= bid.isExpired %></td>
+        </tr>
+        <% i++; } %>
+        </tbody>
+      </table>
+    </div>
+        <% } else {%>
+        <div>
+          <p style="color: green; font-family: arial">
+            Sorry, no buyers here.
+          </p>
+        </div>
+        <% }%>
+  </div>
+  
+  </body>
+  
+</html>
+  

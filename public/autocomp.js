@@ -484,8 +484,11 @@ function initBaseRates(fx, elem) {
       /* etc */
     }
     
-    $(''+elem+'').find('option[value="' + fx.base + '"]').attr('selected', 'selected');
-    $(''+elem+'').trigger('change');
+    var el = $(''+elem+'');
+    if(el && el.length) {
+      $(''+elem+'').find('option[value="' + fx.base + '"]').attr('selected', 'selected');
+      $(''+elem+'').trigger('change');
+    }
   }, 400);
 }
 

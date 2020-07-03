@@ -1,5 +1,6 @@
 dependencies:
   '@sendgrid/mail': 7.2.1
+  akismet-api: 5.0.0
   assert: 2.0.0
   async: 3.2.0
   bad-words: 3.0.3
@@ -29,16 +30,17 @@ dependencies:
   method-override: 3.0.0
   moment: 2.27.0
   money: 0.2.0
-  mongoose: 5.9.20
+  mongoose: 5.9.21
   multer: 1.4.2
   multer-gridfs-storage: 4.2.0
   node-fetch: 2.6.0
   node-xlsx: 0.15.0
+  open-exchange-rates: 0.3.0
   process: 0.11.10
   socket.io: 2.3.0
   socket.io-client: 2.3.0
   ssl: 1.0.0
-  stripe: 8.67.0
+  stripe: 8.68.0
   sweetalert: 2.1.2
   token: 0.1.0
   utf-8-validate: 5.0.2
@@ -98,6 +100,15 @@ packages:
     dev: false
     resolution:
       integrity: sha1-/ts5T58OAqqXaOcCvaI7UF+ufh8=
+  /akismet-api/5.0.0:
+    dependencies:
+      bluebird: 3.7.2
+      superagent: 5.3.1
+    dev: false
+    engines:
+      node: '>=4.0.0'
+    resolution:
+      integrity: sha512-GdFa93txqJM3gGaeXJs0gAXNCIpcBFnCs8ylmPDGCRUecqkfl4+n9AqE0izQv5hWwvM1b47JQjD3pj0BR+zK5Q==
   /ansi-styles/3.2.1:
     dependencies:
       color-convert: 1.9.3
@@ -247,6 +258,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-MKiLiV+I1AA596t9w1sQJ8jkiSr5+ZKi0WKrYGUn6d1Fx+Ij4tIj+m2WMQSGczs5jZVxV339chE8iwk6F64wjA==
+  /bluebird/3.7.2:
+    dev: false
+    resolution:
+      integrity: sha512-XpNj6GDQzdfW+r2Wnn7xiSAd7TM3jzkxGXBGTtWKuSXv1xUV+azxAm8jdWZN06QTQk+2N2XB9jRDkvbmQmcRtg==
   /body-parser/1.19.0:
     dependencies:
       bytes: 3.1.0
@@ -467,6 +482,10 @@ packages:
       node: '>= 0.6'
     resolution:
       integrity: sha512-+Hp8fLp57wnUSt0tY0tHEXh4voZRDnoIrZPqlo3DPiI4y9lwg/jqx+1Om94/W6ZaPDOUbnjOt/99w66zk+l1Xg==
+  /cookiejar/2.1.2:
+    dev: false
+    resolution:
+      integrity: sha512-Mw+adcfzPxcPeI+0WlvRrr/3lGVO0bD75SxX6811cxSh1Wbxx7xZBGK1eVtDf6si8rg2lhnUjsVLMFMfbRIuwA==
   /core-util-is/1.0.2:
     dev: false
     resolution:
@@ -766,6 +785,10 @@ packages:
       node: '>= 0.10.0'
     resolution:
       integrity: sha512-mHJ9O79RqluphRrcw2X/GTh3k9tVv8YcoyY4Kkh4WDMUYKRZUq0h1o0w2rrrxBqM7VoeUVqgb27xlEMXTnYt4g==
+  /fast-safe-stringify/2.0.7:
+    dev: false
+    resolution:
+      integrity: sha512-Utm6CdzT+6xsDk2m8S6uL8VHxNwI6Jub+e9NYTcAms28T84pTa25GJQV9j0CY0N1rM8hK4x6grpF2BQf+2qwVA==
   /fetch/1.1.0:
     dependencies:
       biskviit: 1.0.1
@@ -833,6 +856,10 @@ packages:
       node: '>= 6'
     resolution:
       integrity: sha512-CKMFDglpbMi6PyN+brwB9Q/GOw0eAnsrEZDgcsH5Krhz5Od/haKHAX0NmQfha2zPPz0JpWzA7GJHGSnvCRLWsg==
+  /formidable/1.2.2:
+    dev: false
+    resolution:
+      integrity: sha512-V8gLm+41I/8kguQ4/o1D3RIHRmhYFG4pnNyonvua+40rqcEmT4+V71yaZ3B457xbbgCsCfjSPi65u/W6vK1U5Q==
   /forwarded/0.1.2:
     dev: false
     engines:
@@ -920,6 +947,14 @@ packages:
       node: '>= 0.4.0'
     resolution:
       integrity: sha512-f2dvO0VU6Oej7RkWJGrehjbzMAjFp5/VKPp5tTpWIV4JHHZK1/BxbFRtf/siA2SWTe09caDmVtYYzWEIbBS4zw==
+  /http-agent/0.1.2:
+    dependencies:
+      request: 1.9.9
+    dev: false
+    engines:
+      node: '>= 0.2.0'
+    resolution:
+      integrity: sha1-qqzWM8h+WrQu1PkIJ6Gl8eK6xLg=
   /http-errors/1.7.2:
     dependencies:
       depd: 1.1.2
@@ -1164,6 +1199,13 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-x0Vn8spI+wuJ1O6S7gnbaQg8Pxh4NNHb7KSINmEWKiPE4RKOplvijn+NkmYmmRgP68mc70j2EbeTFRsrswaQeg==
+  /mime/2.4.6:
+    dev: false
+    engines:
+      node: '>=4.0.0'
+    hasBin: true
+    resolution:
+      integrity: sha512-RZKhC3EmpBchfTGBVb8fb+RL2cWyw/32lshnsETttkBAyAUXSGHxbEJWWRXc751DrIxG1q04b8QwMbAwkRPpUA==
   /minimatch/3.0.4:
     dependencies:
       brace-expansion: 1.1.11
@@ -1215,7 +1257,7 @@ packages:
       mongoose: '*'
     resolution:
       integrity: sha512-Yo/7qQU4/EyIS8YDFSeenIvXxZN+ld7YdV9LqFVQJzTLye8unujAWPZ4NWKfFA+RNjh+wvTWKY9Z3E5XM6ZZiQ==
-  /mongoose/5.9.20:
+  /mongoose/5.9.21:
     dependencies:
       bson: 1.1.4
       kareem: 2.3.1
@@ -1232,7 +1274,7 @@ packages:
     engines:
       node: '>=4.0.0'
     resolution:
-      integrity: sha512-vRP6Csu2obzSl3ed7kTQMrolBNgweiRJ/eBU1PSe/rJfjqWS1oqDE2D1ZPGxkVOsKXs7Gyd84GAXerj8IB2UWg==
+      integrity: sha512-HQUemnKJdrE8ig+d3RTeOan6DWasmda8V97fs1ymozTNSuh2eGaf4D92/BrXYCw5QTgE/Ff5SxalndfgLn3DGg==
   /mpath/0.5.1:
     dev: false
     engines:
@@ -1390,6 +1432,12 @@ packages:
     dev: false
     resolution:
       integrity: sha1-WDsap3WWHUsROsF9nFC6753Xa9E=
+  /open-exchange-rates/0.3.0:
+    dependencies:
+      http-agent: 0.1.2
+    dev: false
+    resolution:
+      integrity: sha1-AKDyLooGlF9gYVwlZWzXZf1IMWs=
   /parseqs/0.0.5:
     dependencies:
       better-assert: 1.0.2
@@ -1509,10 +1557,27 @@ packages:
     dev: false
     resolution:
       integrity: sha512-Ebho8K4jIbHAxnuxi7o42OrZgF/ZTNcsZj6nRKyUmkhLFq8CHItp/fy6hQZuZmP/n3yZ9VBUbp4zz/mX8hmYPw==
+  /readable-stream/3.6.0:
+    dependencies:
+      inherits: 2.0.4
+      string_decoder: 1.3.0
+      util-deprecate: 1.0.2
+    dev: false
+    engines:
+      node: '>= 6'
+    resolution:
+      integrity: sha512-BViHy7LKeTz4oNnkcLJ+lVSL6vpiFeX6/d3oSH8zCW7UxP2onchk+vTGB143xuFjHS3deTgkKoXXymXqymiIdA==
   /regexp-clone/1.0.0:
     dev: false
     resolution:
       integrity: sha512-TuAasHQNamyyJ2hb97IuBEif4qBHGjPHBS64sZwytpLEqtBQ1gPJTnOaQ6qmpET16cK14kkjbazl6+p0RRv0yw==
+  /request/1.9.9:
+    deprecated: 'request has been deprecated, see https://github.com/request/request/issues/3142'
+    dev: false
+    engines:
+      '0': node >= 0.3.6
+    resolution:
+      integrity: sha1-ryMf6H43JaXbRv90gz86oOv9kVE=
   /require_optional/1.0.1:
     dependencies:
       resolve-from: 2.0.0
@@ -1560,6 +1625,13 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-sauaDf/PZdVgrLTNYHRtpXa1iRiKcaebiKQ1BJdpQlWH2lCvexQdX55snPFyK7QzpudqbCI0qXFfOasHdyNDGQ==
+  /semver/7.3.2:
+    dev: false
+    engines:
+      node: '>=10'
+    hasBin: true
+    resolution:
+      integrity: sha512-OrOb32TeeambH6UrhtShmF7CRDqhL6/5XpPNp2DuRH6+9QLw/orhp72j87v8Qa1ScDkvrrBNpZcDejAirJmfXQ==
   /send/0.17.1:
     dependencies:
       debug: 2.6.9
@@ -1713,7 +1785,13 @@ packages:
     dev: false
     resolution:
       integrity: sha512-n/ShnvDi6FHbbVfviro+WojiFzv+s8MPMHBczVePfUpDJLwoLT0ht1l4YwBCbi8pJAveEEdnkHyPyTP/mzRfwg==
-  /stripe/8.67.0:
+  /string_decoder/1.3.0:
+    dependencies:
+      safe-buffer: 5.2.1
+    dev: false
+    resolution:
+      integrity: sha512-hkRX8U1WjJFd8LsDJ2yQ/wWWxaopEsABU1XfkM8A+j0+85JAGppt16cr1Whg6KIbb4okU6Mql6BOj+uup/wKeA==
+  /stripe/8.68.0:
     dependencies:
       '@types/node': 14.0.14
       qs: 6.9.4
@@ -1721,7 +1799,25 @@ packages:
     engines:
       node: ^8.1 || >=10.*
     resolution:
-      integrity: sha512-MncFtlNtMPYlian/Za7jgPeC7YJegZjWkfdxcSC5DCgZLO69/za6ORI2M3dwZ50tfqh6BCYkRIcsrK5vkpSUHQ==
+      integrity: sha512-NjVf4dA5ACCbE3susJH7KpT+4EbE1nBSwTjMhi9rT+xhrm9xEtx21lufoYWLkezuPN4O3LIPv4eXJQGaa6SrdQ==
+  /superagent/5.3.1:
+    dependencies:
+      component-emitter: 1.3.0
+      cookiejar: 2.1.2
+      debug: 4.1.1
+      fast-safe-stringify: 2.0.7
+      form-data: 3.0.0
+      formidable: 1.2.2
+      methods: 1.1.2
+      mime: 2.4.6
+      qs: 6.9.4
+      readable-stream: 3.6.0
+      semver: 7.3.2
+    dev: false
+    engines:
+      node: '>= 7.0.0'
+    resolution:
+      integrity: sha512-wjJ/MoTid2/RuGCOFtlacyGNxN9QLMgcpYLDQlWFIhhdJ93kNscFonGvrpAHSCVjRVj++DGCglocF7Aej1KHvQ==
   /supports-color/5.5.0:
     dependencies:
       has-flag: 3.0.0
@@ -1898,6 +1994,7 @@ shrinkwrapMinorVersion: 9
 shrinkwrapVersion: 3
 specifiers:
   '@sendgrid/mail': ^7.2.1
+  akismet-api: ^5.0.0
   assert: ^2.0.0
   async: ^3.2.0
   bad-words: ^3.0.3
@@ -1927,11 +2024,12 @@ specifiers:
   method-override: ^3.0.0
   moment: ^2.27.0
   money: ^0.2.0
-  mongoose: ^5.9.20
+  mongoose: ^5.9.21
   multer: ^1.4.2
   multer-gridfs-storage: ^4.2.0
   node-fetch: ^2.6.0
   node-xlsx: ^0.15.0
+  open-exchange-rates: ^0.3.0
   process: ^0.11.10
   socket.io: ^2.3.0
   socket.io-client: ^2.3.0
