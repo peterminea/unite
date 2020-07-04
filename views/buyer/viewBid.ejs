@@ -266,19 +266,20 @@
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Date Created:</label>
-                    <textarea disabled class="form-control" name="deliveryRequirements"><%= bid.createdAtFormatted %></textarea>
+                    <textarea disabled class="form-control" name="createdAtFormatted"><%= bid.createdAtFormatted %></textarea>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Date of Expiration:</label>
-                    <textarea disabled class="form-control" name="deliveryRequirements"><%= bid.expiryDateFormatted %></textarea>
+                    <textarea disabled class="form-control" name="expiryDateFormatted"><%= bid.expiryDateFormatted %></textarea>
                   </div>
                    <div class="form-group">
-                    <label class="col-form-label">Price</label>
-                     <% l = 0; for(m in bid.priceList) {l += bid.priceList[m];} %>
-                    <input type="text" title="Total order price" value="<%= l %> <%= bid.supplierCurrency %>" class="form-control" id="price_<%= i %>" name="price" disabled>
-                     <input type="hidden" value="<%= bid.buyerCurrency %>" id="currency1_<%= i %>" name="buyerCurrency"></span>
-                    <input type="hidden" value="<%= bid.supplierCurrency %>" id="currency_<%= i %>" name="supplierCurrency"></span>
-                    <input type="hidden" id="defaultPrice_<%= i %>" value="1">
+                    <label class="col-form-label">Price (Your currency):</label>
+                    <input type="text" title="Original order price" value="<%= bid.buyerPrice %> <%= bid.buyerCurrency %>" class="form-control" id="price_<%= i %>" name="buyerPrice" disabled>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Price (Supplier's currency):</label>
+                     <% l = 0; for(m in bid.priceList) {l += bid.priceList[m];} %> <!-- Same as bid.supplierPrice .-->
+                    <input type="text" title="Order price as seen by Supplier" value="<%= l %> <%= bid.supplierCurrency %>" class="form-control" id="supplierPrice_<%= i %>" name="supplierPrice" disabled>
                   </div>
                    <div class="form-group">
                     <label class="col-form-label">Status*</label>
@@ -287,7 +288,7 @@
                   <div class="form-group selectstatus">
                     <select style="width: 100%" id="statuses_<%= i %>">
                     </select>
-                  </div>                  
+                  </div>
                     <% if (statusesJson != null) {  %>
                       <input type="hidden" id="statusJsonValues_<%= i %>" value="<%= statusesJson %>">
                     <% }  %>                  

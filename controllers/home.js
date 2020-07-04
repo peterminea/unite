@@ -140,6 +140,7 @@ exports.getFeedback = (req, res) => {
   
   res.render("feedback", {
     role: obj.role,
+    captchaSiteKey: captchaSiteKey,
     isAdmin: obj.role == process.env.USER_ADMIN,
     successMessage: success,
     errorMessage: error,
@@ -151,9 +152,9 @@ exports.getFeedback = (req, res) => {
 };
 
 exports.getViewFeedbacks = (req, res) => {
-  var obj = userData(req);
+  var obj = userData(req);  
   res.render("viewFeedbacks", {
-    captchaSiteKey: captchaSiteKey,
+    
     role: obj.role,
     isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
@@ -199,6 +200,40 @@ exports.getTermsConditions = (req, res) => {
   });
 }
 
+exports.getBidsList = (req, res) => {
+  MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
+    if(treatError(req, res, err, 'back'))
+      return false;
+
+    var dbo = db.db(BASE);
+    dbo.collection("bidrequests").find({}).toArray(function(err, bids) {
+      if(err) {
+        console.error(err.message);
+        return res.status(500).send({ 
+          msg: err.message 
+        });
+      }
+
+      db.close();
+      bids.sort(function(a, b) {
+        return a.requestName.localeCompare(b.requestName);
+      });
+      
+      var obj = userData(req);
+
+      res.render('bidsCatalog', {
+        role: obj.role,
+        isAdmin: obj.role == process.env.USER_ADMIN,
+        userId: obj.userId,
+        avatar: obj.avatar,
+        userName: obj.userName,
+        userType: obj.userType,
+        bids: bids
+        });
+      });
+  });
+};
+
 exports.getMemberList = async (req, res) => {
   //Get all buyers, suppliers, supervisors.
   var buys = [], supers = [], supps = [];
@@ -241,7 +276,7 @@ exports.getMemberList = async (req, res) => {
   
   var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
-  var obj = userData(req);  
+  var obj = userData(req);
   
   res.render("memberList", {
     buyers: buys,

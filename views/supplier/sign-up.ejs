@@ -63,7 +63,7 @@
           var captchaResponse = formData.get('g-recaptcha-response');
           $('input[name="captchaResponse"]').val(captchaResponse);
 
-          if(!supplierValidateFields(fx, defaultCurr, $('#currency').val()))
+          if(!supplierValidateFields(fx))
             return false;
 
           registrationDialog('Supplier');
@@ -170,11 +170,11 @@
         </div>
         <div>
           <p>
-            You can use an Excel file with your products list, formatted as product name + product price + product currency (3 cells per row), and after you click on the Process button, our system must automatically add the products and build the list on page.
+            You can use an Excel file with your products list, formatted as product name + product price + product currency + amount (4 cells per row, first row must contain column names), and after you click on the Process button, our system will automatically add the products and build their detailed list on page.
           </p>
         </div>
         <div class="form-group">
-          <label>Please choose your prepared product/service list (*.xls/xlsx, name+price+currency on each row):</label>
+          <label>Please choose your prepared product/service list (*.xls/xlsx, name+price+currency+amount on each row):</label>
           <input class="form-control fileexcelupload" type="file" id="products" name="products" single>
           <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Process Excel File" />
         </div>
@@ -186,6 +186,8 @@
             <br>
             <input type="number" min="0.1" step="0.1" placeholder="Price*" class="form-control" title="Price" id="price">
             <input type="text" readonly class="form-control" title="Currency" class="currency0" id="currency">
+            <br>
+            <input type="number" class="form-control" title="Amount" class="amount" id="amount" value="1">
             <div class="input-group-append">
               <button class="btn btn-outline-secondary" type="button" disabled id="addProdService">Add</button>
             </div>
@@ -196,6 +198,16 @@
           <input type="hidden" required id="prodServicesList" name="productsServicesOffered">
           <input type="hidden" name="pricesList" id="pricesList">
           <input type="hidden" name="currenciesList" id="currenciesList">
+          <input type="hidden" name="amountsList" id="amountsList">
+        </div>
+        <div class="form-group">
+          <label>Total Price of Supply*</label>
+          <span type="text" class="form-control" id="totalSupplyPrice" name="totalSupplyPrice"></span>
+          <input type="hidden" id="hiddenTotalPrice" value="0">
+        </div>
+        <div class="form-group">
+          <label>Total Amount of Supply*</label>
+          <input type="number" readonly class="form-control" id="totalSupplyAmount" name="totalSupplyAmount" value="0">
         </div>
         <div class="form-group">
           <label>Capability Description*</label>

@@ -63,6 +63,9 @@
             <a href="/supplier/balance" class="btn btn-primary">Go to balance</a>
           </div>
         </div>
+        <div class='card'>
+          <span style='font-size: 11pt; color: brown'>You currently have a number of <%= supplier.productsServicesOffered.length %> product types, making a total supply amount of <%= supplier.totalSupplyAmount %> items, and the overall price of your offered supply is <%= supplier.totalSupplyPrice %> <%= supplier.currency %>.</span>
+        </div>
       </div>
       <div class="col-sm-6">
         <div class="card">

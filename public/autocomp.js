@@ -451,7 +451,7 @@ function getProductsList(elem, url, token) {//For <select> drop-down currencies.
 
       obj.append('<option></option>');
       for(var i in data) {
-        var opt = '<option ' + 'style="word-wrap: break-word; width: 50px" price="' + data[i].price + '" currency="' + data[i].currency + '" title="' + data[i].name +'" value="' + data[i].name + '">' + data[i].name + '</option>';
+        var opt = '<option ' + 'style="word-wrap: break-word; width: 50px" price="' + data[i].price + '" maxAmount="' + data[i].amount + '" currency="' + data[i].currency + '" title="' + data[i].name +'" value="' + data[i].name + '">' + data[i].name + '</option>';
         obj.append(opt);
       }
       //res(data);
@@ -493,14 +493,36 @@ function initBaseRates(fx, elem) {
 }
 
 
-  function bindRemoveProduct(obj, /*elem, prodInput, priceInput, currencyInput,*/ prodServiceInput) {
-    obj.bind('click', function() {
-      var li = $(this).parent('li');/*
-      var newIndex = elem.find('li').index(li);*/
-
-      prodServiceInput.trigger('change');
-      li.remove();
-    });
+  function bindRemoveProduct(obj, prodServiceInput, fromBuyer, id) {
+    if(!fromBuyer) {
+      obj.on('click', function() {
+        var li = $(this).parent('li');/*
+        var newIndex = elem.find('li').index(li);*/
+        
+        var removedAmount = parseInt(li.find('.amount').text()), removedPrice = removedAmount * parseFloat(li.find('.price').text());
+        var newTotal = parseFloat($('#hiddenTotalPrice').val()) - parseFloat(removedPrice);
+        var newAmount = parseInt($('#totalSupplyAmount').val()) - removedAmount;
+        $('#hiddenTotalPrice').val(newTotal);
+        $('#totalSupplyAmount').text(newAmount);
+        $('#totalSupplyAmount').text(newTotal + ' ' + li.find('.currency').text());
+        
+        prodServiceInput.trigger('change');
+        li.remove();
+      });
+    } else {
+      obj.on('click', function() {
+        var li = $(this).parent('li');/*
+        var newIndex = elem.find('li').index(li);*/
+        var newAmount = parseInt($('#totalAmount_'+id).val()) - parseInt(li.attr('amount'));
+        var newPrice = parseFloat(li.attr('totalPrice')) - parseFloat(li.attr('price'));
+        $('#totalAmount_'+id).val(parseInt(newAmount));
+        $('#price_'+id).val(parseFloat(newPrice).toFixed(2));
+        var supp = fx.convert($('#price_'+id).val(), {from: $('span.bidCurrency').first().text(), to: '<%= supplier.currency %>'});
+        $('#supplierPrice_'+id).val(supp);
+        li.remove();
+      });
+    }
+    
    }
 
 
@@ -509,6 +531,7 @@ function removeAllProducts() {//Supplier products
   $("#prodServicesList").val('');
   $("#pricesList").val('');
   $("#currenciesList").val('');
+  $("#amountsList").val('');
 }
 
 
@@ -520,7 +543,7 @@ function removeAllItems(index) {//Bid items
 }
 
 
-function addition(/*prodInput, priceInput, currencyInput,*/ prod, prodVal, priceVal, currencyVal, elem) {  
+function addition(prod, prodVal, priceVal, currencyVal, amountVal, elem, fromBuyer) {  
   var isPresent = false;
   elem.find('.product').each(function() {
     if($(this).text() == prodVal) {
@@ -536,8 +559,30 @@ function addition(/*prodInput, priceInput, currencyInput,*/ prod, prodVal, price
       text: 'You have already added ' + prodVal + ' to the list. Please refine your selection.'
     });
   } else {
-    elem.append("<li class='list-group-item'><span class='product'>" + prodVal + '</span> - <span class="price">' + priceVal + '</span> <span class="currency">' + currencyVal + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
-      bindRemoveProduct($('.rem').last(), prod);  
+    if(!amountVal) {
+      elem.append("<li class='list-group-item'><span class='product'>" + prodVal + '</span> - <span class="price">' + priceVal + '</span> <span class="currency">' + currencyVal + `</span><span class='amount'> - ${amountVal} items</span><span class='totalPrice'> (Total: ${amountVal} * ${priceVal} ${currencyVal}) </span><span class='rem'>&nbsp;&nbsp;(Remove)</span></li>`);
+    } else {
+      var addedPrice = parseFloat(priceVal * amountVal).toFixed(2);
+      var priceInput = fromBuyer? elem.parent('div').next('div').find('input[id^="price_"]') : $('#price');
+      var buyerCurrency = fromBuyer? priceInput.next('span').text() : $('input[name="currency"]').val();
+      
+      if(!fromBuyer) 
+        $('#hiddenTotalPrice').val(parseFloat(parseFloat($('#hiddenTotalPrice').val()) + parseFloat(addedPrice)).toFixed(2));
+      var bigPrice = fromBuyer? parseFloat(parseFloat(priceInput.val()).toFixed(2) + (addedPrice)).toFixed(2) : $('#hiddenTotalPrice').val();
+
+      if(currencyVal != buyerCurrency) {//Convert the values to the currency of buyer.
+        addedPrice = parseFloat(fx.convert((addedPrice), {from: currencyVal, to: buyerCurrency})).toFixed(2);
+        currencyVal = buyerCurrency;
+        bigPrice = parseFloat(fx.convert((bigPrice), {from: currencyVal, to: buyerCurrency})).toFixed(2);
+      }
+      
+      elem.append("<li class='list-group-item' price='" + addedPrice + "' totalPrice='" + bigPrice +"' amount='" + amountVal + "'><span class='product'>" + prodVal + '</span> - <span class="price">' + priceVal + '</span> <span class="currency">' + currencyVal + `</span> - <span class='amount'>${amountVal}</span> items (<span class='totalPrice'>${amountVal} * ${priceVal}</span> ${currencyVal})<span class='rem'>&nbsp;&nbsp;(Remove)</span></li>`);
+      if(!fromBuyer) {
+        $('#totalSupplyPrice').text(bigPrice + ' ' + currencyVal);
+        $('#totalSupplyAmount').text(parseInt($('#totalSupplyAmount').val() + parseInt(amountVal)));
+      }
+    }
+      bindRemoveProduct($('.rem').last(), prod, fromBuyer, fromBuyer? getId(elem.attr('id')) : null);  
   }
 }
 
@@ -557,11 +602,11 @@ function addProduct(obj) {
       }
 
       var input = $("#prodServiceInput");     
-      var req = input.val().length && $('#price').val().length && $('#currency').val().length;
+      var req = input.val().length && $('#price').val().length && $('#amount').val().length;
 
       if(req) {
         $('#prodServiceInput,#price,#currency').removeClass('errorField');
-        addition(input, input.val(), $('#price').val(), $('#currency').val(), elem);
+        addition(input, input.val(), $('#price').val(), $('#currency').val(), $('#amount').val(), elem, false);
         input.val('');
         $('#price').val('');
         //$('#currency').val('');
@@ -571,10 +616,10 @@ function addProduct(obj) {
         Swal.fire({
           icon: 'warning',
           title: 'Warning',
-          text: 'Please enter valid values for products, prices and currency.'
+          text: 'Please enter valid values for product name, price and amount.'
           });
         //alert('Please enter valid values for products, prices and currency.');
-        $('#prodServiceInput,#price,#currency').addClass('errorField');
+        $('#prodServiceInput,#price,#amount').addClass('errorField');
       }
     });
 }
@@ -728,38 +773,24 @@ function treatLastLi() {
 }
 
 
-function supplierValidateFields(prodList, priceList, currList, fx, defaultCurr, newCurr) {
+function supplierValidateFields(fx) {
   if($('#prodServices li').length == 0) {
     var obj = '<p class="productRequired littleNote">You are required to include at least one product or service.</p>';
     $(obj).insertBefore($(this));
     return false;
   }
-  /*
-  if(prodList && prodList.length) {
-    var arr = prodList.split(','), arr1 = priceList.split(','), arr2 = currList.split(',');
-
-    for(var i in arr1) {
-      var price = fx.convert(arr1[i], {from: defaultCurr, to: newCurr});
-      arr1[i] = parseFloat(price).toFixed(2);
-      arr2[i] = newCurr;
-    }
-    
-    $('#prodServicesList').val(arr);
-    $('#pricesList').val(arr1);
-    $('#currenciesList').val(arr2);
-  }*/
   
-  var arr = [], arr1 = [], arr2 = [];
+  var arr = [], arr1 = [], arr2 = [], arr3 = [];
   
   $('#prodServices li').each(function(index, el) {
-    var product = $(this).find('.product'), price = $(this).find('.price'), currency = $(this).find('.currency');
-    //var newPrice = fx.convert(parseFloat(price.text()), {from: defaultCurr, to: newCurr});
-    arr.push(product);
-    arr1.push(price);
-    arr2.push(currency);    
+    var product = $(this).find('.product'), price = $(this).find('.price'), currency = $(this).find('.currency'), quantity = $(this).find('.amount');
+    arr.push(product.text());
+    arr1.push(parseFloat(price.text()).toFixed(2));
+    arr2.push(currency.text());    
+    arr3.push(quantity.text());
   });
 
-  var preferred = $('.currency').first().val();
+  var preferred = $('.currency').first().text();
   var isChanged = false;
   $('span.currency').each(function(ind, elem) {
     var curr = $(this).text();
@@ -779,6 +810,7 @@ function supplierValidateFields(prodList, priceList, currList, fx, defaultCurr, 
   $('#prodServicesList').val(arr);
   $('#pricesList').val(arr1);
   $('#currenciesList').val(arr2);
+  $('#amountsList').val(arr3);
   return true;
 }
 
@@ -935,6 +967,9 @@ $(document).ready(function() {
         treatLastLi();
         $('<li class="nav-item"><a class="nav-link" href="/filesList" title="View Uploaded Files List">View Uploaded Files</a></li>')
           .insertAfter('li.last');
+        treatLastLi();
+        $('<li class="nav-item"><a class="nav-link" href="/bidsList" title="View UNITE Bids List">View All Bids</a></li>')
+          .insertAfter('li.last');
       }
       
       var ind = parseInt(nav.attr('pos'));
@@ -1089,15 +1124,20 @@ $(document).ready(function() {
             //alert(loc + ' ' + dir);
             //alert(imageExists('../avatars/Avatar-3:15:pm-a.jpg'));
           } else if(isExcel) {
-            var MAX = $("#prodServices").attr('MAX');//parseInt("<%= MAX_PROD %>");
+            var fromBuyer = input.hasClass('fromBuyer');
+            var div = fromBuyer? input.parent('div').next('div') : null;
+            var el = fromBuyer? div.find('ul') : $('#prodServices');
+            var productInput = fromBuyer? div.find('input[id^="prodServiceInput"]') : $("#prodServiceInput");
             
-            if(Array.isArray(response)) {
+            var MAX = el.attr('MAX');//parseInt("<%= MAX_PROD %>");
+            
+            if(Array.isArray(response) && response.length == 4) {
               for(var i in response) {//Each Supplier product should come here.                      
                 if(i < 1) 
                   continue;
-                var elem = response[i];//Assume that elem fields are called name, price, and currency.                
-                var elem2 = $("#prodServices");
-                if(elem2.find('li').length >= MAX) {
+                var elem = response[i];//Assume that elem fields are called name, price, and currency.
+                
+                if(el.find('li').length >= MAX) {
                   Swal.fire({
                     icon: 'error',
                     title: 'Error!',
@@ -1106,8 +1146,15 @@ $(document).ready(function() {
                    return false;
                  }
 
-                addition($("#prodServiceInput"), elem[0], elem[1], elem[2], elem2);
+                fromBuyer? addition(productInput, elem[0], elem[1], elem[2], elem[3], el, true) : addition(productInput, elem[0], elem[1], elem[2],  elem[3], el, false);
               }
+            } else {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error!',
+                  text: 'Invalid Excel data. Please make sure that: 1) Your first row contains the column names; 2) You have four columns: name, price, currency, and amount.'
+                  });
+                 return false;
             }
           } else if(isMultiple) {//response.file.filename, originalname, fieldname, 
             var hasDiv = theDiv.next('div').hasClass('fileWrapper');

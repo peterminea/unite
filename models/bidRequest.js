@@ -62,7 +62,7 @@ const bidRequestSchema = new Schema({
     type: [Number],
     required: true
   },
-  priceList: {
+  priceList: {//Converted to Supplier's currency.
     type: [Number],
     required: true
   },  
@@ -100,7 +100,17 @@ const bidRequestSchema = new Schema({
     },
     default: 0
   },
-  price: {
+  buyerPrice: {//In Buyer's currency.
+    type: Number,
+    required: true,
+    default: 1,
+    validate(value) {
+      if(value < 1) {
+        throw new Error('Price must be a strictly positive value.');
+      }
+    }
+  },
+  supplierPrice: {//In Supplier's currency.
     type: Number,
     required: true,
     default: 1,

@@ -94,6 +94,14 @@
           <th scope="col">Contact Name</th>
           <th scope="col">Balance</th>
           <th scope="col">isActive</th>
+          <th scope="col">Total Bid Count</th>
+          <th scope="col">Total Bid Price</th>
+          <th scope="col">Valid Bids</th>
+          <th scope="col">Valid Bids Price</th>
+          <th scope="col">Cancelled Bids</th>
+          <th scope="col">Cancelled Bids Price</th>
+          <th scope="col">Expired Bids</th>
+          <th scope="col">Expired Bids Price</th>
           <th scope="col">Process</th>
           <th scope="col">Talk</th>
         </tr>
@@ -104,8 +112,27 @@
           <td scope="col"><%= i+1 %></td>
           <td scope="col"><%= buyer.deptAgencyGroup %></td>
           <td scope="col"><%= buyer.contactName %></td>
-          <td scope="col">€<%= buyer.balance %></td>
+          <td scope="col">€ <%= buyer.balance %></td>
           <td scope="col"><%= buyer.isActive %></td>
+          <% if(buyer.bidData != null) { %>
+          <td scope="col"><%= buyer.bidData.totalBids %></td>
+          <td scope="col"><%= buyer.bidData.totalPrice %> <%= buyer.currency %></td>
+          <td scope="col"><%= buyer.bidData.validBids %></td>
+          <td scope="col"><%= buyer.bidData.validBidsPrice %> <%= buyer.currency %></td>
+          <td scope="col"><%= buyer.bidData.cancelledBids %></td>
+          <td scope="col"><%= buyer.bidData.cancelledBidsPrice %> <%= buyer.currency %></td>
+          <td scope="col"><%= buyer.bidData.expiredBids %></td>
+          <td scope="col"><%= buyer.bidData.expiredBidsPrice %> <%= buyer.currency %></td>
+          <% } else { %>
+          <td scope="col"></td>
+          <td scope="col"></td>
+          <td scope="col"></td>
+          <td scope="col"></td>
+          <td scope="col"></td>
+          <td scope="col"></td>
+          <td scope="col"></td>
+          <td scope="col"></td>
+          <% } %>
           <td scope="col">
             <button title="Remove selected Buyer from UNITE" id="process_<%= i %>" class="btn btn-primary">Process</button>
           </td>

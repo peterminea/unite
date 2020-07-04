@@ -27,9 +27,16 @@
         
         $('#addProduct').click(function() {
           if($('#price').val() <= 0) {
-            alert('Please enter a price greater than 0.');
+            Swal.fire({
+              icon: 'error',
+              title: 'Error!',
+              text: 'Please enter a valid value for Price.'
+            });
+            
             return false;
           }
+          
+          $('#totalPrice').val(parseFloat($('#price').val() * $('#amount').val()).toFixed(2));
         });
         
       var token = $("input[name='_csrf']").val();
@@ -64,6 +71,14 @@
           <div class="form-group">
             <label for="currency">Currency:</label>
             <input required class="form-control" type="text" id="currency" name="currency"></input>
+          </div>
+          <div class="form-group">
+            <label for="currency">Amount:</label>
+            <input required min="1" class="form-control" type="number" id="amount" name="amount"></input>
+          </div>
+          <div class="form-group">
+            <label for="currency">Total price:</label>
+            <input readonly min="1" class="form-control" type="number" id="totalPrice" name="totalPrice"></input>
           </div>
           <div class="form-group">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
