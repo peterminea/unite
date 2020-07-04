@@ -21,6 +21,20 @@ const productserviceSchema = new Schema({
     type: String,
     required: true
   },
+  amount: {
+    type: Number,
+    default: 1,
+    validation(value) {
+      if(value < 1) {
+        throw new Error('Please enter a valid amount.');
+      }
+    },
+    required: true
+  },
+  totalPrice: {
+    type: Number,
+    required: true
+  },
   supplier: {
     type: Schema.Types.ObjectId, // Supplier's object id -> It will be generated from current session
     required: true

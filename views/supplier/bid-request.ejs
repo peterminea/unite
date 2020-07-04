@@ -169,28 +169,32 @@
 				</div>
         <div class="form-group">
           <label class="col-form-label">Date Created:</label>
-          <textarea disabled class="form-control" name="deliveryRequirements"><%= request.createdAtFormatted %></textarea>
+          <textarea disabled class="form-control" name="createdAtFormatted"><%= request.createdAtFormatted %></textarea>
         </div>
         <div class="form-group">
           <label class="col-form-label">Date of Expiration:</label>
-          <textarea disabled class="form-control" name="deliveryRequirements"><%= request.expiryDateFormatted %></textarea>
+          <textarea disabled class="form-control" name="expiryDateFormatted"><%= request.expiryDateFormatted %></textarea>
         </div>
         <div class="form-group">
-					<label>Price (Supplier Currency)</label>
-					<% l = 0; for(m in request.priceList) {l += request.priceList[m];} %>
-          <input type="text" title="Total order price" value="<%= l %> <%= request.supplierCurrency %>" class="form-control" id="price" name="price" readonly>
+					<label>Price (Your Currency):</label>
+					<% l = 0; for(m in request.priceList) {l += request.priceList[m];} %> <!-- Also request.supplierPrice .-->
+          <input type="text" title="Total order price" value="<%= l %> <%= request.supplierCurrency %>" class="form-control" id="price" name="supplierPrice" readonly>
+				</div>
+        <div class="form-group">
+					<label>Price (Buyer's Currency):</label>
+          <input type="text" title="Total original order price" value="<%= request.buyerPrice %> <%= request.buyerCurrency %>" class="form-control" id="price" name="buyerPrice" readonly>
 				</div>
         <div class="form-group">
 					<label>Currency (yours):</label>
-					<input type="hidden" class="form-control" readonly value="<%= request.supplierCurrency %>">
+					<input type="text" disabled class="form-control" readonly name="supplierCurrency" value="<%= request.supplierCurrency %>">
 				</div>
         <div class="form-group">
 					<label>Currency (Buyer's original):</label>
-					<input type="hidden" class="form-control" readonly value="<%= request.buyerCurrency %>">
+					<input type="text" disabled class="form-control" readonly name="buyerCurrency" value="<%= request.buyerCurrency %>">
 				</div>
         <div class="form-group">
 					<label>Status</label>
-					<input type="hidden" id="status" name="status" class="form-control" readonly value="<%= request.status %>">
+					<input type="text" disabled id="status" name="status" class="form-control" readonly value="<%= request.status %>">
 				</div>        
         <div class="form-group selectstatus">
           <select style="width: 100%" id="statuses">

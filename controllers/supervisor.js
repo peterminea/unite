@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const bcrypt = require("bcryptjs");
+const ObjectId = require("mongodb").ObjectId;
 const Supervisor = require("../models/supervisor");
 const Buyer = require("../models/buyer");
 const BidRequest = require("../models/bidRequest");
@@ -19,6 +20,79 @@ const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
 const fetch = require('node-fetch');
 
+
+function getBidsData(bids) {
+  var validBids = 0, validBidsPrice = 0;
+  var cancelledBids = 0, cancelledBidsPrice = 0;
+  var expiredBids = 0, expiredBidsPrice = 0;
+  var obj = {};
+  
+  if(bids && bids.length) {
+    obj.totalBids = bids.length;
+    
+    for(var i in bids) {
+      if(!bids[i].isCancelled && !bids[i].isExpired) {
+        validBids++;
+        validBidsPrice += parseFloat(bids[i].buyerPrice).toFixed(2);
+      }
+      
+      if(bids[i].isCancelled) {
+        cancelledBids++;
+        cancelledBidsPrice += parseFloat(bids[i].buyerPrice).toFixed(2);
+      }
+      
+      if(bids[i].isExpired) {
+        expiredBids++;
+        expiredBidsPrice += parseFloat(bids[i].buyerPrice).toFixed(2);
+      }        
+    }
+  } else {
+    obj.totalBids = 0;
+  }
+  
+  obj.validBids = validBids;
+  obj.validBidsPrice = validBidsPrice;
+  obj.cancelledBids = cancelledBids;
+  obj.cancelledBidsPrice = cancelledBidsPrice;
+  obj.expiredBids = expiredBids;
+  obj.expiredBidsPrice = expiredBidsPrice;
+  obj.totalPrice = validBidsPrice + cancelledBidsPrice + expiredBidsPrice;
+  
+  return obj;
+}
+
+
+function getBuyerBidsData(req, res, buyers) {
+  var bidData = [];
+  
+  if(buyers && buyers.length) {
+    MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
+      if(treatError(req, res, err, 'back'))
+        return false;
+      
+      var dbo = db.db(BASE);
+      
+      for(var i in buyers) {
+        await dbo.collection('bidRequests').find({ buyer: new ObjectId(buyers[i]._id) }).toArray(function(err, bids) {
+          if(treatError(err, req, res, 'back')) {
+            return false;
+          }
+          
+          var obj = getBidsData(bids);
+          bidData.push(obj);
+          
+        if(i == buyers.length - 1) {
+          db.close();
+          return bidData;
+          }
+        });
+      }
+    });
+  }
+  
+  return bidData;
+}
+
 exports.getIndex = (req, res) => {
   if(!req || !req.session) 
     return false;
@@ -26,9 +100,17 @@ exports.getIndex = (req, res) => {
 
   Buyer.find(
     { organizationUniteID: supervisor.organizationUniteID },
-    (err, results) => {
+    async (err, results) => {
       if(treatError(req, res, err, 'back'))
         return false;
+      
+      var bidData = await getBuyerBidsData(req, res, results);
+      console.log(bidData? bidData.length : 'Null');
+      if(bidData.length)
+      for(var i in results) {
+        results[i].bidData = bidData[i];
+      }
+      
       var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
       req.session.flash = [];
 

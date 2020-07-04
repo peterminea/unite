@@ -81,8 +81,10 @@ exports.postAddProduct = (req, res) => {
     const product = new ProductService({
       supplier: req.body._id,
       productName: req.body.productName,
-      price: parseFloat(req.body.price),
-      currency: req.body.currency ? req.body.currency : "EUR",
+      price: parseFloat(req.body.price).toFixed(2),
+      currency: req.body.currency ? req.body.currency : process.env.SUPP_DEFAULT_CURR,
+      amount: parseInt(req.body.amount),
+      totalPrice: parseFloat(req.body.price * req.body.amount).toFixed(2),
       createdAt: Date.now(),
       updatedAt: Date.now()
     });
@@ -139,9 +141,9 @@ exports.postCancelBid = (req, res) => {
       catch(e) {
         console.error(e);
         req.flash('error', e.message);
-      }
+      }//Cancelled bids, either by Buyer or by Supplier, do not have an expiry date any longer:
     
-      await dbo.collection("bidrequests").updateOne({ _id: new ObjectId(req.body.bidId) }, { $set: {isCancelled: true, status: parseInt(process.env.SUPP_BID_CANCEL)} }, async function(err, resp) {
+      await dbo.collection("bidrequests").updateOne({ _id: new ObjectId(req.body.bidId) }, { $set: {isCancelled: true, expiryDate: null, expiryDateFormatted: null, status: parseInt(process.env.SUPP_BID_CANCEL)} }, async function(err, resp) {
         if(err) {
           console.error(err.message);
           return res.status(500).send({ 
@@ -383,12 +385,12 @@ exports.getSignUp = (req, res) => {
 };
 
 
-function prel(req, isNumber) {
+function prel(req, isNumber, isInt) {
   var arr = (req);
   arr = arr.split(',');
   var newProd = [];
   for (var i in arr) {
-    newProd.push(isNumber? parseFloat(arr[i]) : String(arr[i]));
+    newProd.push(isNumber? parseFloat(arr[i]).toFixed(2) : isInt? parseInt(arr[i]) : String(arr[i]));
     }
   
   return newProd;
@@ -455,8 +457,11 @@ exports.postSignUp = async (req, res) => {
                     lastYearTurnover: req.body.lastYearTurnover,
                     website: req.body.website,
                     productsServicesOffered: prel(req.body.productsServicesOffered),
-                    pricesList: prel(req.body.pricesList, true),
+                    pricesList: prel(req.body.pricesList, true, false),
                     currenciesList: prel(req.body.currenciesList),
+                    amountsList: prel(req.body.amountsList, false, true),
+                    totalSupplyPrice: req.body.totalSupplyPrice,
+                    totalSupplyAmount: req.body.totalSupplyAmount,
                     capabilityDescription: req.body.capabilityDescription,
                     relevantExperience: req.body.relevantExperience,
                     supportingInformation: req.body.supportingInformation,
@@ -545,8 +550,10 @@ exports.postSignUp = async (req, res) => {
                         var productService = new ProductService({
                           supplier: supplier._id,
                           productName: supplier.productsServicesOffered[i],
-                          price: parseFloat(supplier.pricesList[i]),
+                          price: parseFloat(supplier.pricesList[i]).toFixed(2),
                           currency: supplier.currenciesList[i],
+                          amount: parseInt(supplier.amountsList[i]),
+                          totalPrice: parseFloat(supplier.pricesList[i] * supplier.amountsList[i]).toFixed(2),
                           createdAt: Date.now(),
                           updatedAt: Date.now()
                         });
@@ -608,7 +615,7 @@ exports.getChatLogin = (req, res) => {//We need a username, a room name, and a s
 exports.getChat = (req, res) => {//Coming from the getLogin above.
   var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
-  console.log(req.params.reqName);
+  //console.log(req.params.reqName);
   
   res.render("supplier/chat", {
     successMessage: success,
@@ -740,7 +747,7 @@ exports.getProfile = (req, res) => {
       for(var i in products) {
         req.session.supplier.productsServicesOffered.push(products[i].productName);
       }
-    console.log(products);
+    //console.log(products);
       var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
       req.session.flash = [];
       
@@ -780,24 +787,22 @@ exports.getBidRequests = (req, res) => {
     
     for(var i in validBids) {
       //validPrice += fx(parseFloat(validBids[i].price)).from(validBids[i].currency).to(supplier.currency);
-      validPrice += parseFloat(validBids[i].price);
+      validPrice += parseFloat(validBids[i].supplierPrice);
     }
     
-    totalPrice = validPrice;
+    totalPrice = parseFloat(validPrice);
     
     for(var i in cancelledBids) {
-      //cancelledPrice += fx(parseFloat(cancelledBids[i].price)).from(cancelledBids[i].currency).to(supplier.currency);
-      cancelledPrice += parseFloat(cancelledBids[i].price);
+      cancelledPrice += parseFloat(cancelledBids[i].supplierPrice);
     }
     
-    totalPrice += cancelledPrice;
+    totalPrice += parseFloat(cancelledPrice);
     
     for(var i in expiredBids) {
-      //expiredPrice += fx(parseFloat(expiredBids[i].price)).from(expiredBids[i].currency).to(supplier.currency);
-      expiredPrice += parseFloat(expiredBids[i].price);
+      expiredPrice += parseFloat(expiredBids[i].supplierPrice);
     }
-    
-    totalPrice += expiredPrice;
+    //console.log(cancelledPrice);
+    totalPrice += parseFloat(expiredPrice);
     var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
     req.session.flash = [];
     
@@ -909,8 +914,11 @@ exports.postProfile = async (req, res) => {
     doc.lastYearTurnover = req.body.lastYearTurnover;
     doc.website = req.body.website;    
     doc.productsServicesOffered = prel(req.body.productsServicesOffered);
-    doc.pricesList = prel(req.body.pricesList);
+    doc.pricesList = prel(req.body.pricesList, true, false);
     doc.currenciesList = prel(req.body.currenciesList);
+    doc.amountsList = prel(req.body.amountsList, false, true);
+    doc.totalSupplyPrice = req.body.totalSupplyPrice;
+    doc.totalSupplyAmount = req.body.totalSupplyAmount;
     doc.capabilityDescription = req.body.capabilityDescription;
     doc.relevantExperience = req.body.relevantExperience;
     doc.supportingInformation = req.body.supportingInformation;
@@ -1004,8 +1012,10 @@ exports.postProfile = async (req, res) => {
           var productService = new ProductService({
             supplier: doc._id,
             productName: arr[i],
-            price: parseFloat(doc.pricesList[i]),
+            price: parseFloat(doc.pricesList[i]).toFixed(2),
             currency: doc.currenciesList[i],
+            amount: parseInt(doc.amountsList[i]),
+            totalPrice: parseFloat(doc.pricesList[i] * doc.amountsList[i]).toFixed(2),
             createdAt: Date.now(),
             updatedAt: Date.now()
           });

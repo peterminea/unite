@@ -110,6 +110,7 @@ p.term-black {
 }
 
 .rem {
+  float: right;
   color: green;
   cursor: pointer;
 }

@@ -111,7 +111,7 @@ app.use("/supervisor", supervisorRoutes);
 
 //For chatting:
 const port = 5000;
-
+/*
 const server2 = http2.createSecureServer({
   key: fs.readFileSync("localhost-privkey.pem"),
   cert: fs.readFileSync("localhost-cert.pem")
@@ -128,7 +128,7 @@ server2.on("stream", (stream, headers) => {
   stream.end("<h1>Hello World</h1>");
 });
 
-server2.listen(8443);
+server2.listen(8443);*/
 
 //throw new Error();
 
@@ -1517,6 +1517,7 @@ app.get("/prodServiceAutocomplete", function(req, res, next) {
             id: item._id,
             name: item.productName,
             price: item.price,
+            amount: item.amount,
             currency: item.currency
           };
 
@@ -1800,7 +1801,12 @@ var db;
   var myQuery = {};
   var newValues = { $set: {currenciesList: currenciesList, pricesList: pricesList, productsServicesOffered: productsList} };
   
-  //db.collection("suppliers").updateMany(myQuery, newValues, function(err, obj) {});
+  var amountsList = [];
+  for(var i = 0; i < 9; i++)
+    amountsList.push(10);
+  
+  var newValues2 = { $set: {amountsList: amountsList } };
+  db.collection("suppliers").updateMany(myQuery, newValues2, function(err, obj) {});
   */
 
     // db.collection('suppliers').find({companyName: {$regex: "^(?!Demo$)"}})
@@ -1903,6 +1909,17 @@ var db;
     //db.collection("supervisors").updateMany({}, dateValues, function(err, obj) {});
     //db.collection("suppliers").updateMany({}, dateValues, function(err, obj) {});
     //db.collection("bidrequests").updateMany({}, { $set: { isExpired: false } }, function(err, obj) {});
+    //db.collection("bidrequests").updateMany({}, { $set: { originalPrice: null, price: null, buyerPrice: 3.5, supplierPrice: 3.5 } }, function(err, obj) {});
+    //db.collection("suppliers").updateMany({}, { $set: { totalSupplyPrice: 90, totalSupplyAmount: 10 } }, function(err, obj) {});
+    //db.collection("bidrequests").updateMany({}, { $unset: { price:1, originalPrice:1 } } , {multi: true});
+    //var amountsList = [];
+  //for(var i = 0; i < 9; i++)
+    //amountsList.push(10);
+  
+  //var newValues2 = { $set: {amountsList: amountsList } };
+  //db.collection("suppliers").updateMany({}, newValues2, function(err, obj) {});
+    
+    //db.collection("productservices").updateMany({}, { $set: { price: 3, amount: 5, totalPrice: 15 } }, function(err, obj) {});
  //db.close();
   });
 // Database configuration and test data saving:

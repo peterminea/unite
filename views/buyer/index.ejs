@@ -53,20 +53,23 @@
         var amountInput = $("#amountList_"+id);
         var priceInput = $("#priceList_"+id);
         var arr = [], arr1 = [], arr2 = [];
-        var totalPriceConverted = 0;
+        var totalPriceOriginal = 0, totalPriceConverted = 0;
         
         elem.find('li').each(function() {
           arr.push($(this).find('.product').text());
           arr1.push($(this).attr('amount'));
-          var val = fx.convert(parseFloat($(this).attr('bigPrice')), {from: $(this).find('.currency').text(), to: elem.attr('suppCurrency')});
+          var originalPrice = parseFloat($(this).attr('bigPrice')).toFixed(2);
+          var val = fx.convert(originalPrice, {from: $(this).find('.currency').text(), to: elem.attr('suppCurrency')});
           arr2.push(val);
+          totalPriceOriginal += originalPrice;
           totalPriceConverted += parseFloat(val).toFixed(2);
         });
         
         prodInput.val(arr);
         amountInput.val(arr1);
         priceInput.val(arr2);
-        $('#price_'+id).val(totalPriceConverted);
+        $('#price_'+id).val(totalPriceOriginal);
+        $('#supplierPrice_'+id).val(totalPriceConverted);
       });
 
       $('.buyerCurrency').on('change', function() {
@@ -84,10 +87,11 @@
           });
         }
         
-        var priceInput = $(this).parent('div').next('div').find('.bidPrice');        
-        var val = fx.convert(parseFloat(priceInput.val()), {from: defaultBidCurrency, to: curr});
-        priceInput.val(val.toFixed(2));
-        priceInput.next('.bidCurrency').val(curr);
+        var priceInput = $(this).parent('div').next('div').find('.bidPrice');
+        var oldBidCurrencySpan = priceInput.next('span.bidCurrency');
+        var val = fx.convert(parseFloat(priceInput.val()).toFixed(2), {from: oldBidCurrencySpan.text(), to: curr});
+        priceInput.val(val);
+        $('span.bidCurrency').text(curr);
         
         if(!elem.find('li') || !elem.find('li').length) {
           return false;
@@ -96,9 +100,9 @@
         elem.find('li').each(function() {
           var addedPrice = $(this).attr('price'), totalPrice = $(this).attr('totalPrice'), shownPrice = $(this).find('.price').text(), theCurr = $(this).find('.currency').text();
           
-          addedPrice = fx.convert(parseFloat(addedPrice), {from: theCurr, to: curr});
-          totalPrice = fx.convert(parseFloat(totalPrice), {from: theCurr, to: curr});
-          shownPrice = fx.convert(parseFloat(shownPrice), {from: theCurr, to: curr});
+          addedPrice = fx.convert(parseFloat(addedPrice).toFixed(2), {from: theCurr, to: curr});
+          totalPrice = fx.convert(parseFloat(totalPrice).toFixed(2), {from: theCurr, to: curr});
+          shownPrice = fx.convert(parseFloat(shownPrice).toFixed(2), {from: theCurr, to: curr});
           
           $(this).attr('price', addedPrice);
           $(this).attr('totalPrice', totalPrice);
@@ -109,9 +113,10 @@
       
       
       $('.buyerCurrency')
-        .find('option[value="'+defaultBidCurrency+'"]')
+        .find('option[value="' + defaultBidCurrency+'"]')
         .attr('selected', 'selected');
-      
+    
+      $('span.bidCurrency').text(defaultBidCurrency);
       
       $('.productsList').on('change', function() {
         if(!$(this).val() || !$(this).val().length) {
@@ -122,19 +127,23 @@
         var opt = $(this).find('option:selected');
         var price = opt.attr('price');
         var currency = opt.attr('currency');
+        var maxAmount = opt.attr('maxAmount');
+        var bidCurrency = $('.buyerCurrency')
+          .find('option:selected')
+          .text();
         
-        if(currency != defaultBidCurrency) {
+        if(bidCurrency != currency) {
           Swal.fire({
             icon: 'warning',
             title: 'Warning',
             timer: 2000,
-            text: 'The currency of your order is different from the Supplier\'s.\nYours is ' + currency + ', theirs is ' + suppCurrency '.\nPlease note that conversion rates will be applied.'
+            text: 'The currency of your order is different from the Supplier\'s.\nYours is ' + bidCurrency + ', theirs is ' + currency '.\nPlease note that conversion rates will be applied.'
           });
         }
         
-        var val = fx.convert(parseFloat(price), {from: currency, to: defaultBidCurrency});
+        var val = fx.convert(parseFloat(price).toFixed(2), {from: currency, to: bidCurrency});
         var input = $(this).parent('div').next('div').find('.prodInput');
-        input.attr('price', val);
+        input.attr({'price': val, 'maxAmount': maxAmount});
         input.val(name);
         input.trigger('change');
       });
@@ -212,7 +221,7 @@
               //autocomp(obj, data);
               var $obj = '<div class="prov"><ul>';
               for(var i in data) {
-                $obj += '<li id="' + data[i].price + '" currency="' + data[i].currency + '">' + data[i].name + '</li>';
+                $obj += '<li id="' + data[i].price + '" amount="' + data[i].amount + '" currency="' + data[i].currency + '">' + data[i].name + '</li>';
               }
 
               $obj += '</ul><div>';
@@ -222,10 +231,10 @@
                 .click(function() {
                   var id = getId(obj.attr('id'));
                   var buyerCurr = $('.buyerCurrency[index="'+id+'"]').val();
-                  var val = fx.convert(parseFloat($(this).attr('id')), {from: $(this).attr('currency'), to: buyerCurr});
+                  var val = fx.convert(parseFloat($(this).attr('id')).toFixed(2), {from: $(this).attr('currency'), to: buyerCurr});
                 
                   obj
-                    .attr({'price': val, 'currency': buyerCurr})
+                    .attr({'price': val, 'maxAmount': $(this).attr('amount'), 'currency': buyerCurr})
                     .val($(this).text())
                     .trigger('change');
                   $(this).parent('ul').hide();
@@ -268,7 +277,7 @@
     <% if(bidsLength != null) { %>
       <div class="mt-4">
         <p class='term'>
-          You have made a total of <%= bidsLength %> bids, their overall price (expressed in your currency) is <%= parseFloat(totalBidsPrice).toFixed(2) %> <%= BID_DEFAULT_CURR %>.
+          You have made a total of <%= bidsLength %> bids, their overall price (expressed in your currency) is <%= totalBidsPrice %> <%= BID_DEFAULT_CURR %>.
         </p>
         <a href="../buyer/bidCatalog/<%= buyer._id %>/<%= buyer.organizationName %>"><b>Load full table of Bids</b></a>
       </div>
@@ -550,7 +559,7 @@
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Your currency*:</label>
-                    <select class="form-control" index="<%= i %>" class="buyerCurrency" name="buyerCurrency"></select>
+                    <select class="form-control" index="<%= i %>" class="buyerCurrency"></select>
                   </div>
                   <p>
                     You can either select products from drop-down or search for them via Autocomplete (please enter at least 3 characters).
@@ -558,6 +567,16 @@
                   <div class="form-group">
                     <label class="col-form-label">Supplier's products:</label>
                     <select class="form-control" class="productsList" name="productsList"></select>
+                  </div>
+                  <div>
+                    <p class='term'>
+                      You can use an Excel file with your desired products list, formatted as product name + product price + product currency + amount i.e. Number of items (4 cells per row), and after you click on the Process button, our system will automatically add the products and build the list on page.<br>Please note that if the currency you use in Excel is different from the one from the Buyer page, conversion will be automatically applied. Also, the first row of your document must contain the column names.
+                    </p>
+                  </div>
+                  <div class="form-group">
+                    <label>Please choose your prepared product/service list (*.xls/xlsx, name+price+currency+amount on each row):</label>
+                    <input class="form-control fileexcelupload fromBuyer" type="file" id="products" name="products" single>
+                    <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Process Excel File" />
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Products / Services Offered*</label>
@@ -567,25 +586,35 @@
                         <button class="btn btn-outline-secondary prodButton" type="button" disabled id="addProdService_<%= i %>">Add</button>
                       </div>
                       <p class='littleNote'>
-                        Please note that only available products with this supplier can be selected.
+                        Please note that only available products from this supplier can be selected.
                       </p>
                     </div>
                     <br>
-                    <ul class="list-group" suppCurrency="<%= supplier.currency %>" id="prodServices_<%= i %>">
+                    <ul class="list-group" MAX="<%= MAX_PROD %>" suppCurrency="<%= supplier.currency %>" id="prodServices_<%= i %>">
                     </ul>
                     <input type="hidden" required id="hiddenProdServicesList_<%= i %>" name="productsServicesOffered" value="">
                     <input type="hidden" required id="amountList_<%= i %>" name="amountList" value="">
                     <input type="hidden" required id="priceList_<%= i %>" name="priceList" value="">
                   </div>
                   <div class="form-group">
-                    <label class="col-form-label">Price</label>
-                    <input type="number" class="form-control bidPrice" id="price_<%= i %>" name="price" value="0" readonly>
-                    <span class="form-control bidCurrency" id="currency_<%= i %>" name="buyerCurrency1"></span>
-                    <input type="hidden" id="defaultPrice_<%= i %>" value="1">
+                    <label class="col-form-label">Your total price:</label>
+                    <input type="number" class="form-control bidPrice" id="price_<%= i %>" name="buyerPrice" readonly>
+                    <span class="form-control bidCurrency" id="currency_<%= i %>" name="buyerCurrency"></span>
                   </div>
                   <div class="form-group">
-                    <label class="col-form-label">Supplier's default currency</label>
-                    <span class="form-control" id="supplierCurrency_<%= i %>" name="supplierCurrency"><%= supplier.currency %></span>
+                    <label class="col-form-label">Supplier's equivalent total price:</label>
+                    <input type="text" class="form-control" readonly id="supplierPrice_<%= i %>" name="supplierPrice">
+                    <span class="form-control" id="supplierCurrency_<%= i %>" name="supplierCurrency"> <%= supplier.currency %></span>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Your price per unit/product:</label>
+                    <input type="text" class="form-control" readonly id="buyerPriceUnit_<%= i %>">
+                    <span class="form-control bidCurrency" id="buyerCurrencyUnit_<%= i %>"></span>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Supplier's price per unit/product:</label>
+                    <input type="text" class="form-control" readonly id="supplierPriceUnit_<%= i %>">
+                    <span class="form-control" id="supplierCurrencyUnit_<%= i %>"> <%= supplier.currency %></span>
                   </div>
                    <div class="form-group">
                     <label class="col-form-label">Status*</label>
@@ -652,14 +681,32 @@
                       if($(this).val()) {
                         var id = getId($(this).attr('id'));
                         $("#addProdService_"+id).prop('disabled', false);
-                        $('#defaultPrice_'+id).val($(this).attr('price'));
-                       // $('#currency_'+id).val($(this).attr('currency'));                        
+                        var price = $(this).attr('price')? $(this).attr('price') : 1;                       
+                        
+                        $('#buyerPriceUnit_'+id).val(price + ' * 1 = ' + price);
+                        var suppPrice = fx.convert(price, {from: $('span.bidCurrency').first().text(), to: '<%= supplier.currency %>'});
+                        $('#supplierPriceUnit_'+id).val(suppPrice + ' * 1 = ' + suppPrice);
                       }
                     });
                     
                     $('#amount_'+index).on('change', function() {
                       var id = getId($(this).attr('id'));
-                      $('#price_'+id).val($(this).val() * ($("#prodServiceInput_"+id).attr('price')? ("#prodServiceInput_"+id).attr('price') : $('#defaultPrice_'+id).val()));
+                      var price = $("#prodServiceInput_"+id).attr('price')? $("#prodServiceInput_"+id).attr('price') : 1;
+                      var maxAmount = $("#prodServiceInput_"+id).attr('maxAmount');
+                      
+                      if($(this).val() > maxAmount) {
+                        Swal.fire({
+                          icon: 'error',
+                          title: 'Error!',
+                          text: 'You have reached the limit of ' + maxAmount + ' samples of this product. Supplier\'s stock is not enough.'
+                        });
+
+                        return false;
+                      }
+                      
+                      $('#buyerPriceUnit_'+id).val(price + ` * ${$(this).val()} = ` + price * $(this).val());
+                      var suppPrice = fx.convert(price, {from: $('span.bidCurrency').first().text(), to: '<%= supplier.currency %>'});
+                      $('#supplierPriceUnit_'+id).val(suppPrice + ` * ${$(this).val()} = ` + suppPrice * $(this).val());
                     });
                     
                     var elem = $("#prodServices_"+index);
@@ -697,21 +744,12 @@
 
                       var input = $("#prodServiceInput_"+id);
                       if(!input.attr('price'))
-                        input.attr('price', $('#defaultPrice_'+id).val());
-                      var prodInput = $("#hiddenProdServicesList_"+id);
-                      var amountInput = $("#amountList_"+id);
-                      var priceInput = $("#priceList_"+id);
-                      var product = prodInput.val(), quantity = amountInput.val(), price = priceInput.val();
+                        input.attr('price', 1);
                       //var req = input.val().length;// && $('#price').val().length && $('#currency').val().length;
      
                       if(input.val() && input.val().length) {
                         input.removeClass('errorField');
-                        var addedPrice = parseInt(amount.val()? amount.val() : 1) * parseFloat(input.attr('price')? input.attr('price') : 1);
-                        var price = parseFloat($('#price_'+id).val()) + addedPrice;
-                        $('#price_'+id).val(parseFloat(price));
-                          
-                        var prodVal = input.val(), amountVal = amount.val(), priceVal = $('#price_'+id).val();
-                        var bigPrice = amountVal * priceVal;
+                        var prodVal = input.val();
                         var isPresent = false;
                         
                         elem.find('.product').each(function() {
@@ -731,32 +769,29 @@
                           return false;
                         }/*
                         var arr = prodInput.val() && prodInput.val().length? (prodInput.val()).split(',') : [];
-                        if(checkName(arr, prodVal)) {
-                          Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: 'You have already added ' + prodVal + ' to the list. Please refine your selection.'
-                            });
+                        if(checkName(arr, prodVal)) {                          
                           return false;
                           }*/
-                          
-                          elem.append("<li class='list-group-item' price='" + addedPrice + "' totalPrice='" + bigPrice +"' amount='" + amount.val() + "'><span class='product'>" + prodVal + '</span> - <span class="price">' + input.attr('price') + '</span> <span class="currency">' + $('#currency_'+id).val() + "</span><span class='rem'>&nbsp;(Remove)</span></li>");
-                          $('#totalAmount_'+id).val(parseInt($('#totalAmount_'+id).val()) + parseInt(amountVal));
-                          $(input).val('');
                         
-                          $('.rem').unbind('click').click(function() {
-                            var li = $(this).parent('li');/*
-                            var newIndex = elem.find('li').index(li);*/
-                            var newAmount = parseInt($('#totalAmount_'+id).val()) - parseInt(li.attr('amount'));
-                            var newPrice = parseFloat($('#price_'+id).val()) - parseFloat(li.attr('price'));
-                            $('#totalAmount_'+id).val(parseInt(newAmount));
-                            $('#price_'+id).val(parseFloat(newPrice));
-                            li.remove();
-                          });
+                        var amountVal = amount.val();
+                        var addedPrice = parseInt(amountVal? amountVal : 1) * parseFloat(input.attr('price')? input.attr('price') : 1);
+                        var price = parseFloat($('#price_'+id).val()) + parseFloat(addedPrice);
+                        var bigPrice = parseFloat(price).toFixed(2);
+                        $('#price_'+id).val(bigPrice);
+                        var supp = fx.convert((bigPrice), {from: $('span.bidCurrency').first().text(), to: '<%= supplier.currency %>'});
+                        $('#supplierPrice_'+id).val(supp);
+                        
+                          elem.append("<li class='list-group-item' price='" + addedPrice + "' totalPrice='" + bigPrice +"' amount='" + amountVal + "'><span class='product'>" + prodVal + '</span> - <span class="price">' + input.attr('price') + '</span> <span class="currency">' + $('#currency_'+id).val() + `</span><span class='amount'> - ${amountVal} items</span><span class='totalPrice'> (Total: ${amountVal} * ${input.attr('price')} ${$('#currency_'+id).val()}) </span><span class='rem'>&nbsp;(Remove)</span></li>`);
+                        
+                          $('#totalAmount_'+id).val(parseInt($('#totalAmount_'+id).val()) + parseInt(amountVal));
+                          input.val('');
+                          bindRemoveProduct($('.rem').last(), input, true, id);
+                          //$('.rem').off('click').on('click', function() {
+
                         } else {
                             Swal.fire({
                               icon: 'warning',
-                              title: 'Attention',
+                              title: 'Attention!',
                               text: 'Please enter valid product data (name, amount).'
                             });
                           

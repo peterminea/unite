@@ -158,14 +158,26 @@ const supplierSchema = new Schema({
     type: String,
     required: true
   }],
-  pricesList: [{//String array, actually.
+  pricesList: [{
     type: Number,
     required: true
   }],
-  currenciesList: [{//String array, actually.
+  currenciesList: [{
     type: String,
     required: true
   }],
+  amountsList: [{
+    type: String,
+    required: true
+  }],
+  totalSupplyPrice: {
+    type: String,
+    required: true
+  },
+  totalSupplyAmount: {
+    type: Number,
+    required: true
+  },
   capabilityDescription: {
     type: String,
     required: true

@@ -12,6 +12,7 @@ router.get("/about", sessionExit, homeController.getAbout);
 router.get("/antibriberyAgreement", sessionExit, homeController.getAntibriberyAgreement);
 router.get("/termsConditions", sessionExit, homeController.getTermsConditions);
 router.get("/memberList", sessionExit, homeController.getMemberList);
+router.get("/bidsList", sessionExit, homeController.getBidsList);
 router.get("/feedback", sessionExit, homeController.getFeedback);
 router.get("/viewFeedbacks", sessionExit, homeController.getViewFeedbacks);
 router.get("/deleteUser/:id/:type/:name/:uniteID/:email", sessionExit, homeController.getDeleteUser);

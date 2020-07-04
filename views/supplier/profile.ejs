@@ -28,7 +28,7 @@
       
       postAutocomplete('.country', '/countryAutocomplete', token);
       getAutocomplete('#industry', '/industryGetAutocomplete', token);
-      getAutocomplete('#currency', '/currencyGetAutocomplete', token);
+      //getAutocomplete('#currency', '/currencyGetAutocomplete', token);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       getCurrenciesList('select.currency', '/currencyGetAutocomplete', token);
       initBaseRates(fx, 'select.currency');
@@ -50,7 +50,7 @@
       }*/      
       
       $('#updateProfile').click(function() {
-        if(!supplierValidateFields(fx, defaultCurr, $('#currency').val()))
+        if(!supplierValidateFields(fx))
           return false;
       });
 
@@ -88,7 +88,7 @@
             }
           });
       });
-      
+    
     var MAX = parseInt("<%= MAX_PROD %>");
     $("#prodServices").attr('MAX', MAX);
     addProduct($("#addProdService"));
@@ -220,11 +220,11 @@
         </div>
         <div>
           <p>
-            You can use an Excel file with your products list, formatted as product name + product price + product currency (3 cells per row), and after you click on the Process button, our system must automatically add the products and build the list on page.
+            You can use an Excel file with your products list, formatted as product name + product price + product currency + product amount (4 cells per row, first row must contain column names), and after you click on the Process button, our system will automatically add the products and build their detailed list on page.
           </p>
         </div>
         <div class="form-group">
-          <label>Please choose your prepared product/service list (*.xls/xlsx, name+price+currency on each row):</label>
+          <label>Please choose your prepared product/service list (*.xls/xlsx, name+price+currency+amount on each row):</label>
           <input class="form-control fileexcelupload" type="file" id="products" name="products" single>
           <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Process Excel File" />
         </div>
@@ -236,6 +236,8 @@
             <br>
             <input type="number" min="0.1" step="0.1" placeholder="Price*" class="form-control" title="Price" id="price">
             <input type="text" readonly class="form-control" title="Currency" class="currency0" id="currency">
+            <br>
+            <input type="number" class="form-control" title="Amount" placeholder="Amount" class="amount" id="amount" value="1">
             <div class="input-group-append">
               <button class="btn btn-outline-secondary" type="button" disabled id="addProdService">Add</button>
             </div>
@@ -244,19 +246,42 @@
           <ul class="list-group" id="prodServices">
             <% let i = 0; if (products != null) { for (product of products) { i++; %>
             <li class='list-group-item'>
-              <span class='product'><%= product.productName %></span> - <span class='price'><%= product.price %></span> <span class='currency'><%= product.currency %></span>
-              <span class='rem'>&nbsp;(Remove)</span>
+              <span class='product'><%= product.productName %></span> - <span class='price'><%= product.price %></span> <span class='currency'><%= product.currency %></span> - <span class='amount'><%= product.amount %></span> items (Total: <span class='totalPrice'><%= product.totalPrice %></span> <%= product.currency %>)
+              <span class='rem'>&nbsp;&nbsp;(Remove)</span>
             </li>
             <% } }%>
           </ul>
           <input type="hidden" required id="prodServicesList" name="productsServicesOffered" value="<%= profile.productsServicesOffered %>">
           <input type="hidden" name="pricesList" id="pricesList" value="<%= profile.pricesList %>">
           <input type="hidden" name="currenciesList" id="currenciesList" value="<%= profile.currenciesList %>">
+          <input type="hidden" name="amountsList" id="amountsList" value="<%= profile.amountsList %>">
+        </div>
+        <div class="form-group">
+          <label>Total Price of Supply*</label>
+          <span type="text" class="form-control" id="totalSupplyPrice" name="totalSupplyPrice"></span>
+          <input type="hidden" id="hiddenTotalPrice" value="0">
+        </div>
+        <div class="form-group">
+          <label>Total Amount of Supply*</label>
+          <span class="form-control" id="totalSupplyAmount" name="totalSupplyAmount"></span>
         </div>
         <script type="text/javascript">
-          bindRemoveProduct($('.rem'), $('#prodServiceInput'));
+          bindRemoveProduct($('.rem'), $('#prodServiceInput'), false, null);
           $('<a><span style="color: green; cursor: pointer" id="massRemove">Remove All Products</span></a><br>').insertBefore($("#prodServices"));
           $('#massRemove').on('click', removeAllProducts);
+          var totalLoadedPrice = 0, totalLoadedAmount = 0;
+          
+          $('span.totalPrice').each(function(ind, el) {
+            totalLoadedPrice += parseFloat($(el).text());
+          });
+          
+          $('span.amount').each(function(ind, el) {
+            totalLoadedAmount += parseInt($(el).text());
+          });
+          
+          $('#hiddenTotalPrice').val(totalLoadedPrice);
+          $('#totalSupplyAmount').text(totalLoadedAmount);
+          $('#totalSupplyPrice').text(totalLoadedPrice + ' ' + "<%= profile.currency %>");
         </script>
         
         <div class="form-group">
