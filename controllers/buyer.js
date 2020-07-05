@@ -145,6 +145,7 @@ exports.postIndex = (req, res) => {
       itemDescription: req.body.itemDescription,
       productsServicesOffered: req.body.productsServicesOffered,
       amountList: req.body.amountList,
+      productImagesList: req.body.productImagesList,
       priceList: req.body.priceList,//Supplier's currency.
       orderedProducts: products,
       itemDescriptionLong: req.body.itemDescriptionLong,

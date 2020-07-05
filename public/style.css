@@ -28,6 +28,49 @@ span.requestData {
   font-family: verdana;
 }
 
+span.uploadImage {
+  font-size: 9pt;
+  color: green;
+  cursor: pointer;
+}
+
+span.inc {
+    float: right;
+    background-image: url("https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2FINC.png?v=1593941148908");
+    background-size: 10px 10px;
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 10px;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+}
+
+span.dec {
+    float: right;
+    background-image: url("https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2FDEC.png?v=1593941156757");
+    background-size: 10px 10px;
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 10px;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+}
+
+span.rem {
+  float: right;
+  color: green;
+  cursor: pointer;
+  background-image: url("https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2FREM.png?v=1593942051420");
+  background-size: 10px 10px;
+  background-repeat: no-repeat;
+  width: 10px;
+  height: 10px;
+  margin: 0;
+  padding: 0;
+}
+
 ::placeholder {
  color: #acafea; 
 }
@@ -49,7 +92,7 @@ table.members th,td {
 table.products {
   border: 2.5px solid navy;
   width: 100%;
-  background-color: lime;
+  background-color: aqua;
   margin-left: auto;
   margin-right: auto
 }
@@ -109,12 +152,6 @@ p.term-black {
   color: #666644;
 }
 
-.rem {
-  float: right;
-  color: green;
-  cursor: pointer;
-}
-
 .littleNote {
   color: red;
   font-size: 10pt;
@@ -124,7 +161,7 @@ p.term-black {
 .ui-autocomplete { 
     cursor: pointer; 
     height: 120px; 
-    overflow-y:s croll;
+    overflow-y:scroll;
 }
 
 .customer-form {

@@ -65,7 +65,11 @@ const bidRequestSchema = new Schema({
   priceList: {//Converted to Supplier's currency.
     type: [Number],
     required: true
-  },  
+  },
+  productImagesList: {
+    type: [String],
+    required: true
+  },
   deliveryLocation: {
     type: String,
     required: true

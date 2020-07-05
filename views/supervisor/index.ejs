@@ -24,11 +24,7 @@
     $(document).ready(function() {
       var token = $("input[name^='_csrf']").first().val();
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
-
-      if($('th').length) {
-        $('th').css({cursor: 'pointer'}).attr('title', 'Sort');
-        $('th').on('click', sortTable);
-      }
+      prepareSortTable();
       
       $('button[id^="process"]').click(function(e) {
         var tr = $(this).parent('tr');
@@ -72,8 +68,8 @@
       </div>
       <div class="card-body">
         <h5 class="card-title">Hello, <%= supervisor.organizationName %>! 
-          <% if(supervisor.avatar != null) { %>
-           <img src="<%= supervisor.avatar %>" style="height: 20px; width: 20px">
+          <% if(supervisor.avatar != null && supervisor.avatar.length > 0) { %>
+           <img src="<%= supervisor.avatar %>" style="height: 20px; width: 20px" onclick="window.open(this.src)">
           <% } %>
         </h5>        
         <p style="font-family: verdana; font-size: 11pt; color: green">With your UNITE ID, new buyers can register on the website and start searching for suppliers. If you change the UNITE ID, please announce your members.</p>
