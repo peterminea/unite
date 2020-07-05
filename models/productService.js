@@ -7,6 +7,10 @@ const productserviceSchema = new Schema({
     unique: true,
     required: true
   },
+  productImage: {
+    type: String,//Path
+    required: false
+  },
   price: {
     type: Number,
     default: 1,

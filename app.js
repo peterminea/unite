@@ -395,6 +395,9 @@ app.get("/loadProductsCatalog", (req, res) => {
           catalogItems.push({
             productName: products[i].productName,
             price: products[i].price,
+            amount: products[i].amount,
+            totalPrice: products[i].totalPrice,
+            productImage: products[i].productImage,
             currency: products[i].currency,
             supplier: obj.companyName
           });
@@ -463,19 +466,10 @@ const theStorage = new GridFsStorage({
   }
 });
 
-var extArray = [
-    ".png",
-    ".jpg",
-    ".jpeg",
-    ".gif",
-    ".bmp",
-    ".pdf",
-    ".txt",
-    ".doc",
-    ".docx",
-    ".rtf"
-  ],
+var extArray = [".png", ".jpg", ".jpeg", ".gif", ".bmp", ".pdf", ".txt", ".doc", ".docx", ".rtf"],
+  prodImageArray = ['.png', '.jpg', '.jpeg'],
   excelArray = [".xls", ".xlsx"];
+
 const uploadBase = multer({
   storage: theStorage,
   fileFilter: function(req, file, callback) {
@@ -828,6 +822,7 @@ var storage = multer.diskStorage({
   }
 });
 
+
 var upload = multer({
   storage: storage,
   fileFilter: function(req, file, callback) {
@@ -850,6 +845,7 @@ var upload = multer({
   }
 });
 
+
 var uploadExcel = multer({
   storage: storage,
   fileFilter: function(req, file, callback) {
@@ -863,6 +859,43 @@ var uploadExcel = multer({
       }
     if (!isItIn) {
       return callback(new Error("Please upload an Excel file!"));
+    }
+
+    callback(null, true);
+  },
+  limits: {
+    fileSize: 1024 * 1024 //1 MB
+  }
+});
+
+
+var prodImageStorage = multer.diskStorage({
+  destination: function(req, file, callback) {
+    callback(null, path.join("${__dirname}/../public/productImages"));
+    //callback(null, 'public/uploads/');
+  },
+  filename: function(req, file, callback) {
+    // + path.extname(file.originalname)
+    var date = dateformat(new Date(), "dddd-mmmm-dS-yyyy-h:MM:ss-TT"); //Date.now()
+    var date2 = moment(new Date().getTime()).format("HH:mm:ss:a");
+    callback(null, file.originalname.substring(file.originalname.lastIndexOf('.')+1) + "-" + date + "-" + file.originalname); //The name itself.
+  }
+});
+
+
+var uploadProdImage = multer({
+  storage: prodImageStorage,
+  fileFilter: function(req, file, callback) {
+    var ext = path.extname(file.originalname);
+    var isItIn = false;
+
+    for (var i in prodImageArray)
+      if (ext.toLowerCase() == prodImageArray[i].toLowerCase()) {
+        isItIn = true;
+        break;
+      }
+    if (!isItIn) {
+      return callback(new Error("Please upload an image file!"));
     }
 
     callback(null, true);
@@ -901,6 +934,19 @@ app.post("/uploadfile", upload.single("single"), (req, res, next) => {
   src.on("error", function(err) {
     res.render("error");
   });
+});
+
+
+app.post("/uploadProductImage", uploadProdImage.single("single"), (req, res, next) => {
+  const file = req.file;
+  console.log(file); //Can we parse its content here or not?
+  if (!file) {
+    const error = new Error("Please upload a file");
+    error.httpStatusCode = 400;
+    return next(error);
+  }
+
+  res.send(file);
 });
 
 
@@ -1518,6 +1564,8 @@ app.get("/prodServiceAutocomplete", function(req, res, next) {
             name: item.productName,
             price: item.price,
             amount: item.amount,
+            totalPrice: item.totalPrice,
+            productImage: item.productImage,
             currency: item.currency
           };
 
@@ -1912,14 +1960,24 @@ var db;
     //db.collection("bidrequests").updateMany({}, { $set: { originalPrice: null, price: null, buyerPrice: 3.5, supplierPrice: 3.5 } }, function(err, obj) {});
     //db.collection("suppliers").updateMany({}, { $set: { totalSupplyPrice: 90, totalSupplyAmount: 10 } }, function(err, obj) {});
     //db.collection("bidrequests").updateMany({}, { $unset: { price:1, originalPrice:1 } } , {multi: true});
-    //var amountsList = [];
-  //for(var i = 0; i < 9; i++)
-    //amountsList.push(10);
+   /* var amountsList = [];
+  for(var i = 0; i < 10; i++)
+    amountsList.push(9);
   
-  //var newValues2 = { $set: {amountsList: amountsList } };
-  //db.collection("suppliers").updateMany({}, newValues2, function(err, obj) {});
-    
+  var newValues2 = { $set: {amountsList: amountsList } };
+  var productImagesList = [];
+    for(var i = 0; i < 3; i++)
+    productImagesList.push('public/productImages/png-Sunday-July-5th-2020-2:27:50-PM-UNARIUM.png');
+  var newValues3 = { $set: {productImagesList: productImagesList } };
+  db.collection("bidrequests").updateMany({}, newValues3, function(err, obj) {});  
+  db.collection("suppliers").updateMany({}, newValues2, function(err, obj) {});*/
+//      var productImagesList = [];
+//    for(var i = 0; i < 3; i++)
+//    productImagesList.push('public/productImages/png-Sunday-July-5th-2020-2:27:50-PM-UNARIUM.png');
+//  var newValues3 = { $set: {productImagesList: productImagesList } };
+ // db.collection("bidrequests").updateMany({}, newValues3, function(err, obj) {}); 
     //db.collection("productservices").updateMany({}, { $set: { price: 3, amount: 5, totalPrice: 15 } }, function(err, obj) {});
+    //db.collection("productservices").updateMany({}, { $set: { productImage: 'public/productImages/png-Sunday-July-5th-2020-2:27:50-PM-UNARIUM.png' } }, function(err, obj) {});
  //db.close();
   });
 // Database configuration and test data saving:

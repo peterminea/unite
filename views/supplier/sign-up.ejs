@@ -185,29 +185,42 @@
             <input type="text" class="form-control prodInput" placeholder="Product*" title="Add Product/Service" id="prodServiceInput">
             <br>
             <input type="number" min="0.1" step="0.1" placeholder="Price*" class="form-control" title="Price" id="price">
-            <input type="text" readonly class="form-control" title="Currency" class="currency0" id="currency">
             <br>
-            <input type="number" class="form-control" title="Amount" class="amount" id="amount" value="1">
+            <input type="number" class="form-control" title="Amount" placeholder="Amount*"class="amount" id="amount" min="1">
+            <input type="text" readonly class="form-control" title="Currency" class="currency0" id="currency">
             <div class="input-group-append">
               <button class="btn btn-outline-secondary" type="button" disabled id="addProdService">Add</button>
             </div>
+            <br>
           </div>
-          <br>
-          <ul class="list-group" id="prodServices">           
+          
+          <div class="form-group">
+            <label>Upload a product image:</label>
+            <input class="form-control productimageupload" type="file" id="productImage" name="products" single>
+            <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload Product Image" />
+          </div>
+          
+          <ul class="list-group" id="prodServices">
           </ul>
-          <input type="hidden" required id="prodServicesList" name="productsServicesOffered">
-          <input type="hidden" name="pricesList" id="pricesList">
-          <input type="hidden" name="currenciesList" id="currenciesList">
-          <input type="hidden" name="amountsList" id="amountsList">
+          <p class='term'>
+            You have a number of <span class='productsCount'>          
+              0            
+            </span> products.
+          </p>
+          <input type="hidden" class="supply" required id="prodServicesList" name="productsServicesOffered">
+          <input type="hidden" class="supply" name="pricesList" id="pricesList">
+          <input type="hidden" class="supply" name="currenciesList" id="currenciesList">
+          <input type="hidden" class="supply" name="amountsList" id="amountsList">
+          <input type="hidden" class="supply" name="productImagesList" id="productImagesList">
         </div>
         <div class="form-group">
           <label>Total Price of Supply*</label>
-          <span type="text" class="form-control" id="totalSupplyPrice" name="totalSupplyPrice"></span>
-          <input type="hidden" id="hiddenTotalPrice" value="0">
+          <span type="text" class="form-control supply" id="totalSupplyPrice" name="totalSupplyPrice"></span>
+          <input type="hidden" class="supply" id="hiddenTotalPrice" value="0">
         </div>
         <div class="form-group">
           <label>Total Amount of Supply*</label>
-          <input type="number" readonly class="form-control" id="totalSupplyAmount" name="totalSupplyAmount" value="0">
+          <input type="number" readonly class="form-control supply" id="totalSupplyAmount" name="totalSupplyAmount" value="0">
         </div>
         <div class="form-group">
           <label>Capability Description*</label>

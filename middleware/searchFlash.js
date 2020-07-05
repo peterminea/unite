@@ -13,7 +13,7 @@ module.exports = (flash, type) => {
       message += flash[i].message;
       cnt++;
     }
-  }  
+  }
   
   return message;
 }

@@ -235,38 +235,62 @@
             <input type="text" class="form-control prodInput" placeholder="Product*" title="Add Product/Service" id="prodServiceInput">
             <br>
             <input type="number" min="0.1" step="0.1" placeholder="Price*" class="form-control" title="Price" id="price">
-            <input type="text" readonly class="form-control" title="Currency" class="currency0" id="currency">
             <br>
-            <input type="number" class="form-control" title="Amount" placeholder="Amount" class="amount" id="amount" value="1">
+            <input type="number" class="form-control" title="Amount" placeholder="Amount*"class="amount" id="amount" min="1">
+            <input type="text" readonly class="form-control" title="Currency" class="currency0" id="currency">
             <div class="input-group-append">
               <button class="btn btn-outline-secondary" type="button" disabled id="addProdService">Add</button>
             </div>
+            <br>
           </div>
-          <br>
+          
+          <div class="form-group">
+            <label>Upload a product image:</label>
+            <input class="form-control productimageupload" type="file" id="productImage" name="products" single>
+            <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload Product Image"/>
+          </div>
           <ul class="list-group" id="prodServices">
             <% let i = 0; if (products != null) { for (product of products) { i++; %>
             <li class='list-group-item'>
-              <span class='product'><%= product.productName %></span> - <span class='price'><%= product.price %></span> <span class='currency'><%= product.currency %></span> - <span class='amount'><%= product.amount %></span> items (Total: <span class='totalPrice'><%= product.totalPrice %></span> <%= product.currency %>)
-              <span class='rem'>&nbsp;&nbsp;(Remove)</span>
+              <span class='product'><%= product.productName %></span> - <span class='price'><%= product.price %></span> <span class='currency'><%= product.currency %></span> - <span class='amount'><%= product.amount %></span> items (Total: <span class='totalPrice'><%= parseFloat(product.totalPrice).toFixed(2) %></span> <%= product.currency %>)
+              <span class='productImage' title="Image of product"> 
+              <% if(product.productImage != null) { %>
+              <img src="<%= '../' + product.productImage.substring(7) %>" style="height: 15px; width: 15px" onclick="window.open(this.src)">
+              <% } %>
+              </span>
+              <span class='uploadImage'>&nbsp;&nbsp;&nbsp;Upload Image</span>
+              <span class='rem' title="Delete"></span>  <span class='dec' title='Remove item'></span>  <span class='inc' title='Add item'></span>  
             </li>
             <% } }%>
           </ul>
-          <input type="hidden" required id="prodServicesList" name="productsServicesOffered" value="<%= profile.productsServicesOffered %>">
-          <input type="hidden" name="pricesList" id="pricesList" value="<%= profile.pricesList %>">
-          <input type="hidden" name="currenciesList" id="currenciesList" value="<%= profile.currenciesList %>">
-          <input type="hidden" name="amountsList" id="amountsList" value="<%= profile.amountsList %>">
+          <p class='term'>
+            You have a number of <span class='productsCount'>
+            <% if(products != null) { %>
+              <%= products.length %>
+            <% } else { %>
+              0
+            <% } %>
+            </span> products.
+          </p>
+          <input type="hidden" class="supply" required id="prodServicesList" name="productsServicesOffered" value="<%= profile.productsServicesOffered %>">
+          <input type="hidden" class="supply" name="pricesList" id="pricesList" value="<%= profile.pricesList %>">
+          <input type="hidden" class="supply" name="currenciesList" id="currenciesList" value="<%= profile.currenciesList %>">
+          <input type="hidden" class="supply" name="amountsList" id="amountsList" value="<%= profile.amountsList %>">
+          <input type="hidden" class="supply" name="productImagesList" id="productImagesList" value="<%= profile.productImagesList %>">
         </div>
         <div class="form-group">
           <label>Total Price of Supply*</label>
-          <span type="text" class="form-control" id="totalSupplyPrice" name="totalSupplyPrice"></span>
-          <input type="hidden" id="hiddenTotalPrice" value="0">
+          <span type="text" class="form-control supply" id="totalSupplyPrice" name="totalSupplyPrice"></span>
+          <input type="hidden" class="supply" id="hiddenTotalPrice" value="0">
         </div>
         <div class="form-group">
           <label>Total Amount of Supply*</label>
-          <span class="form-control" id="totalSupplyAmount" name="totalSupplyAmount"></span>
+          <span class="form-control supply" id="totalSupplyAmount" name="totalSupplyAmount"></span>
         </div>
         <script type="text/javascript">
-          bindRemoveProduct($('.rem'), $('#prodServiceInput'), false, null);
+          bindHandleProduct($('.rem'), $('#prodServiceInput'), false, null, true, false);
+          bindHandleProduct($('.inc'), $('#prodServiceInput'), false, null, false, true);
+          bindHandleProduct($('.dec'), $('#prodServiceInput'), false, null, false, false);
           $('<a><span style="color: green; cursor: pointer" id="massRemove">Remove All Products</span></a><br>').insertBefore($("#prodServices"));
           $('#massRemove').on('click', removeAllProducts);
           var totalLoadedPrice = 0, totalLoadedAmount = 0;

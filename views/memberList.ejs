@@ -27,11 +27,7 @@
       type = "<%= userType %>";
       userInputs(id, role, avatar, name, type, $('ul.mr-auto'));  
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
-                   
-      if($('th').length) {
-        $('th').css({cursor: 'pointer'}).attr('title', 'Sort');
-        $('th').on('click', sortTable);
-      }
+      prepareSortTable();
   });
   </script>
 </head>

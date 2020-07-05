@@ -170,6 +170,10 @@ const supplierSchema = new Schema({
     type: String,
     required: true
   }],
+  productImagesList: [{
+    type: String,
+    required: true
+  }],
   totalSupplyPrice: {
     type: String,
     required: true

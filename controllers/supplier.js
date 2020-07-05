@@ -82,6 +82,7 @@ exports.postAddProduct = (req, res) => {
       supplier: req.body._id,
       productName: req.body.productName,
       price: parseFloat(req.body.price).toFixed(2),
+      productImage: req.body.productImage,
       currency: req.body.currency ? req.body.currency : process.env.SUPP_DEFAULT_CURR,
       amount: parseInt(req.body.amount),
       totalPrice: parseFloat(req.body.price * req.body.amount).toFixed(2),
@@ -459,6 +460,7 @@ exports.postSignUp = async (req, res) => {
                     productsServicesOffered: prel(req.body.productsServicesOffered),
                     pricesList: prel(req.body.pricesList, true, false),
                     currenciesList: prel(req.body.currenciesList),
+                    productImagesList: prel(req.body.productImagesList),
                     amountsList: prel(req.body.amountsList, false, true),
                     totalSupplyPrice: req.body.totalSupplyPrice,
                     totalSupplyAmount: req.body.totalSupplyAmount,
@@ -552,6 +554,7 @@ exports.postSignUp = async (req, res) => {
                           productName: supplier.productsServicesOffered[i],
                           price: parseFloat(supplier.pricesList[i]).toFixed(2),
                           currency: supplier.currenciesList[i],
+                          productImage: supplier.productImagesList[i],
                           amount: parseInt(supplier.amountsList[i]),
                           totalPrice: parseFloat(supplier.pricesList[i] * supplier.amountsList[i]).toFixed(2),
                           createdAt: Date.now(),
@@ -916,6 +919,7 @@ exports.postProfile = async (req, res) => {
     doc.productsServicesOffered = prel(req.body.productsServicesOffered);
     doc.pricesList = prel(req.body.pricesList, true, false);
     doc.currenciesList = prel(req.body.currenciesList);
+    doc.productImagesList = prel(req.body.productImagesList);
     doc.amountsList = prel(req.body.amountsList, false, true);
     doc.totalSupplyPrice = req.body.totalSupplyPrice;
     doc.totalSupplyAmount = req.body.totalSupplyAmount;
@@ -1014,6 +1018,7 @@ exports.postProfile = async (req, res) => {
             productName: arr[i],
             price: parseFloat(doc.pricesList[i]).toFixed(2),
             currency: doc.currenciesList[i],
+            productImage: doc.productImagesList[i],
             amount: parseInt(doc.amountsList[i]),
             totalPrice: parseFloat(doc.pricesList[i] * doc.amountsList[i]).toFixed(2),
             createdAt: Date.now(),
