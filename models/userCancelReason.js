@@ -2,10 +2,6 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const userCancelReasonSchema = new Schema({
-  /*type: {//What? User cancellation or Order cancellation?
-    type: String,
-    required: true
-  },*/
   title: {//Drop-down list or radio buttons - Why? Bribery, personal choice, other platform, business issues.
     type: String,
     required: true

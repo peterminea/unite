@@ -33,11 +33,12 @@
       getCurrenciesList('select.currency', '/currencyGetAutocomplete', token);
       initBaseRates(fx, 'select.currency');
       $('select.currency').css('width', '100px');
-      var defaultCurr = "<%= profile.currency %>";
+      var defaultCurr = "<%= profile.currency %>";      
       
-      $("input,textarea,select").on('change', function () {
-        $('#updateProfile').removeAttr('disabled');
-      });
+      $('select.currency')
+        .find('option[value="' + defaultCurr + '"]')
+        .prop('selected', true)
+        .trigger('change');
       
       /*
       $("#prodServiceInput").on("paste", function(e) {
@@ -47,20 +48,27 @@
       });
       
       function treatPaste(txt) {
-      }*/      
-      
+      }*/
+     
       $('#updateProfile').click(function() {
         if(!supplierValidateFields(fx))
           return false;
       });
+      
+      setTimeout(function() {
+       $('#updateProfile').prop('disabled', true);
+        $("input,textarea,select").on('change', function () {
+          $('#updateProfile').removeAttr('disabled');
+        });
+      }, 600);
 
-    $('#prodServiceInput').on('change', function() {
-      if($(this).val()) {
-        $('#addProdService').prop('disabled', false);
-      } else {
-        $('#addProdService').prop('disabled', true);
-      }
-    });
+      $('#prodServiceInput').on('change', function() {
+        if($(this).val()) {
+          $('#addProdService').prop('disabled', false);
+        } else {
+          $('#addProdService').prop('disabled', true);
+        }
+      });
       
         $('#termination').click(function(e) {
           $("#dialog").dialog({
@@ -68,8 +76,8 @@
             width: 300,
             height: 550,
             open: function(event, ui) {
-              $('#dialog').append('<p>Are you sure you want to delete your Supplier account?<br>This will also remove:<br>Your products/services;<br>Your capabilities;<br>Your received orders;<br>Your user tokens (if any);<br>Your message history from UNITE.<br><br>If you just want to take a break, you may' + '<a href="deactivate/<%= profile._id %>"'
-                    + ' deactivate your account</a>' +' deactivate your account instead.</p>');
+              $('#dialog').append('<p>Are you sure you want to delete your Supplier account?<br>This will also remove:<br>Your products/services;<br>Your capabilities;<br>Your received orders;<br>Your user tokens (if any);<br>Your message history from UNITE.<br><br>If you just want to take a break, you may' + '<a href="deactivate/<%= profile._id %>"' 
+                                  + ' deactivate your account</a>' +' deactivate your account instead.</p>');
             },
             close: function(event, ui) {
                 $('#dialog').text('');
@@ -78,9 +86,9 @@
               OK: function() {
                 setTimeout(function() {
                   $('#termination').next('form').submit();
-                }, 150);
+                }, 100);
                 $(this).dialog("close");
-              },              
+              },
               Cancel: function() {
                 $('#dialog').text('');
                 $(this).dialog("close");
@@ -225,6 +233,7 @@
         </div>
         <div class="form-group">
           <label>Please choose your prepared product/service list (*.xls/xlsx, name+price+currency+amount on each row):</label>
+          <input type="hidden" class="fileId" name="excel" value="">
           <input class="form-control fileexcelupload" type="file" id="products" name="products" single>
           <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Process Excel File" />
         </div>
@@ -246,6 +255,7 @@
           
           <div class="form-group">
             <label>Upload a product image:</label>
+            <input type="hidden" class="fileId" name="productImage" value="">
             <input class="form-control productimageupload" type="file" id="productImage" name="products" single>
             <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload Product Image"/>
           </div>
@@ -330,7 +340,7 @@
         
         <div class="form-group">
           <label>User Avatar</label>
-          <input type="hidden" name="avatar" value="<%= profile.avatar %>">
+          <input type="hidden" class="fileId" name="avatar" value="<%= profile.avatar %>">
           <input class="form-control fileupload avatarupload" type="file" id="avatar" name="avatarImg">
           <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
         </div>

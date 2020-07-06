@@ -92,45 +92,29 @@ function getFiles(folder) {/*
 }
 
 
-exports.getFilesList = (req, res) => {
+exports.getFilesList = async (req, res) => {
   var obj = userData(req);
   var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
-  req.session.flash = [];
-  const conn = mongoose.createConnection(URL, {useNewUrlParser: true, useUnifiedTopology: true});
-  const Grid = require('gridfs-stream');
-  let gfs;
-  
-  conn.once('open', () => {
-    gfs = Grid(conn.db, mongoose.mongo);
-    gfs.collection('uploads');    
-    
-    gfs.files.find().toArray(async (err, files) => {
-      if(!files || !files.length) {
-        return res.status(404).json({
-          err: 'No files exist!'
-        });
-      }
-      
-      var uploads = await getFiles('public/uploads');
-      var avatars = await getFiles('public/avatars');
+  req.session.flash = []; 
+  var uploads = await getFiles('public/uploads');
+  var avatars = await getFiles('public/avatars');
+  var files = await getFiles('public/productImages');
 
-      //console.log(obj);
-      res.render("filesList", {
-        role: obj.role,
-        files: files,
-        successMessage: success,
-        errorMessage: error,
-        isAdmin: obj.role == process.env.USER_ADMIN,
-        uploads: uploads,
-        avatars: avatars,
-        userId: obj.userId,
-        avatar: obj.avatar,
-        userName: obj.userName,
-        userType: obj.userType
-      });
-        //return res.json(files);
-    });
+  res.render("filesList", {
+    role: obj.role,
+    //files: files,
+    successMessage: success,
+    errorMessage: error,
+    isAdmin: obj.role == process.env.USER_ADMIN,
+    files: files,
+    uploads: uploads,
+    avatars: avatars,
+    userId: obj.userId,
+    avatar: obj.avatar,
+    userName: obj.userName,
+    userType: obj.userType
   });
+    //return res.json(files);
 };
 
 exports.getFeedback = (req, res) => {

@@ -95,8 +95,8 @@
           <td scope="col"><%= file.filename %></td>
           <td scope="col"><%= file.length %></td>
           <td scope="col"><%= file.uploadDate %></td>
-          <td><span class="download">Get file</span></td>
-          <td><span class="delete">Remove</span></td>
+          <td><a href="../<%= file.path.substring(7) %>" title="Download <%= file.name %>" class="downloadFile" download>Download file</a></td>
+          <td><span name="<%= file.path %>" class="deleteFile">Remove</span></td>
         </tr>
         <% i++; } %>
         </tbody>
@@ -105,7 +105,7 @@
         <% } else {%>
         <div>
           <p style="color: green; font-family: arial">
-            Sorry, no DB files here.
+            Sorry, no Product Image files here.
           </p>
         </div>
         <% }%>  

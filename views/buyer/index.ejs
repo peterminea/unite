@@ -117,10 +117,10 @@
       
       $('select.buyerCurrency')
         .find('option[value="' + defaultBidCurrency + '"]')
-        .attr('selected', 'selected');
-    
-      $('span.bidCurrency').text(defaultBidCurrency);
+        .prop('selected', true);
+      
       $('select.buyerCurrency').trigger('change');
+      $('span.bidCurrency').text(defaultBidCurrency);      
       
       $('.productsList').on('change', function() {
         if(!$(this).val() || !$(this).val().length) {

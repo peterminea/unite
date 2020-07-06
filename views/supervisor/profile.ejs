@@ -24,7 +24,6 @@
   <script type="text/javascript">
       $(document).ready(function() {        
         var token = $("input[name='_csrf']").val();
-        
         postAutocomplete('#country', '/countryAutocomplete', token);
         errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
 

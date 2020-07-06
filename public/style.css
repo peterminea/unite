@@ -16,6 +16,12 @@ body {
   font-size: 16pt;
 }
 
+@media only screen and (max-width: 900px) {
+  a.admin, a.userRight {
+    float: right;
+  }
+}
+
 .font-14pt-custom {
   font-size: 14pt;
   font-weight: bold;

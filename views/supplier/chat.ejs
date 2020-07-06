@@ -28,7 +28,6 @@
   <script type="text/javascript">
     $(document).ready(function() {
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
-      
       const token = $("input[name='_csrf']").val();
       const sock = io();
      

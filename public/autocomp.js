@@ -19,7 +19,7 @@ var autocomp = function(obj, data, enter) {//Not suitable for modals.
       });
     }
   });
-}
+};
 
 function getFiles(folder) {
   
@@ -155,7 +155,7 @@ function treatDiv(div, isMulti, val, input) {
       input.attr('value', (val2 && val2.length)? val2.toString() + ',' : '');
       
       if(!val2 || !val2.length)
-        input.val('');;
+        input.val('');
     } else {
       input.attr('value', '');
       input.val('');
@@ -490,7 +490,7 @@ function initBaseRates(fx, elem) {
       "USD" : 1.13,        // always include the base rate (1:1)
       "RON" : 4.84
       /* etc */
-    }
+    };
     
     var el = $(''+elem+'');
     if(el && el.length) {
@@ -530,7 +530,7 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     var handledPrice = handledAmount * parseFloat(li.find('.price').text());
     var supplierCurrency = fromBuyer? li.parent('ul').attr('suppCurrency') : li.find('.currency').text();
     var totalPagePrice = fromBuyer? parseFloat(li.attr('totalPrice')) : parseFloat($('#hiddenTotalPrice').val());
-    var canContinue = true;
+    var canContinue = true, newAmount, newPrice;
     
     if(isRow || (entireAmount==1 && !isAdd)) {//Delete Row. If 1.
       //if(!confirm('Warning: You are about to remove the entire product row.'))
@@ -570,15 +570,15 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
       return false;
     
     if(!fromBuyer) {
-      var newAmount = isAdd? parseInt($('#totalSupplyAmount').val()) + handledAmount : parseInt($('#totalSupplyAmount').val()) - handledAmount;
-      var newPrice = isAdd? totalPagePrice + parseFloat(handledPrice) : totalPagePrice - parseFloat(handledPrice);
+      newAmount = isAdd? parseInt($('#totalSupplyAmount').val()) + handledAmount : parseInt($('#totalSupplyAmount').val()) - handledAmount;
+      newPrice = isAdd? totalPagePrice + parseFloat(handledPrice) : totalPagePrice - parseFloat(handledPrice);
       $('#hiddenTotalPrice').val(newPrice);
       $('#totalSupplyAmount').text(newAmount);
       $('#totalSupplyPrice').text(newPrice + ' ' + supplierCurrency);
       prodServiceInput.trigger('change');
     } else {
-      var newAmount = isAdd? parseInt($('#totalAmount_'+id).val()) + handledAmount : parseInt($('#totalAmount_'+id).val()) - handledAmount;
-      var newPrice = isAdd? totalPagePrice + handledPrice : totalPagePrice - handledPrice;
+      newAmount = isAdd? parseInt($('#totalAmount_'+id).val()) + handledAmount : parseInt($('#totalAmount_'+id).val()) - handledAmount;
+      newPrice = isAdd? totalPagePrice + handledPrice : totalPagePrice - handledPrice;
       $('#totalAmount_'+id).val(parseInt(newAmount));
       $('#price_'+id).val(parseFloat(newPrice).toFixed(2));
       var supp = fx.convert($('#price_'+id).val(), {from: $('span.bidCurrency').first().text(), to: supplierCurrency});
@@ -656,7 +656,7 @@ function addition(prod, prodVal, priceVal, currencyVal, amountVal, imagePath, el
 
 
 function addProduct(obj) {
-  obj.click(function() {
+  obj.on('click', function() {
      var elem = $("#prodServices");
      var MAX = $("#prodServices").attr('MAX');
 
@@ -726,11 +726,10 @@ function userInputs(id, role, avatar, name, type, ul) {//Home, About, Terms, Ant
     
     var str = '';
     str += '<li class="nav-item logout">'
-        + '<a class="btn btn-danger" style="margin-right: 10px" href="?exit=true&home=true" title="Clear user session/Logout">Logout</a>'
+        + '<a class="btn btn-danger admin" marg="240" style="margin-top: -240px;" href="?exit=true&home=true" title="Clear user session/Logout">Logout</a>'
         + '</li>';
-    ul.append(str);
     
-    //navbarSupportedContent
+    ul.append(str);
     $('.signup').hide();
   }
 }
@@ -806,7 +805,7 @@ function getFeedbacks(obj, token, url) {
     },
     success: function(data) {//data = feedbacks.
       if(!data || !data.length || treatError(data, 'getting Feedbacks')) {
-        obj.prepend('<p class="term">There are currently no Feedbacks available. Please engage with your users first.</p>')
+        obj.prepend('<p class="term">There are currently no Feedbacks available. Please engage with your users first.</p>');
         return false;
       }
       
@@ -843,6 +842,7 @@ function treatLastLi() {
   var nextLi = $('li.last').next('li');
   $('li.last').removeClass('last');
   nextLi.addClass('last');
+  return 30;
 }
 
 
@@ -1003,12 +1003,13 @@ function processSingleFile(response, val, ob, input, prevInput, token, theDiv) {
 $(document).ready(function() {
   var cnt = $('div.container').first();
   
-  cnt
-    .prepend('<div><button class="back btn btn-primary" style=" margin-right: 50px" ' 
-                                    + ' title="Go back one page" onclick="history.go(-1)">Back</button>'
-                + '<button class="forward btn btn-primary" style=" margin-left: 50px"' 
-                                    + ' title="Go forward one page" onclick="history.go(1)">Forward</button>'
-                                   +'</div>');
+  if(!(cnt.hasClass('nobackforward')))
+    cnt
+      .prepend('<div><button class="back btn btn-primary" style=" margin-right: 50px" ' 
+                                      + ' title="Go back one page" onclick="history.go(-1)">Back</button>'
+                  + '<button class="forward btn btn-primary" style=" margin-left: 50px"' 
+                                      + ' title="Go forward one page" onclick="history.go(1)">Forward</button>'
+                                     +'</div>');
   
   if(!cnt.hasClass('terms')) {
     $('input,textarea,span,label,li,button,a,b,p,h1,h2,h3,h4,h5,option')
@@ -1044,8 +1045,7 @@ $(document).ready(function() {
         + '</div>';
     
     nav.append($str);
-    
-    //if(nav.hasClass('home') || isHome) {
+   
       var ul = $('#navbarSupportedContent')
         .find('ul');
       
@@ -1053,23 +1053,39 @@ $(document).ready(function() {
         .insertAfter('li.last');
       
       var isAdmin = nav.find('input[id="userData"]').attr('isAdmin');
+      var bigScreen = window.matchMedia("(min-width: 900px)");
+      var marg = bigScreen.matches? 0 : 180;
+    
+      $(window).off('resize').on('resize', function() {
+          if($(window).width() >= 900) {
+            $('a.admin').css({'margin-top': 0, float: ''});
+          } else {
+            $('a.admin').each(function() {
+              $(this).css({'margin-top': -$(this).attr('marg'), 'float': 'right'});
+            });
+          }
+      });
       
       if(isAdmin == 'true') {
         treatLastLi();
-        $('<li class="nav-item"><a class="nav-link" href="/viewFeedbacks" title="Check Feedbacks">View Feedbacks</a></li>')
+        $('<li class="nav-item"><a class="nav-link admin" marg="' + marg + '" style="margin-top: -' + marg + 'px" title="Admin specific fields"><b>Admin Section<b></a></li>')
           .insertAfter('li.last');
-        treatLastLi();
-        $('<li class="nav-item"><a class="nav-link" href="/memberList" title="List of UNITE Members">List of our members</a></li>')
+        marg -= treatLastLi();
+        $('<li class="nav-item"><a class="nav-link admin" marg="' + marg + '" style="margin-top: -' + marg + 'px" href="/viewFeedbacks" title="Check Feedbacks">View Feedbacks</a></li>')
           .insertAfter('li.last');
-        treatLastLi();
-        $('<li class="nav-item"><a class="nav-link" href="/filesList" title="View Uploaded Files List">View Uploaded Files</a></li>')
+        marg -= treatLastLi();
+        $('<li class="nav-item"><a class="nav-link admin" marg="' + marg + '" style="margin-top: -' + marg + 'px" href="/memberList" title="List of UNITE Members">List of our members</a></li>')
           .insertAfter('li.last');
-        treatLastLi();
-        $('<li class="nav-item"><a class="nav-link" href="/bidsList" title="View UNITE Bids List">View All Bids</a></li>')
+        marg -= treatLastLi();
+        $('<li class="nav-item"><a class="nav-link admin" marg="' + marg + '" style="margin-top: -' + marg + 'px" href="/filesList" title="View Uploaded Files List">View Uploaded Files</a></li>')
+          .insertAfter('li.last');
+        marg -= treatLastLi();
+        $('<li class="nav-item"><a class="nav-link admin" marg="' + marg + '" style="margin-top: -' + marg + 'px" href="/bidsList" title="View UNITE Bids List">View All Bids</a></li>')
           .insertAfter('li.last');
       }
       
       var ind = parseInt(nav.attr('pos'));
+    //$('li.admin').css('float', 'right');
       
       if(ul.find('li').first().hasClass('user')) {
         ind++;
@@ -1078,11 +1094,29 @@ $(document).ready(function() {
       var li = ul.find('li').eq(ind);
       li.addClass('active');
       var text = li.find('a').text();
-      li.find('a').text(text + ' (current)');
+      //li.find('a').text(text + ' (current)');//Askin said that this is not necessary. So REMOVE it!
     //}
   } else {
-    if(nav.length) {
+    if(nav.length && !(nav.hasClass('noMenu')) ) {
       var user = nav.attr('user');
+      var bigScreen = window.matchMedia("(min-width: 900px)");
+      var offset = user == 'supplier'? 112 : user == 'buyer'? 80 : 40;
+      var profilePx = parseInt(offset+32), logoutPx = parseInt(offset);
+      
+      if(bigScreen.matches) {
+        profilePx = 0;
+        logoutPx = 0;
+      }
+      
+      $(window).off('resize').on('resize', function() {
+        if($(window).width() >= 900) {
+          $('a.userRight').css({'margin-top': 0, float: ''});
+        } else {
+          $('a.userRight').each(function() {
+            $(this).css({'margin-top': -$(this).attr('marg'), 'float': 'right'});
+          });
+        }
+      });
       
       var str = '<div class="collapse navbar-collapse" id="navbarSupportedContent">' 
         + '<ul class="navbar-nav mr-auto">'
@@ -1090,10 +1124,10 @@ $(document).ready(function() {
         + '<li class="nav-item"><a class="nav-link" href="/'+user+'">Dashboard <span class="sr-only"></span></a></li>'
         + (user == 'supervisor'? '' : '<li class="nav-item"><a class="nav-link" href="/'+user+'/balance">Balance <span class="sr-only"></span></a></li>')
         + (user == 'supplier'? '<li class="nav-item"><a class="nav-link" href="/'+user+'/bid-requests">Bid Requests</a></li>' : '')
-        + '<li class="nav-item active"><a class="btn btn-primary" style="margin-right: 10px" href="/'+user+'/profile">Profile</a></li><br>'
-        + '<li class="nav-item"><a class="btn btn-danger" title="Logout" href="?exit=true">Logout</a></li></ul></div>';
+        + '<li class="nav-item active"><a class="btn btn-primary userRight" style="margin-top: -' + profilePx + 'px" href="/'+user+'/profile">Profile</a></li><br>'
+        + '<li class="nav-item"><a class="btn btn-danger userRight" style="margin-top: -' + logoutPx + 'px" title="Logout" href="?exit=true">Logout</a></li></ul></div>';
      
-      nav.append(str);
+      nav.append(str);      
       
       if(nav.attr('pos')) {
         var ind = parseInt(nav.attr('pos')), ul = $('#navbarSupportedContent').find('ul');
@@ -1105,7 +1139,6 @@ $(document).ready(function() {
     }
   }
   
-  //$('div.container').not('.text-center')
     $("body").css({"background-image": "url(https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2FWH.png?v=1592308122673)", "background-repeat": "repeat"});//That white! 
   
   if(nav)
@@ -1125,13 +1158,13 @@ $(document).ready(function() {
       return false;
     
     $('#prodServices').find('li').each(function(index, elem) {
-      var price = parseFloat($(this).find('.price').text()), currency = $(this).find('.currency').text();
+      var price = parseFloat($(this).find('.price').text()).toFixed(2), currency = $(this).find('.currency').text();
       var newPrice = fx.convert(price, {from: currency, to: val});
-      $(this).find('.price').text(newPrice.toFixed(2));
+      $(this).find('.price').text(parseFloat(newPrice).toFixed(2));
       $(this).find('span.currency').text(val);
     });
   });
-  
+    
   if(!($('.fileupload').length))
     return false;
   
@@ -1144,8 +1177,7 @@ $(document).ready(function() {
   $('.single,.multiple').each(function(index, element) {
     var input = $(this).prev('input');
     var prevInput = input.prev('input');
-    
-    var val = input.attr('value'), fileId = prevInput.val();
+    var val = input.attr('value'), fileId = prevInput && prevInput.length? prevInput.val() : null;
     var theDiv = $(this).parent('div');
     input.attr('value', fileId);
     val = fileId;
@@ -1163,7 +1195,7 @@ $(document).ready(function() {
         }
       }
 
-      if(isMulti) {//Multi
+      if(isMulti) {
         var ob = '<div class="fileWrapper">';
         for(var i in val) {
           fileExists('public/' + fileId[i].substring(3), isMulti, ob, theDiv, fileId[i], i, val, token);
@@ -1174,10 +1206,6 @@ $(document).ready(function() {
       }
     }
   });
-
-  /*
-  <span class='uploadImage'>&nbsp;&nbsp;&nbsp;Upload Image</span>
-  */
   
   $('.uploadImage').on('click', function() {
     var li = $(this).parent('li');    
@@ -1223,12 +1251,10 @@ $(document).ready(function() {
     };
 
     xhr.send(formData);
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4) {//Success!
-          //alert(xhr.responseText);
+    xhr.onreadystatechange = function() {alert(xhr.responseText);
+      if (xhr.readyState === 4) {//Success!         
           input.next('input').prop('disabled', true);
           var prevInput = input.prev('input');
-          //alert(Array.isArray(xhr.responseText)?(xhr.responseText.file) : xhr.responseText);
           var ob, val, response = isAvatar? xhr.responseText : JSON.parse(xhr.responseText);
           var theDiv = input.parent('div');
         
@@ -1300,7 +1326,7 @@ $(document).ready(function() {
               val = !(input.attr('value') && input.attr('value').length)? absolutePath + '' : input.attr('value') + absolutePath + '';
               input.attr('value', val);
               var file = response[i].path? response[i].path : response[i].file.id;
-              prevInput.attr('value', !(prevInput.val() && prevInput.val().length)? val + '' : prevInput.val() + val + '');//file
+              prevInput.attr('value', !(prevInput.val() && prevInput.val().length)? val + '' : prevInput.val() + val + '');
               
               ob += '<div><a href="' + absolutePath + '" file="' + file + '" title="Download ' + absolutePath + '" style="color: blue; cursor: pointer" download>Download file "' + i + '"</a>&nbsp;<span token="' + token + '" file="' + file + '" class="remFile" onclick="removeFile(this,Swal)" title="Delete the '+ absolutePath +' file">Remove</span></div>';
             }
