@@ -1,5 +1,5 @@
 //var oxr = require('open-exchange-rates'), fx = require('money');
-module.exports = async (oxr, fx) => {console.log(1991);
+module.exports = async (oxr, fx) => {
   if(1==2) {
     oxr.set({ app_id: process.env.EXCH_RATES_APP_ID });
      await oxr.latest(function() {

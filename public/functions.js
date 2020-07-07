@@ -19,7 +19,7 @@ var autocomp = function(obj, data, enter) {//Not suitable for modals.
       });
     }
   });
-}
+};
 
 function getFiles(folder) {
   
@@ -155,7 +155,7 @@ function treatDiv(div, isMulti, val, input) {
       input.attr('value', (val2 && val2.length)? val2.toString() + ',' : '');
       
       if(!val2 || !val2.length)
-        input.val('');;
+        input.val('');
     } else {
       input.attr('value', '');
       input.val('');
@@ -428,6 +428,7 @@ function getCurrenciesList(elem, url, token) {//For <select> drop-down currencie
       }
 
       //obj.append('<option></option>');
+      
       for(var i in data) {
         var opt = '<option ' + 'style="word-wrap: break-word; width: 50px" title="' + data[i].value +'" value="' + data[i].name + '">' + data[i].name + '</option>';
         obj.append(opt);
@@ -449,8 +450,8 @@ function getProductsList(elem, url, token) {//For <select> drop-down currencies.
     url: url,
     headers: { "X-CSRF-Token": token },
     datatype: 'jsonp',
-    type: "GET",
-    //data: req,
+    data: {supplierId: obj.attr('supplierId')},
+    type: "POST",
     success: function(data) {
     if(!data || !data.length || treatError(data, 'retrieving products')) {
         //obj.val('');
@@ -458,8 +459,13 @@ function getProductsList(elem, url, token) {//For <select> drop-down currencies.
       }
 
       obj.append('<option></option>');
+      
       for(var i in data) {
-        var opt = '<option ' + 'style="word-wrap: break-word; width: 50px" price="' + data[i].price + '" maxAmount="' + data[i].amount + '" productImage="' + data[i].productImage + '" currency="' + data[i].currency + '" title="' + data[i].name +'" value="' + data[i].name + '">' + data[i].name + '</option>';
+        var opt = '<option ' + 'style="word-wrap: break-word; width: 50px" price="' + data[i].price 
+          + '" maxAmount="' + data[i].amount + '" productImage="' 
+          + data[i].productImage + '" currency="' + data[i].currency + '" title="' 
+          + data[i].name +'" value="' + data[i].name + '">' + data[i].name + '</option>';
+        
         obj.append(opt);
       }
       //res(data);
@@ -490,7 +496,7 @@ function initBaseRates(fx, elem) {
       "USD" : 1.13,        // always include the base rate (1:1)
       "RON" : 4.84
       /* etc */
-    }
+    };
     
     var el = $(''+elem+'');
     if(el && el.length) {
@@ -526,11 +532,13 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     }
 
     var handledAmount = isRow? entireAmount : 1;
-    var rowPrice = parseFloat(li.find('.totalPrice').text());      
-    var handledPrice = handledAmount * parseFloat(li.find('.price').text());
+    var rowPrice = parseFloat(li.find('span.totalPrice').text()).toFixed(2);      
+    var handledPrice = handledAmount * parseFloat(li.find('span.price').text()).toFixed(2);
     var supplierCurrency = fromBuyer? li.parent('ul').attr('suppCurrency') : li.find('.currency').text();
-    var totalPagePrice = fromBuyer? parseFloat(li.attr('totalPrice')) : parseFloat($('#hiddenTotalPrice').val());
-    var canContinue = true;
+    var totalPagePrice = fromBuyer? parseFloat(li.attr('totalPrice')) : parseFloat($('#hiddenTotalPrice').val()).toFixed(2);
+    var canContinue = true, newAmount, newPrice;
+    var localAmount = isAdd? entireAmount + handledAmount : entireAmount - handledAmount;
+    var localPrice = isAdd? parseFloat(rowPrice) + parseFloat(handledPrice) : parseFloat(rowPrice) - handledPrice;
     
     if(isRow || (entireAmount==1 && !isAdd)) {//Delete Row. If 1.
       //if(!confirm('Warning: You are about to remove the entire product row.'))
@@ -549,7 +557,7 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
         if(result.value) {
           var elem = li.parent('ul');
           li.remove();          
-          var counter = elem.closest('p').find('span');
+          var counter = elem.parent('div').find('p.term span');
           var newValue = -1 + parseInt(counter.text());
           counter.text(newValue);
         } else if (result.dismiss === Swal.DismissReason.cancel) {
@@ -558,11 +566,11 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
         }
       });
     } else {
-      li.find('.amount').text(isAdd? entireAmount + handledAmount : entireAmount - handledAmount);
-      li.find('.totalPrice').text(isAdd? rowPrice + handledPrice : rowPrice - handledPrice);
+      li.find('.amount').text(localAmount);
+      li.find('span.totalPrice').text(localPrice);
       if(!fromBuyer) {
-        li.attr('amount', isAdd? entireAmount + handledAmount : entireAmount - handledAmount);
-        li.attr('price', isAdd? rowPrice + handledPrice : rowPrice - handledPrice);
+        li.attr('amount', localAmount);
+        li.attr('price', localPrice);
       }
     }
 
@@ -570,19 +578,29 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
       return false;
     
     if(!fromBuyer) {
-      var newAmount = isAdd? parseInt($('#totalSupplyAmount').val()) + handledAmount : parseInt($('#totalSupplyAmount').val()) - handledAmount;
-      var newPrice = isAdd? totalPagePrice + parseFloat(handledPrice) : totalPagePrice - parseFloat(handledPrice);
+      newAmount = isAdd? parseInt($('#totalSupplyAmount').val()) + handledAmount : parseInt($('#totalSupplyAmount').val()) - handledAmount;
+      newPrice = isAdd? totalPagePrice + parseFloat(handledPrice) : totalPagePrice - parseFloat(handledPrice);
       $('#hiddenTotalPrice').val(newPrice);
       $('#totalSupplyAmount').text(newAmount);
       $('#totalSupplyPrice').text(newPrice + ' ' + supplierCurrency);
       prodServiceInput.trigger('change');
     } else {
-      var newAmount = isAdd? parseInt($('#totalAmount_'+id).val()) + handledAmount : parseInt($('#totalAmount_'+id).val()) - handledAmount;
-      var newPrice = isAdd? totalPagePrice + handledPrice : totalPagePrice - handledPrice;
+      var totalAmountInput = $('#totalAmount_'+id);      
+      var span = $('span.bidCurrency[index="'+id+'"]').first();
+      newAmount = isAdd? parseInt(totalAmountInput.val()) + handledAmount : parseInt(totalAmountInput.val()) - handledAmount;
+      newPrice = isAdd? parseFloat(totalPagePrice) + parseFloat(handledPrice) : parseFloat(totalPagePrice) - handledPrice;
+      
+      var buyerUnit = $('#buyerPriceUnit_'+id);
+      buyerUnit.text(parseFloat(localPrice).toFixed(2));
+      var suppUnitVal = fx.convert(localPrice, {from: span.text(), to: supplierCurrency});
+      var supplierUnit = $('#supplierPriceUnit_'+id);
+      supplierUnit.text(parseFloat(suppUnitVal).toFixed(2));
+      
+      li.attr('totalPrice', newPrice);
       $('#totalAmount_'+id).val(parseInt(newAmount));
-      $('#price_'+id).val(parseFloat(newPrice).toFixed(2));
-      var supp = fx.convert($('#price_'+id).val(), {from: $('span.bidCurrency').first().text(), to: supplierCurrency});
-      $('#supplierPrice_'+id).val(supp);
+      $('#price_'+id).text(parseFloat(newPrice).toFixed(2));
+      var supp = fx.convert(newPrice, {from: span.text(), to: supplierCurrency});
+      $('#supplierPrice_'+id).text(parseFloat(supp).toFixed(2));
     }
   });
 }
@@ -604,6 +622,11 @@ function removeAllItems(index) {//Bid items
   $("#hiddenProdServicesList_"+index).val('');
   $("#amountList_"+index).val('');
   $("#priceList_"+index).val('');
+  $('#totalAmount_'+index).val(0);
+  $('span.hid').each(function() {
+    var procSpan = $(this).find('span').first();
+    procSpan.text(0);
+  });
 }
 
 
@@ -625,12 +648,14 @@ function addition(prod, prodVal, priceVal, currencyVal, amountVal, imagePath, el
   } else {
       var addedPrice = parseFloat(priceVal * amountVal).toFixed(2);
       var priceInput = fromBuyer? elem.parent('div').next('div').find('input[id^="price_"]') : $('#price');
-      var buyerCurrency = fromBuyer? priceInput.next('span').text() : $('input[name="currency"]').val();
+      var buyerCurrency = fromBuyer? priceInput.parent('div').find('.bidCurrency').first().text() : $('input[name="currency"]').val();
       
       if(!fromBuyer) {
         $('#hiddenTotalPrice').val(parseFloat(parseFloat($('#hiddenTotalPrice').val()) + parseFloat(addedPrice)).toFixed(2));
       }
-      var bigPrice = fromBuyer? parseFloat(parseFloat(priceInput.val()).toFixed(2) + (addedPrice)).toFixed(2) : $('#hiddenTotalPrice').val();
+    
+      var buyerPriceVal = fromBuyer? (priceInput.text()? parseFloat(priceInput.text()): 0): null;
+      var bigPrice = fromBuyer? parseFloat((buyerPriceVal) + parseFloat(addedPrice)).toFixed(2) : $('#hiddenTotalPrice').val();
 
       if(currencyVal != buyerCurrency) {//Convert the values to the currency of buyer.
         addedPrice = parseFloat(fx.convert((addedPrice), {from: currencyVal, to: buyerCurrency})).toFixed(2);
@@ -638,25 +663,39 @@ function addition(prod, prodVal, priceVal, currencyVal, amountVal, imagePath, el
         bigPrice = parseFloat(fx.convert((bigPrice), {from: currencyVal, to: buyerCurrency})).toFixed(2);
       }
       
-      elem.append("<li class='list-group-item' price='" + addedPrice + "' totalPrice='" + bigPrice +"' amount='" + amountVal + "'><span class='product'>" + prodVal + '</span> - <span class="price">' + priceVal + '</span> <span class="currency">' + currencyVal + `</span> - <span class='amount'>${amountVal}</span> items (Total: <span class='totalPrice'>${addedPrice}</span> ${currencyVal})<span class='productImage' title='Image of Product'>` + (imagePath? `<img src="${imagePath}" style="height: 15px; width: 15px" onclick="window.open(this.src)">` : '') + `</span><span class='uploadImage'>&nbsp;&nbsp;&nbsp;Upload Image</span><span class='rem' title="Delete"></span>  <span class='dec' title='Remove item'></span>  <span class='inc' title='Add item'></span>  </li>`);
+      elem.append("<li class='list-group-item' price='" + addedPrice + "' totalPrice='" + bigPrice 
+                  + "' amount='" + amountVal + "'><span class='product'>" + prodVal + '</span> - <span class="price">' 
+                  + priceVal + '</span> <span class="currency">' + currencyVal 
+                  + `</span> - <span class='amount'>${amountVal}</span> items (Total: <span class='totalPrice'>${addedPrice}</span> ${currencyVal})<span class='productImage' title='Image of Product'>` 
+                  + (imagePath? `<img src="${imagePath}" style="height: 15px; width: 15px" onclick="window.open(this.src)">` : '') 
+                  + `</span><span class='uploadImage'>&nbsp;&nbsp;&nbsp;Upload Image</span><span class='rem' title="Delete"></span>  <span class='dec' title='Remove item'></span>  <span class='inc' title='Add item'></span>  </li>`);
       if(!fromBuyer) {
         $('#totalSupplyPrice').text(bigPrice + ' ' + currencyVal);
-        $('#totalSupplyAmount').text(parseInt($('#totalSupplyAmount').val() + parseInt(amountVal)));
+        $('#totalSupplyAmount').text(parseInt($('#totalSupplyAmount').text()) + parseInt(amountVal));
+      } else {
+        var id = getId(elem.attr('id'));
+        
+        var newAmount = parseInt($('#totalAmount_'+id).val()) + parseInt(amountVal);
+        $('#totalAmount_'+id).val(parseInt(newAmount));
+        $('#price_'+id).text(parseFloat(bigPrice).toFixed(2));
+        var supplierCurrency = elem.attr('suppCurrency');
+        var supp = fx.convert($('#price_'+id).text(), {from: $('span.bidCurrency[index="'+id+'"]').first().text(), to: supplierCurrency});
+        $('#supplierPrice_'+id).text(supp);
       }
       
-      var counter = elem.closest('p').find('span');
+      var counter = elem.parent('div').find('p.term span');
       var newValue = 1 + parseInt(counter.text());
       counter.text(newValue);
-    
       bindHandleProduct($('.rem').last(), prod, fromBuyer, fromBuyer? getId(elem.attr('id')) : null, true, false);
       bindHandleProduct($('.inc').last(), prod, fromBuyer, fromBuyer? getId(elem.attr('id')) : null, false, true);
       bindHandleProduct($('.dec').last(), prod, fromBuyer, fromBuyer? getId(elem.attr('id')) : null, false, false);
+      delegateUpload($('.uploadImage').last());
   }
 }
 
 
 function addProduct(obj) {
-  obj.click(function() {
+  obj.on('click', function() {
      var elem = $("#prodServices");
      var MAX = $("#prodServices").attr('MAX');
 
@@ -726,11 +765,10 @@ function userInputs(id, role, avatar, name, type, ul) {//Home, About, Terms, Ant
     
     var str = '';
     str += '<li class="nav-item logout">'
-        + '<a class="btn btn-danger" style="margin-right: 10px" href="?exit=true&home=true" title="Clear user session/Logout">Logout</a>'
+        + '<a class="btn btn-danger admin" marg="240" style="margin-top: -240px;" href="?exit=true&home=true" title="Clear user session/Logout">Logout</a>'
         + '</li>';
-    ul.append(str);
     
-    //navbarSupportedContent
+    ul.append(str);
     $('.signup').hide();
   }
 }
@@ -806,7 +844,7 @@ function getFeedbacks(obj, token, url) {
     },
     success: function(data) {//data = feedbacks.
       if(!data || !data.length || treatError(data, 'getting Feedbacks')) {
-        obj.prepend('<p class="term">There are currently no Feedbacks available. Please engage with your users first.</p>')
+        obj.prepend('<p class="term">There are currently no Feedbacks available. Please engage with your users first.</p>');
         return false;
       }
       
@@ -843,6 +881,7 @@ function treatLastLi() {
   var nextLi = $('li.last').next('li');
   $('li.last').removeClass('last');
   nextLi.addClass('last');
+  return 30;
 }
 
 
@@ -915,6 +954,21 @@ function registrationDialog(accountType) {
         $(this).dialog("close");
       }
     }
+  });
+}
+
+
+function delegateUpload(obj) {
+  obj.on('click', function() {
+    var li = $(this).parent('li');    
+    var ul = li.parent('ul');
+    var div = ul.closest('div');
+    var index = ul.find('li').index(li);
+    var uploadInput = div.find('input[id^="productImage"]');
+    
+    uploadInput
+      .attr('fromOutside', index)
+      .trigger('click');
   });
 }
 
@@ -1003,12 +1057,13 @@ function processSingleFile(response, val, ob, input, prevInput, token, theDiv) {
 $(document).ready(function() {
   var cnt = $('div.container').first();
   
-  cnt
-    .prepend('<div><button class="back btn btn-primary" style=" margin-right: 50px" ' 
-                                    + ' title="Go back one page" onclick="history.go(-1)">Back</button>'
-                + '<button class="forward btn btn-primary" style=" margin-left: 50px"' 
-                                    + ' title="Go forward one page" onclick="history.go(1)">Forward</button>'
-                                   +'</div>');
+  if(!(cnt.hasClass('nobackforward')))
+    cnt
+      .prepend('<div><button class="back btn btn-primary" style=" margin-right: 50px" ' 
+                                      + ' title="Go back one page" onclick="history.go(-1)">Back</button>'
+                  + '<button class="forward btn btn-primary" style=" margin-left: 50px"' 
+                                      + ' title="Go forward one page" onclick="history.go(1)">Forward</button>'
+                                     +'</div>');
   
   if(!cnt.hasClass('terms')) {
     $('input,textarea,span,label,li,button,a,b,p,h1,h2,h3,h4,h5,option')
@@ -1020,8 +1075,7 @@ $(document).ready(function() {
   }
   
   var nav = $('body').find('nav');
-  if(nav.length && nav.next('div').hasClass('home')) {
-    //var isHome = nav.next('div').hasClass('home');    
+  if(nav.length && nav.next('div').hasClass('home')) {    
     
     var $str =
         ' <div class="collapse navbar-collapse" id="navbarSupportedContent">'
@@ -1044,8 +1098,7 @@ $(document).ready(function() {
         + '</div>';
     
     nav.append($str);
-    
-    //if(nav.hasClass('home') || isHome) {
+   
       var ul = $('#navbarSupportedContent')
         .find('ul');
       
@@ -1053,23 +1106,39 @@ $(document).ready(function() {
         .insertAfter('li.last');
       
       var isAdmin = nav.find('input[id="userData"]').attr('isAdmin');
+      var bigScreen = window.matchMedia("(min-width: 900px)");
+      var marg = bigScreen.matches? 0 : 180;
+    
+      $(window).off('resize').on('resize', function() {
+          if($(window).width() >= 900) {
+            $('a.admin').css({'margin-top': 0, float: ''});
+          } else {
+            $('a.admin').each(function() {
+              $(this).css({'margin-top': -$(this).attr('marg'), 'float': 'right'});
+            });
+          }
+      });
       
       if(isAdmin == 'true') {
         treatLastLi();
-        $('<li class="nav-item"><a class="nav-link" href="/viewFeedbacks" title="Check Feedbacks">View Feedbacks</a></li>')
+        $('<li class="nav-item"><a class="nav-link admin" marg="' + marg + '" style="margin-top: -' + marg + 'px" title="Admin specific fields"><b>Admin Section<b></a></li>')
           .insertAfter('li.last');
-        treatLastLi();
-        $('<li class="nav-item"><a class="nav-link" href="/memberList" title="List of UNITE Members">List of our members</a></li>')
+        marg -= treatLastLi();
+        $('<li class="nav-item"><a class="nav-link admin" marg="' + marg + '" style="margin-top: -' + marg + 'px" href="/viewFeedbacks" title="Check Feedbacks">View Feedbacks</a></li>')
           .insertAfter('li.last');
-        treatLastLi();
-        $('<li class="nav-item"><a class="nav-link" href="/filesList" title="View Uploaded Files List">View Uploaded Files</a></li>')
+        marg -= treatLastLi();
+        $('<li class="nav-item"><a class="nav-link admin" marg="' + marg + '" style="margin-top: -' + marg + 'px" href="/memberList" title="List of UNITE Members">List of our members</a></li>')
           .insertAfter('li.last');
-        treatLastLi();
-        $('<li class="nav-item"><a class="nav-link" href="/bidsList" title="View UNITE Bids List">View All Bids</a></li>')
+        marg -= treatLastLi();
+        $('<li class="nav-item"><a class="nav-link admin" marg="' + marg + '" style="margin-top: -' + marg + 'px" href="/filesList" title="View Uploaded Files List">View Uploaded Files</a></li>')
+          .insertAfter('li.last');
+        marg -= treatLastLi();
+        $('<li class="nav-item"><a class="nav-link admin" marg="' + marg + '" style="margin-top: -' + marg + 'px" href="/bidsList" title="View UNITE Bids List">View All Bids</a></li>')
           .insertAfter('li.last');
       }
       
       var ind = parseInt(nav.attr('pos'));
+    //$('li.admin').css('float', 'right');
       
       if(ul.find('li').first().hasClass('user')) {
         ind++;
@@ -1078,11 +1147,29 @@ $(document).ready(function() {
       var li = ul.find('li').eq(ind);
       li.addClass('active');
       var text = li.find('a').text();
-      li.find('a').text(text + ' (current)');
+      //li.find('a').text(text + ' (current)');//Askin said that this is not necessary. So REMOVE it!
     //}
   } else {
-    if(nav.length) {
+    if(nav.length && !(nav.hasClass('noMenu')) ) {
       var user = nav.attr('user');
+      var bigScreen = window.matchMedia("(min-width: 900px)");
+      var offset = user == 'supplier'? 112 : user == 'buyer'? 80 : 40;
+      var profilePx = parseInt(offset+32), logoutPx = parseInt(offset);
+      
+      if(bigScreen.matches) {
+        profilePx = 0;
+        logoutPx = 0;
+      }
+      
+      $(window).off('resize').on('resize', function() {
+        if($(window).width() >= 900) {
+          $('a.userRight').css({'margin-top': 0, float: ''});
+        } else {
+          $('a.userRight').each(function() {
+            $(this).css({'margin-top': -$(this).attr('marg'), 'float': 'right'});
+          });
+        }
+      });
       
       var str = '<div class="collapse navbar-collapse" id="navbarSupportedContent">' 
         + '<ul class="navbar-nav mr-auto">'
@@ -1090,22 +1177,21 @@ $(document).ready(function() {
         + '<li class="nav-item"><a class="nav-link" href="/'+user+'">Dashboard <span class="sr-only"></span></a></li>'
         + (user == 'supervisor'? '' : '<li class="nav-item"><a class="nav-link" href="/'+user+'/balance">Balance <span class="sr-only"></span></a></li>')
         + (user == 'supplier'? '<li class="nav-item"><a class="nav-link" href="/'+user+'/bid-requests">Bid Requests</a></li>' : '')
-        + '<li class="nav-item active"><a class="btn btn-primary" style="margin-right: 10px" href="/'+user+'/profile">Profile</a></li><br>'
-        + '<li class="nav-item"><a class="btn btn-danger" title="Logout" href="?exit=true">Logout</a></li></ul></div>';
+        + '<li class="nav-item active"><a class="btn btn-primary userRight" style="margin-top: -' + profilePx + 'px" href="/'+user+'/profile">Profile</a></li><br>'
+        + '<li class="nav-item"><a class="btn btn-danger userRight" style="margin-top: -' + logoutPx + 'px" title="Logout" href="?exit=true">Logout</a></li></ul></div>';
      
-      nav.append(str);
+      nav.append(str);      
       
       if(nav.attr('pos')) {
         var ind = parseInt(nav.attr('pos')), ul = $('#navbarSupportedContent').find('ul');
         var li = ul.find('li').eq(ind);
         li.addClass('active');
         var text = li.find('a').text();
-        li.find('a').text(text + ' (current)');
+        //li.find('a').text(text + ' (current)');
       }
     }
   }
   
-  //$('div.container').not('.text-center')
     $("body").css({"background-image": "url(https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2FWH.png?v=1592308122673)", "background-repeat": "repeat"});//That white! 
   
   if(nav)
@@ -1125,18 +1211,17 @@ $(document).ready(function() {
       return false;
     
     $('#prodServices').find('li').each(function(index, elem) {
-      var price = parseFloat($(this).find('.price').text()), currency = $(this).find('.currency').text();
+      var price = parseFloat($(this).find('.price').text()).toFixed(2), currency = $(this).find('.currency').text();
       var newPrice = fx.convert(price, {from: currency, to: val});
-      $(this).find('.price').text(newPrice.toFixed(2));
+      $(this).find('.price').text(parseFloat(newPrice).toFixed(2));
       $(this).find('span.currency').text(val);
     });
   });
-  
-  if(!($('.fileupload').length))
+   
+  if(!($('.fileupload').length) && !($('.fileexcelupload').length))
     return false;
   
   var token = $("input[name='_csrf']:first").val();
-  
   $('input.fileupload,input.avatarupload,input.productimageupload,input.fileexcelupload').on('change', function() {
     $(this).val()? $(this).next('input').prop('disabled', false) : $(this).next('input').prop('disabled', true);
   });
@@ -1144,8 +1229,7 @@ $(document).ready(function() {
   $('.single,.multiple').each(function(index, element) {
     var input = $(this).prev('input');
     var prevInput = input.prev('input');
-    
-    var val = input.attr('value'), fileId = prevInput.val();
+    var val = input.attr('value'), fileId = prevInput && prevInput.length? prevInput.val() : null;
     var theDiv = $(this).parent('div');
     input.attr('value', fileId);
     val = fileId;
@@ -1163,7 +1247,7 @@ $(document).ready(function() {
         }
       }
 
-      if(isMulti) {//Multi
+      if(isMulti) {
         var ob = '<div class="fileWrapper">';
         for(var i in val) {
           fileExists('public/' + fileId[i].substring(3), isMulti, ob, theDiv, fileId[i], i, val, token);
@@ -1174,21 +1258,8 @@ $(document).ready(function() {
       }
     }
   });
-
-  /*
-  <span class='uploadImage'>&nbsp;&nbsp;&nbsp;Upload Image</span>
-  */
   
-  $('.uploadImage').on('click', function() {
-    var li = $(this).parent('li');    
-    var ul = li.parent('ul');
-    var div = ul.closest('div');
-    var index = ul.find('li').index(li);
-    
-    div.find('input[id^="productImage"]')
-      .attr('fromOutside', index)
-      .trigger('click');
-  });
+  delegateUpload($('.uploadImage'));
 
   $('.single,.multiple').click(function (e) {
     var input = $(this).prev('input');
@@ -1223,24 +1294,22 @@ $(document).ready(function() {
     };
 
     xhr.send(formData);
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4) {//Success!
-          //alert(xhr.responseText);
+    xhr.onreadystatechange = function() {//alert(xhr.responseText);
+      if (xhr.readyState === 4) {//Success!         
           input.next('input').prop('disabled', true);
           var prevInput = input.prev('input');
-          //alert(Array.isArray(xhr.responseText)?(xhr.responseText.file) : xhr.responseText);
           var ob, val, response = isAvatar? xhr.responseText : JSON.parse(xhr.responseText);
           var theDiv = input.parent('div');
-        
+         
           if(isAvatar) {
-            var src = '../' + response.substring(7);         
+            var src = '../' + response.path.substring(7);         
             $('input[name="avatar"]').val(src);//'../../../'+response
             $('<div><img src="'+src+'" alt="avatar" style="width: 150px; height: 150px"></div>').insertAfter(input);
             //var loc = window.location.pathname;
             //var dir = loc.substring(0, loc.lastIndexOf('/'));
             //alert(loc + ' ' + dir);
             //alert(imageExists('../avatars/Avatar-3:15:pm-a.jpg'));
-          } else if(isProduct) {//Supplier Profile/Sign-up pages; Add Product page.
+          } else if(isProduct) {//Supplier Profile/Sign-up pages; Add Product page.            
             var res = '../' + response.path.substring(7);
             
             input.attr('filePath', res);
@@ -1248,14 +1317,22 @@ $(document).ready(function() {
               $('#productImage').val(response.path);
             }
             
-            if(input.hasAttr('fromOutside')) {
-              var prodList = input.parent('div').closest('ul');
-              var index = parseInt(input.attr('fromOutside'));
-              var li = prodList.find('li').eq(index);
+            if(input.attr('fromOutside') != null) {
+              var index = input.attr('fromOutside');
+              var div = input.parent('div');
+              var ul = div.parent('div').find('ul').last();   
+              var li = ul.find('li').eq(index);
               var span = li.find('.productImage');
-              span.text('');
-              var str = `<img src="${res}" style="height: 15px; width: 15px" onclick="window.open(this.src)">`;
-              span.append(str);
+              var img = span.find('img');
+              
+              if(img != null && img.attr('src') != null) {
+                img.attr('src', res);
+              } else {
+                var str = `<img src="${res}" style="height: 15px; width: 15px" onclick="window.open(this.src)">`;
+                span.append(str);
+              }
+              
+              input.removeAttr('fromOutside');
             } else {
               processSingleFile(response, val, ob, input, prevInput, token, theDiv);
             }
@@ -1300,7 +1377,7 @@ $(document).ready(function() {
               val = !(input.attr('value') && input.attr('value').length)? absolutePath + '' : input.attr('value') + absolutePath + '';
               input.attr('value', val);
               var file = response[i].path? response[i].path : response[i].file.id;
-              prevInput.attr('value', !(prevInput.val() && prevInput.val().length)? val + '' : prevInput.val() + val + '');//file
+              prevInput.attr('value', !(prevInput.val() && prevInput.val().length)? val + '' : prevInput.val() + val + '');
               
               ob += '<div><a href="' + absolutePath + '" file="' + file + '" title="Download ' + absolutePath + '" style="color: blue; cursor: pointer" download>Download file "' + i + '"</a>&nbsp;<span token="' + token + '" file="' + file + '" class="remFile" onclick="removeFile(this,Swal)" title="Delete the '+ absolutePath +' file">Remove</span></div>';
             }

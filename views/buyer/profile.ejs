@@ -21,7 +21,7 @@
   <script src="/sweetalert2@9.min.js"></script>
   <script src="/https.js"></script>
   <script src="/chatUsers.js"></script>
-  <script src="/autocomp.js"></script>
+  <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
       var token = $("input[name='_csrf']").val();
@@ -32,7 +32,7 @@
 
       $('select.currency').css('width', '100px');
 
-      $("input,textarea").on('change', function() {
+      $("input,select,textarea").on('change', function() {
         $('#updateProfile').prop('disabled', false);
       });
 

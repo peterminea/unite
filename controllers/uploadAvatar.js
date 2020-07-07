@@ -1,7 +1,7 @@
 const upload = require("../middleware/avatarUpload");
 
 const avatarUpload = async (req, res) => {
-  try {console.log(11);
+  try {
     await upload(req, res);
        console.log(req.files.length);
     if (req.files.length <= 0) {

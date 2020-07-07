@@ -44,7 +44,7 @@ var uploadAvatars = multer({
     callback(null, true);
   },
   limits: {
-    fileSize: 500*200 //100K
+    fileSize: 500*500 //250K
   }  
 }).array("single", 1);
 var uploadAvatarsMiddleware = util.promisify(uploadAvatars);

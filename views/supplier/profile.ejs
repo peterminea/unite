@@ -21,11 +21,10 @@
   <script src="/money.min.js"></script>
   <script src="/https.js"></script>
   <script src="/chatUsers.js"></script>
-  <script src="/autocomp.js"></script>
+  <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function () {
       var token = $("input[name='_csrf']").val();
-      
       postAutocomplete('.country', '/countryAutocomplete', token);
       getAutocomplete('#industry', '/industryGetAutocomplete', token);
       //getAutocomplete('#currency', '/currencyGetAutocomplete', token);
@@ -33,11 +32,12 @@
       getCurrenciesList('select.currency', '/currencyGetAutocomplete', token);
       initBaseRates(fx, 'select.currency');
       $('select.currency').css('width', '100px');
-      var defaultCurr = "<%= profile.currency %>";
+      var defaultCurr = "<%= profile.currency %>";      
       
-      $("input,textarea,select").on('change', function () {
-        $('#updateProfile').removeAttr('disabled');
-      });
+      $('select.currency')
+        .find('option[value="' + defaultCurr + '"]')
+        .prop('selected', true)
+        .trigger('change');
       
       /*
       $("#prodServiceInput").on("paste", function(e) {
@@ -47,20 +47,27 @@
       });
       
       function treatPaste(txt) {
-      }*/      
-      
+      }*/
+     
       $('#updateProfile').click(function() {
         if(!supplierValidateFields(fx))
           return false;
       });
+      
+      setTimeout(function() {
+       $('#updateProfile').prop('disabled', true);
+        $("input,textarea,select").on('change', function () {
+          $('#updateProfile').removeAttr('disabled');
+        });
+      }, 800);
 
-    $('#prodServiceInput').on('change', function() {
-      if($(this).val()) {
-        $('#addProdService').prop('disabled', false);
-      } else {
-        $('#addProdService').prop('disabled', true);
-      }
-    });
+      $('#prodServiceInput').on('change', function() {
+        if($(this).val()) {
+          $('#addProdService').prop('disabled', false);
+        } else {
+          $('#addProdService').prop('disabled', true);
+        }
+      });
       
         $('#termination').click(function(e) {
           $("#dialog").dialog({
@@ -68,8 +75,8 @@
             width: 300,
             height: 550,
             open: function(event, ui) {
-              $('#dialog').append('<p>Are you sure you want to delete your Supplier account?<br>This will also remove:<br>Your products/services;<br>Your capabilities;<br>Your received orders;<br>Your user tokens (if any);<br>Your message history from UNITE.<br><br>If you just want to take a break, you may' + '<a href="deactivate/<%= profile._id %>"'
-                    + ' deactivate your account</a>' +' deactivate your account instead.</p>');
+              $('#dialog').append('<p>Are you sure you want to delete your Supplier account?<br>This will also remove:<br>Your products/services;<br>Your capabilities;<br>Your received orders;<br>Your user tokens (if any);<br>Your message history from UNITE.<br><br>If you just want to take a break, you may' + '<a href="deactivate/<%= profile._id %>"' 
+                                  + ' deactivate your account</a>' +' deactivate your account instead.</p>');
             },
             close: function(event, ui) {
                 $('#dialog').text('');
@@ -78,9 +85,9 @@
               OK: function() {
                 setTimeout(function() {
                   $('#termination').next('form').submit();
-                }, 150);
+                }, 100);
                 $(this).dialog("close");
-              },              
+              },
               Cancel: function() {
                 $('#dialog').text('');
                 $(this).dialog("close");
@@ -105,6 +112,7 @@
     </button>
   </nav>
 
+  <!-- <img src="../../public/uploads/multiple-12:55:22:pm-GD.png"> -->
   <div class="container">
     <br><br>
     <div class="card">
@@ -225,6 +233,7 @@
         </div>
         <div class="form-group">
           <label>Please choose your prepared product/service list (*.xls/xlsx, name+price+currency+amount on each row):</label>
+          <input type="hidden" class="fileId" name="excel" value="">
           <input class="form-control fileexcelupload" type="file" id="products" name="products" single>
           <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Process Excel File" />
         </div>
@@ -244,8 +253,9 @@
             <br>
           </div>
           
-          <div class="form-group">
+          <div id="prodImage" class="form-group">
             <label>Upload a product image:</label>
+            <input type="hidden" class="fileId" name="productImage" value="">
             <input class="form-control productimageupload" type="file" id="productImage" name="products" single>
             <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload Product Image"/>
           </div>
@@ -280,7 +290,7 @@
         </div>
         <div class="form-group">
           <label>Total Price of Supply*</label>
-          <span type="text" class="form-control supply" id="totalSupplyPrice" name="totalSupplyPrice"></span>
+          <span class="form-control supply" id="totalSupplyPrice" name="totalSupplyPrice"></span>
           <input type="hidden" class="supply" id="hiddenTotalPrice" value="0">
         </div>
         <div class="form-group">
@@ -330,7 +340,7 @@
         
         <div class="form-group">
           <label>User Avatar</label>
-          <input type="hidden" name="avatar" value="<%= profile.avatar %>">
+          <input type="hidden" class="fileId" name="avatar" value="<%= profile.avatar %>">
           <input class="form-control fileupload avatarupload" type="file" id="avatar" name="avatarImg">
           <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
         </div>

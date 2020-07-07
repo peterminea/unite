@@ -18,7 +18,7 @@
   <script src="/bootstrap.min.js"></script>
   <script src="/sweetalert2@9.min.js"></script>
   <script src="/https.js"></script>  
-  <script src="/autocomp.js"></script>
+  <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
@@ -67,7 +67,7 @@
             <button type="submit" id="deactivate" title="Deactivate Account" class="btn btn-primary btn-block btn-lg">Deactivate Account</button>
             <br>
           <div class="form-group text-center">
-            <textarea disabled rows="8" cols="40" style="color: green; font-family: arial; font-size: 14pt">
+            <textarea cols="40" rows="8" disabled style="color: green; font-family: arial; font-size: 14pt">
 If you choose to temporarily deactivate your Supervisor Account, please make sure you have no active Buyers on UNITE. It is not recommended to leave your corresponding Buyers without any surveillance/supervising upon them. Doing so may encourage them to engage in unlawful activities, so please consider making this decision very carefully.
             </textarea>
           </div>
