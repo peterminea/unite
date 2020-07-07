@@ -49,6 +49,7 @@ const Industry = require("./models/industry");
 const Capability = require("./models/capability");
 const ProductService = require("./models/productService");
 const cookieParser = require("cookie-parser");
+//require('dotenv').config();
 
 //const MONGODB_URI = "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";//The DB url is actually saved as an Environment variable, it will be easier to use anywhere in the application that way.
 //Syntax: process.env.MONGODB_URI
@@ -61,14 +62,29 @@ const store = new MongoDBStore({
   collection: "sessions"
 });
 
-//app.use(express.static(path.join(__dirname, '..', "public")));
 app.use(express.json());
 app.use(express.static("public"));
 app.set("view engine", "ejs");
+//app.use("/public", express.static(__dirname + '/public'));
 
 //body parser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+//app.use(express.static(path.join(__dirname, '..', "public")));
+//app.use([/(.*)\.js$/, '/public'], express.static(__dirname + '/public'));
+
+app.use('/public', (req, res, next) => {
+  console.log(req);
+  if (!req.session || process.env.ENV != 'dev') {
+    var result = req.url.match(/(.*)\.js$/)
+    if(result) {
+      return res.status(403).end('403 Forbidden')
+    }
+  }
+  
+  next();
+});
 
 // Session
 app.use(cookieParser("26UNWwbu26FvXZTJQBkf45dLSV7gG9bx"));
@@ -102,7 +118,6 @@ const homeRoutes = require("./routes/home");
 const supplierRoutes = require("./routes/supplier");
 const buyerRoutes = require("./routes/buyer");
 const supervisorRoutes = require("./routes/supervisor");
-//const imageRoutes = require('./routes/image');
 
 app.use("/", homeRoutes);
 app.use("/supplier", supplierRoutes);
@@ -199,13 +214,13 @@ const {
   generateMessage,
   generateSimpleMessage,
   generateLocationMessage
-} = require("./public/chatMessages");
+} = require("./middleware/chatMessages");
 const {
   addUser,
   removeUser,
   getUser,
   getUsersInRoom
-} = require("./public/chatUsers");
+} = require("./middleware/chatUsers");
 //console.log(Date.now() + ' ' + new Date() + ' ' + new Date().getTime());
 
 socket.on("connection", sock => {
@@ -536,7 +551,7 @@ app.post("/uploadfile", upload.single("single"), (req, res, next) => {
   return true;
   
   var tmp_path = req.file.path;
-  var target_path = "public/uploads/" + req.file.originalname;
+  var target_path = "custom/uploads/" + req.file.originalname;
   var src = fs.createReadStream(tmp_path);
   var dest = fs.createWriteStream(target_path);
   src.pipe(dest);
@@ -1103,10 +1118,10 @@ app.post("/currencyAutocomplete", function(req, res, next) {
 
 app.get("/currencyGetAutocomplete", function(req, res, next) {
   var regex = new RegExp(req.query["term"], "i");
-
-  var currencyFilter = Currency.find({ value: regex }, { value: 1, name: 1 })
+  var val = regex? { value: regex } : {};
+  var currencyFilter = Currency.find(val, { value: 1, name: 1 })
     .sort({ value: 1 })
-    .limit(10); //Negative sort means descending.
+    .limit(regex? 10 : 30); //Negative sort means descending.
 
   currencyFilter.exec(function(err, data) {
     var result = [];
@@ -1132,20 +1147,22 @@ app.get("/currencyGetAutocomplete", function(req, res, next) {
   });
 });
 
-app.get("/prodServiceAutocomplete", function(req, res, next) {
+app.post("/prodServiceAutocomplete", function(req, res, next) {
   var regex = new RegExp(req.query["term"], "i");
-  var id = req.query["supplierId"];
+  var id = req.body["supplierId"];
+  console.log(id);
+  var values = regex && id? { productName: regex, supplier: new ObjectId(id) } : { supplier: (id) };
 
   var prodServiceFilter = ProductService.find(
-    { productName: regex, supplier: new ObjectId(id) },
+    values,
     { productName: 1, price: 1, currency: 1 }
   )
     .sort({ productName: 1 })
-    .limit(parseInt(MAX_PROD)); //Negative sort means descending.
+    .limit(regex && id? parseInt(MAX_PROD) : 100); //Negative sort means descending.
 
   prodServiceFilter.exec(function(err, data) {
     var result = [];
-
+    console.log(data.length);
     if (!err) {
       if (data && data.length && data.length > 0) {
         data.forEach(item => {

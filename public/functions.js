@@ -428,6 +428,7 @@ function getCurrenciesList(elem, url, token) {//For <select> drop-down currencie
       }
 
       //obj.append('<option></option>');
+      
       for(var i in data) {
         var opt = '<option ' + 'style="word-wrap: break-word; width: 50px" title="' + data[i].value +'" value="' + data[i].name + '">' + data[i].name + '</option>';
         obj.append(opt);
@@ -449,8 +450,8 @@ function getProductsList(elem, url, token) {//For <select> drop-down currencies.
     url: url,
     headers: { "X-CSRF-Token": token },
     datatype: 'jsonp',
-    type: "GET",
-    //data: req,
+    data: {supplierId: obj.attr('supplierId')},
+    type: "POST",
     success: function(data) {
     if(!data || !data.length || treatError(data, 'retrieving products')) {
         //obj.val('');
@@ -458,8 +459,13 @@ function getProductsList(elem, url, token) {//For <select> drop-down currencies.
       }
 
       obj.append('<option></option>');
+      
       for(var i in data) {
-        var opt = '<option ' + 'style="word-wrap: break-word; width: 50px" price="' + data[i].price + '" maxAmount="' + data[i].amount + '" productImage="' + data[i].productImage + '" currency="' + data[i].currency + '" title="' + data[i].name +'" value="' + data[i].name + '">' + data[i].name + '</option>';
+        var opt = '<option ' + 'style="word-wrap: break-word; width: 50px" price="' + data[i].price 
+          + '" maxAmount="' + data[i].amount + '" productImage="' 
+          + data[i].productImage + '" currency="' + data[i].currency + '" title="' 
+          + data[i].name +'" value="' + data[i].name + '">' + data[i].name + '</option>';
+        
         obj.append(opt);
       }
       //res(data);
@@ -526,10 +532,10 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     }
 
     var handledAmount = isRow? entireAmount : 1;
-    var rowPrice = parseFloat(li.find('.totalPrice').text());      
-    var handledPrice = handledAmount * parseFloat(li.find('.price').text());
+    var rowPrice = parseFloat(li.find('.totalPrice').text()).toFixed(2);      
+    var handledPrice = handledAmount * parseFloat(li.find('.price').text()).toFixed(2);
     var supplierCurrency = fromBuyer? li.parent('ul').attr('suppCurrency') : li.find('.currency').text();
-    var totalPagePrice = fromBuyer? parseFloat(li.attr('totalPrice')) : parseFloat($('#hiddenTotalPrice').val());
+    var totalPagePrice = fromBuyer? parseFloat(li.attr('totalPrice')).toFixed(2) : parseFloat($('#hiddenTotalPrice').val()).toFixed(2);
     var canContinue = true, newAmount, newPrice;
     
     if(isRow || (entireAmount==1 && !isAdd)) {//Delete Row. If 1.
@@ -549,7 +555,7 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
         if(result.value) {
           var elem = li.parent('ul');
           li.remove();          
-          var counter = elem.closest('p').find('span');
+          var counter = elem.parent('div').find('p.term span');
           var newValue = -1 + parseInt(counter.text());
           counter.text(newValue);
         } else if (result.dismiss === Swal.DismissReason.cancel) {
@@ -630,6 +636,7 @@ function addition(prod, prodVal, priceVal, currencyVal, amountVal, imagePath, el
       if(!fromBuyer) {
         $('#hiddenTotalPrice').val(parseFloat(parseFloat($('#hiddenTotalPrice').val()) + parseFloat(addedPrice)).toFixed(2));
       }
+    
       var bigPrice = fromBuyer? parseFloat(parseFloat(priceInput.val()).toFixed(2) + (addedPrice)).toFixed(2) : $('#hiddenTotalPrice').val();
 
       if(currencyVal != buyerCurrency) {//Convert the values to the currency of buyer.
@@ -641,16 +648,24 @@ function addition(prod, prodVal, priceVal, currencyVal, amountVal, imagePath, el
       elem.append("<li class='list-group-item' price='" + addedPrice + "' totalPrice='" + bigPrice +"' amount='" + amountVal + "'><span class='product'>" + prodVal + '</span> - <span class="price">' + priceVal + '</span> <span class="currency">' + currencyVal + `</span> - <span class='amount'>${amountVal}</span> items (Total: <span class='totalPrice'>${addedPrice}</span> ${currencyVal})<span class='productImage' title='Image of Product'>` + (imagePath? `<img src="${imagePath}" style="height: 15px; width: 15px" onclick="window.open(this.src)">` : '') + `</span><span class='uploadImage'>&nbsp;&nbsp;&nbsp;Upload Image</span><span class='rem' title="Delete"></span>  <span class='dec' title='Remove item'></span>  <span class='inc' title='Add item'></span>  </li>`);
       if(!fromBuyer) {
         $('#totalSupplyPrice').text(bigPrice + ' ' + currencyVal);
-        $('#totalSupplyAmount').text(parseInt($('#totalSupplyAmount').val() + parseInt(amountVal)));
+        $('#totalSupplyAmount').text(parseInt($('#totalSupplyAmount').text()) + parseInt(amountVal));
+      } else {
+        var id = getId(elem.attr('id'));
+        var newAmount = parseInt($('#totalAmount_'+id).val()) + parseInt(amountVal);
+        $('#totalAmount_'+id).val(parseInt(newAmount));
+        $('#price_'+id).val(parseFloat(bigPrice).toFixed(2));
+        var supplierCurrency = elem.attr('suppCurrency');
+        var supp = fx.convert($('#price_'+id).val(), {from: $('span.bidCurrency').first().text(), to: supplierCurrency});
+        $('#supplierPrice_'+id).val(supp);
       }
       
-      var counter = elem.closest('p').find('span');
+      var counter = elem.parent('div').find('p.term span');
       var newValue = 1 + parseInt(counter.text());
       counter.text(newValue);
-    
       bindHandleProduct($('.rem').last(), prod, fromBuyer, fromBuyer? getId(elem.attr('id')) : null, true, false);
       bindHandleProduct($('.inc').last(), prod, fromBuyer, fromBuyer? getId(elem.attr('id')) : null, false, true);
       bindHandleProduct($('.dec').last(), prod, fromBuyer, fromBuyer? getId(elem.attr('id')) : null, false, false);
+      delegateUpload($('.uploadImage').last());
   }
 }
 
@@ -919,6 +934,20 @@ function registrationDialog(accountType) {
 }
 
 
+function delegateUpload(obj) {
+  obj.on('click', function() {
+    var li = $(this).parent('li');    
+    var ul = li.parent('ul');
+    var div = ul.closest('div');
+    var index = ul.find('li').index(li);
+
+    div.find('input[id^="productImage"]')
+      .attr('fromOutside', index)
+      .trigger('click');      
+  });
+}
+
+
 function prepareSortTable() {
   if($('th').length) {
     $('th').css({cursor: 'pointer'}).attr('title', 'Sort Asc/Desc');
@@ -1021,8 +1050,7 @@ $(document).ready(function() {
   }
   
   var nav = $('body').find('nav');
-  if(nav.length && nav.next('div').hasClass('home')) {
-    //var isHome = nav.next('div').hasClass('home');    
+  if(nav.length && nav.next('div').hasClass('home')) {    
     
     var $str =
         ' <div class="collapse navbar-collapse" id="navbarSupportedContent">'
@@ -1134,7 +1162,7 @@ $(document).ready(function() {
         var li = ul.find('li').eq(ind);
         li.addClass('active');
         var text = li.find('a').text();
-        li.find('a').text(text + ' (current)');
+        //li.find('a').text(text + ' (current)');
       }
     }
   }
@@ -1207,16 +1235,7 @@ $(document).ready(function() {
     }
   });
   
-  $('.uploadImage').on('click', function() {
-    var li = $(this).parent('li');    
-    var ul = li.parent('ul');
-    var div = ul.closest('div');
-    var index = ul.find('li').index(li);
-    
-    div.find('input[id^="productImage"]')
-      .attr('fromOutside', index)
-      .trigger('click');
-  });
+  delegateUpload($('.uploadImage'));
 
   $('.single,.multiple').click(function (e) {
     var input = $(this).prev('input');
@@ -1251,37 +1270,47 @@ $(document).ready(function() {
     };
 
     xhr.send(formData);
-    xhr.onreadystatechange = function() {alert(xhr.responseText);
+    xhr.onreadystatechange = function() {//alert(xhr.responseText);
       if (xhr.readyState === 4) {//Success!         
           input.next('input').prop('disabled', true);
           var prevInput = input.prev('input');
           var ob, val, response = isAvatar? xhr.responseText : JSON.parse(xhr.responseText);
           var theDiv = input.parent('div');
-        
+         
           if(isAvatar) {
-            var src = '../' + response.substring(7);         
+            var src = '../' + response.path.substring(7);         
             $('input[name="avatar"]').val(src);//'../../../'+response
             $('<div><img src="'+src+'" alt="avatar" style="width: 150px; height: 150px"></div>').insertAfter(input);
             //var loc = window.location.pathname;
             //var dir = loc.substring(0, loc.lastIndexOf('/'));
             //alert(loc + ' ' + dir);
             //alert(imageExists('../avatars/Avatar-3:15:pm-a.jpg'));
-          } else if(isProduct) {//Supplier Profile/Sign-up pages; Add Product page.
-            var res = '../' + response.path.substring(7);
-            
+          } else if(isProduct) {//Supplier Profile/Sign-up pages; Add Product page.            
+            var res = '../' + response.path.substring(7);            
             input.attr('filePath', res);
             if(input.hasClass('separated')) {//The separated Add Product Page.
               $('#productImage').val(response.path);
             }
             
-            if(input.hasAttr('fromOutside')) {
-              var prodList = input.parent('div').closest('ul');
+            if(input.attr('fromOutside') != null) {
+              var div = input.parent('div');              
+              var ul = div.parent('div').find('ul');
               var index = parseInt(input.attr('fromOutside'));
-              var li = prodList.find('li').eq(index);
+              var li = ul.find('li').eq(index);
               var span = li.find('.productImage');
-              span.text('');
-              var str = `<img src="${res}" style="height: 15px; width: 15px" onclick="window.open(this.src)">`;
-              span.append(str);
+              var img = span.find('img');
+              if(img != null) {
+                span.find('img').attr('src', res);
+              } else {
+                var str = `<img src="${res}" style="height: 15px; width: 15px" onclick="window.open(this.src)">`;
+                span.append(str);
+              }
+                     //                              alert(span.text());
+              //span.text('');
+             // var str = `<img src="${res}" style="height: 15px; width: 15px" onclick="window.open(this.src)">`;
+              //alert(str);
+              //span.text(str);
+              input.removeAttr('fromOutside');
             } else {
               processSingleFile(response, val, ob, input, prevInput, token, theDiv);
             }

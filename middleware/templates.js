@@ -193,7 +193,7 @@ const postSignInBody = async (link, req, res) => {
 
         var dbo = db.db(BASE);
         console.log(dbLink);
-         dbo.collection(dbLink).findOne( { emailAddress: email, password: password },  (err, doc) => {
+         dbo.collection(dbLink).findOne( { emailAddress: email} ,  (err, doc) => {
           if(err) 
             return console.error(err.message);
 
@@ -260,9 +260,10 @@ const postSignInBody = async (link, req, res) => {
                   }
 
                   db.close();
+                console.log(`/${link}`);
                   setTimeout(function() {
                     return res.redirect(`/${link}`);
-                  }, 100);
+                  }, 500);
               } else {
                 req.flash("error", "Passwords and e-mail do not match!");
                 return res.redirect(`/${link}/sign-in`);

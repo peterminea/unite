@@ -21,16 +21,16 @@
   <script src="/sweetalert2@9.min.js"></script>
   <script src="/https.js"></script>
   <script src="/chatUsers.js"></script>
-  <script src="/autocomp.js"></script>
+  <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
       var token = $("input[name='_csrf']").val();
       getAutocomplete('#search', '/capabilityInputAutocomplete', token, true);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
-      getCurrenciesList('.buyerCurrency', '/currencyGetAutocomplete', token);//Preferred currency for Buyer.
+      getCurrenciesList('select.buyerCurrency', '/currencyGetAutocomplete', token);//Preferred currency for Buyer.
       getProductsList('.productsList', '/prodServiceAutocomplete', token);      
-      initBaseRates(fx, '.buyerCurrency');      
-      var defaultBidCurrency = '<%= BID_DEFAULT_CURR %>';    
+      initBaseRates(fx, 'select.buyerCurrency');      
+      var defaultBidCurrency = '<%= BID_DEFAULT_CURR %>';
 
       $('.placeBid').on('click', function() {
         var id = $(this).attr('index');
@@ -76,13 +76,13 @@
         $('#supplierPrice_'+id).val(totalPriceConverted);
       });
 
-      $('select.buyerCurrency').on('change', function() {alert(1);
+      $('select.buyerCurrency').on('change', function() {
         var curr = $(this).val();
         var id = $(this).attr('index');
         var elem = $("#prodServices_"+id);
         var suppCurrency = elem.attr('suppCurrency');
         
-        if(curr != suppCurrency) {
+        if(curr && curr != suppCurrency) {
           Swal.fire({
             icon: 'warning',
             title: 'Warning',
@@ -91,11 +91,13 @@
           });
         }
         
-        var priceInput = $(this).parent('div').next('div').find('.bidPrice');
-        var oldBidCurrencySpan = priceInput.next('span.bidCurrency');
+        var priceInput = $(this).parent('div').parent('div').find('.bidPrice');
+        var oldBidCurrencySpan = priceInput.parent('div').find('span.bidCurrency');
         var val = fx.convert(parseFloat(priceInput.val()).toFixed(2), {from: oldBidCurrencySpan.text(), to: curr});
-        priceInput.val(val);
-        $('span.bidCurrency').text(curr);
+        priceInput.val(val);        
+        $('span.bidCurrency').each(function(i, e) {
+          $(this).text(curr);
+        });
         
         if(!elem.find('li') || !elem.find('li').length) {
           return false;
@@ -132,7 +134,7 @@
         var price = opt.attr('price');
         var currency = opt.attr('currency');
         var maxAmount = opt.attr('maxAmount');
-        var bidCurrency = $('.buyerCurrency').find('option:selected').text();
+        var bidCurrency = $('select.buyerCurrency').find('option:selected').val();
         
         if(bidCurrency != currency) {
           Swal.fire({
@@ -213,7 +215,7 @@
             url: "/prodServiceAutocomplete",
             headers: { "X-CSRF-Token": token },
             datatype: 'jsonp',
-            type: "GET",
+            type: "POST",
             data: req,
             scroll: true,
             success: function(data) {
@@ -236,7 +238,7 @@
                 .find('li')
                 .click(function() {
                   var id = getId(obj.attr('id'));
-                  var buyerCurr = $('.buyerCurrency[index="'+id+'"]').val();
+                  var buyerCurr = $('select.buyerCurrency[index="'+id+'"]').val();
                   var val = fx.convert(parseFloat($(this).attr('id')).toFixed(2), {from: $(this).attr('currency'), to: buyerCurr});
                 
                   obj
@@ -312,7 +314,7 @@
             data-toggle="modal">Request a Bid</button>
           <button class="btn btn-dark" style="float: right" data-target="#comp_<%= i %>"
             data-toggle="modal">Supplier Details</button>
-          <a href="../buyer/viewBid/<%= supplier._id %>/<%= buyer._id %>/<%= buyer.balance %>"><button class="btn btn-dark" style="margin-right: 10px; float: right">View Bid(s)</button></a>
+          <a href="../buyer/viewBid/<%= supplier._id %>/<%= buyer._id %>/<%= buyer.currency %>/<%= buyer.balance %>"><button class="btn btn-dark" style="margin-right: 10px; float: right">View Bid(s)</button></a>
         </div>
 
         <!-- Modal view of Supplier Details (read-only mode) -->
@@ -534,11 +536,6 @@
                     </div>
                   </div>
                   <div class="form-group">
-                    <label class="col-form-label">Amount*</label>
-                    <input type="number" class="form-control" id="amount_<%= i %>" name="theAmount" value="0" required>
-                    <input type="hidden" id="totalAmount_<%= i %>" name="amount" value="0">
-                  </div>
-                  <div class="form-group">
                     <label class="col-form-label">Delivery Location*</label>
                     <textarea class="form-control" name="deliveryLocation" required></textarea>
                   </div>
@@ -564,15 +561,19 @@
                     <textarea class="form-control" name="otherRequirements"></textarea>
                   </div>
                   <div class="form-group">
+                    <label class="col-form-label">Amount*</label>
+                    <input type="number" class="form-control" id="amount_<%= i %>" name="theAmount" value="0" required>
+                  </div>
+                  <div class="form-group">
                     <label class="col-form-label">Your currency*:</label>
-                    <select class="form-control" index="<%= i %>" class="buyerCurrency"></select>
+                    <select class="form-control buyerCurrency" index="<%= i %>" ></select>
                   </div>
                   <p>
                     You can either select products from drop-down or search for them via Autocomplete (please enter at least 3 characters).
                   </p>
                   <div class="form-group">
                     <label class="col-form-label">Supplier's products:</label>
-                    <select class="form-control" class="productsList" name="productsList"></select>
+                    <select supplierId="<%= supplier._id %>" class="form-control productsList" name="productsList"></select>
                   </div>
                   <div>
                     <p class='term'>
@@ -581,6 +582,7 @@
                   </div>
                   <div class="form-group">
                     <label>Please choose your prepared product/service list (*.xls/xlsx, name+price+currency+amount on each row):</label>
+                    <input type="hidden" class="fileId" name="excel" value="">
                     <input class="form-control fileexcelupload fromBuyer" type="file" id="products" name="products" single>
                     <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Process Excel File" />
                   </div>
@@ -597,21 +599,23 @@
                     </div>
                   <div class="form-group">
                     <label>Upload a product image:</label>
+                    <input type="hidden" class="fileId" name="productImage" value="">
                     <input class="form-control productimageupload" type="file" id="productImage_<%= i %>" name="products" single>
                     <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload Product Image" />
                   </div>
-                    <br>                    
                     <ul class="list-group" MAX="<%= MAX_PROD %>" suppCurrency="<%= supplier.currency %>" id="prodServices_<%= i %>">
-                    </ul>
+                    </ul>                    
                     <p class='term'>
-                      You have a number of <span class='productsCount'>          
-                        0            
-                      </span> products.
+                      You have a number of <span class='productsCount'>0</span> products.
                     </p>
                     <input type="hidden" required id="hiddenProdServicesList_<%= i %>" name="productsServicesOffered" value="">
                     <input type="hidden" required id="amountList_<%= i %>" name="amountList" value="">
                     <input type="hidden" required id="priceList_<%= i %>" name="priceList" value="">
                     <input type="hidden" required id="productImagesList_<%= i %>" name="productImagesList" value="">
+                  </div>
+                  <div class="form-group">
+                    <label>Total number of items (Overall Amount):</label>
+                    <input type="text" disabled id="totalAmount_<%= i %>" name="amount" value="0">
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Your total price:</label>
@@ -635,18 +639,18 @@
                   </div>
                    <div class="form-group">
                     <label class="col-form-label">Status*</label>
-                    <input type="number" id="status_<%= i %>" class="form-control" name="status" min="0" max="4" step="1" value="0" readonly>
+                    <input type="number" id="status_<%= i %>" class="form-control" name="status" min="0" max="4" step="1" value="<%= statuses[0].value %>" readonly>
                   </div>
                   <div class="form-group">
-                    <select style="width: 100%" id="statuses_<%= i %>">
+                    <select class='statuses' style="width: 100%" id="statuses_<%= i %>">
                       <% if (statuses != null) { for (status of statuses) { %>
                       <option disabled title="<%= status.name %>" value="<%= status.value %>"><%= status.name %></option>
-                      <% } }%>
+                      <% } } %>
                     </select>
                     <div style="display: none" id="statusJsonValues_<%= i %>">                      
-                      <% if (statusesJson != null) {  %>
-                        <span><%= statusesJson %></span>
-                      <% }  %>
+                      <% if (statusesJson != null) { %>
+                        <span class='statuses'><%= statusesJson %></span>
+                      <% } %>
                     </div>
                   </div>
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
@@ -675,8 +679,8 @@
                     sel
                       .find('option[value="' + $('#status_'+index).val() + '"]')
                       .prop('selected', true);
-                    sel.attr('title', sel.find('option:selected').text());
                     
+                    sel.attr('title', sel.find('option:selected').text());
                     var x = JSON.parse($('#statusJsonValues_'+index+' span:first').text());
                     
                     $('#status_'+index).change(function(e) {//Read-only select, though.
@@ -690,7 +694,7 @@
                       if($("#statusText_"+id).length)
                         $("#statusText_"+id).remove();
                       
-                      $('<div style="color: blue" id="statusText_'+id + '"><p>' + statusText + '</p></div>')
+                      $('<div style="color: blue" id="statusText_' + id + '"><p>' + statusText + '</p></div>')
                         .insertAfter($('#status_'+id).parent('div'));
                     });
                     
@@ -698,20 +702,22 @@
                       if($(this).val()) {
                         var id = getId($(this).attr('id'));
                         $("#addProdService_"+id).prop('disabled', false);
-                        var price = $(this).attr('price')? $(this).attr('price') : 1;                       
-                        
+                        var price = $(this).attr('price')? $(this).attr('price') : 1;
+                        alert(price);
                         $('#buyerPriceUnit_'+id).val(price + ' * 1 = ' + price);
-                        var suppPrice = fx.convert(price, {from: $('span.bidCurrency').first().text(), to: '<%= supplier.currency %>'});
+                        var suppPrice = fx.convert(price, {from: $('span.bidCurrency').first().text(), to: '<%= supplier.currency %>'
+                                                          });
                         $('#supplierPriceUnit_'+id).val(suppPrice + ' * 1 = ' + suppPrice);
                       }
-                    });
+                      });
                     
                     $('#amount_'+index).on('change', function() {
                       var id = getId($(this).attr('id'));
                       var price = $("#prodServiceInput_"+id).attr('price')? $("#prodServiceInput_"+id).attr('price') : 1;
+                      alert(price);
                       var maxAmount = $("#prodServiceInput_"+id).attr('maxAmount');
                       
-                      if($(this).val() > maxAmount) {
+                      if(maxAmount && $(this).val() > maxAmount) {
                         Swal.fire({
                           icon: 'error',
                           title: 'Error!',
@@ -722,12 +728,14 @@
                       }
                       
                       $('#buyerPriceUnit_'+id).val(price + ` * ${$(this).val()} = ` + price * $(this).val());
-                      var suppPrice = fx.convert(price, {from: $('span.bidCurrency').first().text(), to: '<%= supplier.currency %>'});
+                      var suppPrice = fx.convert(price, {from: $('span.bidCurrency').first().text(), to: '<%= supplier.currency %>'
+                                                        });
                       $('#supplierPriceUnit_'+id).val(suppPrice + ` * ${$(this).val()} = ` + suppPrice * $(this).val());
                     });
                     
-                    var elem = $("#prodServices_"+index);
-                    $('<a><span style="color: green; cursor: pointer" id="massRemove_'+index+'">Remove All Products</span></a><br>').insertBefore(elem);
+                    
+                    var elem0 = $("#prodServices_"+index);
+                    $('<a><span style="color: green; cursor: pointer" id="massRemove_'+index+'">Remove All Products</span></a><br>').insertBefore(elem0);
                     
                     var num = index;
                     $('#massRemove_'+index).on('click', function() {
@@ -736,6 +744,9 @@
                     
                     var MAX = parseInt("<%= MAX_PROD %>");
                     $("#addProdService_"+index).on('click', function() {
+                      var id = getId($(this).attr('id'));
+                      var elem = $("#prodServices_"+id);
+                      
                       if(elem.find('li').length >= MAX) {
                           Swal.fire({
                             icon: 'error',
@@ -746,9 +757,9 @@
                           return false;
                       }
                       
-                      var id = getId($(this).attr('id'));
+                      alert(id);
                       $('#status_'+ id).trigger('change');                      
-                      var amount = $('#amount_'+id);                      
+                      var amount = $('#amount_'+id);
                       if(!amount.val() || amount.val() < 1) {
                         Swal.fire({
                           icon: 'warning',
@@ -792,30 +803,44 @@
                         
                         var amountVal = amount.val();
                         var addedPrice = parseInt(amountVal? amountVal : 1) * parseFloat(input.attr('price')? input.attr('price') : 1);
-                        var price = parseFloat($('#price_'+id).val()) + parseFloat(addedPrice);
+                        var price = parseFloat($('#price_'+id).val()? $('#price_'+id).val() : 0) + parseFloat(addedPrice);
                         var bigPrice = parseFloat(price).toFixed(2);
+                        
                         $('#price_'+id).val(bigPrice);
-                        var supp = fx.convert((bigPrice), {from: $('span.bidCurrency').first().text(), to: '<%= supplier.currency %>'});
+                        var supp = fx.convert((bigPrice), {from: $('span.bidCurrency').first().text(), to: '<%= supplier.currency %>'
+                                                          });
                         $('#supplierPrice_'+id).val(supp);
                         var imageInput = $('input.productimageupload[id="productImage_'+id+'"]');
                         
                         var imagePath = input.attr('productImage')?
                           '../' + input.attr('productImage').substring(7) 
-                          : imageInput.attr('filePath');
+                          : imageInput.attr('filePath');                      
                         
-                          elem.append("<li class='list-group-item' price='" + addedPrice + "' maxAmount='" + input.attr('maxAmount') "' totalPrice='" + bigPrice +"' amount='" + amountVal + "'><span class='product'>" + prodVal + '</span> - <span class="price">' + input.attr('price') + '</span> <span class="currency">' + $('#currency_'+id).val() + `</span> - <span class='amount'>${amountVal}</span> items (Total: <span class='totalPrice'>${addedPrice}</span> ${$('#currency_'+id).val()})<span class='productImage' title='Image of product'>` + imagePath? `<img src="${imagePath}" style="height: 15px; width: 15px" onclick="window.open(this.src)">` : '' + `</span><span class='uploadImage'>&nbsp;&nbsp;&nbsp;Upload Image</span> <span class='rem' title="Delete"></span>  <span class='dec' title='Remove item'></span>  <span class='inc' title='Add item'></span>  </li>`);
+                          elem.append("<li class='list-group-item' price='" 
+                                      + addedPrice + "' maxAmount='" + (input.attr('maxAmount')? input.attr('maxAmount') : amountVal)
+                                      + "' totalPrice='" + bigPrice + "' amount='" + amountVal 
+                                      + "'><span class='product'>" + prodVal 
+                                      + '</span> - <span class="price">' + input.attr('price') 
+                                      + '</span> <span class="currency">' + $('#currency_'+id).val() 
+                                      + `</span> - <span class='amount'>${amountVal}</span> items (Total: <span class='totalPrice'>${addedPrice}</span> ${$('#currency_'+id).val()})<span class='productImage' title='Image of Product'>` 
+                                    + (imagePath? `<img src="${imagePath}" style="height: 15px; width: 15px" onclick="window.open(this.src)">` : '') 
+                                    + `</span><span class='uploadImage'>&nbsp;&nbsp;&nbsp;Upload Image</span><span class='rem' title="Delete"></span>  <span class='dec' title='Remove item'></span>  <span class='inc' title='Add item'></span>  </li>`);
+                        
                           imageInput
                             .removeAttr('filePath')
                             .attr('value', '');
-                        
-                          var counter = elem.closest('p').find('span');
-                          var newValue = 1 + parseInt(counter.text());
+                          
+                          var counter = elem.parent('div').find('span.productsCount');
+                          var newValue = 1 + parseInt(counter.text()? counter.text() : 0);
+                          var totalAmount = $('#totalAmount_'+id).val()? parseInt($('#totalAmount_'+id).val()) : 0;
                           counter.text(newValue);
-                          $('#totalAmount_'+id).val(parseInt($('#totalAmount_'+id).val()) + parseInt(amountVal));
-                          input.val('');
+                          alert(elem.attr('id'));
+                          
+                          $('#totalAmount_'+id).val(totalAmount + parseInt(amountVal));
                           bindHandleProduct($('.rem').last(), input, true, id, true, false);
                           bindHandleProduct($('.inc').last(), input, true, id, false, true);
                           bindHandleProduct($('.dec').last(), input, true, id, false, false);
+                          input.val('');
                         } else {
                             Swal.fire({
                               icon: 'warning',
@@ -826,10 +851,11 @@
                             input.addClass('errorField');
                             //$('#prodServiceInput,#price,#currency').addClass('errorField');
                         }
+                      
+                      $(this).prop('disabled', true);
                     });
                   </script>
                 </div>
-                
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                   <button index="<%= i %>" class='placeBid' type="submit" class="btn btn-primary">Send request</button>

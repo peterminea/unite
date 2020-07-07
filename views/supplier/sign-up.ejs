@@ -22,7 +22,7 @@
   <script src="/https.js"></script>
   <script src="/chatUsers.js"></script>
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-  <script src="/autocomp.js"></script>
+  <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function () {
       var token = $("input[name='_csrf']").val();
@@ -205,9 +205,7 @@
           <ul class="list-group" id="prodServices">
           </ul>
           <p class='term'>
-            You have a number of <span class='productsCount'>          
-              0            
-            </span> products.
+            You have a number of <span class='productsCount'>0</span> products.
           </p>
           <input type="hidden" class="supply" required id="prodServicesList" name="productsServicesOffered">
           <input type="hidden" class="supply" name="pricesList" id="pricesList">

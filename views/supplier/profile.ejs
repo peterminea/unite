@@ -21,11 +21,10 @@
   <script src="/money.min.js"></script>
   <script src="/https.js"></script>
   <script src="/chatUsers.js"></script>
-  <script src="/autocomp.js"></script>
+  <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function () {
       var token = $("input[name='_csrf']").val();
-      
       postAutocomplete('.country', '/countryAutocomplete', token);
       getAutocomplete('#industry', '/industryGetAutocomplete', token);
       //getAutocomplete('#currency', '/currencyGetAutocomplete', token);
@@ -60,7 +59,7 @@
         $("input,textarea,select").on('change', function () {
           $('#updateProfile').removeAttr('disabled');
         });
-      }, 600);
+      }, 800);
 
       $('#prodServiceInput').on('change', function() {
         if($(this).val()) {
@@ -113,6 +112,7 @@
     </button>
   </nav>
 
+  <!-- <img src="../../public/uploads/multiple-12:55:22:pm-GD.png"> -->
   <div class="container">
     <br><br>
     <div class="card">
@@ -253,7 +253,7 @@
             <br>
           </div>
           
-          <div class="form-group">
+          <div id="prodImage" class="form-group">
             <label>Upload a product image:</label>
             <input type="hidden" class="fileId" name="productImage" value="">
             <input class="form-control productimageupload" type="file" id="productImage" name="products" single>
@@ -290,7 +290,7 @@
         </div>
         <div class="form-group">
           <label>Total Price of Supply*</label>
-          <span type="text" class="form-control supply" id="totalSupplyPrice" name="totalSupplyPrice"></span>
+          <span class="form-control supply" id="totalSupplyPrice" name="totalSupplyPrice"></span>
           <input type="hidden" class="supply" id="hiddenTotalPrice" value="0">
         </div>
         <div class="form-group">

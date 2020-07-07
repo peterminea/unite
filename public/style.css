@@ -16,6 +16,10 @@ body {
   font-size: 16pt;
 }
 
+span.supply {
+  background-color: lightgray
+}
+
 @media only screen and (max-width: 900px) {
   a.admin, a.userRight {
     float: right;
