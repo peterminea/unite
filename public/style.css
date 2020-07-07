@@ -16,7 +16,7 @@ body {
   font-size: 16pt;
 }
 
-span.supply {
+span.hid,span.supply {
   background-color: lightgray
 }
 

@@ -72,8 +72,45 @@
         priceInput.val(arr2);
         prodImageInput.val(arr3);
         
-        $('#price_'+id).val(totalPriceOriginal);
-        $('#supplierPrice_'+id).val(totalPriceConverted);
+        $('#price_'+id).text(totalPriceOriginal);
+        $('#supplierPrice_'+id).text(totalPriceConverted);
+      });
+
+      $('input[id^="prodServiceInput_"]').on('change', function() {
+        if($(this).val()) {
+          var id = getId($(this).attr('id'));
+          $("#addProdService_"+id).prop('disabled', false);
+          var price = $(this).attr('price')? $(this).attr('price') : 1;
+          price *= parseInt($('#amount_'+id).val());
+
+          $('#buyerPriceUnit_'+id).text(price);
+          var suppPrice = fx.convert(price, {from: $('span.bidCurrency[index="'+id+'"]').first().text(), to: '<%= supplier.currency %>'
+       });
+          $('#supplierPriceUnit_'+id).text(suppPrice);
+        }
+      });
+
+      $('input[id^="amount_"]').on('change', function() {
+        var id = getId($(this).attr('id'));
+        var price = $("#prodServiceInput_"+id).attr('price')? $("#prodServiceInput_"+id).attr('price') : 1;
+        price *= parseInt($(this).val());
+
+        var maxAmount = $("#prodServiceInput_"+id).attr('maxAmount');
+
+        if(maxAmount && $(this).val() > maxAmount) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'You have reached the limit of ' + maxAmount + ' samples of this product. Supplier\'s stock is not enough.'
+          });
+
+          return false;
+        }
+
+        $('#buyerPriceUnit_'+id).text(price);
+        var suppPrice = fx.convert(price, {from: $('span.bidCurrency[index="'+id+'"]').first().text(), to: '<%= supplier.currency %>'
+        });
+        $('#supplierPriceUnit_'+id).text(suppPrice);
       });
 
       $('select.buyerCurrency').on('change', function() {
@@ -91,13 +128,21 @@
           });
         }
         
-        var priceInput = $(this).parent('div').parent('div').find('.bidPrice');
-        var oldBidCurrencySpan = priceInput.parent('div').find('span.bidCurrency');
-        var val = fx.convert(parseFloat(priceInput.val()).toFixed(2), {from: oldBidCurrencySpan.text(), to: curr});
-        priceInput.val(val);        
-        $('span.bidCurrency').each(function(i, e) {
+        var priceInput = $('#price_'+id);
+        var oldBidCurrencySpan = $('span.bidCurrency[index="'+id+'"]').first();
+        var val = fx.convert(parseFloat(priceInput.text()).toFixed(2), {from: oldBidCurrencySpan.text(), to: curr});
+        priceInput.text(val);
+        $('span.bidCurrency[index="'+id+'"]').each(function(i, e) {
           $(this).text(curr);
         });
+        
+        var buyerPriceUnit = $('#buyerPriceUnit_'+id), buyerPriceCurr = $('#buyerPriceCurrency_'+id);
+        if(buyerPriceUnit.text() != null && buyerPriceUnit.text() != '0') {
+          var newPriceUnit = fx.convert(parseFloat(buyerPriceUnit.text()).toFixed(2), {from: buyerPriceCurr.text(), to: curr});
+          buyerPriceUnit.text(newPriceUnit);
+        }
+        
+        buyerPriceCurr.text(curr);
         
         if(!elem.find('li') || !elem.find('li').length) {
           return false;
@@ -227,7 +272,7 @@
 
               res(data);
               //autocomp(obj, data);
-              var $obj = '<div class="prov"><ul>';
+              var $obj = '<div class="prov"><ul class="autocomp">';
               for(var i in data) {
                 $obj += '<li id="' + data[i].price + '" amount="' + data[i].amount + '" totalPrice="' + data[i].totalPrice + '" productImage="' + data[i].productImage + '" currency="' + data[i].currency + '">' + data[i].name + '</li>';
               }
@@ -255,6 +300,125 @@
         },
         minLength: 3
       });
+      
+  $('button[id^="addProdService_"]').on('click', function() {
+    var id = getId($(this).attr('id'));
+    var elem = $("#prodServices_"+id);
+    var MAX = parseInt($(this).attr('MAX'));
+
+    if(elem.find('li').length >= MAX) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error!',
+          text: 'You have reached the limit of ' + MAX + ' products to request from the supplier.'
+        });
+
+        return false;
+    }                      
+
+    $('#status_'+ id).trigger('change');                      
+    var amount = $('#amount_'+id);
+    if(!amount.val() || amount.val() < 1) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Attention',                          
+        text: 'Please select an amount of products first.'
+      });
+
+      return false;
+    }
+
+    var input = $("#prodServiceInput_"+id);
+    if(!input.attr('price'))
+      input.attr('price', 1);
+    //var req = input.val().length;// && $('#price').val().length && $('#currency').val().length;
+
+    if(input.val() && input.val().length) {
+      input.removeClass('errorField');
+      var prodVal = input.val();
+      var isPresent = false;
+
+      elem.find('.product').each(function() {
+        if(prodVal == $(this).text()) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'You have already added ' + prodVal + ' to the list. Please refine your selection.'
+          });
+
+          isPresent = true;
+          return false;
+        }
+      });
+
+      if(isPresent) {
+        return false;
+      }
+
+      var amountVal = amount.val();
+      var priceUnit = parseFloat(input.attr('price')? input.attr('price') : 1).toFixed(2);
+      var addedPrice = parseInt(amountVal? amountVal : 1) * priceUnit;
+      var buyerPriceUnit = $('#buyerPriceUnit_'+id), buyerPriceCurr = $('#buyerPriceCurrency_'+id);
+      var buyerCurrSpan = $('span.bidCurrency[index="'+id+'"]').first();
+
+      buyerPriceUnit.text(parseFloat(addedPrice).toFixed(2));
+      buyerPriceCurr.text(buyerCurrSpan.text());
+      var suppPriceUnit = fx.convert((addedPrice), {from: buyerCurrSpan.text(), to: '<%= supplier.currency %>'
+   });
+
+      $('#supplierPriceUnit_'+id).text(parseFloat(suppPriceUnit).toFixed(2));
+      var price = parseFloat($('#price_'+id).text()? $('#price_'+id).text() : 0) + parseFloat(addedPrice);
+      var bigPrice = parseFloat(price).toFixed(2);
+
+      $('#price_'+id).text(bigPrice);
+      var supp = fx.convert(bigPrice, {from: buyerCurrSpan.text(), to: '<%= supplier.currency %>'
+   });
+      $('#supplierPrice_'+id).text(parseFloat(supp).toFixed(2));
+      
+      var imageInput = $('input.productimageupload[id="productImage_'+id+'"]');
+      var imagePath = input.attr('productImage')?
+        '../' + input.attr('productImage').substring(7) 
+        : imageInput.attr('filePath');      
+
+        elem.append("<li class='list-group-item' price='" 
+                    + addedPrice + "' maxAmount='" + (input.attr('maxAmount')? input.attr('maxAmount') : 2*amountVal)
+                    + "' totalPrice='" + bigPrice + "' amount='" + amountVal 
+                    + "'><span class='product'>" + prodVal 
+                    + '</span> - <span class="price">' + input.attr('price') 
+                    + '</span> <span class="currency">' + $('#currency_'+id).text() 
+                    + `</span> - <span class='amount'>${amountVal}</span> items (Total: <span class='totalPrice'>${addedPrice}</span> ${$('#currency_'+id).text()})&nbsp;<span class='productImage' title='Image of Product'>`
+                  + (imagePath? `<img src="${imagePath}" style="height: 15px; width: 15px" onclick="window.open(this.src)">` : '') 
+                  + `</span><span class='uploadImage'>&nbsp;&nbsp;&nbsp;Upload Image</span><span class='rem' title="Delete"></span>  <span class='dec' title='Remove item'></span>  <span class='inc' title='Add item'></span>  </li>`);
+
+        imageInput
+          .removeAttr('filePath')
+          .attr('value', '');
+
+        var counter = elem.parent('div').find('span.productsCount');
+        var newValue = 1 + parseInt(counter.text()? counter.text() : 0);
+        var totalAmount = $('#totalAmount_'+id).val()? parseInt($('#totalAmount_'+id).val()) : 0;
+        counter.text(newValue);
+        $('#totalAmount_'+id).val(totalAmount + parseInt(amountVal));
+        bindHandleProduct($('.rem').last(), input, true, id, true, false);
+        bindHandleProduct($('.inc').last(), input, true, id, false, true);
+        bindHandleProduct($('.dec').last(), input, true, id, false, false);
+        delegateUpload($('.uploadImage').last());
+        input.val('');
+        amount.val(0);
+      } else {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Attention!',
+            text: 'Please enter valid product data (name, amount).'
+          });
+
+          input.addClass('errorField');
+          //$('#prodServiceInput,#price,#currency').addClass('errorField');
+      }
+
+    $(this).prop('disabled', true);
+  });
+      
   });
   </script>
 </head>
@@ -291,6 +455,9 @@
       </div>
     <% } %>
     
+
+    
+    <% if (statuses == null) { %>
     <form class="my-2 my-lg-2" method="POST">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
       <input class="form-control mr-sm-2" type="search" id="search" placeholder="Search Capabilites" aria-label="Search" name="capabilityInput">
@@ -300,8 +467,9 @@
     <div class="mt-4">
       <button class="form-control btn btn-primary" id="loadCatalog" avatar="<%= buyer.avatar %>">
         Load Catalog of Products
-      </button>
+      </button>      
     </div>
+    <% } %>
 
     <div class="bodyBuilder">
       <% let i = 0; if (suppliers != null) { for (supplier of suppliers) { i++; %>
@@ -482,8 +650,8 @@
         </div>
 
         <!-- Modal window for the new Bid Request -->
-        <div class="modal fade" id="request_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
-          <div class="modal-dialog" role="document">
+        <div class="modal fade" style="width: 100%; max-width: 810px" id="request_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog" style="width: 100%; max-width: 800px" role="document">
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title">New Bid Request</h5>
@@ -561,10 +729,6 @@
                     <textarea class="form-control" name="otherRequirements"></textarea>
                   </div>
                   <div class="form-group">
-                    <label class="col-form-label">Amount*</label>
-                    <input type="number" class="form-control" id="amount_<%= i %>" name="theAmount" value="0" required>
-                  </div>
-                  <div class="form-group">
                     <label class="col-form-label">Your currency*:</label>
                     <select class="form-control buyerCurrency" index="<%= i %>" ></select>
                   </div>
@@ -573,11 +737,11 @@
                   </p>
                   <div class="form-group">
                     <label class="col-form-label">Supplier's products:</label>
-                    <select supplierId="<%= supplier._id %>" class="form-control productsList" name="productsList"></select>
+                    <select index="<%= i %>" supplierId="<%= supplier._id %>" class="form-control productsList" name="productsList"></select>
                   </div>
                   <div>
                     <p class='term'>
-                      You can use an Excel file with your desired products list, formatted as product name + product price + product currency + amount i.e. Number of items (4 cells per row), and after you click on the Process button, our system will automatically add the products and build the list on page.<br>Please note that if the currency you use in Excel is different from the one from the Buyer page, conversion will be automatically applied. Also, the first row of your document must contain the column names.
+                      You can use an Excel file with your desired products list, formatted as product name + product price + product currency + amount i.e. Number of items (4 cells per row), and after you click Process, our system will automatically add the products on page.<br>If the currency you use in Excel is different from the one from the Buyer page, conversion will be automatically applied. Also, the first row of your document must contain the column names.
                     </p>
                   </div>
                   <div class="form-group">
@@ -588,23 +752,27 @@
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Products / Services Offered*</label>
+                    <span class='littleNote form-control'>
+                      You can also request products that are not in the list of the supplier.
+                    </span>
                     <div class="input-group">
                       <input type="text" required class="form-control prodInput" supplierId="<%= supplier._id %>" placeholder="Add Product/Service*" id="prodServiceInput_<%= i %>">
                       <div class="input-group-append">
-                        <button class="btn btn-outline-secondary prodButton" type="button" disabled id="addProdService_<%= i %>">Add</button>
+                        <button class="btn btn-outline-secondary prodButton" type="button" disabled MAX="<%= MAX_PROD %>" id="addProdService_<%= i %>">Add</button>
                       </div>
-                      <p class='littleNote'>
-                        Please note that only available products from this supplier can be selected.
-                      </p>
                     </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Amount*</label>
+                    <input type="number" class="form-control" id="amount_<%= i %>" name="theAmount" value="0" required>
+                  </div>
                   <div class="form-group">
                     <label>Upload a product image:</label>
                     <input type="hidden" class="fileId" name="productImage" value="">
                     <input class="form-control productimageupload" type="file" id="productImage_<%= i %>" name="products" single>
-                    <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload Product Image" />
+                    <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload Product Image" />                    
                   </div>
                     <ul class="list-group" MAX="<%= MAX_PROD %>" suppCurrency="<%= supplier.currency %>" id="prodServices_<%= i %>">
-                    </ul>                    
+                    </ul>
                     <p class='term'>
                       You have a number of <span class='productsCount'>0</span> products.
                     </p>
@@ -615,27 +783,35 @@
                   </div>
                   <div class="form-group">
                     <label>Total number of items (Overall Amount):</label>
-                    <input type="text" disabled id="totalAmount_<%= i %>" name="amount" value="0">
+                    <input class="form-control" type="number" disabled id="totalAmount_<%= i %>" name="amount" value="0">
                   </div>
                   <div class="form-group">
-                    <label class="col-form-label">Your total price:</label>
-                    <input type="number" class="form-control bidPrice" id="price_<%= i %>" name="buyerPrice" readonly>
-                    <span class="form-control bidCurrency" id="currency_<%= i %>" name="buyerCurrency"></span>
+                    <label class=" col-form-label">Your total price:</label>
+                    <span class="form-control hid">
+                      <span index="<%= i %>" class="bidPrice" id="price_<%= i %>" name="buyerPrice">0</span>
+                      <span index="<%= i %>" class="bidCurrency" id="currency_<%= i %>" name="buyerCurrency"></span>
+                    </span>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Supplier's equivalent total price:</label>
-                    <input type="text" class="form-control" readonly id="supplierPrice_<%= i %>" name="supplierPrice">
-                    <span class="form-control" id="supplierCurrency_<%= i %>" name="supplierCurrency"> <%= supplier.currency %></span>
+                    <span class="form-control hid">
+                      <span id="supplierPrice_<%= i %>" name="supplierPrice">0</span>
+                      <span index="<%= i %>" class="suppCurrency" id="supplierCurrency_<%= i %>" name="supplierCurrency"> <%= supplier.currency %></span>
+                    </span>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Your price per unit/product:</label>
-                    <input type="text" class="form-control" readonly id="buyerPriceUnit_<%= i %>">
-                    <span class="form-control bidCurrency" id="buyerCurrencyUnit_<%= i %>"></span>
+                    <span class="form-control hid">
+                      <span id="buyerPriceUnit_<%= i %>">0</span>
+                      <span index="<%= i %>" class="bidCurrency" id="buyerCurrencyUnit_<%= i %>"></span>
+                    </span>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Supplier's price per unit/product:</label>
-                    <input type="text" class="form-control" readonly id="supplierPriceUnit_<%= i %>">
-                    <span class="form-control" id="supplierCurrencyUnit_<%= i %>"> <%= supplier.currency %></span>
+                    <span class="form-control hid">
+                      <span id="supplierPriceUnit_<%= i %>">0</span>
+                      <span index="<%= i %>" class="suppCurrency" id="supplierCurrencyUnit_<%= i %>"><%= supplier.currency %></span>
+                    </span>
                   </div>
                    <div class="form-group">
                     <label class="col-form-label">Status*</label>
@@ -698,161 +874,12 @@
                         .insertAfter($('#status_'+id).parent('div'));
                     });
                     
-                    $('#prodServiceInput_'+index).change(function() {
-                      if($(this).val()) {
-                        var id = getId($(this).attr('id'));
-                        $("#addProdService_"+id).prop('disabled', false);
-                        var price = $(this).attr('price')? $(this).attr('price') : 1;
-                        alert(price);
-                        $('#buyerPriceUnit_'+id).val(price + ' * 1 = ' + price);
-                        var suppPrice = fx.convert(price, {from: $('span.bidCurrency').first().text(), to: '<%= supplier.currency %>'
-                                                          });
-                        $('#supplierPriceUnit_'+id).val(suppPrice + ' * 1 = ' + suppPrice);
-                      }
-                      });
-                    
-                    $('#amount_'+index).on('change', function() {
-                      var id = getId($(this).attr('id'));
-                      var price = $("#prodServiceInput_"+id).attr('price')? $("#prodServiceInput_"+id).attr('price') : 1;
-                      alert(price);
-                      var maxAmount = $("#prodServiceInput_"+id).attr('maxAmount');
-                      
-                      if(maxAmount && $(this).val() > maxAmount) {
-                        Swal.fire({
-                          icon: 'error',
-                          title: 'Error!',
-                          text: 'You have reached the limit of ' + maxAmount + ' samples of this product. Supplier\'s stock is not enough.'
-                        });
-
-                        return false;
-                      }
-                      
-                      $('#buyerPriceUnit_'+id).val(price + ` * ${$(this).val()} = ` + price * $(this).val());
-                      var suppPrice = fx.convert(price, {from: $('span.bidCurrency').first().text(), to: '<%= supplier.currency %>'
-                                                        });
-                      $('#supplierPriceUnit_'+id).val(suppPrice + ` * ${$(this).val()} = ` + suppPrice * $(this).val());
-                    });
-                    
                     
                     var elem0 = $("#prodServices_"+index);
                     $('<a><span style="color: green; cursor: pointer" id="massRemove_'+index+'">Remove All Products</span></a><br>').insertBefore(elem0);
                     
-                    var num = index;
                     $('#massRemove_'+index).on('click', function() {
-                      removeAllItems(num);
-                    });
-                    
-                    var MAX = parseInt("<%= MAX_PROD %>");
-                    $("#addProdService_"+index).on('click', function() {
-                      var id = getId($(this).attr('id'));
-                      var elem = $("#prodServices_"+id);
-                      
-                      if(elem.find('li').length >= MAX) {
-                          Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: 'You have reached the limit of ' + MAX + ' products to request from the supplier.'
-                          });
-                        
-                          return false;
-                      }
-                      
-                      alert(id);
-                      $('#status_'+ id).trigger('change');                      
-                      var amount = $('#amount_'+id);
-                      if(!amount.val() || amount.val() < 1) {
-                        Swal.fire({
-                          icon: 'warning',
-                          title: 'Attention',                          
-                          text: 'Please select an amount of products first.'
-                        });
-                       
-                        return false;
-                      }
-
-                      var input = $("#prodServiceInput_"+id);
-                      if(!input.attr('price'))
-                        input.attr('price', 1);
-                      //var req = input.val().length;// && $('#price').val().length && $('#currency').val().length;
-     
-                      if(input.val() && input.val().length) {
-                        input.removeClass('errorField');
-                        var prodVal = input.val();
-                        var isPresent = false;
-                        
-                        elem.find('.product').each(function() {
-                          if(prodVal == $(this).text()) {
-                            Swal.fire({
-                              icon: 'error',
-                              title: 'Error!',
-                              text: 'You have already added ' + prodVal + ' to the list. Please refine your selection.'
-                            });
-                            
-                            isPresent = true;
-                            return false;
-                          }
-                        });
-                        
-                        if(isPresent) {
-                          return false;
-                        }/*
-                        var arr = prodInput.val() && prodInput.val().length? (prodInput.val()).split(',') : [];
-                        if(checkName(arr, prodVal)) {                          
-                          return false;
-                          }*/
-                        
-                        var amountVal = amount.val();
-                        var addedPrice = parseInt(amountVal? amountVal : 1) * parseFloat(input.attr('price')? input.attr('price') : 1);
-                        var price = parseFloat($('#price_'+id).val()? $('#price_'+id).val() : 0) + parseFloat(addedPrice);
-                        var bigPrice = parseFloat(price).toFixed(2);
-                        
-                        $('#price_'+id).val(bigPrice);
-                        var supp = fx.convert((bigPrice), {from: $('span.bidCurrency').first().text(), to: '<%= supplier.currency %>'
-                                                          });
-                        $('#supplierPrice_'+id).val(supp);
-                        var imageInput = $('input.productimageupload[id="productImage_'+id+'"]');
-                        
-                        var imagePath = input.attr('productImage')?
-                          '../' + input.attr('productImage').substring(7) 
-                          : imageInput.attr('filePath');                      
-                        
-                          elem.append("<li class='list-group-item' price='" 
-                                      + addedPrice + "' maxAmount='" + (input.attr('maxAmount')? input.attr('maxAmount') : amountVal)
-                                      + "' totalPrice='" + bigPrice + "' amount='" + amountVal 
-                                      + "'><span class='product'>" + prodVal 
-                                      + '</span> - <span class="price">' + input.attr('price') 
-                                      + '</span> <span class="currency">' + $('#currency_'+id).val() 
-                                      + `</span> - <span class='amount'>${amountVal}</span> items (Total: <span class='totalPrice'>${addedPrice}</span> ${$('#currency_'+id).val()})<span class='productImage' title='Image of Product'>` 
-                                    + (imagePath? `<img src="${imagePath}" style="height: 15px; width: 15px" onclick="window.open(this.src)">` : '') 
-                                    + `</span><span class='uploadImage'>&nbsp;&nbsp;&nbsp;Upload Image</span><span class='rem' title="Delete"></span>  <span class='dec' title='Remove item'></span>  <span class='inc' title='Add item'></span>  </li>`);
-                        
-                          imageInput
-                            .removeAttr('filePath')
-                            .attr('value', '');
-                          
-                          var counter = elem.parent('div').find('span.productsCount');
-                          var newValue = 1 + parseInt(counter.text()? counter.text() : 0);
-                          var totalAmount = $('#totalAmount_'+id).val()? parseInt($('#totalAmount_'+id).val()) : 0;
-                          counter.text(newValue);
-                          alert(elem.attr('id'));
-                          
-                          $('#totalAmount_'+id).val(totalAmount + parseInt(amountVal));
-                          bindHandleProduct($('.rem').last(), input, true, id, true, false);
-                          bindHandleProduct($('.inc').last(), input, true, id, false, true);
-                          bindHandleProduct($('.dec').last(), input, true, id, false, false);
-                          input.val('');
-                        } else {
-                            Swal.fire({
-                              icon: 'warning',
-                              title: 'Attention!',
-                              text: 'Please enter valid product data (name, amount).'
-                            });
-                          
-                            input.addClass('errorField');
-                            //$('#prodServiceInput,#price,#currency').addClass('errorField');
-                        }
-                      
-                      $(this).prop('disabled', true);
+                      removeAllItems(getId($(this).attr('id')));
                     });
                   </script>
                 </div>

@@ -92,6 +92,7 @@ exports.getIndex = async (req, res) => {
         BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
         bidsLength: bids && bids.length ? bids.length : null,
         totalBidsPrice: totalBidsPrice,
+        statuses: null,
         successMessage: success,
         errorMessage: error,
         suppliers: null
