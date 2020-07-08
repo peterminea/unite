@@ -263,13 +263,12 @@
             <% let i = 0; if (products != null) { for (product of products) { i++; %>
             <li class='list-group-item'>
               <span class='product'><%= product.productName %></span> - <span class='price'><%= product.price %></span> <span class='currency'><%= product.currency %></span> - <span class='amount'><%= product.amount %></span> items (Total: <span class='totalPrice'><%= parseFloat(product.totalPrice).toFixed(2) %></span> <%= product.currency %>)
+              <span class='rem' title="Delete"></span>  <span class='dec' title='Remove item'></span>  <span class='inc' title='Add item'></span>  <span class='uploadImage'>Upload Image</span>   
               <span class='productImage' title="Image of product"> 
-              <% if(product.productImage != null) { %>
-              <img src="<%= '../' + product.productImage.substring(7) %>" style="height: 15px; width: 15px" onclick="window.open(this.src)">
+              <% if(product.productImage.length > 0) { %>
+              <img src="<%= '../' + product.productImage.substring(7) %>" style="height: 25px; width: 30px" onclick="window.open(this.src)">
               <% } %>
               </span>
-              <span class='uploadImage'>&nbsp;&nbsp;&nbsp;Upload Image</span>
-              <span class='rem' title="Delete"></span>  <span class='dec' title='Remove item'></span>  <span class='inc' title='Add item'></span>  
             </li>
             <% } }%>
           </ul>
@@ -295,7 +294,7 @@
         </div>
         <div class="form-group">
           <label>Total Amount of Supply*</label>
-          <span class="form-control supply" id="totalSupplyAmount" name="totalSupplyAmount"></span>
+          <input disabled type="number" class="form-control supply" id="totalSupplyAmount" name="totalSupplyAmount" value="0"></span>
         </div>
         <script type="text/javascript">
           bindHandleProduct($('.rem'), $('#prodServiceInput'), false, null, true, false);
@@ -314,7 +313,7 @@
           });
           
           $('#hiddenTotalPrice').val(totalLoadedPrice);
-          $('#totalSupplyAmount').text(totalLoadedAmount);
+          $('#totalSupplyAmount').val(totalLoadedAmount);
           $('#totalSupplyPrice').text(totalLoadedPrice + ' ' + "<%= profile.currency %>");
         </script>
         

@@ -44,6 +44,16 @@ span.uploadImage {
   cursor: pointer;
 }
 
+span.productImage,span.uploadImage {
+  float: right;
+  cursor: pointer;
+  margin-right: 30px;
+}
+
+span.productImage {
+  margin-top: -2px;
+}
+
 span.inc {
     float: right;
     background-image: url("https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2FINC.png?v=1593941148908");
@@ -51,7 +61,7 @@ span.inc {
     background-repeat: no-repeat;
     width: 20px;
     height: 10px;
-    margin: 0;
+    margin-top: 5px;
     padding: 0;
     cursor: pointer;
 }
@@ -63,7 +73,7 @@ span.dec {
     background-repeat: no-repeat;
     width: 20px;
     height: 10px;
-    margin: 0;
+    margin-top: 5px;
     padding: 0;
     cursor: pointer;
 }
@@ -77,7 +87,7 @@ span.rem {
   background-repeat: no-repeat;
   width: 10px;
   height: 10px;
-  margin: 0;
+  margin-top: 5px;
   padding: 0;
 }
 

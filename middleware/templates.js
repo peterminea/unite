@@ -26,6 +26,51 @@ const sendConfirmationEmail = (name, link, token, req) => {
 };
 
 
+const prel = (req, isFloat, isInt) => {
+  var arr = (req);
+  arr = arr.split(',');
+  var newProd = [];
+  for (var i in arr) {
+    newProd.push(isFloat? parseFloat(arr[i]).toFixed(2) : isInt? parseInt(arr[i]) : String(arr[i]));
+    }
+  
+  return newProd;
+}
+
+
+const sortLists = (productList, amountList, priceList, imagesList, currenciesList) => {
+  var arr = [], arr2 = [], arr3 = [], arr4 = [], arr5 = [];
+  
+  for(var i in productList) {
+    arr.push(productList[i]);
+  }
+  
+  arr.sort();
+  
+  for(var i in arr) {
+    for(var j in productList) {
+      if(arr[i] == productList[j]) {
+        arr2.push(amountList[j]);
+        arr3.push(priceList[j]);
+        arr4.push(imagesList[j]);
+        if(currenciesList)
+            arr5.push(currenciesList[j]);
+        break;
+      }
+    }
+  }
+  
+  for(var i in productList) {
+    productList[i] = arr[i];
+    amountList[i] = arr2[i];
+    priceList[i] = arr3[i];
+    imagesList[i] = arr4[i];
+    if(currenciesList)
+      currenciesList[i] = arr5[i];
+  }
+}
+
+
 const sendCancellationEmail = (type, req, data, reason) => {//Buyer: placed orders, sent/received messages
   sgMail.send({
     from: 'peter@uniteprocurement.com',
@@ -301,4 +346,4 @@ const sendExpiredBidEmails = (req, res, expiredBids) => {
 };
 
 
-module.exports = { sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody };
+module.exports = { sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, prel, sortLists, postSignInBody };

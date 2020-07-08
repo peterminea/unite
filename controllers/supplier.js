@@ -21,7 +21,7 @@ const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const search = require('../middleware/searchFlash');
 var Recaptcha = require('express-recaptcha').RecaptchaV3;
-const { sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../middleware/templates');
+const { sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, prel, sortLists, postSignInBody } = require('../middleware/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
@@ -386,18 +386,6 @@ exports.getSignUp = (req, res) => {
 };
 
 
-function prel(req, isNumber, isInt) {
-  var arr = (req);
-  arr = arr.split(',');
-  var newProd = [];
-  for (var i in arr) {
-    newProd.push(isNumber? parseFloat(arr[i]).toFixed(2) : isInt? parseInt(arr[i]) : String(arr[i]));
-    }
-  
-  return newProd;
-}
-
-
 let global = 0;
 exports.postSignUp = async (req, res) => {
   const captchaVerified = await fetch('https://www.google.com/recaptcha/api/siteverify?secret=' + captchaSecretKey + '&response=' + req.body.captchaResponse, {method: 'POST'})
@@ -436,6 +424,14 @@ exports.postSignUp = async (req, res) => {
 
             try {
               await bcrypt.hash(req.body.password, 16, async function(err, hash) {
+                
+                  var productList = prel(req.body.productsServicesOffered);
+                  var amountsList = prel(req.body.amountsList, false, true);
+                  var pricesList = prel(req.body.pricesList, true, false);
+                  var imagesList = prel(req.body.productImagesList);
+                  var currenciesList = prel(req.body.currenciesList);
+                  sortLists(productList, amountsList, pricesList, imagesList, currenciesList);
+                
                   supplier = new Supplier({
                     role: process.env.USER_REGULAR,
                     avatar: req.body.avatar,
@@ -457,11 +453,11 @@ exports.postSignUp = async (req, res) => {
                     employeeNumbers: req.body.employeeNumbers,
                     lastYearTurnover: req.body.lastYearTurnover,
                     website: req.body.website,
-                    productsServicesOffered: prel(req.body.productsServicesOffered),
-                    pricesList: prel(req.body.pricesList, true, false),
-                    currenciesList: prel(req.body.currenciesList),
-                    productImagesList: prel(req.body.productImagesList),
-                    amountsList: prel(req.body.amountsList, false, true),
+                    productsServicesOffered: productList,
+                    pricesList: pricesList,
+                    currenciesList: currenciesList,
+                    productImagesList: imagesList,
+                    amountsList: amountsList,
                     totalSupplyPrice: req.body.totalSupplyPrice,
                     totalSupplyAmount: req.body.totalSupplyAmount,
                     capabilityDescription: req.body.capabilityDescription,
@@ -554,7 +550,7 @@ exports.postSignUp = async (req, res) => {
                           productName: supplier.productsServicesOffered[i],
                           price: parseFloat(supplier.pricesList[i]).toFixed(2),
                           currency: supplier.currenciesList[i],
-                          productImage: supplier.productImagesList[i],
+                          productImage: supplier.productImagesList[i].length? supplier.productImagesList[i] : '',
                           amount: parseInt(supplier.amountsList[i]),
                           totalPrice: parseFloat(supplier.pricesList[i] * supplier.amountsList[i]).toFixed(2),
                           createdAt: Date.now(),
@@ -897,6 +893,13 @@ exports.postProfile = async (req, res) => {
     if(treatError(req, res, err, '/supplier/profile'))
       return false;
 
+    var productList = prel(req.body.productsServicesOffered);
+    var amountsList = prel(req.body.amountsList, false, true);
+    var pricesList = prel(req.body.pricesList, true, false);
+    var imagesList = prel(req.body.productImagesList);
+    var currenciesList = prel(req.body.currenciesList);
+    sortLists(productList, amountsList, pricesList, imagesList, currenciesList);
+    
     doc._id = req.body._id;
     doc.avatar = req.body.avatar;
     doc.role = req.body.role;
@@ -920,11 +923,11 @@ exports.postProfile = async (req, res) => {
     doc.employeeNumbers = req.body.employeeNumbers;
     doc.lastYearTurnover = req.body.lastYearTurnover;
     doc.website = req.body.website;    
-    doc.productsServicesOffered = prel(req.body.productsServicesOffered);
-    doc.pricesList = prel(req.body.pricesList, true, false);
-    doc.currenciesList = prel(req.body.currenciesList);
-    doc.productImagesList = prel(req.body.productImagesList);
-    doc.amountsList = prel(req.body.amountsList, false, true);
+    doc.productsServicesOffered = productList;
+    doc.pricesList = pricesList;
+    doc.currenciesList = currenciesList;
+    doc.productImagesList = imagesList;
+    doc.amountsList = amountsList;
     doc.totalSupplyPrice = req.body.totalSupplyPrice;
     doc.totalSupplyAmount = req.body.totalSupplyAmount;
     doc.capabilityDescription = req.body.capabilityDescription;
@@ -1022,7 +1025,7 @@ exports.postProfile = async (req, res) => {
             productName: arr[i],
             price: parseFloat(doc.pricesList[i]).toFixed(2),
             currency: doc.currenciesList[i],
-            productImage: doc.productImagesList[i],
+            productImage: doc.productImagesList[i].length? doc.productImagesList[i] : '',
             amount: parseInt(doc.amountsList[i]),
             totalPrice: parseFloat(doc.pricesList[i] * doc.amountsList[i]).toFixed(2),
             createdAt: Date.now(),
