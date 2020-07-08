@@ -89,6 +89,10 @@
           $('#supplierPriceUnit_'+id).text(suppPrice);
         }
       });
+      
+      $('input[id^="amount_"]').inputFilter(function(value) {
+        return /^\d*$/.test(value);
+      });
 
       $('input[id^="amount_"]').on('change', function() {
         var id = getId($(this).attr('id'));
@@ -534,8 +538,8 @@
         </div>
 
         <!-- Modal window for the new Bid Request -->
-        <div class="modal fade" style="width: 100%; max-width: 90%; overflow: scroll" id="request_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
-          <div class="modal-dialog" style="max-width: 850px; overflow: scroll" role="document">
+        <div class="modal fade" style="width: 100%; max-width: 95%; overflow: auto" id="request_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog" style="max-width: 850px; overflow: auto" role="document">
             <div class="modal-content" style="width: 100%; overflow: visible">
               <div class="modal-header">
                 <h5 class="modal-title">New Bid Request</h5>
@@ -647,7 +651,7 @@
                     </div>
                   <div class="form-group">
                     <label class="col-form-label">Amount*</label>
-                    <input type="number" class="form-control" id="amount_<%= i %>" name="theAmount" value="0" required>
+                    <input type="number" min="1" step="1" class="form-control" id="amount_<%= i %>" name="theAmount" value="0" required>
                   </div>
                   <div class="form-group">
                     <label>Upload a product image:</label>
@@ -789,11 +793,11 @@
 
                       $('#status_'+ id).trigger('change');                      
                       var amount = $('#amount_'+id);
-                      if(!amount.val() || amount.val() < 1) {
+                      if(!amount.val() || amount.val() < 1 || !(Number.isInteger(parseFloat(amount.val())))) {
                         Swal.fire({
                           icon: 'warning',
                           title: 'Attention',                          
-                          text: 'Please select an amount of products first.'
+                          text: 'Please select a valid amount of products first.'
                         });
 
                         return false;
@@ -827,7 +831,9 @@
                         }
 
                         var amountVal = amount.val();
-                        var priceUnit = parseFloat(input.attr('price')? input.attr('price') : 1).toFixed(2);
+                        var currencyVal = $('#currency_'+id).text();
+                        var priceVal = input.attr('price');
+                        var priceUnit = parseFloat(priceVal? priceVal : 1).toFixed(2);
                         var addedPrice = parseInt(amountVal? amountVal : 1) * priceUnit;
                         var buyerPriceUnit = $('#buyerPriceUnit_'+id), buyerPriceCurr = $('#buyerPriceCurrency_'+id);
                         var buyerCurrSpan = $('span.bidCurrency[index="'+id+'"]').first();
@@ -841,19 +847,25 @@
                         var imageInput = $('input.productimageupload[id="productImage_'+id+'"]');
                         var imagePath = input.attr('productImage')?
                           '../' + input.attr('productImage').substring(7) 
-                          : imageInput.attr('filePath');      
+                          : imageInput.attr('filePath');
+                        
                         elem.find('li').attr('totalPrice', bigPrice);
+                        
 
                           elem.append("<li class='list-group-item' price='" 
                                       + addedPrice + "' maxAmount='" + (input.attr('maxAmount')? input.attr('maxAmount') : 2*amountVal)
-                                      + "' totalPrice='" + bigPrice + "' amount='" + amountVal 
-                                      + "'><span class='product'>" + prodVal 
-                                      + '</span> - <span class="price">' + input.attr('price') 
-                                      + '</span> <span class="currency">' + $('#currency_'+id).text() 
-                                      + `</span> - <span class='amount'>${amountVal}</span> items <span class='rem' title="Delete"></span>  <span class='dec' title='Remove item'></span>  <span class='inc' title='Add item'></span>  <span class='productImage' title='Image of Product'>` + (imagePath? `<img src="${imagePath}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '') +  `</span>  <span class='uploadImage'>Upload Image</span>  <span class='priceWrapper'>(Total: <span class='totalPrice'>${addedPrice}</span> ${$('#currency_'+id).text()})</span>  </li>`);
+                                      + "' totalPrice='" + bigPrice + "' amount='" + amountVal + "'>" 
+                                      + `<span class='product'>${prodVal}</span>
+<span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span>
+<span class='productImage' title='Image of Product'>` + (imagePath && imagePath.length? `<img src="${imagePath}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '') +  `</span>
+<span class='uploadImage'>Upload Image</span>
+<span class='priceWrapper'>Total: <span class='totalPrice'>${addedPrice}</span> ${currencyVal}</span>
+<span class='amountWrapper'><span class='amount'>${amountVal}</span> items</span>
+<span class='basicPriceWrapper'><span class='price'>${priceVal}</span><span class='currency'>${currencyVal}</span></span>
+</li>`);
 
                           imageInput
-                            .removeAttr('filePath')
+                            .attr('filePath', null)
                             .attr('value', '');
                           
                           var counter = elem.parent('div').find('span.productsCount');
@@ -870,7 +882,7 @@
                           $('#supplierPriceUnit_'+id).text(parseFloat(suppPriceUnit).toFixed(2));
                           var supp = fx.convert(parseFloat(bigPrice), {from: buyerCurrSpan.text(), to: '<%= supplier.currency %>'});
                           $('#supplierPrice_'+id).text(parseFloat(supp).toFixed(2));
-                          input.val('').removeAttr('productImage');
+                          input.val('').attr('productImage', null);
                           amount.val(0);
                         } else {
                             Swal.fire({

@@ -225,7 +225,7 @@
                     <ul id="cartList_<%= i %>" class="list-group">
                       <% for (h in products) { %>
                       <li class="list-group-item"><span><%= amounts[h] %>*<%= products[h] %> - <%= prices[h] %> <%= bid.supplierCurrency %></span>
-                        &nbsp;&nbsp;<span class="right"><% if(images[h].length > 0) { %><img src="../<%= path %><%= images[h].substring(7) %>" style="height: 25px; width: 30px" onclick="window.open(this.src)"></img> <% } %></span></li>
+                        &nbsp;&nbsp;<span class="right"><% if(images[h].length > 0) { %><img src="../<%= path %><%= images[h].substring(7) %>" title="Product Image" style="height: 25px; width: 30px" onclick="window.open(this.src)"></img> <% } %></span></li>
                       <% } %>
                     </ul>
                   </div>

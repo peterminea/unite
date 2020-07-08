@@ -50,10 +50,9 @@ span.productImage,span.uploadImage {
   margin-right: 30px;
 }
 
-span.priceWrapper {
-  float: right;
-  cursor: pointer;
-  margin-right: 50px;
+span.priceWrapper,span.basicPriceWrapper,span.amountWrapper {
+  float: right;  
+  margin-right: 40px;
 }
 
 span.right {

@@ -21,9 +21,24 @@ var autocomp = function(obj, data, enter) {//Not suitable for modals.
   });
 };
 
-function getFiles(folder) {
-  
-}
+(function($) {
+  $.fn.inputFilter = function(inputFilter) {
+    return this.on("input keydown keyup mousedown mouseup select contextmenu drop paste", function() {
+      if (inputFilter(this.value)) {
+        this.oldValue = this.value;
+        this.oldSelectionStart = this.selectionStart;
+        this.oldSelectionEnd = this.selectionEnd;
+      } else if (this.hasOwnProperty("oldValue")) {
+        this.value = this.oldValue;
+        this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+      } else {
+        this.value = "";
+      }
+    });
+  };
+}(jQuery));
+
+
 
 
 function sortTable() {//Ascending or descending. Each <th> column tag is involved.
@@ -564,9 +579,15 @@ function addition(prod, prodVal, priceVal, currencyVal, amountVal, imagePath, el
       }
       
       elem.append("<li class='list-group-item' price='" + addedPrice + "' totalPrice='" + bigPrice 
-                  + "' amount='" + amountVal + "'><span class='product'>" + prodVal + '</span> - <span class="price">' 
-                  + priceVal + '</span> <span class="currency">' + currencyVal 
-                  + `</span> - <span class='amount'>${amountVal}</span> items (Total: <span class='totalPrice'>${addedPrice}</span> ${currencyVal}) <span class='rem' title="Delete"></span>  <span class='dec' title='Remove item'></span>  <span class='inc' title='Add item'></span>  <span class='productImage' title='Image of Product'>` + (imagePath? `<img src="${imagePath}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '') +  "</span>  <span class='uploadImage'>Upload Image</span>    </li>");
+                  + "' amount='" + amountVal + "'>" 
+                  + `<span class='product'>${prodVal}</span>
+<span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span>
+<span class='productImage' title='Image of Product'>` + (imagePath && imagePath.length? `<img src="${imagePath}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '') +  `</span>
+<span class='uploadImage'>Upload Image</span>
+<span class='priceWrapper'>Total: <span class='totalPrice'>${addedPrice}</span> ${currencyVal}</span>
+<span class='amountWrapper'><span class='amount'>${amountVal}</span> items</span>
+<span class='basicPriceWrapper'><span class='price'>${priceVal}</span><span class='currency'>${currencyVal}</span></span>
+</li>`);
       
       var totalAmountInput = fromBuyer? $('#totalAmount_'+id) : $('#totalSupplyAmount');
       totalAmountInput.val(parseInt(totalAmountInput.val()) + parseInt(amountVal));
@@ -606,7 +627,7 @@ function addProduct(obj) {
       }
 
       var input = $("#prodServiceInput");     
-      var req = input.val().length && $('#price').val().length && $('#amount').val().length;
+      var req = input.val().length && $('#price').val().length && $('#amount').val().length && Number.isInteger(parseFloat($('#amount').val()));
       var imagePath = $('input.productimageupload').attr('filePath');
 
       if(req) {
@@ -618,7 +639,7 @@ function addProduct(obj) {
         $('#addProdService').prop('disabled', true);
         $('.productRequired').remove();
         $('input.productimageupload')
-          .removeAttr('filePath')
+          .attr('filePath', null)
           .attr('value', '');
         
       } else {
@@ -1074,8 +1095,8 @@ $(document).ready(function() {
         + '<li class="nav-item"><a class="nav-link" href="/'+user+'">Dashboard <span class="sr-only"></span></a></li>'
         + (user == 'supervisor'? '' : '<li class="nav-item"><a class="nav-link" href="/'+user+'/balance">Balance <span class="sr-only"></span></a></li>')
         + (user == 'supplier'? '<li class="nav-item"><a class="nav-link" href="/'+user+'/bid-requests">Bid Requests</a></li>' : '')
-        + '<li class="nav-item"><a class="btn btn-primary userRight" style="margin-top: -' + profilePx + 'px" href="/'+user+'/profile">Profile</a></li><br>'
-        + '<li class="nav-item"><a class="btn btn-danger userRight" style="margin-top: -' + logoutPx + 'px" title="Logout" href="?exit=true">Logout</a></li></ul></div>';
+        + '<li class="nav-item"><a class="btn btn-primary userRight" marg="' + profilePx + '" style="margin-top: -' + profilePx + 'px" href="/'+user+'/profile">Profile</a></li><br>'
+        + '<li class="nav-item"><a class="btn btn-danger userRight" marg="' + logoutPx + '" style="margin-top: -' + logoutPx + 'px" title="Logout" href="?exit=true">Logout</a></li></ul></div>';
      
       nav.append(str);  
       
@@ -1235,7 +1256,8 @@ $(document).ready(function() {
               }
               
               input.removeAttr('fromOutside');
-              //input.prev('input').val('');
+              input.prev('input').val('');
+              input.removeAttr('filePath');
             } else {
               processSingleFile(response, val, ob, input, prevInput, token, theDiv);
             }
