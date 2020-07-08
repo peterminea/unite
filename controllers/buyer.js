@@ -34,6 +34,8 @@ const {
   sendForgotPasswordEmail,
   sendResetPasswordEmail,
   sendCancelBidEmail,
+  prel,
+  sortLists,
   postSignInBody
 } = require("../middleware/templates");
 const {
@@ -102,6 +104,7 @@ exports.getIndex = async (req, res) => {
   }
 };
 
+
 exports.postIndex = (req, res) => {
   initConversions(oxr, fx);
 
@@ -159,13 +162,11 @@ exports.postIndex = (req, res) => {
     });
   } else if (req.body.itemDescription) {
     //New Bid Request placed
-    var productList = req.body.productsServicesOffered;
-    var amountList = req.body.amountList;
-    var priceList = req.body.priceList;
-
-    productList = productList.split(",");
-    amountList = amountList.split(",");
-    priceList = priceList.split(",");
+    var productList = prel(req.body.productsServicesOffered);
+    var amountList = prel(req.body.amountList, false, true);
+    var priceList = prel(req.body.priceList, true, false);
+    var imagesList = prel(req.body.productImagesList);
+    sortLists(productList, amountList, priceList, imagesList);
 
     var products = [];
 
@@ -174,11 +175,12 @@ exports.postIndex = (req, res) => {
         "Product name: '" +
           productList[i] +
           "', amount: " +
-          parseInt(amountList[i]) +
+          (amountList[i]) +
           ", price: " +
-          parseFloat(priceList[i]).toFixed(2) +
+          (priceList[i]) +
           " " +
           req.body.supplierCurrency +
+          (imagesList[i].length? ", image path: " + imagesList[i]  : '') +
           "."
       );
     }
@@ -190,10 +192,10 @@ exports.postIndex = (req, res) => {
       buyerEmail: req.body.buyerEmail,
       supplierEmail: req.body.supplierEmail,
       itemDescription: req.body.itemDescription,
-      productsServicesOffered: req.body.productsServicesOffered,
-      amountList: req.body.amountList,
-      productImagesList: req.body.productImagesList,
-      priceList: req.body.priceList, //Supplier's currency.
+      productsServicesOffered: productList,
+      amountList: amountList,
+      productImagesList: imagesList,
+      priceList: priceList, //Supplier's currency.
       orderedProducts: products,
       itemDescriptionLong: req.body.itemDescriptionLong,
       itemDescriptionUrl: req.itemDescriptionUrl,

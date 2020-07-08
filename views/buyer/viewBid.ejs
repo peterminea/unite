@@ -211,12 +211,14 @@
                     const products = bid.productsServicesOffered;
                     const prices = bid.priceList;
                     const amounts = bid.amountList;
+                    const images = bid.productImagesList;
                       %>
                     <Code></Code>
                     <label>Products / Services Offered</label>
                     <ul id="cartList_<%= i %>" class="list-group">
                       <% for (h in products) { %>
-                      <li class="list-group-item"><%= amounts[h] %>*<%= products[h] %> - <%= prices[h] %> <%= bid.supplierCurrency %></li>
+                      <li class="list-group-item"><span><%= amounts[h] %>*<%= products[h] %> - <%= prices[h] %> <%= bid.supplierCurrency %></span>
+                        <span><% if(images[h].length > 0) { %><img src="../<%= images[h].substring(7) %>" style="height: 20px; width: 20px" onclick="window.open(this.src)"></img> <% } %></span></li>
                       <% } %>
                     </ul>
                   </div>

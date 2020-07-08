@@ -503,7 +503,7 @@ function initBaseRates(fx, elem) {
       $(''+elem+'').find('option[value="' + fx.base + '"]').attr('selected', 'selected');
       $(''+elem+'').trigger('change');
     }
-  }, 400);
+  }, 100);
 }
 
 
@@ -519,6 +519,7 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
   obj.on('click', function() {
     var li = $(this).parent('li');/*
     var newIndex = elem.find('li').index(li);*/
+    var ul = li.parent('ul');
     var entireAmount = parseInt(li.find('.amount').text());
 
     if(isAdd && entireAmount == parseInt(li.attr('maxAmount'))) {
@@ -536,9 +537,14 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     var handledPrice = handledAmount * parseFloat(li.find('span.price').text()).toFixed(2);
     var supplierCurrency = fromBuyer? li.parent('ul').attr('suppCurrency') : li.find('.currency').text();
     var totalPagePrice = fromBuyer? parseFloat(li.attr('totalPrice')) : parseFloat($('#hiddenTotalPrice').val()).toFixed(2);
-    var canContinue = true, newAmount, newPrice;
+    
+    var canContinue = true;
+    var totalAmountInput = fromBuyer? $('#totalAmount_'+id) : $('#totalSupplyAmount');
     var localAmount = isAdd? entireAmount + handledAmount : entireAmount - handledAmount;
     var localPrice = isAdd? parseFloat(rowPrice) + parseFloat(handledPrice) : parseFloat(rowPrice) - handledPrice;
+    var newAmount = isAdd? parseInt(totalAmountInput.val()) + handledAmount : parseInt(totalAmountInput.val()) - handledAmount;
+    var newPrice = isAdd? parseFloat(totalPagePrice) + parseFloat(handledPrice) : parseFloat(totalPagePrice) - handledPrice;
+    totalAmountInput.val(parseInt(newAmount));
     
     if(isRow || (entireAmount==1 && !isAdd)) {//Delete Row. If 1.
       //if(!confirm('Warning: You are about to remove the entire product row.'))
@@ -555,14 +561,12 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
         //, reverseButtons: true
       }).then((result) => {
         if(result.value) {
-          var elem = li.parent('ul');
           li.remove();          
-          var counter = elem.parent('div').find('p.term span');
+          var counter = ul.parent('div').find('p.term span');
           var newValue = -1 + parseInt(counter.text());
           counter.text(newValue);
         } else if (result.dismiss === Swal.DismissReason.cancel) {
           canContinue = false;
-          return canContinue;
         }
       });
     } else {
@@ -573,34 +577,23 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
         li.attr('price', localPrice);
       }
     }
-
-    if(canContinue == false)
-      return false;
     
     if(!fromBuyer) {
-      newAmount = isAdd? parseInt($('#totalSupplyAmount').val()) + handledAmount : parseInt($('#totalSupplyAmount').val()) - handledAmount;
-      newPrice = isAdd? totalPagePrice + parseFloat(handledPrice) : totalPagePrice - parseFloat(handledPrice);
       $('#hiddenTotalPrice').val(newPrice);
-      $('#totalSupplyAmount').text(newAmount);
       $('#totalSupplyPrice').text(newPrice + ' ' + supplierCurrency);
       prodServiceInput.trigger('change');
     } else {
-      var totalAmountInput = $('#totalAmount_'+id);      
       var span = $('span.bidCurrency[index="'+id+'"]').first();
-      newAmount = isAdd? parseInt(totalAmountInput.val()) + handledAmount : parseInt(totalAmountInput.val()) - handledAmount;
-      newPrice = isAdd? parseFloat(totalPagePrice) + parseFloat(handledPrice) : parseFloat(totalPagePrice) - handledPrice;
-      
-      var buyerUnit = $('#buyerPriceUnit_'+id);
-      buyerUnit.text(parseFloat(localPrice).toFixed(2));
+      $('#buyerPriceUnit_'+id).text(parseFloat(localPrice).toFixed(2));
       var suppUnitVal = fx.convert(localPrice, {from: span.text(), to: supplierCurrency});
-      var supplierUnit = $('#supplierPriceUnit_'+id);
-      supplierUnit.text(parseFloat(suppUnitVal).toFixed(2));
-      
-      li.attr('totalPrice', newPrice);
-      $('#totalAmount_'+id).val(parseInt(newAmount));
+      $('#supplierPriceUnit_'+id).text(parseFloat(suppUnitVal).toFixed(2));
+      var supp = parseFloat(fx.convert(newPrice, {from: span.text(), to: supplierCurrency})).toFixed(2);
       $('#price_'+id).text(parseFloat(newPrice).toFixed(2));
-      var supp = fx.convert(newPrice, {from: span.text(), to: supplierCurrency});
-      $('#supplierPrice_'+id).text(parseFloat(supp).toFixed(2));
+      $('#supplierPrice_'+id).text(supp);
+      
+      if(canContinue == false)
+        return false;
+      ul.find('li').attr('totalPrice', parseFloat(newPrice));
     }
   });
 }
@@ -646,41 +639,39 @@ function addition(prod, prodVal, priceVal, currencyVal, amountVal, imagePath, el
       text: 'You have already added ' + prodVal + ' to the list. Please refine your selection.'
     });
   } else {
+      var id = fromBuyer? getId(elem.attr('id')) : null;
       var addedPrice = parseFloat(priceVal * amountVal).toFixed(2);
-      var priceInput = fromBuyer? elem.parent('div').next('div').find('input[id^="price_"]') : $('#price');
-      var buyerCurrency = fromBuyer? priceInput.parent('div').find('.bidCurrency').first().text() : $('input[name="currency"]').val();
+      var priceInput = fromBuyer? $('#price_'+id) : $('#totalSupplyPrice');
+      var pageCurrency = fromBuyer? $('#currency_'+id).text() : $('input[name="currency"]').val();
       
       if(!fromBuyer) {
         $('#hiddenTotalPrice').val(parseFloat(parseFloat($('#hiddenTotalPrice').val()) + parseFloat(addedPrice)).toFixed(2));
       }
     
       var buyerPriceVal = fromBuyer? (priceInput.text()? parseFloat(priceInput.text()): 0): null;
-      var bigPrice = fromBuyer? parseFloat((buyerPriceVal) + parseFloat(addedPrice)).toFixed(2) : $('#hiddenTotalPrice').val();
+      var bigPrice = fromBuyer? parseFloat((buyerPriceVal) + parseFloat(addedPrice)).toFixed(2) : parseFloat($('#hiddenTotalPrice').val()).toFixed(2);
 
-      if(currencyVal != buyerCurrency) {//Convert the values to the currency of buyer.
-        addedPrice = parseFloat(fx.convert((addedPrice), {from: currencyVal, to: buyerCurrency})).toFixed(2);
-        currencyVal = buyerCurrency;
-        bigPrice = parseFloat(fx.convert((bigPrice), {from: currencyVal, to: buyerCurrency})).toFixed(2);
+      if(currencyVal != pageCurrency) {//Convert the values to the currency of buyer (or Supplier).
+        addedPrice = parseFloat(fx.convert((addedPrice), {from: currencyVal, to: pageCurrency})).toFixed(2);
+        currencyVal = pageCurrency;
+        bigPrice = (fx.convert((bigPrice), {from: currencyVal, to: pageCurrency}));
       }
       
       elem.append("<li class='list-group-item' price='" + addedPrice + "' totalPrice='" + bigPrice 
                   + "' amount='" + amountVal + "'><span class='product'>" + prodVal + '</span> - <span class="price">' 
                   + priceVal + '</span> <span class="currency">' + currencyVal 
-                  + `</span> - <span class='amount'>${amountVal}</span> items (Total: <span class='totalPrice'>${addedPrice}</span> ${currencyVal})<span class='productImage' title='Image of Product'>` 
-                  + (imagePath? `<img src="${imagePath}" style="height: 15px; width: 15px" onclick="window.open(this.src)">` : '') 
-                  + `</span><span class='uploadImage'>&nbsp;&nbsp;&nbsp;Upload Image</span><span class='rem' title="Delete"></span>  <span class='dec' title='Remove item'></span>  <span class='inc' title='Add item'></span>  </li>`);
+                  + `</span> - <span class='amount'>${amountVal}</span> items (Total: <span class='totalPrice'>${addedPrice}</span> ${currencyVal}) <span class='rem' title="Delete"></span>  <span class='dec' title='Remove item'></span>  <span class='inc' title='Add item'></span>  <span class='uploadImage'>Upload Image</span>    <span class='productImage' title='Image of Product'>` + (imagePath? `<img src="${imagePath}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '') +  '</span>  </li>');
+      
+      var totalAmountInput = fromBuyer? $('#totalAmount_'+id) : $('#totalSupplyAmount');
+      totalAmountInput.val(parseInt(totalAmountInput.val()) + parseInt(amountVal));
+    
       if(!fromBuyer) {
         $('#totalSupplyPrice').text(bigPrice + ' ' + currencyVal);
-        $('#totalSupplyAmount').text(parseInt($('#totalSupplyAmount').text()) + parseInt(amountVal));
       } else {
-        var id = getId(elem.attr('id'));
-        
-        var newAmount = parseInt($('#totalAmount_'+id).val()) + parseInt(amountVal);
-        $('#totalAmount_'+id).val(parseInt(newAmount));
         $('#price_'+id).text(parseFloat(bigPrice).toFixed(2));
-        var supplierCurrency = elem.attr('suppCurrency');
-        var supp = fx.convert($('#price_'+id).text(), {from: $('span.bidCurrency[index="'+id+'"]').first().text(), to: supplierCurrency});
+        var supp = fx.convert(parseFloat($('#price_'+id).text()), {from: $('span.bidCurrency[index="'+id+'"]').first().text(), to: elem.attr('suppCurrency')});
         $('#supplierPrice_'+id).text(supp);
+        elem.find('li').attr('totalPrice', bigPrice);
       }
       
       var counter = elem.parent('div').find('p.term span');
@@ -900,9 +891,9 @@ function supplierValidateFields(fx) {
     
     arr.push(product.text());
     arr1.push(parseFloat(price.text()).toFixed(2));
-    arr2.push(currency.text());    
+    arr2.push(currency.text());
     arr3.push(quantity.text());
-    arr4.push(src? 'public/' + src.substring(3) : null);
+    arr4.push(src? 'public/' + src.substring(3) : '');
   });
 
   var preferred = $('.currency').first().text();
@@ -1328,7 +1319,7 @@ $(document).ready(function() {
               if(img != null && img.attr('src') != null) {
                 img.attr('src', res);
               } else {
-                var str = `<img src="${res}" style="height: 15px; width: 15px" onclick="window.open(this.src)">`;
+                var str = `<img src="${res}" style="height: 25px; width: 30px" onclick="window.open(this.src)">`;
                 span.append(str);
               }
               
