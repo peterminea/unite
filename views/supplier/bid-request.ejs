@@ -99,7 +99,13 @@
 					</div>				
         
         <input type='hidden' name='createdAt' value="<%= request.createdAt %>">
-
+        <% if(request.warningExpiration != null) { %>
+        <div>
+          <p class='warn'>
+            This Bid Request is about to expire. Its limit date is <%= request.expiryDateFormatted %>.<% if(request.cannotExtendMore != null) { %><br>Please upload a Bid Extension Letter in order to gain <%= bidExtensionDays %> more validity days.<% } else { %><br>You have already extended the initial bid validity, so the date above is final.<% } %>
+          </p>
+        </div>
+        <% } %>
 				<div class="form-group">
 					<label>Item Description</label>
 					<input type="text" class="form-control" value="<%= request.itemDescription %>" readonly>
@@ -116,7 +122,7 @@
 					<ul class="list-group">
             <% for (h in products) { %>
             <li class="list-group-item"><span><%= amounts[h] %>*<%= products[h] %> - <%= prices[h] %> <%= request.supplierCurrency %></span>
-            <span><% if(images[h].length > 0) { %><img src="../<%= images[h].substring(7) %>" style="height: 20px; width: 20px" onclick="window.open(this.src)"></img> <% } %></span></li>
+            &nbsp;&nbsp;<span class='right'><% if(images[h].length > 0) { %><img src="../<%= path %><%= images[h].substring(7) %>" style="height: 25px; width: 30px" onclick="window.open(this.src)"></img> <% } %></span></li>
             <% } %>
           </ul>
 				</div>
@@ -194,6 +200,14 @@
 					<label>Currency (Buyer's original):</label>
 					<input type="text" disabled class="form-control" readonly name="buyerCurrency" value="<%= request.buyerCurrency %>">
 				</div>
+        <% if(request.isExtended == false) { %>
+            <div class="form-group">
+              <label>Extension letter</label>
+              <input type="hidden" class="fileId" name="validityExtensionId">
+              <input class="form-control upload" type="file" id="validityExtension" name="validityExtension"/>
+              <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
+            </div>
+        <% } %>
         <div class="form-group">
 					<label>Status</label>
 					<input type="text" disabled id="status" name="status" class="form-control" readonly value="<%= request.status %>">

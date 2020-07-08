@@ -345,5 +345,45 @@ const sendExpiredBidEmails = (req, res, expiredBids) => {
   }
 };
 
+const { basicFormat, customFormat, normalFormat } = require('../middleware/dateConversions');
 
-module.exports = { sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, prel, sortLists, postSignInBody };
+const updateBidBody = (req, res, reqId, returnLink) => {
+  MongoClient.connect(URL, { useUnifiedTopology: true }, async function(err, db) {
+    if (treatError(req, res, err, "back")) 
+      return false;    
+
+    var dbo = db.db(BASE);
+    
+    var bid = await dbo.collection("bidrequests").findOne({ _id: reqId }, function(err, bid) {
+      if (treatError(req, res, err, "back") || !bid) 
+        return false;
+      var values;
+      
+      if(!bid.isExpired && !bid.isExtended && bid.validityExtensionId) {
+        var extDuration = process.env.DAYS_BID_EXTENDED * process.env.DAY_DURATION;
+        var newDate = bid.expiryDate + extDuration;
+        var newDateFormatted = customFormat(newDate);
+        values = { $set: { isExtended: true, expiryDate: newDate, expiryDateFormatted: newDateFormatted, status: req.body.status } };
+      } else {
+        values = { $set: { status: req.body.status } };
+      }
+      
+      dbo
+      .collection("bidrequests")
+      .updateOne(
+        { _id: reqId },
+        values,
+        function(err, resp) {
+          if (treatError(req, res, err, "back")) 
+            return false;
+          
+          req.flash("success", "Bid status updated successfully!");
+          db.close();
+          res.redirect(returnLink);
+        });
+    });
+  });
+}
+
+
+module.exports = { sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, prel, sortLists, postSignInBody, updateBidBody };

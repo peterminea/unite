@@ -21,6 +21,8 @@
     <script src="/functions.js"></script>
     <script type="text/javascript">
     $(document).ready(function() {
+      errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
+      
       $('input.form-control').on('change', function () {
         if($('#username').val() && $('#room').val()) {
           var string = "../../../../../../../supervisor/chat/";

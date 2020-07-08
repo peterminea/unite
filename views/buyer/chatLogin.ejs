@@ -21,9 +21,11 @@
     <script src="/functions.js"></script>
     <script type="text/javascript">
     $(document).ready(function() {
+      errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
+      
       $('input.form-control').on('change', function () {
         if($('#username').val() && $('#room').val()) {
-          var string = "../../../../../../../supervisor/chat/";
+          var string = "../../../../../../../buyer/chat/";
           string += $('#from').val() + '/' + $('#to').val() + '/' 
           + $('#username').val() + '/' + $('#room').val() + '/' 
           + $('#reqId').val() + '/' + $('#reqName').val() + '/' 
@@ -45,25 +47,6 @@
   </head>
   
   <body>
-    <% if (errorMessage.length > 0) { %>
-    <script>
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: '<%= errorMessage %>'
-      })
-    </script>
-    <% } %>
-    
-    <% if (successMessage.length > 0) { %>
-    <script>
-      Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: '<%= successMessage %>'
-      })
-    </script>
-    <% } %>
   <nav user="buyer" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
     <a class="navbar-brand" href="/">UNITE</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"

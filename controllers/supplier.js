@@ -21,7 +21,7 @@ const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const search = require('../middleware/searchFlash');
 var Recaptcha = require('express-recaptcha').RecaptchaV3;
-const { sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, prel, sortLists, postSignInBody } = require('../middleware/templates');
+const { sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, prel, sortLists, postSignInBody, updateBidBody } = require('../middleware/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
@@ -779,7 +779,7 @@ exports.getBidRequests = (req, res) => {
           var date = Date.now();
           var bidDate = requests[i].expiryDate;
           bidDate > date? 
-            (requests[i].isCancelled == true? validBids.push(requests[i]) : cancelledBids.push(requests[i]))
+            (requests[i].isCancelled == true? cancelledBids.push(requests[i]) : validBids.push(requests[i]))
           : expiredBids.push(requests[i]);
         }
       }
@@ -850,12 +850,21 @@ exports.getBidRequest = (req, res) => {
       return Buyer.findOne({ _id: request.buyer });
     })
     .then((buyer) => {
+    if(request.expirationDate <= Date.now() + process.env.DAYS_BEFORE_BID_EXPIRES * process.env.DAY_DURATION) {
+      request.warningExpiration = true;
+      if(request.isExtended == true) {
+        request.cannotExtendMore = true;
+      }
+    }
+    
     var promise = BidStatus.find({}).exec();
     promise.then((statuses) => {
       res.render("supplier/bid-request", {
         supplier: supplier,
         request: request,
         buyer: buyer,
+        path: '../',
+        bidExtensionDays: process.env.DAYS_BID_EXTENDED,
         successMessage: success,
         errorMessage: error,
         statuses: statuses,
@@ -868,20 +877,7 @@ exports.getBidRequest = (req, res) => {
 
 
 exports.postBidRequest = (req, res) => {
-  MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-    if(treatError(req, res, err, 'back'))
-      return false;
-    var dbo = db.db(BASE);
-    
-    await dbo.collection("bidrequests").updateOne({ _id: req.body.reqId }, { $set: {status: req.body.status} }, function(err, res) {
-      if(treatError(req, res, err, 'back'))
-        return false;
-      req.flash('success', 'Bid status updated successfully!');
-      return res.redirect('/supplier/index');
-    });
-    
-    db.close();
-  });
+  updateBidBody(req, res, req.body.reqId, '/supplier/index');
  }
 
 

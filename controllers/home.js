@@ -63,7 +63,7 @@ exports.getDeleteUser = (req, res) => {
 
 function getFiles(folder) {/*
   console.log(folder);
-  fs.readdir(folder, (err, files) => {//  console.log(err);
+  fs.readdir(folder, (err, files) => {
     files.forEach((file) => {
       //console.log(file);
     });
