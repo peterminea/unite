@@ -50,8 +50,23 @@ span.productImage,span.uploadImage {
   margin-right: 30px;
 }
 
+span.priceWrapper {
+  float: right;
+  cursor: pointer;
+  margin-right: 50px;
+}
+
+span.right {
+  float: right;
+  margin-right: 20px
+}
+
 span.productImage {
   margin-top: -2px;
+}
+
+span.uploadImage {
+  margin-top: 2px;
 }
 
 span.inc {
@@ -154,6 +169,11 @@ p.term {
   font-size: 14pt;
 }
 
+p.warn {
+  color: red;
+  font-size: 11pt;
+}
+
 p.term-light {
   color: white;
   font-size: 16pt;
@@ -169,7 +189,7 @@ p.term-black {
 }
 
 .color-secondary {
-  color: #666644;
+  color: #665544;
 }
 
 .littleNote {

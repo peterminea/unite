@@ -162,9 +162,9 @@
         </div>
    
         <!-- Modal window for the new, valid Bid Request -->
-        <div class="modal fade" id="request_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
+        <div class="modal fade" style="width: 100%; max-width: 90%; overflow: scroll" id="request_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog" style="max-width: 850px; overflow: scroll" role="document">
+            <div class="modal-content" style="width: 100%; overflow: visible">
               <div class="modal-header">
                 <h5 class="modal-title">View Bid Request</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -179,6 +179,13 @@
                       (*) are required fields.
                     </label>
                   </div>
+                  <% if(bid.warningExpiration != null) { %>
+                  <div>
+                    <p class='warn'>
+                      This Bid Request is about to expire. Its limit date is <%= bid.expiryDateFormatted %>.<% if(bid.cannotExtendMore != null) { %><br>Please upload a Bid Extension Letter in order to gain <%= bidExtensionDays %> more validity days.<% } else { %><br>You have already extended the initial bid validity, so the date above is final.<% } %>
+                    </p>
+                  </div>
+                  <% } %>
                   <div class="form-group">
                     <label class="col-form-label">Request Name*</label>
                     <input readonly type="text" class="form-control" name="requestName" value="<%= bid.requestName %>">
@@ -218,7 +225,7 @@
                     <ul id="cartList_<%= i %>" class="list-group">
                       <% for (h in products) { %>
                       <li class="list-group-item"><span><%= amounts[h] %>*<%= products[h] %> - <%= prices[h] %> <%= bid.supplierCurrency %></span>
-                        <span><% if(images[h].length > 0) { %><img src="../<%= images[h].substring(7) %>" style="height: 20px; width: 20px" onclick="window.open(this.src)"></img> <% } %></span></li>
+                        &nbsp;&nbsp;<span class="right"><% if(images[h].length > 0) { %><img src="../<%= path %><%= images[h].substring(7) %>" style="height: 25px; width: 30px" onclick="window.open(this.src)"></img> <% } %></span></li>
                       <% } %>
                     </ul>
                   </div>
@@ -283,6 +290,14 @@
                      <% l = 0; for(m in bid.priceList) {l += bid.priceList[m];} %> <!-- Same as bid.supplierPrice .-->
                     <input type="text" title="Order price as seen by Supplier" value="<%= l %> <%= bid.supplierCurrency %>" class="form-control" id="supplierPrice_<%= i %>" name="supplierPrice" disabled>
                   </div>
+              <% if(bid.isExtended == false) { %>
+                  <div class="form-group">
+                    <label>Extension letter</label>
+                    <input type="hidden" class="fileId" name="validityExtensionId">
+                    <input class="form-control upload" type="file" id="validityExtension" name="validityExtension"/>
+                    <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
+                  </div>
+              <% } %>
                    <div class="form-group">
                     <label class="col-form-label">Status*</label>
                     <input type="hidden" id="status_<%= i %>" class="form-control" name="status" value="<%= bid.status %>">
@@ -420,10 +435,10 @@
      <!-- Buyer=sender, supplier=receiver. -->     
           <div class="container mt-4">
             <div class="form-group">
-              <a href="../../../buyer/chatLogin/<%= bid.buyer %>/<%= bid.supplier %>/<%= bid._id %>/<%= bid.requestName %>/<%= bid.supplierName %>/<%= bid.buyerName %>">
+              <a href="../../../../../buyer/chatLogin/<%= bid.buyer %>/<%= bid.supplier %>/<%= bid._id %>/<%= bid.requestName %>/<%= bid.supplierName %>/<%= bid.buyerName %>">
                 <button style="float: left" title="Chat" id="chat" class="btn-primary btn">Chat with your supplier</button>
               </a>
-              <a href="../../../buyer/cancelBid/<%= bid._id %>/<%= bid.requestName %>/Buyer/<%= bid.buyerName %>/<%= bid.supplierName %>/<%= bid.buyerEmail %>/<%= bid.supplierEmail %>">
+              <a href="../../../../../buyer/cancelBid/<%= bid._id %>/<%= bid.requestName %>/Buyer/<%= bid.buyerName %>/<%= bid.supplierName %>/<%= bid.buyerEmail %>/<%= bid.supplierEmail %>">
                 <button style="float: right" title="Cancel Bid" id="cancelBid" class="btn-primary btn">Cancel your Order</button>
               </a>
             </div>

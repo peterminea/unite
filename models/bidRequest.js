@@ -154,7 +154,16 @@ const bidRequestSchema = new Schema({
   },
   isExpired: {
     type: Boolean,
-    //required: true,
+    required: false,
+    default: false
+  },
+  validityExtension: {
+    type: String,
+    required: false
+  },
+  isExtended: {
+    type: Boolean,
+    required: true,
     default: false
   },
   buyer: {

@@ -110,41 +110,6 @@ function treatError(data, message) {
 }
 
 
-function takeAction(obj, token, tr) {
-  var fileId = tr.attr('id');
-  var isDownload = obj.hasClass('download')? true : false;
-  var url = isDownload? '/download/' : '/files/';
-  var type = isDownload? 'GET' : 'DELETE';
-  var data = isDownload? null : {_method: 'delete'};
-  
-  $.ajax({
-    url: url+fileId,
-    type: type,
-    data: data,
-    headers: { "X-CSRF-Token": token },
-    datatype: 'application/json',
-    error: function() {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error!',
-        text: 'Error on AJAX call!'
-      });
-    },
-    success: function(data) {
-      if(!isDownload)
-        tr.remove();
-      if(data && data.message) {
-        Swal.fire({
-          icon: 'info',
-          title: 'Information',
-          text: data.message
-        });        
-      }
-    }
-  });
-}
-
-
 function treatDiv(div, isMulti, val, input) {
     if(isMulti) {
       var newIndex = div.parent('div').find('div').index(div);
@@ -176,7 +141,7 @@ function removeFile(obj, Swal) {//remove from Glitch
   if(tr == null) {
    isMulti = div.parent('div').hasClass('fileWrapper');  
    input = isMulti? 
-      div.parent('div').prev('div').find('.fileupload') : div.prev('div').find('.fileupload');
+      div.parent('div').prev('div').find('.upload') : div.prev('div').find('.upload');
    val = input.attr('value');
   }
   
@@ -229,70 +194,6 @@ function removeFile(obj, Swal) {//remove from Glitch
           });
         }
       });      
-    }
-  });
-}
-
-
-function deleteFile(obj) {//remove from Database
-  var token = $(obj).attr('token');
-  var file = $(obj).attr('file');  
-  var div = $(obj).parent('div');
-  var isMulti = div.parent('div').hasClass('fileWrapper');
-  
-  var input = isMulti? 
-      div.parent('div').prev('div').find('.fileupload') : div.prev('div').find('.fileupload');
-  var val = input.attr('value');
-  //var isMulti = val.charAt(val.length-1) == ','? true : false;
-  
-  $.ajax({
-    url: '/files/'+file,
-    type: 'DELETE',
-    headers: { "X-CSRF-Token": token },
-    data: {_method: 'delete'},
-    datatype: 'application/json',
-    error: function() {
-      //alert('Error on AJAX Request!');
-      treatDiv(div, isMulti, val, input);
-    },
-    success: function(data) {
-      if(treatError(data, 'deletion')) {
-        return false;
-      }
-      
-      treatDiv(div, isMulti, val, input);
-      //alert('File removed!');
-    }
-  });
-}
-
-
-function downloadFile(obj) {//download from Database
-  var token = $(obj).attr('token');
-  var file = $(obj).attr('file');
-  var div = $(obj).parent('div');
-  var isMulti = div.parent('div').hasClass('fileWrapper');
-  
-  var input = isMulti? 
-      div.parent('div').prev('div').find('.fileupload') : div.prev('div').find('.fileupload');
-  var val = input.attr('value');
-  
-  $.ajax({
-    url: '/download/'+file,
-    type: 'GET',
-    headers: { "X-CSRF-Token": token },
-    //data: {_method: 'delete'},
-    datatype: 'application/json',
-    error: function() {
-      //alert('Error on AJAX Request!');
-      //treatDiv(div, isMulti, val, input);
-    },
-    success: function(data) {
-      if(treatError(data, 'downloading file')) {
-        return false;
-      }
-      //treatDiv(div, isMulti, val, input);
-      //alert('File removed!');
     }
   });
 }
@@ -599,23 +500,28 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
 }
 
 
-function removeAllProducts() {//Supplier products
+function removeAllProducts() {//Supplier products.
   $("#prodServices").find('li').remove();
   $('input.supply').each(function() {
     $(this).val('');
   });
   $('span.supply').each(function() {
-    $(this).val('');
+    $(this).text('0');
   });
+  
+  $('#totalSupplyAmount').val('0');
+  $('#totalSupplyPrice').text('0 ' + $('input[name="currency"]').val());
+  $('#hiddenTotalPrice').val('0');
 }
 
 
-function removeAllItems(index) {//Bid items
+function removeAllItems(index) {//Bid items.
   $("#prodServices_"+index).find('li').remove();
   $("#hiddenProdServicesList_"+index).val('');
   $("#amountList_"+index).val('');
   $("#priceList_"+index).val('');
-  $('#totalAmount_'+index).val(0);
+  $("#productImagesList_"+index).val('');
+  $('#totalAmount_'+index).val('0');
   $('span.hid').each(function() {
     var procSpan = $(this).find('span').first();
     procSpan.text(0);
@@ -660,7 +566,7 @@ function addition(prod, prodVal, priceVal, currencyVal, amountVal, imagePath, el
       elem.append("<li class='list-group-item' price='" + addedPrice + "' totalPrice='" + bigPrice 
                   + "' amount='" + amountVal + "'><span class='product'>" + prodVal + '</span> - <span class="price">' 
                   + priceVal + '</span> <span class="currency">' + currencyVal 
-                  + `</span> - <span class='amount'>${amountVal}</span> items (Total: <span class='totalPrice'>${addedPrice}</span> ${currencyVal}) <span class='rem' title="Delete"></span>  <span class='dec' title='Remove item'></span>  <span class='inc' title='Add item'></span>  <span class='uploadImage'>Upload Image</span>    <span class='productImage' title='Image of Product'>` + (imagePath? `<img src="${imagePath}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '') +  '</span>  </li>');
+                  + `</span> - <span class='amount'>${amountVal}</span> items (Total: <span class='totalPrice'>${addedPrice}</span> ${currencyVal}) <span class='rem' title="Delete"></span>  <span class='dec' title='Remove item'></span>  <span class='inc' title='Add item'></span>  <span class='productImage' title='Image of Product'>` + (imagePath? `<img src="${imagePath}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '') +  "</span>  <span class='uploadImage'>Upload Image</span>    </li>");
       
       var totalAmountInput = fromBuyer? $('#totalAmount_'+id) : $('#totalSupplyAmount');
       totalAmountInput.val(parseInt(totalAmountInput.val()) + parseInt(amountVal));
@@ -1154,7 +1060,7 @@ $(document).ready(function() {
       
       $(window).off('resize').on('resize', function() {
         if($(window).width() >= 900) {
-          $('a.userRight').css({'margin-top': 0, float: ''});
+          $('a.userRight').css({'margin-top': 0, 'margin-right': '10px', 'float': ''});
         } else {
           $('a.userRight').each(function() {
             $(this).css({'margin-top': -$(this).attr('marg'), 'float': 'right'});
@@ -1168,10 +1074,14 @@ $(document).ready(function() {
         + '<li class="nav-item"><a class="nav-link" href="/'+user+'">Dashboard <span class="sr-only"></span></a></li>'
         + (user == 'supervisor'? '' : '<li class="nav-item"><a class="nav-link" href="/'+user+'/balance">Balance <span class="sr-only"></span></a></li>')
         + (user == 'supplier'? '<li class="nav-item"><a class="nav-link" href="/'+user+'/bid-requests">Bid Requests</a></li>' : '')
-        + '<li class="nav-item active"><a class="btn btn-primary userRight" style="margin-top: -' + profilePx + 'px" href="/'+user+'/profile">Profile</a></li><br>'
+        + '<li class="nav-item"><a class="btn btn-primary userRight" style="margin-top: -' + profilePx + 'px" href="/'+user+'/profile">Profile</a></li><br>'
         + '<li class="nav-item"><a class="btn btn-danger userRight" style="margin-top: -' + logoutPx + 'px" title="Logout" href="?exit=true">Logout</a></li></ul></div>';
      
-      nav.append(str);      
+      nav.append(str);  
+      
+      if(bigScreen.matches) {        
+        $('a.userRight').css({'margin-right': '10px'});
+      }
       
       if(nav.attr('pos')) {
         var ind = parseInt(nav.attr('pos')), ul = $('#navbarSupportedContent').find('ul');
@@ -1209,11 +1119,12 @@ $(document).ready(function() {
     });
   });
    
-  if(!($('.fileupload').length) && !($('.fileexcelupload').length))
+  if(!($('input.upload').length))
     return false;
   
   var token = $("input[name='_csrf']:first").val();
-  $('input.fileupload,input.avatarupload,input.productimageupload,input.fileexcelupload').on('change', function() {
+  
+  $('input.upload').on('change', function() {
     $(this).val()? $(this).next('input').prop('disabled', false) : $(this).next('input').prop('disabled', true);
   });
 
@@ -1324,6 +1235,7 @@ $(document).ready(function() {
               }
               
               input.removeAttr('fromOutside');
+              //input.prev('input').val('');
             } else {
               processSingleFile(response, val, ob, input, prevInput, token, theDiv);
             }

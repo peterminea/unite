@@ -36,7 +36,8 @@ const {
   sendCancelBidEmail,
   prel,
   sortLists,
-  postSignInBody
+  postSignInBody,
+  updateBidBody
 } = require("../middleware/templates");
 const {
   removeAssociatedBuyerBids,
@@ -210,8 +211,11 @@ exports.postIndex = (req, res) => {
       supplierPrice: req.body.supplierPrice,
       isCancelled: false,
       isExpired: false,
+      isExtended: req.body.validityExtensionId? true : false,
       buyerCurrency: req.body.buyerCurrency,
       supplierCurrency: req.body.supplierCurrency,
+      validityExtensionId: req.body.validityExtensionId,
+      validityExtension: req.body.validityExtensionId,
       specialMentions: req.body.specialMentions
         ? req.body.specialMentions
         : req.body.buyerName +
@@ -225,13 +229,13 @@ exports.postIndex = (req, res) => {
       createdAt: req.body.createdAt ? req.body.createdAt : Date.now(),
       updatedAt: Date.now(),
       expiryDate:
-        Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION,
+        Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION + (req.body.validityExtensionId? process.env.DAYS_BID_EXTENDED * process.env.DAY_DURATION : 0),
       createdAtFormatted: req.body.createdAt
         ? normalFormat(req.body.createdAt)
         : normalFormat(Date.now()),
       updatedAtFormatted: normalFormat(Date.now()),
       expiryDateFormatted: customFormat(
-        Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION
+        Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION + (req.body.validityExtensionId? process.env.DAYS_BID_EXTENDED * process.env.DAY_DURATION : 0)
       ),
       buyer: req.body.buyer,
       supplier: req.body.supplier
@@ -285,6 +289,7 @@ exports.getChatLogin = (req, res) => {
   var success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
   req.session.flash = [];
+  console.log(req.params.requestName);
 
   res.render("buyer/chatLogin", {
     successMessage: success,
@@ -335,8 +340,8 @@ exports.getViewBids = (req, res) => {
         var bidDate = bids[i].expiryDate;
         bidDate > date
           ? bids[i].isCancelled == true
-            ? validBids.push(bids[i])
-            : cancelledBids.push(bids[i])
+            ? cancelledBids.push(bids[i])
+            : validBids.push(bids[i])
           : expiredBids.push(bids[i]);
       }
     }
@@ -350,6 +355,12 @@ exports.getViewBids = (req, res) => {
 
     for (var i in validBids) {
       //validPrice += fx(parseFloat(validBids[i].price)).from(validBids[i].supplierCurrency).to(req.params.currency);
+      if(validBids[i].expirationDate <= Date.now() + process.env.DAYS_BEFORE_BID_EXPIRES * process.env.DAY_DURATION) {
+        validBids[i].warningExpiration = true;
+        if(validBids[i].isExtended == true) {
+          validBids[i].cannotExtendMore = true;
+        }
+      }
       validPrice += parseFloat(validBids[i].buyerPrice);
     }
 
@@ -386,6 +397,8 @@ exports.getViewBids = (req, res) => {
       expiredPrice: expiredPrice,
       cancelledPrice: cancelledPrice,
       currency: req.params.currency,
+      path: '../../../../',
+      bidExtensionDays: process.env.DAYS_BID_EXTENDED,
       statusesJson: JSON.stringify(statusesJson),
       supplierId: req.params.supplierId,
       buyerId: req.params.buyerId,
@@ -395,24 +408,7 @@ exports.getViewBids = (req, res) => {
 };
 
 exports.postViewBids = (req, res) => {
-  MongoClient.connect(URL, { useUnifiedTopology: true }, function(err, db) {
-    //db or client.
-    if (treatError(req, res, err, "back")) return false;
-
-    var dbo = db.db(BASE);
-    dbo
-      .collection("bidrequests")
-      .updateOne(
-        { _id: req.body.id },
-        { $set: { status: req.body.status } },
-        function(err, resp) {
-          if (treatError(req, res, err, "back")) return false;
-          req.flash("success", "Bid status updated successfully!");
-          db.close();
-          res.redirect("back");
-        }
-      );
-  });
+  updateBidBody(req, res, req.body.id, 'back');
 };
 
 exports.getCancelBid = (req, res) => {
