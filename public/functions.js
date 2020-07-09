@@ -340,6 +340,7 @@ function getCurrenciesList(elem, url, token) {//For <select> drop-down currencie
     success: function(data) {
     if(!data || !data.length || treatError(data, 'loading currencies')) {
         //obj.val('');
+        obj.append('<option>No results found.</option>');
         return false;
       }
 
@@ -371,6 +372,7 @@ function getProductsList(elem, url, token) {//For <select> drop-down currencies.
     success: function(data) {
     if(!data || !data.length || treatError(data, 'retrieving products')) {
         //obj.val('');
+        obj.append('<option>No results found.</option>');
         return false;
       }
 

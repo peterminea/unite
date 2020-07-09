@@ -112,18 +112,40 @@
 				</div>
 				<div class="form-group">
 					<% const re = /:\s|,\s/;
-            const products = request.productsServicesOffered;
+            const products = request.productList;
             const prices = request.priceList;
             const amounts = request.amountList;
             const images = request.productImagesList;
             %>
-					<Code></Code>
-					<label>Products / Services Offered</label>
-					<ul class="list-group">
+					<Code>The product prices are expressed in your currency.<br></Code>
+					<label>Products / Services Ordered</label>
+          <ul id="productsListUl" class="list-group">
+            <% let h = 0; if (products != null) { %> 
+              <li class='list-group-item' style='color: brown'>
+              <span class='cnt'>#</span>
+              <span class='product0'>Name</span>
+              <span class='buttonsWrapper'>Buttons</span>
+              <span class='imageWrapper'>Images</span>
+              <span class='priceWrapper'>Total</span>
+              <span class='amountWrapper'>Count</span>
+              <span class='basicPriceWrapper'>Price</span></span>
+            </li>
             <% for (h in products) { %>
-            <li class="list-group-item"><span><%= amounts[h] %>*<%= products[h] %> - <%= prices[h] %> <%= request.supplierCurrency %></span>
-            &nbsp;&nbsp;<span class='right'><% if(images[h].length > 0) { %><img src="../<%= path %><%= images[h].substring(7) %>" style="height: 25px; width: 30px" onclick="window.open(this.src)"></img> <% } %></span></li>
-            <% } %>
+            <li class='list-group-item'>
+              <span class='cnt'><%= h+1 %></span>
+              <span class='product'><%= products[h] %></span>
+              <span class='buttonsWrapper'><span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span></span>
+              <span class='imageWrapper'><span class='uploadImage'>Upload Image</span>  <span class='productImage' title="Product Image"> 
+                <% if(images[h].length > 0) { %>
+                <img src="<%= '../' + images[h].substring(7) %>" style="height: 25px; width: 30px" onclick="window.open(this.src)">
+                <% } %>
+                </span>
+              </span>
+              <span class='priceWrapper'><span class='totalPrice'><%= parseFloat(parseInt(amounts[h])*parseFloat(prices[h])).toFixed(2) %></span> <%= request.supplierCurrency %></span>
+              <span class='amountWrapper'><span class='amount'><%= amounts[h] %></span> items </span>
+              <span class='basicPriceWrapper'><span class='price'><%= parseFloat(prices[h]).toFixed(2) %></span> <span class='currency'><%= request.supplierCurrency %></span></span>
+            </li>
+            <% } }%>
           </ul>
 				</div>
         <div class="form-group">

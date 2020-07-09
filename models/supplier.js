@@ -167,7 +167,7 @@ const supplierSchema = new Schema({
     required: true
   }],
   amountsList: [{
-    type: String,
+    type: Number,
     required: true
   }],
   productImagesList: [{
