@@ -29,7 +29,6 @@
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       getCurrenciesList('select.currency', '/currencyGetAutocomplete', token);      
       initBaseRates(fx, 'select.currency');
-
       $('select.currency').css('width', '100px');
 
       $("input,select,textarea").on('change', function() {

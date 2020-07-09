@@ -433,7 +433,7 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
   });
   
   obj.on('click', function() {
-    var li = $(this).parent('li');/*
+    var li = $(this).parent('span').parent('li');/*
     var newIndex = elem.find('li').index(li);*/
     var ul = li.parent('ul');
     var entireAmount = parseInt(li.find('.amount').text());
@@ -452,14 +452,14 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     var rowPrice = parseFloat(li.find('span.totalPrice').text()).toFixed(2);      
     var handledPrice = handledAmount * parseFloat(li.find('span.price').text()).toFixed(2);
     var supplierCurrency = fromBuyer? li.parent('ul').attr('suppCurrency') : li.find('.currency').text();
-    var totalPagePrice = fromBuyer? parseFloat(li.attr('totalPrice')) : parseFloat($('#hiddenTotalPrice').val()).toFixed(2);
+    var totalPagePrice = fromBuyer? parseFloat(li.attr('totalPrice')).toFixed(2) : parseFloat($('#hiddenTotalPrice').val()).toFixed(2);
     
     var canContinue = true;
     var totalAmountInput = fromBuyer? $('#totalAmount_'+id) : $('#totalSupplyAmount');
     var localAmount = isAdd? entireAmount + handledAmount : entireAmount - handledAmount;
-    var localPrice = isAdd? parseFloat(rowPrice) + parseFloat(handledPrice) : parseFloat(rowPrice) - handledPrice;
+    var localPrice = isAdd? parseFloat(parseFloat(rowPrice) + parseFloat(handledPrice)).toFixed(2) : parseFloat(rowPrice - handledPrice).toFixed(2);
     var newAmount = isAdd? parseInt(totalAmountInput.val()) + handledAmount : parseInt(totalAmountInput.val()) - handledAmount;
-    var newPrice = isAdd? parseFloat(totalPagePrice) + parseFloat(handledPrice) : parseFloat(totalPagePrice) - handledPrice;
+    var newPrice = isAdd? parseFloat(parseFloat(totalPagePrice) + parseFloat(handledPrice)).toFixed(2) : parseFloat(totalPagePrice - handledPrice).toFixed(2);
     totalAmountInput.val(parseInt(newAmount));
     
     if(isRow || (entireAmount==1 && !isAdd)) {//Delete Row. If 1.
@@ -577,14 +577,20 @@ function addition(prod, prodVal, priceVal, currencyVal, amountVal, imagePath, el
         currencyVal = pageCurrency;
         bigPrice = (fx.convert((bigPrice), {from: currencyVal, to: pageCurrency}));
       }
+    
+      if(!(elem.find('li').length)) {
+        elem.append(`<li class='list-group-item' style='color: brown'><span class='cnt'>#</span><span class='product0'>Name</span><span class='buttonsWrapper'>Buttons</span><span class='imageWrapper'>Images</span><span class='priceWrapper'>Total</span><span class='amountWrapper'>Count</span>
+<span class='basicPriceWrapper'>Price</span></span></li>`);
+      }
+                        
+      var lis = elem.find('li').length;
       
-      elem.append("<li class='list-group-item' price='" + addedPrice + "' totalPrice='" + bigPrice 
-                  + "' amount='" + amountVal + "'>" 
-                  + `<span class='product'>${prodVal}</span>
-<span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span>
-<span class='productImage' title='Image of Product'>` + (imagePath && imagePath.length? `<img src="${imagePath}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '') +  `</span>
-<span class='uploadImage'>Upload Image</span>
-<span class='priceWrapper'>Total: <span class='totalPrice'>${addedPrice}</span> ${currencyVal}</span>
+      elem.append(
+        "<li class='list-group-item' price='" + addedPrice + "' totalPrice='" + bigPrice + "' amount='" + amountVal + "'>"
+        + `<span class='cnt'>${lis}</span><span class='product'>${prodVal}</span>
+<span class='buttonsWrapper'><span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span></span>
+<span class='imageWrapper'><span class='productImage' title='Image of Product'>` + (imagePath && imagePath.length? `<img src="${imagePath}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '') +  `</span><span class='uploadImage'>Upload Image</span></span>
+<span class='priceWrapper'><span class='totalPrice'>${addedPrice}</span> ${currencyVal}</span>
 <span class='amountWrapper'><span class='amount'>${amountVal}</span> items</span>
 <span class='basicPriceWrapper'><span class='price'>${priceVal}</span><span class='currency'>${currencyVal}</span></span>
 </li>`);
@@ -878,7 +884,7 @@ function registrationDialog(accountType) {
 
 function delegateUpload(obj) {
   obj.on('click', function() {
-    var li = $(this).parent('li');    
+    var li = $(this).parent('span').parent('li');    
     var ul = li.parent('ul');
     var div = ul.closest('div');
     var index = ul.find('li').index(li);
@@ -1146,7 +1152,9 @@ $(document).ready(function() {
   var token = $("input[name='_csrf']:first").val();
   
   $('input.upload').on('change', function() {
-    $(this).val()? $(this).next('input').prop('disabled', false) : $(this).next('input').prop('disabled', true);
+    var nextInput = $(this).next('input');    
+    $(this).attr('fromOutside') != null?
+      nextInput.trigger('click') : nextInput.prop('disabled', ($(this).val()? false : true));
   });
 
   $('.single,.multiple').each(function(index, element) {

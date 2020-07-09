@@ -39,64 +39,72 @@ span.requestData {
 }
 
 span.uploadImage {
-  font-size: 9pt;
+  font-size: 10pt;
   color: green;
   cursor: pointer;
+  margin-top: 2px;
 }
 
-span.productImage,span.uploadImage {
-  float: right;
-  cursor: pointer;
-  margin-right: 30px;
+span.imageWrapper {  
+  cursor: pointer;  
+}
+
+span.imageWrapper,span.priceWrapper,span.basicPriceWrapper,span.amountWrapper {
+  float: right;  
+  margin-right: 36px;
+}
+
+span.imageWrapper {
+  width: 140px
+}
+
+span.product {
+  font-weight: bold
+}
+
+span.cnt {
+  float: left;
+  width: 25px
 }
 
 span.priceWrapper,span.basicPriceWrapper,span.amountWrapper {
-  float: right;  
-  margin-right: 40px;
-}
-
-span.right {
-  float: right;
-  margin-right: 20px
+  width: 100px
 }
 
 span.productImage {
   margin-top: -2px;
 }
 
-span.uploadImage {
-  margin-top: 2px;
+span.buttonsWrapper {
+  float: right;
+  cursor: pointer;
 }
 
 span.inc {
-    float: right;
     background-image: url("https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2FINC.png?v=1593941148908");
+    float: right;
     background-size: 10px 10px;
     background-repeat: no-repeat;
     width: 20px;
     height: 10px;
     margin-top: 5px;
     padding: 0;
-    cursor: pointer;
 }
 
-span.dec {
-    float: right;
+span.dec {    
     background-image: url("https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2FDEC.png?v=1593941156757");
+    float: right;
     background-size: 10px 10px;
     background-repeat: no-repeat;
     width: 20px;
     height: 10px;
     margin-top: 5px;
     padding: 0;
-    cursor: pointer;
 }
 
 span.rem {
-  float: right;
-  color: green;
-  cursor: pointer;
   background-image: url("https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2FREM.png?v=1593942051420");
+  float: right;
   background-size: 10px 10px;
   background-repeat: no-repeat;
   width: 10px;
