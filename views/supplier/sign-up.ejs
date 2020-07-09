@@ -35,6 +35,11 @@
       initBaseRates(fx, 'select.currency');
       
       var defaultCurr = "<%= DEFAULT_CURR %>";
+      
+      $("#amount").inputFilter(function(value) {
+          return /^\d*$/.test(value);
+      });
+      
       $('select.currency')
         .find('option[value="'+defaultCurr+'"]')
         .prop('selected', true);
