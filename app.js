@@ -1,36 +1,3 @@
-//Basic declarations:
-const path = require("path");
-const http = require("http");
-const express = require("express");
-const socketio = require("socket.io");
-const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
-const session = require("express-session");
-const MongoDBStore = require("connect-mongodb-session")(session);
-const csrf = require("csurf");
-const multer = require("multer");
-const fs = require("fs-extra");
-const fs2 = require("fs");
-const dateformat = require("dateformat");
-const { basicFormat, customFormat, normalFormat } = require('./middleware/dateConversions');
-const process = require("process");
-const MongoClient = require("mongodb").MongoClient;
-const app = express();
-const server = http.createServer(app);
-const socket = socketio(server);
-const BadWords = require("bad-words");
-const crypto = require("crypto");
-const moment = require("moment");
-const http2 = require("http2");
-
-const BASE = process.env.BASE;
-const URI = process.env.MONGODB_URI;
-const MAX_PROD = process.env.SUP_MAX_PROD;
-
-const stripeSecretKey = process.env.STRIPE_KEY_SECRET;
-const stripePublicKey = process.env.STRIPE_KEY_PUBLIC;
-const stripe = require("stripe")(stripeSecretKey);
-
 //Classes:
 const BidRequest = require("./models/bidRequest");
 const BidStatus = require("./models/bidStatus");
@@ -48,12 +15,45 @@ const Country = require("./models/country");
 const Industry = require("./models/industry");
 const Capability = require("./models/capability");
 const ProductService = require("./models/productService");
+
+//Basic declarations:
+const path = require("path");
+const http = require("http");
+const express = require("express");
+const socketio = require("socket.io");
+const bodyParser = require("body-parser");
+const session = require("express-session");
+const csrf = require("csurf");
+const multer = require("multer");
+const fs = require("fs-extra");
+const fs2 = require("fs");
+const dateformat = require("dateformat");
+const { basicFormat, customFormat, normalFormat } = require('./middleware/dateConversions');
+const process = require("process");
+const BadWords = require("bad-words");
+const crypto = require("crypto");
+const moment = require("moment");
+const http2 = require("http2");
+const mongoose = require("mongoose");
+const MongoDBStore = require("connect-mongodb-session")(session);
+const MongoClient = require("mongodb").MongoClient;
+const BASE = process.env.BASE;
+const URI = process.env.MONGODB_URI;
+const MAX_PROD = process.env.SUP_MAX_PROD;
+const stripeSecretKey = process.env.STRIPE_KEY_SECRET;
+const stripePublicKey = process.env.STRIPE_KEY_PUBLIC;
+const stripe = require("stripe")(stripeSecretKey);
+
+
 const cookieParser = require("cookie-parser");
 //require('dotenv').config();
 
 //const MONGODB_URI = "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";//The DB url is actually saved as an Environment variable, it will be easier to use anywhere in the application that way.
 //Syntax: process.env.MONGODB_URI
 
+const app = express();
+const server = http.createServer(app);
+const socket = socketio(server);
 mongoose.Promise = global.Promise;
 mongoose.set("useCreateIndex", true);
 
@@ -145,7 +145,6 @@ server2.on("stream", (stream, headers) => {
 
 server2.listen(8443);*/
 
-//throw new Error();
 
 app.post("/processBuyer", (req, res) => {
   MongoClient.connect(URI, { useUnifiedTopology: true }, function(err, db) {
@@ -1233,6 +1232,28 @@ if (1 == 2)
     process.on("uncaughtException", function(err) {
       console.error(err.message);
     });
+    
+    var originalList = [];
+    for(var i = 0; i < 3; i++) {
+      originalList.push(3.25);
+    }
+    
+    var productList = [];
+    productList.push('Tempera');
+    productList.push('Paintbrushes');
+    productList.push('Frames');
+    
+    var productDetailsList = [];
+    productDetailsList.push("Product name: 'Tempera', amount: 2, price: 6 EUR.");
+    productDetailsList.push("Product name: 'Paintbrushes', amount: 5, price: 10 EUR.");
+    productDetailsList.push("Product name: 'Frames', amount: 3, price: 15 EUR.");
+    
+    var unset = { $unset: { products: 1, productsServicesOffered: 1 } };
+    var set = { $set: { productList: productList, productDetailsList: productDetailsList } };
+  
+    db.collection("bidrequests").updateMany({}, unset, {multi: true});
+    db.collection("bidrequests").updateMany({}, set, function(err, obj) {});
+    db.collection("bidrequests").updateMany({}, { $set: { priceOriginalList: originalList } }, function(err, obj) {});
 
  //db.close();
   });

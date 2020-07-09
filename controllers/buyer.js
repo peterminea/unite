@@ -163,9 +163,10 @@ exports.postIndex = (req, res) => {
     });
   } else if (req.body.itemDescription) {
     //New Bid Request placed
-    var productList = prel(req.body.productsServicesOffered);
+    var productList = prel(req.body.productList);
     var amountList = prel(req.body.amountList, false, true);
     var priceList = prel(req.body.priceList, true, false);
+    var priceOriginalList = prel(req.body.priceOriginalList, true, false);
     var imagesList = prel(req.body.productImagesList);
     sortLists(productList, amountList, priceList, imagesList);
 
@@ -193,11 +194,12 @@ exports.postIndex = (req, res) => {
       buyerEmail: req.body.buyerEmail,
       supplierEmail: req.body.supplierEmail,
       itemDescription: req.body.itemDescription,
-      productsServicesOffered: productList,
+      productList: productList,
       amountList: amountList,
       productImagesList: imagesList,
       priceList: priceList, //Supplier's currency.
-      orderedProducts: products,
+      priceOriginalList: priceOriginalList,
+      productDetailsList: products,
       itemDescriptionLong: req.body.itemDescriptionLong,
       itemDescriptionUrl: req.itemDescriptionUrl,
       amount: req.body.amount,

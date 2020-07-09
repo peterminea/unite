@@ -36,8 +36,8 @@
       
       var defaultCurr = "<%= DEFAULT_CURR %>";
       
-      $("#amount").inputFilter(function(value) {
-          return /^\d*$/.test(value);
+      $("input.number").inputFilter(function(value) {
+        return /^\d*$/.test(value);
       });
       
       $('select.currency')
@@ -163,11 +163,11 @@
         </div>
         <div class="form-group">
           <label>Employee Numbers*</label>
-          <input type="number" class="form-control" name="employeeNumbers" required>
+          <input type="number" class="form-control number" name="employeeNumbers" required>
         </div>
         <div class="form-group">
           <label>Last Year Turnover*</label>
-          <input type="number" class="form-control" name="lastYearTurnover" required>
+          <input type="number" class="form-control number" name="lastYearTurnover" required>
         </div>
         <div class="form-group">
           <label>Website</label>
@@ -190,9 +190,9 @@
           <div class="input-group">
             <input type="text" class="form-control prodInput" placeholder="Product*" title="Add Product/Service" id="prodServiceInput">
             <br>
-            <input type="number" min="0.1" step="0.1" placeholder="Price*" class="form-control" title="Price" id="price">
+            <input type="number" min="0.1" step="0.1" placeholder="Price*" class="form-control number" title="Price" id="price">
             <br>
-            <input type="number" class="form-control" title="Amount" placeholder="Amount*"class="amount" id="amount" min="1">
+            <input type="number" class="form-control number" title="Amount" placeholder="Amount*"class="amount" id="amount" step="1" min="1">
             <input type="text" readonly class="form-control" title="Currency" class="currency0" id="currency">
             <div class="input-group-append">
               <button class="btn btn-outline-secondary" type="button" disabled id="addProdService">Add</button>

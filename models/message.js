@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const BidRequest = require('../models/bidRequest');
+var bid = mongoose.model('BidRequest');
 
 const messageSchema = new Schema({
     from: {
@@ -28,6 +30,7 @@ const messageSchema = new Schema({
     },
     bidRequestId: {
         type: Schema.Types.ObjectId,
+        ref: 'bid',
         required: false
     }
 },

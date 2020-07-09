@@ -49,9 +49,9 @@
        
         var prodInput = $("#hiddenProdServicesList_"+id);
         var amountInput = $("#amountList_"+id);
-        var priceInput = $("#priceList_"+id);
+        var priceInput = $("#priceList_"+id), priceOrigInput = $("#priceOriginalList_"+id);
         var prodImageInput = $("#productImagesList_"+id);
-        var arr = [], arr1 = [], arr2 = [], arr3 = [];
+        var arr = [], arr1 = [], arr2 = [], arr3 = [], arr4 = [];
         var totalPriceOriginal = 0, totalPriceConverted = 0;
         
         elem.find('li').each(function() {
@@ -60,6 +60,7 @@
           var originalPrice = parseFloat($(this).attr('bigPrice')).toFixed(2);
           var val = fx.convert(originalPrice, {from: $(this).find('.currency').text(), to: elem.attr('suppCurrency')});
           arr2.push(val);
+          arr4.push(originalPrice);
           totalPriceOriginal += originalPrice;
           totalPriceConverted += parseFloat(val).toFixed(2);
           var img = $(this).find('.productImage img');
@@ -71,6 +72,7 @@
         amountInput.val(arr1);
         priceInput.val(arr2);
         prodImageInput.val(arr3);
+        priceOrigInput.val(arr4);
         
         $('#price_'+id).text(totalPriceOriginal);
         $('#supplierPrice_'+id).text(totalPriceConverted);
@@ -462,8 +464,16 @@
                     <input type="text" class="form-control" readonly value="<%= supplier.otherSocialMediaURL %>">
                   </div>
                   <div class="form-group">
-                    <label>Products / Services Offered</label>
-                    <input type="text" class="form-control" readonly value="<%= supplier.productsServicesOffered %>" >
+                    <label>Products / Services Offered:</label>
+                    <% if(supplier.productsServicesOffered != null && supplier.productsServicesOffered.length > 0) { %>
+                    <select class="form-control" style="width: 200px">
+                      <% for(sel of supplier.productsServicesOffered) { %>
+                      <option disabled><%= sel %></option>
+                      <% } %>
+                    </select>
+                    <% } else { %>
+                    <span class='form-control'>None</span>
+                    <% } %>
                   </div>
                   <div class="form-group">
                     <label>Capability Description</label>
@@ -511,18 +521,17 @@
                   <!--Mandatory check of agreements -->
                   <div class="form-group">
                     <div class="form-check">
-                      <input readonly disabled class="form-check-input" type="checkbox"
+                      <input readonly disabled name='terms' class="form-check-input" type="checkbox"
                         <%= supplier.UNITETermsAndConditions ? "checked" : "" %>>
-                      <label class="form-check-label" for="invalidCheck2">
+                      <label class="form-check-label" for="terms">
                         UNITE Terms And Conditions
                       </label>
                     </div>
                   </div>
                   <div class="form-group">
                     <div class="form-check">
-                      <input class="form-check-input" type="checkbox"
-                        <%= supplier.antibriberyAgreement ? "checked" : "" %> disabled readonly>
-                      <label class="form-check-label" for="invalidCheck2">
+                      <input readonly disabled class="form-check-input" type="checkbox" name='antibrib' <%= supplier.antibriberyAgreement ? "checked" : "" %> disabled readonly>
+                      <label class="form-check-label" for="antibrib">
                         Antibribery Agreement
                       </label>
                     </div>
@@ -639,7 +648,7 @@
                     <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Process Excel File" />
                   </div>
                   <div class="form-group">
-                    <label class="col-form-label">Products / Services Offered*</label>
+                    <label class="col-form-label">Products / Services Requested*</label>
                     <span class='littleNote form-control'>
                       You can also request products that are not in the list of the supplier.
                     </span>
@@ -664,9 +673,10 @@
                     <p class='term'>
                       You have a number of <span class='productsCount'>0</span> products.
                     </p>
-                    <input type="hidden" required id="hiddenProdServicesList_<%= i %>" name="productsServicesOffered" value="">
+                    <input type="hidden" required id="hiddenProdServicesList_<%= i %>" name="productList" value="">
                     <input type="hidden" required id="amountList_<%= i %>" name="amountList" value="">
                     <input type="hidden" required id="priceList_<%= i %>" name="priceList" value="">
+                    <input type="hidden" required id="priceOriginalList_<%= i %>" name="priceOriginalList" value="">
                     <input type="hidden" required id="productImagesList_<%= i %>" name="productImagesList" value="">
                   </div>
                   <div class="form-group">
@@ -688,14 +698,14 @@
                     </span>
                   </div>
                   <div class="form-group">
-                    <label class="col-form-label">Your price per unit/product:</label>
+                    <label class="col-form-label">Your price for selected product:</label>
                     <span class="form-control hid">
                       <span id="buyerPriceUnit_<%= i %>">0</span>
                       <span index="<%= i %>" class="bidCurrency" id="buyerCurrencyUnit_<%= i %>"></span>
                     </span>
                   </div>
                   <div class="form-group">
-                    <label class="col-form-label">Supplier's price per unit/product:</label>
+                    <label class="col-form-label">Supplier's price for selected product:</label>
                     <span class="form-control hid">
                       <span id="supplierPriceUnit_<%= i %>">0</span>
                       <span index="<%= i %>" class="suppCurrency" id="supplierCurrencyUnit_<%= i %>"><%= supplier.currency %></span>
@@ -711,7 +721,7 @@
                       <option disabled title="<%= status.name %>" value="<%= status.value %>"><%= status.name %></option>
                       <% } } %>
                     </select>
-                    <div style="display: none" id="statusJsonValues_<%= i %>">
+                    <div style="visibility: hidden" id="statusJsonValues_<%= i %>">
                       <% if (statusesJson != null) { %>
                         <span class='statuses'><%= statusesJson %></span>
                       <% } %>

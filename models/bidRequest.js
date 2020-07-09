@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const process = require('process');
+const Buyer = require('../models/buyer'), Supplier = require('../models/supplier');
+var buyer = mongoose.model('Buyer'), supplier = mongoose.model('Supplier');
 
 const bidRequestSchema = new Schema({
   requestName: {
@@ -28,10 +30,6 @@ const bidRequestSchema = new Schema({
     type: String,
     required: true
   },
-  productsServicesOffered: {
-    type: [String],
-    required: true
-  },
   itemDescriptionLong: {
     type: String,
     required: true
@@ -43,7 +41,7 @@ const bidRequestSchema = new Schema({
   amount: {
     type: Number,
     validate(value) {
-      if(value < 0) {
+      if(value < 0 || !(Number.isInteger(value))) {
         throw new Error('Please specify a valid number.');
       }
     },
@@ -57,19 +55,30 @@ const bidRequestSchema = new Schema({
     type: String,
     required: true,
   },
-  orderedProducts: [String],//Schema.Types.Mixed,
-  amountList: {
-    type: [Number],
+  productList: [{
+    type: String,//Schema.Types.Mixed,
     required: true
-  },
-  priceList: {//Converted to Supplier's currency.
-    type: [Number],
+  }],
+  productDetailsList: [{
+    type: String,
     required: true
-  },
-  productImagesList: {
-    type: [String],
+  }],
+  amountList: [{
+    type: Number,
     required: true
-  },
+  }],
+  priceList: [{//Converted to Supplier's currency.
+    type: Number,
+    required: true
+  }],
+  priceOriginalList: [{//Keeps Buyer's currency.
+    type: Number,
+    required: true
+  }],
+  productImagesList: [{
+    type: String,
+    required: true
+  }],
   deliveryLocation: {
     type: String,
     required: true
@@ -109,7 +118,7 @@ const bidRequestSchema = new Schema({
     required: true,
     default: 1,
     validate(value) {
-      if(value < 1) {
+      if(value <= 0) {
         throw new Error('Price must be a strictly positive value.');
       }
     }
@@ -119,7 +128,7 @@ const bidRequestSchema = new Schema({
     required: true,
     default: 1,
     validate(value) {
-      if(value < 1) {
+      if(value <= 0) {
         throw new Error('Price must be a strictly positive value.');
       }
     }
@@ -167,11 +176,13 @@ const bidRequestSchema = new Schema({
     default: false
   },
   buyer: {
-    type: Schema.Types.ObjectId, // Buyer's object id -> It will be generated from current session
+    type: Schema.Types.ObjectId,
+    ref: 'buyer',// Buyer's object id -> It will be generated from current session
     required: true
   },
   supplier: {
     type: Schema.Types.ObjectId, // Supplier's object id -> It will be generated from current session
+    ref: 'supplier',
     required: true
   }
 });
