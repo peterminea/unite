@@ -526,9 +526,9 @@ function removeAllProducts() {//Supplier products.
     $(this).text('0');
   });
   
-  $('#totalSupplyAmount').val('0');
+  $('#totalSupplyAmount').val(0);
   $('#totalSupplyPrice').text('0 ' + $('input[name="currency"]').val());
-  $('#hiddenTotalPrice').val('0');
+  $('#hiddenTotalPrice').val(0);
 }
 
 
@@ -594,7 +594,7 @@ function addition(prod, prodVal, priceVal, currencyVal, amountVal, imagePath, el
 <span class='imageWrapper'><span class='productImage' title='Image of Product'>` + (imagePath && imagePath.length? `<img src="${imagePath}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '') +  `</span><span class='uploadImage'>Upload Image</span></span>
 <span class='priceWrapper'><span class='totalPrice'>${addedPrice}</span> ${currencyVal}</span>
 <span class='amountWrapper'><span class='amount'>${amountVal}</span> items</span>
-<span class='basicPriceWrapper'><span class='price'>${priceVal}</span><span class='currency'>${currencyVal}</span></span>
+<span class='basicPriceWrapper'><span class='price'>${priceVal}</span> <span class='currency'>${currencyVal}</span></span>
 </li>`);
       
       var totalAmountInput = fromBuyer? $('#totalAmount_'+id) : $('#totalSupplyAmount');
@@ -642,7 +642,10 @@ function addProduct(obj) {
         $('#prodServiceInput,#price,#currency').removeClass('errorField');
         addition(input, input.val(), $('#price').val(), $('#currency').val(), $('#amount').val(), imagePath, elem, false);
         input.val('');
+        $('#price').val('0');
+        $('#amount').val('0');
         $('#price').val('');
+        $('#amount').val('');
         //$('#currency').val('');
         $('#addProdService').prop('disabled', true);
         $('.productRequired').remove();
@@ -818,9 +821,12 @@ function supplierValidateFields(fx) {
     return false;
   }
   
+  $('#hiddenTotalPrice').val(parseFloat($('#totalSupplyAmount').val()));
+  $('#hiddenTotalAmount').val($('#totalSupplyPrice').text());
+  
   var arr = [], arr1 = [], arr2 = [], arr3 = [], arr4 = [];
   
-  $('#prodServices li').each(function(index, el) {
+  $('#prodServices li').not(':first').each(function(index, el) {
     var product = $(this).find('.product'), price = $(this).find('.price'), currency = $(this).find('.currency'), quantity = $(this).find('.amount'), productImageSpan = $(this).find('.productImage');
     var src = productImageSpan.find('img').length? productImageSpan.find('img').attr('src') : null;
     
@@ -831,7 +837,7 @@ function supplierValidateFields(fx) {
     arr4.push(src? 'public/' + src.substring(3) : '');
   });
 
-  var preferred = $('.currency').first().text();
+  var preferred = $('select.currency').find('option:selected').text();
   var isChanged = false;
   $('span.currency').each(function(ind, elem) {
     var curr = $(this).text();
@@ -863,16 +869,26 @@ function registrationDialog(accountType) {
     width: 300,
     height: 450,
     open: function(event, ui) {
-      $('#dialog').append('<p>Congratulations for choosing to register your ' + accountType + ' account on UNITE!<br>Your next step is to verify your e-mail address for the Account Confirmation link.<br>Please confirm your new Account in order to start using our Services.</p>');
+      var password = $('input[name="password"]').val(), passwordRepeat = $('input[name="passwordRepeat"]').val();
+      if(password !== passwordRepeat) {
+        $('#registration').addClass('error');
+        $('#dialog').append('<p><b>Passwords do not match.</b></p>');
+      } else {
+        $('#registration').removeClass('error');
+        $('#dialog').append('<p>Congratulations for choosing to register your ' + accountType + ' account on UNITE!<br>Your next step is to verify your e-mail address for the Account Confirmation link.<br>Please confirm your new Account in order to start using our Services.</p>');
+      }
     },
     close: function(event, ui) {
         $('#dialog').text('');
     },
     buttons: {
       OK: function() {
-        setTimeout(function() {
-          $('#registration').submit();
-        }, 150);
+        if(!($('#registration').hasClass('error'))) {
+          setTimeout(function() {
+            $('#registration').submit();
+          }, 150);
+        }
+        
         $(this).dialog("close");
       },              
       Cancel: function() {
@@ -1227,17 +1243,17 @@ $(document).ready(function() {
     };
 
     xhr.send(formData);
-    xhr.onreadystatechange = function() {//alert(xhr.responseText);
+    xhr.onreadystatechange = function() {
       if (xhr.readyState === 4) {//Success!         
           input.next('input').prop('disabled', true);
           var prevInput = input.prev('input');
           var ob, val, response = isAvatar? xhr.responseText : JSON.parse(xhr.responseText);
           var theDiv = input.parent('div');
-         
+          
           if(isAvatar) {
-            var src = '../' + response.path.substring(7);         
+            var src = '../' + response.substring(7);
             $('input[name="avatar"]').val(src);//'../../../'+response
-            $('<div><img src="'+src+'" alt="avatar" style="width: 150px; height: 150px"></div>').insertAfter(input);
+            $(`<div><img src="${src}" alt="avatar" style="width: 60px; height: 60px"  onclick="window.open(this.src)"><br><span token="${token}" file="${response}" class="remFile" onclick="removeFile(this,Swal)" title="Delete the ${src} file">Remove</span></div>`).insertAfter(input);
             //var loc = window.location.pathname;
             //var dir = loc.substring(0, loc.lastIndexOf('/'));
             //alert(loc + ' ' + dir);

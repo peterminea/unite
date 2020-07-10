@@ -424,13 +424,15 @@ exports.postSignUp = async (req, res) => {
 
             try {
               await bcrypt.hash(req.body.password, 16, async function(err, hash) {
-                
                   var productList = prel(req.body.productsServicesOffered);
                   var amountsList = prel(req.body.amountsList, false, true);
                   var pricesList = prel(req.body.pricesList, true, false);
                   var imagesList = prel(req.body.productImagesList);
                   var currenciesList = prel(req.body.currenciesList);
                   sortLists(productList, amountsList, pricesList, imagesList, currenciesList);
+                  console.log(req.body.totalSupplyPrice);
+                  console.log(req.body.totalSupplyAmount);
+                  console.log(productList);
                 
                   supplier = new Supplier({
                     role: process.env.USER_REGULAR,
@@ -497,8 +499,7 @@ exports.postSignUp = async (req, res) => {
                        return res.status(500).send({
                            msg: err.message
                            });
-                    }
-                  });
+                    }                  
 
                     req.session.supplier = supplier;
                     req.session.supplierId = supplier._id;
@@ -570,6 +571,7 @@ exports.postSignUp = async (req, res) => {
                       }, 250);
                     }
               });
+            });
          } catch {              
          }
         }
@@ -1043,9 +1045,9 @@ exports.postProfile = async (req, res) => {
           req.flash("success", "Supplier details updated successfully!");
           console.log('Supplier details updated successfully!');
           return res.redirect("/supplier/profile");
-        }, 400);
+          }, 400);
+        });
       });
-    });
     })
     //.catch(console.error);
   } catch {

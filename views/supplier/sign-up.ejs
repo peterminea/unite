@@ -40,13 +40,26 @@
         return /^\d*$/.test(value);
       });
       
-      $('select.currency')
-        .find('option[value="'+defaultCurr+'"]')
-        .prop('selected', true);
+      $("input.float").inputFilter(function(value) {
+        return /^[0-9]+([,.][0-9]+)?$/g.test(value);
+      });    
+      
+      
+      // /^[0-9]+([,.][0-9]+)?$/g     
+      setTimeout(function() {
+        $('select.currency')
+          .find('option[value="' + defaultCurr + '"]')
+          .prop('selected', true)
+          .trigger('change');
+
+         $('#updateProfile').prop('disabled', true);
+          $("input,textarea,select").on('change', function () {
+            $('#updateProfile').removeAttr('disabled');
+          });
+      }, 800);      
 
       $('select.currency')
-        .css('width', '100px')
-        .trigger('change');
+        .css('width', '100px');
 
       $('.cb').click(function() {
         $('#register').prop('disabled', $(':checkbox:checked').length == 2? false : true);
@@ -93,7 +106,7 @@
       </a>
     </div>
 
-    <div class="sign-in-form smooth-shadow">
+    <div class="profile-form smooth-shadow">
       <form id="registration" method="POST">
         <h2>Sign up as Supplier</h2>
         <input type="hidden" name="priceList" id="priceList">
@@ -116,6 +129,10 @@
           <label for="password">Password*</label>
           <input type="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}" title="Please type at least one number, one uppercase and lowercase letter, and at least 6 characters." class="form-control" id="password" name="password" required>
         </div>
+        <div class="form-group">
+          <label for="password">Please re-enter password*</label>
+          <input type="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}" title="Please ensure that the passwords match." class="form-control" name="passwordRepeat" required>
+        </div> 
         <div class="form-group">
           <label>Director's name*</label>
           <input type="text" class="form-control" name="directorsName" required>
@@ -173,6 +190,18 @@
           <label>Website</label>
           <input type="text" class="form-control" name="website">
         </div>
+        <div class="form-group">
+          <label>Capability Description*</label>
+          <input type="text" class="form-control" name="capabilityDescription" required>
+        </div>
+        <div class="form-group">
+          <label>Relevant Experience*</label>
+          <textarea required class="form-control" id="relevantExperience" name="relevantExperience"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Supporting Information</label>
+          <input type="text" class="form-control" name="supportingInformation">
+        </div>
         <div>
           <p>
             You can use an Excel file with your products list, formatted as product name + product price + product currency + amount (4 cells per row, first row must contain column names), and after you click on the Process button, our system will automatically add the products and build their detailed list on page.
@@ -190,7 +219,7 @@
           <div class="input-group">
             <input type="text" class="form-control prodInput" placeholder="Product*" title="Add Product/Service" id="prodServiceInput">
             <br>
-            <input type="number" min="0.1" step="0.1" placeholder="Price*" class="form-control number" title="Price" id="price">
+            <input type="number" min="0.1" step="0.1" placeholder="Price*" class="form-control float" title="Price" id="price">
             <br>
             <input type="number" class="form-control number" title="Amount" placeholder="Amount*"class="amount" id="amount" step="1" min="1">
             <input type="text" readonly class="form-control" title="Currency" class="currency0" id="currency">
@@ -220,24 +249,13 @@
         </div>
         <div class="form-group">
           <label>Total Price of Supply*</label>
-          <span type="text" class="form-control supply" id="totalSupplyPrice" name="totalSupplyPrice"></span>
-          <input type="hidden" class="supply" id="hiddenTotalPrice" value="0">
+          <span type="text" class="form-control supply" id="totalSupplyPrice">0 <%= DEFAULT_CURR %></span>
+          <input type="hidden" class="supply2" id="hiddenTotalPrice" name="totalSupplyPrice" value="0">
         </div>
         <div class="form-group">
           <label>Total Amount of Supply*</label>
-          <input type="number" disabled class="form-control supply" id="totalSupplyAmount" name="totalSupplyAmount" value="0">
-        </div>
-        <div class="form-group">
-          <label>Capability Description*</label>
-          <input type="text" class="form-control" name="capabilityDescription" required>
-        </div>
-        <div class="form-group">
-          <label>Relevant Experience*</label>
-          <textarea required class="form-control" id="relevantExperience" name="relevantExperience"></textarea>
-        </div>
-        <div class="form-group">
-          <label>Supporting Information</label>
-          <input type="text" class="form-control" name="supportingInformation">
+          <input type="number" disabled class="form-control supply2" id="totalSupplyAmount" value="0">
+          <input type="hidden" class="supply2" id="hiddenTotalAmount" name="totalSupplyAmount" value="0">
         </div>
         
         <div class="form-group">

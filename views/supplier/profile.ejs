@@ -38,11 +38,10 @@
         return /^\d*$/.test(value);
       });
       
-      $('select.currency')
-        .find('option[value="' + defaultCurr + '"]')
-        .prop('selected', true)
-        .trigger('change');
-      
+      $("input.float").inputFilter(function(value) {
+        return /^[0-9]+([,.][0-9]+)?$/g.test(value);
+      });
+
       /*
       $("#prodServiceInput").on("paste", function(e) {
           // access the clipboard using the api
@@ -69,6 +68,9 @@
             $('#updateProfile').removeAttr('disabled');
           });
       }, 800);
+      
+      $('select.currency')
+        .css('width', '100px');
 
       $('#prodServiceInput').on('change', function() {
         if($(this).val()) {
@@ -120,8 +122,7 @@
       <span class="navbar-toggler-icon"></span>
     </button>
   </nav>
-
-  <!-- <img src="../../public/uploads/multiple-12:55:22:pm-GD.png"> -->
+  
   <div class="container">
     <br><br>
     <div class="card">
@@ -235,6 +236,18 @@
           <label>Other Social Media URL</label>
           <input type="url" class="form-control" id="otherSocialMediaURL" name="otherSocialMediaURL" value="<%= profile.otherSocialMediaURL %>">
         </div>
+        <div class="form-group">
+          <label>Capability Description*</label>
+          <input type="text" class="form-control" id="capabilityDescription" name="capabilityDescription" value="<%= profile.capabilityDescription %>" required>
+        </div>
+        <div class="form-group">
+          <label>Relevant Experience*</label>
+          <textarea required class="form-control" id="relevantExperience" name="relevantExperience"><%= profile.relevantExperience %></textarea>
+        </div>
+        <div class="form-group">
+          <label>Supporting Information</label>
+          <input type="text" class="form-control" id="supportingInformation" name="supportingInformation" value="<%= profile.supportingInformation %>">
+        </div>
         <div>
           <p>
             You can use an Excel file with your products list, formatted as product name + product price + product currency + product amount (4 cells per row, first row must contain column names), and after you click on the Process button, our system will automatically add the products and build their detailed list on page.
@@ -252,7 +265,7 @@
           <div class="input-group">
             <input type="text" class="form-control prodInput" placeholder="Product*" title="Add Product/Service" id="prodServiceInput">
             <br>
-            <input type="number" min="0.1" step="0.1" placeholder="Price*" class="form-control number" title="Price" id="price">
+            <input type="number" min="0.1" step="0.1" placeholder="Price*" class="form-control float" title="Price" id="price">
             <br>
             <input type="number" class="form-control number" title="Amount" placeholder="Amount*" id="amount" step="1" min="1">
             <input type="text" readonly class="form-control" title="Currency" class="currency0" id="currency">
@@ -313,12 +326,13 @@
         </div>
         <div class="form-group">
           <label>Total Price of Supply*</label>
-          <span class="form-control supply1" id="totalSupplyPrice" name="totalSupplyPrice"></span>
-          <input type="hidden" class="supply2" id="hiddenTotalPrice" value="0">
+          <span class="form-control supply1" id="totalSupplyPrice"><%= profile.totalSupplyPrice %> <%= <%= profile.currency %> %></span>
+          <input type="hidden" class="supply2" id="hiddenTotalPrice" name="totalSupplyPrice" value="<%= profile.totalSupplyPrice %>">
         </div>
         <div class="form-group">
           <label>Total Amount of Supply*</label>
-          <input disabled type="number" class="form-control supply2" id="totalSupplyAmount" name="totalSupplyAmount" value="0">
+          <input disabled type="number" class="form-control supply2" id="totalSupplyAmount" value="<%= profile.totalSupplyAmount %>">
+          <input type="hidden" class="supply2" id="hiddenTotalAmount" name="totalSupplyAmount" value="<%= profile.totalSupplyAmount %>">
         </div>
         <script type="text/javascript">
           bindHandleProduct($('.rem'), $('#prodServiceInput'), false, null, true, false);
@@ -339,21 +353,9 @@
           totalLoadedPrice = parseFloat(totalLoadedPrice).toFixed(2);
           $('#hiddenTotalPrice').val(totalLoadedPrice);
           $('#totalSupplyAmount').val(totalLoadedAmount);
-          $('#totalSupplyPrice').text(totalLoadedPrice + ' ' + "<%= profile.currency %>");
+          $('#hiddenTotalAmount').val(totalLoadedPrice);
+          $('#totalSupplyPrice').text(totalLoadedPrice + ' ' + "< %= profile.currency %>");
         </script>
-        
-        <div class="form-group">
-          <label>Capability Description*</label>
-          <input type="text" class="form-control" id="capabilityDescription" name="capabilityDescription" value="<%= profile.capabilityDescription %>" required>
-        </div>
-        <div class="form-group">
-          <label>Relevant Experience*</label>
-          <textarea required class="form-control" id="relevantExperience" name="relevantExperience"><%= profile.relevantExperience %></textarea>
-        </div>
-        <div class="form-group">
-          <label>Supporting Information</label>
-          <input type="text" class="form-control" id="supportingInformation" name="supportingInformation" value="<%= profile.supportingInformation %>">
-        </div>
 
         <!-- Uploading files field section-->
         <div class="form-group">

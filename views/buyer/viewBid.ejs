@@ -23,6 +23,7 @@
     $(document).ready(function() {
       var token = $("input[name='_csrf']").first().val();
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
+      $('.rem,.inc,.dec').off('click');//Off in View Mode.
 
       //setTimeout({
       $.ajax({
@@ -162,8 +163,8 @@
         </div>
    
         <!-- Modal window for the new, valid Bid Request -->
-        <div class="modal fade" style="width: 100%; max-width: 90%; overflow: scroll" id="request_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
-          <div class="modal-dialog" style="max-width: 850px; overflow: scroll" role="document">
+        <div class="modal fade" style="width: 100%; max-width: 95%; overflow: scroll" id="request_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog" style="max-width: 1000px; overflow: scroll" role="document">
             <div class="modal-content" style="width: 100%; overflow: visible">
               <div class="modal-header">
                 <h5 class="modal-title">View Bid Request</h5>
@@ -235,12 +236,12 @@
                       </li>
                       <% for (h in products) { %>
                       <li class='list-group-item'>
-                        <span class='cnt'><%= h+1 %></span>
+                        <span class='cnt'><%= parseInt(h)+1 %></span>
                         <span class='product'><%= products[h] %></span>
                         <span class='buttonsWrapper'><span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span></span>
                         <span class='imageWrapper'><span class='uploadImage'>Upload Image</span>  <span class='productImage' title="Product Image"> 
                           <% if(images[h].length > 0) { %>
-                          <img src="<%= '../' + images[h].substring(7) %>" style="height: 25px; width: 30px" onclick="window.open(this.src)">
+                          <img src="<%= path + '../' + images[h].substring(7) %>" style="height: 25px; width: 30px" onclick="window.open(this.src)">
                           <% } %>
                           </span>
                         </span>

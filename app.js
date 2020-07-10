@@ -331,7 +331,7 @@ socket.on("connection", sock => {
         throw err;
       }
     });
-    console.log("BAI VADIME");
+    
     console.log(callback);
     socket
       .to(user.room)
@@ -628,7 +628,7 @@ app.post("/multipleupload", uploadController.multipleUpload, (req, res, next) =>
 
 
 app.post("/avatarUpload", uploadAvatarController.avatarUpload, (req, res, next) => {
-    console.log(req);    
+    console.log(req.files);
     res.send();
   },
   (error, req, res, next) => {
