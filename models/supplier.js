@@ -98,7 +98,7 @@ const supplierSchema = new Schema({
   },
   areaCovered: {
     type: String,
-    required: true
+    required: false
   },
   contactMobileNumber: {
     type: String,
@@ -172,14 +172,14 @@ const supplierSchema = new Schema({
   }],
   productImagesList: [{
     type: String,
-    required: true
+    required: false
   }],
   totalSupplyPrice: {
     type: String,
     required: true
   },
   totalSupplyAmount: {
-    type: Number,
+    type: String,
     required: true
   },
   capabilityDescription: {

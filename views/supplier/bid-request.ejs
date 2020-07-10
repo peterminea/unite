@@ -25,6 +25,7 @@
   <script type="text/javascript">
   $(document).ready(function() {
     errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
+    $('.rem,.inc,.dec').off('click');//Off in View Mode.
   });
   </script>
 </head>
@@ -132,12 +133,12 @@
             </li>
             <% for (h in products) { %>
             <li class='list-group-item'>
-              <span class='cnt'><%= h+1 %></span>
+              <span class='cnt'><%= parseInt(h)+1 %></span>
               <span class='product'><%= products[h] %></span>
               <span class='buttonsWrapper'><span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span></span>
               <span class='imageWrapper'><span class='uploadImage'>Upload Image</span>  <span class='productImage' title="Product Image"> 
                 <% if(images[h].length > 0) { %>
-                <img src="<%= '../' + images[h].substring(7) %>" style="height: 25px; width: 30px" onclick="window.open(this.src)">
+                <img src="<%= path + '../' + images[h].substring(7) %>" style="height: 25px; width: 30px" onclick="window.open(this.src)">
                 <% } %>
                 </span>
               </span>

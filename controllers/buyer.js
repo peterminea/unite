@@ -983,7 +983,6 @@ exports.postSignUp = async (req, res) => {
                         err,
                         hash
                       ) {
-
                         buyer = new Buyer({
                           role: process.env.USER_REGULAR,
                           avatar: req.body.avatar,
@@ -1007,10 +1006,9 @@ exports.postSignUp = async (req, res) => {
                           updatedAtFormatted: normalFormat(Date.now())
                         });
 
-                        await buyer.save(err => {
-                          if (treatError(req, res, err, "/buyer/sign-up"))
+                        await buyer.save(async (err) => {
+                          if(treatError(req, res, err, "/buyer/sign-up"))
                             return false;
-                        });
 
                         req.session.buyer = buyer;
                         req.session.buyerId = buyer._id;
@@ -1043,13 +1041,13 @@ exports.postSignUp = async (req, res) => {
                         req.flash(
                           "success",
                           "Buyer signed up successfully! Please confirm your account by visiting " +
-                            req.body.emailAddress +
-                            ""
+                            req.body.emailAddress + ""
                         );
                         setTimeout(function() {
                           return res.redirect("/buyer/sign-in");
                         }, 250);
                       });
+                    });
                     } catch {}
                   }
                 );

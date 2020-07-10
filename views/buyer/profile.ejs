@@ -150,12 +150,10 @@
           <label>Country*</label>
           <input type="text" class="form-control" id="country" name="country" value="<%= profile.country %>" required>
         </div>
-        
         <div class="form-group">
           <label>Date Created</label>
           <input type="text" disabled class="form-control" id="dateCreated" name="createdAtFormatted" value="<%= profile.createdAtFormatted %>">
         </div>
-        
         <br>
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
         <button type="submit" disabled id="updateProfile" value="Update Profile" class="btn btn-primary btn-block btn-lg">Update Profile</button>

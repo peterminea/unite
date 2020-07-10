@@ -19,7 +19,7 @@ var storage = multer.diskStorage({
     
     //var date = dateformat(new Date(), 'dddd, mmmm dS, yyyy, h:MM:ss TT');//Date.now()
     var date2 = moment(new Date().getTime()).format('h:mm:a');
-    var filename =  'Avatar-'+ date2 + '-' + file.originalname;
+    var filename =  'Avatar-' + date2 + '-' + file.originalname;
     console.log(callback);
     callback(null, filename);
   }

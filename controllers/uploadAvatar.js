@@ -8,7 +8,7 @@ const avatarUpload = async (req, res) => {
       return res.send('You must select at least one file.');
     }
 
-    console.log((req.files[0].path));
+    console.log((req.files[0].path) + ' ' + 7);
     res.send(req.files[0].path);
     //return req.files.length == 1? res.send('File has been uploaded!') : res.send('Files have been uploaded!');
   } catch (error) {

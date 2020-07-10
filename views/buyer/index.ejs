@@ -548,7 +548,7 @@
 
         <!-- Modal window for the new Bid Request -->
         <div class="modal fade" style="width: 100%; max-width: 95%; overflow: auto" id="request_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
-          <div class="modal-dialog" style="max-width: 850px; overflow: auto" role="document">
+          <div class="modal-dialog" style="max-width: 1000px; overflow: auto" role="document">
             <div class="modal-content" style="width: 100%; overflow: visible">
               <div class="modal-header">
                 <h5 class="modal-title">New Bid Request</h5>
@@ -900,6 +900,7 @@
                           $('#supplierPrice_'+id).text(parseFloat(supp).toFixed(2));
                           input.val('').attr('productImage', null);
                           amount.val(0);
+                          amount.val('');
                         } else {
                             Swal.fire({
                               icon: 'warning',
