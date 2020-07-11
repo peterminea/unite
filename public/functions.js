@@ -1349,6 +1349,20 @@ function productImageFormatter(cellvalue, options, rowObject) {
 }
 
 
+function getExt(name) {
+  var ind = name.lastIndexOf('.');
+  ind = name.substring(ind+1);
+  return ind.toLowerCase();
+}
+
+
+function imageFormatter(cellvalue, options, rowObject) {
+  var ext =  getExt(rowObject.downloadHref);
+  
+  return ext == 'png' || ext == 'jpg' || ext == 'jpeg'? `<img src="${rowObject.downloadHref}" title="Image" style="height: 30px; width: 30px" onclick="window.open(this.src)">` : `<span style="cursor: pointer" name="${rowObject.downloadHref}" onclick="window.open('https://www.google.com/')">No image</span>`;
+}
+
+
 $(document).ready(function() {
   var cnt = $('div.container').first();
   

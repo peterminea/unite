@@ -123,6 +123,7 @@
       { name: 'filename', label: 'File Name', align: 'center', search: true, width: 160},
       { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 160},
       { name: 'length', label: 'File Length', align: 'center', sorttype: 'number', search: true, width: 160},
+      { name: 'image', label: 'Image', align: 'center', formatter: imageFormatter, search: false, width: 100 },
       { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 250},
       { name: 'download', label: 'Download it', align: 'center', formatter: downloadFormatter, search: false, width: 100},
       { name: 'deletion', label: 'Remove', align: 'center', formatter: fileRemovalFormatter, search: false, width: 100},
@@ -199,10 +200,11 @@
  
   <script type="text/javascript">
     var data = [];
-    var colModelUploadImages = [
+    var colModelUploadIFiles = [
       { name: 'filename', label: 'File Name', align: 'center', search: true, width: 160},
       { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 160},
       { name: 'length', label: 'File Length', align: 'center', search: true, sorttype: 'number', width: 160},
+      { name: 'image', label: 'Image', align: 'center', formatter: imageFormatter, search: false, width: 100 },
       { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 250},
       { name: 'download', label: 'Download it', align: 'center', formatter: downloadFormatter, search: false, width: 100},
       { name: 'deletion', label: 'Remove', align: 'center', formatter: fileRemovalFormatter, search: false, width: 100},
@@ -211,7 +213,7 @@
       { name: 'deletionHref', hidden: true }
     ];   
 
-  initGrid(colModelUploadImages, data, "#gridUploads", '#uploadPager', "filename", 'Uploaded Files', 1200, "<%= csrfToken %>");
+  initGrid(colModelUploadIFiles, data, "#gridUploads", '#uploadPager', "filename", 'Uploaded Files', 1200, "<%= csrfToken %>");
   </script>
     <% i = 0; for (file of uploads) { %>
   <script type="text/javascript">                 
@@ -283,6 +285,7 @@
       { name: 'filename', label: 'File Name', align: 'center', search: true, width: 160},
       { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 160},
       { name: 'length', label: 'File Length', align: 'center', sorttype: 'number', search: true, width: 160},
+      { name: 'image', label: 'Image', align: 'center', formatter: imageFormatter, search: false, width: 100 },
       { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 250},
       { name: 'download', label: 'Download it', align: 'center', formatter: downloadFormatter, search: false, width: 100},
       { name: 'deletion', label: 'Remove', align: 'center', formatter: fileRemovalFormatter, search: false, width: 100},
