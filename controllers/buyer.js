@@ -273,7 +273,7 @@ exports.postIndex = (req, res) => {
   }
 };
 
-exports.getBidCatalog = (req, res) => {
+exports.getBidsCatalog = (req, res) => {
   MongoClient.connect(URL, { useUnifiedTopology: true }, function(err, db) {
     if (treatError(req, res, err, "back")) return false;
 
@@ -295,7 +295,7 @@ exports.getBidCatalog = (req, res) => {
           return a.requestName.localeCompare(b.requestName);
         });
 
-        res.render("buyer/bidCatalog", {
+        res.render("buyer/bidsCatalog", {
           buyerName: req.params.buyerName,
           bids: bids
         });

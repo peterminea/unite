@@ -12,14 +12,18 @@
   <link rel="stylesheet" href="/messages.css">
   <link rel="stylesheet" href="/jquery-ui.css">
   <link rel="stylesheet" href="/bootstrap.min.css">
+  <link rel="stylesheet" href="/ui.jqgrid.min.css">
+  <link rel="stylesheet" href="/ui.multiselect.min.css">
   <script src="/jquery.min.js"></script>
   <script src="/jquery-ui.min.js"></script>
   <script src="/popper.min.js"></script>
   <script src="/bootstrap.min.js"></script>
-  <script src="/index.min.js"></script>
   <script src="/sweetalert2@9.min.js"></script>
-  <script src="/https.js"></script>
+  <script src="/index.min.js"></script>
   <script src="/money.min.js"></script>
+  <script src="/jquery.simulate.js"></script>
+  <script src="/jquery.jqgrid.min.js"></script>
+  <script src="/https.js"></script>
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {      
@@ -90,6 +94,65 @@
         </tbody>
       </table>
     </div>
+    <div id="jqDiv_0" class="form-group">
+      <table id="gridBids">
+      </table>
+    </div>
+  <script type="text/javascript">
+    var data = [];
+    var colModelGridBids = [
+      { name: 'bidName', label: 'Bid Request Name', search: true, width: 210},
+      { name: 'supplierName', label: 'Bid Supplier Name', align: 'center', sorttype: 'text', search: true, width: 220},      
+      { name: 'buyerPrice', label: 'Buyer\'s Price', align: 'center', formatter: buyerPriceFormatter, search: true, width: 100},
+      { name: 'supplierPrice', label: 'Supplier\'s Price', align: 'center', formatter: supplierPriceFormatter, search: true, width: 100 },
+      { name: 'buyerPriceHref', hidden: true },
+      { name: 'supplierPriceHref', hidden: true },
+      { name: 'dateCreated', label: 'Creation Date', align: 'center', search: true, width: 200},
+      { name: 'expiryDate', label: 'Expiry Date', align: 'center', search: true, width: 100},
+      { name: 'isCancelled', label: 'Is Cancelled?', align: 'center', search: true, width: 100},
+      { name: 'isExpired', label: 'Is Expired?', align: 'center', search: true, width: 100 }
+    ];
+    
+    $("#gridBids").jqGrid({
+      colModel: colModelGridBids,
+      data: data,
+      guiStyle: "bootstrap4",
+      iconSet: "fontAwesome",
+      idPrefix: "gb1_",
+      viewrecords : true,
+      gridview : true,
+      altRows: true,
+      //autowidth: true,
+      rownumbers : true,
+      autoencode : false,
+      toolbar: [true, "top"],
+      width: 1500,
+      //height: 300,
+      sortname: "name",
+      sortorder: "asc",
+      caption: "The Bids List grid, which uses predefined formatters and templates:"
+    });
+  
+  </script>
+  <% i = 0; for (bid of bids) { %>
+  <script type="text/javascript">
+    
+    var data = {
+          id: "<%= i %>",
+          bidName: "<%= bid.requestName %>",
+          supplierName: "<%= bid.supplierName %>",
+          expiryDate: "<%= bid.expiryDateFormatted %>",
+          dateCreated: "<%= bid.createdAtFormatted %>",
+          isCancelled: "<%= bid.isCancelled %>",
+          isExpired: "<%= bid.isExpired %>",
+          buyerPriceHref: "<%= parseFloat(bid.buyerPrice) %> <%= bid.buyerCurrency %>",
+          supplierPriceHref: "<%= parseFloat(bid.supplierPrice) %> <%= bid.supplierCurrency %>"
+    };
+
+    $("#gridBids").jqGrid('addRowData', data.id, data, 'last');        
+  </script>
+     <% i++; } %>
+
         <% } else {%>
         <div>
           <p style="color: green; font-family: arial">

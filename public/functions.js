@@ -726,38 +726,7 @@ function addition(prod, prodVal, priceVal, currencyVal, amountVal, imagePath, el
       tr.attr('amount', amountVal);
       if(fromBuyer) {
         tr.attr('maxAmount', (buyerInput.attr('maxAmount')? buyerInput.attr('maxAmount') : 2*amountVal));
-      }
-    
-    /*
-          var colModel = [
-            { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
-            { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, search: true, width: 140},
-            { name: 'hiddenPrice', hidden: true },
-            { name: 'hiddenTotalPrice', hidden: true },
-            { name: 'hiddenCurrency', hidden: true },
-            { name: 'productImageSource', hidden: true},
-            { name: 'amount', label: 'Amount', formatter: amountFormatter, align: 'center', search: true, template: 'number', width: 70},
-            { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, search: true, width: 90},            { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
-             { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
-          ];
-          
-          $('#prodServices').find('li').not(':first').each(function(i, e) {
-            var src = $(this).find('.productImage img').length?
-                $(this).find('.productImage img').attr('src') : null;
-                       
-            data.push({
-              id: i,
-              name: $(this).find('.product').text(),
-              price: $(this).find('.price').text() + ' ' + $(this).find('.currency').text(),
-              hiddenPrice: $(this).find('.price').text(),
-              hiddenTotalPrice: $(this).find('.totalPrice').text(),
-              hiddenCurrency: $(this).find('.currency').text(),
-              productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '',
-              amount: parseInt($(this).find('.amount').text()),
-              totalPrice: $(this).find('.totalPrice').text() + ' ' + $(this).find('.currency').text()
-            });
-          });   
-    */
+      } 
     
       if(!fromBuyer) {
         $('#totalSupplyPrice').text(bigPrice + ' ' + currencyVal);
@@ -1246,6 +1215,11 @@ function totalPriceFormatter(cellvalue, options, rowObject ) {
 }
 
 
+function productPriceFormatter(cellvalue, options, rowObject ) {
+  return `<span class='priceWrapper0'><span class='totalPrice'>${parseFloat(rowObject.hiddenTotalPrice).toFixed(2)}</span> <span class='currency'>${rowObject.currency}</span></span>`;
+}
+
+
 function amountFormatter(cellvalue, options, rowObject ) {
 return `<span class='amountWrapper0'><span class='amount'>${parseInt(cellvalue)}</span> items </span>`;
 }
@@ -1273,6 +1247,21 @@ function downloadFormatter(cellvalue, options, rowObject) {
 
 function fileRemovalFormatter(cellvalue, options, rowObject) {
   return `<span name="${rowObject.deletionHref}" class="deleteFile">Remove</span>`;
+}
+
+
+function buyerPriceFormatter(cellvalue, options, rowObject) {
+  return `<span>${rowObject.buyerPriceHref}</span>`;
+}
+
+
+function supplierPriceFormatter(cellvalue, options, rowObject) {
+  return `<span>${rowObject.supplierPriceHref}</span>`;
+}
+
+
+function productImageFormatter(cellvalue, options, rowObject) {
+  return `<img src="${rowObject.hiddenImageSrc}" style="height: 20px; width: 20px" onclick="window.open(this.src)">`;
 }
 
 
