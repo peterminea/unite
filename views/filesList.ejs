@@ -37,10 +37,10 @@
     var token = $('input[name="_csrf"]').val();
     $('.downloadFile,.deleteFile').attr('token', token);
     $('.deleteFile').on('click', function() {
-      removeFile(this, Swal);
+      removeFile(this);
     });
     
-    $('.download,.delete,.downloadFile,.deleteFile').css({'cursor': 'pointer', 'color': 'lime', 'font-weight': 'bold'});
+    $('.download,.delete,.downloadFile,.deleteFile').css({'cursor': 'pointer', 'color': 'teal', 'font-weight': 'bold'});
     errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
     
     $('.download,.delete').on('click', function() {
@@ -113,42 +113,26 @@
     <div id="jqDiv_0" class="form-group">
       <table id="gridProdImages">
       </table>
+      <div id='prodImagePager'>
+      </div>
     </div>
   
   <script type="text/javascript">
     var data = [];
     var colModelProdImages = [
-      { name: 'filename', label: 'File Name', search: true, width: 210},
-      { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 220},
-      { name: 'length', label: 'File Length', align: 'center', sorttype: 'number', search: true, width: 220},
-      { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 200},
+      { name: 'filename', label: 'File Name', align: 'center', search: true, width: 160},
+      { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 160},
+      { name: 'length', label: 'File Length', align: 'center', sorttype: 'number', search: true, width: 160},
+      { name: 'image', label: 'Image', align: 'center', formatter: imageFormatter, search: false, width: 100 },
+      { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 250},
       { name: 'download', label: 'Download it', align: 'center', formatter: downloadFormatter, search: false, width: 100},
       { name: 'deletion', label: 'Remove', align: 'center', formatter: fileRemovalFormatter, search: false, width: 100},
       { name: 'downloadHref', hidden: true },
       { name: 'downloadName', hidden: true },
       { name: 'deletionHref', hidden: true }
     ];   
-    
-    $("#gridProdImages").jqGrid({
-      colModel: colModelProdImages,
-      data: data,
-      guiStyle: "bootstrap4",
-      iconSet: "fontAwesome",
-      idPrefix: "gb1_",
-      viewrecords : true,
-      gridview : true,
-      altRows: true,
-      //autowidth: true,
-      rownumbers : true,
-      autoencode : false,
-      toolbar: [true, "top"],
-      width: 1500,
-      //height: 300,
-      sortname: "name",
-      sortorder: "asc",
-      caption: "The Product Image Files grid, which uses predefined formatters and templates:"
-    });
-  
+
+    initGrid(colModelProdImages, data, "#gridProdImages", '#prodImagePager', "filename", 'Product Image Files', 1200, "<%= csrfToken %>");
   </script>
     <% i = 0; for (file of files) { %>
   <script type="text/javascript">                 
@@ -210,42 +194,26 @@
     <div id="jqDiv_1" class="form-group">
       <table id="gridUploads">
       </table>
+      <div id='uploadPager'>
+      </div>
     </div>  
  
   <script type="text/javascript">
     var data = [];
-    var colModelUploadImages = [
-      { name: 'filename', label: 'File Name', search: true, width: 210},
-      { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 220},
-      { name: 'length', label: 'File Length', align: 'center', search: true, sorttype: 'number', width: 220},
-      { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 200},
+    var colModelUploadIFiles = [
+      { name: 'filename', label: 'File Name', align: 'center', search: true, width: 160},
+      { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 160},
+      { name: 'length', label: 'File Length', align: 'center', search: true, sorttype: 'number', width: 160},
+      { name: 'image', label: 'Image', align: 'center', formatter: imageFormatter, search: false, width: 100 },
+      { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 250},
       { name: 'download', label: 'Download it', align: 'center', formatter: downloadFormatter, search: false, width: 100},
       { name: 'deletion', label: 'Remove', align: 'center', formatter: fileRemovalFormatter, search: false, width: 100},
       { name: 'downloadHref', hidden: true },
       { name: 'downloadName', hidden: true },
       { name: 'deletionHref', hidden: true }
     ];   
-    
-    $("#gridUploads").jqGrid({
-      colModel: colModelUploadImages,
-      data: data,
-      guiStyle: "bootstrap4",
-      iconSet: "fontAwesome",
-      idPrefix: "gb1_",
-      viewrecords : true,
-      gridview : true,
-      altRows: true,
-      //autowidth: true,
-      rownumbers : true,
-      autoencode : false,
-      toolbar: [true, "top"],
-      width: 1500,
-      //height: 300,
-      sortname: "name",
-      sortorder: "asc",
-      caption: "The Uploaded Files grid, which uses predefined formatters and templates:"
-    });
-  
+
+  initGrid(colModelUploadIFiles, data, "#gridUploads", '#uploadPager', "filename", 'Uploaded Files', 1200, "<%= csrfToken %>");
   </script>
     <% i = 0; for (file of uploads) { %>
   <script type="text/javascript">                 
@@ -307,42 +275,26 @@
     <div id="jqDiv_2" class="form-group">
       <table id="gridAvatars">
       </table>
+      <div id='avatarPager'>
+      </div>
     </div>
  
   <script type="text/javascript">
     var data = [];
     var colModelAvatarImages = [
-      { name: 'filename', label: 'File Name', search: true, width: 210},
-      { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 220},
-      { name: 'length', label: 'File Length', align: 'center', sorttype: 'number', search: true, width: 220},
-      { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 200},
+      { name: 'filename', label: 'File Name', align: 'center', search: true, width: 160},
+      { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 160},
+      { name: 'length', label: 'File Length', align: 'center', sorttype: 'number', search: true, width: 160},
+      { name: 'image', label: 'Image', align: 'center', formatter: imageFormatter, search: false, width: 100 },
+      { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 250},
       { name: 'download', label: 'Download it', align: 'center', formatter: downloadFormatter, search: false, width: 100},
       { name: 'deletion', label: 'Remove', align: 'center', formatter: fileRemovalFormatter, search: false, width: 100},
       { name: 'downloadHref', hidden: true },
       { name: 'downloadName', hidden: true },
       { name: 'deletionHref', hidden: true }
-    ];   
-    
-    $("#gridAvatars").jqGrid({
-      colModel: colModelAvatarImages,
-      data: data,
-      guiStyle: "bootstrap4",
-      iconSet: "fontAwesome",
-      idPrefix: "gb1_",
-      viewrecords : true,
-      gridview : true,
-      altRows: true,
-      //autowidth: true,
-      rownumbers : true,
-      autoencode : false,
-      toolbar: [true, "top"],
-      width: 1500,
-      //height: 300,
-      sortname: "name",
-      sortorder: "asc",
-      caption: "The Avatar Files grid, which uses predefined formatters and templates:"
-    });
-  
+    ];
+
+  initGrid(colModelAvatarImages, data, "#gridAvatars", '#avatarPager', "filename", 'Avatar Files', 1200, "<%= csrfToken %>");
   </script>
     <% i = 0; for (file of avatars) { %>
   <script type="text/javascript">                 

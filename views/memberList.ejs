@@ -105,6 +105,8 @@
     <div id="jqDiv_0" class="form-group">
       <table id="gridBuyer">
       </table>
+      <div id="buyerPager">
+      </div>
     </div>
   
   <script type="text/javascript">
@@ -123,26 +125,7 @@
       { name: 'hiddenHref', hidden: true }
     ];   
     
-    $("#gridBuyer").jqGrid({
-      colModel: colModelBuyer,
-      data: data,
-      guiStyle: "bootstrap4",
-      iconSet: "fontAwesome",
-      idPrefix: "gb1_",
-      viewrecords : true,
-      gridview : true,
-      altRows: true,
-      //autowidth: true,
-      rownumbers : true,
-      autoencode : false,
-      toolbar: [true, "top"],
-      width: 1500,
-      //height: 300,
-      sortname: "name",
-      sortorder: "asc",
-      caption: "The Buyers grid, which uses predefined formatters and templates:"
-    });
-  
+    initGrid(colModelBuyer, data, "#gridBuyer", '#buyerPager', "organizationName", 'Buyers');
   </script>
   <% i = 0; for (buyer of buyers) { %>
     <script type="text/javascript">                 
@@ -216,6 +199,8 @@
     <div id="jqDiv_1" class="form-group">
       <table id="gridSupervisor">
       </table>
+      <div id="supervPager">
+      </div>
     </div>
   
   <script type="text/javascript">
@@ -231,28 +216,9 @@
       { name: 'isActive', label: 'Is Active?', align: 'center', search: true, width: 60},
       { name: 'deletion', label: 'Removal', align: 'center', formatter: removalFormatter, search: false, width: 100},
       { name: 'hiddenHref', hidden: true }
-    ];   
+    ];
     
-    $("#gridSupervisor").jqGrid({
-      colModel: colModelSupervisor,
-      data: data,
-      guiStyle: "bootstrap4",
-      iconSet: "fontAwesome",
-      idPrefix: "gb1_",
-      viewrecords : true,
-      gridview : true,
-      altRows: true,
-      //autowidth: true,
-      rownumbers : true,
-      autoencode : false,
-      toolbar: [true, "top"],
-      width: 1800,
-      //height: 300,
-      sortname: "name",
-      sortorder: "asc",
-      caption: "The Buyers grid, which uses predefined formatters and templates:"
-    });
-  
+    initGrid(colModelSupervisor, data, "#gridSupervisor", '#supervPager', "organizationName", 'Supervisors');
   </script>
   <% i = 0; for (supervisor of supervisors) { %>
     <script type="text/javascript">                 
@@ -338,6 +304,8 @@
     <div id="jqDiv_2" class="form-group">
       <table id="gridSupplier">
       </table>
+      <div id="suppPager">
+      </div>
     </div>
   
   <script type="text/javascript">
@@ -352,7 +320,7 @@
       { name: 'country', label: 'Country', align: 'center', search: true, width: 140},
       { name: 'areaCovered', label: 'Area Covered', align: 'center', search: true, width: 200},
       { name: 'companyAddress', label: 'Company Address', align: 'center', search: true, width: 360},
-      { name: 'employeeNumbers', label: 'Employees Number', align: 'center', search: true, width: 140},
+      { name: 'employeeNumbers', label: 'Employees Number', align: 'center', sorttype: 'number', search: true, width: 140},
       { name: 'industry', label: 'Industry', align: 'center', search: true, width: 160},
       { name: 'capabilityDescription', label: 'Capability Description', align: 'center', search: true, width: 210},
       { name: 'role', label: 'Role', align: 'center', search: true, width: 75},
@@ -361,6 +329,8 @@
       { name: 'hiddenHref', hidden: true }
     ];   
     
+    initGrid(colModelSupplier, data, "#gridSupplier", '#suppPager', "companyName", 'Suppliers');
+    /*
     $("#gridSupplier").jqGrid({
       colModel: colModelSupplier,
       data: data,
@@ -370,16 +340,36 @@
       viewrecords : true,
       gridview : true,
       altRows: true,
+      pager:  '#suppPager',
+      rowNum: 50,
+      scroll: 1,
+      shrinkToFit: true,
       //autowidth: true,
       rownumbers : true,
       autoencode : false,
       toolbar: [true, "top"],
       width: 2950,
       //height: 300,
-      sortname: "name",
+      sortname: "companyName",
       sortorder: "asc",
-      caption: "The Buyers grid, which uses predefined formatters and templates:"
+      caption: "The Suppliers grid, which uses predefined formatters and templates:"
     });
+    
+      $('#gridSupplier').navGrid("#suppPager", {edit: false, add: false, del: false, refresh: false, view: false});
+      $('#gridSupplier').inlineNav('#suppPager',
+                // the buttons to appear on the toolbar of the grid
+        { 
+            edit: true, 
+            add: true, 
+            del: true, 
+            cancel: true,
+            editParams: {
+                keys: true,
+            },
+            addParams: {
+                keys: true
+            }
+        });*/
   
   </script>
   <% i = 0; for (supplier of suppliers) { %>

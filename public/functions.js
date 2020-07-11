@@ -385,7 +385,7 @@ function treatDiv(div, isMulti, val, input) {
 }
 
 
-function removeFile(obj, Swal) {//remove from Glitch 
+function removeFile(obj) {//remove from Glitch 
   var token = $(obj).attr('token');
   var file = $(obj).attr('file')? $(obj).attr('file') : '';
   var tr = $(obj).parent('div')? null : $(obj).parent('td').parent('tr');
@@ -522,12 +522,10 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
   });
   
   obj.on('click', function() {
-    var li = $(this).parent('span').parent('li'), ul;/*
-    var newIndex = elem.find('li').index(li);*/
-    
+    var li = $(this).parent('span').parent('li'), ul;
     var divId = fromBuyer? $('#jqDiv_'+id) : $('#jqDiv');
     var gridId = fromBuyer? $('#grid_'+id) : $('#grid');
-    var isUl = false;
+    var isUl = false, rowId;
     
     if(!li.length) {//Not from list, but from grid.
       li = $(this).parent('span').closest('tr');
@@ -540,6 +538,8 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     //divId.prev('div').find('ul');
     var counter = divId.prev('div').find('p.term span');
     var entireAmount = parseInt(li.find('.amount').text());
+    var index = isUl? ul.find('li').index(li) : ul.find('tr').index(li);
+    var rowid = 'gb1_'+(index-1);
 
     if(isAdd && entireAmount == parseInt(li.attr('maxAmount'))) {
       Swal.fire({
@@ -554,7 +554,7 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     var handledAmount = isRow? entireAmount : 1;
     var rowPrice = parseFloat(li.find('span.totalPrice').text()).toFixed(2);      
     var handledPrice = handledAmount * parseFloat(li.find('span.price').text()).toFixed(2);
-    var supplierCurrency = fromBuyer? ul.attr('suppCurrency') : li.find('.currency').text();
+    var supplierCurrency = fromBuyer? ul.attr('suppCurrency') : li.find('span.currency').first().text();
     var totalPagePrice = fromBuyer? parseFloat(li.attr('totalPrice')).toFixed(2) : parseFloat($('#hiddenTotalPrice').val()).toFixed(2);
     
     var canContinue = true;
@@ -565,7 +565,7 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     var newPrice = isAdd? parseFloat(parseFloat(totalPagePrice) + parseFloat(handledPrice)).toFixed(2) : parseFloat(totalPagePrice - handledPrice).toFixed(2);
     
     isUl? ul.find('li').attr('totalPrice', parseFloat(newPrice)) : ul.find('tr').attr('totalPrice', parseFloat(newPrice));
-    totalAmountInput.val(parseInt(newAmount));
+    totalAmountInput.val(parseInt(newAmount));    
     
     if(isRow || (entireAmount==1 && !isAdd)) {//Delete Row. If 1.
       //if(!confirm('Warning: You are about to remove the entire product row.'))
@@ -585,21 +585,42 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
           li.remove();
           var newValue = -1 + parseInt(counter.text());
           counter.text(newValue);
+          if(!isUl)
+            gridId.jqGrid('delRowData', rowId);
         } else if (result.dismiss === Swal.DismissReason.cancel) {
           canContinue = false;
         }
       });
     } else {
+      gridId.jqGrid('editRow', index, true)
+      
       li.find('.amount').text(localAmount);
       li.find('span.totalPrice').text(localPrice);
       if(!fromBuyer) {
         li.attr('amount', localAmount);
         li.attr('price', localPrice);
       }
+      
+      if(!isUl && isAdd) {
+        rowId = gridId.jqGrid('getRowData', rowid);
+        var td = li.find('span.priceWrapper0').parent('td');
+        td.find('span:lt(2)').attr({'title': localPrice});
+        rowId.totalPrice = td.html();
+        //alert(td.html())
+        td = li.find('span.amountWrapper0').parent('td');
+        
+        td.find('span:gt(0)').attr({'title': localAmount});
+        td.find('span:first').attr({'title': localAmount + ' items'});
+        //alert(td.html())
+        rowId.amount = td.html();
+        //alert(5);
+        gridId.jqGrid('saveRow', rowid);
+        //alert(rowId.totalPrice + '\n' + td.html());
+      }
     }
     
     if(!fromBuyer) {
-      $('#hiddenTotalPrice').val(newPrice);
+      $('#hiddenTotalPrice').val(parseFloat(newPrice));
       $('#totalSupplyPrice').text(newPrice + ' ' + supplierCurrency);
       prodServiceInput.trigger('change');
     } else {
@@ -610,6 +631,8 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
       var supp = parseFloat(fx.convert(newPrice, {from: span.text(), to: supplierCurrency})).toFixed(2);
       $('#price_'+id).text(parseFloat(newPrice).toFixed(2));
       $('#supplierPrice_'+id).text(supp);
+      
+      gridId.trigger('reloadGrid');
       
       if(canContinue == false)
         return false;
@@ -1123,6 +1146,67 @@ function errorSuccess(Swal, errorMessage, successMessage) {
 }
 
 
+function initGrid(colModel, data, gridId, pagerId, sortName, theName, width, token) {
+    $(`${gridId}`).jqGrid({
+      colModel: colModel,
+      data: data,
+      guiStyle: "bootstrap4",
+      iconSet: "fontAwesome",
+      idPrefix: "gb1_",
+      viewrecords : true,
+      gridview : true,
+      altRows: true,
+      pager:  pagerId,
+      rowNum: 30,
+      //scroll: 1,
+      shrinkToFit: true,
+      //autowidth: true,
+      rownumbers : true,
+      pagination: true,
+      autoencode : false,
+      toolbar: [true, "top"],
+      width: !width? 2950 : width,
+      //height: 300,
+      sortname: sortName,
+      sortorder: "asc",
+      loadComplete: function() {
+        var divId = $(`${gridId}`).parent('div');
+        var table = divId.find('table').first();
+        if(token) {
+          table.find('.downloadFile,.deleteFile')
+            .attr('token', token);        
+          table.find('.downloadFile > a,.deleteFile')
+            .css({'cursor': 'pointer', 'color': 'teal', 'font-weight': 'bold'});
+        
+          table.find('.deleteFile').on('click', function() {
+            removeFile(this);
+          });
+        }
+      },
+      gridComplete: function() {
+        
+      },
+      caption: `The ${theName} grid, which uses predefined formatters and templates:`
+    });
+    
+    $(`${gridId}`).navGrid(pagerId, {edit: true, add: true, del: true, refresh: true, view: true});
+    $(`${gridId}`).inlineNav(pagerId,
+              // the buttons to appear on the toolbar of the grid
+      { 
+          edit: true, 
+          add: true, 
+          del: true, 
+          cancel: true,
+          editParams: {
+              keys: true,
+          },
+          addParams: {
+              keys: true
+          }
+      });
+}
+
+
 function fileExists(absolutePath, isMulti, ob, theDiv, fileId, i, val, token) {
     $.ajax({
       url: '/exists',
@@ -1226,12 +1310,12 @@ return `<span class='amountWrapper0'><span class='amount'>${parseInt(cellvalue)}
 
 
 function buttonsWrapperFormatter(cellvalue, options, rowObject) {
-  return `<span class='buttonsWrapper'><span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span></span>`;
+  return `<span class='buttonsWrapper' style="text-align: center"><span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span></span>`;
 }
 
 
 function imageWrapperFormatter(cellvalue, options, rowObject) {
-  return `<span class='imageWrapper0'><span class='uploadImage'>Upload Image</span>  <span class='productImage' title="Product Image">${rowObject.productImageSource}</span></span>`;
+  return `<span class='imageWrapper0'><span style='text-align: center' class='uploadImage'>Upload Image</span>  <span class='productImage' title="Product Image">${rowObject.productImageSource}</span></span>`;
 }
 
 
@@ -1241,7 +1325,7 @@ function removalFormatter(cellvalue, options, rowObject) {
 
 
 function downloadFormatter(cellvalue, options, rowObject) {
-  return `<a href="${rowObject.downloadHref}" title="Download ${rowObject.downloadName}" class="downloadFile" download>Download file</a>`;
+  return `<span class='downloadFile'><a href="${rowObject.downloadHref}" title="Download ${rowObject.downloadName}" class="downloadFileHref" download>Download file</a></span>`;
 }
 
 
@@ -1262,6 +1346,20 @@ function supplierPriceFormatter(cellvalue, options, rowObject) {
 
 function productImageFormatter(cellvalue, options, rowObject) {
   return `<img src="${rowObject.hiddenImageSrc}" style="height: 20px; width: 20px" onclick="window.open(this.src)">`;
+}
+
+
+function getExt(name) {
+  var ind = name.lastIndexOf('.');
+  ind = name.substring(ind+1);
+  return ind.toLowerCase();
+}
+
+
+function imageFormatter(cellvalue, options, rowObject) {
+  var ext =  getExt(rowObject.downloadHref);
+  
+  return ext == 'png' || ext == 'jpg' || ext == 'jpeg'? `<img src="${rowObject.downloadHref}" title="Image" style="height: 30px; width: 30px" onclick="window.open(this.src)">` : `<span style="cursor: pointer" name="${rowObject.downloadHref}" onclick="window.open('https://www.google.com/')">No image</span>`;
 }
 
 
