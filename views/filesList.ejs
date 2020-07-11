@@ -37,10 +37,10 @@
     var token = $('input[name="_csrf"]').val();
     $('.downloadFile,.deleteFile').attr('token', token);
     $('.deleteFile').on('click', function() {
-      removeFile(this, Swal);
+      removeFile(this);
     });
     
-    $('.download,.delete,.downloadFile,.deleteFile').css({'cursor': 'pointer', 'color': 'lime', 'font-weight': 'bold'});
+    $('.download,.delete,.downloadFile,.deleteFile').css({'cursor': 'pointer', 'color': 'teal', 'font-weight': 'bold'});
     errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
     
     $('.download,.delete').on('click', function() {
@@ -120,10 +120,10 @@
   <script type="text/javascript">
     var data = [];
     var colModelProdImages = [
-      { name: 'filename', label: 'File Name', search: true, width: 210},
-      { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 220},
-      { name: 'length', label: 'File Length', align: 'center', sorttype: 'number', search: true, width: 220},
-      { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 200},
+      { name: 'filename', label: 'File Name', align: 'center', search: true, width: 160},
+      { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 160},
+      { name: 'length', label: 'File Length', align: 'center', sorttype: 'number', search: true, width: 160},
+      { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 250},
       { name: 'download', label: 'Download it', align: 'center', formatter: downloadFormatter, search: false, width: 100},
       { name: 'deletion', label: 'Remove', align: 'center', formatter: fileRemovalFormatter, search: false, width: 100},
       { name: 'downloadHref', hidden: true },
@@ -131,7 +131,7 @@
       { name: 'deletionHref', hidden: true }
     ];   
 
-    initGrid(colModelProdImages, data, "#gridProdImages", '#prodImagePager', "filename", 'Product Image Files');
+    initGrid(colModelProdImages, data, "#gridProdImages", '#prodImagePager', "filename", 'Product Image Files', 1200, "<%= csrfToken %>");
   </script>
     <% i = 0; for (file of files) { %>
   <script type="text/javascript">                 
@@ -200,10 +200,10 @@
   <script type="text/javascript">
     var data = [];
     var colModelUploadImages = [
-      { name: 'filename', label: 'File Name', search: true, width: 210},
-      { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 220},
-      { name: 'length', label: 'File Length', align: 'center', search: true, sorttype: 'number', width: 220},
-      { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 200},
+      { name: 'filename', label: 'File Name', align: 'center', search: true, width: 160},
+      { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 160},
+      { name: 'length', label: 'File Length', align: 'center', search: true, sorttype: 'number', width: 160},
+      { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 250},
       { name: 'download', label: 'Download it', align: 'center', formatter: downloadFormatter, search: false, width: 100},
       { name: 'deletion', label: 'Remove', align: 'center', formatter: fileRemovalFormatter, search: false, width: 100},
       { name: 'downloadHref', hidden: true },
@@ -211,7 +211,7 @@
       { name: 'deletionHref', hidden: true }
     ];   
 
-  initGrid(colModelUploadImages, data, "#gridUploads", '#uploadPager', "filename", 'Uploaded Files');
+  initGrid(colModelUploadImages, data, "#gridUploads", '#uploadPager', "filename", 'Uploaded Files', 1200, "<%= csrfToken %>");
   </script>
     <% i = 0; for (file of uploads) { %>
   <script type="text/javascript">                 
@@ -280,10 +280,10 @@
   <script type="text/javascript">
     var data = [];
     var colModelAvatarImages = [
-      { name: 'filename', label: 'File Name', search: true, width: 210},
-      { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 220},
-      { name: 'length', label: 'File Length', align: 'center', sorttype: 'number', search: true, width: 220},
-      { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 200},
+      { name: 'filename', label: 'File Name', align: 'center', search: true, width: 160},
+      { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 160},
+      { name: 'length', label: 'File Length', align: 'center', sorttype: 'number', search: true, width: 160},
+      { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 250},
       { name: 'download', label: 'Download it', align: 'center', formatter: downloadFormatter, search: false, width: 100},
       { name: 'deletion', label: 'Remove', align: 'center', formatter: fileRemovalFormatter, search: false, width: 100},
       { name: 'downloadHref', hidden: true },
@@ -291,7 +291,7 @@
       { name: 'deletionHref', hidden: true }
     ];
 
-  initGrid(colModelAvatarImages, data, "#gridAvatars", '#avatarPager', "filename", 'Avatar Files');
+  initGrid(colModelAvatarImages, data, "#gridAvatars", '#avatarPager', "filename", 'Avatar Files', 1200, "<%= csrfToken %>");
   </script>
     <% i = 0; for (file of avatars) { %>
   <script type="text/javascript">                 

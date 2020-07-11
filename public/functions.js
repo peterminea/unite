@@ -34,50 +34,6 @@ var autocomp = function(obj, data, enter) {//Not suitable for modals.
 };
 
 
-function initGrid(colModel, data, gridId, pagerId, sortName, theName, width) {
-    $(`${gridId}`).jqGrid({
-      colModel: colModel,
-      data: data,
-      guiStyle: "bootstrap4",
-      iconSet: "fontAwesome",
-      idPrefix: "gb1_",
-      viewrecords : true,
-      gridview : true,
-      altRows: true,
-      pager:  pagerId,
-      rowNum: 30,
-      //scroll: 1,
-      shrinkToFit: true,
-      //autowidth: true,
-      rownumbers : true,
-      pagination: true,
-      autoencode : false,
-      toolbar: [true, "top"],
-      width: !width? 2950 : width,
-      //height: 300,
-      sortname: sortName,
-      sortorder: "asc",
-      caption: `The ${theName} grid, which uses predefined formatters and templates:`
-    });
-    
-    $(`${gridId}`).navGrid(pagerId, {edit: true, add: true, del: true, refresh: true, view: true});
-    $(`${gridId}`).inlineNav(pagerId,
-              // the buttons to appear on the toolbar of the grid
-      { 
-          edit: true, 
-          add: true, 
-          del: true, 
-          cancel: true,
-          editParams: {
-              keys: true,
-          },
-          addParams: {
-              keys: true
-          }
-      });
-}
-
-
 function getCurrenciesList(elem, url, token) {//For <select> drop-down currencies.
   var obj = $('' + elem + '');
   
@@ -429,7 +385,7 @@ function treatDiv(div, isMulti, val, input) {
 }
 
 
-function removeFile(obj, Swal) {//remove from Glitch 
+function removeFile(obj) {//remove from Glitch 
   var token = $(obj).attr('token');
   var file = $(obj).attr('file')? $(obj).attr('file') : '';
   var tr = $(obj).parent('div')? null : $(obj).parent('td').parent('tr');
@@ -1190,6 +1146,67 @@ function errorSuccess(Swal, errorMessage, successMessage) {
 }
 
 
+function initGrid(colModel, data, gridId, pagerId, sortName, theName, width, token) {
+    $(`${gridId}`).jqGrid({
+      colModel: colModel,
+      data: data,
+      guiStyle: "bootstrap4",
+      iconSet: "fontAwesome",
+      idPrefix: "gb1_",
+      viewrecords : true,
+      gridview : true,
+      altRows: true,
+      pager:  pagerId,
+      rowNum: 30,
+      //scroll: 1,
+      shrinkToFit: true,
+      //autowidth: true,
+      rownumbers : true,
+      pagination: true,
+      autoencode : false,
+      toolbar: [true, "top"],
+      width: !width? 2950 : width,
+      //height: 300,
+      sortname: sortName,
+      sortorder: "asc",
+      loadComplete: function() {
+        var divId = $(`${gridId}`).parent('div');
+        var table = divId.find('table').first();
+        if(token) {
+          table.find('.downloadFile,.deleteFile')
+            .attr('token', token);        
+          table.find('.downloadFile > a,.deleteFile')
+            .css({'cursor': 'pointer', 'color': 'teal', 'font-weight': 'bold'});
+        
+          table.find('.deleteFile').on('click', function() {
+            removeFile(this);
+          });
+        }
+      },
+      gridComplete: function() {
+        
+      },
+      caption: `The ${theName} grid, which uses predefined formatters and templates:`
+    });
+    
+    $(`${gridId}`).navGrid(pagerId, {edit: true, add: true, del: true, refresh: true, view: true});
+    $(`${gridId}`).inlineNav(pagerId,
+              // the buttons to appear on the toolbar of the grid
+      { 
+          edit: true, 
+          add: true, 
+          del: true, 
+          cancel: true,
+          editParams: {
+              keys: true,
+          },
+          addParams: {
+              keys: true
+          }
+      });
+}
+
+
 function fileExists(absolutePath, isMulti, ob, theDiv, fileId, i, val, token) {
     $.ajax({
       url: '/exists',
@@ -1293,12 +1310,12 @@ return `<span class='amountWrapper0'><span class='amount'>${parseInt(cellvalue)}
 
 
 function buttonsWrapperFormatter(cellvalue, options, rowObject) {
-  return `<span class='buttonsWrapper'><span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span></span>`;
+  return `<span class='buttonsWrapper' style="text-align: center"><span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span></span>`;
 }
 
 
 function imageWrapperFormatter(cellvalue, options, rowObject) {
-  return `<span class='imageWrapper0'><span class='uploadImage'>Upload Image</span>  <span class='productImage' title="Product Image">${rowObject.productImageSource}</span></span>`;
+  return `<span class='imageWrapper0'><span style='text-align: center' class='uploadImage'>Upload Image</span>  <span class='productImage' title="Product Image">${rowObject.productImageSource}</span></span>`;
 }
 
 
@@ -1308,7 +1325,7 @@ function removalFormatter(cellvalue, options, rowObject) {
 
 
 function downloadFormatter(cellvalue, options, rowObject) {
-  return `<a href="${rowObject.downloadHref}" title="Download ${rowObject.downloadName}" class="downloadFile" download>Download file</a>`;
+  return `<span class='downloadFile'><a href="${rowObject.downloadHref}" title="Download ${rowObject.downloadName}" class="downloadFileHref" download>Download file</a></span>`;
 }
 
 

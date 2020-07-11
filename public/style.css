@@ -150,7 +150,7 @@ table.products th,td {
 table.files {
   border: 2.25px solid fuchsia;
   width: 100%;
-  background-color: teal;
+  background-color: darkseagreen;
   margin-left: auto;
   margin-right: auto
 }
@@ -228,7 +228,7 @@ p.term-black {
 }
 
 span.adminDelete {
-  color: lime;
+  color: darkmagenta;
   text-decoration: underline
 }
 
