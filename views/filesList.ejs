@@ -40,7 +40,7 @@
       removeFile(this);
     });
     
-    $('.download,.delete,.downloadFile,.deleteFile').css({'cursor': 'pointer', 'color': 'teal', 'font-weight': 'bold'});
+    $('.download,.delete,.downloadFile,.downloadFile > a,.deleteFile').css({'cursor': 'pointer', 'color': 'teal', 'font-weight': 'bold'});
     errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
     
     $('.download,.delete').on('click', function() {
@@ -123,7 +123,7 @@
       { name: 'filename', label: 'File Name', align: 'center', search: true, width: 160},
       { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 160},
       { name: 'length', label: 'File Length', align: 'center', sorttype: 'number', search: true, width: 160},
-      { name: 'image', label: 'Image', align: 'center', formatter: imageFormatter, search: false, width: 100 },
+      { name: 'image', label: 'Image', align: 'center', formatter: imageFormatter, sortable: false, search: false, width: 100 },
       { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 250},
       { name: 'download', label: 'Download it', align: 'center', formatter: downloadFormatter, search: false, width: 100},
       { name: 'deletion', label: 'Remove', align: 'center', formatter: fileRemovalFormatter, search: false, width: 100},
@@ -204,7 +204,7 @@
       { name: 'filename', label: 'File Name', align: 'center', search: true, width: 160},
       { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 160},
       { name: 'length', label: 'File Length', align: 'center', search: true, sorttype: 'number', width: 160},
-      { name: 'image', label: 'Image', align: 'center', formatter: imageFormatter, search: false, width: 100 },
+      { name: 'image', label: 'Image', align: 'center', formatter: imageFormatter, sortable: false, search: false, width: 100 },
       { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 250},
       { name: 'download', label: 'Download it', align: 'center', formatter: downloadFormatter, search: false, width: 100},
       { name: 'deletion', label: 'Remove', align: 'center', formatter: fileRemovalFormatter, search: false, width: 100},
@@ -285,7 +285,7 @@
       { name: 'filename', label: 'File Name', align: 'center', search: true, width: 160},
       { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 160},
       { name: 'length', label: 'File Length', align: 'center', sorttype: 'number', search: true, width: 160},
-      { name: 'image', label: 'Image', align: 'center', formatter: imageFormatter, search: false, width: 100 },
+      { name: 'image', label: 'Image', align: 'center', formatter: imageFormatter, sortable: false, search: false, width: 100 },
       { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 250},
       { name: 'download', label: 'Download it', align: 'center', formatter: downloadFormatter, search: false, width: 100},
       { name: 'deletion', label: 'Remove', align: 'center', formatter: fileRemovalFormatter, search: false, width: 100},

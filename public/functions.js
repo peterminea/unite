@@ -521,7 +521,7 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     buttonsStyling: true
   });
   
-  obj.on('click', function() {
+  obj.off('click').on('click', function() {
     var li = $(this).parent('span').parent('li'), ul;
     var divId = fromBuyer? $('#jqDiv_'+id) : $('#jqDiv');
     var gridId = fromBuyer? $('#grid_'+id) : $('#grid');
@@ -534,12 +534,11 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
       ul = li.parent('ul');
       isUl = true;
     }
-    
-    //divId.prev('div').find('ul');
+  
     var counter = divId.prev('div').find('p.term span');
     var entireAmount = parseInt(li.find('.amount').text());
     var index = isUl? ul.find('li').index(li) : ul.find('tr').index(li);
-    var rowid = 'gb1_'+(index-1);
+    var rowid = 'gb1_'+(index);
 
     if(isAdd && entireAmount == parseInt(li.attr('maxAmount'))) {
       Swal.fire({
@@ -554,18 +553,18 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     var handledAmount = isRow? entireAmount : 1;
     var rowPrice = parseFloat(li.find('span.totalPrice').text()).toFixed(2);      
     var handledPrice = handledAmount * parseFloat(li.find('span.price').text()).toFixed(2);
-    var supplierCurrency = fromBuyer? ul.attr('suppCurrency') : li.find('span.currency').first().text();
+    var theCurrency = fromBuyer? ul.attr('buyerCurrency') : li.find('span.currency').first().text();
+    var supplierCurrency = fromBuyer? ul.attr('supprCurrency') : theCurrency
+    
     var totalPagePrice = fromBuyer? parseFloat(li.attr('totalPrice')).toFixed(2) : parseFloat($('#hiddenTotalPrice').val()).toFixed(2);
     
     var canContinue = true;
-    var totalAmountInput = fromBuyer? $('#totalAmount_'+id) : $('#totalSupplyAmount');
     var localAmount = isAdd? entireAmount + handledAmount : entireAmount - handledAmount;
     var localPrice = isAdd? parseFloat(parseFloat(rowPrice) + parseFloat(handledPrice)).toFixed(2) : parseFloat(rowPrice - handledPrice).toFixed(2);
+    var totalAmountInput = fromBuyer? $('#totalAmount_'+id) : $('#totalSupplyAmount');
     var newAmount = isAdd? parseInt(totalAmountInput.val()) + handledAmount : parseInt(totalAmountInput.val()) - handledAmount;
     var newPrice = isAdd? parseFloat(parseFloat(totalPagePrice) + parseFloat(handledPrice)).toFixed(2) : parseFloat(totalPagePrice - handledPrice).toFixed(2);
-    
-    isUl? ul.find('li').attr('totalPrice', parseFloat(newPrice)) : ul.find('tr').attr('totalPrice', parseFloat(newPrice));
-    totalAmountInput.val(parseInt(newAmount));    
+    var totalPrice = newPrice + ' ' + theCurrency, addedPrice = localPrice + ' ' + theCurrency;
     
     if(isRow || (entireAmount==1 && !isAdd)) {//Delete Row. If 1.
       //if(!confirm('Warning: You are about to remove the entire product row.'))
@@ -592,36 +591,37 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
         }
       });
     } else {
-      gridId.jqGrid('editRow', index, true)
+      isUl? ul.find('li').attr('totalPrice', parseFloat(newPrice)) : ul.find('tr').attr('totalPrice', parseFloat(newPrice));
+      totalAmountInput.val(parseInt(newAmount));
       
-      li.find('.amount').text(localAmount);
+      li.find('span.amount').text(localAmount);
       li.find('span.totalPrice').text(localPrice);
       if(!fromBuyer) {
         li.attr('amount', localAmount);
         li.attr('price', localPrice);
       }
       
-      if(!isUl && isAdd) {
+      if(!isUl && !isRow && (entireAmount > 1 || isAdd)) {//No deletion.
+        //gridId.jqGrid('editRow', index, true);
         rowId = gridId.jqGrid('getRowData', rowid);
-        var td = li.find('span.priceWrapper0').parent('td');
-        td.find('span:lt(2)').attr({'title': localPrice});
-        rowId.totalPrice = td.html();
-        //alert(td.html())
-        td = li.find('span.amountWrapper0').parent('td');
-        
-        td.find('span:gt(0)').attr({'title': localAmount});
-        td.find('span:first').attr({'title': localAmount + ' items'});
-        //alert(td.html())
-        rowId.amount = td.html();
-        //alert(5);
-        gridId.jqGrid('saveRow', rowid);
+        //var td;
+        //alert(JSON.stringify(rowId));
+        rowId.hiddenAmount = localAmount;
+        rowId.hiddenTotalPrice = addedPrice;
+        //alert(JSON.stringify(rowId)); 
+        gridId.jqGrid('setRowData', rowid, rowId);
+        //gridId.jqGrid('saveRow', rowid);
         //alert(rowId.totalPrice + '\n' + td.html());
       }
     }
     
+    if(canContinue == false) {//Row deletion cancelled, nothing happens.
+      return false;
+    }
+    
     if(!fromBuyer) {
       $('#hiddenTotalPrice').val(parseFloat(newPrice));
-      $('#totalSupplyPrice').text(newPrice + ' ' + supplierCurrency);
+      $('#totalSupplyPrice').text(totalPrice);
       prodServiceInput.trigger('change');
     } else {
       var span = $('span.bidCurrency[index="'+id+'"]').first();
@@ -631,11 +631,7 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
       var supp = parseFloat(fx.convert(newPrice, {from: span.text(), to: supplierCurrency})).toFixed(2);
       $('#price_'+id).text(parseFloat(newPrice).toFixed(2));
       $('#supplierPrice_'+id).text(supp);
-      
       gridId.trigger('reloadGrid');
-      
-      if(canContinue == false)
-        return false;
     }
   });
 }
@@ -1016,8 +1012,8 @@ function supplierValidateFields(fx) {
   
   var arr = [], arr1 = [], arr2 = [], arr3 = [], arr4 = [];
   
-  $('#prodServices li').not(':first').each(function(index, el) {
-    var product = $(this).find('.product'), price = $(this).find('.price'), currency = $(this).find('.currency'), quantity = $(this).find('.amount'), productImageSpan = $(this).find('.productImage');
+  $('#grid tr').not(':first').each(function(index, el) {
+    var product = $(this).find('span.product'), price = $(this).find('span.price'), currency = $(this).find('span.currency'), quantity = $(this).find('span.amount'), productImageSpan = $(this).find('span.productImage');
     var src = productImageSpan.find('img').length? productImageSpan.find('img').attr('src') : null;
     
     arr.push(product.text());
@@ -1091,7 +1087,7 @@ function registrationDialog(accountType) {
 
 
 function delegateUpload(obj) {
-  obj.on('click', function() {
+  obj.off('click').on('click', function() {
     var uploadInput,  li = $(this).parent('span').parent('li');
     var index;
     var id = getId(obj.attr('id'));
@@ -1151,8 +1147,9 @@ function initGrid(colModel, data, gridId, pagerId, sortName, theName, width, tok
       colModel: colModel,
       data: data,
       guiStyle: "bootstrap4",
-      iconSet: "fontAwesome",
+      iconSet: "glyph",
       idPrefix: "gb1_",
+      datatype: 'local',
       viewrecords : true,
       gridview : true,
       altRows: true,
@@ -1178,9 +1175,16 @@ function initGrid(colModel, data, gridId, pagerId, sortName, theName, width, tok
           table.find('.downloadFile > a,.deleteFile')
             .css({'cursor': 'pointer', 'color': 'teal', 'font-weight': 'bold'});
         
-          table.find('.deleteFile').on('click', function() {
+          table.find('.deleteFile').off('click').on('click', function() {
             removeFile(this);
           });
+        } else {
+          var id = getId(divId.attr('id'));
+          var prod = $("#prodServiceInput").length? $("#prodServiceInput") : $("#prodServiceInput_"+id);
+          bindHandleProduct(table.find('.rem'), prod, false, null, true, false);
+          bindHandleProduct(table.find('.inc'), prod, false, null, false, true);
+          bindHandleProduct(table.find('.dec'), prod, false, null, false, false);
+          delegateUpload(table.find('.uploadImage'));
         }
       },
       gridComplete: function() {
@@ -1279,13 +1283,16 @@ function checkPresence(obj) {
 }
 
 
-
 //jqGrid Formatters:
-
 function productFormatter(cellvalue, options, rowObject ) {
 // format the cellvalue to new format
   //alert(JSON.stringify(rowObject));
 return `<span class='product'>${cellvalue}</span>`;
+}
+
+
+function amountFormatter(cellvalue, options, rowObject ) {
+return `<span class='amountWrapper0'><span class='amount'>${parseInt(rowObject.hiddenAmount)}</span> items </span>`;
 }
 
 
@@ -1299,16 +1306,6 @@ function totalPriceFormatter(cellvalue, options, rowObject ) {
 }
 
 
-function productPriceFormatter(cellvalue, options, rowObject ) {
-  return `<span class='priceWrapper0'><span class='totalPrice'>${parseFloat(rowObject.hiddenTotalPrice).toFixed(2)}</span> <span class='currency'>${rowObject.currency}</span></span>`;
-}
-
-
-function amountFormatter(cellvalue, options, rowObject ) {
-return `<span class='amountWrapper0'><span class='amount'>${parseInt(cellvalue)}</span> items </span>`;
-}
-
-
 function buttonsWrapperFormatter(cellvalue, options, rowObject) {
   return `<span class='buttonsWrapper' style="text-align: center"><span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span></span>`;
 }
@@ -1319,6 +1316,11 @@ function imageWrapperFormatter(cellvalue, options, rowObject) {
 }
 
 
+function productPriceFormatter(cellvalue, options, rowObject ) {
+  return `<span class='priceWrapper0'><span class='totalPrice'>${parseFloat(rowObject.hiddenTotalPrice).toFixed(2)}</span> <span class='currency'>${rowObject.currency}</span></span>`;
+}
+
+
 function removalFormatter(cellvalue, options, rowObject) {
   return rowObject.hiddenHref.length? `<a href="${rowObject.hiddenHref}"><span class="adminDelete">Remove User</span></a>` : '';
 }
@@ -1326,6 +1328,11 @@ function removalFormatter(cellvalue, options, rowObject) {
 
 function downloadFormatter(cellvalue, options, rowObject) {
   return `<span class='downloadFile'><a href="${rowObject.downloadHref}" title="Download ${rowObject.downloadName}" class="downloadFileHref" download>Download file</a></span>`;
+}
+
+
+function linkFormatter(cellvalue, options, rowObject) {
+  return '<span class="placeBid" style="font-weight: bold"><a href="../buyer/placeBid/' + rowObject.buyerId + '/' + rowObject.productId  + '/' + rowObject.supplierId  + '"><b>Bid on this Product</b></a></span>';
 }
 
 
@@ -1345,7 +1352,7 @@ function supplierPriceFormatter(cellvalue, options, rowObject) {
 
 
 function productImageFormatter(cellvalue, options, rowObject) {
-  return `<img src="${rowObject.hiddenImageSrc}" style="height: 20px; width: 20px" onclick="window.open(this.src)">`;
+  return `<img src="${rowObject.hiddenImageSrc}" title="Product Image" style="height: 20px; width: 20px" onclick="window.open(this.src)">`;
 }
 
 
@@ -1705,7 +1712,7 @@ $(document).ready(function() {
             var fromBuyer = input.hasClass('fromBuyer');
             var div = fromBuyer? input.parent('div').next('div') : null;
             var el = fromBuyer? div.find('ul') : $('#prodServices');
-            var productInput = fromBuyer? div.find('input[id^="prodServiceInput"]') : $("#prodServiceInput");
+            var productInput = fromBuyer? div.find('input[id^="prodServiceInput_"]') : $("#prodServiceInput");
             
             var MAX = el.attr('MAX');//parseInt("<%= MAX_PROD %>");
             

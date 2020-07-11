@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Buyer - Bid on selected Product - UNITE</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A cool thing made with Glitch">
+  <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/messages.css">
+  <link rel="stylesheet" href="/jquery-ui.css">
+  <link rel="stylesheet" href="/bootstrap.min.css">
+  <link rel="stylesheet" href="/ui.jqgrid.min.css">
+  <link rel="stylesheet" href="/ui.multiselect.min.css">
+ <!--  <script src="/jquery.min.js"></script> -->
+  <script src="/jquery.js"></script>
+  <script src="/jquery-ui.min.js"></script>
+  <script src="/popper.min.js"></script>
+  <script src="/bootstrap.min.js"></script>
+  <script src="/sweetalert2@9.min.js"></script>
+  <script src="/index.min.js"></script>
+  <script src="/money.min.js"></script>
+  <script src="/jquery.simulate.js"></script>
+  <script src="/jquery.jqgrid.min.js"></script>
+  <script src="/grid.locale-en.js"></script>
+  <script src="/https.js"></script>
+  <script src="/chatUsers.js"></script>
+  <script src="/functions.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function () {
+    });
+  </script>
+  </head>
+  
+  <body>
+    <nav pos="" user="buyer" class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="/buyer">Buyer - Bid on Product - UNITE</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </nav>
+
+    <div class="container">
+      <br><br>
+      <div class="card">
+        <h5 class="card-header">Welcome!</h5>
+        <div class="card-body">
+          <h5 class="card-title">Please make your Bid Request</h5>
+          <p class="card-text">This is your profile page. Please keep your data accurate, and you will have good luck with finding your needed suppliers!</p>
+        </div>
+      </div>
+      
+      <div class="smooth-shadow profile-form">
+        <form method="POST">
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="text-muted form-text">
+                Please fill in all the required (*) fields.
+              </label>
+            </div>
+            <div class="form-group">
+              <label class="col-form-label">Request Name*</label>
+              <input type="text" class="form-control" id="requestName_<%= i %>" name="requestName" required>
+            </div>
+            <div class="form-group">
+              <label class="col-form-label">Supplier Company</label>
+              <input type="text" class="form-control" name="supplierName" value="<%= supplier.companyName %>" disabled>
+            </div>
+            <div class="form-group">
+              <label class="col-form-label">Buyer Organization</label>
+              <input type="text" class="form-control" name="buyerName" value="<%= buyer.organizationName %>" disabled>
+            </div>
+            <div class="form-group">
+              <label class="col-form-label">Buyer's E-mail Address*</label>
+              <input type="email" class="form-control" name="buyerEmail" value="<%= buyer.emailAddress %>" disabled>
+            </div>
+            <div class="form-group">
+              <label class="col-form-label">Supplier's E-mail Address*</label>
+              <input type="email" class="form-control" name="supplierEmail" value="<%= supplier.emailAddress %>" disabled>
+            </div>
+            <div class="form-group">
+              <label class="col-form-label">Item Description <b>(Short)</b>*</label>
+              <input type="text" class="form-control" name="itemDescription" required>
+            </div>
+            <div class="form-group">
+              <label class="col-form-label">Item Description (Long)*</label>
+              <textarea class="form-control" name="itemDescriptionLong" required></textarea>
+            </div>
+            <div class="form-group">
+              <label class="col-form-label">Item Description URL (Long)</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="basic-addon3">http(s)://</span>
+                </div>
+                <input type="text" class="form-control" aria-describedby="basic-addon3" name="itemDescriptionUrl">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="col-form-label">Delivery Location*</label>
+              <textarea class="form-control" name="deliveryLocation" required></textarea>
+            </div>
+            <div class="form-group">
+              <label class="col-form-label">Delivery Requirements*</label>
+              <textarea class="form-control" name="deliveryRequirements" required></textarea>
+            </div>
+            <div class="form-group">
+              <label class="col-form-label">Compliance Requirements*</label>
+              <textarea class="form-control" name="complianceRequirements" required></textarea>
+            </div>
+            <div class="form-group">
+              <label class="col-form-label">Compliance Requirements URL</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="basic-addon3">http(s)://</span>
+                </div>
+                <input type="text" class="form-control" name="complianceRequirementsUrl" aria-describedby="basic-addon3">
+              </div>
+            </div>
+             <div class="form-group">
+              <label class="col-form-label">Other Requirements</label>
+              <textarea class="form-control" name="otherRequirements"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="col-form-label">Your currency*:</label>
+              <select class="form-control buyerCurrency" index="<%= i %>" ></select>
+            </div>
+            <p>
+              You can either select products from drop-down or search for them via Autocomplete (please enter at least 3 characters).
+            </p>
+            <div class="form-group">
+              <label class="col-form-label">Supplier's products:</label>
+              <select index="<%= i %>" supplierId="<%= supplier._id %>" class="form-control productsList" name="productsList"></select>
+            </div>
+            <div>
+              <p class='term'>
+                You can use an Excel file with your desired products list, formatted as product name + product price + product currency + amount i.e. Number of items (4 cells per row), and after you click Process, our system will automatically add the products on page.<br>If the currency you use in Excel is different from the one from the Buyer page, conversion will be automatically applied. Also, the first row of your document must contain the column names.
+              </p>
+            </div>
+            <div class="form-group">
+              <label>Please choose your prepared product/service list (*.xls/xlsx, name+price+currency+amount on each row):</label>
+              <input type="hidden" class="fileId" name="excel" value="">
+              <input class="form-control upload fileexcelupload fromBuyer" type="file" id="products" name="excel" single>
+              <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Process Excel File" />
+            </div>
+            <div class="form-group">
+              <label class="col-form-label">Products / Services Requested*</label>
+              <span class='littleNote form-control'>
+                You can also request products that are not in the list of the supplier.
+              </span>
+              <div class="input-group">
+                <input type="text" required class="form-control prodInput" supplierId="<%= supplier._id %>" placeholder="Add Product/Service*" id="prodServiceInput_<%= i %>">
+                <div class="input-group-append">
+                  <button class="btn btn-outline-secondary prodButton" type="button" disabled MAX="<%= MAX_PROD %>" id="addProdService_<%= i %>">Add</button>
+                </div>
+              </div>
+            <div class="form-group">
+              <label class="col-form-label">Amount*</label>
+              <input type="number" min="1" step="1" class="form-control" id="amount_<%= i %>" name="theAmount" value="0" required>
+            </div>
+            <div class="form-group">
+              <label>Upload a product image:</label>
+              <input type="hidden" class="fileId" name="productImage" value="">
+              <input class="form-control upload productimageupload" type="file" id="productImage_<%= i %>" name="products" single>
+              <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload Product Image" />                    
+            </div>
+              <ul class="list-group" MAX="<%= MAX_PROD %>" suppCurrency="<%= supplier.currency %>" id="prodServices_<%= i %>">
+              </ul>
+              <p class='term'>
+                You have a number of <span class='productsCount'>0</span> products.
+              </p>
+              <input type="hidden" required id="hiddenProdServicesList_<%= i %>" name="productList" value="">
+              <input type="hidden" required id="amountList_<%= i %>" name="amountList" value="">
+              <input type="hidden" required id="priceList_<%= i %>" name="priceList" value="">
+              <input type="hidden" required id="priceOriginalList_<%= i %>" name="priceOriginalList" value="">
+              <input type="hidden" required id="productImagesList_<%= i %>" name="productImagesList" value="">
+            </div>
+            <div id="jqDiv_<%= i %>" class="form-group">
+              <table id="grid_<%= i %>">
+              </table>
+              <div id='prodPager_<%= i %>'>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Total number of items (Overall Amount):</label>
+              <input class="form-control" type="number" disabled id="totalAmount_<%= i %>" name="amount" value="0">
+            </div>
+            <div class="form-group">
+              <label class=" col-form-label">Your total price:</label>
+              <span class="form-control hid">
+                <span index="<%= i %>" class="bidPrice" id="price_<%= i %>" name="buyerPrice">0</span>
+                <span index="<%= i %>" class="bidCurrency" id="currency_<%= i %>" name="buyerCurrency"></span>
+              </span>
+            </div>
+            <div class="form-group">
+              <label class="col-form-label">Supplier's equivalent total price:</label>
+              <span class="form-control hid">
+                <span id="supplierPrice_<%= i %>" name="supplierPrice">0</span>
+                <span index="<%= i %>" class="suppCurrency" id="supplierCurrency_<%= i %>" name="supplierCurrency"><%= supplier.currency %></span>
+              </span>
+            </div>
+            <div class="form-group">
+              <label class="col-form-label">Your price for selected product:</label>
+              <span class="form-control hid">
+                <span id="buyerPriceUnit_<%= i %>">0</span>
+                <span index="<%= i %>" class="bidCurrency" id="buyerCurrencyUnit_<%= i %>"></span>
+              </span>
+            </div>
+            <div class="form-group">
+              <label class="col-form-label">Supplier's price for selected product:</label>
+              <span class="form-control hid">
+                <span id="supplierPriceUnit_<%= i %>">0</span>
+                <span index="<%= i %>" class="suppCurrency" id="supplierCurrencyUnit_<%= i %>"><%= supplier.currency %></span>
+              </span>
+            </div>
+             <div class="form-group">
+              <label class="col-form-label">Status*</label>
+              <input type="number" id="status_<%= i %>" class="form-control" name="status" min="0" max="4" step="1" value="<%= statuses[0].value %>" readonly>
+            </div>
+            <div class="form-group">
+              <select class='statuses' style="width: 100%" id="statuses_<%= i %>">
+                <% if (statuses != null) { for (status of statuses) { %>
+                <option disabled title="<%= status.name %>" value="<%= status.value %>"><%= status.name %></option>
+                <% } } %>
+              </select>
+              <div style="visibility: hidden" id="statusJsonValues_<%= i %>">
+                <% if (statusesJson != null) { %>
+                  <span class='statuses'><%= statusesJson %></span>
+                <% } %>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Bid extension letter</label>
+              <input type="hidden" class="fileId" name="validityExtensionId">
+              <input class="form-control upload" type="file" id="validityExtension" name="validityExtension"/>
+              <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
+            </div>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="buyer" value="<%= buyer._id %>">
+            <input type="hidden" name="supplier" value="<%= supplier._id %>">
+            <script type="text/javascript">
+              function limitStatus(e) {
+                  var ASCIICode = (e.which) ? e.which : e.keyCode;
+                  if (ASCIICode > 31 && (ASCIICode < 48 || ASCIICode > 54)) 
+                      return false;
+                  return true; 
+              }
+
+              var index = "<%= i %>";
+
+              var data = [];
+              var colModel = [
+                { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
+                { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, search: true, width: 140},
+                { name: 'hiddenPrice', hidden: true },
+                { name: 'hiddenAmount', hidden: true },
+                { name: 'hiddenTotalPrice', hidden: true },
+                { name: 'hiddenCurrency', hidden: true },
+                { name: 'productImageSource', hidden: true},
+                { name: 'amount', label: 'Amount', formatter: amountFormatter, align: 'center', search: true, template: 'number', width: 70},
+                { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, search: true, width: 90},            
+                { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
+                 { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
+              ];
+
+              initGrid(colModel, data, "#grid_"+index, '#prodPager_'+index, "name", 'Products List', 1000);
+              setTimeout(function() {
+                var table = $("#jqDiv_"+index).find('table').eq(1);
+                table.attr('suppCurrency', "<%= supplier.currency %>");
+              }, 1000);
+
+              $('#status_'+index).on('keypress keyon keyup', function(e) {
+                  return limitStatus(e);
+              });
+
+              var sel = $('#statuses_'+index);
+              var statusVector = [];
+              sel.find('option').each(function(index, element) {
+                statusVector.push($(element).text());
+              });
+
+              sel
+                .find('option[value="' + $('#status_'+index).val() + '"]')
+                .prop('selected', true);
+
+              sel.attr('title', sel.find('option:selected').text());
+              var x = JSON.parse($('#statusJsonValues_'+index+' span:first').text());
+
+              $('#status_'+index).change(function(e) {//Read-only select, though.
+                if($(this).val() < x.BUYER_REQUESTED_BID
+                   || $(this).val() > x.PAYMENT_DELIVERY_DONE) {//The last two options can be triggered by the corresponding Cancel Bid button. 5 for Supplier cancellation, 6 for Buyer cancellation.
+                  return false;
+                }
+
+                var id = getId($(this).attr('id'));
+                var statusText = statusVector[parseInt($(this).val())];
+                if($("#statusText_"+id).length)
+                  $("#statusText_"+id).remove();
+
+                $('<div style="color: blue" id="statusText_' + id + '"><p>' + statusText + '</p></div>')
+                  .insertAfter($('#status_'+id).parent('div'));
+              });
+
+              var elem0 = $("#prodServices_"+index);
+              $('<a><span style="color: green; cursor: pointer" id="massRemove_'+index+'">Remove All Products</span></a><br>').insertBefore(elem0);
+
+              $('#massRemove_'+index).on('click', function() {
+                removeAllItems(getId($(this).attr('id')));
+              });
+
+              $('button[id="addProdService_'+index+'"]').on('click', function() {
+                var id = getId($(this).attr('id'));
+                var elem = $("#prodServices_"+id);
+                var MAX = parseInt($(this).attr('MAX'));
+
+                if(elem.find('li').length >= MAX) {
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Error!',
+                      text: 'You have reached the limit of ' + MAX + ' products to request from the supplier.'
+                    });
+
+                    return false;
+                }                      
+
+                $('#status_'+ id).trigger('change');                      
+                var amount = $('#amount_'+id);
+                if(!amount.val() || amount.val() < 1 || !(Number.isInteger(parseFloat(amount.val())))) {
+                  Swal.fire({
+                    icon: 'warning',
+                    title: 'Attention',                          
+                    text: 'Please select a valid amount of products first.'
+                  });
+
+                  return false;
+                }
+
+                var input = $("#prodServiceInput_"+id);
+                if(!input.attr('price'))
+                  input.attr('price', 1);
+                //var req = input.val().length;// && $('#price').val().length && $('#currency').val().length;
+
+                if(input.val() && input.val().length) {
+                  input.removeClass('errorField');
+                  var prodVal = input.val();
+                  var isPresent = false;
+
+                  elem.find('.product').each(function() {
+                    if(prodVal == $(this).text()) {
+                      Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'You have already added ' + prodVal + ' to the list. Please refine your selection.'
+                      });
+
+                      isPresent = true;
+                      return false;
+                    }
+                  });
+
+                  if(isPresent) {
+                    return false;
+                  }
+
+                  var amountVal = amount.val();
+                  var currencyVal = $('#currency_'+id).text();
+                  var priceVal = input.attr('price');
+                  var priceUnit = parseFloat(priceVal? priceVal : 1).toFixed(2);
+                  var addedPrice = parseInt(amountVal? amountVal : 1) * priceUnit;
+                  var buyerPriceUnit = $('#buyerPriceUnit_'+id), buyerPriceCurr = $('#buyerPriceCurrency_'+id);
+                  var buyerCurrSpan = $('span.bidCurrency[index="'+id+'"]').first();
+                  buyerPriceUnit.text(parseFloat(addedPrice).toFixed(2));
+                  buyerPriceCurr.text(buyerCurrSpan.text());
+                  var supplierCurrency = $('#supplierCurrency_'+id).text();
+                  var price = parseFloat($('#price_'+id).text()? $('#price_'+id).text() : 0) + parseFloat(addedPrice);
+                  var bigPrice = parseFloat(price).toFixed(2);
+                  $('#price_'+id).text(bigPrice);
+
+                  var imageInput = $('input.productimageupload[id="productImage_'+id+'"]');
+                  var imagePath = input.attr('productImage')?
+                    '../' + input.attr('productImage').substring(7) 
+                    : imageInput.attr('filePath');                        
+
+                  if(elem.find('li').length) {
+                    elem.find('li').attr('totalPrice', bigPrice);
+                  } else {
+                    elem.append(`<li class='list-group-item' style='color: brown'><span class='cnt'>#</span><span class='product0'>Name</span><span class='buttonsWrapper'>Buttons</span><span class='imageWrapper'>Images</span><span class='priceWrapper'>Total</span><span class='amountWrapper'>Count</span>
+<span class='basicPriceWrapper'>Price</span></span></li>`);
+                  }
+
+                  var lis = elem.find('li').length;
+                  var divId = $('#jqDiv_'+id);
+
+                  elem.append("<li class='list-group-item' price='" 
+                                + addedPrice + "' maxAmount='" + (input.attr('maxAmount')? input.attr('maxAmount') : 2*amountVal)
+                                + "' totalPrice='" + bigPrice + "' amount='" + amountVal + "'>" 
+                                + `<span class='cnt'>${lis}</span><span class='product'>${prodVal}</span>
+<span class='buttonsWrapper'><span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span></span>
+<span class='imageWrapper'><span class='productImage' title='Image of Product'>` + (imagePath && imagePath.length? `<img src="${imagePath}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '') +  `</span><span class='uploadImage'>Upload Image</span></span>
+<span class='priceWrapper'><span class='totalPrice'>${parseFloat(addedPrice).toFixed(2)}</span> ${currencyVal}</span>
+<span class='amountWrapper'><span class='amount'>${amountVal}</span> items</span>
+<span class='basicPriceWrapper'><span class='price'>${parseFloat(priceVal).toFixed(2)}</span> <span class='currency'>${currencyVal}</span></span>
+</li>`);
+
+                    imageInput
+                      .attr('filePath', null)
+                      .attr('value', '');
+
+                    var gridId = $('#grid_'+id);
+                    var src = imagePath && imagePath.length? imagePath : null;
+
+                    var data = {
+                              id: lis,
+                              name: prodVal,
+                              price: priceVal + ' ' + currencyVal,
+                              hiddenPrice: priceVal,
+                              hiddenTotalPrice: addedPrice,
+                              hiddenCurrency: currencyVal,
+                              productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '',
+                              amount: parseInt(amountVal),
+                              totalPrice: addedPrice + ' ' + currencyVal
+                    };
+
+                    gridId.jqGrid('addRowData', lis, data, 'last');
+                    var table = divId.find('table').eq(1);//Last
+                    var tr = table.find('tbody tr').eq(lis);
+                    tr.attr('price', addedPrice);
+                    tr.attr('totalPrice', bigPrice);
+                    tr.attr('amount', amountVal);
+                    tr.attr('maxAmount', '<%= product.amount %>');
+
+                    var counter = elem.parent('div').find('span.productsCount');
+                    var newValue = 1 + parseInt(counter.text()? counter.text() : 0);
+                    var totalAmount = $('#totalAmount_'+id).val()? parseInt($('#totalAmount_'+id).val()) : 0;
+                    counter.text(newValue);
+                    $('#totalAmount_'+id).val(totalAmount + parseInt(amountVal));                         
+
+                    bindHandleProduct(elem.find('.rem').last(), input, true, id, true, false);
+                    bindHandleProduct(elem.find('.inc').last(), input, true, id, false, true);
+                    bindHandleProduct(elem.find('.dec').last(), input, true, id, false, false);                        
+                    delegateUpload(elem.find('.uploadImage').last());
+
+                    bindHandleProduct(gridId.find('.rem').last(), input, true, id, true, false);
+                    bindHandleProduct(gridId.find('.inc').last(), input, true, id, false, true);
+                    bindHandleProduct(gridId.find('.dec').last(), input, true, id, false, false);                        
+                    delegateUpload(gridId.find('.uploadImage').last());
+
+                    var suppPriceUnit = fx.convert(parseFloat(addedPrice), {from: buyerCurrSpan.text(), to: '<%= supplier.currency %>'});
+
+                    $('#supplierPriceUnit_'+id).text(parseFloat(suppPriceUnit).toFixed(2));
+                    var supp = fx.convert(parseFloat(bigPrice), {from: buyerCurrSpan.text(), to: '<%= supplier.currency %>'});
+                    $('#supplierPrice_'+id).text(parseFloat(supp).toFixed(2));
+                    input.val('').attr('productImage', null);
+                    amount.val(0);
+                    amount.val('');
+                  } else {
+                      Swal.fire({
+                        icon: 'warning',
+                        title: 'Attention!',
+                        text: 'Please enter valid product data (name, amount).'
+                      });
+
+                      input.addClass('errorField');
+                      //$('#prodServiceInput,#price,#currency').addClass('errorField');
+                  }
+
+                $(this).prop('disabled', true);
+                });
+
+            </script>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button index="<%= i %>" class='placeBid' type="submit" class="btn btn-primary">Send request</button>
+          </div>
+        </form>
+      </div>
+    </div>
+</body>  
+</html>

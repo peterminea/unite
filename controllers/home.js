@@ -98,11 +98,10 @@ exports.getFilesList = async (req, res) => {
   req.session.flash = []; 
   var uploads = await getFiles('public/uploads');
   var avatars = await getFiles('public/avatars');
-  var files = await getFiles('public/productImages');
+  var files = await getFiles('public/productImages');  
 
   res.render("filesList", {
     role: obj.role,
-    //files: files,
     successMessage: success,
     errorMessage: error,
     isAdmin: obj.role == process.env.USER_ADMIN,

@@ -271,12 +271,14 @@
           var colModel = [
             { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
             { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, search: true, width: 140},
+            { name: 'hiddenAmount', hidden: true },
             { name: 'hiddenPrice', hidden: true },
             { name: 'hiddenTotalPrice', hidden: true },
             { name: 'hiddenCurrency', hidden: true },
             { name: 'productImageSource', hidden: true},
             { name: 'amount', label: 'Amount', formatter: amountFormatter, align: 'center', search: true, template: 'number', width: 70},
-            { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, search: true, width: 90},            { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
+            { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, search: true, width: 90},            
+            { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
              { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
           ];
           
@@ -291,13 +293,12 @@
               hiddenPrice: $(this).find('.price').text(),
               hiddenTotalPrice: $(this).find('.totalPrice').text(),
               hiddenCurrency: $(this).find('.currency').text(),
-              productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '',
-              amount: parseInt($(this).find('.amount').text()),
-              totalPrice: $(this).find('.totalPrice').text() + ' ' + $(this).find('.currency').text()
+              productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '',              
+              hiddenAmount: parseInt($(this).find('.amount').text())
             });
           });             
 
-          initGrid(colModel, data, "#grid", '#prodPager', "name", 'Products List');
+          initGrid(colModel, data, "#grid", '#prodPager', "name", 'Products List', 1000);
           var x = JSON.parse($('#statusJsonValues span').first().text());
           
            $('#statuses')
