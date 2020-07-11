@@ -407,6 +407,8 @@ app.get("/loadProductsCatalog", (req, res) => {
 
         if (obj)
           catalogItems.push({
+            productId: products[i]._id,
+            supplierId: obj._id,
             productName: products[i].productName,
             price: products[i].price,
             amount: products[i].amount,

@@ -39,7 +39,7 @@
       initBaseRates(fx, 'select.buyerCurrency');      
       var defaultBidCurrency = '<%= BID_DEFAULT_CURR %>';
 
-      $('.placeBid').on('click', function() {
+      $('button.placeBid').on('click', function() {
         var id = $(this).attr('index');
         var elem = $("#prodServices_"+id);
         
@@ -128,7 +128,6 @@
 
       $('select.buyerCurrency').on('change', function() {
         var curr = $(this).val();
-        //alert($(this).val())
         var id = $(this).attr('index');
         var elem = $("#prodServices_"+id), grid = $("#grid_"+id);
         elem.attr('buyerCurrency', curr);
@@ -250,11 +249,11 @@
             var str = '<div id="catalog"><h4>Catalog of Products</h4><table id="products" class="table table-striped table-hover table-condensed products">' 
             + '<thead><tr><th scope="col">#</th>' 
             + '<th colspan="2" scope="col">Product name</th><th scope="col">Supplier name</th><th colspan="2" scope="col">Product price</th><th scope="col">Currency</th>' 
-            + '<th scope="col">Amount</th><th colspan="2" scope="col">Total Price</th><th scope="col">Image</th></tr></thead><tbody>';
+            + '<th scope="col">Amount</th><th colspan="2" scope="col">Total Price</th><th scope="col">Image</th><th scope="col">Place Bid</th></tr></thead><tbody>';
 // that.attr('avatar')
             for(var i in data) {
                str += '<tr id="'+i+'">'
-                + '<td scope="col">' + parseInt(parseInt(i)+1) + '</td>'                
+                + '<td scope="col">' + parseInt(parseInt(i)+1) + '</td>'
                 + '<td colspan="2" scope="col">' + data[i].productName + '</td>'
                 + '<td scope="col">' + data[i].supplier + '</td>'
                 + '<td colspan="2" scope="col">' + data[i].price + '</td>'
@@ -262,6 +261,7 @@
                 + '<td scope="col">' + data[i].amount + '</td>'
                 + '<td colspan="2" scope="col">' + data[i].totalPrice + ' ' + data[i].currency + '</td>'
                 + '<td scope="col"><img src="' + ('../' + data[i].productImage.substring(7)) + '" style="height: 20px; width: 20px" onclick="window.open(this.src)"></td>'
+                + '<td scope="col"><span class="placeBid" style="text-color: beige; font-weight: bold"><a href="../buyer/placeBid/' + $('#loadCatalog').attr('buyer') + '/' + data[i].productId  + '/' + data[i].supplierId  + '"><b>Bid on this Product</b></a></span></td>'
                 + '</tr>';
             }
 
@@ -269,8 +269,7 @@
             $('div.bodyBuilder').append(str);
             prepareSortTable();
             
-            //jqGrid
-            
+            //jqGrid:            
             str = '';
             str += '<div id="jqDiv_0" class="jqGridProd form-group"><table id="gridProds"></table><div id="prodPager"></div></div>';
             $('div.bodyBuilder').append(str);
@@ -282,8 +281,12 @@
               { name: 'productPrice', label: 'Product price', align: 'center', search: true, width: 140},
               { name: 'amount', label: 'Amount', align: 'center', formatter: amountFormatter, template: 'number', sorttype: 'text', search: true, width: 140 },
               { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, search: true, width: 90},
-              { name: 'image', label: 'Product Image', align: 'center', formatter: productImageFormatter, search: true, width: 90},
-              { name: 'hiddenAmount', hidden: true }
+              { name: 'image', label: 'Product Image', align: 'center', formatter: productImageFormatter, search: false, sortable: false, width: 90},
+              { name: 'placeBid', label: 'Place Bid', align: 'center', search: false, sortable: false, formatter: linkFormatter, width: 140},
+              { name: 'hiddenAmount', hidden: true },
+              { name: 'productId', hidden: true },
+              { name: 'buyerId', hidden: true },
+              { name: 'supplierId', hidden: true },
               { name: 'hiddenImageSrc', hidden: true },
               { name: 'hiddenTotalPrice', hidden: true }
             ];
@@ -291,6 +294,9 @@
             for(var i in data) {
              data2.push({
                 id: i,
+                productId: data[i].productId,
+                buyerId: $('#loadCatalog').attr('buyer'),
+                supplierId: data[i].supplierId, 
                 productName: data[i].productName,
                 supplierName: data[i].supplier,
                 productPrice: data[i].price + ' ' + data[i].currency,
@@ -301,7 +307,7 @@
               });
             }
 
-            initGrid(colModel, data2, "#gridProds", '#prodPager', "productName", 'Products List', 1000);
+            initGrid(colModel, data2, "#gridProds", '#prodPager', "productName", 'Products List', 1100);
           }
         });
       });
@@ -412,7 +418,7 @@
     </form>
     
     <div class="mt-4">
-      <button class="form-control btn btn-primary" id="loadCatalog" avatar="<%= buyer.avatar %>">
+      <button class="form-control btn btn-primary" id="loadCatalog" buyer="<%= buyer._id %>" avatar="<%= buyer.avatar %>">
         Load Catalog of Products
       </button>
     </div>

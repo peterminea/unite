@@ -12,6 +12,7 @@ const Supervisor = require("../models/supervisor");
 const Supplier = require("../models/supplier");
 const Capability = require("../models/capability");
 const BidRequest = require("../models/bidRequest");
+const ProductService = require("../models/productService");
 const Country = require('../models/country');
 const BidStatus = require("../models/bidStatus");
 const {
@@ -72,7 +73,7 @@ exports.getIndex = async (req, res) => {
       buyer: req.session.buyer ? req.session.buyer._id : null
     }).exec();
 
-    promise.then(bids => {
+    promise.then((bids) => {
       var totalBidsPrice = 0;
       if (bids && bids.length) {
         for (var i in bids) {
@@ -145,12 +146,12 @@ exports.postIndex = (req, res) => {
       }
 
       var promise = BidStatus.find({}).exec();
-      promise.then(statuses => {
+      promise.then((statuses) => {
         var promise2 = BidRequest.find({
           buyer: req.session.buyer ? req.session.buyer._id : null
         }).exec();
 
-        promise2.then(bids => {
+        promise2.then((bids) => {
           var totalBidsPrice = 0;
           if (bids && bids.length) {
             for (var i in bids) {
@@ -263,7 +264,8 @@ exports.postIndex = (req, res) => {
     return bidRequest
       .save()
       .then((err, result) => {
-        if (treatError(req, res, err, "buyer/index")) return false;
+        if(treatError(req, res, err, "buyer/index")) 
+          return false;
         req.flash("success", "Bid requested successfully!");
         return res.redirect("/buyer/index");
       })
@@ -273,9 +275,64 @@ exports.postIndex = (req, res) => {
   }
 };
 
+
+exports.getPlaceBid = (req, res) => {
+  var buyerId = req.params.buyerId, productId = req.params.productId, supplierId = req.params.supplierId;
+  
+  Buyer.find({ _id: buyerId }).then((buyer) => {
+    if(!buyer) {
+        req.flash('error', 'Buyer not found in the database!');
+        return res.redirect('back');
+      }
+  
+    ProductService.find({ _id: productId, supplier: supplierId }).then( (prod) => {
+      if(!prod) {
+        req.flash('error', 'Product not found!');
+        return res.redirect('back');
+      }
+
+      Supplier.find({ _id: supplierId }).then( (sup) => {
+        if(!sup) {
+          req.flash('error', 'Supplier for the product not found!');
+          return res.redirect('back');
+        }
+        
+        var promise = BidStatus.find({}).exec();
+        promise.then((statuses) => {
+
+          var success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
+          req.session.flash = [];
+
+          res.render("buyer/placeBid", {
+            successMessage: success,
+            errorMessage: error,
+            MAX_PROD: process.env.BID_MAX_PROD,
+            BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+            statuses: statuses,
+            statusesJson: JSON.stringify(statusesJson),
+            buyer: buyer,
+            product: prod,
+            supplier: sup
+            });
+          });
+        });
+      });
+    });
+}
+
+
+exports.postPlaceBid = (req, res) => {
+  
+  const BidRequest = new BidRequest({
+    
+  });
+}
+
+
 exports.getBidsCatalog = (req, res) => {
   MongoClient.connect(URL, { useUnifiedTopology: true }, function(err, db) {
-    if (treatError(req, res, err, "back")) return false;
+    if (treatError(req, res, err, "back")) 
+      return false;
 
     var dbo = db.db(BASE);
     var query = { buyer: new ObjectId(req.params.buyerId) };
@@ -294,9 +351,14 @@ exports.getBidsCatalog = (req, res) => {
         bids.sort(function(a, b) {
           return a.requestName.localeCompare(b.requestName);
         });
+      
+        var success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
+        req.session.flash = [];
 
         res.render("buyer/bidsCatalog", {
           buyerName: req.params.buyerName,
+          successMessage: success,
+          errorMessage: error,
           bids: bids
         });
       });
@@ -348,7 +410,7 @@ exports.getViewBids = (req, res) => {
     buyer: req.params.buyerId
   }).exec();
 
-  promise.then(async bids => {
+  promise.then(async (bids) => {
     //Verify bids:
     var validBids = [],
       cancelledBids = [],

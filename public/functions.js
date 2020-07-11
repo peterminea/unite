@@ -521,7 +521,7 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     buttonsStyling: true
   });
   
-  obj.on('click', function() {
+  obj.off('click').on('click', function() {
     var li = $(this).parent('span').parent('li'), ul;
     var divId = fromBuyer? $('#jqDiv_'+id) : $('#jqDiv');
     var gridId = fromBuyer? $('#grid_'+id) : $('#grid');
@@ -1087,7 +1087,7 @@ function registrationDialog(accountType) {
 
 
 function delegateUpload(obj) {
-  obj.on('click', function() {
+  obj.off('click').on('click', function() {
     var uploadInput,  li = $(this).parent('span').parent('li');
     var index;
     var id = getId(obj.attr('id'));
@@ -1175,9 +1175,16 @@ function initGrid(colModel, data, gridId, pagerId, sortName, theName, width, tok
           table.find('.downloadFile > a,.deleteFile')
             .css({'cursor': 'pointer', 'color': 'teal', 'font-weight': 'bold'});
         
-          table.find('.deleteFile').on('click', function() {
+          table.find('.deleteFile').off('click').on('click', function() {
             removeFile(this);
           });
+        } else {
+          var id = getId(divId.attr('id'));
+          var prod = $("#prodServiceInput").length? $("#prodServiceInput") : $("#prodServiceInput_"+id);
+          bindHandleProduct(table.find('.rem'), prod, false, null, true, false);
+          bindHandleProduct(table.find('.inc'), prod, false, null, false, true);
+          bindHandleProduct(table.find('.dec'), prod, false, null, false, false);
+          delegateUpload(table.find('.uploadImage'));
         }
       },
       gridComplete: function() {
@@ -1321,6 +1328,11 @@ function removalFormatter(cellvalue, options, rowObject) {
 
 function downloadFormatter(cellvalue, options, rowObject) {
   return `<span class='downloadFile'><a href="${rowObject.downloadHref}" title="Download ${rowObject.downloadName}" class="downloadFileHref" download>Download file</a></span>`;
+}
+
+
+function linkFormatter(cellvalue, options, rowObject) {
+  return '<span class="placeBid" style="font-weight: bold"><a href="../buyer/placeBid/' + rowObject.buyerId + '/' + rowObject.productId  + '/' + rowObject.supplierId  + '"><b>Bid on this Product</b></a></span>';
 }
 
 
@@ -1700,7 +1712,7 @@ $(document).ready(function() {
             var fromBuyer = input.hasClass('fromBuyer');
             var div = fromBuyer? input.parent('div').next('div') : null;
             var el = fromBuyer? div.find('ul') : $('#prodServices');
-            var productInput = fromBuyer? div.find('input[id^="prodServiceInput"]') : $("#prodServiceInput");
+            var productInput = fromBuyer? div.find('input[id^="prodServiceInput_"]') : $("#prodServiceInput");
             
             var MAX = el.attr('MAX');//parseInt("<%= MAX_PROD %>");
             
