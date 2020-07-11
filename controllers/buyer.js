@@ -10,7 +10,9 @@ const Message = require("../models/message");
 const Buyer = require("../models/buyer");
 const Supervisor = require("../models/supervisor");
 const Supplier = require("../models/supplier");
+const Capability = require("../models/capability");
 const BidRequest = require("../models/bidRequest");
+const Country = require('../models/country');
 const BidStatus = require("../models/bidStatus");
 const {
   basicFormat,
@@ -84,23 +86,38 @@ exports.getIndex = async (req, res) => {
       var success = search(req.session.flash, "success"),
         error = search(req.session.flash, "error");
       req.session.flash = [];
-
-      res.render("buyer/index", {
-        message: req.flash(
-          "info",
-          "Please wait while we are loading the list of available products (The Catalog)..."
-        ),
-        buyer: req.session ? req.session.buyer : null,
-        MAX_PROD: process.env.BID_MAX_PROD,
-        BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
-        bidsLength: bids && bids.length ? bids.length : null,
-        totalBidsPrice: totalBidsPrice,
-        statuses: null,
-        successMessage: success,
-        errorMessage: error,
-        suppliers: null
-        //catalogItems: catalogItems
-      });
+      
+      Capability.find({}).then((caps) => {
+        var cap = [];
+        for(var i in caps) {
+          cap.push({
+            id: i,
+            name: caps[i].capabilityDescription
+          });
+        }
+          
+        cap.sort(function (a, b) {
+          return a.name.localeCompare(b.name);
+        });
+        
+        res.render("buyer/index", {
+          message: req.flash(
+            "info",
+            "Please wait while we are loading the list of available products (The Catalog)..."
+          ),
+          buyer: req.session ? req.session.buyer : null,
+          MAX_PROD: process.env.BID_MAX_PROD,
+          BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+          bidsLength: bids && bids.length ? bids.length : null,
+          totalBidsPrice: totalBidsPrice,
+          capabilities: cap,
+          statuses: null,
+          successMessage: success,
+          errorMessage: error,
+          suppliers: null
+          //catalogItems: catalogItems
+        });        
+      })
     });
   }
 };
@@ -720,14 +737,41 @@ exports.getSignUp = (req, res) => {
   var success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
   req.session.flash = [];
+  
+  if (!req.session.buyerId) {
+    Country.find({}).then((countries) => {
+        var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+        req.session.flash = [];
 
-  if (!req.session.buyerId)
-    return res.render("buyer/sign-up", {
-      DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
-      captchaSiteKey: captchaSiteKey,
-      successMessage: success,
-      errorMessage: error
+        var country = [];
+        for(var i in countries) {
+          country.push({id: i, name: countries[i].name});
+        }
+      
+      Supervisor.find({}, {organizationUniteID: 1 }).then((ids) => {
+        var uniteIds = [];
+        for(var i in ids) {
+          uniteIds.push({
+            id: i,
+            name: ids[i]
+          });
+        }
+
+        uniteIds.sort(function (a, b) {
+          return a.name.localeCompare(b.name);
+        });
+
+        return res.render("buyer/sign-up", {
+          DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+          captchaSiteKey: captchaSiteKey,
+          uniteIds: uniteIds,
+          countries: country,
+          successMessage: success,
+          errorMessage: error
+        });
+      });
     });
+  }
   else return res.redirect("/buyer");
 };
 
@@ -860,7 +904,7 @@ exports.postResetPasswordToken = (req, res) => {
               return res.redirect("back");
             }
 
-            if (req.body.password === req.body.confirm) {
+            if (req.body.password === req.body.passwordRepeat) {
               MongoClient.connect(URL, { useUnifiedTopology: true }, function(
                 err,
                 db
@@ -1068,12 +1112,23 @@ exports.getProfile = (req, res) => {
   var success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
   req.session.flash = [];
+  
+  Country.find({}).then((countries) => {
+      var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+      req.session.flash = [];
 
-  res.render("buyer/profile", {
-    DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
-    successMessage: success,
-    errorMessage: error,
-    profile: req.session.buyer
+      var country = [];
+      for(var i in countries) {
+        country.push({id: i, name: countries[i].name});
+      }
+        
+    res.render("buyer/profile", {
+      DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+      successMessage: success,
+      countries: country,
+      errorMessage: error,
+      profile: req.session.buyer
+    });
   });
 };
 

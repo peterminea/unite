@@ -25,7 +25,7 @@
   <script type="text/javascript">
     $(document).ready(function() {
       var token = $("input[name='_csrf']").val();
-      postAutocomplete('#country', '/countryAutocomplete', token);
+      getAutocomplete('#country', '/countryAutocomplete', token);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       getCurrenciesList('select.currency', '/currencyGetAutocomplete', token);      
       initBaseRates(fx, 'select.currency');
@@ -34,6 +34,21 @@
       $("input,select,textarea").on('change', function() {
         $('#updateProfile').prop('disabled', false);
       });
+      
+        $('#updateProfile').on('click', function(e) {
+          e.preventDefault();
+          
+          if(!validCountry($('.country'))) {
+            return false;
+          }
+/*
+          $('input.autocomp').not('.country').each(function() {
+            var cls = !($(this).hasClass('present')) && !($(this).hasClass('changed'));
+            $(this).next('input').val(cls? 'canSave' : '');
+          });*/
+
+          $('#updateForm').submit();
+        });
 
       $('#termination').click(function(e) {
         $("#dialog").dialog({
@@ -86,7 +101,7 @@
 
     <br><br>
     <div class="smooth-shadow profile-form">
-      <form method="POST">
+      <form id="updateForm" method="POST">
         <input type="hidden" name="_id" value="<%= profile._id %>">
         <input type="hidden" name="role" value="<%= profile.role %>">
         <input type="hidden" name="balance" id="balance" value="<%= profile.balance %>">
@@ -121,8 +136,8 @@
         </div>
         <div class="form-group">
         <label>Password</label>
-        <input required type="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}" title="Please type at least one number and one uppercase&lowercase letter, and at least 6 characters" id="password" name="password" class="form-control" value="<%= profile.password %>">
-          <a href="forgotPassword"><label>Forgot your password?</label></a>
+        <input required type="password" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[ -/:-@\[-`{-~]).{6,12}$" title="Please type at least one number, 1 uppercase + 1 lowercase letter, a special Char, and 6 to 12 characters." class="form-control" id="password" name="password" value="<%= profile.password %>">
+          <a href="forgotPassword"><label>Forgot/Change your password?</label></a>
         </div>        
         <input type="hidden" name="isVerified" id="isVerified" value="<%= profile.isVerified %>">        
         <div class="form-group mr-2">
@@ -148,7 +163,14 @@
         </div>
         <div class="form-group">
           <label>Country*</label>
-          <input type="text" class="form-control" id="country" name="country" value="<%= profile.country %>" required>
+          <input type="text" class="form-control autocomp" id="country" class="country" name="country" value="<%= profile.country %>" required>
+          <input type="hidden" name="saveCountry">
+          <select class='autocomp'>
+            <option id="" value=""></option>
+            <% for(country of countries) { %>
+            <option id="<%= country.id %>" value="<%= country.name %>"><%= country.name %></option>
+            <% } %>
+          </select>
         </div>
         <div class="form-group">
           <label>Date Created</label>

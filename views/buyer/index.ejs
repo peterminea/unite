@@ -12,13 +12,20 @@
   <link rel="stylesheet" href="/messages.css">
   <link rel="stylesheet" href="/jquery-ui.css">
   <link rel="stylesheet" href="/bootstrap.min.css">
-  <script src="/jquery.min.js"></script>
+  <link rel="stylesheet" href="/ui.jqgrid.min.css">
+  <link rel="stylesheet" href="/ui.multiselect.min.css">
+ <!--  <script src="/jquery.min.js"></script> -->
+  <script  src="https://code.jquery.com/jquery-3.5.1.js"  integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" 
+  crossorigin="anonymous"></script>
   <script src="/jquery-ui.min.js"></script>
   <script src="/popper.min.js"></script>
   <script src="/bootstrap.min.js"></script>
+  <script src="/sweetalert2@9.min.js"></script>
   <script src="/index.min.js"></script>
   <script src="/money.min.js"></script>
-  <script src="/sweetalert2@9.min.js"></script>
+  <script src="/jquery.simulate.js"></script>
+  <script src="/jquery.jqgrid.min.js"></script>
+  <script src="/grid.locale-en.js"></script>
   <script src="/https.js"></script>
   <script src="/chatUsers.js"></script>
   <script src="/functions.js"></script>
@@ -168,7 +175,7 @@
           $(this).find('.currency').text(curr);
         });
       });
-      
+
       setTimeout(function() {
         $('select.buyerCurrency')
           .find('option[value="' + defaultBidCurrency + '"]')
@@ -305,7 +312,7 @@
               });
             },
             error: function(err) {
-              alert(err);
+              alert(err.message);
             }
           });
         },
@@ -345,13 +352,25 @@
         </p>
         <a href="../buyer/bidCatalog/<%= buyer._id %>/<%= buyer.organizationName %>"><b>Load full table of Bids</b></a>
       </div>
+    <% } else { %>
+      <p>
+        There are no bids placed by you for this Supplier.  
+      </p>
     <% } %>
     
     <% if (statuses == null) { %>
     <form class="my-2 my-lg-2" method="POST">
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-      <input class="form-control mr-sm-2" type="search" id="search" placeholder="Search Capabilites" aria-label="Search" name="capabilityInput">
-      <p class='littleNote'>Suppliers with the requested capabilities will be searched for.</p>
+      <div class='mt-4'>        
+        <input class="form-control search mr-sm-2" type="search" id="search" placeholder="Search Capabilites" aria-label="Search" name="capabilityInput">
+        <p class='littleNote'>Suppliers with the requested capabilities will be searched for.</p>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <select class='autocomp'>
+          <option id="" value=""></option>
+          <% for(capability of capabilities) { %>
+          <option id="<%= capability.id %>" value="<%= capability.name %>"><%= capability.name %></option>
+          <% } %>
+        </select>
+      </div>
     </form>
     
     <div class="mt-4">
@@ -679,6 +698,10 @@
                     <input type="hidden" required id="priceOriginalList_<%= i %>" name="priceOriginalList" value="">
                     <input type="hidden" required id="productImagesList_<%= i %>" name="productImagesList" value="">
                   </div>
+                  <div id="jqDiv_<%= i %>" class="form-group">
+                    <table id="grid_<%= i %>">
+                    </table>
+                  </div>
                   <div class="form-group">
                     <label>Total number of items (Overall Amount):</label>
                     <input class="form-control" type="number" disabled id="totalAmount_<%= i %>" name="amount" value="0">
@@ -743,11 +766,65 @@
                             return false;
                         return true; 
                     }
-                  
-                    var index = "<%= i %>";
                     
+                    var index = "<%= i %>";
+
+                    var data = [];
+                    var colModel = [
+                      { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
+                      { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, search: true, width: 140},
+                      { name: 'hiddenPrice', hidden: true },
+                      { name: 'hiddenTotalPrice', hidden: true },
+                      { name: 'hiddenCurrency', hidden: true },
+                      { name: 'productImageSource', hidden: true},
+                      { name: 'amount', label: 'Amount', formatter: amountFormatter, align: 'center', search: true, template: 'number', width: 70},
+                      { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, search: true, width: 90},            { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
+                       { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
+                    ];
+                    
+                    /*
+                    $('#prodServices_'+index).find('li').not(':first').each(function(i, e) {
+                      var src = $(this).find('.productImage img').length?
+                          $(this).find('.productImage img').attr('src') : null;
+
+                      data.push({
+                        id: i,
+                        name: $(this).find('.product').text(),
+                        price: $(this).find('.price').text() + ' ' + $(this).find('.currency').text(),
+                        hiddenPrice: $(this).find('.price').text(),
+                        hiddenTotalPrice: $(this).find('.totalPrice').text(),
+                        hiddenCurrency: $(this).find('.currency').text(),
+                        productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '',
+                        amount: parseInt($(this).find('.amount').text()),
+                        totalPrice: $(this).find('.totalPrice').text() + ' ' + $(this).find('.currency').text()
+                      });
+                    });*/
+
+                    $("#grid_"+index).jqGrid({
+                      colModel: colModel,
+                      data: data,
+                      guiStyle: "bootstrap4",
+                      iconSet: "fontAwesome",
+                      idPrefix: "gb1_",
+                      viewrecords : true,
+                      gridview : true,
+                      altRows: true,
+                      //autowidth: true,
+                      toolbar: [true, "top"],
+                      rownumbers : true,
+                      autoencode : false,
+                      width: 750,
+                      height: 300,
+                      sortname: "name",
+                      sortorder: "asc",
+                      caption: "The Products grid, which uses predefined formatters and templates:"
+                    });
+                    
+                    var table = $("#grid_"+index).find('table').eq(1);
+                    table.attr('suppCurrency', "<%= supplier.currency %>");
+
                     $('#status_'+index).on('keypress keyon keyup', function(e) {
-                      return limitStatus(e);
+                        return limitStatus(e);
                     });
                     
                     var sel = $('#statuses_'+index);
@@ -777,7 +854,6 @@
                       $('<div style="color: blue" id="statusText_' + id + '"><p>' + statusText + '</p></div>')
                         .insertAfter($('#status_'+id).parent('div'));
                     });
-                    
                     
                     var elem0 = $("#prodServices_"+index);
                     $('<a><span style="color: green; cursor: pointer" id="massRemove_'+index+'">Remove All Products</span></a><br>').insertBefore(elem0);
@@ -857,8 +933,7 @@
                         var imageInput = $('input.productimageupload[id="productImage_'+id+'"]');
                         var imagePath = input.attr('productImage')?
                           '../' + input.attr('productImage').substring(7) 
-                          : imageInput.attr('filePath');
-                        
+                          : imageInput.attr('filePath');                        
                         
                         if(elem.find('li').length) {
                           elem.find('li').attr('totalPrice', bigPrice);
@@ -868,6 +943,7 @@
                         }
                         
                         var lis = elem.find('li').length;
+                        var divId = $('#jqDiv_'+id);
 
                         elem.append("<li class='list-group-item' price='" 
                                       + addedPrice + "' maxAmount='" + (input.attr('maxAmount')? input.attr('maxAmount') : 2*amountVal)
@@ -883,16 +959,46 @@
                           imageInput
                             .attr('filePath', null)
                             .attr('value', '');
+                        
+                          var gridId = $('#grid_'+id);
+                          var src = imagePath && imagePath.length? imagePath : null;
+
+                          var data = {
+                                    id: lis,
+                                    name: prodVal,
+                                    price: priceVal + ' ' + currencyVal,
+                                    hiddenPrice: priceVal,
+                                    hiddenTotalPrice: addedPrice,
+                                    hiddenCurrency: currencyVal,
+                                    productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '',
+                                    amount: parseInt(amountVal),
+                                    totalPrice: addedPrice + ' ' + currencyVal
+                          };
+
+                          gridId.jqGrid('addRowData', lis, data, 'last');
+                          var table = divId.find('table').eq(1);//Last
+                          var tr = table.find('tbody tr').eq(lis);
+                          tr.attr('price', addedPrice);
+                          tr.attr('totalPrice', bigPrice);
+                          tr.attr('amount', amountVal);                          
+                          tr.attr('maxAmount', (input.attr('maxAmount')? input.attr('maxAmount') : 2*amountVal));
                           
                           var counter = elem.parent('div').find('span.productsCount');
                           var newValue = 1 + parseInt(counter.text()? counter.text() : 0);
                           var totalAmount = $('#totalAmount_'+id).val()? parseInt($('#totalAmount_'+id).val()) : 0;
                           counter.text(newValue);
-                          $('#totalAmount_'+id).val(totalAmount + parseInt(amountVal));
-                          bindHandleProduct($('.rem').last(), input, true, id, true, false);
-                          bindHandleProduct($('.inc').last(), input, true, id, false, true);
-                          bindHandleProduct($('.dec').last(), input, true, id, false, false);
-                          delegateUpload($('.uploadImage').last());
+                          $('#totalAmount_'+id).val(totalAmount + parseInt(amountVal));                         
+                          
+                          bindHandleProduct(elem.find('.rem').last(), input, true, id, true, false);
+                          bindHandleProduct(elem.find('.inc').last(), input, true, id, false, true);
+                          bindHandleProduct(elem.find('.dec').last(), input, true, id, false, false);                        
+                          delegateUpload(elem.find('.uploadImage').last());
+                        
+                          bindHandleProduct(gridId.find('.rem').last(), input, true, id, true, false);
+                          bindHandleProduct(gridId.find('.inc').last(), input, true, id, false, true);
+                          bindHandleProduct(gridId.find('.dec').last(), input, true, id, false, false);                        
+                          delegateUpload(gridId.find('.uploadImage').last());
+                        
                           var suppPriceUnit = fx.convert(parseFloat(addedPrice), {from: buyerCurrSpan.text(), to: '<%= supplier.currency %>'});
                           
                           $('#supplierPriceUnit_'+id).text(parseFloat(suppPriceUnit).toFixed(2));

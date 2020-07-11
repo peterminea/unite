@@ -7,29 +7,30 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="A cool thing made with Glitch">
-  <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/messages.css">
   <link rel="stylesheet" href="/jquery-ui.css">
   <link rel="stylesheet" href="/bootstrap.min.css">
+  <link rel="stylesheet" href="/ui.jqgrid.min.css">
+  <link rel="stylesheet" href="/ui.multiselect.min.css">
   <script src="/jquery.min.js"></script>
   <script src="/jquery-ui.min.js"></script>
   <script src="/popper.min.js"></script>
-  <script src="/bootstrap.min.js"></script>  
-  <script src="/index.min.js"></script>
+  <script src="/bootstrap.min.js"></script>
   <script src="/sweetalert2@9.min.js"></script>
+  <script src="/index.min.js"></script>
   <script src="/money.min.js"></script>
+  <script src="/jquery.simulate.js"></script>
+  <script src="/jquery.jqgrid.min.js"></script>
   <script src="/https.js"></script>
   <script src="/chatUsers.js"></script>
-  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function () {
       var token = $("input[name='_csrf']").val();
-
-      postAutocomplete('.country', '/countryAutocomplete', token);
+      getAutocomplete('.country', '/countryAutocomplete', token);
       getAutocomplete('#industry', '/industryGetAutocomplete', token);
-      getAutocomplete('#currency', '/currencyGetAutocomplete', token);
+      //getAutocomplete('#currency', '/currencyGetAutocomplete', token);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       getCurrenciesList('select.currency', '/currencyGetAutocomplete', token);      
       initBaseRates(fx, 'select.currency');
@@ -42,10 +43,8 @@
       
       $("input.float").inputFilter(function(value) {
         return /^[0-9]+([,.][0-9]+)?$/g.test(value);
-      });    
+      });
       
-      
-      // /^[0-9]+([,.][0-9]+)?$/g     
       setTimeout(function() {
         $('select.currency')
           .find('option[value="' + defaultCurr + '"]')
@@ -56,7 +55,7 @@
           $("input,textarea,select").on('change', function () {
             $('#updateProfile').removeAttr('disabled');
           });
-      }, 800);      
+      }, 1000);      
 
       $('select.currency')
         .css('width', '100px');
@@ -77,6 +76,7 @@
       
         $('#register').click(function(e) {
           e.preventDefault();
+          
           var formData = new FormData(document.getElementById('registration'));
           var captchaResponse = formData.get('g-recaptcha-response');
           $('input[name="captchaResponse"]').val(captchaResponse);
@@ -123,16 +123,18 @@
         <div class="form-group">
           <label>Email address*</label>
           <input type="email" class="form-control" name="emailAddress" required>
-          <small class="text-muted form-text">Only companies' domains are allowed.</small>
+          <small class="text-muted form-text">Only company domains are allowed.</small>
         </div>
         <div class="form-group">
           <label for="password">Password*</label>
-          <input type="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}" title="Please type at least one number, one uppercase and lowercase letter, and at least 6 characters." class="form-control" id="password" name="password" required>
+          <input type="password" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[ -/:-@\[-`{-~]).{6,12}$" title="Please type at least one number, 1 uppercase + 1 lowercase letter, a special Char, and 6 to 12 characters." class="form-control" id="password" name="password" onkeyup="validatePassword(this.value);" required>
+          <span id="msg"></span>
         </div>
         <div class="form-group">
-          <label for="password">Please re-enter password*</label>
-          <input type="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}" title="Please ensure that the passwords match." class="form-control" name="passwordRepeat" required>
-        </div> 
+          <label for="passwordRepeat">Please re-enter password*</label>
+          <input type="password" class="passRepeat" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[ -/:-@\[-`{-~]).{6,12}$" title="Please ensure that the passwords match." class="form-control" name="passwordRepeat" onkeyup="verifyMatch(this.value);" required>
+          <span id="match"></span>
+        </div>
         <div class="form-group">
           <label>Director's name*</label>
           <input type="text" class="form-control" name="directorsName" required>
@@ -151,7 +153,14 @@
           </div>
         <div class="form-group">
           <label>Registered Country*</label>
-          <input type="text" class="form-control country" name="registeredCountry" required>
+          <input type="text" class="form-control country autocomp" title="Registered Country" name="registeredCountry" required>
+          <input type="hidden" name="saveRegisteredCountry">
+          <select class='autocomp'>
+            <option id="" value=""></option>
+            <% for(country of countries) { %>
+            <option id="<%= country.id %>" value="<%= country.name %>"><%= country.name %></option>
+            <% } %>
+          </select>
         </div>
         <div class="form-group">
           <label>Company Address*</label>
@@ -172,11 +181,25 @@
         </div>
         <div class="form-group">
           <label>Country*</label>
-          <input type="text" class="form-control country" id="country" name="country" required>
+          <input type="text" class="form-control country autocomp" title="Country" id="country" name="country" required>
+          <input type="hidden" name="saveCountry">
+          <select class='autocomp'>
+            <option id="" value=""></option>
+            <% for(country of countries) { %>
+            <option id="<%= country.id %>" value="<%= country.name %>"><%= country.name %></option>
+            <% } %>
+          </select>
         </div>
         <div class="form-group">
           <label>Industry*</label>
-          <input type="text" class="form-control" id="industry" name="industry" required>
+          <input type="text" class="form-control autocomp" id="industry" name="industry" required>
+          <input type="hidden" name="saveIndustry">
+          <select class='autocomp'>
+            <option id="" value=""></option>
+            <% for(industry of industries) { %>
+            <option id="<%= industry.id %>" value="<%= industry.name %>"><%= industry.name %></option>
+            <% } %>
+          </select>
         </div>
         <div class="form-group">
           <label>Employee Numbers*</label>

@@ -1,5 +1,17 @@
+
+
 var autocomp = function(obj, data, enter) {//Not suitable for modals.
-  $('ul.ui-autocomplete').not('div.container *').each(function(i, e) {                
+
+  var sel = obj.parent('div').find('select');
+  for(var i in data) {
+      var opt = '<option ' + 'style="word-wrap: break-word; width: 120px" title="' + data[i].name +'" value="' + data[i].value + '">' + data[i].name + '</option>';
+      sel.append(opt);
+  }
+  /*
+  if(1==2)
+  $('ul.ui-autocomplete').not('div.container *')
+    //.css('position', 'relative')
+    .each(function(i, e) {
   if($(this).children('li').length) {
     $(this).css({'height': '75px', 'text-align': 'left'});
 
@@ -7,7 +19,7 @@ var autocomp = function(obj, data, enter) {//Not suitable for modals.
       var name = data[index].name;
       $(element).css({'height': '15px'})
         .find('div').css({'font-family': 'arial', 'font-size': '15px'}).text(name);
-      $(element).bind('click', function() {                      
+      $(element).bind('click', function() {
         obj.val(name);        
         $(this).parent('ul').hide();
         if(enter) {
@@ -18,8 +30,237 @@ var autocomp = function(obj, data, enter) {//Not suitable for modals.
         });
       });
     }
-  });
+  });*/
 };
+
+
+function getCurrenciesList(elem, url, token) {//For <select> drop-down currencies.
+  var obj = $('' + elem + '');
+  
+  $.ajax({
+    url: url,
+    headers: { "X-CSRF-Token": token },
+    datatype: 'jsonp',
+    type: "GET",
+    //data: req,
+    success: function(data) {
+    if(!data || !data.length || treatError(data, 'loading currencies')) {
+        //obj.val('');
+        obj.append('<option>No results found.</option>');
+        return false;
+      }
+
+      for(var i in data) {
+        var opt = '<option ' + 'style="word-wrap: break-word; width: 50px" title="' + data[i].value +'" value="' + data[i].name + '">' + data[i].name + '</option>';
+        obj.append(opt);
+      }
+      //res(data);
+      //autocomp(obj, data, isEnter);          
+    },
+    error: function(err) {
+      alert(err);
+    }
+  });
+}
+
+
+function getProductsList(elem, url, token) {//For <select> drop-down currencies.
+  var obj = $('' + elem + '');
+  
+  $.ajax({
+    url: url,
+    headers: { "X-CSRF-Token": token },
+    datatype: 'jsonp',
+    data: {supplierId: obj.attr('supplierId')},
+    type: "POST",
+    success: function(data) {
+    if(!data || !data.length || treatError(data, 'retrieving products')) {
+        //obj.val('');
+        obj.append('<option>No results found.</option>');
+        return false;
+      }
+
+      obj.append('<option></option>');
+      
+      for(var i in data) {
+        var opt = '<option ' + 'style="word-wrap: break-word; width: 50px" price="' + data[i].price 
+          + '" maxAmount="' + data[i].amount + '" productImage="' 
+          + data[i].productImage + '" currency="' + data[i].currency + '" title="' 
+          + data[i].name +'" value="' + data[i].name + '">' + data[i].name + '</option>';
+        
+        obj.append(opt);
+      }
+      //res(data);
+      //autocomp(obj, data, isEnter);          
+    },
+    error: function(err) {
+      alert(err);
+    }
+  });
+}
+
+/*
+function getValues(elem, url, token, isEnter) {
+  var obj = $('' + elem + '');
+
+  $.ajax({
+    url: url,
+    headers: { "X-CSRF-Token": token },
+    datatype: 'jsonp',
+    type: "GET",
+    //data: req,
+    success: function(data) {//alert(res);
+    if(!data || !data.length) {//Recommended to disable it for a better user experience. We can add our items as well.
+        //obj.val('');
+        //return false;
+      }
+      //res(data);
+      //alert(data.length);
+      autocomp(obj, data, isEnter);          
+    },
+    error: function(err) {
+      alert(err);
+    }
+  });
+  }
+  */
+
+
+function openDropdown(obj) {
+  function down() {
+      var obj = $(this);
+      var pos = obj.offset(); // remember position
+      var len = obj.find("option").length;
+      
+      if(len > 10) {
+        len = 10;
+      }
+      
+      obj.css({"position": "relative", "zIndex": 9999});
+      obj.offset(pos);   // reset position
+      obj.attr("size", 20+len); // open dropdown
+      obj.unbind("focus", down);
+      //obj.focus();
+  }
+
+  function up() {
+      var obj = $(this);    
+      obj.css("position", "static");
+      obj.attr("size", "1");  // close dropdown
+      obj.unbind("change", up);
+      //obj.focus();
+  }
+  
+    obj.focus(down).blur(up).focus();
+}
+
+
+function getAutocomplete(elem, url, token, isEnter) {
+  $('' + elem + '').autocomplete({
+    source: function(req, res) {
+      var obj = $(this.element);
+      var sel = obj.parent('div').find('select');
+      var data = [], found = false;
+      
+      sel.find('option.autocomp').remove();
+      var arr = sel.find('option').not('.first');
+      
+      arr.each(function(index, element) {
+        if(req.term.length) {
+          if($(element).text().toLowerCase().includes(req.term.toLowerCase())) {
+            data.push($(element).text());
+            found = true;
+          } else {
+            //$(element).css('visibility', 'hidden');
+          }
+          
+          if(found == true && index == arr.length-1) {
+            for(var i = data.length-1; i >= 0; i--) {
+              sel.prepend(`<option class='autocomp'>${data[i]}</option>`);
+            }
+            //sel.simulate('click');
+            sel.prepend('<option class="autocomp">...</option>');
+            sel.find('option.autocomp').eq(0).prop('selected', true);
+            openDropdown(sel);
+          }
+        }
+      });
+    },
+    minLength: 3,
+    delay: 50,
+    focus: function (event, ui) {
+        if(!ui.item)
+          return false;
+        this.value = ui.item.name;
+        event.preventDefault();
+     },
+    select: function(event, ui) {
+      if(ui.item) {
+        $(this).val(ui.item.name);
+        event.preventDefault();
+      }
+    }
+  });
+}
+
+
+function validatePassword(password) {
+  // Do not show anything when the length of password is zero.
+  if (password.length === 0) {
+      $("#msg").text('');
+      return;
+  }
+  // Create an array and push all possible values that you want in password
+  var matchedCase = new Array();
+  matchedCase.push("[$@$!%*#?&]"); // Special Character
+  matchedCase.push("[A-Z]");      // Uppercase letters
+  matchedCase.push("[0-9]");      // Numbers
+  matchedCase.push("[a-z]");     // Lowercase letters
+
+  // Check the conditions
+  var ctr = 0;
+  for (var i = 0; i < matchedCase.length; i++) {
+      if (new RegExp(matchedCase[i]).test(password)) {
+          ctr++;
+      }
+  }
+  // Display it:
+  var color = "", strength = "";
+  
+  switch (ctr) {
+      case 0:
+        strength = "Extremely Weak";
+        color = "black";
+        break;
+      case 1:
+        strength = "Weak";
+        color = "red";
+        break;
+      case 2:
+        strength = "Medium";
+        color = "orange";
+        break;
+      case 3:
+        strength = "Good";
+        color = "yellow";
+        break;
+      case 4:
+        strength = "Strong";
+        color = "green";
+        break;
+  }
+ 
+  $("#msg")
+    .css({'color': color})
+    .text(strength);
+}
+
+
+function verifyMatch(password) {
+  var mainPass = $('#password').val();
+  $('#match').text(password !== mainPass? 'Passwords do not match!' : '')  
+}
+
 
 (function($) {
   $.fn.inputFilter = function(inputFilter) {
@@ -37,8 +278,6 @@ var autocomp = function(obj, data, enter) {//Not suitable for modals.
     });
   };
 }(jQuery));
-
-
 
 
 function sortTable() {//Ascending or descending. Each <th> column tag is involved.
@@ -240,159 +479,7 @@ function checkName(arr, name) {
 }
 
 function getId(val) {
-  return val.substr(val.indexOf('_')+1);
-}
-
-
-function getAutocomplete(elem, url, token, isEnter) {
-  $('' + elem + '').autocomplete({
-    source: function(req, res) {
-      var obj = $(this.element);
-
-      $.ajax({
-        url: url,
-        headers: { "X-CSRF-Token": token },
-        datatype: 'jsonp',
-        type: "GET",
-        data: req,
-        success: function(data) {
-        if(!data || !data.length) {//Recommended to disable it for a better user experience. We can add our items as well.
-            //obj.val('');
-            //return false;
-          }
-          res(data);
-          autocomp(obj, data, isEnter);          
-        },
-        error: function(err) {
-          alert(err);
-        }
-      });
-    },
-    minLength: 3,
-    delay: 50,
-    focus: function (event, ui) {
-        if(!ui.item)
-          return false;
-        this.value = ui.item.name;
-        event.preventDefault();
-     },
-    select: function(event, ui) {
-      if(ui.item) {
-        $(this).val(ui.item.name);
-        event.preventDefault();
-      }
-    }
-  });
-}
-
-
-function postAutocomplete(elem, url, token) {
-  $('' + elem + '').autocomplete({
-    source: function(req, res) {
-      var obj = $(this.element);
-
-      $.ajax({
-        url: url,
-        headers: { "X-CSRF-Token": token },
-        datatype: 'jsonp',
-        type: "POST",
-        data: req,
-        success: function(data) {
-        if(!data || !data.length) {
-            //obj.val('');
-            //return false;
-          }
-          res(data);
-          autocomp(obj, data);
-        },
-        error: function(err) {
-          alert(err);
-        }
-      });
-    },
-    minLength: 3,
-    delay: 50,
-    focus: function (event, ui) {
-        if(!ui.item)
-          return false;
-        this.value = ui.item.name;
-        event.preventDefault();
-     },
-    select: function(event, ui) {
-      if(ui.item) {
-        $(this).val(ui.item.name);
-        event.preventDefault();
-      }
-    }
-  });
-}
-
-
-function getCurrenciesList(elem, url, token) {//For <select> drop-down currencies.
-  var obj = $('' + elem + '');
-  
-  $.ajax({
-    url: url,
-    headers: { "X-CSRF-Token": token },
-    datatype: 'jsonp',
-    type: "GET",
-    //data: req,
-    success: function(data) {
-    if(!data || !data.length || treatError(data, 'loading currencies')) {
-        //obj.val('');
-        obj.append('<option>No results found.</option>');
-        return false;
-      }
-
-      //obj.append('<option></option>');
-      
-      for(var i in data) {
-        var opt = '<option ' + 'style="word-wrap: break-word; width: 50px" title="' + data[i].value +'" value="' + data[i].name + '">' + data[i].name + '</option>';
-        obj.append(opt);
-      }
-      //res(data);
-      //autocomp(obj, data, isEnter);          
-    },
-    error: function(err) {
-      alert(err);
-    }
-  });
-}
-
-
-function getProductsList(elem, url, token) {//For <select> drop-down currencies.
-  var obj = $('' + elem + '');
-  
-  $.ajax({
-    url: url,
-    headers: { "X-CSRF-Token": token },
-    datatype: 'jsonp',
-    data: {supplierId: obj.attr('supplierId')},
-    type: "POST",
-    success: function(data) {
-    if(!data || !data.length || treatError(data, 'retrieving products')) {
-        //obj.val('');
-        obj.append('<option>No results found.</option>');
-        return false;
-      }
-
-      obj.append('<option></option>');
-      
-      for(var i in data) {
-        var opt = '<option ' + 'style="word-wrap: break-word; width: 50px" price="' + data[i].price 
-          + '" maxAmount="' + data[i].amount + '" productImage="' 
-          + data[i].productImage + '" currency="' + data[i].currency + '" title="' 
-          + data[i].name +'" value="' + data[i].name + '">' + data[i].name + '</option>';
-        
-        obj.append(opt);
-      }
-      //res(data);
-      //autocomp(obj, data, isEnter);          
-    },
-    error: function(err) {
-      alert(err);
-    }
-  });
+  return !val? null : val.substr(val.indexOf('_') + 1);
 }
 
 
@@ -435,9 +522,23 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
   });
   
   obj.on('click', function() {
-    var li = $(this).parent('span').parent('li');/*
+    var li = $(this).parent('span').parent('li'), ul;/*
     var newIndex = elem.find('li').index(li);*/
-    var ul = li.parent('ul');
+    
+    var divId = fromBuyer? $('#jqDiv_'+id) : $('#jqDiv');
+    var gridId = fromBuyer? $('#grid_'+id) : $('#grid');
+    var isUl = false;
+    
+    if(!li.length) {//Not from list, but from grid.
+      li = $(this).parent('span').closest('tr');
+      ul = li.closest('table');
+    } else {
+      ul = li.parent('ul');
+      isUl = true;
+    }
+    
+    //divId.prev('div').find('ul');
+    var counter = divId.prev('div').find('p.term span');
     var entireAmount = parseInt(li.find('.amount').text());
 
     if(isAdd && entireAmount == parseInt(li.attr('maxAmount'))) {
@@ -453,7 +554,7 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     var handledAmount = isRow? entireAmount : 1;
     var rowPrice = parseFloat(li.find('span.totalPrice').text()).toFixed(2);      
     var handledPrice = handledAmount * parseFloat(li.find('span.price').text()).toFixed(2);
-    var supplierCurrency = fromBuyer? li.parent('ul').attr('suppCurrency') : li.find('.currency').text();
+    var supplierCurrency = fromBuyer? ul.attr('suppCurrency') : li.find('.currency').text();
     var totalPagePrice = fromBuyer? parseFloat(li.attr('totalPrice')).toFixed(2) : parseFloat($('#hiddenTotalPrice').val()).toFixed(2);
     
     var canContinue = true;
@@ -462,6 +563,8 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     var localPrice = isAdd? parseFloat(parseFloat(rowPrice) + parseFloat(handledPrice)).toFixed(2) : parseFloat(rowPrice - handledPrice).toFixed(2);
     var newAmount = isAdd? parseInt(totalAmountInput.val()) + handledAmount : parseInt(totalAmountInput.val()) - handledAmount;
     var newPrice = isAdd? parseFloat(parseFloat(totalPagePrice) + parseFloat(handledPrice)).toFixed(2) : parseFloat(totalPagePrice - handledPrice).toFixed(2);
+    
+    isUl? ul.find('li').attr('totalPrice', parseFloat(newPrice)) : ul.find('tr').attr('totalPrice', parseFloat(newPrice));
     totalAmountInput.val(parseInt(newAmount));
     
     if(isRow || (entireAmount==1 && !isAdd)) {//Delete Row. If 1.
@@ -479,8 +582,7 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
         //, reverseButtons: true
       }).then((result) => {
         if(result.value) {
-          li.remove();          
-          var counter = ul.parent('div').find('p.term span');
+          li.remove();
           var newValue = -1 + parseInt(counter.text());
           counter.text(newValue);
         } else if (result.dismiss === Swal.DismissReason.cancel) {
@@ -511,7 +613,6 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
       
       if(canContinue == false)
         return false;
-      ul.find('li').attr('totalPrice', parseFloat(newPrice));
     }
   });
 }
@@ -528,7 +629,8 @@ function removeAllProducts() {//Supplier products.
   
   $('#totalSupplyAmount').val(0);
   $('#totalSupplyPrice').text('0 ' + $('input[name="currency"]').val());
-  $('#hiddenTotalPrice').val(0);
+  $('#hiddenTotalPrice').val('0 ' + $('input[name="currency"]').val());
+  $('#hiddenTotalAmount').val(0);
 }
 
 
@@ -566,6 +668,7 @@ function addition(prod, prodVal, priceVal, currencyVal, amountVal, imagePath, el
       var addedPrice = parseFloat(priceVal * amountVal).toFixed(2);
       var priceInput = fromBuyer? $('#price_'+id) : $('#totalSupplyPrice');
       var pageCurrency = fromBuyer? $('#currency_'+id).text() : $('input[name="currency"]').val();
+      var buyerInput = fromBuyer? $("#prodServiceInput_"+id) : null;
       
       if(!fromBuyer) {
         $('#hiddenTotalPrice').val(parseFloat(parseFloat($('#hiddenTotalPrice').val()) + parseFloat(addedPrice)).toFixed(2));
@@ -585,10 +688,10 @@ function addition(prod, prodVal, priceVal, currencyVal, amountVal, imagePath, el
 <span class='basicPriceWrapper'>Price</span></span></li>`);
       }
                         
-      var lis = elem.find('li').length;
+      var lis = elem.find('li').length;//table.find('tbody tr').length;
       
       elem.append(
-        "<li class='list-group-item' price='" + addedPrice + "' totalPrice='" + bigPrice + "' amount='" + amountVal + "'>"
+        "<li class='list-group-item' price='" + addedPrice + "' totalPrice='" + bigPrice + (fromBuyer? "' maxAmount='" + (buyerInput.attr('maxAmount')? buyerInput.attr('maxAmount') : 2*amountVal) : '') + "' amount='" + amountVal + "'>"
         + `<span class='cnt'>${lis}</span><span class='product'>${prodVal}</span>
 <span class='buttonsWrapper'><span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span></span>
 <span class='imageWrapper'><span class='productImage' title='Image of Product'>` + (imagePath && imagePath.length? `<img src="${imagePath}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '') +  `</span><span class='uploadImage'>Upload Image</span></span>
@@ -599,6 +702,62 @@ function addition(prod, prodVal, priceVal, currencyVal, amountVal, imagePath, el
       
       var totalAmountInput = fromBuyer? $('#totalAmount_'+id) : $('#totalSupplyAmount');
       totalAmountInput.val(parseInt(totalAmountInput.val()) + parseInt(amountVal));
+      var gridId = fromBuyer? $('#grid_'+id) : $('#grid');
+      var divId = fromBuyer? $('#jqDiv_'+id) : $('#jqDiv');
+      var src = imagePath && imagePath.length? imagePath : null;
+
+      var data = {
+                id: lis,
+                name: prodVal,
+                price: priceVal + ' ' + currencyVal,
+                hiddenPrice: priceVal,
+                hiddenTotalPrice: addedPrice,
+                hiddenCurrency: currencyVal,
+                productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '',
+                amount: parseInt(amountVal),
+                totalPrice: addedPrice + ' ' + currencyVal
+      };
+    
+      gridId.jqGrid('addRowData', lis, data, 'last');
+      var table = divId.find('table').eq(1);//Last
+      var tr = table.find('tbody tr').eq(lis);
+      tr.attr('price', addedPrice);
+      tr.attr('totalPrice', bigPrice);
+      tr.attr('amount', amountVal);
+      if(fromBuyer) {
+        tr.attr('maxAmount', (buyerInput.attr('maxAmount')? buyerInput.attr('maxAmount') : 2*amountVal));
+      }
+    
+    /*
+          var colModel = [
+            { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
+            { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, search: true, width: 140},
+            { name: 'hiddenPrice', hidden: true },
+            { name: 'hiddenTotalPrice', hidden: true },
+            { name: 'hiddenCurrency', hidden: true },
+            { name: 'productImageSource', hidden: true},
+            { name: 'amount', label: 'Amount', formatter: amountFormatter, align: 'center', search: true, template: 'number', width: 70},
+            { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, search: true, width: 90},            { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
+             { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
+          ];
+          
+          $('#prodServices').find('li').not(':first').each(function(i, e) {
+            var src = $(this).find('.productImage img').length?
+                $(this).find('.productImage img').attr('src') : null;
+                       
+            data.push({
+              id: i,
+              name: $(this).find('.product').text(),
+              price: $(this).find('.price').text() + ' ' + $(this).find('.currency').text(),
+              hiddenPrice: $(this).find('.price').text(),
+              hiddenTotalPrice: $(this).find('.totalPrice').text(),
+              hiddenCurrency: $(this).find('.currency').text(),
+              productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '',
+              amount: parseInt($(this).find('.amount').text()),
+              totalPrice: $(this).find('.totalPrice').text() + ' ' + $(this).find('.currency').text()
+            });
+          });   
+    */
     
       if(!fromBuyer) {
         $('#totalSupplyPrice').text(bigPrice + ' ' + currencyVal);
@@ -609,13 +768,20 @@ function addition(prod, prodVal, priceVal, currencyVal, amountVal, imagePath, el
         elem.find('li').attr('totalPrice', bigPrice);
       }
       
-      var counter = elem.parent('div').find('p.term span');
+      //var counter = elem.parent('div').find('p.term span');
+      var counter = divId.prev('div').find('p.term span');
       var newValue = 1 + parseInt(counter.text());
       counter.text(newValue);
-      bindHandleProduct($('.rem').last(), prod, fromBuyer, fromBuyer? getId(elem.attr('id')) : null, true, false);
-      bindHandleProduct($('.inc').last(), prod, fromBuyer, fromBuyer? getId(elem.attr('id')) : null, false, true);
-      bindHandleProduct($('.dec').last(), prod, fromBuyer, fromBuyer? getId(elem.attr('id')) : null, false, false);
-      delegateUpload($('.uploadImage').last());
+    
+      bindHandleProduct(elem.find('.rem').last(), prod, fromBuyer, fromBuyer? getId(elem.attr('id')) : null, true, false);
+      bindHandleProduct(elem.find('.inc').last(), prod, fromBuyer, fromBuyer? getId(elem.attr('id')) : null, false, true);
+      bindHandleProduct(elem.find('.dec').last(), prod, fromBuyer, fromBuyer? getId(elem.attr('id')) : null, false, false);
+      delegateUpload(elem.find('.uploadImage').last());
+    
+      bindHandleProduct(gridId.find('.rem').last(), prod, fromBuyer, fromBuyer? getId(elem.attr('id')) : null, true, false);
+      bindHandleProduct(gridId.find('.inc').last(), prod, fromBuyer, fromBuyer? getId(elem.attr('id')) : null, false, true);
+      bindHandleProduct(gridId.find('.dec').last(), prod, fromBuyer, fromBuyer? getId(elem.attr('id')) : null, false, false);
+      delegateUpload(gridId.find('.uploadImage').last());
   }
 }
 
@@ -635,7 +801,9 @@ function addProduct(obj) {
       }
 
       var input = $("#prodServiceInput");     
-      var req = input.val().length && $('#price').val().length && $('#amount').val().length && Number.isInteger(parseFloat($('#amount').val()));
+      var req = input.val().length && $('#price').val().length && $('#amount').val().length 
+      && $('#price').val()> 0 && $('#amount').val() > 0
+      && Number.isInteger(parseFloat($('#amount').val()));
       var imagePath = $('input.productimageupload').attr('filePath');
 
       if(req) {
@@ -806,6 +974,27 @@ function imageExists(image_url){
 }
 
 
+function validCountry(obj) {
+  var inputs = [];
+  obj.each(function() {
+    if(!($(this).hasClass('present'))) {
+      inputs.push($(this).attr('title'));
+    }
+  });
+
+  if(inputs.length) {
+      Swal.fire({
+        icon: 'error',
+        title: 'error',
+        text: 'Please enter a valid country name from the list for the input(s): ' + inputs.toString()
+      });
+    return false;
+  }
+  
+  return true;
+}
+
+
 function treatLastLi() {
   var nextLi = $('li.last').next('li');
   $('li.last').removeClass('last');
@@ -819,10 +1008,19 @@ function supplierValidateFields(fx) {
     var obj = '<p class="productRequired littleNote">You are required to include at least one product or service.</p>';
     $(obj).insertBefore($(this));
     return false;
+  } 
+
+  if(!validCountry($('.country'))) {
+    return false;
   }
   
-  $('#hiddenTotalPrice').val(parseFloat($('#totalSupplyAmount').val()));
-  $('#hiddenTotalAmount').val($('#totalSupplyPrice').text());
+  $('input.autocomp').not(".country").each(function() {
+    var cls = !($(this).hasClass('present')) && !($(this).hasClass('changed'));
+    $(this).next('input').val(cls? 'canSave' : '');
+  });
+
+  $('#hiddenTotalAmount').val(parseInt($('#totalSupplyAmount').val()));
+  $('#hiddenTotalPrice').val($('#totalSupplyPrice').text());
   
   var arr = [], arr1 = [], arr2 = [], arr3 = [], arr4 = [];
   
@@ -902,12 +1100,25 @@ function registrationDialog(accountType) {
 
 function delegateUpload(obj) {
   obj.on('click', function() {
-    var li = $(this).parent('span').parent('li');    
-    var ul = li.parent('ul');
-    var div = ul.closest('div');
-    var index = ul.find('li').index(li);
-    var uploadInput = div.find('input[id^="productImage"]');
+    var uploadInput,  li = $(this).parent('span').parent('li');
+    var index;
+    var id = getId(obj.attr('id'));
     
+    if(li.length) {//List
+      var ul = li.parent('ul');
+      var div = ul.closest('div');
+      var index = ul.find('li').index(li);
+      uploadInput = div.find('input[id^="productImage"]');
+    } else {//jqGrid
+      var divId = id? $('#jqDiv_'+id) : $('#jqDiv');
+      
+      var tr = $(this).closest('tr');//parent('span').parent('td').parent('tr');
+      var table = tr.closest('table');//parent('tbody').parent('table');
+      var div = divId.prev('div');
+      index = table.find('tr').index(tr);
+      uploadInput = div.find('input[id^="productImage"]');
+    }
+ 
     uploadInput
       .attr('fromOutside', index)
       .trigger('click');
@@ -993,6 +1204,75 @@ function processSingleFile(response, val, ob, input, prevInput, token, theDiv) {
 
     ob = '<div><a href="' + val + '" file="' + file + '" title="Download ' + val + '" style="color: blue; cursor: pointer" download>Download file</a>&nbsp;<span token="' + token + '" file="' + file + '" class="remFile" onclick="removeFile(this,Swal)" title="Delete the '+ val +' file">Remove</span></div>';
     $(ob).insertAfter(theDiv);
+}
+
+
+function checkPresence(obj) {
+    var sel = obj.parent('div').find('select');
+    var val = obj.val();
+    obj.removeClass('present');
+    var isPresent = false;
+    
+    sel.find('option').not(':first').each(function(index, element) {
+      if($(this).text() == val) {
+        isPresent = true;
+        return true;
+      }
+    });
+    
+    if(isPresent) {
+      obj.addClass('present');
+    }
+}
+
+
+
+//jqGrid Formatters:
+
+function productFormatter(cellvalue, options, rowObject ) {
+// format the cellvalue to new format
+  //alert(JSON.stringify(rowObject));
+return `<span class='product'>${cellvalue}</span>`;
+}
+
+
+function priceFormatter(cellvalue, options, rowObject ) {
+  return `<span class='basicPriceWrapper0'><span class='price'>${parseFloat(rowObject.hiddenPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency}</span></span>`;
+}
+
+
+function totalPriceFormatter(cellvalue, options, rowObject ) {
+  return `<span class='priceWrapper0'><span class='totalPrice'>${parseFloat(rowObject.hiddenTotalPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency}</span></span>`;
+}
+
+
+function amountFormatter(cellvalue, options, rowObject ) {
+return `<span class='amountWrapper0'><span class='amount'>${parseInt(cellvalue)}</span> items </span>`;
+}
+
+
+function buttonsWrapperFormatter(cellvalue, options, rowObject) {
+  return `<span class='buttonsWrapper'><span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span></span>`;
+}
+
+
+function imageWrapperFormatter(cellvalue, options, rowObject) {
+  return `<span class='imageWrapper0'><span class='uploadImage'>Upload Image</span>  <span class='productImage' title="Product Image">${rowObject.productImageSource}</span></span>`;
+}
+
+
+function removalFormatter(cellvalue, options, rowObject) {
+  return rowObject.hiddenHref.length? `<a href="${rowObject.hiddenHref}"><span class="adminDelete">Remove User</span></a>` : '';
+}
+
+
+function downloadFormatter(cellvalue, options, rowObject) {
+  return `<a href="${rowObject.downloadHref}" title="Download ${rowObject.downloadName}" class="downloadFile" download>Download file</a>`;
+}
+
+
+function fileRemovalFormatter(cellvalue, options, rowObject) {
+  return `<span name="${rowObject.deletionHref}" class="deleteFile">Remove</span>`;
 }
 
 
@@ -1164,6 +1444,41 @@ $(document).ready(function() {
     });
   });
    
+  
+  $('select.autocomp')
+    .prepend('<option class="first" value=""></option>')
+    .css({'width': '100%'})
+    .find('option.first')
+    .prop('selected', true);
+  
+  $('select.autocomp').on('change', function() {
+    var input = $(this).parent('div').find('input.form-control');
+    input.val($(this).val());
+    $(this).find('option.autocomp').remove();
+    
+    if(input.hasClass('search')) {
+      input.parent('div').parent('form').submit();
+    } else {
+      input.addClass('fromList');
+    }
+    
+    $(this).blur();
+  });
+  
+  $('input.autocomp').each(function(index, element) {
+    checkPresence($(this));
+  });
+  
+  $('input.autocomp').on('change', function() {
+    checkPresence($(this));
+    $(this).addClass('changed');
+  });
+  
+  if($('#match').length) {
+    $('#match').css({color: 'red'});
+  }
+  
+ 
   if(!($('input.upload').length))
     return false;
   
@@ -1274,11 +1589,23 @@ $(document).ready(function() {
               var span = li.find('.productImage');
               var img = span.find('img');
               
+              var table = ul.parent('div').next('div').find('table').eq(1);//Last
+              var tr = table.find('tbody tr').eq(index);
+              var span2 = tr.find('span.productImage');
+              var img2 = span2.find('img');
+              
               if(img != null && img.attr('src') != null) {
                 img.attr('src', res);
               } else {
                 var str = `<img src="${res}" style="height: 25px; width: 30px" onclick="window.open(this.src)">`;
                 span.append(str);
+              }
+              
+              if(img2 != null && img2.attr('src') != null) {
+                img2.attr('src', res);
+              } else {
+                var str = `<img src="${res}" style="height: 25px; width: 30px" onclick="window.open(this.src)">`;
+                span2.append(str);
               }
               
               input.removeAttr('fromOutside');

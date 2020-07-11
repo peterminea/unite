@@ -11,11 +11,17 @@
   <link rel="stylesheet" href="/messages.css">
   <link rel="stylesheet" href="/jquery-ui.css">
   <link rel="stylesheet" href="/bootstrap.min.css">
+  <link rel="stylesheet" href="/ui.jqgrid.min.css">
+  <link rel="stylesheet" href="/ui.multiselect.min.css">
   <script src="/jquery.min.js"></script>
   <script src="/jquery-ui.min.js"></script>
   <script src="/popper.min.js"></script>
   <script src="/bootstrap.min.js"></script>
   <script src="/sweetalert2@9.min.js"></script>
+  <script src="/index.min.js"></script>
+  <script src="/money.min.js"></script>
+  <script src="/jquery.simulate.js"></script>
+  <script src="/jquery.jqgrid.min.js"></script>
   <script src="/https.js"></script>
   <script src="/functions.js"></script>
   <script type="text/javascript">
@@ -64,7 +70,7 @@
   <br>
   <div>
     <p class='term'>
-      Disclaimer: This is a Demo list of files that are uploaded to our App folders and Database.
+      Disclaimer: This is a Demo list of files that are uploaded to our App folders.
     </p>
     <p class='term'>
       We include Avatars and user-specific files that are uploaded. For practical reasons, we prefer uploading files to dedicated folders of the application hosting space, and not to the DB itself - currently the database only contains a few uploaded files.<br>Note: Only Site Administrators can access these lists. So, guys, what we get to see here - it is only for us!
@@ -72,7 +78,7 @@
   </div>
   <br><br>
   <h3 style="color: green">
-    List of UNITE Database Files
+    List of UNITE Product Image Files
   </h3>
   <br>
 <% if(files != null && files.length > 0) {%>
@@ -82,6 +88,7 @@
         <tr>
           <th scope="col">#</th>
           <th scope="col">File name</th>
+          <th scope="col">File folder</th>
           <th scope="col">File Size</th>
           <th scope="col">Upload Date</th>
           <th scope="col">Download File</th>
@@ -92,9 +99,10 @@
         <% let i = 0; for (file of files) { %>
         <tr id="<%= file._id %>">
           <td scope="col"><%= i+1 %></td>
-          <td scope="col"><%= file.filename %></td>
-          <td scope="col"><%= file.length %></td>
-          <td scope="col"><%= file.uploadDate %></td>
+          <td scope="col"><%= file.name %></td>
+          <td scope="col"><%= file.folder %></td>
+          <td scope="col"><%= file.size %></td>
+          <td scope="col"><%= file.date %></td>
           <td><a href="../<%= file.path.substring(7) %>" title="Download <%= file.name %>" class="downloadFile" download>Download file</a></td>
           <td><span name="<%= file.path %>" class="deleteFile">Remove</span></td>
         </tr>
@@ -102,6 +110,62 @@
         </tbody>
       </table>
     </div>
+    <div id="jqDiv_0" class="form-group">
+      <table id="gridProdImages">
+      </table>
+    </div>
+  
+  <script type="text/javascript">
+    var data = [];
+    var colModelProdImages = [
+      { name: 'filename', label: 'File Name', search: true, width: 210},
+      { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 220},
+      { name: 'length', label: 'File Length', align: 'center', sorttype: 'number', search: true, width: 220},
+      { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 200},
+      { name: 'download', label: 'Download it', align: 'center', formatter: downloadFormatter, search: false, width: 100},
+      { name: 'deletion', label: 'Remove', align: 'center', formatter: fileRemovalFormatter, search: false, width: 100},
+      { name: 'downloadHref', hidden: true },
+      { name: 'downloadName', hidden: true },
+      { name: 'deletionHref', hidden: true }
+    ];   
+    
+    $("#gridProdImages").jqGrid({
+      colModel: colModelProdImages,
+      data: data,
+      guiStyle: "bootstrap4",
+      iconSet: "fontAwesome",
+      idPrefix: "gb1_",
+      viewrecords : true,
+      gridview : true,
+      altRows: true,
+      //autowidth: true,
+      rownumbers : true,
+      autoencode : false,
+      toolbar: [true, "top"],
+      width: 1500,
+      //height: 300,
+      sortname: "name",
+      sortorder: "asc",
+      caption: "The Product Image Files grid, which uses predefined formatters and templates:"
+    });
+  
+  </script>
+    <% i = 0; for (file of files) { %>
+  <script type="text/javascript">                 
+    var data = {
+          id: "<%= i %>",
+          filename: "<%= file.name %>",
+          folder: "<%= file.folder %>",
+          length: "<%= file.size %>",
+          uploadDate: "<%= file.date %>",
+          downloadHref: "../<%= file.path.substring(7) %>",
+          downloadName: "<%= file.name %>",
+          deletionHref: "<%= file.path %>"
+    };
+
+    $("#gridProdImages").jqGrid('addRowData', data.id, data, 'last');        
+  </script>
+     <% i++; } %>
         <% } else {%>
         <div>
           <p style="color: green; font-family: arial">
@@ -143,6 +207,62 @@
         </tbody>
       </table>
     </div>
+    <div id="jqDiv_1" class="form-group">
+      <table id="gridUploads">
+      </table>
+    </div>  
+ 
+  <script type="text/javascript">
+    var data = [];
+    var colModelUploadImages = [
+      { name: 'filename', label: 'File Name', search: true, width: 210},
+      { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 220},
+      { name: 'length', label: 'File Length', align: 'center', search: true, sorttype: 'number', width: 220},
+      { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 200},
+      { name: 'download', label: 'Download it', align: 'center', formatter: downloadFormatter, search: false, width: 100},
+      { name: 'deletion', label: 'Remove', align: 'center', formatter: fileRemovalFormatter, search: false, width: 100},
+      { name: 'downloadHref', hidden: true },
+      { name: 'downloadName', hidden: true },
+      { name: 'deletionHref', hidden: true }
+    ];   
+    
+    $("#gridUploads").jqGrid({
+      colModel: colModelUploadImages,
+      data: data,
+      guiStyle: "bootstrap4",
+      iconSet: "fontAwesome",
+      idPrefix: "gb1_",
+      viewrecords : true,
+      gridview : true,
+      altRows: true,
+      //autowidth: true,
+      rownumbers : true,
+      autoencode : false,
+      toolbar: [true, "top"],
+      width: 1500,
+      //height: 300,
+      sortname: "name",
+      sortorder: "asc",
+      caption: "The Uploaded Files grid, which uses predefined formatters and templates:"
+    });
+  
+  </script>
+    <% i = 0; for (file of uploads) { %>
+  <script type="text/javascript">                 
+    var data = {
+          id: "<%= i %>",
+          filename: "<%= file.name %>",
+          folder: "<%= file.folder %>",
+          length: "<%= file.size %>",
+          uploadDate: "<%= file.date %>",
+          downloadHref: "../<%= file.path.substring(7) %>",
+          downloadName: "<%= file.name %>",
+          deletionHref: "<%= file.path %>"
+    };
+
+    $("#gridUploads").jqGrid('addRowData', data.id, data, 'last');        
+  </script>
+     <% i++; } %>
         <% } else {%>
         <div>
           <p style="color: green; font-family: arial">
@@ -184,6 +304,62 @@
         </tbody>
       </table>
     </div>
+    <div id="jqDiv_2" class="form-group">
+      <table id="gridAvatars">
+      </table>
+    </div>
+ 
+  <script type="text/javascript">
+    var data = [];
+    var colModelAvatarImages = [
+      { name: 'filename', label: 'File Name', search: true, width: 210},
+      { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 220},
+      { name: 'length', label: 'File Length', align: 'center', sorttype: 'number', search: true, width: 220},
+      { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 200},
+      { name: 'download', label: 'Download it', align: 'center', formatter: downloadFormatter, search: false, width: 100},
+      { name: 'deletion', label: 'Remove', align: 'center', formatter: fileRemovalFormatter, search: false, width: 100},
+      { name: 'downloadHref', hidden: true },
+      { name: 'downloadName', hidden: true },
+      { name: 'deletionHref', hidden: true }
+    ];   
+    
+    $("#gridAvatars").jqGrid({
+      colModel: colModelAvatarImages,
+      data: data,
+      guiStyle: "bootstrap4",
+      iconSet: "fontAwesome",
+      idPrefix: "gb1_",
+      viewrecords : true,
+      gridview : true,
+      altRows: true,
+      //autowidth: true,
+      rownumbers : true,
+      autoencode : false,
+      toolbar: [true, "top"],
+      width: 1500,
+      //height: 300,
+      sortname: "name",
+      sortorder: "asc",
+      caption: "The Avatar Files grid, which uses predefined formatters and templates:"
+    });
+  
+  </script>
+    <% i = 0; for (file of avatars) { %>
+  <script type="text/javascript">                 
+    var data = {
+          id: "<%= i %>",
+          filename: "<%= file.name %>",
+          folder: "<%= file.folder %>",
+          length: "<%= file.size %>",
+          uploadDate: "<%= file.date %>",
+          downloadHref: "../<%= file.path.substring(7) %>",
+          downloadName: "<%= file.name %>",
+          deletionHref: "<%= file.path %>"
+    };
+
+    $("#gridAvatars").jqGrid('addRowData', data.id, data, 'last');        
+  </script>
+     <% i++; } %>
         <% } else {%>
         <div>
           <p style="color: green; font-family: arial">

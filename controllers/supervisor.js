@@ -19,6 +19,7 @@ const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, superv
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
 const fetch = require('node-fetch');
+const Country = require('../models/country');
 
 
 function getBidsData(bids) {
@@ -406,7 +407,7 @@ exports.postResetPasswordToken = (req, res) => {
         return res.redirect('back');
       }
         
-    if(req.body.password === req.body.confirm) {
+    if (req.body.password === req.body.passwordRepeat) {
         MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
           if(treatError(req, res, err, 'back'))
             return false;
@@ -453,13 +454,24 @@ exports.getSignUp = (req, res) => {
   var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   
-  if(!req.session.supervisorId)
-    res.render("supervisor/sign-up", {
-      captchaSiteKey: captchaSiteKey,
-      successMessage: success,
-      errorMessage: error
+  if(!req.session.supervisorId) {
+    Country.find({}).then((countries) => {
+        var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+        req.session.flash = [];
+
+        var country = [];
+        for(var i in countries) {
+          country.push({id: i, name: countries[i].name});
+        }
+
+      res.render("supervisor/sign-up", {
+        captchaSiteKey: captchaSiteKey,
+        countries: country,
+        successMessage: success,
+        errorMessage: error
+      });
     });
-  else 
+  } else 
     return res.redirect("/supervisor");
 }
 
@@ -579,11 +591,22 @@ exports.getProfile = (req, res) => {
   
   var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
-  
-  res.render("supervisor/profile", {
-    successMessage: success,
-    errorMessage: error,
-    profile: req.session.supervisor });
+  Country.find({}).then((countries) => {
+    var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+    req.session.flash = [];
+
+    var country = [];
+    for(var i in countries) {
+      country.push({id: i, name: countries[i].name});
+    }
+    
+    res.render("supervisor/profile", {
+      successMessage: success,
+      errorMessage: error,
+      countries: country,
+      profile: req.session.supervisor
+    });
+  });
 }
 
 

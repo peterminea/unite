@@ -179,7 +179,7 @@ const supplierSchema = new Schema({
     required: true
   },
   totalSupplyAmount: {
-    type: String,
+    type: Number,
     required: true
   },
   capabilityDescription: {

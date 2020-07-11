@@ -99,6 +99,8 @@ exports.getFilesList = async (req, res) => {
   var uploads = await getFiles('public/uploads');
   var avatars = await getFiles('public/avatars');
   var files = await getFiles('public/productImages');
+  
+  console.log(files);
 
   res.render("filesList", {
     role: obj.role,

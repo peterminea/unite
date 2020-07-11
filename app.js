@@ -746,10 +746,12 @@ app.post("/purchase", (req, res, next) => {
 
 //Autocomplete fields:
 const jsonp = require("jsonp");
-
+/*
 app.post("/countryAutocomplete", function(req, res, next) {
-  var regex = new RegExp(req.body.term, "i");
-  var countryFilter = Country.find({ name: regex }, { name: 1 })
+  var regex = req.body.term? new RegExp(req.body.term, "i") : null;
+  var val = regex? { name: regex } : {};
+  
+  var countryFilter = Country.find(val, { name: 1 })
     .sort({ name: 1 })
     .limit(15); //Positive sort is ascending.
   countryFilter.exec(function(err, data) {
@@ -766,7 +768,7 @@ app.post("/countryAutocomplete", function(req, res, next) {
           result.push(obj);
         });
       }
-
+      console.log(result);
       res.jsonp(result);
     } else {
       //req.flash("error", err.message);
@@ -777,12 +779,14 @@ app.post("/countryAutocomplete", function(req, res, next) {
 });
 
 app.post("/industryAutocomplete", function(req, res, next) {
-  var regex = new RegExp(req.query["term"], "i");
-  var industryFilter = Industry.find({ name: regex }, { name: 1 })
+  var regex = new RegExp(req.body.term, "i");
+  var val = regex? { name: regex } : {};
+  
+  var industryFilter = Industry.find(val, { name: 1 })
     .sort({ name: 1 })
     .limit(15); //Negative sort means descending.
 
-  industryFilter.exec(function(err, data) {
+  industryFilter.exec(function(err, data) {console.log(data.length);
     var result = [];
 
     if (!err) {
@@ -807,6 +811,40 @@ app.post("/industryAutocomplete", function(req, res, next) {
     }
   });
 });
+
+
+app.get("/industryGetAutocomplete", function(req, res, next) {
+  var regex = req.query["term"]? new RegExp(req.query["term"], "i") : null;
+  var val = regex? { name: regex } : {};
+  
+  var industryFilter = Industry.find(val, { name: 1 })
+    .sort({ name: 1 })
+    .limit(30); //Negative sort means descending.
+
+  industryFilter.exec(function(err, data) {console.log(data.length);
+    var result = [];
+
+    if (!err) {
+      if (data && data.length && data.length > 0) {
+        data.forEach(item => {
+          let obj = {
+            id: item._id,
+            name: item.name
+          };
+
+          result.push(obj);
+        });
+      }
+      console.log(result);
+      res.jsonp(result);
+    } else {
+      req.flash("error", err.message);
+      throw err;
+      //res.json(err);
+    }
+  });
+});
+*/
 
 app.post("/deleteBid", function(req, res, next) {
   MongoClient.connect(URI, { useUnifiedTopology: true }, function(err, db) {
@@ -861,35 +899,7 @@ app.post("/exists", function(req, res) {
   });
 });
 
-app.get("/industryGetAutocomplete", function(req, res, next) {
-  var regex = new RegExp(req.query["term"], "i");
-  var industryFilter = Industry.find({ name: regex }, { name: 1 })
-    .sort({ name: 1 })
-    .limit(15); //Negative sort means descending.
 
-  industryFilter.exec(function(err, data) {
-    var result = [];
-
-    if (!err) {
-      if (data && data.length && data.length > 0) {
-        data.forEach(item => {
-          let obj = {
-            id: item._id,
-            name: item.name
-          };
-
-          result.push(obj);
-        });
-      }
-
-      res.jsonp(result);
-    } else {
-      req.flash("error", err.message);
-      throw err;
-      //res.json(err);
-    }
-  });
-});
 
 app.get("/bidStatuses", function(req, res, next) {
   var statusFilter = BidStatus.find({});
@@ -1022,8 +1032,10 @@ app.get("/feedbacks", async function(req, res, next) {
 
 app.get("/uniteIDAutocomplete", function(req, res, next) {
   var regex = new RegExp(req.query["term"], "i");
+  var val = regex? { organizationUniteID: regex } : {};
+  
   var uniteIDFilter = Supervisor.find(
-    { organizationUniteID: regex },
+    val,
     { organizationUniteID: 1 }
   )
     .sort({ organizationUniteID: 1 })
@@ -1054,8 +1066,10 @@ app.get("/uniteIDAutocomplete", function(req, res, next) {
 
 app.post("/uniteIDAutocomplete", function(req, res, next) {
   var regex = new RegExp(req.query["term"], "i");
+  var val = regex? { organizationUniteID: regex } : {};
+  
   var uniteIDFilter = Supervisor.find(
-    { organizationUniteID: regex },
+    val,
     { organizationUniteID: 1 }
   )
     .sort({ organizationUniteID: 1 })
@@ -1084,10 +1098,12 @@ app.post("/uniteIDAutocomplete", function(req, res, next) {
   });
 });
 
+/*
 app.post("/currencyAutocomplete", function(req, res, next) {
   var regex = new RegExp(req.query["term"], "i");
+  var val = regex? { value: regex } : {};
 
-  var currencyFilter = Currency.find({ value: regex }, { value: 1, name: 1 })
+  var currencyFilter = Currency.find(val, { value: 1, name: 1 })
     .sort({ value: 1 })
     .limit(10); //Negative sort means descending.
 
@@ -1113,7 +1129,7 @@ app.post("/currencyAutocomplete", function(req, res, next) {
       throw err;
     }
   });
-});
+});*/
 
 app.get("/currencyGetAutocomplete", function(req, res, next) {
   var regex = new RegExp(req.query["term"], "i");
@@ -1189,9 +1205,10 @@ app.post("/prodServiceAutocomplete", function(req, res, next) {
 
 app.get("/capabilityInputAutocomplete", function(req, res, next) {
   var regex = new RegExp(req.query["term"], "i");
+  var val = regex? { capabilityDescription: regex } : {};
 
   var capDescriptionFilter = Supplier.find(
-    { capabilityDescription: regex },
+    val,
     { capabilityDescription: 1 }
   )
     .sort({ capabilityDescription: 1 })
@@ -1221,7 +1238,7 @@ app.get("/capabilityInputAutocomplete", function(req, res, next) {
 
 
 var db;
-if (1 == 2)
+//if (1 == 2)
   MongoClient.connect(URI, { useUnifiedTopology: true }, (err, client) => {
     if (err) {
       console.error(err.message);
@@ -1250,6 +1267,31 @@ if (1 == 2)
     
     var unset = { $unset: { products: 1, productsServicesOffered: 1 } };
     var set = { $set: { productList: productList, productDetailsList: productDetailsList } };
+    /*
+    Industry.find({}).exec().then((inds) => {//Ascending sorting of table contents by name, then resetting its contents based on this new sorting.
+      inds.sort(function (a, b) {
+        return a.name.localeCompare(b.name);
+      });
+      
+      console.log(inds);
+
+      for(var i in inds) {
+        var myQuery = {name: inds[i].name};      
+
+        var ind = new Industry({
+        //_id: inds[i]._id,
+        name: inds[i].name
+        , __v: inds[i].__v? inds[i].__v : 0
+        });
+
+        db.collection('industries').deleteOne(myQuery, function(err, obj) {});
+        console.log(ind);
+        ind.save();      
+      }
+    });*/
+    
+    
+    //db.collection('industries').deleteMany( { name : "Agriculture", _id: { $not: { $eq: new ObjectId("5ecfc60ee0558a504f587f78") } } } );
   
     db.collection("bidrequests").updateMany({}, unset, {multi: true});
     db.collection("bidrequests").updateMany({}, set, function(err, obj) {});

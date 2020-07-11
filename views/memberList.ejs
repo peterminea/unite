@@ -11,11 +11,14 @@
   <link rel="stylesheet" href="/messages.css">
   <link rel="stylesheet" href="/jquery-ui.css">
   <link rel="stylesheet" href="/bootstrap.min.css">
+  <link rel="stylesheet" href="/ui.jqgrid.min.css">
+  <link rel="stylesheet" href="/ui.multiselect.min.css">
   <script src="/jquery.min.js"></script>
   <script src="/jquery-ui.min.js"></script>
   <script src="/popper.min.js"></script>
   <script src="/bootstrap.min.js"></script>
   <script src="/sweetalert2@9.min.js"></script>
+  <script src="/jquery.jqgrid.min.js"></script>
   <script src="/https.js"></script>
   <script src="/functions.js"></script>
   <script type="text/javascript">
@@ -62,7 +65,7 @@
     List of UNITE Buyers
   </h3>
   <br>
-<% if(buyers != null && buyers.length > 0) {%>
+<% if(buyers != null && buyers.length > 0) { %>
   <div class="container form-group mt-4" style="text-align: center">
     <table id="buyers" class="table table-striped table-hover table-condensed members">
       <thead>
@@ -99,7 +102,68 @@
         </tbody>
       </table>
     </div>
-        <% } else {%>
+    <div id="jqDiv_0" class="form-group">
+      <table id="gridBuyer">
+      </table>
+    </div>
+  
+  <script type="text/javascript">
+    var data = [];
+    var colModelBuyer = [
+      { name: 'organizationName', label: 'Organization name', search: true, width: 210},
+      { name: 'deptAgencyGroup', label: 'Dept. Agency Group', align: 'center', search: true, width: 220},
+      { name: 'contactName', label: 'Contact Name', align: 'center', search: true, width: 200},
+      { name: 'emailAddress', label: 'E-mail Address', align: 'center', search: true, width: 160},
+      { name: 'contactMobileNumber', label: 'Contact Mobile Number', align: 'center', search: true, width: 120},
+      { name: 'country', label: 'Country', align: 'center', search: true, width: 105},
+      { name: 'qualification', label: 'Qualification', align: 'center', search: true, width: 200},
+      { name: 'role', label: 'Role', align: 'center', search: true, width: 75},
+      { name: 'isActive', label: 'Is Active?', align: 'center', search: true, width: 60},
+      { name: 'deletion', label: 'Removal', align: 'center', formatter: removalFormatter, search: false, width: 100},
+      { name: 'hiddenHref', hidden: true }
+    ];   
+    
+    $("#gridBuyer").jqGrid({
+      colModel: colModelBuyer,
+      data: data,
+      guiStyle: "bootstrap4",
+      iconSet: "fontAwesome",
+      idPrefix: "gb1_",
+      viewrecords : true,
+      gridview : true,
+      altRows: true,
+      //autowidth: true,
+      rownumbers : true,
+      autoencode : false,
+      toolbar: [true, "top"],
+      width: 1500,
+      //height: 300,
+      sortname: "name",
+      sortorder: "asc",
+      caption: "The Buyers grid, which uses predefined formatters and templates:"
+    });
+  
+  </script>
+  <% i = 0; for (buyer of buyers) { %>
+    <script type="text/javascript">                 
+      var data = {
+            id: "<%= i %>",
+            organizationName: "<%= buyer.organizationName %>",
+            deptAgencyGroup: "<%= buyer.deptAgencyGroup %>",
+            contactName: "<%= buyer.contactName %>",
+            emailAddress: "<%= buyer.emailAddress %>",
+            contactMobileNumber: "<%= buyer.contactMobileNumber %>",
+            country: "<%= buyer.country %>",
+            qualification: "<%= buyer.qualification %>",
+            role: "<%= buyer.role %>",
+            isActive: "<%= buyer.isActive %>",
+            hiddenHref: <% if(buyer.role != 'Admin') { %> "deleteUser/<%= buyer._id %>/Buyer/<%= buyer.organizationName %>/None/<%= buyer.emailAddress %>" <% } else { %> '' <% } %>
+      };
+        
+      $("#gridBuyer").jqGrid('addRowData', data.id, data, 'last');        
+    </script>
+     <% i++; } %>
+        <% } else { %>
         <div>
           <p style="color: green; font-family: arial">
             Sorry, no buyers here.
@@ -149,7 +213,66 @@
         </tbody>
       </table>
     </div>
-        <% } else {%>
+    <div id="jqDiv_1" class="form-group">
+      <table id="gridSupervisor">
+      </table>
+    </div>
+  
+  <script type="text/javascript">
+    var data = [];
+    var colModelSupervisor = [
+      { name: 'organizationName', label: 'Organization name', search: true, width: 240},
+      { name: 'organizationUniteID', label: 'Organization UNITE ID', align: 'center', search: true, width: 140},
+      { name: 'contactName', label: 'Contact Name', align: 'center', search: true, width: 200},
+      { name: 'emailAddress', label: 'E-mail Address', align: 'center', search: true, width: 160},
+      { name: 'contactMobileNumber', label: 'Contact Mobile Number', align: 'center', search: true, width: 120},
+      { name: 'country', label: 'Country', align: 'center', search: true, width: 105},
+      { name: 'role', label: 'Role', align: 'center', search: true, width: 75},
+      { name: 'isActive', label: 'Is Active?', align: 'center', search: true, width: 60},
+      { name: 'deletion', label: 'Removal', align: 'center', formatter: removalFormatter, search: false, width: 100},
+      { name: 'hiddenHref', hidden: true }
+    ];   
+    
+    $("#gridSupervisor").jqGrid({
+      colModel: colModelSupervisor,
+      data: data,
+      guiStyle: "bootstrap4",
+      iconSet: "fontAwesome",
+      idPrefix: "gb1_",
+      viewrecords : true,
+      gridview : true,
+      altRows: true,
+      //autowidth: true,
+      rownumbers : true,
+      autoencode : false,
+      toolbar: [true, "top"],
+      width: 1800,
+      //height: 300,
+      sortname: "name",
+      sortorder: "asc",
+      caption: "The Buyers grid, which uses predefined formatters and templates:"
+    });
+  
+  </script>
+  <% i = 0; for (supervisor of supervisors) { %>
+    <script type="text/javascript">                 
+      var data = {
+            id: "<%= i %>",
+            organizationName: "<%= supervisor.organizationName %>",
+            organizationUniteID: "<%= supervisor.organizationUniteID %>",
+            contactName: "<%= supervisor.contactName %>",
+            emailAddress: "<%= supervisor.emailAddress %>",
+            contactMobileNumber: "<%= supervisor.contactMobileNumber %>",
+            country: "<%= supervisor.country %>",
+            role: "<%= supervisor.role %>",
+            isActive: "<%= supervisor.isActive %>",
+            hiddenHref: <% if(supervisor.role != 'Admin') { %> "deleteUser/<%= supervisor._id %>/Supervisor/<%= supervisor.organizationName %>/<%= supervisor.organizationUniteID %>/<%= supervisor.emailAddress %>" <% } else { %> '' <% } %>
+      };
+        
+      $("#gridSupervisor").jqGrid('addRowData', data.id, data, 'last');        
+    </script>
+     <% i++; } %>
+        <% } else { %>
         <div>
           <p style="color: green; font-family: arial">
             Sorry, no supervisors here.
@@ -212,15 +335,84 @@
         </tbody>
       </table>
     </div>
-        <% } else {%>
+    <div id="jqDiv_2" class="form-group">
+      <table id="gridSupplier">
+      </table>
+    </div>
+  
+  <script type="text/javascript">
+    var data = [];
+    var colModelSupplier = [
+      { name: 'companyName', label: 'Company name', search: true, width: 150},
+      { name: 'directorsName', label: 'Director\'s Name', align: 'center', search: true, width: 180},
+      { name: 'contactName', label: 'Contact Name', align: 'center', search: true, width: 225},
+      { name: 'emailAddress', label: 'E-mail Address', align: 'center', search: true, width: 240},
+      { name: 'registeredCountry', label: 'Registered Country', align: 'center', search: true, width: 170},
+      { name: 'contactMobileNumber', label: 'Contact Mobile Number', align: 'center', search: true, width: 150},
+      { name: 'country', label: 'Country', align: 'center', search: true, width: 140},
+      { name: 'areaCovered', label: 'Area Covered', align: 'center', search: true, width: 200},
+      { name: 'companyAddress', label: 'Company Address', align: 'center', search: true, width: 360},
+      { name: 'employeeNumbers', label: 'Employees Number', align: 'center', search: true, width: 140},
+      { name: 'industry', label: 'Industry', align: 'center', search: true, width: 160},
+      { name: 'capabilityDescription', label: 'Capability Description', align: 'center', search: true, width: 210},
+      { name: 'role', label: 'Role', align: 'center', search: true, width: 75},
+      { name: 'isActive', label: 'Is Active?', align: 'center', search: true, width: 60},
+      { name: 'deletion', label: 'Removal', align: 'center', formatter: removalFormatter, search: false, width: 100},
+      { name: 'hiddenHref', hidden: true }
+    ];   
+    
+    $("#gridSupplier").jqGrid({
+      colModel: colModelSupplier,
+      data: data,
+      guiStyle: "bootstrap4",
+      iconSet: "fontAwesome",
+      idPrefix: "gb1_",
+      viewrecords : true,
+      gridview : true,
+      altRows: true,
+      //autowidth: true,
+      rownumbers : true,
+      autoencode : false,
+      toolbar: [true, "top"],
+      width: 2950,
+      //height: 300,
+      sortname: "name",
+      sortorder: "asc",
+      caption: "The Buyers grid, which uses predefined formatters and templates:"
+    });
+  
+  </script>
+  <% i = 0; for (supplier of suppliers) { %>
+    <script type="text/javascript">                 
+      var data = {
+            id: "<%= i %>",
+            companyName: "<%= supplier.companyName %>",
+            directorsName: "<%= supplier.directorsName %>",
+            contactName: "<%= supplier.contactName %>",
+            emailAddress: "<%= supplier.emailAddress %>",
+            registeredCountry: "<%= supplier.registeredCountry %>",
+            contactMobileNumber: "<%= supplier.contactMobileNumber %>",
+            country: "<%= supplier.country %>",
+            areaCovered: "<%= supplier.areaCovered %>",
+            companyAddress: "<%= supplier.companyAddress %>",
+            employeeNumbers: "<%= supplier.employeeNumbers %>",
+            industry: "<%= supplier.industry %>",
+            capabilityDescription: "<%= supplier.capabilityDescription %>",
+            role: "<%= supplier.role %>",
+            isActive: "<%= supplier.isActive %>",
+            hiddenHref: <% if(supplier.role != 'Admin') { %> "deleteUser/<%= supplier._id %>/Supplier/<%= supplier.companyName %>/None/<%= supplier.emailAddress %>" <% } else { %> '' <% } %>
+      };
+        
+      $("#gridSupplier").jqGrid('addRowData', data.id, data, 'last');        
+    </script>
+     <% i++; } %>
+        <% } else { %>
         <div>
           <p style="color: green; font-family: arial">
             Sorry, no suppliers here.
           </p>          
         </div>
         <% }%>
-
-      
     </div>
     
   </body>

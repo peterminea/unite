@@ -12,28 +12,35 @@
   <link rel="stylesheet" href="/messages.css">
   <link rel="stylesheet" href="/jquery-ui.css">
   <link rel="stylesheet" href="/bootstrap.min.css">
-  <script src="/jquery.min.js"></script>
+  <link rel="stylesheet" href="/ui.jqgrid.min.css">
+  <link rel="stylesheet" href="/ui.multiselect.min.css">
+ <!--  <script src="/jquery.min.js"></script> -->
+  <script  src="https://code.jquery.com/jquery-3.5.1.js"  integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" 
+  crossorigin="anonymous"></script>
   <script src="/jquery-ui.min.js"></script>
   <script src="/popper.min.js"></script>
   <script src="/bootstrap.min.js"></script>
   <script src="/sweetalert2@9.min.js"></script>
   <script src="/index.min.js"></script>
   <script src="/money.min.js"></script>
+  <script src="/jquery.simulate.js"></script>
+  <script src="/jquery.jqgrid.min.js"></script>
+  <script src="/grid.locale-en.js"></script>
   <script src="/https.js"></script>
   <script src="/chatUsers.js"></script>
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function () {
       var token = $("input[name='_csrf']").val();
-      postAutocomplete('.country', '/countryAutocomplete', token);
-      getAutocomplete('#industry', '/industryGetAutocomplete', token);
-      //getAutocomplete('#currency', '/currencyGetAutocomplete', token);
-      errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
-      getCurrenciesList('select.currency', '/currencyGetAutocomplete', token);
-      initBaseRates(fx, 'select.currency');
-      $('select.currency').css('width', '100px');
-      var defaultCurr = "<%= profile.currency %>"; 
       
+      getAutocomplete('.country', '/countryAutocomplete', token);      
+      getAutocomplete('#industry', '/industryGetAutocomplete', token);      
+      //getAutocomplete('select.currency', '/currencyGetAutocomplete', token);
+      errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');      
+      getCurrenciesList('select.currency', '/currencyGetAutocomplete', token);      
+      initBaseRates(fx, 'select.currency');
+      var defaultCurr = "<%= profile.currency %>";
+   
       $("input.number").inputFilter(function(value) {
         return /^\d*$/.test(value);
       });
@@ -41,6 +48,18 @@
       $("input.float").inputFilter(function(value) {
         return /^[0-9]+([,.][0-9]+)?$/g.test(value);
       });
+      
+      setTimeout(function() {
+        $('select.currency')
+          .find('option[value="' + defaultCurr + '"]')
+          .prop('selected', true)
+          .trigger('change');        
+              
+         $('#updateProfile').prop('disabled', true);
+          $("input,textarea,select").on('change', function () {
+            $('#updateProfile').removeAttr('disabled');
+          });
+      }, 1200);
 
       /*
       $("#prodServiceInput").on("paste", function(e) {
@@ -56,21 +75,6 @@
         if(!supplierValidateFields(fx))
           return false;
       });
-      
-      setTimeout(function() {
-        $('select.currency')
-          .find('option[value="' + defaultCurr + '"]')
-          .prop('selected', true)
-          .trigger('change');
-
-         $('#updateProfile').prop('disabled', true);
-          $("input,textarea,select").on('change', function () {
-            $('#updateProfile').removeAttr('disabled');
-          });
-      }, 800);
-      
-      $('select.currency')
-        .css('width', '100px');
 
       $('#prodServiceInput').on('change', function() {
         if($(this).val()) {
@@ -155,8 +159,8 @@
         </div>
         <div class="form-group">
           <label>Password*</label>
-          <input required type="password" id="password" name="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}" title="Please type at least one number and one uppercase&lowercase letter, and at least 6 characters" class="form-control" value="<%= profile.password %>">
-          <a href="forgotPassword"><label>Forgot your password?</label></a>
+          <input readonly type="password" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[ -/:-@\[-`{-~]).{6,12}$" title="Please type at least one number, 1 uppercase + 1 lowercase letter, a special Char, and 6 to 12 characters." class="form-control" id="password" name="password" value="<%= profile.password %>">
+          <a href="forgotPassword"><label>Forgot/Change your password?</label></a>
         </div>
         <input type="hidden" name="isVerified" id="isVerified" value="<%= profile.isVerified %>">
         <div class="form-group">
@@ -177,7 +181,13 @@
         </div>
         <div class="form-group">
           <label>Registered Country*</label>
-          <input type="text" class="form-control country" id="registeredCountry" name="registeredCountry" value="<%= profile.registeredCountry %>" required>
+          <input type="text" class="form-control country autocomp" id="registeredCountry" name="registeredCountry" value="<%= profile.registeredCountry %>" required>
+          <input type="hidden" name="saveRegisteredCountry">
+          <select class='autocomp'>
+            <% for(country of countries) { %>
+            <option id="<%= country.id %>" value="<%= country.name %>"><%= country.name %></option>
+            <% } %>
+          </select>
         </div>
         <div class="form-group">
           <label>Company Address*</label>
@@ -194,15 +204,27 @@
         <div class="form-group">
           <label>Preferred Currency (Default: Euro)*</label>
           <input type="hidden" name="currency" value="<%= profile.currency %>" required><br>
-          <select class="currency" class="form-control" title="Currency" value="<%= profile.currency %>" required></select>
+          <select class="currency" style="width: 100px" class="form-control" title="Currency" value="<%= profile.currency %>" required></select>
         </div>
         <div class="form-group">
           <label>Country*</label>
-          <input type="text" class="form-control country" id="country" name="country" value="<%= profile.country %>" required>
+          <input type="text" class="form-control country autocomp" id="country" name="country" value="<%= profile.country %>" required>
+          <input type="hidden" name="saveCountry">
+          <select class='autocomp'>
+            <% for(country of countries) { %>
+            <option id="<%= country.id %>" value="<%= country.name %>"><%= country.name %></option>
+            <% } %>
+          </select>
         </div>
         <div class="form-group">
           <label>Industry*</label>
-          <input type="text" class="form-control" id="industry" name="industry" value="<%= profile.industry %>" required>
+          <input type="text" class="form-control autocomp" id="industry" name="industry" value="<%= profile.industry %>" required>
+          <input type="hidden" name="saveIndustry">
+          <select class='autocomp'>
+            <% for(industry of industries) { %>
+            <option id="<%= industry.id %>" value="<%= industry.name %>"><%= industry.name %></option>
+            <% } %>
+          </select>
         </div>
         <div class="form-group">
           <label>Employee Numbers*</label>
@@ -238,7 +260,13 @@
         </div>
         <div class="form-group">
           <label>Capability Description*</label>
-          <input type="text" class="form-control" id="capabilityDescription" name="capabilityDescription" value="<%= profile.capabilityDescription %>" required>
+          <input type="text" class="form-control autocomp" id="capabilityDescription" name="capabilityDescription" value="<%= profile.capabilityDescription %>" required>
+          <input type="hidden" name="saveCapability">
+          <select class='autocomp'>
+            <% for(cap of capabilities) { %>
+            <option id="<%= cap.id %>" value="<%= cap.name %>"><%= cap.name %></option>
+            <% } %>
+          </select>
         </div>
         <div class="form-group">
           <label>Relevant Experience*</label>
@@ -324,9 +352,13 @@
           <input type="hidden" class="supply" name="amountsList" id="amountsList" value="<%= profile.amountsList %>">
           <input type="hidden" class="supply" name="productImagesList" id="productImagesList" value="<%= profile.productImagesList %>">
         </div>
+        <div id="jqDiv" class="form-group">
+          <table id="grid">
+          </table>
+        </div>
         <div class="form-group">
           <label>Total Price of Supply*</label>
-          <span class="form-control supply1" id="totalSupplyPrice"><%= profile.totalSupplyPrice %> <%= <%= profile.currency %> %></span>
+          <span class="form-control supply1" id="totalSupplyPrice"><%= profile.totalSupplyPrice %> <%= profile.currency %></span>
           <input type="hidden" class="supply2" id="hiddenTotalPrice" name="totalSupplyPrice" value="<%= profile.totalSupplyPrice %>">
         </div>
         <div class="form-group">
@@ -335,6 +367,57 @@
           <input type="hidden" class="supply2" id="hiddenTotalAmount" name="totalSupplyAmount" value="<%= profile.totalSupplyAmount %>">
         </div>
         <script type="text/javascript">
+          
+          var data = [];
+          var colModel = [
+            { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
+            { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, search: true, width: 140},
+            { name: 'hiddenPrice', hidden: true },
+            { name: 'hiddenTotalPrice', hidden: true },
+            { name: 'hiddenCurrency', hidden: true },
+            { name: 'productImageSource', hidden: true},
+            { name: 'amount', label: 'Amount', formatter: amountFormatter, align: 'center', search: true, template: 'number', width: 70},
+            { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, search: true, width: 90},            { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
+             { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
+          ];
+          
+          $('#prodServices').find('li').not(':first').each(function(i, e) {
+            var src = $(this).find('.productImage img').length?
+                $(this).find('.productImage img').attr('src') : null;
+                       
+            data.push({
+              id: i,
+              name: $(this).find('.product').text(),
+              price: $(this).find('.price').text() + ' ' + $(this).find('.currency').text(),
+              hiddenPrice: $(this).find('.price').text(),
+              hiddenTotalPrice: $(this).find('.totalPrice').text(),
+              hiddenCurrency: $(this).find('.currency').text(),
+              productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '',
+              amount: parseInt($(this).find('.amount').text()),
+              totalPrice: $(this).find('.totalPrice').text() + ' ' + $(this).find('.currency').text()
+            });
+          });             
+          
+          $("#grid").jqGrid({
+            colModel: colModel,
+            data: data,
+            guiStyle: "bootstrap4",
+            iconSet: "fontAwesome",
+            idPrefix: "gb1_",
+            viewrecords : true,
+            gridview : true,
+            altRows: true,
+            //autowidth: true,
+            rownumbers : true,
+            autoencode : false,
+            toolbar: [true, "top"],
+            width: 750,
+            height: 300,
+            sortname: "name",
+            sortorder: "asc",
+            caption: "The Products grid, which uses predefined formatters and templates:"
+          });
+          
           bindHandleProduct($('.rem'), $('#prodServiceInput'), false, null, true, false);
           bindHandleProduct($('.inc'), $('#prodServiceInput'), false, null, false, true);
           bindHandleProduct($('.dec'), $('#prodServiceInput'), false, null, false, false);
@@ -350,11 +433,52 @@
             totalLoadedAmount += parseInt($(el).text());
           });
           
+              
           totalLoadedPrice = parseFloat(totalLoadedPrice).toFixed(2);
-          $('#hiddenTotalPrice').val(totalLoadedPrice);
-          $('#totalSupplyAmount').val(totalLoadedAmount);
-          $('#hiddenTotalAmount').val(totalLoadedPrice);
-          $('#totalSupplyPrice').text(totalLoadedPrice + ' ' + "< %= profile.currency %>");
+          $('#hiddenTotalPrice').val(totalLoadedPrice/2);
+          $('#totalSupplyAmount').val(totalLoadedAmount/2);
+          $('#hiddenTotalAmount').val(totalLoadedPrice/2);
+          $('#totalSupplyPrice').text(parseFloat(totalLoadedPrice/2).toFixed(2) + ' ' + "<%= profile.currency %>");
+       
+
+          
+          if(1==2)
+          
+          $("#grid").jqGrid({
+            colModel: [
+              { name: "name", label: "Client", width: 53 },
+              { name: "invdate", label: "Date", width: 75, align: "center", sorttype: "date",
+               formatter: "date", formatoptions: { newformat: "d-M-Y" } },
+              { name: "amount", label: "Amount", width: 65, template: "number" },
+              
+              { name: "tax", label: "Tax", width: 41, template: "number" },
+              { name: "total", label: "Total", width: 51, template: "number" },
+              { name: "closed", label: "Closed", width: 59, template: "booleanCheckbox", firstsortorder: "desc" },
+              { name: "ship_via", label: "Shipped via", width: 87, align: "center", formatter: "select",
+               formatoptions: { value: "FE:FedEx;TN:TNT;DH:DHL", defaultValue: "DH" } }
+            ],
+            data: [
+              { id: "10",  invdate: "2015-10-01", name: "test",   amount: "" },
+              { id: "20",  invdate: "2015-09-01", name: "test2",  amount: "300.00", tax: "20.00", closed: false, ship_via: "FE", total: "320.00" },
+              { id: "30",  invdate: "2015-09-01", name: "test3",  amount: "400.00", tax: "30.00", closed: false, ship_via: "FE", total: "430.00" },
+              { id: "40",  invdate: "2015-10-04", name: "test4",  amount: "200.00", tax: "10.00", closed: true,  ship_via: "TN", total: "210.00" },
+              { id: "50",  invdate: "2015-10-31", name: "test5",  amount: "300.00", tax: "20.00", closed: false, ship_via: "FE", total: "320.00" },
+              { id: "60",  invdate: "2015-09-06", name: "test6",  amount: "400.00", tax: "30.00", closed: false, ship_via: "FE", total: "430.00" },
+              { id: "70",  invdate: "2015-10-04", name: "test7",  amount: "200.00", tax: "10.00", closed: true,  ship_via: "TN", total: "210.00" },
+              { id: "80",  invdate: "2015-10-03", name: "test8",  amount: "300.00", tax: "20.00", closed: false, ship_via: "FE", total: "320.00" },
+              { id: "90",  invdate: "2015-09-01", name: "test9",  amount: "400.00", tax: "30.00", closed: false, ship_via: "TN", total: "430.00" },
+              { id: "100", invdate: "2015-09-08", name: "test10", amount: "500.00", tax: "30.00", closed: true,  ship_via: "TN", total: "530.00" },
+              { id: "110", invdate: "2015-09-08", name: "test11", amount: "500.00", tax: "30.00", closed: false, ship_via: "FE", total: "530.00" },
+              { id: "120", invdate: "2015-09-10", name: "test12", amount: "500.00", tax: "30.00", closed: false, ship_via: "FE", total: "530.00" }
+            ],
+            guiStyle: "bootstrap4",
+            iconSet: "fontAwesome",
+            idPrefix: "gb1_",
+            rownumbers: true,
+            sortname: "invdate",
+            sortorder: "desc",
+            caption: "The grid, which uses predefined formatters and templates"
+          });
         </script>
 
         <!-- Uploading files field section-->
