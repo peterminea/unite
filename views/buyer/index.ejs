@@ -130,7 +130,10 @@
         var curr = $(this).val();
         //alert($(this).val())
         var id = $(this).attr('index');
-        var elem = $("#prodServices_"+id);
+        var elem = $("#prodServices_"+id), grid = $("#grid_"+id);
+        elem.attr('buyerCurrency', curr);
+        grid.attr('buyerCurrency', curr);
+        
         var suppCurrency = elem.attr('suppCurrency');
         
         if(curr && curr != suppCurrency) {
@@ -184,8 +187,9 @@
         $('span.bidCurrency').each(function() {
           $(this).text(defaultBidCurrency);
           });
+        
         $('select.buyerCurrency').trigger('change');
-      }, 800);
+      }, 900);
       
       $('.productsList').on('change', function() {
         if(!$(this).val() || !$(this).val().length) {
@@ -274,12 +278,12 @@
             var data2 = [];
             var colModel = [
               { name: 'productName', label: 'Product name', formatter: productFormatter, search: true, width: 140},
-              { name: 'supplierName', label: 'Product price', align: 'center', search: true, width: 140},
+              { name: 'supplierName', label: 'Supplier Name', align: 'center', search: true, width: 140},
               { name: 'productPrice', label: 'Product price', align: 'center', search: true, width: 140},
-              { name: 'currency', label: 'Product price', align: 'center', search: true, width: 140},
-              { name: 'amount', label: 'Product price', align: 'center', formatter: amountFormatter, template: 'number', sorttype: 'text', search: true, width: 140 },
-              { name: 'totalPrice', label: 'Total price', align: 'center', formatter: productPriceFormatter, search: true, width: 90},
+              { name: 'amount', label: 'Amount', align: 'center', formatter: amountFormatter, template: 'number', sorttype: 'text', search: true, width: 140 },
+              { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, search: true, width: 90},
               { name: 'image', label: 'Product Image', align: 'center', formatter: productImageFormatter, search: true, width: 90},
+              { name: 'hiddenAmount', hidden: true }
               { name: 'hiddenImageSrc', hidden: true },
               { name: 'hiddenTotalPrice', hidden: true }
             ];
@@ -289,15 +293,15 @@
                 id: i,
                 productName: data[i].productName,
                 supplierName: data[i].supplier,
-                productPrice: data[i].price,
-                currency: data[i].currency,
-                amount: data[i].amount,
+                productPrice: data[i].price + ' ' + data[i].currency,
+                hiddenCurrency: data[i].currency,
+                hiddenAmount: data[i].amount,
                 hiddenTotalPrice: data[i].totalPrice,
                 hiddenImageSrc: '../' + data[i].productImage.substring(7)
               });
             }
 
-            initGrid(colModel, data2, "#gridProds", '#prodPager', "productName", 'Products List');
+            initGrid(colModel, data2, "#gridProds", '#prodPager', "productName", 'Products List', 1000);
           }
         });
       });
@@ -810,15 +814,17 @@
                       { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
                       { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, search: true, width: 140},
                       { name: 'hiddenPrice', hidden: true },
+                      { name: 'hiddenAmount', hidden: true },
                       { name: 'hiddenTotalPrice', hidden: true },
                       { name: 'hiddenCurrency', hidden: true },
                       { name: 'productImageSource', hidden: true},
                       { name: 'amount', label: 'Amount', formatter: amountFormatter, align: 'center', search: true, template: 'number', width: 70},
-                      { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, search: true, width: 90},            { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
+                      { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, search: true, width: 90},            
+                      { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
                        { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
                     ];
                     
-                    initGrid(colModel, data, "#grid_"+index, '#prodPager_'+index, "name", 'Products List');
+                    initGrid(colModel, data, "#grid_"+index, '#prodPager_'+index, "name", 'Products List', 1000);
                     setTimeout(function() {
                       var table = $("#jqDiv_"+index).find('table').eq(1);
                       table.attr('suppCurrency', "<%= supplier.currency %>");

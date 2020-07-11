@@ -93,7 +93,6 @@
             <label>Organization UNITE ID*</label>
             <input type="text" required title="Please select a valid ID from the list" class="form-control" id="organizationUniteID" name="organizationUniteID" >
             <select class='autocomp'>
-              <option id="" value=""></option>
               <% for(elem of uniteIds) { %>
               <option id="<%= elem.id %>" value="<%= elem.name %>"><%= elem.name %></option>
               <% } %>

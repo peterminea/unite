@@ -374,6 +374,7 @@
           var colModel = [
             { name: 'name', label: 'Product name', align: 'center', formatter: productFormatter, search: true, width: 140},
             { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, search: true, width: 140},
+            { name: 'hiddenAmount', hidden: true },
             { name: 'hiddenPrice', hidden: true },
             { name: 'hiddenTotalPrice', hidden: true },
             { name: 'hiddenCurrency', hidden: true },
@@ -396,6 +397,7 @@
               + `" style="height: 25px; width: 30px" onclick="window.open(this.src)">`
                 <% } else { %> '' <% } %>,
               amount: '<%= product.amount %>',
+              hiddenAmount: '<%= product.amount %>',
               totalPrice: '<%= parseFloat(product.totalPrice).toFixed(2) %> <%= product.currency %>'
             });
           <% } } %>

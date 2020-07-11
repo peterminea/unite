@@ -748,15 +748,15 @@ exports.getSignUp = (req, res) => {
           country.push({id: i, name: countries[i].name});
         }
       
-      Supervisor.find({}, {organizationUniteID: 1 }).then((ids) => {
+      Supervisor.find({}, { organizationUniteID: 1 }).then((ids) => {
         var uniteIds = [];
         for(var i in ids) {
           uniteIds.push({
             id: i,
-            name: ids[i]
+            name: ids[i].organizationUniteID
           });
         }
-
+        
         uniteIds.sort(function (a, b) {
           return a.name.localeCompare(b.name);
         });

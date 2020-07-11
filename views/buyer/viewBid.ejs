@@ -374,6 +374,7 @@
                       var colModel = [
                         { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
                         { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, search: true, width: 140},
+                        { name: 'hiddenAmount', hidden: true },
                         { name: 'hiddenPrice', hidden: true },
                         { name: 'hiddenTotalPrice', hidden: true },
                         { name: 'hiddenCurrency', hidden: true },
@@ -395,12 +396,11 @@
                           hiddenTotalPrice: $(this).find('.totalPrice').text(),
                           hiddenCurrency: $(this).find('.currency').text(),
                           productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '',
-                          amount: parseInt($(this).find('.amount').text()),
-                          totalPrice: $(this).find('.totalPrice').text() + ' ' + $(this).find('.currency').text()
+                          hiddenAmount: parseInt($(this).find('.amount').text())
                         });
                       });             
 
-                      initGrid(colModel, data, "#grid_"+index, '#prodPager_'+index, "name", 'Products List');
+                      initGrid(colModel, data, "#grid_"+index, '#prodPager_'+index, "name", 'Products List', 1000);
                       $('#mainForm_'+index).submit(function(e) {
                         //e.preventDefault();
                         
