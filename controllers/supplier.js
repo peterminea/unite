@@ -27,6 +27,8 @@ const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
 const fetch = require('node-fetch');
 var oxr = require('open-exchange-rates'),	fx = require('money'), initConversions = require('../middleware/exchangeRates');
+const Country = require('../models/country');
+
 
 const statusesJson = {
   BUYER_REQUESTED_BID: parseInt(process.env.BUYER_REQ_BID),
@@ -373,14 +375,35 @@ exports.getSignUp = (req, res) => {
   var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   
-  if (!req.session.supplierId)
-    return res.render("supplier/sign-up", {
-      MAX_PROD: process.env.SUPP_MAX_PROD,
-      DEFAULT_CURR: process.env.SUPP_DEFAULT_CURR,
-      captchaSiteKey: captchaSiteKey,
-      successMessage: success,
-      errorMessage: error
+  if (!req.session.supplierId) {
+    Country.find({}).then((countries) => {
+      Industry.find({}).then((industries) => {
+        
+          var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+          req.session.flash = [];
+
+          var country = [], industry = [], product = [];
+          
+          for(var i in countries) {
+            country.push({id: i, name: countries[i].name});
+          }
+
+          for(var i in industries) {
+            industry.push({id: i, name: industries[i].name});
+          }        
+    
+          return res.render("supplier/sign-up", {
+            MAX_PROD: process.env.SUPP_MAX_PROD,
+            DEFAULT_CURR: process.env.SUPP_DEFAULT_CURR,
+            countries: country,
+            industries: industry,
+            captchaSiteKey: captchaSiteKey,
+            successMessage: success,
+            errorMessage: error
+          });
+        });      
     });
+  }
   else 
     return res.redirect("/supplier");
 };
@@ -504,19 +527,21 @@ exports.postSignUp = async (req, res) => {
                     req.session.supplier = supplier;
                     req.session.supplierId = supplier._id;
                     await req.session.save();
+                    
+                    //if(req.body.saveCapability.length) {
+                      var capability = new Capability({
+                        supplier: supplier._id,
+                        capabilityDescription: supplier.capabilityDescription,
+                        createdAt: Date.now(),
+                        updatedAt: Date.now()
+                      });
 
-                    var capability = new Capability({
-                      supplier: supplier._id,
-                      capabilityDescription: supplier.capabilityDescription,
-                      createdAt: Date.now(),
-                      updatedAt: Date.now()
-                    });
-
-                    await capability.save(function(err) {
-                      if(treatError(req, res, err, '/supplier/sign-up'))
-                        return false;
-                      console.log('Capability saved!');
-                    });
+                      await capability.save(function(err) {
+                        if(treatError(req, res, err, '/supplier/sign-up'))
+                          return false;
+                        console.log('Capability saved!');
+                      });
+                    //}
 
                     var token = new Token({
                       _userId: supplier._id,
@@ -532,15 +557,17 @@ exports.postSignUp = async (req, res) => {
                          });
                           }
                     });
+                    
+                      if(req.body.saveIndustry.length) {
+                        var industry = new Industry({
+                          name: req.body.industry
+                        });
 
-                    var industry = new Industry({
-                      name: req.body.industry
-                    });
-
-                    industry.save((err) => {
-                      if(treatError(req, res, err, '/supplier/sign-up'))
-                        return false;//If that industry already exists.
-                    });
+                        industry.save((err) => {
+                          if(treatError(req, res, err, '/supplier/sign-up'))
+                            return false;//If that industry already exists.
+                        });
+                      }
 
                     await sendConfirmationEmail(supplier.companyName, "/supplier/confirmation/", token.token, req);
 
@@ -704,7 +731,7 @@ exports.postResetPasswordToken = (req, res) => {
         return res.redirect('back');
       }
         
-    if(req.body.password === req.body.confirm) {
+    if (req.body.password === req.body.passwordRepeat) {
         MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
           if(treatError(req, res, err, 'back'))
             return false;
@@ -735,6 +762,11 @@ exports.postResetPasswordToken = (req, res) => {
 }
 
 
+function generateData(countries, industries) {
+  
+}
+
+
 exports.getProfile = (req, res) => {
   if (!req || !req.session) 
     return false;
@@ -752,18 +784,57 @@ exports.getProfile = (req, res) => {
       for(var i in products) {
         req.session.supplier.productsServicesOffered.push(products[i].productName);
       }
-    //console.log(products);
-      var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
-      req.session.flash = [];
-      
-      res.render("supplier/profile", {
-        products: products,
-        MAX_PROD: process.env.SUPP_MAX_PROD,
-        DEFAULT_CURR: process.env.SUPP_DEFAULT_CURR,
-        successMessage: success,
-        errorMessage: error,
-        profile: req.session.supplier
+    
+    Country.find({}).then((countries) => {
+      Industry.find({}).then((industries) => {
+        Capability.find({}).then((caps) => {
+          var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+          req.session.flash = [];
+
+          var country = [], industry = [], cap = [], product = [];
+          
+          for(var i in countries) {
+            country.push({id: i, name: countries[i].name});
+          }
+
+          for(var i in industries) {
+            industry.push({id: i, name: industries[i].name});
+          }
+          
+          for(var i in caps) {
+            cap.push({id: i, name: caps[i].capabilityDescription});
+          }
+          
+          cap.sort(function (a, b) {
+            return a.name.localeCompare(b.name);
+          });
+
+          for(var i in products) {
+            product.push({
+              id: i,
+              price: products[i].price,
+              amount: products[i].amount,
+              productName: products[i].productName,
+              currency: products[i].currency,
+              totalPrice: products[i].totalPrice,
+              productImage: products[i].productImage
+            });
+          }
+
+          res.render("supplier/profile", {
+            products: product,
+            countries: country,
+            industries: industry,
+            capabilities: cap,
+            MAX_PROD: process.env.SUPP_MAX_PROD,
+            DEFAULT_CURR: process.env.SUPP_DEFAULT_CURR,
+            successMessage: success,
+            errorMessage: error,
+            profile: req.session.supplier
+          });
+        });
       });
+    });
     })
     .catch(console.error);
 }
@@ -973,33 +1044,38 @@ exports.postProfile = async (req, res) => {
 
       console.log("Supplier updated!");
       var arr = doc.productsServicesOffered;
-      await dbo.collection("capabilities").deleteMany({ supplier: doc._id }, (err, resp1) => {
-        if(treatError(req, res, err, '/supplier/profile'))
-          return false;
-
-        var capability = new Capability({
-        supplier: doc._id,
-        capabilityDescription: doc.capabilityDescription,
-        createdAt: Date.now(),
-        updatedAt: Date.now()
-      });
-
-      capability.save((err) => {
-        if(treatError(req, res, err, '/supplier/profile'))
-          return false;
-      });
-
-       console.log('Capability description saved!');
-    });
       
-      var industry = new Industry({
-        name: doc.industry
-      });
+      if(req.body.saveCapability.length) {
+        await dbo.collection("capabilities").deleteMany({ supplier: doc._id }, (err, resp1) => {
+          if(treatError(req, res, err, '/supplier/profile'))
+            return false;
 
-      industry.save((err) => {
-        if(treatError(req, res, err, '/supplier/profile'))
-          return false;
+        
+            var capability = new Capability({
+            supplier: doc._id,
+            capabilityDescription: doc.capabilityDescription,
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+          });
+
+          capability.save((err) => {
+            if(treatError(req, res, err, '/supplier/profile'))
+              return false;
+          });
+          console.log('Capability description saved!');
       });
+    }
+      
+      if(req.body.saveIndustry.length) {
+        var industry = new Industry({
+          name: doc.industry
+        });
+
+        industry.save((err) => {
+          if(treatError(req, res, err, '/supplier/profile'))
+            return false;
+        });
+      }
       
       console.log('Now saving new data to session:');
       req.session.supplier = doc;

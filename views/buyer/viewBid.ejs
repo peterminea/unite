@@ -12,18 +12,27 @@
   <link rel="stylesheet" href="/messages.css">
   <link rel="stylesheet" href="/jquery-ui.css">
   <link rel="stylesheet" href="/bootstrap.min.css">
-  <script src="/jquery.min.js"></script>
+  <link rel="stylesheet" href="/ui.jqgrid.min.css">
+  <link rel="stylesheet" href="/ui.multiselect.min.css">
+ <!--  <script src="/jquery.min.js"></script> -->
+  <script  src="https://code.jquery.com/jquery-3.5.1.js"  integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" 
+  crossorigin="anonymous"></script>
   <script src="/jquery-ui.min.js"></script>
+  <script src="/popper.min.js"></script>
   <script src="/bootstrap.min.js"></script>
-  <script src="/money.min.js"></script>
   <script src="/sweetalert2@9.min.js"></script>
+  <script src="/index.min.js"></script>
+  <script src="/money.min.js"></script>
+  <script src="/jquery.simulate.js"></script>
+  <script src="/jquery.jqgrid.min.js"></script>
+  <script src="/grid.locale-en.js"></script>
   <script src="/https.js"></script>  
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
       var token = $("input[name='_csrf']").first().val();
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
-      $('.rem,.inc,.dec').off('click');//Off in View Mode.
+      $('.rem,.inc,.dec,.uploadImage').off('click');//Off in View Mode.
 
       //setTimeout({
       $.ajax({
@@ -252,6 +261,10 @@
                       <% } }%>
                     </ul>
                   </div>
+                   <div id="jqDiv_<%= i %>" class="form-group">
+                    <table id="grid_<%= i %>">
+                    </table>
+                  </div>
                   <div class="form-group">
                     <label class="col-form-label">Item Description (Long)*</label>
                     <textarea disabled class="form-control" name="itemDescriptionLong"><%= bid.itemDescriptionLong %></textarea>
@@ -354,6 +367,56 @@
                     </button>
                     <script type="text/javascript">
                       var index = "<%= i %>";
+                      
+                      var data = [];
+                      var colModel = [
+                        { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
+                        { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, search: true, width: 140},
+                        { name: 'hiddenPrice', hidden: true },
+                        { name: 'hiddenTotalPrice', hidden: true },
+                        { name: 'hiddenCurrency', hidden: true },
+                        { name: 'productImageSource', hidden: true},
+                        { name: 'amount', label: 'Amount', formatter: amountFormatter, align: 'center', search: true, template: 'number', width: 70},
+                        { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, search: true, width: 90},            { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
+                         { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
+                      ];
+
+                      $('#cartList_'+index).find('li').not(':first').each(function(i, e) {
+                        var src = $(this).find('.productImage img').length?
+                            $(this).find('.productImage img').attr('src') : null;
+
+                        data.push({
+                          id: i,
+                          name: $(this).find('.product').text(),
+                          price: $(this).find('.price').text() + ' ' + $(this).find('.currency').text(),
+                          hiddenPrice: $(this).find('.price').text(),
+                          hiddenTotalPrice: $(this).find('.totalPrice').text(),
+                          hiddenCurrency: $(this).find('.currency').text(),
+                          productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '',
+                          amount: parseInt($(this).find('.amount').text()),
+                          totalPrice: $(this).find('.totalPrice').text() + ' ' + $(this).find('.currency').text()
+                        });
+                      });             
+
+                      $("#grid_"+index).jqGrid({
+                        colModel: colModel,
+                        data: data,
+                        guiStyle: "bootstrap4",
+                        iconSet: "fontAwesome",
+                        idPrefix: "gb1_",
+                        viewrecords : true,
+                        gridview : true,
+                        altRows: true,
+                        //autowidth: true,
+                        rownumbers : true,
+                        autoencode : false,
+                        toolbar: [true, "top"],
+                        width: 750,
+                        height: 300,
+                        sortname: "name",
+                        sortorder: "asc",
+                        caption: "The Products grid, which uses predefined formatters and templates:"
+                      });
                       
                       $('#mainForm_'+index).submit(function(e) {
                         //e.preventDefault();
