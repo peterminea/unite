@@ -34,6 +34,50 @@ var autocomp = function(obj, data, enter) {//Not suitable for modals.
 };
 
 
+function initGrid(colModel, data, gridId, pagerId, sortName, theName, width) {
+    $(`${gridId}`).jqGrid({
+      colModel: colModel,
+      data: data,
+      guiStyle: "bootstrap4",
+      iconSet: "fontAwesome",
+      idPrefix: "gb1_",
+      viewrecords : true,
+      gridview : true,
+      altRows: true,
+      pager:  pagerId,
+      rowNum: 30,
+      //scroll: 1,
+      shrinkToFit: true,
+      //autowidth: true,
+      rownumbers : true,
+      pagination: true,
+      autoencode : false,
+      toolbar: [true, "top"],
+      width: !width? 2950 : width,
+      //height: 300,
+      sortname: sortName,
+      sortorder: "asc",
+      caption: `The ${theName} grid, which uses predefined formatters and templates:`
+    });
+    
+    $(`${gridId}`).navGrid(pagerId, {edit: true, add: true, del: true, refresh: true, view: true});
+    $(`${gridId}`).inlineNav(pagerId,
+              // the buttons to appear on the toolbar of the grid
+      { 
+          edit: true, 
+          add: true, 
+          del: true, 
+          cancel: true,
+          editParams: {
+              keys: true,
+          },
+          addParams: {
+              keys: true
+          }
+      });
+}
+
+
 function getCurrenciesList(elem, url, token) {//For <select> drop-down currencies.
   var obj = $('' + elem + '');
   
@@ -522,12 +566,10 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
   });
   
   obj.on('click', function() {
-    var li = $(this).parent('span').parent('li'), ul;/*
-    var newIndex = elem.find('li').index(li);*/
-    
+    var li = $(this).parent('span').parent('li'), ul;
     var divId = fromBuyer? $('#jqDiv_'+id) : $('#jqDiv');
     var gridId = fromBuyer? $('#grid_'+id) : $('#grid');
-    var isUl = false;
+    var isUl = false, rowId;
     
     if(!li.length) {//Not from list, but from grid.
       li = $(this).parent('span').closest('tr');
@@ -540,6 +582,8 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     //divId.prev('div').find('ul');
     var counter = divId.prev('div').find('p.term span');
     var entireAmount = parseInt(li.find('.amount').text());
+    var index = isUl? ul.find('li').index(li) : ul.find('tr').index(li);
+    var rowid = 'gb1_'+(index-1);
 
     if(isAdd && entireAmount == parseInt(li.attr('maxAmount'))) {
       Swal.fire({
@@ -554,7 +598,7 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     var handledAmount = isRow? entireAmount : 1;
     var rowPrice = parseFloat(li.find('span.totalPrice').text()).toFixed(2);      
     var handledPrice = handledAmount * parseFloat(li.find('span.price').text()).toFixed(2);
-    var supplierCurrency = fromBuyer? ul.attr('suppCurrency') : li.find('.currency').text();
+    var supplierCurrency = fromBuyer? ul.attr('suppCurrency') : li.find('span.currency').first().text();
     var totalPagePrice = fromBuyer? parseFloat(li.attr('totalPrice')).toFixed(2) : parseFloat($('#hiddenTotalPrice').val()).toFixed(2);
     
     var canContinue = true;
@@ -565,7 +609,7 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     var newPrice = isAdd? parseFloat(parseFloat(totalPagePrice) + parseFloat(handledPrice)).toFixed(2) : parseFloat(totalPagePrice - handledPrice).toFixed(2);
     
     isUl? ul.find('li').attr('totalPrice', parseFloat(newPrice)) : ul.find('tr').attr('totalPrice', parseFloat(newPrice));
-    totalAmountInput.val(parseInt(newAmount));
+    totalAmountInput.val(parseInt(newAmount));    
     
     if(isRow || (entireAmount==1 && !isAdd)) {//Delete Row. If 1.
       //if(!confirm('Warning: You are about to remove the entire product row.'))
@@ -585,21 +629,42 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
           li.remove();
           var newValue = -1 + parseInt(counter.text());
           counter.text(newValue);
+          if(!isUl)
+            gridId.jqGrid('delRowData', rowId);
         } else if (result.dismiss === Swal.DismissReason.cancel) {
           canContinue = false;
         }
       });
     } else {
+      gridId.jqGrid('editRow', index, true)
+      
       li.find('.amount').text(localAmount);
       li.find('span.totalPrice').text(localPrice);
       if(!fromBuyer) {
         li.attr('amount', localAmount);
         li.attr('price', localPrice);
       }
+      
+      if(!isUl && isAdd) {
+        rowId = gridId.jqGrid('getRowData', rowid);
+        var td = li.find('span.priceWrapper0').parent('td');
+        td.find('span:lt(2)').attr({'title': localPrice});
+        rowId.totalPrice = td.html();
+        //alert(td.html())
+        td = li.find('span.amountWrapper0').parent('td');
+        
+        td.find('span:gt(0)').attr({'title': localAmount});
+        td.find('span:first').attr({'title': localAmount + ' items'});
+        //alert(td.html())
+        rowId.amount = td.html();
+        //alert(5);
+        gridId.jqGrid('saveRow', rowid);
+        //alert(rowId.totalPrice + '\n' + td.html());
+      }
     }
     
     if(!fromBuyer) {
-      $('#hiddenTotalPrice').val(newPrice);
+      $('#hiddenTotalPrice').val(parseFloat(newPrice));
       $('#totalSupplyPrice').text(newPrice + ' ' + supplierCurrency);
       prodServiceInput.trigger('change');
     } else {
@@ -610,6 +675,8 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
       var supp = parseFloat(fx.convert(newPrice, {from: span.text(), to: supplierCurrency})).toFixed(2);
       $('#price_'+id).text(parseFloat(newPrice).toFixed(2));
       $('#supplierPrice_'+id).text(supp);
+      
+      gridId.trigger('reloadGrid');
       
       if(canContinue == false)
         return false;

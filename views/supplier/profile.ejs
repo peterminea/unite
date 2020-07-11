@@ -355,6 +355,8 @@
         <div id="jqDiv" class="form-group">
           <table id="grid">
           </table>
+          <div id='prodPager'>
+          </div>
         </div>
         <div class="form-group">
           <label>Total Price of Supply*</label>
@@ -377,50 +379,32 @@
             { name: 'hiddenCurrency', hidden: true },
             { name: 'productImageSource', hidden: true},
             { name: 'amount', label: 'Amount', formatter: amountFormatter, align: 'center', search: true, template: 'number', width: 70},
-            { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, search: true, width: 90},            { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
+            { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, search: true, width: 90},            
+            { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
              { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
           ];
           
-          $('#prodServices').find('li').not(':first').each(function(i, e) {
-            var src = $(this).find('.productImage img').length?
-                $(this).find('.productImage img').attr('src') : null;
-                       
+          <% i = 0; if (products != null) { for (product of products) { i++; %>
             data.push({
-              id: i,
-              name: $(this).find('.product').text(),
-              price: $(this).find('.price').text() + ' ' + $(this).find('.currency').text(),
-              hiddenPrice: $(this).find('.price').text(),
-              hiddenTotalPrice: $(this).find('.totalPrice').text(),
-              hiddenCurrency: $(this).find('.currency').text(),
-              productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '',
-              amount: parseInt($(this).find('.amount').text()),
-              totalPrice: $(this).find('.totalPrice').text() + ' ' + $(this).find('.currency').text()
+              id: '<%= parseInt(i) %>',
+              name: '<%= product.productName %>',
+              price: '<%= parseFloat(product.price).toFixed(2) %> <%= product.currency %>',
+              hiddenPrice: '<%= parseFloat(product.price).toFixed(2) %>',
+              hiddenTotalPrice: '<%= parseFloat(product.totalPrice).toFixed(2) %>',
+              hiddenCurrency: '<%= product.currency %>',
+              productImageSource: <% if(product.productImage.length > 0) { %> `<img src="../` + '<%= product.productImage.substring(7) %>' 
+              + `" style="height: 25px; width: 30px" onclick="window.open(this.src)">`
+                <% } else { %> '' <% } %>,
+              amount: '<%= product.amount %>',
+              totalPrice: '<%= parseFloat(product.totalPrice).toFixed(2) %> <%= product.currency %>'
             });
-          });             
+          <% } } %>
           
-          $("#grid").jqGrid({
-            colModel: colModel,
-            data: data,
-            guiStyle: "bootstrap4",
-            iconSet: "fontAwesome",
-            idPrefix: "gb1_",
-            viewrecords : true,
-            gridview : true,
-            altRows: true,
-            //autowidth: true,
-            rownumbers : true,
-            autoencode : false,
-            toolbar: [true, "top"],
-            width: 750,
-            height: 300,
-            sortname: "name",
-            sortorder: "asc",
-            caption: "The Products grid, which uses predefined formatters and templates:"
-          });
-          
+          initGrid(colModel, data, "#grid", '#prodPager', "name", 'Products List', 1000);
           bindHandleProduct($('.rem'), $('#prodServiceInput'), false, null, true, false);
           bindHandleProduct($('.inc'), $('#prodServiceInput'), false, null, false, true);
           bindHandleProduct($('.dec'), $('#prodServiceInput'), false, null, false, false);
+          
           $('<a><span style="color: green; cursor: pointer" id="massRemove">Remove All Products</span></a><br>').insertBefore($("#prodServices"));
           $('#massRemove').on('click', removeAllProducts);
           var totalLoadedPrice = 0, totalLoadedAmount = 0;
@@ -432,53 +416,13 @@
           $('span.amount').each(function(ind, el) {
             totalLoadedAmount += parseInt($(el).text());
           });
-          
               
           totalLoadedPrice = parseFloat(totalLoadedPrice).toFixed(2);
           $('#hiddenTotalPrice').val(totalLoadedPrice/2);
           $('#totalSupplyAmount').val(totalLoadedAmount/2);
           $('#hiddenTotalAmount').val(totalLoadedPrice/2);
           $('#totalSupplyPrice').text(parseFloat(totalLoadedPrice/2).toFixed(2) + ' ' + "<%= profile.currency %>");
-       
-
-          
-          if(1==2)
-          
-          $("#grid").jqGrid({
-            colModel: [
-              { name: "name", label: "Client", width: 53 },
-              { name: "invdate", label: "Date", width: 75, align: "center", sorttype: "date",
-               formatter: "date", formatoptions: { newformat: "d-M-Y" } },
-              { name: "amount", label: "Amount", width: 65, template: "number" },
-              
-              { name: "tax", label: "Tax", width: 41, template: "number" },
-              { name: "total", label: "Total", width: 51, template: "number" },
-              { name: "closed", label: "Closed", width: 59, template: "booleanCheckbox", firstsortorder: "desc" },
-              { name: "ship_via", label: "Shipped via", width: 87, align: "center", formatter: "select",
-               formatoptions: { value: "FE:FedEx;TN:TNT;DH:DHL", defaultValue: "DH" } }
-            ],
-            data: [
-              { id: "10",  invdate: "2015-10-01", name: "test",   amount: "" },
-              { id: "20",  invdate: "2015-09-01", name: "test2",  amount: "300.00", tax: "20.00", closed: false, ship_via: "FE", total: "320.00" },
-              { id: "30",  invdate: "2015-09-01", name: "test3",  amount: "400.00", tax: "30.00", closed: false, ship_via: "FE", total: "430.00" },
-              { id: "40",  invdate: "2015-10-04", name: "test4",  amount: "200.00", tax: "10.00", closed: true,  ship_via: "TN", total: "210.00" },
-              { id: "50",  invdate: "2015-10-31", name: "test5",  amount: "300.00", tax: "20.00", closed: false, ship_via: "FE", total: "320.00" },
-              { id: "60",  invdate: "2015-09-06", name: "test6",  amount: "400.00", tax: "30.00", closed: false, ship_via: "FE", total: "430.00" },
-              { id: "70",  invdate: "2015-10-04", name: "test7",  amount: "200.00", tax: "10.00", closed: true,  ship_via: "TN", total: "210.00" },
-              { id: "80",  invdate: "2015-10-03", name: "test8",  amount: "300.00", tax: "20.00", closed: false, ship_via: "FE", total: "320.00" },
-              { id: "90",  invdate: "2015-09-01", name: "test9",  amount: "400.00", tax: "30.00", closed: false, ship_via: "TN", total: "430.00" },
-              { id: "100", invdate: "2015-09-08", name: "test10", amount: "500.00", tax: "30.00", closed: true,  ship_via: "TN", total: "530.00" },
-              { id: "110", invdate: "2015-09-08", name: "test11", amount: "500.00", tax: "30.00", closed: false, ship_via: "FE", total: "530.00" },
-              { id: "120", invdate: "2015-09-10", name: "test12", amount: "500.00", tax: "30.00", closed: false, ship_via: "FE", total: "530.00" }
-            ],
-            guiStyle: "bootstrap4",
-            iconSet: "fontAwesome",
-            idPrefix: "gb1_",
-            rownumbers: true,
-            sortname: "invdate",
-            sortorder: "desc",
-            caption: "The grid, which uses predefined formatters and templates"
-          });
+ 
         </script>
 
         <!-- Uploading files field section-->

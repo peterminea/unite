@@ -268,7 +268,7 @@
             //jqGrid
             
             str = '';
-            str += '<div id="jqDiv_0" class="jqGridProd form-group"><table id="gridProds"></table></div>';
+            str += '<div id="jqDiv_0" class="jqGridProd form-group"><table id="gridProds"></table><div id="prodPager"></div></div>';
             $('div.bodyBuilder').append(str);
             
             var data2 = [];
@@ -296,26 +296,8 @@
                 hiddenImageSrc: '../' + data[i].productImage.substring(7)
               });
             }
-            
-            $("#gridProds").jqGrid({
-              colModel: colModel,
-              data: data2,
-              guiStyle: "bootstrap4",
-              iconSet: "fontAwesome",
-              idPrefix: "gb1_",
-              viewrecords : true,
-              gridview : true,
-              altRows: true,
-              //autowidth: true,
-              rownumbers : true,
-              autoencode : false,
-              toolbar: [true, "top"],
-              width: 750,
-              height: 300,
-              sortname: "name",
-              sortorder: "asc",
-              caption: "The Products grid, which uses predefined formatters and templates:"
-            });
+
+            initGrid(colModel, data2, "#gridProds", '#prodPager', "productName", 'Products List');
           }
         });
       });
@@ -753,6 +735,8 @@
                   <div id="jqDiv_<%= i %>" class="form-group">
                     <table id="grid_<%= i %>">
                     </table>
+                    <div id='prodPager_<%= i %>'>
+                    </div>
                   </div>
                   <div class="form-group">
                     <label>Total number of items (Overall Amount):</label>
@@ -834,46 +818,11 @@
                        { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
                     ];
                     
-                    /*
-                    $('#prodServices_'+index).find('li').not(':first').each(function(i, e) {
-                      var src = $(this).find('.productImage img').length?
-                          $(this).find('.productImage img').attr('src') : null;
-
-                      data.push({
-                        id: i,
-                        name: $(this).find('.product').text(),
-                        price: $(this).find('.price').text() + ' ' + $(this).find('.currency').text(),
-                        hiddenPrice: $(this).find('.price').text(),
-                        hiddenTotalPrice: $(this).find('.totalPrice').text(),
-                        hiddenCurrency: $(this).find('.currency').text(),
-                        productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '',
-                        amount: parseInt($(this).find('.amount').text()),
-                        totalPrice: $(this).find('.totalPrice').text() + ' ' + $(this).find('.currency').text()
-                      });
-                    });*/
-
-                    $("#grid_"+index).jqGrid({
-                      colModel: colModel,
-                      data: data,
-                      guiStyle: "bootstrap4",
-                      iconSet: "fontAwesome",
-                      idPrefix: "gb1_",
-                      viewrecords : true,
-                      gridview : true,
-                      altRows: true,
-                      //autowidth: true,
-                      toolbar: [true, "top"],
-                      rownumbers : true,
-                      autoencode : false,
-                      width: 750,
-                      height: 300,
-                      sortname: "name",
-                      sortorder: "asc",
-                      caption: "The Products grid, which uses predefined formatters and templates:"
-                    });
-                    
-                    var table = $("#grid_"+index).find('table').eq(1);
-                    table.attr('suppCurrency', "<%= supplier.currency %>");
+                    initGrid(colModel, data, "#grid_"+index, '#prodPager_'+index, "name", 'Products List');
+                    setTimeout(function() {
+                      var table = $("#jqDiv_"+index).find('table').eq(1);
+                      table.attr('suppCurrency', "<%= supplier.currency %>");
+                    }, 1000);
 
                     $('#status_'+index).on('keypress keyon keyup', function(e) {
                         return limitStatus(e);
