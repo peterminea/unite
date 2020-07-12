@@ -1039,7 +1039,7 @@ app.get("/currencyGetAutocomplete", function(req, res, next) {
   var val = regex? { value: regex } : {};
   var currencyFilter = Currency.find(val, { value: 1, name: 1 })
     .sort({ value: 1 })
-    .limit(regex? 10 : 30); //Negative sort means descending.
+    .limit(regex? 210 : 230); //Negative sort means descending.
 
   currencyFilter.exec(function(err, data) {
     var result = [];
@@ -1140,6 +1140,19 @@ app.get("/capabilityInputAutocomplete", function(req, res, next) {
 });
 
 
+function traverse_it(obj){
+    for(var prop in obj){
+        if(typeof obj[prop]=='object'){
+            // object
+            traverse_it(obj[prop[i]]);
+        }else{
+            // something else
+            alert('The value of '+prop+' is '+obj[prop]+'.');
+        }
+    }
+}
+
+
 var db;
 //if (1 == 2)
   MongoClient.connect(URI, { useUnifiedTopology: true }, (err, client) => {
@@ -1192,9 +1205,58 @@ var db;
         ind.save();      
       }
     });*/
-    
+    /*
     
     //db.collection('industries').deleteMany( { name : "Agriculture", _id: { $not: { $eq: new ObjectId("5ecfc60ee0558a504f587f78") } } } );
+    
+     var rawdata = fs.readFileSync('currencies.json');
+    //console.log(rawdata)
+     let currencies = JSON.parse(rawdata);
+     //console.log(currencies);
+    
+    Object.keys(currencies).forEach(function(key) {
+     // console.table('Key : ' + key + ', Value : ' + JSON.stringify(currencies[key]))
+      var t = JSON.stringify(currencies[key]);
+      var obj = JSON.parse(t.substring(7, t.length-1));
+      //console.log(obj);
+      
+    });
+    
+    var currs = [];
+    
+    for(var i of currencies) {
+      var t = JSON.stringify(i);
+      var obj = JSON.parse(t.substring(7, t.length-1));
+      //console.log(obj);
+      
+      currs.push({
+        name: obj.name,
+        value: obj.code
+      });
+    }
+    
+    currs.push({
+      name: 'Euro',
+      value: 'EUR'
+    });
+    
+    currs.sort(function(a, b) {
+      return a.value.localeCompare(b.value);
+    });
+    
+    db.collection("currencies").deleteMany({},  function(err, obj) {});
+    
+    var curr;    
+    
+    for(var i in currs) {
+      curr = new Currency({
+        name: currs[i].name,
+        value: currs[i].value
+      });
+      
+      console.log(curr);
+      curr.save();
+    }*/
   
     db.collection("bidrequests").updateMany({}, unset, {multi: true});
     db.collection("bidrequests").updateMany({}, set, function(err, obj) {});

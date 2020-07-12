@@ -49,7 +49,7 @@
         <h5 class="card-header">Welcome!</h5>
         <div class="card-body">
           <h5 class="card-title">Please make your Bid Request</h5>
-          <p class="card-text">This is your profile page. Please keep your data accurate, and you will have good luck with finding your needed suppliers!</p>
+          <p class="card-text" style="color: beige">You can place a bid request on one or more products, belonging to one or more suppliers.<br>If you choose more suppliers, separate Bid Request objects will be created upon submit, with each one of them being sent to the corresponding supplier.<br>If you choose the same product name from several suppliers, and bids are accepted, you will have to pay each supplier. Please handle these choices carefully.</p>
         </div>
       </div>
       
@@ -63,11 +63,15 @@
             </div>
             <div class="form-group">
               <label class="col-form-label">Request Name*</label>
-              <input type="text" class="form-control" id="requestName_<%= i %>" name="requestName" required>
+              <input type="text" class="form-control" id="requestName" name="requestName" required>
             </div>
             <div class="form-group">
               <label class="col-form-label">Supplier Company</label>
               <input type="text" class="form-control" name="supplierName" value="<%= supplier.companyName %>" disabled>
+            </div>
+            <div class="form-group">
+              <label class="col-form-label">Supplier's E-mail Address*</label>
+              <input type="email" class="form-control" name="supplierEmail" value="<%= supplier.emailAddress %>" disabled>
             </div>
             <div class="form-group">
               <label class="col-form-label">Buyer Organization</label>
@@ -76,10 +80,6 @@
             <div class="form-group">
               <label class="col-form-label">Buyer's E-mail Address*</label>
               <input type="email" class="form-control" name="buyerEmail" value="<%= buyer.emailAddress %>" disabled>
-            </div>
-            <div class="form-group">
-              <label class="col-form-label">Supplier's E-mail Address*</label>
-              <input type="email" class="form-control" name="supplierEmail" value="<%= supplier.emailAddress %>" disabled>
             </div>
             <div class="form-group">
               <label class="col-form-label">Item Description <b>(Short)</b>*</label>
@@ -125,14 +125,20 @@
             </div>
             <div class="form-group">
               <label class="col-form-label">Your currency*:</label>
-              <select class="form-control buyerCurrency" index="<%= i %>" ></select>
+              <select class="form-control buyerCurrency" index="0" ></select>
             </div>
             <p>
               You can either select products from drop-down or search for them via Autocomplete (please enter at least 3 characters).
             </p>
             <div class="form-group">
-              <label class="col-form-label">Supplier's products:</label>
-              <select index="<%= i %>" supplierId="<%= supplier._id %>" class="form-control productsList" name="productsList"></select>
+              <label class="col-form-label">Available products:</label>
+              <select index="0" supplierId="" class="form-control productsList" name="productsList">
+              <% if(products != null) { %>
+                <option></option>
+                <% for(product of products) { %>
+                <option style="word-wrap: break-word; width: 250px" totalPrice="<%= product.totalPrice %>" price="<%= product.price %>" maxAmount="<%= product.amount %>" productImage="<%= product.productImage %>" currency="<%= product.currency %>" title="<%= product.productName %>" value="<%= product.productName %>"><%= product.productName %></option>
+              <% } } %>
+              </select>
             </div>
             <div>
               <p class='term'>
@@ -151,81 +157,81 @@
                 You can also request products that are not in the list of the supplier.
               </span>
               <div class="input-group">
-                <input type="text" required class="form-control prodInput" supplierId="<%= supplier._id %>" placeholder="Add Product/Service*" id="prodServiceInput_<%= i %>">
+                <input type="text" required class="form-control prodInput" supplierId="<%= supplier._id %>" placeholder="Add Product/Service*" id="prodServiceInput">
                 <div class="input-group-append">
-                  <button class="btn btn-outline-secondary prodButton" type="button" disabled MAX="<%= MAX_PROD %>" id="addProdService_<%= i %>">Add</button>
+                  <button class="btn btn-outline-secondary prodButton" type="button" disabled MAX="<%= MAX_PROD %>" id="addProdService">Add</button>
                 </div>
               </div>
             <div class="form-group">
               <label class="col-form-label">Amount*</label>
-              <input type="number" min="1" step="1" class="form-control" id="amount_<%= i %>" name="theAmount" value="0" required>
+              <input type="number" min="1" step="1" class="form-control" id="amount" name="theAmount" value="0" required>
             </div>
             <div class="form-group">
               <label>Upload a product image:</label>
               <input type="hidden" class="fileId" name="productImage" value="">
-              <input class="form-control upload productimageupload" type="file" id="productImage_<%= i %>" name="products" single>
+              <input class="form-control upload productimageupload" type="file" id="productImage" name="products" single>
               <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload Product Image" />                    
             </div>
-              <ul class="list-group" MAX="<%= MAX_PROD %>" suppCurrency="<%= supplier.currency %>" id="prodServices_<%= i %>">
+              <ul class="list-group" MAX="<%= MAX_PROD %>" suppCurrency="<%= supplier.currency %>" id="prodServices">
               </ul>
               <p class='term'>
                 You have a number of <span class='productsCount'>0</span> products.
               </p>
-              <input type="hidden" required id="hiddenProdServicesList_<%= i %>" name="productList" value="">
-              <input type="hidden" required id="amountList_<%= i %>" name="amountList" value="">
-              <input type="hidden" required id="priceList_<%= i %>" name="priceList" value="">
-              <input type="hidden" required id="priceOriginalList_<%= i %>" name="priceOriginalList" value="">
-              <input type="hidden" required id="productImagesList_<%= i %>" name="productImagesList" value="">
+              <input type="hidden" required id="hiddenProdServicesList" name="productList" value="">
+              <input type="hidden" required id="amountList" name="amountList" value="">
+              <input type="hidden" required id="priceList" name="priceList" value="">
+              <input type="hidden" required id="priceOriginalList" name="priceOriginalList" value="">
+              <input type="hidden" required id="productImagesList>" name="productImagesList" value="">
             </div>
-            <div id="jqDiv_<%= i %>" class="form-group">
-              <table id="grid_<%= i %>">
+            <div id="jqDiv" class="form-group">
+              <table id="grid">
               </table>
-              <div id='prodPager_<%= i %>'>
+              <div id='prodPager'>
               </div>
             </div>
             <div class="form-group">
               <label>Total number of items (Overall Amount):</label>
-              <input class="form-control" type="number" disabled id="totalAmount_<%= i %>" name="amount" value="0">
+              <input class="form-control" type="number" disabled id="totalAmount" name="amount" value="0">
             </div>
             <div class="form-group">
               <label class=" col-form-label">Your total price:</label>
               <span class="form-control hid">
-                <span index="<%= i %>" class="bidPrice" id="price_<%= i %>" name="buyerPrice">0</span>
-                <span index="<%= i %>" class="bidCurrency" id="currency_<%= i %>" name="buyerCurrency"></span>
+                <span index="0" class="bidPrice" id="price" name="buyerPrice">0</span>
+                <span index="0" class="bidCurrency" id="currency" name="buyerCurrency"></span>
               </span>
             </div>
             <div class="form-group">
               <label class="col-form-label">Supplier's equivalent total price:</label>
               <span class="form-control hid">
-                <span id="supplierPrice_<%= i %>" name="supplierPrice">0</span>
-                <span index="<%= i %>" class="suppCurrency" id="supplierCurrency_<%= i %>" name="supplierCurrency"><%= supplier.currency %></span>
+                <span id="supplierPrice" name="supplierPrice">0</span>
+                <span index="0" class="suppCurrency" id="supplierCurrency" name="supplierCurrency"><%= supplier.currency %></span>
               </span>
             </div>
             <div class="form-group">
               <label class="col-form-label">Your price for selected product:</label>
               <span class="form-control hid">
-                <span id="buyerPriceUnit_<%= i %>">0</span>
-                <span index="<%= i %>" class="bidCurrency" id="buyerCurrencyUnit_<%= i %>"></span>
+                <span id="buyerPriceUnit">0</span>
+                <span index="0" class="bidCurrency" id="buyerCurrencyUnit"></span>
               </span>
             </div>
             <div class="form-group">
               <label class="col-form-label">Supplier's price for selected product:</label>
               <span class="form-control hid">
-                <span id="supplierPriceUnit_<%= i %>">0</span>
-                <span index="<%= i %>" class="suppCurrency" id="supplierCurrencyUnit_<%= i %>"><%= supplier.currency %></span>
+                <span id="supplierPriceUnit">0</span>
+                <span index="0" class="suppCurrency" id="supplierCurrencyUnit"><%= supplier.currency %></span>
               </span>
             </div>
              <div class="form-group">
               <label class="col-form-label">Status*</label>
-              <input type="number" id="status_<%= i %>" class="form-control" name="status" min="0" max="4" step="1" value="<%= statuses[0].value %>" readonly>
+              <input type="number" id="status" class="form-control" name="status" min="0" max="4" step="1" value="<%= statuses[0].value %>" readonly>
             </div>
             <div class="form-group">
-              <select class='statuses' style="width: 100%" id="statuses_<%= i %>">
+              <select class='statuses' style="width: 100%" id="statuses">
                 <% if (statuses != null) { for (status of statuses) { %>
                 <option disabled title="<%= status.name %>" value="<%= status.value %>"><%= status.name %></option>
                 <% } } %>
               </select>
-              <div style="visibility: hidden" id="statusJsonValues_<%= i %>">
+              <div style="visibility: hidden" id="statusJsonValues">
                 <% if (statusesJson != null) { %>
                   <span class='statuses'><%= statusesJson %></span>
                 <% } %>
@@ -248,7 +254,7 @@
                   return true; 
               }
 
-              var index = "<%= i %>";
+              var index = '';
 
               var data = [];
               var colModel = [
@@ -265,30 +271,30 @@
                  { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
               ];
 
-              initGrid(colModel, data, "#grid_"+index, '#prodPager_'+index, "name", 'Products List', 1000);
+              initGrid(colModel, data, "#grid"+index, '#prodPager'+index, "name", 'Products List', 1000);
               setTimeout(function() {
-                var table = $("#jqDiv_"+index).find('table').eq(1);
+                var table = $("#jqDiv"+index).find('table').eq(1);
                 table.attr('suppCurrency', "<%= supplier.currency %>");
               }, 1000);
 
-              $('#status_'+index).on('keypress keyon keyup', function(e) {
+              $('#status'+index).on('keypress keyon keyup', function(e) {
                   return limitStatus(e);
               });
 
-              var sel = $('#statuses_'+index);
+              var sel = $('#statuses'+index);
               var statusVector = [];
               sel.find('option').each(function(index, element) {
                 statusVector.push($(element).text());
               });
 
               sel
-                .find('option[value="' + $('#status_'+index).val() + '"]')
+                .find('option[value="' + $('#status'+index).val() + '"]')
                 .prop('selected', true);
 
               sel.attr('title', sel.find('option:selected').text());
-              var x = JSON.parse($('#statusJsonValues_'+index+' span:first').text());
+              var x = JSON.parse($('#statusJsonValues'+index+' span:first').text());
 
-              $('#status_'+index).change(function(e) {//Read-only select, though.
+              $('#status'+index).change(function(e) {//Read-only select, though.
                 if($(this).val() < x.BUYER_REQUESTED_BID
                    || $(this).val() > x.PAYMENT_DELIVERY_DONE) {//The last two options can be triggered by the corresponding Cancel Bid button. 5 for Supplier cancellation, 6 for Buyer cancellation.
                   return false;
@@ -296,23 +302,23 @@
 
                 var id = getId($(this).attr('id'));
                 var statusText = statusVector[parseInt($(this).val())];
-                if($("#statusText_"+id).length)
-                  $("#statusText_"+id).remove();
+                if($("#statusText").length)
+                  $("#statusText").remove();
 
-                $('<div style="color: blue" id="statusText_' + id + '"><p>' + statusText + '</p></div>')
-                  .insertAfter($('#status_'+id).parent('div'));
+                $('<div style="color: blue" id="statusText"><p>' + statusText + '</p></div>')
+                  .insertAfter($('#status').parent('div'));
               });
 
-              var elem0 = $("#prodServices_"+index);
-              $('<a><span style="color: green; cursor: pointer" id="massRemove_'+index+'">Remove All Products</span></a><br>').insertBefore(elem0);
+              var elem0 = $("#prodServices"+index);
+              $('<a><span style="color: green; cursor: pointer" id="massRemove'+index+'">Remove All Products</span></a><br>').insertBefore(elem0);
 
-              $('#massRemove_'+index).on('click', function() {
-                removeAllItems(getId($(this).attr('id')));
+              $('#massRemove'+index).on('click', function() {
+                removeAllItems('');
               });
 
-              $('button[id="addProdService_'+index+'"]').on('click', function() {
+              $('button[id="addProdService'+index+'"]').on('click', function() {
                 var id = getId($(this).attr('id'));
-                var elem = $("#prodServices_"+id);
+                var elem = $("#prodServices");
                 var MAX = parseInt($(this).attr('MAX'));
 
                 if(elem.find('li').length >= MAX) {
@@ -325,8 +331,8 @@
                     return false;
                 }                      
 
-                $('#status_'+ id).trigger('change');                      
-                var amount = $('#amount_'+id);
+                $('#status').trigger('change');                      
+                var amount = $('#amount');
                 if(!amount.val() || amount.val() < 1 || !(Number.isInteger(parseFloat(amount.val())))) {
                   Swal.fire({
                     icon: 'warning',
@@ -337,7 +343,7 @@
                   return false;
                 }
 
-                var input = $("#prodServiceInput_"+id);
+                var input = $("#prodServiceInput");
                 if(!input.attr('price'))
                   input.attr('price', 1);
                 //var req = input.val().length;// && $('#price').val().length && $('#currency').val().length;
@@ -365,20 +371,20 @@
                   }
 
                   var amountVal = amount.val();
-                  var currencyVal = $('#currency_'+id).text();
+                  var currencyVal = $('#currency').text();
                   var priceVal = input.attr('price');
                   var priceUnit = parseFloat(priceVal? priceVal : 1).toFixed(2);
                   var addedPrice = parseInt(amountVal? amountVal : 1) * priceUnit;
-                  var buyerPriceUnit = $('#buyerPriceUnit_'+id), buyerPriceCurr = $('#buyerPriceCurrency_'+id);
-                  var buyerCurrSpan = $('span.bidCurrency[index="'+id+'"]').first();
+                  var buyerPriceUnit = $('#buyerPriceUnit'), buyerPriceCurr = $('#buyerPriceCurrency');
+                  var buyerCurrSpan = $('span.bidCurrency[index="'+'"]').first();
                   buyerPriceUnit.text(parseFloat(addedPrice).toFixed(2));
                   buyerPriceCurr.text(buyerCurrSpan.text());
-                  var supplierCurrency = $('#supplierCurrency_'+id).text();
-                  var price = parseFloat($('#price_'+id).text()? $('#price_'+id).text() : 0) + parseFloat(addedPrice);
+                  var supplierCurrency = $('#supplierCurrency').text();
+                  var price = parseFloat($('#price').text()? $('#price').text() : 0) + parseFloat(addedPrice);
                   var bigPrice = parseFloat(price).toFixed(2);
-                  $('#price_'+id).text(bigPrice);
+                  $('#price').text(bigPrice);
 
-                  var imageInput = $('input.productimageupload[id="productImage_'+id+'"]');
+                  var imageInput = $('input.productimageupload[id="productImage'+'"]');
                   var imagePath = input.attr('productImage')?
                     '../' + input.attr('productImage').substring(7) 
                     : imageInput.attr('filePath');                        
@@ -391,10 +397,10 @@
                   }
 
                   var lis = elem.find('li').length;
-                  var divId = $('#jqDiv_'+id);
+                  var divId = $('#jqDiv');
 
                   elem.append("<li class='list-group-item' price='" 
-                                + addedPrice + "' maxAmount='" + (input.attr('maxAmount')? input.attr('maxAmount') : 2*amountVal)
+                                + addedPrice + "' maxAmount='" + '<%= product.amount %>'
                                 + "' totalPrice='" + bigPrice + "' amount='" + amountVal + "'>" 
                                 + `<span class='cnt'>${lis}</span><span class='product'>${prodVal}</span>
 <span class='buttonsWrapper'><span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span></span>
@@ -408,7 +414,7 @@
                       .attr('filePath', null)
                       .attr('value', '');
 
-                    var gridId = $('#grid_'+id);
+                    var gridId = $('#grid');
                     var src = imagePath && imagePath.length? imagePath : null;
 
                     var data = {
@@ -433,25 +439,25 @@
 
                     var counter = elem.parent('div').find('span.productsCount');
                     var newValue = 1 + parseInt(counter.text()? counter.text() : 0);
-                    var totalAmount = $('#totalAmount_'+id).val()? parseInt($('#totalAmount_'+id).val()) : 0;
+                    var totalAmount = $('#totalAmount').val()? parseInt($('#totalAmount').val()) : 0;
                     counter.text(newValue);
-                    $('#totalAmount_'+id).val(totalAmount + parseInt(amountVal));                         
+                    $('#totalAmount').val(totalAmount + parseInt(amountVal));                         
 
-                    bindHandleProduct(elem.find('.rem').last(), input, true, id, true, false);
-                    bindHandleProduct(elem.find('.inc').last(), input, true, id, false, true);
-                    bindHandleProduct(elem.find('.dec').last(), input, true, id, false, false);                        
+                    bindHandleProduct(elem.find('.rem').last(), input, false, id, true, false);
+                    bindHandleProduct(elem.find('.inc').last(), input, false, id, false, true);
+                    bindHandleProduct(elem.find('.dec').last(), input, false, id, false, false);                        
                     delegateUpload(elem.find('.uploadImage').last());
 
-                    bindHandleProduct(gridId.find('.rem').last(), input, true, id, true, false);
-                    bindHandleProduct(gridId.find('.inc').last(), input, true, id, false, true);
-                    bindHandleProduct(gridId.find('.dec').last(), input, true, id, false, false);                        
+                    bindHandleProduct(gridId.find('.rem').last(), input, false, id, true, false);
+                    bindHandleProduct(gridId.find('.inc').last(), input, false, id, false, true);
+                    bindHandleProduct(gridId.find('.dec').last(), input, false, id, false, false);                        
                     delegateUpload(gridId.find('.uploadImage').last());
 
                     var suppPriceUnit = fx.convert(parseFloat(addedPrice), {from: buyerCurrSpan.text(), to: '<%= supplier.currency %>'});
 
-                    $('#supplierPriceUnit_'+id).text(parseFloat(suppPriceUnit).toFixed(2));
+                    $('#supplierPriceUnit').text(parseFloat(suppPriceUnit).toFixed(2));
                     var supp = fx.convert(parseFloat(bigPrice), {from: buyerCurrSpan.text(), to: '<%= supplier.currency %>'});
-                    $('#supplierPrice_'+id).text(parseFloat(supp).toFixed(2));
+                    $('#supplierPrice').text(parseFloat(supp).toFixed(2));
                     input.val('').attr('productImage', null);
                     amount.val(0);
                     amount.val('');
@@ -473,7 +479,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button index="<%= i %>" class='placeBid' type="submit" class="btn btn-primary">Send request</button>
+            <button index="" class='placeBid' type="submit" class="btn btn-primary">Send request</button>
           </div>
         </form>
       </div>
