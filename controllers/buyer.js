@@ -270,36 +270,56 @@ exports.postIndex = (req, res) => {
         return res.redirect("/buyer/index");
       })
       .catch(console.error);
-  } else {
-    res.redirect("/buyer");
-  }
-};
+  } else if(req.body.bidProductList) {//Place bid on one or more products (+ 1 or more suppliers) from the Product Catalog grid.
+     var buyerId = req.body.buyerId, productIds = req.body.productList, supplierIds = req.body.supplierList;
+    
+      var productList = prel(req.body.productList);
+      var supplierList = prel(req.body.supplierList);
 
+      var prodIDs = [], suppIDs = [];
 
-exports.getPlaceBid = (req, res) => {
-  var buyerId = req.params.buyerId, productId = req.params.productId, supplierId = req.params.supplierId;
-  
+      for(var i in productList) {
+        prodIDs.push(new ObjectId(productList[i]));
+      }
+
+      for(var i in supplierList) {
+        suppIDs.push(new ObjectId(supplierList[i]));
+      }
+    
+    var uniqueSupplierIds = suppIDs.filter((v, i, a) => a.indexOf(v) === i);
+    
+  // { $in : [1,2,3,4] }
+  //Or array
   Buyer.find({ _id: buyerId }).then((buyer) => {
     if(!buyer) {
         req.flash('error', 'Buyer not found in the database!');
         return res.redirect('back');
       }
   
-    ProductService.find({ _id: productId, supplier: supplierId }).then( (prod) => {
-      if(!prod) {
-        req.flash('error', 'Product not found!');
+    ProductService.find({ _id: { $in: prodIDs } }).then((prods) => {
+      if(!prods) {
+        req.flash('error', 'Products not found!');
         return res.redirect('back');
       }
 
-      Supplier.find({ _id: supplierId }).then( (sup) => {
-        if(!sup) {
-          req.flash('error', 'Supplier for the product not found!');
+      Supplier.find({ _id: { $in: uniqueSupplierIds } }).then((sups) => {
+        if(!sups) {
+          req.flash('error', 'Suppliers for the products not found!');
           return res.redirect('back');
         }
         
         var promise = BidStatus.find({}).exec();
         promise.then((statuses) => {
-
+          var products = [], supps = [];
+          
+          for(var i in prods) {
+            prods.push(prods[i]);
+          }
+          
+          for(var i in sups) {
+            sups.push(sups[i]);  
+          }
+          
           var success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
           req.session.flash = [];
 
@@ -311,8 +331,60 @@ exports.getPlaceBid = (req, res) => {
             statuses: statuses,
             statusesJson: JSON.stringify(statusesJson),
             buyer: buyer,
-            product: prod,
-            supplier: sup
+            products: prods,
+            suppliers: sups
+            });
+          });
+        });
+      });
+    });
+  } else {
+    res.redirect("/buyer");
+  }
+};
+
+
+exports.getPlaceBid = (req, res) => {
+  var buyerId = new ObjectId(req.params.buyerId), productId = new ObjectId(req.params.productId), supplierId = new ObjectId(req.params.supplierId);
+  // { $in : [1,2,3,4] }
+  //Or array
+  Buyer.find({ _id: buyerId }).then((buyer) => {
+    if(!buyer) {
+        req.flash('error', 'Buyer not found in the database!');
+        return res.redirect('back');
+      }
+  
+    ProductService.find({ _id: productId }).then((prod) => {
+      if(!prod) {
+        req.flash('error', 'Product not found!');
+        return res.redirect('back');
+      }
+
+      Supplier.find({ _id: supplierId }).then((sup) => {
+        if(!sup) {
+          req.flash('error', 'Supplier for the product not found!');
+          return res.redirect('back');
+        }
+        
+        var promise = BidStatus.find({}).exec();
+        promise.then((statuses) => {
+          var prods = [], sups = [];
+          prods.push(prod);
+          sups.push(sup);
+          
+          var success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
+          req.session.flash = [];
+
+          res.render("buyer/placeBid", {
+            successMessage: success,
+            errorMessage: error,
+            MAX_PROD: process.env.BID_MAX_PROD,
+            BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+            statuses: statuses,
+            statusesJson: JSON.stringify(statusesJson),
+            buyer: buyer,
+            products: prods,
+            suppliers: sups
             });
           });
         });
@@ -323,9 +395,14 @@ exports.getPlaceBid = (req, res) => {
 
 exports.postPlaceBid = (req, res) => {
   
-  const BidRequest = new BidRequest({
-    
-  });
+  
+  var suppIds = prel(req.body.supplierIdsList);
+  
+  for(var i in suppIds) {
+    const BidRequest = new BidRequest({
+      
+    });  
+  }  
 }
 
 

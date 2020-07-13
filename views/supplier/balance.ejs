@@ -44,16 +44,18 @@
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-      $('#balance').val(parseFloat($('#defaultBalance').val()).toFixed(2) + ' ' + $('#defaultCurrency').val());
-      //getAutocomplete('#currency', '/currencyGetAutocomplete', $('#token').val());//For inputs.
+      var defaultCurr = $('#defaultCurrency').val();
+      var defaultBalance = $('#defaultBalance').val();
+      
+      $('#balance').val(parseFloat(defaultBalance).toFixed(2) + ' ' + defaultCurr);
       getCurrenciesList('#currency', '/currencyGetAutocomplete', $('#token').val());//For selects.
       //errorSuccess(Swal, '< %= errorMessage %>', '< %= successMessage %>');
-      initBaseRates(fx, '#currency');
-      
-      $('#currency').on('change', function() {        
-        var val = fx.convert($('#defaultBalance').val(), {from: $('#defaultCurrency').val(), to: $(this).val()});
-        $('#balance').val(val.toFixed(2) + ' ' + $(this).val());
-      });
+      initBaseRates(fx, '#currency').then((fx) => {   
+        $('#currency').on('change', function() {
+          var val = fx.convert(defaultBalance, {from: defaultCurr, to: $(this).val()});
+          $('#balance').val(val.toFixed(2) + ' ' + $(this).val());
+        });
+      }) 
     });
   </script>
 </head>
