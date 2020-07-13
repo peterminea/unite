@@ -30,6 +30,25 @@
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function () {
+        var token = $("input[name='_csrf']").val();
+        errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
+        getCurrenciesList('select.buyerCurrency', '/currencyGetAutocomplete', token);//Preferred currency for Buyer.
+        getProductsList('.productsList', '/prodServiceAutocomplete', token);
+        initBaseRates(fx, 'select.buyerCurrency');      
+        var defaultBidCurrency = '<%= BID_DEFAULT_CURR %>';
+      
+        initBaseRates(fx, 'select.buyerCurrency')
+        .then(() => {
+          $('select.buyerCurrency')
+            .find('option[value="' + defaultBidCurrency + '"]')
+            .prop('selected', true);
+
+          $('span.bidCurrency').each(function() {
+            $(this).text(defaultBidCurrency);
+            });
+
+          $('select.buyerCurrency').trigger('change');
+        });
     });
   </script>
   </head>
@@ -65,14 +84,29 @@
               <label class="col-form-label">Request Name*</label>
               <input type="text" class="form-control" id="requestName" name="requestName" required>
             </div>
+            <% if(suppliers != null) { if(suppliers.length == 1) { %>
             <div class="form-group">
               <label class="col-form-label">Supplier Company</label>
-              <input type="text" class="form-control" name="supplierName" value="<%= supplier.companyName %>" disabled>
+              <input type="text" class="form-control" name="supplierName" value="<%= supplier[0].companyName %>" disabled>
             </div>
             <div class="form-group">
               <label class="col-form-label">Supplier's E-mail Address*</label>
-              <input type="email" class="form-control" name="supplierEmail" value="<%= supplier.emailAddress %>" disabled>
+              <input type="email" class="form-control" name="supplierEmail" value="<%= supplier[0].emailAddress %>" disabled>
             </div>
+            <% } else if(suppliers.length > 1) { %>
+            <p class='term'>
+              This Bid Request is directed to multiple suppliers.<br>For this, when submitting the bid, separate bids will be created for each Supplier and the corresponding products, with the prices accordingly converted to the matching currencies.
+            </p>
+            <p class='term'>
+              The Suppliers are:
+            </p>
+            <% let j = 0; for(supplier of suppliers) { j++; %>
+            <div class="form-group">
+              <label class="col-form-label">Supplier data:</label>
+              <strong><%= j %> - </strong><input type="text" class="form-control" value="Name: <%= supplier.companyName %>, e-mail: <%= supplier.emailAddress %>" disabled>
+            </div>
+            <% } %>
+            <% } } %>
             <div class="form-group">
               <label class="col-form-label">Buyer Organization</label>
               <input type="text" class="form-control" name="buyerName" value="<%= buyer.organizationName %>" disabled>
@@ -125,14 +159,14 @@
             </div>
             <div class="form-group">
               <label class="col-form-label">Your currency*:</label>
-              <select class="form-control buyerCurrency" index="0" ></select>
+              <select class="form-control buyerCurrency" index="-1" ></select>
             </div>
             <p>
               You can either select products from drop-down or search for them via Autocomplete (please enter at least 3 characters).
             </p>
             <div class="form-group">
               <label class="col-form-label">Available products:</label>
-              <select index="0" supplierId="" class="form-control productsList" name="productsList">
+              <select index="-1" supplierId="" class="form-control productsList" name="productsList">
               <% if(products != null) { %>
                 <option></option>
                 <% for(product of products) { %>
@@ -154,10 +188,10 @@
             <div class="form-group">
               <label class="col-form-label">Products / Services Requested*</label>
               <span class='littleNote form-control'>
-                You can also request products that are not in the list of the supplier.
+                You can also request products that are not in the list of the supplier(s). They will then negotiate with you.
               </span>
               <div class="input-group">
-                <input type="text" required class="form-control prodInput" supplierId="<%= supplier._id %>" placeholder="Add Product/Service*" id="prodServiceInput">
+                <input type="text" required class="form-control prodInput" supplierId="" placeholder="Add Product/Service*" id="prodServiceInput">
                 <div class="input-group-append">
                   <button class="btn btn-outline-secondary prodButton" type="button" disabled MAX="<%= MAX_PROD %>" id="addProdService">Add</button>
                 </div>
@@ -172,7 +206,7 @@
               <input class="form-control upload productimageupload" type="file" id="productImage" name="products" single>
               <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload Product Image" />                    
             </div>
-              <ul class="list-group" MAX="<%= MAX_PROD %>" suppCurrency="<%= supplier.currency %>" id="prodServices">
+              <ul class="list-group" MAX="<%= MAX_PROD %>" id="prodServices">
               </ul>
               <p class='term'>
                 You have a number of <span class='productsCount'>0</span> products.
@@ -196,29 +230,15 @@
             <div class="form-group">
               <label class=" col-form-label">Your total price:</label>
               <span class="form-control hid">
-                <span index="0" class="bidPrice" id="price" name="buyerPrice">0</span>
-                <span index="0" class="bidCurrency" id="currency" name="buyerCurrency"></span>
-              </span>
-            </div>
-            <div class="form-group">
-              <label class="col-form-label">Supplier's equivalent total price:</label>
-              <span class="form-control hid">
-                <span id="supplierPrice" name="supplierPrice">0</span>
-                <span index="0" class="suppCurrency" id="supplierCurrency" name="supplierCurrency"><%= supplier.currency %></span>
+                <span index="-1" class="bidPrice" id="price" name="buyerPrice">0</span>
+                <span index="-1" class="bidCurrency" id="currency" name="buyerCurrency"></span>
               </span>
             </div>
             <div class="form-group">
               <label class="col-form-label">Your price for selected product:</label>
               <span class="form-control hid">
                 <span id="buyerPriceUnit">0</span>
-                <span index="0" class="bidCurrency" id="buyerCurrencyUnit"></span>
-              </span>
-            </div>
-            <div class="form-group">
-              <label class="col-form-label">Supplier's price for selected product:</label>
-              <span class="form-control hid">
-                <span id="supplierPriceUnit">0</span>
-                <span index="0" class="suppCurrency" id="supplierCurrencyUnit"><%= supplier.currency %></span>
+                <span index="-1" class="bidCurrency" id="buyerCurrencyUnit"></span>
               </span>
             </div>
              <div class="form-group">
@@ -245,7 +265,6 @@
             </div>
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <input type="hidden" name="buyer" value="<%= buyer._id %>">
-            <input type="hidden" name="supplier" value="<%= supplier._id %>">
             <script type="text/javascript">
               function limitStatus(e) {
                   var ASCIICode = (e.which) ? e.which : e.keyCode;
@@ -268,7 +287,7 @@
                 { name: 'amount', label: 'Amount', formatter: amountFormatter, align: 'center', search: true, template: 'number', width: 70},
                 { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, search: true, width: 90},            
                 { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
-                 { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
+                { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
               ];
 
               initGrid(colModel, data, "#grid"+index, '#prodPager'+index, "name", 'Products List', 1000);
@@ -315,166 +334,8 @@
               $('#massRemove'+index).on('click', function() {
                 removeAllItems('');
               });
-
-              $('button[id="addProdService'+index+'"]').on('click', function() {
-                var id = getId($(this).attr('id'));
-                var elem = $("#prodServices");
-                var MAX = parseInt($(this).attr('MAX'));
-
-                if(elem.find('li').length >= MAX) {
-                    Swal.fire({
-                      icon: 'error',
-                      title: 'Error!',
-                      text: 'You have reached the limit of ' + MAX + ' products to request from the supplier.'
-                    });
-
-                    return false;
-                }                      
-
-                $('#status').trigger('change');                      
-                var amount = $('#amount');
-                if(!amount.val() || amount.val() < 1 || !(Number.isInteger(parseFloat(amount.val())))) {
-                  Swal.fire({
-                    icon: 'warning',
-                    title: 'Attention',                          
-                    text: 'Please select a valid amount of products first.'
-                  });
-
-                  return false;
-                }
-
-                var input = $("#prodServiceInput");
-                if(!input.attr('price'))
-                  input.attr('price', 1);
-                //var req = input.val().length;// && $('#price').val().length && $('#currency').val().length;
-
-                if(input.val() && input.val().length) {
-                  input.removeClass('errorField');
-                  var prodVal = input.val();
-                  var isPresent = false;
-
-                  elem.find('.product').each(function() {
-                    if(prodVal == $(this).text()) {
-                      Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: 'You have already added ' + prodVal + ' to the list. Please refine your selection.'
-                      });
-
-                      isPresent = true;
-                      return false;
-                    }
-                  });
-
-                  if(isPresent) {
-                    return false;
-                  }
-
-                  var amountVal = amount.val();
-                  var currencyVal = $('#currency').text();
-                  var priceVal = input.attr('price');
-                  var priceUnit = parseFloat(priceVal? priceVal : 1).toFixed(2);
-                  var addedPrice = parseInt(amountVal? amountVal : 1) * priceUnit;
-                  var buyerPriceUnit = $('#buyerPriceUnit'), buyerPriceCurr = $('#buyerPriceCurrency');
-                  var buyerCurrSpan = $('span.bidCurrency[index="'+'"]').first();
-                  buyerPriceUnit.text(parseFloat(addedPrice).toFixed(2));
-                  buyerPriceCurr.text(buyerCurrSpan.text());
-                  var supplierCurrency = $('#supplierCurrency').text();
-                  var price = parseFloat($('#price').text()? $('#price').text() : 0) + parseFloat(addedPrice);
-                  var bigPrice = parseFloat(price).toFixed(2);
-                  $('#price').text(bigPrice);
-
-                  var imageInput = $('input.productimageupload[id="productImage'+'"]');
-                  var imagePath = input.attr('productImage')?
-                    '../' + input.attr('productImage').substring(7) 
-                    : imageInput.attr('filePath');                        
-
-                  if(elem.find('li').length) {
-                    elem.find('li').attr('totalPrice', bigPrice);
-                  } else {
-                    elem.append(`<li class='list-group-item' style='color: brown'><span class='cnt'>#</span><span class='product0'>Name</span><span class='buttonsWrapper'>Buttons</span><span class='imageWrapper'>Images</span><span class='priceWrapper'>Total</span><span class='amountWrapper'>Count</span>
-<span class='basicPriceWrapper'>Price</span></span></li>`);
-                  }
-
-                  var lis = elem.find('li').length;
-                  var divId = $('#jqDiv');
-
-                  elem.append("<li class='list-group-item' price='" 
-                                + addedPrice + "' maxAmount='" + '<%= product.amount %>'
-                                + "' totalPrice='" + bigPrice + "' amount='" + amountVal + "'>" 
-                                + `<span class='cnt'>${lis}</span><span class='product'>${prodVal}</span>
-<span class='buttonsWrapper'><span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span></span>
-<span class='imageWrapper'><span class='productImage' title='Image of Product'>` + (imagePath && imagePath.length? `<img src="${imagePath}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '') +  `</span><span class='uploadImage'>Upload Image</span></span>
-<span class='priceWrapper'><span class='totalPrice'>${parseFloat(addedPrice).toFixed(2)}</span> ${currencyVal}</span>
-<span class='amountWrapper'><span class='amount'>${amountVal}</span> items</span>
-<span class='basicPriceWrapper'><span class='price'>${parseFloat(priceVal).toFixed(2)}</span> <span class='currency'>${currencyVal}</span></span>
-</li>`);
-
-                    imageInput
-                      .attr('filePath', null)
-                      .attr('value', '');
-
-                    var gridId = $('#grid');
-                    var src = imagePath && imagePath.length? imagePath : null;
-
-                    var data = {
-                              id: lis,
-                              name: prodVal,
-                              price: priceVal + ' ' + currencyVal,
-                              hiddenPrice: priceVal,
-                              hiddenTotalPrice: addedPrice,
-                              hiddenCurrency: currencyVal,
-                              productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '',
-                              amount: parseInt(amountVal),
-                              totalPrice: addedPrice + ' ' + currencyVal
-                    };
-
-                    gridId.jqGrid('addRowData', lis, data, 'last');
-                    var table = divId.find('table').eq(1);//Last
-                    var tr = table.find('tbody tr').eq(lis);
-                    tr.attr('price', addedPrice);
-                    tr.attr('totalPrice', bigPrice);
-                    tr.attr('amount', amountVal);
-                    tr.attr('maxAmount', '<%= product.amount %>');
-
-                    var counter = elem.parent('div').find('span.productsCount');
-                    var newValue = 1 + parseInt(counter.text()? counter.text() : 0);
-                    var totalAmount = $('#totalAmount').val()? parseInt($('#totalAmount').val()) : 0;
-                    counter.text(newValue);
-                    $('#totalAmount').val(totalAmount + parseInt(amountVal));                         
-
-                    bindHandleProduct(elem.find('.rem').last(), input, false, id, true, false);
-                    bindHandleProduct(elem.find('.inc').last(), input, false, id, false, true);
-                    bindHandleProduct(elem.find('.dec').last(), input, false, id, false, false);                        
-                    delegateUpload(elem.find('.uploadImage').last());
-
-                    bindHandleProduct(gridId.find('.rem').last(), input, false, id, true, false);
-                    bindHandleProduct(gridId.find('.inc').last(), input, false, id, false, true);
-                    bindHandleProduct(gridId.find('.dec').last(), input, false, id, false, false);                        
-                    delegateUpload(gridId.find('.uploadImage').last());
-
-                    var suppPriceUnit = fx.convert(parseFloat(addedPrice), {from: buyerCurrSpan.text(), to: '<%= supplier.currency %>'});
-
-                    $('#supplierPriceUnit').text(parseFloat(suppPriceUnit).toFixed(2));
-                    var supp = fx.convert(parseFloat(bigPrice), {from: buyerCurrSpan.text(), to: '<%= supplier.currency %>'});
-                    $('#supplierPrice').text(parseFloat(supp).toFixed(2));
-                    input.val('').attr('productImage', null);
-                    amount.val(0);
-                    amount.val('');
-                  } else {
-                      Swal.fire({
-                        icon: 'warning',
-                        title: 'Attention!',
-                        text: 'Please enter valid product data (name, amount).'
-                      });
-
-                      input.addClass('errorField');
-                      //$('#prodServiceInput,#price,#currency').addClass('errorField');
-                  }
-
-                $(this).prop('disabled', true);
-                });
-
+              
+              bindAddBid($('button[id="addProdService"]'), null);
             </script>
           </div>
           <div class="modal-footer">

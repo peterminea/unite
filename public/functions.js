@@ -536,10 +536,181 @@ function checkName(arr, name) {
   return false;
 }
 
+
 function getId(val) {
-  return !val ? null :
-    val.indexOf("_") != -1? val.substr(val.indexOf("_") + 1) : val;
+  return !val ? '' :
+    val.indexOf("_") != -1? val.substr(val.indexOf("_") + 1) : '';
 }
+
+
+function bindAddBid(obj, suppCurr) {
+  obj.on('click', function() {
+    var id = '_' + getId($(this).attr('id'));
+    if(id.length == 1)
+      id = '';
+
+    var elem = $("#prodServices"+id);
+    var amount = $('#amount'+id);
+    var input = $("#prodServiceInput"+id);
+
+    var MAX = parseInt($(this).attr('MAX'));
+
+    if(elem.find('li').length >= MAX) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error!',
+          text: 'You have reached the limit of ' + MAX + ' products to request from the supplier.'
+        });
+
+        return false;
+    }
+
+    $('#status'+id).trigger('change');                      
+
+    if(!amount.val() || amount.val() < 1 || !(Number.isInteger(parseFloat(amount.val())))) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Attention',                          
+        text: 'Please select a valid amount of products first.'
+      });
+
+      return false;
+    }
+    if(!input.attr('price'))
+      input.attr('price', 1);
+    //var req = input.val().length;// && $('#price').val().length && $('#currency').val().length;
+
+    if(input.val() && input.val().length) {
+      input.removeClass('errorField');
+      var prodVal = input.val();
+      var isPresent = false;
+
+      elem.find('.product').each(function() {
+        if(prodVal == $(this).text()) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'You have already added ' + prodVal + ' to the list. Please refine your selection.'
+          });
+
+          isPresent = true;
+          return false;
+        }
+      });
+
+      if(isPresent) {
+        return false;
+      }
+
+      var amountVal = amount.val();
+      var currencyVal = $('#currency'+id).text();
+      var priceVal = input.attr('price');
+      var priceUnit = parseFloat(priceVal? priceVal : 1).toFixed(2);
+      var addedPrice = parseInt(amountVal? amountVal : 1) * priceUnit;
+      var buyerPriceUnit = $('#buyerPriceUnit'+id), buyerPriceCurr = $('#buyerPriceCurrency'+id);
+      var buyerCurrSpan = $('span.bidCurrency[index="'+ (id.length? id : '-1') +'"]').first();
+      buyerPriceUnit.text(parseFloat(addedPrice).toFixed(2));
+      buyerPriceCurr.text(buyerCurrSpan.text());
+      var supplierCurrency = $('#supplierCurrency'+id).text();
+      var price = parseFloat($('#price'+id).text()? $('#price'+id).text() : 0) + parseFloat(addedPrice);
+      var bigPrice = parseFloat(price).toFixed(2);
+      $('#price'+id).text(bigPrice);
+
+      var imageInput = $('input.productimageupload[id="productImage'+id+'"]');
+      var imagePath = input.attr('productImage')?
+        '../' + input.attr('productImage').substring(7) 
+        : imageInput.attr('filePath');                        
+
+      if(elem.find('li').length) {
+        elem.find('li').attr('totalPrice', bigPrice);
+      } else {
+        elem.append(`<li class='list-group-item' style='color: brown'><span class='cnt'>#</span><span class='product0'>Name</span><span class='buttonsWrapper'>Buttons</span><span class='imageWrapper'>Images</span><span class='priceWrapper'>Total</span><span class='amountWrapper'>Count</span>
+<span class='basicPriceWrapper'>Price</span></span></li>`);
+      }
+
+      var lis = elem.find('li').length;
+      var divId = $('#jqDiv'+id);
+
+      elem.append("<li class='list-group-item' price='" 
+                    + addedPrice + "' maxAmount='" + (input.attr('maxAmount')? input.attr('maxAmount') : 2*amountVal)
+                    + "' totalPrice='" + bigPrice + "' amount='" + amountVal + "'>" 
+                    + `<span class='cnt'>${lis}</span><span class='product'>${prodVal}</span>
+<span class='buttonsWrapper'><span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span></span>
+<span class='imageWrapper'><span class='productImage' title='Image of Product'>` + (imagePath && imagePath.length? `<img src="${imagePath}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '') +  `</span><span class='uploadImage'>Upload Image</span></span>
+<span class='priceWrapper'><span class='totalPrice'>${parseFloat(addedPrice).toFixed(2)}</span> ${currencyVal}</span>
+<span class='amountWrapper'><span class='amount'>${amountVal}</span> items</span>
+<span class='basicPriceWrapper'><span class='price'>${parseFloat(priceVal).toFixed(2)}</span> <span class='currency'>${currencyVal}</span></span>
+</li>`);
+
+        imageInput
+          .attr('filePath', null)
+          .attr('value', '');
+
+        var gridId = $('#grid'+id);
+        var src = imagePath && imagePath.length? imagePath : null;
+
+        var data = {
+                  id: lis,
+                  name: prodVal,
+                  price: priceVal + ' ' + currencyVal,
+                  hiddenPrice: priceVal,
+                  hiddenTotalPrice: addedPrice,
+                  hiddenCurrency: currencyVal,
+                  productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '',
+                  amount: parseInt(amountVal),
+                  totalPrice: addedPrice + ' ' + currencyVal
+        };
+
+        gridId.jqGrid('addRowData', lis, data, 'last');
+        var table = divId.find('table').eq(1);//Last
+        var tr = table.find('tbody tr').eq(lis);
+        tr.attr('price', addedPrice);
+        tr.attr('totalPrice', bigPrice);
+        tr.attr('amount', amountVal);                          
+        tr.attr('maxAmount', (input.attr('maxAmount')? input.attr('maxAmount') : 2*amountVal));
+
+        var counter = elem.parent('div').find('span.productsCount');
+        var newValue = 1 + parseInt(counter.text()? counter.text() : 0);
+        var totalAmount = $('#totalAmount'+id).val()? parseInt($('#totalAmount'+id).val()) : 0;
+        counter.text(newValue);
+        $('#totalAmount'+id).val(totalAmount + parseInt(amountVal));
+        var isNewBid = (id.length > 0);
+
+        bindHandleProduct(elem.find('.rem').last(), input, isNewBid, id, true, false);
+        bindHandleProduct(elem.find('.inc').last(), input, isNewBid, id, false, true);
+        bindHandleProduct(elem.find('.dec').last(), input, isNewBid, id, false, false);                        
+        delegateUpload(elem.find('.uploadImage').last());
+
+        bindHandleProduct(gridId.find('.rem').last(), input, isNewBid, id, true, false);
+        bindHandleProduct(gridId.find('.inc').last(), input, isNewBid, id, false, true);
+        bindHandleProduct(gridId.find('.dec').last(), input, isNewBid, id, false, false);                        
+        delegateUpload(gridId.find('.uploadImage').last());
+
+        if(isNewBid) {                        
+          var suppPriceUnit = fx.convert(parseFloat(addedPrice), {from: buyerCurrSpan.text(), to: suppCurr});                          
+          $('#supplierPriceUnit'+id).text(parseFloat(suppPriceUnit).toFixed(2));
+          var supp = fx.convert(parseFloat(bigPrice), {from: buyerCurrSpan.text(), to: suppCurr});
+          $('#supplierPrice'+id).text(parseFloat(supp).toFixed(2));
+        }
+
+        input.val('').attr('productImage', null);
+        amount.val(0);
+        amount.val('');
+      } else {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Attention!',
+            text: 'Please enter valid product data (name, amount).'
+          });
+
+          input.addClass('errorField');
+          //$('#prodServiceInput,#price,#currency').addClass('errorField');
+      }
+
+    $(this).prop('disabled', true);
+  });
+}
+
 
 function initBaseRates(fx, elem) {
   if (typeof fx == undefined) 
@@ -731,7 +902,9 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
       $("#totalSupplyPrice").text(totalPrice);
       prodServiceInput.trigger("change");
     } else {
-      var span = $('span.bidCurrency[index="' + getId(id) + '"]').first();
+      var id2 = getId(id);
+      
+      var span = $('span.bidCurrency[index="' + (id.length? id : '-1') + '"]').first();
       $("#buyerPriceUnit" + id).text(parseFloat(localPrice).toFixed(2));
       var suppUnitVal = fx.convert(localPrice, {
         from: span.text(),
@@ -812,13 +985,13 @@ function addition(
         " to the list. Please refine your selection."
     });
   } else {
-    var id = fromBuyer ? getId(elem.attr("id")) : null;
+    var id = fromBuyer ? '_' + getId(elem.attr("id")) : '';
     var addedPrice = parseFloat(priceVal * amountVal).toFixed(2);
-    var priceInput = fromBuyer ? $("#price_" + id) : $("#totalSupplyPrice");
+    var priceInput = fromBuyer ? $("#price" + id) : $("#totalSupplyPrice");
     var pageCurrency = fromBuyer
-      ? $("#currency_" + id).text()
+      ? $("#currency" + id).text()
       : $('input[name="currency"]').val();
-    var buyerInput = fromBuyer ? $("#prodServiceInput_" + id) : null;
+    var buyerInput = fromBuyer ? $("#prodServiceInput" + id) : null;
 
     if (!fromBuyer) {
       $("#hiddenTotalPrice").val(
@@ -881,13 +1054,13 @@ function addition(
     );
 
     var totalAmountInput = fromBuyer
-      ? $("#totalAmount_" + id)
+      ? $("#totalAmount" + id)
       : $("#totalSupplyAmount");
     totalAmountInput.val(
       parseInt(totalAmountInput.val()) + parseInt(amountVal)
     );
-    var gridId = fromBuyer ? $("#grid_" + id) : $("#grid");
-    var divId = fromBuyer ? $("#jqDiv_" + id) : $("#jqDiv");
+    var gridId = fromBuyer ? $("#grid" + id) : $("#grid");
+    var divId = fromBuyer ? $("#jqDiv" + id) : $("#jqDiv");
     var src = imagePath && imagePath.length ? imagePath : null;
 
     var data = {
@@ -922,14 +1095,14 @@ function addition(
     if (!fromBuyer) {
       $("#totalSupplyPrice").text(bigPrice + " " + currencyVal);
     } else {
-      $("#price_" + id).text(parseFloat(bigPrice).toFixed(2));
-      var supp = fx.convert(parseFloat($("#price_" + id).text()), {
-        from: $('span.bidCurrency[index="' + id + '"]')
+      $("#price" + id).text(parseFloat(bigPrice).toFixed(2));
+      var supp = fx.convert(parseFloat($("#price" + id).text()), {
+        from: $('span.bidCurrency[index="' + getId(id) + '"]')
           .first()
           .text(),
         to: elem.attr("suppCurrency")
       });
-      $("#supplierPrice_" + id).text(supp);
+      $("#supplierPrice" + id).text(supp);
       elem.find("li").attr("totalPrice", bigPrice);
     }
 
@@ -1421,7 +1594,10 @@ function delegateUpload(obj) {
         .parent("span")
         .parent("li");
     var index;
-    var id = getId(obj.attr("id"));
+    
+    var id = '_' + getId(obj.attr("id"));
+    if(id.length == 1)
+      id = '';
 
     if (li.length) {
       //List
@@ -1431,7 +1607,7 @@ function delegateUpload(obj) {
       uploadInput = div.find('input[id^="productImage"]');
     } else {
       //jqGrid
-      var divId = id ? $("#jqDiv_" + id) : $("#jqDiv");
+      var divId = id.length? $("#jqDiv" + id) : $("#jqDiv");
 
       var tr = $(this).closest("tr"); //parent('span').parent('td').parent('tr');
       var table = tr.closest("table"); //parent('tbody').parent('table');
@@ -1521,10 +1697,11 @@ function initGrid(
             removeFile(this);
           });
       } else if (table.find(".rem").length) {
-        var id = getId(divId.attr("id"));
+        var id = '_' + getId(divId.attr("id"));
+        
         var prod = $("#prodServiceInput").length
           ? $("#prodServiceInput")
-          : $("#prodServiceInput_" + id);
+          : $("#prodServiceInput" + id);
         bindHandleProduct(table.find(".rem"), prod, false, null, true, false);
         bindHandleProduct(table.find(".inc"), prod, false, null, false, true);
         bindHandleProduct(table.find(".dec"), prod, false, null, false, false);
@@ -2056,6 +2233,247 @@ $(document).ready(function() {
   if ($("#match").length) {
     $("#match").css({ color: "red" });
   }
+  
+  
+  if($('button.placeBid').length) {//Placing a bid from Buyer Index or PlaceBid.
+    
+      $('button.placeBid').on('click', function() {
+        var id = '_' + $(this).attr('index');
+        if(id.charAt(1) == '-')
+            id = '';
+        
+        var elem = $("#prodServices"+id);
+        
+        if(!(elem.find('li')) || !(elem.find('li').length)) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            //timer: 2000,
+            text: 'You must choose at least one product from your Supplier\'s offer before placing the Order.'
+          });
+          
+          return false;
+        }
+       
+        var prodInput = $("#hiddenProdServicesList"+id);
+        var amountInput = $("#amountList"+id);
+        var priceInput = $("#priceList"+id), priceOrigInput = $("#priceOriginalList"+id);
+        var prodImageInput = $("#productImagesList"+id);
+        var arr = [], arr1 = [], arr2 = [], arr3 = [], arr4 = [];
+        var totalPriceOriginal = 0, totalPriceConverted = 0;
+        
+        elem.find('li').each(function() {
+          arr.push($(this).find('.product').text());
+          arr1.push($(this).attr('amount'));
+          var originalPrice = parseFloat($(this).attr('bigPrice')).toFixed(2);
+          var val = fx.convert(originalPrice, {from: $(this).find('.currency').text(), to: elem.attr('suppCurrency')});
+          arr2.push(val);
+          arr4.push(originalPrice);
+          totalPriceOriginal += originalPrice;
+          totalPriceConverted += parseFloat(val).toFixed(2);
+          var img = $(this).find('.productImage img');
+          var src = img && img.length? 'public/' + img.attr('src').substring(3) : '';
+          arr3.push(src);
+        });
+        
+        prodInput.val(arr);
+        amountInput.val(arr1);
+        priceInput.val(arr2);
+        prodImageInput.val(arr3);
+        priceOrigInput.val(arr4);
+        
+        $('#price'+id).text(totalPriceOriginal);
+        $('#supplierPrice'+id).text(totalPriceConverted);
+      });
+    
+      $('input[id^="prodServiceInput"]').on('change', function() {
+        if($(this).val()) {
+          var id = '_' + getId($(this).attr('id'));
+          if(id.length == 1)
+            id = '';
+          
+          $("#addProdService"+id).prop('disabled', false);
+          var price = $(this).attr('price')? $(this).attr('price') : 1;
+          price *= parseInt($('#amount'+id).val());
+          $('#buyerPriceUnit'+id).text(price);
+          var supplierCurrency = $('#supplierCurrency'+id).text();
+          var suppPrice = fx.convert(price, {from: $('span.bidCurrency[index="'+ (id.length? id : '-1') +'"]').first().text(), to: supplierCurrency
+       });
+          $('#supplierPriceUnit'+id).text(suppPrice);
+        }
+      });
+      
+      $('input[id^="amount"]').inputFilter(function(value) {
+        return /^\d*$/.test(value);
+      });
+
+      $('input[id^="amount"]').on('change', function() {
+        var id = '_' + getId($(this).attr('id'));
+        if(id.length == 1)
+            id = '';
+        
+        var price = $("#prodServiceInput"+id).attr('price')? $("#prodServiceInput"+id).attr('price') : 1;
+        price *= parseInt($(this).val());
+        var maxAmount = $("#prodServiceInput"+id).attr('maxAmount');
+
+        if(maxAmount && $(this).val() > maxAmount) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'You have reached the limit of ' + maxAmount + ' samples of this product. Supplier\'s stock is not enough.'
+          });
+
+          return false;
+        }
+
+        $('#buyerPriceUnit'+id).text(price);
+        var supplierCurrency = $('#supplierCurrency'+id).text();
+        var suppPrice = fx.convert(price, {from: $('span.bidCurrency[index="'+ (id.length? id : '-1') +'"]').first().text(), to: supplierCurrency
+        });
+        $('#supplierPriceUnit'+id).text(suppPrice);
+      });
+
+      $('select.buyerCurrency').on('change', function() {
+        var curr = $(this).val();
+        var id = '_' + $(this).attr('index');
+        if(id.charAt(1) == '-')
+            id = '';
+        
+        var elem = $("#prodServices"+id), grid = $("#grid"+id);
+        elem.attr('buyerCurrency', curr);
+        grid.attr('buyerCurrency', curr);
+        
+        var suppCurrency = elem.attr('suppCurrency');
+        
+        if(curr && curr != suppCurrency) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Warning',
+            timer: 2000,
+            html: 'The currency of your order is different from the Supplier\'s.<br>Yours is ' + curr + ', theirs is ' + suppCurrency  + '.<br>Please note that conversion rates will be applied.'
+          });
+        }
+        
+        var priceInput = $('#price'+id);
+        var oldBidCurrencySpan = $('span.bidCurrency[index="'+ (id.length? id : '-1') +'"]').first();
+        var val = fx.convert(parseFloat(priceInput.text()).toFixed(2), {from: oldBidCurrencySpan.text(), to: curr});
+        priceInput.text(val);
+        $('span.bidCurrency[index="'+ (id.length? id : '-1') +'"]').each(function(i, e) {
+          $(this).text(curr);
+        });
+        
+        var buyerPriceUnit = $('#buyerPriceUnit'+id), buyerPriceCurr = $('#buyerPriceCurrency'+id);
+        if(buyerPriceUnit.text() != null && buyerPriceUnit.text() != '0') {
+          var newPriceUnit = fx.convert(parseFloat(buyerPriceUnit.text()).toFixed(2), {from: buyerPriceCurr.text(), to: curr});
+          buyerPriceUnit.text(newPriceUnit);
+        }
+        
+        buyerPriceCurr.text(curr);
+        
+        if(!elem.find('li') || !elem.find('li').length) {
+          return false;
+        }
+        
+        elem.find('li').each(function() {
+          var addedPrice = $(this).attr('price'), totalPrice = $(this).attr('totalPrice'), shownPrice = $(this).find('.price').text(), theCurr = $(this).find('.currency').text();
+          
+          addedPrice = fx.convert(parseFloat(addedPrice).toFixed(2), {from: theCurr, to: curr});
+          totalPrice = fx.convert(parseFloat(totalPrice).toFixed(2), {from: theCurr, to: curr});
+          shownPrice = fx.convert(parseFloat(shownPrice).toFixed(2), {from: theCurr, to: curr});
+          
+          $(this).attr('price', addedPrice);
+          $(this).attr('totalPrice', totalPrice);
+          $(this).find('.price').text(shownPrice);
+          $(this).find('.currency').text(curr);
+        });
+      });    
+    
+      $('.productsList').on('change', function() {
+        if(!$(this).val() || !$(this).val().length) {
+          return false;
+        }
+        
+        var name = $(this).val();
+        var opt = $(this).find('option:selected');
+        var price = opt.attr('price');
+        var totalPrice = opt.attr('totalPrice');
+        var currency = opt.attr('currency');
+        var maxAmount = opt.attr('maxAmount');
+        var bidCurrency = $('select.buyerCurrency').find('option:selected').val();
+        
+        if(bidCurrency != currency) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Warning',
+            timer: 2000,
+            html: "The currency of your order is different from the Supplier's.<br>Yours is " + bidCurrency + ', theirs is ' + currency  + '.<br>Please note that conversion rates will be applied.'
+          });
+        }
+        
+        var val = fx.convert(parseFloat(price).toFixed(2), {from: currency, to: bidCurrency});
+        var input = $(this).parent('div').next('div').find('.prodInput');
+        input.attr('price', val);
+        input.attr('maxAmount', maxAmount);
+        input.val(name);
+        input.trigger('change');
+      });
+    
+    
+      $('.prodInput').autocomplete({
+        source: function(req, res) {
+          var obj = $(this.element);
+          $('.prov').remove();
+          req.supplierId = obj.attr('supplierId');
+
+          $.ajax({
+            url: "/prodServiceAutocomplete",
+            headers: { "X-CSRF-Token": token },
+            datatype: 'jsonp',
+            type: "POST",
+            data: req,
+            scroll: true,
+            success: function(data) {
+              if(!data || !data.length) {
+                //obj.val('');
+                //obj.next('.prodButton').prop('disabled', true);
+               //return false;
+              }
+
+              res(data);
+              //autocomp(obj, data);
+              var $obj = '<div class="prov"><ul class="autocomp">';
+              for(var i in data) {
+                $obj += '<li id="' + data[i].price + '" amount="' + data[i].amount + '" totalPrice="' + data[i].totalPrice + '" productImage="' + data[i].productImage + '" currency="' + data[i].currency + '">' + data[i].name + '</li>';
+              }
+
+              $obj += '</ul><div>';
+              $($obj)
+                .insertAfter(obj.parent('div'))
+                .find('li')
+                .click(function() {
+                  var id = '_' + getId(obj.attr('id'));
+                  if(id.length == 1)
+                    id = '';
+                
+                  var buyerCurr = $('select.buyerCurrency[index="' + id.length? id : '-1' +'"]').val();
+                  var val = fx.convert(parseFloat($(this).attr('id')).toFixed(2), {from: $(this).attr('currency'), to: buyerCurr});
+                
+                  obj
+                    .attr({'price': val, 'maxAmount': $(this).attr('amount'), 'currency': buyerCurr})
+                    .val($(this).text())
+                    .trigger('change');
+                  $(this).parent('ul').hide();
+              });
+            },
+            error: function(err) {
+              alert(err.message);
+            }
+          });
+        },
+        minLength: 3
+      });    
+  }
+  
 
   if (!$("input.upload").length) return false;
 
@@ -2240,7 +2658,7 @@ $(document).ready(function() {
           var div = fromBuyer ? input.parent("div").next("div") : null;
           var el = fromBuyer ? div.find("ul") : $("#prodServices");
           var productInput = fromBuyer
-            ? div.find('input[id^="prodServiceInput_"]')
+            ? div.find('input[id^="prodServiceInput"]')
             : $("#prodServiceInput");
 
           var MAX = el.attr("MAX"); //parseInt("<%= MAX_PROD %>");

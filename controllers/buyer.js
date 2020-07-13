@@ -286,6 +286,8 @@ exports.postIndex = (req, res) => {
         suppIDs.push(new ObjectId(supplierList[i]));
       }
     
+    var uniqueSupplierIds = suppIDs.filter((v, i, a) => a.indexOf(v) === i);
+    
   // { $in : [1,2,3,4] }
   //Or array
   Buyer.find({ _id: buyerId }).then((buyer) => {
@@ -300,7 +302,7 @@ exports.postIndex = (req, res) => {
         return res.redirect('back');
       }
 
-      Supplier.find({ _id: { $in: suppIDs } }).then((sups) => {
+      Supplier.find({ _id: { $in: uniqueSupplierIds } }).then((sups) => {
         if(!sups) {
           req.flash('error', 'Suppliers for the products not found!');
           return res.redirect('back');
@@ -393,9 +395,14 @@ exports.getPlaceBid = (req, res) => {
 
 exports.postPlaceBid = (req, res) => {
   
-  const BidRequest = new BidRequest({
-    
-  });
+  
+  var suppIds = prel(req.body.supplierIdsList);
+  
+  for(var i in suppIds) {
+    const BidRequest = new BidRequest({
+      
+    });  
+  }  
 }
 
 
