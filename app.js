@@ -1139,22 +1139,51 @@ app.get("/capabilityInputAutocomplete", function(req, res, next) {
   });
 });
 
+const fetch = require('node-fetch');
+let url = "https://www.floatrates.com/daily/eur.json";
+let settings = { method: "Get" };
 
-function traverse_it(obj){
-    for(var prop in obj){
-        if(typeof obj[prop]=='object'){
-            // object
-            traverse_it(obj[prop[i]]);
-        }else{
-            // something else
-            alert('The value of '+prop+' is '+obj[prop]+'.');
-        }
-    }
-}
+fetch(url, settings)
+    .then(res => res.json())
+    .then((json) => {
+        // do something with JSON
+      //console.log(JSON.stringify(json));
+  var currency = JSON.stringify(json);
+  currency = '[' + (currency).split('},').join('}},{') + ']';
+  currency = JSON.parse(currency);
+ 
+  for(var i of currency) {
+    var t = JSON.stringify(i);
+    var obj = JSON.parse(t.substring(7, t.length-1));
+    //console.log(obj);
+  }
+  
+  var fx = {
+    base: process.env.APP_DEFAULT_CURR,
+  }, t, obj = [], str = 'fx.rates = {\n';
+  
+  for(var i in currency) {
+    t = JSON.stringify(currency[i]);
+    obj.push(JSON.parse(t.substring(7, t.length-1)));
+  }
+  
+  obj.sort(function(a, b) {
+      return a.code.localeCompare(b.code);
+    });
+  
+  for(var i in obj) {
+    str += obj[i].code + ': ' + obj[i].rate + (i == obj.length-1? '' : ',\n');
+  } 
+
+  str += '\n}';
+  
+  eval(str);
+  //console.log(fx);  
+  });
 
 
 var db;
-//if (1 == 2)
+if (1 == 2)
   MongoClient.connect(URI, { useUnifiedTopology: true }, (err, client) => {
     if (err) {
       console.error(err.message);
@@ -1183,6 +1212,9 @@ var db;
     
     var unset = { $unset: { products: 1, productsServicesOffered: 1 } };
     var set = { $set: { productList: productList, productDetailsList: productDetailsList } };
+    
+    
+    
     /*
     Industry.find({}).exec().then((inds) => {//Ascending sorting of table contents by name, then resetting its contents based on this new sorting.
       inds.sort(function (a, b) {
@@ -1209,8 +1241,7 @@ var db;
     
     //db.collection('industries').deleteMany( { name : "Agriculture", _id: { $not: { $eq: new ObjectId("5ecfc60ee0558a504f587f78") } } } );
     
-     var rawdata = fs.readFileSync('currencies.json');
-    //console.log(rawdata)
+     var rawdata = fs.readFileSync('currencies.json');    
      let currencies = JSON.parse(rawdata);
      //console.log(currencies);
     

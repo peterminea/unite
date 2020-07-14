@@ -52,8 +52,7 @@ const {
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
 const fetch = require("node-fetch");
-var oxr = require("open-exchange-rates"),
-  fx = require("money"),
+var fx = require("money"),
   initConversions = require("../middleware/exchangeRates");
 
 const statusesJson = {
@@ -68,7 +67,7 @@ const statusesJson = {
 
 exports.getIndex = async (req, res) => {
   if (req.session) {
-    await initConversions(oxr, fx);
+    await initConversions(fx);
     var promise = BidRequest.find({
       buyer: req.session.buyer ? req.session.buyer._id : null
     }).exec();
@@ -124,8 +123,44 @@ exports.getIndex = async (req, res) => {
 };
 
 
+function prepareBidData(req) {
+  var productList = prel(req.body.productList);
+  var amountList = prel(req.body.amountList, false, true);
+  var priceList = prel(req.body.priceList, true, false);
+  var priceOriginalList = prel(req.body.priceOriginalList, true, false);
+  var imagesList = prel(req.body.productImagesList);
+  sortLists(productList, amountList, priceList, imagesList);
+
+  var products = [];
+
+  for (var i in productList) {
+    products.push(
+      "Product name: '" +
+        productList[i] +
+        "', amount: " +
+        (amountList[i]) +
+        ", price: " +
+        (priceList[i]) +
+        " " +
+        req.body.supplierCurrency +
+        (imagesList[i].length? ", image path: " + imagesList[i]  : '') +
+        "."
+    );
+  }
+  
+  return {
+    productList: productList, 
+    amountList: amountList, 
+    priceList: priceList, 
+    priceOriginalList: priceOriginalList, 
+    imagesList: imagesList, 
+    products: products
+  };
+}
+
+
 exports.postIndex = (req, res) => {
-  initConversions(oxr, fx);
+  initConversions(fx);
 
   if (req.body.capabilityInput) {
     //req.term for Autocomplete - We started the search and become able to place a Bid Request.
@@ -168,6 +203,7 @@ exports.postIndex = (req, res) => {
             buyer: req.session.buyer,
             suppliers: suppliers2,
             MAX_PROD: process.env.BID_MAX_PROD,
+            MAX_AMOUNT: process.env.MAX_PROD_PIECES,
             BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
             bidsLength: bids && bids.length ? bids.length : null,
             totalBidsPrice: totalBidsPrice,
@@ -180,30 +216,9 @@ exports.postIndex = (req, res) => {
       });
     });
   } else if (req.body.itemDescription) {
-    //New Bid Request placed
-    var productList = prel(req.body.productList);
-    var amountList = prel(req.body.amountList, false, true);
-    var priceList = prel(req.body.priceList, true, false);
-    var priceOriginalList = prel(req.body.priceOriginalList, true, false);
-    var imagesList = prel(req.body.productImagesList);
-    sortLists(productList, amountList, priceList, imagesList);
-
-    var products = [];
-
-    for (var i in productList) {
-      products.push(
-        "Product name: '" +
-          productList[i] +
-          "', amount: " +
-          (amountList[i]) +
-          ", price: " +
-          (priceList[i]) +
-          " " +
-          req.body.supplierCurrency +
-          (imagesList[i].length? ", image path: " + imagesList[i]  : '') +
-          "."
-      );
-    }
+    //New Bid Request placed,
+    
+    var t = prepareBidData(req);
 
     const bidRequest = new BidRequest({
       requestName: req.body.requestName,
@@ -212,12 +227,12 @@ exports.postIndex = (req, res) => {
       buyerEmail: req.body.buyerEmail,
       supplierEmail: req.body.supplierEmail,
       itemDescription: req.body.itemDescription,
-      productList: productList,
-      amountList: amountList,
-      productImagesList: imagesList,
-      priceList: priceList, //Supplier's currency.
-      priceOriginalList: priceOriginalList,
-      productDetailsList: products,
+      productList: t.productList,
+      amountList: t.amountList,
+      productImagesList: t.imagesList,
+      priceList: t.priceList, //Supplier's currency.
+      priceOriginalList: t.priceOriginalList,
+      productDetailsList: t.products,
       itemDescriptionLong: req.body.itemDescriptionLong,
       itemDescriptionUrl: req.itemDescriptionUrl,
       amount: req.body.amount,
@@ -271,11 +286,9 @@ exports.postIndex = (req, res) => {
       })
       .catch(console.error);
   } else if(req.body.bidProductList) {//Place bid on one or more products (+ 1 or more suppliers) from the Product Catalog grid.
-     var buyerId = req.body.buyerId, productIds = req.body.productList, supplierIds = req.body.supplierList;
-    
+     var buyerId = req.body.buyerId, productIds = req.body.productList, supplierIds = req.body.supplierList;    
       var productList = prel(req.body.productList);
       var supplierList = prel(req.body.supplierList);
-
       var prodIDs = [], suppIDs = [];
 
       for(var i in productList) {
@@ -322,11 +335,17 @@ exports.postIndex = (req, res) => {
           
           var success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
           req.session.flash = [];
+          var isMultiProd = prodIDs.length > 1;
+          var isMultiSupp = uniqueSupplierIds.length > 1;
 
           res.render("buyer/placeBid", {
             successMessage: success,
             errorMessage: error,
+            isMultiProd: isMultiProd,
+            isMultiSupp: isMultiSupp,
+            isMultiBid: isMultiProd || isMultiSupp,
             MAX_PROD: process.env.BID_MAX_PROD,
+            MAX_AMOUNT: process.env.MAX_PROD_PIECES,
             BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
             statuses: statuses,
             statusesJson: JSON.stringify(statusesJson),
@@ -379,6 +398,7 @@ exports.getPlaceBid = (req, res) => {
             successMessage: success,
             errorMessage: error,
             MAX_PROD: process.env.BID_MAX_PROD,
+            MAX_AMOUNT: process.env.MAX_PROD_PIECES,
             BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
             statuses: statuses,
             statusesJson: JSON.stringify(statusesJson),
@@ -393,16 +413,93 @@ exports.getPlaceBid = (req, res) => {
 }
 
 
-exports.postPlaceBid = (req, res) => {
+exports.postPlaceBid = async (req, res) => {
+  //await initConversions(fx);
+  
+  var suppIds = req.body.supplierIdsList? prel(req.body.supplierIdsList) : [];//Multi or not.
+  
+  if(req.body.supplierId) {//Not Multi.
+    suppIds.push(req.body.supplierId)
+  };
+  
+  //Supplier's name, e-mail, currency to be saved as lists in PlaceBid in case of Multi.
+  
+  var t = prepareBidData(req);
+  var names = req.body.supplierNamesList? prel(req.body.supplierNamesList) : null;;
+  var emails = req.body.supplierEmailsList? prel(req.body.supplierEmailsList) : null;
+  var currencies = req.body.supplierCurrenciesList? prel(req.body.supplierCurrenciesList) : null;
   
   
-  var suppIds = prel(req.body.supplierIdsList);
   
   for(var i in suppIds) {
-    const BidRequest = new BidRequest({
+    const bidRequest = new BidRequest({
+      requestName: req.body.requestName,
+      supplierName: req.body.supplierName? req.body.supplierName : names[i],
+      buyerName: req.body.buyerName,
+      buyerEmail: req.body.buyerEmail,
+      supplierEmail: req.body.supplierEmail? req.body.supplierEmail : emails[i],
+      itemDescription: req.body.itemDescription,
+      productList: t.productList,
+      amountList: t.amountList,
+      productImagesList: t.imagesList,
+      priceList: t.priceList,//Supplier's currency.
+      priceOriginalList: t.priceOriginalList,
+      productDetailsList: t.products,
+      itemDescriptionLong: req.body.itemDescriptionLong,
+      itemDescriptionUrl: req.itemDescriptionUrl,
+      amount: req.body.amount,
+      deliveryLocation: req.body.deliveryLocation,
+      deliveryRequirements: req.body.deliveryRequirements,
+      complianceRequirements: req.body.complianceRequirements,
+      complianceRequirementsUrl: req.body.complianceRequirementsUrl,
+      otherRequirements: req.body.otherRequirements,
+      status: req.body.status,
+      buyerPrice: req.body.buyerPrice,
+      supplierPrice: req.body.supplierPrice? req.body.supplierPrice : 1,
+      isCancelled: false,
+      isExpired: false,
+      isExtended: req.body.validityExtensionId? true : false,
+      buyerCurrency: req.body.buyerCurrency,
+      supplierCurrency: req.body.supplierCurrency? req.body.supplierCurrency : currencies[i],
+      validityExtensionId: req.body.validityExtensionId,
+      validityExtension: req.body.validityExtensionId,
+      specialMentions: req.body.specialMentions
+        ? req.body.specialMentions
+        : req.body.buyerName +
+          " has sent a new Order to " +
+          req.body.supplierName? req.body.supplierName : 'Multiple Suppliers' +
+          ", and the Bid price is " +
+          req.body.price +
+          " " +
+          (req.body.supplierCurrency? req.body.supplierCurrency : currencies[i]) +
+          ".",
+      createdAt: req.body.createdAt ? req.body.createdAt : Date.now(),
+      updatedAt: Date.now(),
+      expiryDate:
+        Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION + (req.body.validityExtensionId? process.env.DAYS_BID_EXTENDED * process.env.DAY_DURATION : 0),
+      createdAtFormatted: req.body.createdAt
+        ? normalFormat(req.body.createdAt)
+        : normalFormat(Date.now()),
+      updatedAtFormatted: normalFormat(Date.now()),
+      expiryDateFormatted: customFormat(
+        Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION + (req.body.validityExtensionId? process.env.DAYS_BID_EXTENDED * process.env.DAY_DURATION : 0)
+      ),
+      buyer: req.body.buyer,
+      supplier: suppIds[i]
+    });
+    
+    return bidRequest
+      .save()
+      .then((err, result) => {
+        if(treatError(req, res, err, "buyer/index")) 
+          return false;
+        req.flash("success", "Bid requested successfully!");
       
-    });  
-  }  
+        if(i == suppIds.length-1)
+           return res.redirect("/buyer/index");
+      })
+      .catch(console.error);
+  }
 }
 
 
@@ -505,7 +602,7 @@ exports.getViewBids = (req, res) => {
     }
 
     await sendExpiredBidEmails(req, res, expiredBids);
-    await initConversions(oxr, fx);
+    await initConversions(fx);
     var totalPrice = 0,
       validPrice = 0,
       cancelledPrice = 0,
@@ -1330,4 +1427,4 @@ exports.postProfile = (req, res) => {
   } catch {
     //return res.redirect('/buyer/profile');
   }
-};
+}

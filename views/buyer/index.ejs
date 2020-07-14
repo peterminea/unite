@@ -517,7 +517,7 @@
                   </p>
                   <div class="form-group">
                     <label class="col-form-label">Supplier's products:</label>
-                    <select index="<%= i %>" supplierId="<%= supplier._id %>" class="form-control productsList" name="productsList"></select>
+                    <select index="<%= i %>" supplierId="<%= supplier._id %>" class="form-control productsList" name="productsList" id="productsList_<%= i %>"></select>
                   </div>
                   <div>
                     <p class='term'>
@@ -536,7 +536,7 @@
                       You can also request products that are not in the list of the supplier.
                     </span>
                     <div class="input-group">
-                      <input type="text" required class="form-control prodInput" supplierId="<%= supplier._id %>" placeholder="Add Product/Service*" id="prodServiceInput_<%= i %>">
+                      <input type="text" required class="form-control prodInput" defaultMaxAmount="<%= MAX_AMOUNT %>" placeholder="Add Product/Service*" id="prodServiceInput_<%= i %>">
                       <div class="input-group-append">
                         <button class="btn btn-outline-secondary prodButton" type="button" disabled MAX="<%= MAX_PROD %>" id="addProdService_<%= i %>">Add</button>
                       </div>
@@ -572,25 +572,11 @@
                     <label>Total number of items (Overall Amount):</label>
                     <input class="form-control" type="number" disabled id="totalAmount_<%= i %>" name="amount" value="0">
                   </div>
-                  <div class="form-group">
-                    <label class=" col-form-label">Your total price:</label>
-                    <span class="form-control hid">
-                      <span index="<%= i %>" class="bidPrice" id="price_<%= i %>" name="buyerPrice">0</span>
-                      <span index="<%= i %>" class="bidCurrency" id="currency_<%= i %>" name="buyerCurrency"></span>
-                    </span>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Supplier's equivalent total price:</label>
-                    <span class="form-control hid">
-                      <span id="supplierPrice_<%= i %>" name="supplierPrice">0</span>
-                      <span index="<%= i %>" class="suppCurrency" id="supplierCurrency_<%= i %>" name="supplierCurrency"><%= supplier.currency %></span>
-                    </span>
-                  </div>
-                  <div class="form-group">
+                   <div class="form-group">
                     <label class="col-form-label">Your price for selected product:</label>
                     <span class="form-control hid">
-                      <span id="buyerPriceUnit_<%= i %>">0</span>
-                      <span index="<%= i %>" class="bidCurrency" id="buyerCurrencyUnit_<%= i %>"></span>
+                      <span id="buyerPriceUnit">0</span>
+                      <span index="-1" class="bidCurrency" id="buyerCurrencyUnit"></span>
                     </span>
                   </div>
                   <div class="form-group">
@@ -598,6 +584,20 @@
                     <span class="form-control hid">
                       <span id="supplierPriceUnit_<%= i %>">0</span>
                       <span index="<%= i %>" class="suppCurrency" id="supplierCurrencyUnit_<%= i %>"><%= supplier.currency %></span>
+                    </span>
+                  </div>
+                  <div class="form-group">
+                    <label class=" col-form-label">Your total price:</label>
+                    <span class="form-control hid">
+                      <span index="-1" class="bidPrice" id="price" name="buyerPrice">0</span>
+                      <span index="-1" class="bidCurrency" id="currency" name="buyerCurrency"></span>
+                    </span>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Supplier's equivalent total price:</label>
+                    <span class="form-control hid">
+                      <span id="supplierPrice_<%= i %>" name="supplierPrice">0</span>
+                      <span index="<%= i %>" class="suppCurrency" id="supplierCurrency_<%= i %>" name="supplierCurrency"><%= supplier.currency %></span>
                     </span>
                   </div>
                    <div class="form-group">
