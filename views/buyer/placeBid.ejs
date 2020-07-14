@@ -73,7 +73,7 @@
       </div>
       
       <div class="smooth-shadow profile-form">
-        <form method="POST">
+        <form id="bidForm" method="POST">
           <div class="modal-body">
             <div class="form-group">
               <label class="text-muted form-text">
@@ -93,6 +93,7 @@
               <label class="col-form-label">Supplier's E-mail Address*</label>
               <input type="email" class="form-control" name="supplierEmail" value="<%= supplier[0].emailAddress %>" disabled>
             </div>
+            <input type="hidden" name="supplierId" value="<%= supplier[0]._id %>">
             <% } else if(suppliers.length > 1) { %>
             <p class='term'>
               This Bid Request is directed to multiple suppliers.<br>For this, when submitting the bid, separate bids will be created for each Supplier and the corresponding products, with the prices accordingly converted to the matching currencies.
@@ -166,11 +167,11 @@
             </p>
             <div class="form-group">
               <label class="col-form-label">Available products:</label>
-              <select index="-1" supplierId="" class="form-control productsList" name="productsList">
+              <select index="-1" class="form-control productsList" name="productsList">
               <% if(products != null) { %>
                 <option></option>
                 <% for(product of products) { %>
-                <option style="word-wrap: break-word; width: 250px" totalPrice="<%= product.totalPrice %>" price="<%= product.price %>" maxAmount="<%= product.amount %>" productImage="<%= product.productImage %>" currency="<%= product.currency %>" title="<%= product.productName %>" value="<%= product.productName %>"><%= product.productName %></option>
+                <option style="word-wrap: break-word; width: 250px" supplierId="<%= product.supplier %>" totalPrice="<%= product.totalPrice %>" price="<%= product.price %>" maxAmount="<%= product.amount %>" productImage="<%= product.productImage %>" currency="<%= product.currency %>" title="<%= product.productName %>" value="<%= product.productName %>"><%= product.productName %></option>
               <% } } %>
               </select>
             </div>
@@ -191,7 +192,7 @@
                 You can also request products that are not in the list of the supplier(s). They will then negotiate with you.
               </span>
               <div class="input-group">
-                <input type="text" required class="form-control prodInput" supplierId="" placeholder="Add Product/Service*" id="prodServiceInput">
+                <input type="text" required defaultMaxAmount="<%= MAX_AMOUNT %>" class="form-control prodInput" <% if(products.length == 1) { %> "maxAmount="<%= products[0].amount %>" "supplierId="<%= supplier._id %>"<% } else { %> <% } %> placeholder="Add Product/Service*" id="prodServiceInput">
                 <div class="input-group-append">
                   <button class="btn btn-outline-secondary prodButton" type="button" disabled MAX="<%= MAX_PROD %>" id="addProdService">Add</button>
                 </div>
@@ -216,6 +217,9 @@
               <input type="hidden" required id="priceList" name="priceList" value="">
               <input type="hidden" required id="priceOriginalList" name="priceOriginalList" value="">
               <input type="hidden" required id="productImagesList>" name="productImagesList" value="">
+              <% if(isMulti == true) { %>
+              <input type="hidden" id="supplierIdsList" name="supplierIdsList">
+              <% } %>
             </div>
             <div id="jqDiv" class="form-group">
               <table id="grid">
@@ -228,19 +232,49 @@
               <input class="form-control" type="number" disabled id="totalAmount" name="amount" value="0">
             </div>
             <div class="form-group">
-              <label class=" col-form-label">Your total price:</label>
-              <span class="form-control hid">
-                <span index="-1" class="bidPrice" id="price" name="buyerPrice">0</span>
-                <span index="-1" class="bidCurrency" id="currency" name="buyerCurrency"></span>
-              </span>
-            </div>
-            <div class="form-group">
               <label class="col-form-label">Your price for selected product:</label>
               <span class="form-control hid">
                 <span id="buyerPriceUnit">0</span>
                 <span index="-1" class="bidCurrency" id="buyerCurrencyUnit"></span>
               </span>
             </div>
+             <% if(products.length == 1) { %>
+            <div class="form-group">
+              <label class="col-form-label">Supplier's price for selected product:</label>
+              <span class="form-control hid">
+                <span id="supplierPriceUnit">0</span>
+                <span index="<%= i %>" class="suppCurrency" id="supplierCurrencyUnit"><%= suppliers[0].currency %></span>
+              </span>
+            </div>
+            <% } else { %>
+            <div class="form-group">
+              <p>
+                This Bid is intended to be sent to multiple suppliers. The equivalent Supplier prices will be decided separately for each one of them, after you submit the bid.
+              </p>
+            </div>
+            <% } %>
+            <div class="form-group">
+              <label class=" col-form-label">Your total price:</label>
+              <span class="form-control hid">
+                <span index="-1" class="bidPrice" id="price" name="buyerPrice">0</span>
+                <span index="-1" class="bidCurrency" id="currency" name="buyerCurrency"></span>
+              </span>
+            </div>
+             <% if(products.length == 1) { %>
+            <div class="form-group">
+              <label class="col-form-label">Supplier's equivalent total price:</label>
+              <span class="form-control hid">
+                <span id="supplierPrice" name="supplierPrice">0</span>
+                <span index="<%= i %>" class="suppCurrency" id="supplierCurrency" name="supplierCurrency"><%= suppliers[0].currency %></span>
+              </span>
+            </div>
+            <% } else { %>
+            <div class="form-group">
+              <p>
+                As your Bid is intended to address multiple suppliers, each one of them will have the prices of the corresponding / proposed Products converted from your currency to theirs corresponding one.
+              </p>
+            </div>
+            <% } %>
              <div class="form-group">
               <label class="col-form-label">Status*</label>
               <input type="number" id="status" class="form-control" name="status" min="0" max="4" step="1" value="<%= statuses[0].value %>" readonly>
@@ -265,6 +299,13 @@
             </div>
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <input type="hidden" name="buyer" value="<%= buyer._id %>">
+            <% if(suppliers.length <= 1) { %>
+            <input type="hidden" name="supplier" value="<%= suppliers[0]._id %>">
+            <% } else { %>
+            <input type="hidden" id="supplierNamesList" name="supplierNamesList">
+            <input type="hidden" id="supplierEmailsList" name="supplierEmailsList">
+            <input type="hidden" id="supplierCurrenciesList" name="supplierCurrenciesList">
+            <% } %>
             <script type="text/javascript">
               function limitStatus(e) {
                   var ASCIICode = (e.which) ? e.which : e.keyCode;
@@ -274,6 +315,20 @@
               }
 
               var index = '';
+              
+              if($('#supplierNamesList').length) {
+                var arr1 = [], arr2 = [], arr3 = [];
+                
+                <% for(supplier of suppliers) { %>
+                arr1.push('<%= supplier.companyName %>');
+                arr2.push('<%= supplier.emailAddress %>');
+                arr3.push('<%= supplier.currency %>');
+                <% } %>
+                          
+                $('#supplierNamesList').val(arr1);
+                $('#supplierEmailsList').val(arr2);
+                $('#supplierCurrenciesList').val(arr3);
+              }
 
               var data = [];
               var colModel = [
@@ -312,6 +367,12 @@
 
               sel.attr('title', sel.find('option:selected').text());
               var x = JSON.parse($('#statusJsonValues'+index+' span:first').text());
+              
+              <% if(products.length == 1) { %>
+              $('.productsList option[value="<%= product.productName %>"]')
+                .prop('selected', true)
+                .trigger('change');
+              <% } %>
 
               $('#status'+index).change(function(e) {//Read-only select, though.
                 if($(this).val() < x.BUYER_REQUESTED_BID

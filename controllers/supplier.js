@@ -26,7 +26,7 @@ const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, superv
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
 const fetch = require('node-fetch');
-var oxr = require('open-exchange-rates'),	fx = require('money'), initConversions = require('../middleware/exchangeRates');
+var fx = require('money'), initConversions = require('../middleware/exchangeRates');
 const Country = require('../models/country');
 
 
@@ -858,7 +858,7 @@ exports.getBidRequests = (req, res) => {
       }
     
     await sendExpiredBidEmails(req, res, expiredBids);
-    await initConversions(oxr, fx);
+    await initConversions(fx);
     var totalPrice = 0, validPrice = 0, cancelledPrice = 0, expiredPrice = 0;
     
     for(var i in validBids) {
