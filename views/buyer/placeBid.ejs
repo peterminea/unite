@@ -167,7 +167,7 @@
             </p>
             <div class="form-group">
               <label class="col-form-label">Available products:</label>
-              <select index="-1" class="form-control productsList" name="productsList">
+              <select index="-1" class="form-control productsList" name="productsList" id="productsList">
               <% if(products != null) { %>
                 <option></option>
                 <% for(product of products) { %>
@@ -272,7 +272,9 @@
             <div class="form-group">
               <p>
                 As your Bid is intended to address multiple suppliers, each one of them will have the prices of the corresponding / proposed Products converted from your currency to theirs corresponding one.
+                As you add amunts for products, each one of the Suppliers will have here their updated, corresponding price in their currency.
               </p>
+              
             </div>
             <% } %>
              <div class="form-group">

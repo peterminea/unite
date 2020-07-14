@@ -286,11 +286,9 @@ exports.postIndex = (req, res) => {
       })
       .catch(console.error);
   } else if(req.body.bidProductList) {//Place bid on one or more products (+ 1 or more suppliers) from the Product Catalog grid.
-     var buyerId = req.body.buyerId, productIds = req.body.productList, supplierIds = req.body.supplierList;
-    
+     var buyerId = req.body.buyerId, productIds = req.body.productList, supplierIds = req.body.supplierList;    
       var productList = prel(req.body.productList);
       var supplierList = prel(req.body.supplierList);
-
       var prodIDs = [], suppIDs = [];
 
       for(var i in productList) {
@@ -416,7 +414,7 @@ exports.getPlaceBid = (req, res) => {
 
 
 exports.postPlaceBid = async (req, res) => {
-  await initConversions(fx);
+  //await initConversions(fx);
   
   var suppIds = req.body.supplierIdsList? prel(req.body.supplierIdsList) : [];//Multi or not.
   
@@ -427,21 +425,24 @@ exports.postPlaceBid = async (req, res) => {
   //Supplier's name, e-mail, currency to be saved as lists in PlaceBid in case of Multi.
   
   var t = prepareBidData(req);
+  var names = req.body.supplierNamesList? prel(req.body.supplierNamesList) : null;;
+  var emails = req.body.supplierEmailsList? prel(req.body.supplierEmailsList) : null;
+  var currencies = req.body.supplierCurrenciesList? prel(req.body.supplierCurrenciesList) : null;
   
   
   
   for(var i in suppIds) {
     const bidRequest = new BidRequest({
       requestName: req.body.requestName,
-      supplierName: req.body.supplierName,
+      supplierName: req.body.supplierName? req.body.supplierName : names[i],
       buyerName: req.body.buyerName,
       buyerEmail: req.body.buyerEmail,
-      supplierEmail: req.body.supplierEmail,
+      supplierEmail: req.body.supplierEmail? req.body.supplierEmail : emails[i],
       itemDescription: req.body.itemDescription,
       productList: t.productList,
       amountList: t.amountList,
       productImagesList: t.imagesList,
-      priceList: t.priceList, //Supplier's currency.
+      priceList: t.priceList,//Supplier's currency.
       priceOriginalList: t.priceOriginalList,
       productDetailsList: t.products,
       itemDescriptionLong: req.body.itemDescriptionLong,
@@ -454,12 +455,12 @@ exports.postPlaceBid = async (req, res) => {
       otherRequirements: req.body.otherRequirements,
       status: req.body.status,
       buyerPrice: req.body.buyerPrice,
-      supplierPrice: req.body.supplierPrice,
+      supplierPrice: req.body.supplierPrice? req.body.supplierPrice : 1,
       isCancelled: false,
       isExpired: false,
       isExtended: req.body.validityExtensionId? true : false,
       buyerCurrency: req.body.buyerCurrency,
-      supplierCurrency: req.body.supplierCurrency,
+      supplierCurrency: req.body.supplierCurrency? req.body.supplierCurrency : currencies[i],
       validityExtensionId: req.body.validityExtensionId,
       validityExtension: req.body.validityExtensionId,
       specialMentions: req.body.specialMentions
@@ -470,7 +471,7 @@ exports.postPlaceBid = async (req, res) => {
           ", and the Bid price is " +
           req.body.price +
           " " +
-          req.body.supplierCurrency +
+          (req.body.supplierCurrency? req.body.supplierCurrency : currencies[i]) +
           ".",
       createdAt: req.body.createdAt ? req.body.createdAt : Date.now(),
       updatedAt: Date.now(),
@@ -486,7 +487,19 @@ exports.postPlaceBid = async (req, res) => {
       buyer: req.body.buyer,
       supplier: suppIds[i]
     });
-  }  
+    
+    return bidRequest
+      .save()
+      .then((err, result) => {
+        if(treatError(req, res, err, "buyer/index")) 
+          return false;
+        req.flash("success", "Bid requested successfully!");
+      
+        if(i == suppIds.length-1)
+           return res.redirect("/buyer/index");
+      })
+      .catch(console.error);
+  }
 }
 
 

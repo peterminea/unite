@@ -518,7 +518,7 @@ function getId(val) {
 }
 
 
-function bindAddBid(obj, suppCurr) {
+function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
   obj.on('click', function() {
     var id = '_' + getId($(this).attr('id'));
     if(id.length == 1)
@@ -586,7 +586,9 @@ function bindAddBid(obj, suppCurr) {
       var buyerCurrSpan = $('span.bidCurrency[index="'+ (id.length? id : '-1') +'"]').first();
       buyerPriceUnit.text(parseFloat(addedPrice).toFixed(2));
       buyerPriceCurr.text(buyerCurrSpan.text());
-      var supplierCurrency = $('#supplierCurrency'+id).text();
+      var option = $(`#productsList${id} option:selected`);
+      
+      var suppCurr = option.attr('currency')? option.attr('currency') : $('#supplierCurrency'+id).text();
       var price = parseFloat($('#price'+id).text()? $('#price'+id).text() : 0) + parseFloat(addedPrice);
       var bigPrice = parseFloat(price).toFixed(2);
       $('#price'+id).text(bigPrice);
@@ -596,8 +598,8 @@ function bindAddBid(obj, suppCurr) {
         '../' + input.attr('productImage').substring(7) 
         : imageInput.attr('filePath');
       
-      var suppId = $('#productsList').length && $('#productsList option:selected').attr('supplierId')?
-        $('#productsList option:selected').attr('supplierId') : null;
+      var suppId = option.attr('supplierId')?
+        option.attr('supplierId') : null;
 
       if(elem.find('li').length) {
         elem.find('li').attr('totalPrice', bigPrice);
@@ -668,7 +670,7 @@ function bindAddBid(obj, suppCurr) {
         delegateUpload(gridId.find('.uploadImage').last());
 
         if(isNewBid) {                        
-          var suppPriceUnit = fx.convert(parseFloat(addedPrice), {from: buyerCurrSpan.text(), to: suppCurr});                          
+          var suppPriceUnit = fx.convert(parseFloat(addedPrice), {from: buyerCurrSpan.text(), to: suppCurr});
           $('#supplierPriceUnit'+id).text(parseFloat(suppPriceUnit).toFixed(2));
           var supp = fx.convert(parseFloat(bigPrice), {from: buyerCurrSpan.text(), to: suppCurr});
           $('#supplierPrice'+id).text(parseFloat(supp).toFixed(2));
@@ -2258,14 +2260,20 @@ $(document).ready(function() {
         var prodImageInput = $("#productImagesList"+id);
         var arr = [], arr1 = [], arr2 = [], arr3 = [], arr4 = [], arr5 = [];
         var totalPriceOriginal = 0, totalPriceConverted = 0;
+        var origCurrency = $(this).find('.currency').text();
+        
+        var suppCurrency = $('#productsList'+id+' option:selected').attr('currency')?
+        $('#productsList'+id+' option:selected').attr('currency') : origCurrency;
+        
         
         elem.find('tr').each(function() {
           arr.push($(this).find('span.product').text());
           arr1.push($(this).attr('amount'));
           var originalPrice = parseFloat($(this).attr('bigPrice')).toFixed(2);
-          var val = fx.convert(originalPrice, {from: $(this).find('.currency').text(), to: elem.attr('suppCurrency')});
+          var val = fx.convert(originalPrice, {from: origCurrency, to: suppCurrency});
           arr2.push(val);
           arr4.push(originalPrice);
+          
           totalPriceOriginal += originalPrice;
           totalPriceConverted += parseFloat(val).toFixed(2);
           var img = $(this).find('span.productImage img');
