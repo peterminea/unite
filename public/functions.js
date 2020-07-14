@@ -2270,7 +2270,7 @@ $(document).ready(function() {
         var amountInput = $("#amountList"+id);
         var priceInput = $("#priceList"+id), priceOrigInput = $("#priceOriginalList"+id);
         var prodImageInput = $("#productImagesList"+id);
-        var arr = [], arr1 = [], arr2 = [], arr3 = [], arr4 = [], arr5 = [], arr6 = [], arr7 = [];;
+        var arr = [], arr1 = [], arr2 = [], arr3 = [], arr4 = [], arr5 = [], arr6 = [];//, arr7 = [];;
         var totalPriceOriginal = 0, totalPriceConverted = 0;
         var origCurrency = $(this).find('.currency').text();
         
@@ -2294,7 +2294,7 @@ $(document).ready(function() {
           
           if($('#supplierIdsList').length) {//PlaceBid Multi Supplier.
             arr5.push($(this).attr('supplierId'));
-            arr7.push($(this).attr('productId'));
+            //arr7.push($(this).attr('productId'));
           }
         });
         
@@ -2306,7 +2306,7 @@ $(document).ready(function() {
         
         if(arr5.length) {
           $('#supplierIdsList').val(arr5);
-          $('#productIdsList').val(arr7);
+          //$('#productIdsList').val(arr7);
           
           $('span.totalPrice').each(function(index, element) {
             arr6.push(parseFloat($(this).text()));

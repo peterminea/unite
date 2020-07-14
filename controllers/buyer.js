@@ -67,13 +67,16 @@ const statusesJson = {
 
 exports.getIndex = async (req, res) => {
   if (req.session) {
-    await initConversions(fx);
+    initConversions(fx);
+     
     var promise = BidRequest.find({
       buyer: req.session.buyer ? req.session.buyer._id : null
     }).exec();
 
     promise.then((bids) => {
       var totalBidsPrice = 0;
+      
+      
       if (bids && bids.length) {
         for (var i in bids) {
           totalBidsPrice += fx(parseFloat(bids[i].buyerPrice).toFixed(2))
@@ -118,7 +121,7 @@ exports.getIndex = async (req, res) => {
           //catalogItems: catalogItems
         });        
       })
-    });
+    }); 
   }
 };
 
@@ -343,13 +346,16 @@ exports.postIndex = (req, res) => {
             errorMessage: error,
             isMultiProd: isMultiProd,
             isMultiSupp: isMultiSupp,
-            isMultiBid: isMultiProd || isMultiSupp,
+            isMultiBid: isMultiSupp,
+            isSingleBid: !isMultiSupp, 
             MAX_PROD: process.env.BID_MAX_PROD,
             MAX_AMOUNT: process.env.MAX_PROD_PIECES,
             BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
             statuses: statuses,
             statusesJson: JSON.stringify(statusesJson),
             buyer: buyer,
+            product: prods[0],
+            supplier: sups[0],
             products: prods,
             suppliers: sups
             });
@@ -386,11 +392,7 @@ exports.getPlaceBid = (req, res) => {
         }
         
         var promise = BidStatus.find({}).exec();
-        promise.then((statuses) => {
-          var prods = [], sups = [];
-          prods.push(prod);
-          sups.push(sup);
-          
+        promise.then((statuses) => {          
           var success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
           req.session.flash = [];
 
@@ -402,9 +404,13 @@ exports.getPlaceBid = (req, res) => {
             BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
             statuses: statuses,
             statusesJson: JSON.stringify(statusesJson),
+            isMultiProd: false,
+            isMultiSupp: false,
+            isMultiBid: false,
+            isSingleBid: true, 
             buyer: buyer,
-            products: prods,
-            suppliers: sups
+            product: prod,
+            supplier: sup
             });
           });
         });
@@ -475,8 +481,6 @@ function arrangeMultiData(t, suppIds) {
 
 
 exports.postPlaceBid = async (req, res) => {
-  //await initConversions(fx);
-  
   var suppIds = req.body.supplierIdsList? prel(req.body.supplierIdsList) : [];//Multi or not.
   //var productIds = req.body.productIdsList? prel(req.body.productIdsList) : [];
   var t = prepareBidData(req), names, emails, currencies, totalPricesList;

@@ -33,7 +33,7 @@
         var token = $("input[name='_csrf']").val();
         errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
         getCurrenciesList('select.buyerCurrency', '/currencyGetAutocomplete', token);//Preferred currency for Buyer.
-        getProductsList('.productsList', '/prodServiceAutocomplete', token);
+        //getProductsList('.productsList', '/prodServiceAutocomplete', token);
         initBaseRates(fx, 'select.buyerCurrency');      
         var defaultBidCurrency = '<%= BID_DEFAULT_CURR %>';
       
@@ -68,7 +68,7 @@
         <h5 class="card-header">Welcome!</h5>
         <div class="card-body">
           <h5 class="card-title">Please make your Bid Request</h5>
-          <p class="card-text" style="color: beige">You can place a bid request on one or more products, belonging to one or more suppliers.<br>If you choose more suppliers, separate Bid Request objects will be created upon submit, with each one of them being sent to the corresponding supplier.<br>If you choose the same product name from several suppliers, and bids are accepted, you will have to pay each supplier. Please handle these choices carefully.</p>
+          <p class="card-text" style="background-color: navy; color: beige">You can place a bid request on one or more products, belonging to one or more suppliers.<br>If you choose more suppliers, separate Bid Request objects will be created upon submit, with each one of them being sent to the corresponding supplier.<br>If you choose the same product name from several suppliers, and bids are accepted, you will have to pay each supplier. Please handle these choices carefully.</p>
         </div>
       </div>
       
@@ -84,16 +84,16 @@
               <label class="col-form-label">Request Name*</label>
               <input type="text" class="form-control" id="requestName" name="requestName" required>
             </div>
-            <% if(suppliers != null) { if(suppliers.length == 1) { %>
+            <%  if(isSingleBid == true) { %>
             <div class="form-group">
               <label class="col-form-label">Supplier Company</label>
-              <input type="text" class="form-control" name="supplierName" value="<%= supplier[0].companyName %>" disabled>
+              <input type="text" class="form-control" name="supplierName" value="<%= supplier.companyName %>" disabled>
             </div>
             <div class="form-group">
               <label class="col-form-label">Supplier's E-mail Address*</label>
-              <input type="email" class="form-control" name="supplierEmail" value="<%= supplier[0].emailAddress %>" disabled>
+              <input type="email" class="form-control" name="supplierEmail" value="<%= supplier.emailAddress %>" disabled>
             </div>
-            <input type="hidden" name="supplierId" value="<%= supplier[0]._id %>">
+            <input type="hidden" name="supplierId" value="<%= supplier._id %>">
             <% } else if(suppliers.length > 1) { %>
             <p class='term'>
               This Bid Request is directed to multiple suppliers.<br>For this, when submitting the bid, separate bids will be created for each Supplier and the corresponding products, with the prices accordingly converted to the matching currencies.
@@ -107,7 +107,7 @@
               <strong><%= j %> - </strong><input type="text" class="form-control" value="Name: <%= supplier.companyName %>, e-mail: <%= supplier.emailAddress %>" disabled>
             </div>
             <% } %>
-            <% } } %>
+            <% } %>
             <div class="form-group">
               <label class="col-form-label">Buyer Organization</label>
               <input type="text" class="form-control" name="buyerName" value="<%= buyer.organizationName %>" disabled>
@@ -168,11 +168,14 @@
             <div class="form-group">
               <label class="col-form-label">Available products:</label>
               <select index="-1" class="form-control productsList only" name="productsList" id="productsList">
-              <% if(products != null) { %>
-                <option></option>
+              <% if(isMultiProd) { %>
+                <option>Please select...</option>
                 <% for(product of products) { %>
                 <option style="word-wrap: break-word; width: 250px" productId="<%= product._id %>" supplierId="<%= product.supplier %>" totalPrice="<%= product.totalPrice %>" price="<%= product.price %>" maxAmount="<%= product.amount %>" productImage="<%= product.productImage %>" currency="<%= product.currency %>" title="<%= product.productName %>" value="<%= product.productName %>"><%= product.productName %></option>
-              <% } } %>
+              <% } } else { %>
+                <option>Please select...</option>
+                <option style="word-wrap: break-word; width: 250px" productId="<%= product._id %>" supplierId="<%= product.supplier %>" totalPrice="<%= product.totalPrice %>" price="<%= product.price %>" maxAmount="<%= product.amount %>" productImage="<%= product.productImage %>" currency="<%= product.currency %>" title="<%= product.productName %>" value="<%= product.productName %>"><%= product.productName %></option>
+                <% } %>
               </select>
             </div>
             <div>
@@ -192,7 +195,7 @@
                 You can also request products that are not in the list of the supplier(s). They will then negotiate with you.
               </span>
               <div class="input-group">
-                <input type="text" disabled defaultMaxAmount="<%= MAX_AMOUNT %>" class="form-control prodInput" <% if(products.length == 1) { %> "maxAmount="<%= products[0].amount %>" "supplierId="<%= supplier._id %>"<% } else { %> <% } %> placeholder="Add Product/Service*" id="prodServiceInput">
+                <input type="text" disabled defaultMaxAmount="<%= MAX_AMOUNT %>" class="form-control prodInput" <% if(isSingleProd == true) { %> "maxAmount="<%= product.amount %>" "supplierId="<%= supplier._id %>"<% } else { %> <% } %> placeholder="Add Product/Service*" id="prodServiceInput">
                 <div class="input-group-append">
                   <button class="btn btn-outline-secondary prodButton" type="button" disabled MAX="<%= MAX_PROD %>" id="addProdService">Add</button>
                 </div>
@@ -217,8 +220,8 @@
               <input type="hidden" required id="priceList" name="priceList" value="">
               <input type="hidden" required id="priceOriginalList" name="priceOriginalList" value="">
               <input type="hidden" required id="productImagesList>" name="productImagesList" value="">
-              <% if(isMulti == true) { %>
-              <input type="hidden" id="productIdsList" name="productIdsList">
+              <% if(isMultiBid == true) { %>
+              <!-- <input type="hidden" id="productIdsList" name="productIdsList"> -->
               <input type="hidden" id="supplierIdsList" name="supplierIdsList">
               <input type="hidden" id="supplierTotalPricesList" name="supplierTotalPricesList">
               <% } %>
@@ -247,12 +250,12 @@
                 <span index="-1" class="bidCurrency" id="currency" name="buyerCurrency"></span>
               </span>
             </div>
-           <% if(products.length == 1) { %>
+           <% if(isSingleBid == true) { %>
             <div class="form-group">
               <label class="col-form-label">Supplier's price for selected product:</label>
               <span class="form-control hid">
                 <span id="supplierPriceUnit">0</span>
-                <span index="0" class="suppCurrency" id="supplierCurrencyUnit"><%= suppliers[0].currency %></span>
+                <span index="0" class="suppCurrency" id="supplierCurrencyUnit"><%= supplier.currency %></span>
               </span>
             </div>
             <% } else { %>
@@ -267,12 +270,12 @@
                 <% } %>
             </div>
             <% } %>
-             <% if(products.length == 1) { %>
+             <% if(isSingleBid == true) { %>
             <div class="form-group">
               <label class="col-form-label">Supplier's equivalent total price:</label>
               <span class="form-control hid">
                 <span id="supplierPrice" name="supplierPrice">0</span>
-                <span index="<%= i %>" class="suppCurrency" id="supplierCurrency" name="supplierCurrency"><%= suppliers[0].currency %></span>
+                <span index="0" class="suppCurrency" id="supplierCurrency" name="supplierCurrency"><%= supplier.currency %></span>
               </span>
             </div>
             <% } else { %>
@@ -381,7 +384,7 @@
               sel.attr('title', sel.find('option:selected').text());
               var x = JSON.parse($('#statusJsonValues'+index+' span:first').text());
               
-              <% if(products.length == 1) { %>
+              <% if(isSingleProd == true) { %>
               $('.productsList option[value="<%= product.productName %>"]')
                 .prop('selected', true)
                 .trigger('change');
