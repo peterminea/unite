@@ -167,11 +167,11 @@
             </p>
             <div class="form-group">
               <label class="col-form-label">Available products:</label>
-              <select index="-1" class="form-control productsList" name="productsList" id="productsList">
+              <select index="-1" class="form-control productsList only" name="productsList" id="productsList">
               <% if(products != null) { %>
                 <option></option>
                 <% for(product of products) { %>
-                <option style="word-wrap: break-word; width: 250px" supplierId="<%= product.supplier %>" totalPrice="<%= product.totalPrice %>" price="<%= product.price %>" maxAmount="<%= product.amount %>" productImage="<%= product.productImage %>" currency="<%= product.currency %>" title="<%= product.productName %>" value="<%= product.productName %>"><%= product.productName %></option>
+                <option style="word-wrap: break-word; width: 250px" productId="<%= product._id %>" supplierId="<%= product.supplier %>" totalPrice="<%= product.totalPrice %>" price="<%= product.price %>" maxAmount="<%= product.amount %>" productImage="<%= product.productImage %>" currency="<%= product.currency %>" title="<%= product.productName %>" value="<%= product.productName %>"><%= product.productName %></option>
               <% } } %>
               </select>
             </div>
@@ -192,7 +192,7 @@
                 You can also request products that are not in the list of the supplier(s). They will then negotiate with you.
               </span>
               <div class="input-group">
-                <input type="text" required defaultMaxAmount="<%= MAX_AMOUNT %>" class="form-control prodInput" <% if(products.length == 1) { %> "maxAmount="<%= products[0].amount %>" "supplierId="<%= supplier._id %>"<% } else { %> <% } %> placeholder="Add Product/Service*" id="prodServiceInput">
+                <input type="text" disabled defaultMaxAmount="<%= MAX_AMOUNT %>" class="form-control prodInput" <% if(products.length == 1) { %> "maxAmount="<%= products[0].amount %>" "supplierId="<%= supplier._id %>"<% } else { %> <% } %> placeholder="Add Product/Service*" id="prodServiceInput">
                 <div class="input-group-append">
                   <button class="btn btn-outline-secondary prodButton" type="button" disabled MAX="<%= MAX_PROD %>" id="addProdService">Add</button>
                 </div>
@@ -218,7 +218,9 @@
               <input type="hidden" required id="priceOriginalList" name="priceOriginalList" value="">
               <input type="hidden" required id="productImagesList>" name="productImagesList" value="">
               <% if(isMulti == true) { %>
+              <input type="hidden" id="productIdsList" name="productIdsList">
               <input type="hidden" id="supplierIdsList" name="supplierIdsList">
+              <input type="hidden" id="supplierTotalPricesList" name="supplierTotalPricesList">
               <% } %>
             </div>
             <div id="jqDiv" class="form-group">
@@ -237,22 +239,7 @@
                 <span id="buyerPriceUnit">0</span>
                 <span index="-1" class="bidCurrency" id="buyerCurrencyUnit"></span>
               </span>
-            </div>
-             <% if(products.length == 1) { %>
-            <div class="form-group">
-              <label class="col-form-label">Supplier's price for selected product:</label>
-              <span class="form-control hid">
-                <span id="supplierPriceUnit">0</span>
-                <span index="<%= i %>" class="suppCurrency" id="supplierCurrencyUnit"><%= suppliers[0].currency %></span>
-              </span>
-            </div>
-            <% } else { %>
-            <div class="form-group">
-              <p>
-                This Bid is intended to be sent to multiple suppliers. The equivalent Supplier prices will be decided separately for each one of them, after you submit the bid.
-              </p>
-            </div>
-            <% } %>
+            </div>            
             <div class="form-group">
               <label class=" col-form-label">Your total price:</label>
               <span class="form-control hid">
@@ -260,6 +247,26 @@
                 <span index="-1" class="bidCurrency" id="currency" name="buyerCurrency"></span>
               </span>
             </div>
+           <% if(products.length == 1) { %>
+            <div class="form-group">
+              <label class="col-form-label">Supplier's price for selected product:</label>
+              <span class="form-control hid">
+                <span id="supplierPriceUnit">0</span>
+                <span index="0" class="suppCurrency" id="supplierCurrencyUnit"><%= suppliers[0].currency %></span>
+              </span>
+            </div>
+            <% } else { %>
+            <div class="form-group">
+              <p>
+                This Bid is intended to be sent to multiple suppliers. The equivalent Supplier prices will be decided separately for each one of them.
+                </p>
+                <% let i = 0; for(supplier of suppliers) { i++; %>
+                <label class="col-form-label">Supplier <%= i %> (<%= supplier.companyName %>) unit price for selected product:</label>
+                <span class='multiSupp unitPrice' suppId='<%= supplier._id %>' id="supplierPriceUnit_<%= i %>">0</span>
+                <span index="<%= i %>" class="suppCurrency" id="supplierCurrencyUnit_<%= i %>"><%= supplier.currency %></span>
+                <% } %>
+            </div>
+            <% } %>
              <% if(products.length == 1) { %>
             <div class="form-group">
               <label class="col-form-label">Supplier's equivalent total price:</label>
@@ -274,7 +281,11 @@
                 As your Bid is intended to address multiple suppliers, each one of them will have the prices of the corresponding / proposed Products converted from your currency to theirs corresponding one.
                 As you add amunts for products, each one of the Suppliers will have here their updated, corresponding price in their currency.
               </p>
-              
+              <% let i = 0; for(supplier of suppliers) { i++; %>
+              <label class="col-form-label">Supplier <%= i %> (<%= supplier.companyName %>) total price for selected product:</label>
+              <span class='multiSupp totalPrice' suppId='<%= supplier._id %>' id="supplierPrice_<%= i %>">0</span>
+              <span index="<%= i %>" class="suppCurrency" id="supplierCurrency_<%= i %>"><%= supplier.currency %></span>
+              <% } %>
             </div>
             <% } %>
              <div class="form-group">

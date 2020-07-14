@@ -216,7 +216,7 @@ exports.postIndex = (req, res) => {
       });
     });
   } else if (req.body.itemDescription) {
-    //New Bid Request placed,
+    //New Bid Request placed.
     
     var t = prepareBidData(req);
 
@@ -413,23 +413,87 @@ exports.getPlaceBid = (req, res) => {
 }
 
 
+function isPresent(elem, array) {
+  for(var i in array) {
+    if(elem == array[i])
+      return true;
+  }
+  
+  return false;
+}
+
+
+function arrangeMultiData(t, suppIds) {
+  var productLists = [], amountLists = [], productImagesLists = [], priceLists = [], priceOriginalLists = [], productDetailsLists = [];
+  var uniqueSuppIds = [];
+  var app = [];
+  
+  for(var i in suppIds) {//0, 1, 2, 3, 4 - 0=2=4, 1=3.
+    //i=0, app=[]
+    //i=1, app=024
+    //i=2, app=02413
+    //i=3, app=02413
+    //i=4, app=02413
+    var productList = [], amountList = [], productImagesList = [], priceList = [], priceOriginalList = [], productDetailsList = [];
+    
+    if(!isPresent(suppIds[i], app)) {
+      for(var j in suppIds) {//0: 0, 2, 4.
+        if(suppIds[i] == suppIds[j]) {
+          app.push(j);
+          productList.push(t.productList[j]);
+          amountList.push(t.amountList[j]);
+          productImagesList.push(t.productImagesList[j]);
+          priceList.push(t.priceList[j]);
+          priceOriginalList.push(t.priceOriginalList[j]);
+          productDetailsList.push(t.productDetailsList[j]);
+        }
+      }
+      
+      productLists.push(productList);
+      amountLists.push(amountList);
+      productImagesLists.push(productImagesList);
+      priceLists.push(priceList);
+      priceOriginalLists.push(priceOriginalList);
+      productDetailsList.push(productDetailsList);
+      uniqueSuppIds.push(suppIds[i]);
+    }
+    
+    if(app.length == suppIds.length)
+      break;
+  }
+  
+  return {
+    productList: productLists, 
+    amountList: amountLists, 
+    priceList: priceLists, 
+    priceOriginalList: priceOriginalLists, 
+    imagesList: productImagesList, 
+    products: productDetailsList,
+    uniqueSuppIds: uniqueSuppIds
+  };
+}
+
+
 exports.postPlaceBid = async (req, res) => {
   //await initConversions(fx);
   
   var suppIds = req.body.supplierIdsList? prel(req.body.supplierIdsList) : [];//Multi or not.
+  //var productIds = req.body.productIdsList? prel(req.body.productIdsList) : [];
+  var t = prepareBidData(req), names, emails, currencies, totalPricesList;
   
   if(req.body.supplierId) {//Not Multi.
     suppIds.push(req.body.supplierId)
+  } else {
+    names = req.body.supplierNamesList? prel(req.body.supplierNamesList) : null;;
+    emails = req.body.supplierEmailsList? prel(req.body.supplierEmailsList) : null;
+    currencies = req.body.supplierCurrenciesList? prel(req.body.supplierCurrenciesList) : null;
+    totalPricesList = req.body.supplierTotalPricesList? prel(req.body.supplierTotalPricesList) : null;
+    t = arrangeMultiData(suppIds);
+    suppIds = suppIds.filter((v, i, a) => a.indexOf(v) === i);
+    //suppIds = t.uniqueSuppIds;
   };
   
-  //Supplier's name, e-mail, currency to be saved as lists in PlaceBid in case of Multi.
-  
-  var t = prepareBidData(req);
-  var names = req.body.supplierNamesList? prel(req.body.supplierNamesList) : null;;
-  var emails = req.body.supplierEmailsList? prel(req.body.supplierEmailsList) : null;
-  var currencies = req.body.supplierCurrenciesList? prel(req.body.supplierCurrenciesList) : null;
-  
-  
+  //Supplier's name, e-mail, currency, total price to be saved as lists in PlaceBid in case of Multi.
   
   for(var i in suppIds) {
     const bidRequest = new BidRequest({
@@ -439,12 +503,12 @@ exports.postPlaceBid = async (req, res) => {
       buyerEmail: req.body.buyerEmail,
       supplierEmail: req.body.supplierEmail? req.body.supplierEmail : emails[i],
       itemDescription: req.body.itemDescription,
-      productList: t.productList,
-      amountList: t.amountList,
-      productImagesList: t.imagesList,
-      priceList: t.priceList,//Supplier's currency.
-      priceOriginalList: t.priceOriginalList,
-      productDetailsList: t.products,
+      productList: !(t.uniqueSuppIds)? t.productList : t.productList[i],
+      amountList: !(t.uniqueSuppIds)? t.amountList : t.amountList[i],
+      productImagesList: !(t.uniqueSuppIds)? t.imagesList : t.imagesList[i],
+      priceList: !(t.uniqueSuppIds)? t.priceList : t.priceList[i],//Supplier's currency.
+      priceOriginalList: !(t.uniqueSuppIds)? t.priceOriginalList : t.priceOriginalList[i],
+      productDetailsList: !(t.uniqueSuppIds)? t.products : t.products[i],
       itemDescriptionLong: req.body.itemDescriptionLong,
       itemDescriptionUrl: req.itemDescriptionUrl,
       amount: req.body.amount,
@@ -455,7 +519,7 @@ exports.postPlaceBid = async (req, res) => {
       otherRequirements: req.body.otherRequirements,
       status: req.body.status,
       buyerPrice: req.body.buyerPrice,
-      supplierPrice: req.body.supplierPrice? req.body.supplierPrice : 1,
+      supplierPrice: req.body.supplierPrice? req.body.supplierPrice : totalPricesList[i],
       isCancelled: false,
       isExpired: false,
       isExtended: req.body.validityExtensionId? true : false,

@@ -1183,7 +1183,7 @@ fetch(url, settings)
 
 
 var db;
-if (1 == 2)
+//if (1 == 2)
   MongoClient.connect(URI, { useUnifiedTopology: true }, (err, client) => {
     if (err) {
       console.error(err.message);
@@ -1212,6 +1212,11 @@ if (1 == 2)
     
     var unset = { $unset: { products: 1, productsServicesOffered: 1 } };
     var set = { $set: { productList: productList, productDetailsList: productDetailsList } };
+    
+    var obj = {'125': 'data',
+              '126': 'code'};
+    
+    console.log(obj['125']);
     
     
     
