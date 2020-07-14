@@ -525,12 +525,13 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
       id = '';
 
     var elem = $("#prodServices"+id);
+    var gridId = $('#grid'+id);
     var amount = $('#amount'+id);
     var input = $("#prodServiceInput"+id);
 
     var MAX = parseInt($(this).attr('MAX'));
 
-    if(elem.find('li').length >= MAX) {
+    if(grid.find('tr').length >= MAX) {
         Swal.fire({
           icon: 'error',
           title: 'Error!',
@@ -560,7 +561,7 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
       var prodVal = input.val();
       var isPresent = false;
 
-      elem.find('.product').each(function() {
+      grid.find('tr span.product').each(function() {
         if(prodVal == $(this).text()) {
           Swal.fire({
             icon: 'error',
@@ -586,9 +587,9 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
       var buyerCurrSpan = $('span.bidCurrency[index="'+ (id.length? id : '-1') +'"]').first();
       buyerPriceUnit.text(parseFloat(addedPrice).toFixed(2));
       buyerPriceCurr.text(buyerCurrSpan.text());
-      var option = $(`#productsList${id} option:selected`);
+      var option = $(`#productsList${id} option:selected`);      
       
-      var suppCurr = option.attr('currency')? option.attr('currency') : $('#supplierCurrency'+id).text();
+      var suppCurr = option && option.attr('currency')? option.attr('currency') : $('#supplierCurrency'+id).text();
       var price = parseFloat($('#price'+id).text()? $('#price'+id).text() : 0) + parseFloat(addedPrice);
       var bigPrice = parseFloat(price).toFixed(2);
       $('#price'+id).text(bigPrice);
@@ -598,8 +599,11 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
         '../' + input.attr('productImage').substring(7) 
         : imageInput.attr('filePath');
       
-      var suppId = option.attr('supplierId')?
+      var suppId = option && option.attr('supplierId')?
         option.attr('supplierId') : null;
+      
+      var productId = option && option.attr('productId')?
+        option.attr('productId') : null;
 
       if(elem.find('li').length) {
         elem.find('li').attr('totalPrice', bigPrice);
@@ -612,7 +616,7 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
       var divId = $('#jqDiv'+id);
 
       elem.append("<li class='list-group-item' price='" 
-                    + "' supplierId='" + suppId + addedPrice + "' maxAmount='" + (input.attr('maxAmount')? input.attr('maxAmount') : input.attr('defaultMaxAmount'))
+                    + "' productId='" + productId + "' supplierId='" + suppId + addedPrice + "' maxAmount='" + (input.attr('maxAmount')? input.attr('maxAmount') : input.attr('defaultMaxAmount'))
                     + "' totalPrice='" + bigPrice + "' amount='" + amountVal + "'>" 
                     + `<span class='cnt'>${lis}</span><span class='product'>${prodVal}</span>
 <span class='buttonsWrapper'><span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span></span>
@@ -625,8 +629,7 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
         imageInput
           .attr('filePath', null)
           .attr('value', '');
-
-        var gridId = $('#grid'+id);
+        
         var src = imagePath && imagePath.length? imagePath : null;
 
         var data = {
@@ -648,6 +651,7 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
             tr.attr('price', addedPrice);
             tr.attr('totalPrice', bigPrice);
             tr.attr('amount', amountVal);
+            tr.attr('productId', productId);
             tr.attr('supplierId', suppId);
             tr.attr('maxAmount', (input.attr('maxAmount')? input.attr('maxAmount') : input.attr('defaultMaxAmount')));
         });
@@ -657,7 +661,7 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
         var totalAmount = $('#totalAmount'+id).val()? parseInt($('#totalAmount'+id).val()) : 0;
         counter.text(newValue);
         $('#totalAmount'+id).val(totalAmount + parseInt(amountVal));
-        var isNewBid = (id.length > 0);
+        var isNewBid = (id.length > 0);//New Bid BuyerIndex
 
         bindHandleProduct(elem.find('.rem').last(), input, isNewBid, id, true, false);
         bindHandleProduct(elem.find('.inc').last(), input, isNewBid, id, false, true);
@@ -669,11 +673,19 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
         bindHandleProduct(gridId.find('.dec').last(), input, isNewBid, id, false, false);                        
         delegateUpload(gridId.find('.uploadImage').last());
 
-        if(isNewBid) {                        
+        if(isNewBid) {
           var suppPriceUnit = fx.convert(parseFloat(addedPrice), {from: buyerCurrSpan.text(), to: suppCurr});
           $('#supplierPriceUnit'+id).text(parseFloat(suppPriceUnit).toFixed(2));
           var supp = fx.convert(parseFloat(bigPrice), {from: buyerCurrSpan.text(), to: suppCurr});
           $('#supplierPrice'+id).text(parseFloat(supp).toFixed(2));
+        } else if($('span.multiSupp').length) {//Place Bid MultiSupplier from the Catalog
+          var index = $(`#productsList${id}`).find('option').not(':first').index(option);
+          var unitPrice = $('span.unitPrice').eq(index);
+          var totalPrice = $('span.totalPrice').eq(index);
+          var suppPriceUnit = fx.convert(parseFloat(addedPrice), {from: buyerCurrSpan.text(), to: suppCurr});
+          var supp = fx.convert(parseFloat(bigPrice), {from: buyerCurrSpan.text(), to: suppCurr});
+          unitPrice.text(suppPriceUnit);
+          totalPrice.text(supp);
         }
 
         input.val('').attr('productImage', null);
@@ -2258,7 +2270,7 @@ $(document).ready(function() {
         var amountInput = $("#amountList"+id);
         var priceInput = $("#priceList"+id), priceOrigInput = $("#priceOriginalList"+id);
         var prodImageInput = $("#productImagesList"+id);
-        var arr = [], arr1 = [], arr2 = [], arr3 = [], arr4 = [], arr5 = [];
+        var arr = [], arr1 = [], arr2 = [], arr3 = [], arr4 = [], arr5 = [], arr6 = [], arr7 = [];;
         var totalPriceOriginal = 0, totalPriceConverted = 0;
         var origCurrency = $(this).find('.currency').text();
         
@@ -2282,6 +2294,7 @@ $(document).ready(function() {
           
           if($('#supplierIdsList').length) {//PlaceBid Multi Supplier.
             arr5.push($(this).attr('supplierId'));
+            arr7.push($(this).attr('productId'));
           }
         });
         
@@ -2293,6 +2306,13 @@ $(document).ready(function() {
         
         if(arr5.length) {
           $('#supplierIdsList').val(arr5);
+          $('#productIdsList').val(arr7);
+          
+          $('span.totalPrice').each(function(index, element) {
+            arr6.push(parseFloat($(this).text()));
+          });
+          
+          $('#supplierTotalPricesList'+id).val(arr6);
         }
         
         $('#price'+id).text(totalPriceOriginal);
