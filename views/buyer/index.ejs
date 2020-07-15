@@ -32,24 +32,14 @@
   <script type="text/javascript">
     $(document).ready(function() {
       var token = $("input[name='_csrf']").val();
-      getAutocomplete('#search', '/capabilityInputAutocomplete', token, true);
-      errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
-      getCurrenciesList('select.buyerCurrency', '/currencyGetAutocomplete', token);//Preferred currency for Buyer.
       getProductsList('.productsList', '/prodServiceAutocomplete', token);
+      getAutocomplete('#search', '/capabilityInputAutocomplete', token, true);
+      errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>'); 
       var defaultBidCurrency = '<%= BID_DEFAULT_CURR %>';
-      
-      initBaseRates(fx, 'select.buyerCurrency')
-      .then(() => {
-        $('select.buyerCurrency')
-          .find('option[value="' + defaultBidCurrency + '"]')
-          .prop('selected', true);
-            
-        $('span.bidCurrency').each(function() {
-          $(this).text(defaultBidCurrency);
-          });
-        
-        $('select.buyerCurrency').trigger('change');
-      });
+                   
+      setTimeout(function() {
+        getCurrenciesList('select.buyerCurrency', '/currencyGetAutocomplete', token, defaultBidCurrency);//Preferred currency for Buyer.      
+      }, 1320);      
 
       $('#loadCatalog').on('click', function() {
         if($('div.suppliersLive').length)
@@ -520,7 +510,7 @@
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Your currency*:</label>
-                    <select class="form-control buyerCurrency" index="<%= i %>" ></select>
+                    <select class="form-control buyerCurrency" suppCurrency="<%= supplier.currency %>" index="<%= i %>" ></select>
                   </div>
                   <p>
                     You can either select products from drop-down or search for them via Autocomplete (please enter at least 3 characters).

@@ -32,23 +32,8 @@
     $(document).ready(function () {
         var token = $("input[name='_csrf']").val();
         errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
-        getCurrenciesList('select.buyerCurrency', '/currencyGetAutocomplete', token);//Preferred currency for Buyer.
-        //getProductsList('.productsList', '/prodServiceAutocomplete', token);
-        initBaseRates(fx, 'select.buyerCurrency');      
         var defaultBidCurrency = '<%= BID_DEFAULT_CURR %>';
-      
-        initBaseRates(fx, 'select.buyerCurrency')
-        .then(() => {
-          $('select.buyerCurrency')
-            .find('option[value="' + defaultBidCurrency + '"]')
-            .prop('selected', true);
-
-          $('span.bidCurrency').each(function() {
-            $(this).text(defaultBidCurrency);
-            });
-
-          $('select.buyerCurrency').trigger('change');
-        });
+        getCurrenciesList('select.buyerCurrency', '/currencyGetAutocomplete', token, defaultBidCurrency); 
     });
   </script>
   </head>
@@ -160,7 +145,7 @@
             </div>
             <div class="form-group">
               <label class="col-form-label">Your currency*:</label>
-              <select class="form-control buyerCurrency" index="-1" ></select>
+              <select class="form-control buyerCurrency" <% if(isSingleProd == true) { %> suppCurrency="<%= product.currency %>" <% } else { %> suppCurrency="<%= products[0].currency %>" <% } %> index="-1"></select>
             </div>
             <p>
               You can either select products from drop-down or search for them via Autocomplete (please enter at least 3 characters).
@@ -168,12 +153,12 @@
             <div class="form-group">
               <label class="col-form-label">Available products:</label>
               <select index="-1" class="form-control productsList only" name="productsList" id="productsList">
-              <% if(isMultiProd) { %>
-                <option>Please select...</option>
+              <% if(isSingleProd == false) { %>
+                <option title="Please select the product"></option>
                 <% for(product of products) { %>
                 <option style="word-wrap: break-word; width: 250px" productId="<%= product._id %>" supplierId="<%= product.supplier %>" totalPrice="<%= product.totalPrice %>" price="<%= product.price %>" maxAmount="<%= product.amount %>" productImage="<%= product.productImage %>" currency="<%= product.currency %>" title="<%= product.productName %>" value="<%= product.productName %>"><%= product.productName %></option>
-              <% } } else { %>
-                <option>Please select...</option>
+              <% } } else if(isSingleProd == true) { %>
+                <option title="Please select the product"></option>
                 <option style="word-wrap: break-word; width: 250px" productId="<%= product._id %>" supplierId="<%= product.supplier %>" totalPrice="<%= product.totalPrice %>" price="<%= product.price %>" maxAmount="<%= product.amount %>" productImage="<%= product.productImage %>" currency="<%= product.currency %>" title="<%= product.productName %>" value="<%= product.productName %>"><%= product.productName %></option>
                 <% } %>
               </select>
@@ -191,9 +176,6 @@
             </div>
             <div class="form-group">
               <label class="col-form-label">Products / Services Requested*</label>
-              <span class='littleNote form-control'>
-                You can also request products that are not in the list of the supplier(s). They will then negotiate with you.
-              </span>
               <div class="input-group">
                 <input type="text" disabled defaultMaxAmount="<%= MAX_AMOUNT %>" class="form-control prodInput" <% if(isSingleProd == true) { %> "maxAmount="<%= product.amount %>" "supplierId="<%= supplier._id %>"<% } else { %> <% } %> placeholder="Add Product/Service*" id="prodServiceInput">
                 <div class="input-group-append">
@@ -315,8 +297,8 @@
             </div>
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <input type="hidden" name="buyer" value="<%= buyer._id %>">
-            <% if(suppliers.length <= 1) { %>
-            <input type="hidden" name="supplier" value="<%= suppliers[0]._id %>">
+            <% if(isSingleBid == true) { %>
+            <input type="hidden" name="supplier" value="<%= supplier._id %>">
             <% } else { %>
             <input type="hidden" id="supplierNamesList" name="supplierNamesList">
             <input type="hidden" id="supplierEmailsList" name="supplierEmailsList">
@@ -331,20 +313,15 @@
               }
 
               var index = '';
-              
-              if($('#supplierNamesList').length) {
-                var arr1 = [], arr2 = [], arr3 = [];
-                
-                <% for(supplier of suppliers) { %>
+              <% if(isSingleBid == false) { for(supplier of suppliers) { %>
+                var arr1 = [], arr2 = [], arr3 = [];               
                 arr1.push('<%= supplier.companyName %>');
                 arr2.push('<%= supplier.emailAddress %>');
-                arr3.push('<%= supplier.currency %>');
-                <% } %>
-                          
+                arr3.push('<%= supplier.currency %>');                          
                 $('#supplierNamesList').val(arr1);
                 $('#supplierEmailsList').val(arr2);
                 $('#supplierCurrenciesList').val(arr3);
-              }
+              <% } } %>
 
               var data = [];
               var colModel = [
@@ -362,10 +339,13 @@
               ];
 
               initGrid(colModel, data, "#grid"+index, '#prodPager'+index, "name", 'Products List', 1000);
+              
+              <%= if(isSingleBid == true) { %>
               setTimeout(function() {
-                var table = $("#jqDiv"+index).find('table').eq(1);
-                table.attr('suppCurrency', "<%= supplier.currency %>");
+                var table = $("#jqDiv"+index).find('table').eq(1);                
+                table.attr('suppCurrency', "<%= supplier.currency %>");                
               }, 1000);
+              <% } %>
 
               $('#status'+index).on('keypress keyon keyup', function(e) {
                   return limitStatus(e);
@@ -385,9 +365,9 @@
               var x = JSON.parse($('#statusJsonValues'+index+' span:first').text());
               
               <% if(isSingleProd == true) { %>
-              $('.productsList option[value="<%= product.productName %>"]')
-                .prop('selected', true)
-                .trigger('change');
+              $('select.productsList')
+                .find('option[value="<%= product.productName %>"]')
+                .prop('selected', true); 
               <% } %>
 
               $('#status'+index).change(function(e) {//Read-only select, though.
@@ -396,7 +376,6 @@
                   return false;
                 }
 
-                var id = getId($(this).attr('id'));
                 var statusText = statusVector[parseInt($(this).val())];
                 if($("#statusText").length)
                   $("#statusText").remove();
@@ -416,7 +395,7 @@
             </script>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button href="../buyer/index" type="button" class="btn btn-secondary">Close</button>
             <button index="" class='placeBid' type="submit" class="btn btn-primary">Send request</button>
           </div>
         </form>
