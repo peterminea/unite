@@ -3,7 +3,7 @@ module.exports = async (fx) => {
   let url = "https://www.floatrates.com/daily/eur.json";
   let settings = { method: "Get" };
 
-  fetch(url, settings)
+  await fetch(url, settings)
       .then(res => res.json())
       .then((json) => {
     var currency = JSON.stringify(json);
@@ -15,9 +15,7 @@ module.exports = async (fx) => {
       var obj = JSON.parse(t.substring(7, t.length-1));
     }
 
-    fx = {
-      base: process.env.APP_DEFAULT_CURR,//EUR
-    };
+    fx.base = process.env.APP_DEFAULT_CURR;//EUR    
     
     var t, obj = [], str = 'fx.rates = {\n';
 
@@ -35,6 +33,8 @@ module.exports = async (fx) => {
     } 
 
     str += '\n}';
-    eval(str);
+    eval(str);    
+    //console.log(fx);
+    return fx;
     });
 }

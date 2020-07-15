@@ -67,19 +67,21 @@ const statusesJson = {
 
 exports.getIndex = async (req, res) => {
   if (req.session) {
-    await initConversions(fx);
+     
     var promise = BidRequest.find({
       buyer: req.session.buyer ? req.session.buyer._id : null
     }).exec();
 
     promise.then((bids) => {
+      initConversions(fx);
       var totalBidsPrice = 0;
-      if (bids && bids.length) {
+      
+      
+      if (bids && bids.length && fx) {
         for (var i in bids) {
           totalBidsPrice += fx(parseFloat(bids[i].buyerPrice).toFixed(2))
             .from(bids[i].supplierCurrency)
-            .to(process.env.BID_DEFAULT_CURR);
-          console.log(bids[i].buyerPrice);
+            .to(process.env.BID_DEFAULT_CURR);          
         }
       }
 
@@ -118,7 +120,7 @@ exports.getIndex = async (req, res) => {
           //catalogItems: catalogItems
         });        
       })
-    });
+    }); 
   }
 };
 
@@ -160,7 +162,7 @@ function prepareBidData(req) {
 
 
 exports.postIndex = (req, res) => {
-  initConversions(fx);
+   initConversions(fx);
 
   if (req.body.capabilityInput) {
     //req.term for Autocomplete - We started the search and become able to place a Bid Request.
@@ -337,19 +339,24 @@ exports.postIndex = (req, res) => {
           req.session.flash = [];
           var isMultiProd = prodIDs.length > 1;
           var isMultiSupp = uniqueSupplierIds.length > 1;
+          console.log(buyer);
 
           res.render("buyer/placeBid", {
             successMessage: success,
             errorMessage: error,
             isMultiProd: isMultiProd,
             isMultiSupp: isMultiSupp,
-            isMultiBid: isMultiProd || isMultiSupp,
+            isMultiBid: isMultiSupp,
+            isSingleBid: !isMultiSupp, 
+            isSingleProd: !isMultiProd,
             MAX_PROD: process.env.BID_MAX_PROD,
             MAX_AMOUNT: process.env.MAX_PROD_PIECES,
             BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
             statuses: statuses,
             statusesJson: JSON.stringify(statusesJson),
             buyer: buyer,
+            product: prods[0],
+            supplier: sups[0],
             products: prods,
             suppliers: sups
             });
@@ -367,7 +374,7 @@ exports.getPlaceBid = (req, res) => {
   var buyerId = new ObjectId(req.params.buyerId), productId = new ObjectId(req.params.productId), supplierId = new ObjectId(req.params.supplierId);
   // { $in : [1,2,3,4] }
   //Or array
-  Buyer.find({ _id: buyerId }).then((buyer) => {
+  Buyer.find({ _id: new ObjectId(buyerId) }).then((buyer) => {
     if(!buyer) {
         req.flash('error', 'Buyer not found in the database!');
         return res.redirect('back');
@@ -386,13 +393,11 @@ exports.getPlaceBid = (req, res) => {
         }
         
         var promise = BidStatus.find({}).exec();
-        promise.then((statuses) => {
-          var prods = [], sups = [];
-          prods.push(prod);
-          sups.push(sup);
-          
+        promise.then((statuses) => {          
           var success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
           req.session.flash = [];
+          
+          console.log(buyer[0]);
 
           res.render("buyer/placeBid", {
             successMessage: success,
@@ -402,9 +407,14 @@ exports.getPlaceBid = (req, res) => {
             BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
             statuses: statuses,
             statusesJson: JSON.stringify(statusesJson),
-            buyer: buyer,
-            products: prods,
-            suppliers: sups
+            isMultiProd: false,
+            isMultiSupp: false,
+            isMultiBid: false,
+            isSingleBid: true, 
+            isSingleProd: true,
+            buyer: buyer[0],
+            product: prod[0],
+            supplier: sup[0]
             });
           });
         });
@@ -475,8 +485,6 @@ function arrangeMultiData(t, suppIds) {
 
 
 exports.postPlaceBid = async (req, res) => {
-  //await initConversions(fx);
-  
   var suppIds = req.body.supplierIdsList? prel(req.body.supplierIdsList) : [];//Multi or not.
   //var productIds = req.body.productIdsList? prel(req.body.productIdsList) : [];
   var t = prepareBidData(req), names, emails, currencies, totalPricesList;

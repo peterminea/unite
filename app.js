@@ -1183,7 +1183,7 @@ fetch(url, settings)
 
 
 var db;
-//if (1 == 2)
+if (1 == 2)
   MongoClient.connect(URI, { useUnifiedTopology: true }, (err, client) => {
     if (err) {
       console.error(err.message);
@@ -1212,13 +1212,7 @@ var db;
     
     var unset = { $unset: { products: 1, productsServicesOffered: 1 } };
     var set = { $set: { productList: productList, productDetailsList: productDetailsList } };
-    
-    var obj = {'125': 'data',
-              '126': 'code'};
-    
-    console.log(obj['125']);
-    
-    
+
     
     /*
     Industry.find({}).exec().then((inds) => {//Ascending sorting of table contents by name, then resetting its contents based on this new sorting.
