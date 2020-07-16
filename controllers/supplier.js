@@ -453,9 +453,6 @@ exports.postSignUp = async (req, res) => {
                   var imagesList = prel(req.body.productImagesList);
                   var currenciesList = prel(req.body.currenciesList);
                   sortLists(productList, amountsList, pricesList, imagesList, currenciesList);
-                  console.log(req.body.totalSupplyPrice);
-                  console.log(req.body.totalSupplyAmount);
-                  console.log(productList);
                 
                   supplier = new Supplier({
                     role: process.env.USER_REGULAR,
@@ -643,7 +640,6 @@ exports.getChatLogin = (req, res) => {//We need a username, a room name, and a s
 exports.getChat = (req, res) => {//Coming from the getLogin above.
   var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
-  //console.log(req.params.reqName);
   
   res.render("supplier/chat", {
     successMessage: success,
@@ -842,6 +838,10 @@ exports.getProfile = (req, res) => {
 
 exports.getBidRequests = (req, res) => {
   const supplier = req.session.supplier;
+  try {
+    initConversions(fx);
+  } catch {
+  }
   
   BidRequest.find({ supplier: supplier._id })
     .then(async (requests) => {
@@ -858,7 +858,7 @@ exports.getBidRequests = (req, res) => {
       }
     
     await sendExpiredBidEmails(req, res, expiredBids);
-    await initConversions(fx);
+    
     var totalPrice = 0, validPrice = 0, cancelledPrice = 0, expiredPrice = 0;
     
     for(var i in validBids) {
@@ -877,7 +877,7 @@ exports.getBidRequests = (req, res) => {
     for(var i in expiredBids) {
       expiredPrice += parseFloat(expiredBids[i].supplierPrice);
     }
-    //console.log(cancelledPrice);
+    
     totalPrice += parseFloat(expiredPrice);
     var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
     req.session.flash = [];
@@ -1028,7 +1028,6 @@ exports.postProfile = async (req, res) => {
     
     //doc.__v = 1;//Last saved version. To be taken into account for future cases of concurrential changes, in case updateOne does not protect us from that problem.
     var price = req.body.price;
-    //console.log(doc);
     
     if(global++ < 1)
     await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {

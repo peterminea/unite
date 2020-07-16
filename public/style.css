@@ -26,6 +26,11 @@ span.hid,span.supply {
   }
 }
 
+span.multiSupp,span.suppCurrency {
+  color: navy; 
+  font-weight: bold
+}
+
 .font-14pt-custom {
   font-size: 14pt;
   font-weight: bold;

@@ -67,24 +67,17 @@ const statusesJson = {
 
 exports.getIndex = async (req, res) => {
   if (req.session) {
-     
+      try {
+        initConversions(fx);
+      }
+      catch {
+      }
+    
     var promise = BidRequest.find({
       buyer: req.session.buyer ? req.session.buyer._id : null
     }).exec();
 
     promise.then((bids) => {
-      initConversions(fx);
-      var totalBidsPrice = 0;
-      
-      
-      if (bids && bids.length && fx) {
-        for (var i in bids) {
-          totalBidsPrice += fx(parseFloat(bids[i].buyerPrice).toFixed(2))
-            .from(bids[i].supplierCurrency)
-            .to(process.env.BID_DEFAULT_CURR);          
-        }
-      }
-
       var success = search(req.session.flash, "success"),
         error = search(req.session.flash, "error");
       req.session.flash = [];
@@ -100,25 +93,33 @@ exports.getIndex = async (req, res) => {
           
         cap.sort(function (a, b) {
           return a.name.localeCompare(b.name);
-        });
-        
-        res.render("buyer/index", {
-          message: req.flash(
-            "info",
-            "Please wait while we are loading the list of available products (The Catalog)..."
-          ),
-          buyer: req.session ? req.session.buyer : null,
-          MAX_PROD: process.env.BID_MAX_PROD,
-          BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
-          bidsLength: bids && bids.length ? bids.length : null,
-          totalBidsPrice: totalBidsPrice,
-          capabilities: cap,
-          statuses: null,
-          successMessage: success,
-          errorMessage: error,
-          suppliers: null
-          //catalogItems: catalogItems
         });        
+        
+        setTimeout(function() {
+          var totalBidsPrice = 0;      
+
+          if (bids && bids.length && fx) {
+            for (var i in bids) {
+              totalBidsPrice += fx(parseFloat(bids[i].buyerPrice).toFixed(2))
+                .from(bids[i].supplierCurrency)
+                .to(process.env.BID_DEFAULT_CURR);          
+            }
+          }
+
+          res.render("buyer/index", {
+            buyer: req.session ? req.session.buyer : null,
+            MAX_PROD: process.env.BID_MAX_PROD,
+            BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+            bidsLength: bids && bids.length ? bids.length : null,
+            totalBidsPrice: totalBidsPrice,
+            capabilities: cap,
+            statuses: null,
+            successMessage: success,
+            errorMessage: error,
+            suppliers: null
+            //catalogItems: catalogItems
+          });
+        }, 1000);
       })
     }); 
   }
@@ -288,9 +289,10 @@ exports.postIndex = (req, res) => {
       })
       .catch(console.error);
   } else if(req.body.bidProductList) {//Place bid on one or more products (+ 1 or more suppliers) from the Product Catalog grid.
-     var buyerId = req.body.buyerId, productIds = req.body.productList, supplierIds = req.body.supplierList;    
-      var productList = prel(req.body.productList);
-      var supplierList = prel(req.body.supplierList);
+    
+     var buyerId = req.body.buyerId, productIds = req.body.bidProductList, supplierIds = req.body.bidSupplierList;
+      var productList = prel(productIds);
+      var supplierList = prel(supplierIds);
       var prodIDs = [], suppIDs = [];
 
       for(var i in productList) {
@@ -328,18 +330,17 @@ exports.postIndex = (req, res) => {
           var products = [], supps = [];
           
           for(var i in prods) {
-            prods.push(prods[i]);
+            products.push(prods[i]);
           }
           
           for(var i in sups) {
-            sups.push(sups[i]);  
+            supps.push(sups[i]);  
           }
           
           var success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
           req.session.flash = [];
           var isMultiProd = prodIDs.length > 1;
           var isMultiSupp = uniqueSupplierIds.length > 1;
-          console.log(buyer);
 
           res.render("buyer/placeBid", {
             successMessage: success,
@@ -354,11 +355,11 @@ exports.postIndex = (req, res) => {
             BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
             statuses: statuses,
             statusesJson: JSON.stringify(statusesJson),
-            buyer: buyer,
-            product: prods[0],
-            supplier: sups[0],
-            products: prods,
-            suppliers: sups
+            buyer: buyer[0],
+            product: products[0],
+            supplier: supps[0],
+            products: products,
+            suppliers: supps
             });
           });
         });
@@ -397,7 +398,6 @@ exports.getPlaceBid = (req, res) => {
           var success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
           req.session.flash = [];
           
-          console.log(buyer[0]);
 
           res.render("buyer/placeBid", {
             successMessage: success,
@@ -616,7 +616,6 @@ exports.getChatLogin = (req, res) => {
   var success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
   req.session.flash = [];
-  console.log(req.params.requestName);
 
   res.render("buyer/chatLogin", {
     successMessage: success,
@@ -1271,7 +1270,7 @@ exports.postSignUp = async (req, res) => {
       "&response=" +
       req.body.captchaResponse,
     { method: "POST" }
-  ).then(res0 => res0.json());
+  ).then((res0) => res0.json());
 
   console.log(captchaVerified);
   if (
@@ -1291,7 +1290,7 @@ exports.postSignUp = async (req, res) => {
         "yahuo.com",
         "gmx"
       ];
-      console.log(final_domain.toLowerCase());
+      
       for (var i = 0; i < prohibitedArray.length; i++)
         if (
           final_domain.toLowerCase().includes(prohibitedArray[i].toLowerCase())

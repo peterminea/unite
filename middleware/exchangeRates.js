@@ -1,10 +1,10 @@
-module.exports = async (fx) => {
+module.exports =  (fx) => {
   const fetch = require('node-fetch');
   let url = "https://www.floatrates.com/daily/eur.json";
   let settings = { method: "Get" };
 
-  await fetch(url, settings)
-      .then(res => res.json())
+  fetch(url, settings)
+      .then((res) => res.json())
       .then((json) => {
     var currency = JSON.stringify(json);
     currency = '[' + (currency).split('},').join('}},{') + ']';

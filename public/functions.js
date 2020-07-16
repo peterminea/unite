@@ -412,7 +412,7 @@ function treatDiv(div, isMulti, val, input) {
       .parent("div")
       .find("div")
       .index(div);
-    //alert(div.parent('div').length + ' ' + newIndex + ' ' + div.parent('div').hasClass('fileWrapper'));
+    
     var val2 = val.substring(0, val.length - 1);
     val2 = val2.split(",");
     val2.splice(newIndex, 1);
@@ -636,7 +636,7 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
       var divId = $('#jqDiv'+id);
 
       elem.append("<li class='list-group-item' price='" 
-                    + "' productId='" + productId + "' supplierId='" + suppId + addedPrice + "' maxAmount='" + (input.attr('maxAmount')? input.attr('maxAmount') : input.attr('defaultMaxAmount'))
+                    + "' productId='" + productId + "' supplierCurrency='" + suppCurr + "' supplierId='" + suppId + addedPrice + "' maxAmount='" + (input.attr('maxAmount')? input.attr('maxAmount') : input.attr('defaultMaxAmount'))
                     + "' totalPrice='" + bigPrice + "' amount='" + amountVal + "'>" 
                     + `<span class='cnt'>${lis}</span><span class='product'>${prodVal}</span>
 <span class='buttonsWrapper'><span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span></span>
@@ -668,12 +668,12 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
           //.then(() => {
             //var table = gridId;//divId.find('table').eq(1);//Last
             var tr = grid.find('tbody tr').eq(lis);
-            alert(tr.length);
             tr.attr('price', addedPrice);
             tr.attr('totalPrice', bigPrice);
             tr.attr('amount', amountVal);
             tr.attr('productId', productId);
             tr.attr('supplierId', suppId);
+            tr.attr('supplierCurrency', suppCurr);
             tr.attr('maxAmount', (input.attr('maxAmount')? input.attr('maxAmount') : input.attr('defaultMaxAmount')));
        // });
 
@@ -694,19 +694,18 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
         bindHandleProduct(grid.find('.dec').last(), input, isNewBid, id, false, false);                        
         delegateUpload(grid.find('.uploadImage').last());
 
-        if(isNewBid) {
-          var suppPriceUnit = fx.convert(parseFloat(addedPrice), {from: buyerCurrSpan.text(), to: suppCurr});
+        if(isNewBid || !($('span.multiSupp').length)) {
+          var suppPriceUnit = fx.convert(parseFloat(priceUnit), {from: buyerCurrSpan.text(), to: suppCurr});
           $('#supplierPriceUnit'+id).text(parseFloat(suppPriceUnit).toFixed(2));
-          var supp = fx.convert(parseFloat(bigPrice), {from: buyerCurrSpan.text(), to: suppCurr});
+          var supp = fx.convert(parseFloat(bigPrice).toFixed(2), {from: buyerCurrSpan.text(), to: suppCurr});
           $('#supplierPrice'+id).text(parseFloat(supp).toFixed(2));
-        } else if($('span.multiSupp').length) {//Place Bid MultiSupplier from the Catalog
-          var index = $(`#productsList${id}`).find('option').not(':first').index(option);
-          var unitPrice = $('span.unitPrice').eq(index);
-          var totalPrice = $('span.totalPrice').eq(index);
-          var suppPriceUnit = fx.convert(parseFloat(addedPrice), {from: buyerCurrSpan.text(), to: suppCurr});
-          var supp = fx.convert(parseFloat(bigPrice), {from: buyerCurrSpan.text(), to: suppCurr});
-          unitPrice.text(suppPriceUnit);
-          totalPrice.text(supp);
+        } else if($('span.multiSupp').length) {//Place Bid MultiSupplier from the Catalog.
+          var unitPrice = $(`span.unitPrice[suppId="${suppId}"]`);
+          var totalPrice = $(`span.totalPrice[suppId="${suppId}"]`);
+          var suppPriceUnit = fx.convert((priceUnit), {from: buyerCurrSpan.text(), to: suppCurr});
+          var supp = fx.convert((addedPrice), {from: buyerCurrSpan.text(), to: suppCurr});
+          unitPrice.text(parseFloat(suppPriceUnit).toFixed(2));
+          totalPrice.text(parseFloat(supp).toFixed(2));
         }
 
         input.val('').attr('productImage', null);
@@ -800,8 +799,8 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
       ul;
     var divId = fromBuyer ? $("#jqDiv" + id) : $("#jqDiv");
     var gridId = fromBuyer ? $("#grid" + id) : $("#grid");
-    var isUl = false,
-      rowId;
+    var fromBid = fromBuyer || !($("#hiddenTotalPrice").length);
+    var isUl = false, rowId;
 
     if (!li.length) {
       //Not from list, but from grid.
@@ -834,43 +833,33 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
       return false;
     }
 
-    var handledAmount = isRow ? entireAmount : 1;
+    var handledAmount = isRow? entireAmount : 1;
     var rowPrice = parseFloat(li.find("span.totalPrice").text()).toFixed(2);
-    var handledPrice =
-      handledAmount * parseFloat(li.find("span.price").text()).toFixed(2);
-    var theCurrency = fromBuyer
-      ? ul.attr("buyerCurrency")
+    var handledPrice = handledAmount * parseFloat(li.find("span.price").text()).toFixed(2);
+    var theCurrency = fromBid? ul.attr("buyerCurrency")
       : li
           .find("span.currency")
           .first()
           .text();
-    var supplierCurrency = fromBuyer ? ul.attr("supprCurrency") : theCurrency;
-
-    var totalPagePrice = fromBuyer
-      ? parseFloat(li.attr("totalPrice")).toFixed(2)
+    
+    var supplierCurrency = fromBid? li.attr("suppCurrency") : theCurrency;
+    var totalPagePrice = fromBid? parseFloat(li.attr("totalPrice")).toFixed(2)
       : parseFloat($("#hiddenTotalPrice").val()).toFixed(2);
 
     var canContinue = true;
-    var localAmount = isAdd
-      ? entireAmount + handledAmount
+    var localAmount = isAdd? entireAmount + handledAmount
       : entireAmount - handledAmount;
-    var localPrice = isAdd
-      ? parseFloat(parseFloat(rowPrice) + parseFloat(handledPrice)).toFixed(2)
+    var localPrice = isAdd? parseFloat(parseFloat(rowPrice) + parseFloat(handledPrice)).toFixed(2)
       : parseFloat(rowPrice - handledPrice).toFixed(2);
-    var totalAmountInput = fromBuyer
-      ? $("#totalAmount" + id)
+    var totalAmountInput = fromBid? $("#totalAmount" + id)
       : $("#totalSupplyAmount");
-    var newAmount = isAdd
-      ? parseInt(totalAmountInput.val()) + handledAmount
+    var newAmount = isAdd? parseInt(totalAmountInput.val()) + handledAmount
       : parseInt(totalAmountInput.val()) - handledAmount;
-    var newPrice = isAdd
-      ? parseFloat(
-          parseFloat(totalPagePrice) + parseFloat(handledPrice)
-        ).toFixed(2)
+    var newPrice = isAdd? parseFloat(    parseFloat(totalPagePrice) + parseFloat(handledPrice)     ).toFixed(2)
       : parseFloat(totalPagePrice - handledPrice).toFixed(2);
     var totalPrice = newPrice + " " + theCurrency,
       addedPrice = localPrice + " " + theCurrency;
-
+ 
     if (isRow || (entireAmount == 1 && !isAdd)) {
       SwalCustom.fire({
         title: "Are you sure?",
@@ -922,25 +911,31 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
       return false;
     }
 
-    if (!fromBuyer) {
+    if (!fromBid) {
       $("#hiddenTotalPrice").val(parseFloat(newPrice));
       $("#totalSupplyPrice").text(totalPrice);
       prodServiceInput.trigger("change");
     } else {
       var id2 = getId(id);
-      
       var span = $('span.bidCurrency[index="' + (id2.length? id : '-1') + '"]').first();
       $("#buyerPriceUnit" + id).text(parseFloat(localPrice).toFixed(2));
-      var suppUnitVal = fx.convert(localPrice, {
-        from: span.text(),
-        to: supplierCurrency
-      });
-      $("#supplierPriceUnit" + id).text(parseFloat(suppUnitVal).toFixed(2));
-      var supp = parseFloat(
-        fx.convert(newPrice, { from: span.text(), to: supplierCurrency })
-      ).toFixed(2);
       $("#price" + id).text(parseFloat(newPrice).toFixed(2));
-      $("#supplierPrice" + id).text(supp);
+      
+      if($('span.multiSupp').length) {
+        var supplierId = li.attr('supplierId');
+        var unitSpan = $(`span.unitPrice[suppId="${supplierId}"]`);
+        var totalSpan = $(`span.totalPrice[suppId="${supplierId}"]`);
+        var suppUnitVal = parseFloat(fx.convert(localPrice, {from: span.text(),  to: supplierCurrency})).toFixed(2);
+        unitSpan.text(suppUnitVal);
+        var totalVal = parseFloat(fx.convert(newPrice, {from: span.text(),  to: supplierCurrency})).toFixed(2);
+        totalSpan.text(totalVal);
+      } else {
+        var suppUnitVal = fx.convert(localPrice, {from: span.text(), to: supplierCurrency});
+        $("#supplierPriceUnit" + id).text(parseFloat(suppUnitVal).toFixed(2));
+        var supp = parseFloat(fx.convert(newPrice, { from: span.text(), to: supplierCurrency }) ).toFixed(2);
+        $("#supplierPrice" + id).text(supp);
+      }
+      
       gridId.trigger("reloadGrid");
     }
   });
@@ -1251,7 +1246,7 @@ function addProduct(obj) {
         title: "Warning",
         text: "Please enter valid values for product name, price and amount."
       });
-      //alert('Please enter valid values for products, prices and currency.');
+      
       $("#prodServiceInput,#price,#amount").addClass("errorField");
     }
   });
@@ -1622,6 +1617,8 @@ function registrationDialog(accountType) {
 
 function delegateUpload(obj) {
   obj.off("click").on("click", function() {
+    //var isTable = 
+    
     var uploadInput,
       li = $(this)
         .parent("span")
@@ -1641,7 +1638,6 @@ function delegateUpload(obj) {
     } else {
       //jqGrid
       var divId = id.length? $("#jqDiv" + id) : $("#jqDiv");
-
       var tr = $(this).closest("tr"); //parent('span').parent('td').parent('tr');
       var table = tr.closest("table"); //parent('tbody').parent('table');
       var div = divId.prev("div");
@@ -1731,6 +1727,8 @@ function initGrid(
           });
       } else if (table.find(".rem").length) {
         var id = '_' + getId(divId.attr("id"));
+        if(id.length == 1)
+          id = '';
         
         var prod = $("#prodServiceInput").length
           ? $("#prodServiceInput")
@@ -1743,6 +1741,12 @@ function initGrid(
       }
     },
     gridComplete: function() {},
+    onSelectRow : function(id) { 
+      var ids = $(`${gridId}`).jqGrid("getGridParam", "selarrrow");
+      if($('#bidOnProds').length) {
+        $('#bidOnProds').prop('disabled', ids.length? false : true);
+      }
+    },
     caption: `The ${theName} grid, which uses predefined formatters and templates:`
   });
 
@@ -1893,7 +1897,7 @@ function productFormatter(cellvalue, options, rowObject) {
   return `<span class='product'>${cellvalue}</span>`;
 }
 
-function amountFormatter(cellvalue, options, rowObject) {alert(rowObject.hiddenAmount);
+function amountFormatter(cellvalue, options, rowObject) {
   return `<span class='amountWrapper0'><span class='amount'>${parseInt( rowObject.hiddenAmount )}</span> items </span>`;
 }
 
@@ -2389,6 +2393,8 @@ $(document).ready(function() {
       });
 
       $('select.buyerCurrency').on('change', function() {
+        $(this).removeClass('warned');
+        
         var curr = $(this).find('option:selected').text();
         var id = '_' + $(this).attr('index');
         if(id.charAt(1) == '-')
@@ -2400,6 +2406,8 @@ $(document).ready(function() {
         
         var suppCurrency = elem.attr('suppCurrency')? elem.attr('suppCurrency') : null; 
         if(suppCurrency && curr && curr != suppCurrency) {
+          $(this).addClass('warned');
+          
           Swal.fire({
             icon: 'warning',
             title: 'Warning',
@@ -2433,7 +2441,7 @@ $(document).ready(function() {
         }
         
         elem.find('li').each(function() {
-          var addedPrice = $(this).attr('price'), totalPrice = $(this).attr('totalPrice'), shownPrice = $(this).find('.price').text(), theCurr = $(this).find('.currency').text();
+          var addedPrice = $(this).attr('price'), totalPrice = $(this).attr('totalPrice'), shownPrice = $(this).find('.price').text(), theCurr = $(this).find('span.currency').text();
           
           addedPrice = fx.convert(parseFloat(addedPrice).toFixed(2), {from: theCurr, to: curr});
           totalPrice = fx.convert(parseFloat(totalPrice).toFixed(2), {from: theCurr, to: curr});
@@ -2442,7 +2450,20 @@ $(document).ready(function() {
           $(this).attr('price', addedPrice);
           $(this).attr('totalPrice', totalPrice);
           $(this).find('.price').text(shownPrice);
-          $(this).find('.currency').text(curr);
+          $(this).find('span.currency').text(curr);
+        });
+        
+        grid.find('tr').each(function() {
+          var addedPrice = $(this).attr('price'), totalPrice = $(this).attr('totalPrice'), shownPrice = $(this).find('span.price').text(), theCurr = $(this).find('span.currency').text();
+          
+          addedPrice = fx.convert(parseFloat(addedPrice).toFixed(2), {from: theCurr, to: curr});
+          totalPrice = fx.convert(parseFloat(totalPrice).toFixed(2), {from: theCurr, to: curr});
+          shownPrice = fx.convert(parseFloat(shownPrice).toFixed(2), {from: theCurr, to: curr});
+          
+          $(this).attr('price', addedPrice);
+          $(this).attr('totalPrice', totalPrice);
+          $(this).find('.price').text(shownPrice);
+          $(this).find('span.currency').text(curr);
         });
       });    
     
@@ -2455,7 +2476,6 @@ $(document).ready(function() {
         var opt = $(this).find('option:selected');
         var price = opt.attr('price');
         var isSingle = $("#prodServiceInput").length > 0;
-        
         if(isSingle) {
           $("#prodServiceInput").attr('price', price);
         }
@@ -2483,7 +2503,7 @@ $(document).ready(function() {
           $('#addProdService').removeAttr('disabled');
         }
      
-        if(bidCurrency != currency) {
+        if(bidCurrency != currency && !($(this).hasClass('warned'))) {
           Swal.fire({
             icon: 'warning',
             title: 'Warning',
@@ -2631,7 +2651,7 @@ $(document).ready(function() {
     var formData = new FormData();
     formData.append("_csrf", token);
     formData.append("upload_file", true);
-
+    
     if (isMultiple == false) {
       formData.append("single", input[0].files[0]);
     } else {
@@ -2850,6 +2870,12 @@ $(document).ready(function() {
         } else {
           console.log("failed");
         }
+      } else if(xhr.responseText.length > 150) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Upload Error!',
+          text: xhr.responseText
+        });
       }
     };
 

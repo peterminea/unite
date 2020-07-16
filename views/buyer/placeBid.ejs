@@ -89,10 +89,11 @@
             <% let j = 0; for(supplier of suppliers) { j++; %>
             <div class="form-group">
               <label class="col-form-label">Supplier data:</label>
-              <strong><%= j %> - </strong><input type="text" class="form-control" value="Name: <%= supplier.companyName %>, e-mail: <%= supplier.emailAddress %>" disabled>
+              <strong><%= j %> : </strong>
+              <input type="text" style="text-color: navy; font-weight: bold" class="form-control" value="Name: <%= supplier.companyName %>, e-mail: <%= supplier.emailAddress %>" disabled>
             </div>
-            <% } %>
-            <% } %>
+            <% } } %>
+            
             <div class="form-group">
               <label class="col-form-label">Buyer Organization</label>
               <input type="text" class="form-control" name="buyerName" value="<%= buyer.organizationName %>" disabled>
@@ -192,7 +193,7 @@
               <input class="form-control upload productimageupload" type="file" id="productImage" name="products" single>
               <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload Product Image" />                    
             </div>
-              <ul class="list-group" MAX="<%= MAX_PROD %>" id="prodServices">
+              <ul class="list-group" MAX="<%= MAX_PROD %>" buyerCurrency="<%= buyer.currency %>" id="prodServices">
               </ul>
               <p class='term'>
                 You have a number of <span class='productsCount'>0</span> products.
@@ -209,7 +210,7 @@
               <% } %>
             </div>
             <div id="jqDiv" class="form-group">
-              <table id="grid">
+              <table id="grid" buyerCurrency="<%= buyer.currency %>">
               </table>
               <div id='prodPager'>
               </div>
@@ -246,9 +247,11 @@
                 This Bid is intended to be sent to multiple suppliers. The equivalent Supplier prices will be decided separately for each one of them.
                 </p>
                 <% let i = 0; for(supplier of suppliers) { i++; %>
-                <label class="col-form-label">Supplier <%= i %> (<%= supplier.companyName %>) unit price for selected product:</label>
-                <span class='multiSupp unitPrice' suppId='<%= supplier._id %>' id="supplierPriceUnit_<%= i %>">0</span>
-                <span index="<%= i %>" class="suppCurrency" id="supplierCurrencyUnit_<%= i %>"><%= supplier.currency %></span>
+              <div>
+                  <label class="col-form-label">Supplier <%= i %> (<strong><%= supplier.companyName %></strong>) unit price for selected product:</label>
+                  <span class='multiSupp unitPrice' suppId='<%= supplier._id %>' id="supplierPriceUnit_<%= i %>">0</span>
+                  <span index="<%= i %>" class="suppCurrency" id="supplierCurrencyUnit_<%= i %>"><%= supplier.currency %></span>
+              </div>
                 <% } %>
             </div>
             <% } %>
@@ -261,17 +264,17 @@
               </span>
             </div>
             <% } else { %>
-            <div class="form-group">
               <p>
-                As your Bid is intended to address multiple suppliers, each one of them will have the prices of the corresponding / proposed Products converted from your currency to theirs corresponding one.
-                As you add amunts for products, each one of the Suppliers will have here their updated, corresponding price in their currency.
+                As your Bid is intended to address multiple suppliers, each one of them will have the prices of the corresponding / proposed Products converted from your currency to theirs corresponding one.<br>As you add amounts for products, each one of the Suppliers will have here their updated, corresponding price in their currency.
               </p>
               <% let i = 0; for(supplier of suppliers) { i++; %>
-              <label class="col-form-label">Supplier <%= i %> (<%= supplier.companyName %>) total price for selected product:</label>
-              <span class='multiSupp totalPrice' suppId='<%= supplier._id %>' id="supplierPrice_<%= i %>">0</span>
-              <span index="<%= i %>" class="suppCurrency" id="supplierCurrency_<%= i %>"><%= supplier.currency %></span>
+              <div class="form-group">
+                <label class="col-form-label">Supplier <%= i %> (<strong><%= supplier.companyName %></strong>) total price for selected product:</label>
+                <span class='multiSupp totalPrice' suppId='<%= supplier._id %>' id="supplierPrice_<%= i %>">0</span>
+                <span index="<%= i %>" class="suppCurrency" id="supplierCurrency_<%= i %>"><%= supplier.currency %></span>
+              </div>
               <% } %>
-            </div>
+            
             <% } %>
              <div class="form-group">
               <label class="col-form-label">Status*</label>
@@ -340,7 +343,7 @@
 
               initGrid(colModel, data, "#grid"+index, '#prodPager'+index, "name", 'Products List', 1000);
               
-              <%= if(isSingleBid == true) { %>
+              <% if(isSingleBid == true) { %>
               setTimeout(function() {
                 var table = $("#jqDiv"+index).find('table').eq(1);                
                 table.attr('suppCurrency', "<%= supplier.currency %>");                
@@ -370,9 +373,9 @@
                 .prop('selected', true); 
               <% } %>
 
-              $('#status'+index).change(function(e) {//Read-only select, though.
+              $('#status'+index).change(function(e) {
                 if($(this).val() < x.BUYER_REQUESTED_BID
-                   || $(this).val() > x.PAYMENT_DELIVERY_DONE) {//The last two options can be triggered by the corresponding Cancel Bid button. 5 for Supplier cancellation, 6 for Buyer cancellation.
+                   || $(this).val() > x.PAYMENT_DELIVERY_DONE) {
                   return false;
                 }
 
@@ -394,9 +397,9 @@
               bindAddBid($('button[id="addProdService"]'), null);
             </script>
           </div>
-          <div class="modal-footer">
-            <button href="../buyer/index" type="button" class="btn btn-secondary">Close</button>
-            <button index="" class='placeBid' type="submit" class="btn btn-primary">Send request</button>
+          <div class="form-group">
+            <a href="/buyer"><button type="button" class="btn btn-warning" style="float: left">Cancel</button></a>
+            <button index="" type="submit" class="placeBid btn btn-primary" style="float: right">Send request</button>
           </div>
         </form>
       </div>
