@@ -132,12 +132,14 @@
             initGrid(colModel, data2, "#gridProds", '#prodPager', "productName", 'Products List', 1100);
             
             str = '';
-            str += '<br><div class=" profile-form"> <form id="bidProdsForm" method="POST"> <input type="hidden" name="_csrf" value="'
-              + "<%= csrfToken %>" 
+            str += '<br><div class=" profile-form"> <form id="bidProdsForm" method="POST">' 
               + "<input type='hidden' id='bidProductList' name='bidProductList'>"
               + "<input type='hidden' id='bidSupplierList' name='bidSupplierList'>"
               + "<input type='hidden' id='buyerId' name='buyerId'>"
-              + '"/>  <button type="submit" id="bidOnProds" value="Bid on selected products" class="btn btn-primary btn-block btn-lg">Bid on Selected Products</button>'
+              + '<input type="hidden" name="_csrf" value="'
+              + "<%= csrfToken %>" 
+              + '">' 
+              + '<button type="submit" id="bidOnProds" disabled value="Bid on selected products" class="btn btn-primary btn-block btn-lg">Bid on Selected Products</button>'
               + '</form></div>';
             $('div.bodyBuilder').append(str);
             
@@ -163,20 +165,20 @@
                   title: 'warning',
                   text: 'You can select at most '+  + ' products.'
                 });
-                 }
+              }
               
               var prodIds = [], buyerId, suppIds = [];
               for(var i in selIds) {
-                var data = $('#gridProds').jqGrid('getRowData', rowid);
-                if(i == 0) 
-                  buyerId = data[i].buyerId;
-                prodIds.push(data[i].productId);
-                suppIds.push(data[i].supplierId);
+                var data = $('#gridProds').jqGrid('getRowData', selIds[i]);
+                if(prodIds.length == 0) 
+                  buyerId = data.buyerId;
+                prodIds.push(data.productId);
+                suppIds.push(data.supplierId);
               }
               
               $('#bidProductList').val(prodIds);
               $('#bidSupplierList').val(suppIds);
-              $('#buyerId').val(buyerId)
+              $('#buyerId').val(buyerId);
               $('#bidProdsForm').submit();
             });
           }
@@ -238,7 +240,7 @@
     </form>
     
     <div class="mt-4">
-      <button class="form-control btn btn-primary" MAX="<%= MAX_PROD %>" id="loadCatalog" buyer="<%= buyer._id %>" avatar="<%= buyer.avatar %>">
+      <button class="form-control btn btn-warning" MAX="<%= MAX_PROD %>" id="loadCatalog" buyer="<%= buyer._id %>" avatar="<%= buyer.avatar %>">
         Load Catalog of Products
       </button>
     </div>
@@ -551,7 +553,7 @@
                     <input class="form-control upload productimageupload" type="file" id="productImage_<%= i %>" name="products" single>
                     <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload Product Image" />                    
                   </div>
-                    <ul class="list-group" MAX="<%= MAX_PROD %>" suppCurrency="<%= supplier.currency %>" id="prodServices_<%= i %>">
+                    <ul class="list-group" MAX="<%= MAX_PROD %>" buyerCurrency="<%= buyer.currency %>" suppCurrency="<%= supplier.currency %>" id="prodServices_<%= i %>">
                     </ul>
                     <p class='term'>
                       You have a number of <span class='productsCount'>0</span> products.
@@ -563,7 +565,7 @@
                     <input type="hidden" required id="productImagesList_<%= i %>" name="productImagesList" value="">
                   </div>
                   <div id="jqDiv_<%= i %>" class="form-group">
-                    <table id="grid_<%= i %>">
+                    <table id="grid_<%= i %>" buyerCurrency="<%= buyer.currency %>">
                     </table>
                     <div id='prodPager_<%= i %>'>
                     </div>
@@ -707,45 +709,15 @@
                   </script>
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                  <button index="<%= i %>" class='placeBid' type="submit" class="btn btn-primary">Send request</button>
+                  <button class="btn btn-warning" style="float: left">Cancel</button>
+                  <button index="<%= i %>" type="submit" class="placeBid btn btn-primary">Send request</button>
                 </div>
               </form>
             </div>
           </div>
         </div>
-      </div> 
-      <% } } else if(1==2 && catalogItems != null) { %>
-        <div id="catalog">
-          <h4>
-            Catalog of Products
-          </h4>
-          <table id="buyers" class="table table-striped table-hover table-condensed products">
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Supplier name</th>
-                <th scope="col">Product name</th>
-                <th scope="col">Product price</th>
-                <th scope="col">Currency</th>
-                <th scope="col">Image</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% let j = 0; for (item of catalogItems) { %>
-              <tr id="<%= j %>">
-                <td scope="col"><%= j+1 %></td>
-                <td scope="col"><%= item.supplier %></td>
-                <td scope="col"><%= item.productName %></td>
-                <td scope="col"><%= item.price %></td>
-                <td scope="col"><%= item.currency %></td>
-                <td scope="col"><img src="<%= buyer.avatar %>" style="height: 25px; width: 20px"></td>
-              </tr>
-              <% j++; } %>
-              </tbody>
-          </table>
       </div>
-      <% } %>
+      <% } } %>
     </div>
   </div>
 </body>

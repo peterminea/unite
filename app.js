@@ -421,10 +421,10 @@ app.get("/loadProductsCatalog", (req, res) => {
     }
 
     catalogItems.sort(function(a, b) {
-      return a.supplier.localeCompare(b.supplier);
+      return a.productName.localeCompare(b.productName);
     });
 
-    //console.log(JSON.stringify(catalogItems));
+    console.log((catalogItems.length));
     res.json(catalogItems);
   });
 });
