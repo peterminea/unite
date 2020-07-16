@@ -88,8 +88,8 @@
             </p>
             <% let j = 0; for(supplier of suppliers) { j++; %>
             <div class="form-group">
-              <label class="col-form-label">Supplier data:</label>
-              <strong><%= j %> : </strong>
+              <label class="col-form-label">Supplier data</label>
+              <strong><%= j %>: </strong>
               <input type="text" style="text-color: navy; font-weight: bold" class="form-control" value="Name: <%= supplier.companyName %>, e-mail: <%= supplier.emailAddress %>" disabled>
             </div>
             <% } } %>
@@ -220,14 +220,14 @@
               <input class="form-control" type="number" disabled id="totalAmount" name="amount" value="0">
             </div>
             <div class="form-group">
-              <label class="col-form-label">Your price for selected product:</label>
+              <label class="col-form-label">Your price for selected product <span class='productName'></span>:</label>
               <span class="form-control hid">
                 <span id="buyerPriceUnit">0</span>
                 <span index="-1" class="bidCurrency" id="buyerCurrencyUnit"></span>
               </span>
             </div>            
             <div class="form-group">
-              <label class=" col-form-label">Your total price:</label>
+              <label class=" col-form-label">Your Overall price:</label>
               <span class="form-control hid">
                 <span index="-1" class="bidPrice" id="price" name="buyerPrice">0</span>
                 <span index="-1" class="bidCurrency" id="currency" name="buyerCurrency"></span>
@@ -235,7 +235,7 @@
             </div>
            <% if(isSingleBid == true) { %>
             <div class="form-group">
-              <label class="col-form-label">Supplier's price for selected product:</label>
+              <label class="col-form-label">Supplier's price for selected product <span class='productName'></span>:</label>
               <span class="form-control hid">
                 <span id="supplierPriceUnit">0</span>
                 <span index="0" class="suppCurrency" id="supplierCurrencyUnit"><%= supplier.currency %></span>
@@ -248,7 +248,7 @@
                 </p>
                 <% let i = 0; for(supplier of suppliers) { i++; %>
               <div>
-                  <label class="col-form-label">Supplier <%= i %> (<strong><%= supplier.companyName %></strong>) unit price for selected product:</label>
+                <label class="col-form-label">Supplier <%= i %> (<strong><%= supplier.companyName %></strong>) unit price for selected product <span class='productName'></span>:</label>
                   <span class='multiSupp unitPrice' suppId='<%= supplier._id %>' id="supplierPriceUnit_<%= i %>">0</span>
                   <span index="<%= i %>" class="suppCurrency" id="supplierCurrencyUnit_<%= i %>"><%= supplier.currency %></span>
               </div>
@@ -269,7 +269,7 @@
               </p>
               <% let i = 0; for(supplier of suppliers) { i++; %>
               <div class="form-group">
-                <label class="col-form-label">Supplier <%= i %> (<strong><%= supplier.companyName %></strong>) total price for selected product:</label>
+                <label class="col-form-label">Supplier <%= i %> (<strong><%= supplier.companyName %></strong>) total price for selected product <span class='productName'></span>:</label>
                 <span class='multiSupp totalPrice' suppId='<%= supplier._id %>' id="supplierPrice_<%= i %>">0</span>
                 <span index="<%= i %>" class="suppCurrency" id="supplierCurrency_<%= i %>"><%= supplier.currency %></span>
               </div>
@@ -329,16 +329,16 @@
               var data = [];
               var colModel = [
                 { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
-                { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, search: true, width: 140},
+                { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, unformat: priceUnformatter, template: 'number', sorttype: 'number', search: true, width: 140},
+                { name: 'amount', label: 'Amount', formatter: amountFormatter, unformat: amountUnformatter, template: 'number', sorttype: 'number', align: 'center', search: true, template: 'number', width: 70},
+                { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, unformat: totalPriceUnformatter, template: 'number', sorttype: 'number', search: true, width: 90},            
+                { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
+                { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter},
                 { name: 'hiddenPrice', hidden: true },
                 { name: 'hiddenAmount', hidden: true },
                 { name: 'hiddenTotalPrice', hidden: true },
                 { name: 'hiddenCurrency', hidden: true },
-                { name: 'productImageSource', hidden: true},
-                { name: 'amount', label: 'Amount', formatter: amountFormatter, align: 'center', search: true, template: 'number', width: 70},
-                { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, search: true, width: 90},            
-                { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
-                { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
+                { name: 'productImageSource', hidden: true}
               ];
 
               initGrid(colModel, data, "#grid"+index, '#prodPager'+index, "name", 'Products List', 1000);

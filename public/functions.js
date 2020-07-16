@@ -1692,7 +1692,7 @@ function initGrid(
     guiStyle: "bootstrap4",
     iconSet: "glyph",
     idPrefix: "gb1_",
-    datatype: "local",
+    datatype: "clientSide",
     viewrecords: true,
     gridview: true,
     altRows: true,
@@ -1898,21 +1898,15 @@ function productFormatter(cellvalue, options, rowObject) {
 }
 
 function amountFormatter(cellvalue, options, rowObject) {
-  return `<span class='amountWrapper0'><span class='amount'>${parseInt( rowObject.hiddenAmount )}</span> items </span>`;
+  return `<span class='amountWrapper0'><span class='amount'>${parseInt(rowObject.hiddenAmount )}</span> items </span>`;
 }
 
 function priceFormatter(cellvalue, options, rowObject) {
-  return `<span class='basicPriceWrapper0'><span class='price'>${parseFloat(rowObject.hiddenPrice).toFixed(2)}</span> <span class='currency'>${
-    rowObject.hiddenCurrency
-  }</span></span>`;
+  return `<span class='basicPriceWrapper0'><span class='price'>${parseFloat(rowObject.hiddenPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency}</span></span>`;
 }
 
 function totalPriceFormatter(cellvalue, options, rowObject) {
-  return `<span class='priceWrapper0'><span class='totalPrice'>${parseFloat(
-    rowObject.hiddenTotalPrice
-  ).toFixed(2)}</span> <span class='currency'>${
-    rowObject.hiddenCurrency
-  }</span></span>`;
+  return `<span class='priceWrapper0'><span class='totalPrice'>${parseFloat(rowObject.hiddenTotalPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency }</span></span>`;
 }
 
 function buttonsWrapperFormatter(cellvalue, options, rowObject) {
@@ -1924,11 +1918,7 @@ function imageWrapperFormatter(cellvalue, options, rowObject) {
 }
 
 function productPriceFormatter(cellvalue, options, rowObject) {
-  return `<span class='priceWrapper0'><span class='totalPrice'>${parseFloat(
-    rowObject.hiddenTotalPrice
-  ).toFixed(2)}</span> <span class='currency'>${
-    rowObject.currency
-  }</span></span>`;
+  return `<span class='priceWrapper0'><span class='totalPrice'>${parseFloat(rowObject.hiddenTotalPrice).toFixed(2)}</span> <span class='currency'>${rowObject.currency }</span></span>`;
 }
 
 function removalFormatter(cellvalue, options, rowObject) {
@@ -1982,6 +1972,54 @@ function imageFormatter(cellvalue, options, rowObject) {
     ? `<img src="${rowObject.downloadHref}" title="Image" style="height: 30px; width: 30px" onclick="window.open(this.src)">`
     : `<span style="cursor: pointer" name="${rowObject.downloadHref}" onclick="window.open('https://www.google.com/')">No image</span>`;
 }
+
+
+function buyerRemovalFormatter(cellvalue, options, rowObject) {
+  return `<a href="../../../supervisor/chatLogin/${rowObject.supervisorId}/${rowObject.buyerId}/0/None/${rowObject. buyerOrganizationName}/(Supervisor)-${rowObject.supervisorOrganizationName}>`;
+}
+
+
+function chatFormatter(cellvalue, options, rowObject) {
+  return `<button title="Remove selected Buyer from UNITE" id="process_${rowObject.index}" class="btn btn-primary">Process</button>`;
+}
+
+
+//Unformatters:
+
+function priceUnformatter(cellvalue, options, cell) {
+  return parseFloat($('span.price', cell).text()).toFixed(2);// + ' ' + $('.currency', cell).text();
+}
+
+function amountUnformatter(cellvalue, options, cell) {
+  return parseInt($('span.amount', cell).text());
+}
+
+function totalPriceUnformatter(cellvalue, options, cell) {//Also for productPriceFormatter.
+  return parseFloat($('span.totalPrice', cell).text()).toFixed(2);// + ' ' + $('.currency', cell).text();
+}
+
+
+//Formatters for Supervisor's Buyers Table:
+
+function totalBidsPriceFormatter(cellvalue, options, rowObject) {
+  return `<span class='basicPriceWrapper0'><span class='price'>${parseFloat(rowObject.hiddenTotalBidsPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency}</span></span>`;
+}
+
+
+function validBidsPriceFormatter(cellvalue, options, rowObject) {
+  return `<span class='basicPriceWrapper0'><span class='price'>${parseFloat(rowObject.hiddenValidBidsPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency}</span></span>`;
+}
+
+
+function cancelledBidsPriceFormatter(cellvalue, options, rowObject) {
+  return `<span class='basicPriceWrapper0'><span class='price'>${parseFloat(rowObject.hiddenCancelledBidsPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency}</span></span>`;
+}
+
+
+function expiredBidsPriceFormatter(cellvalue, options, rowObject) {
+  return `<span class='basicPriceWrapper0'><span class='price'>${parseFloat(rowObject.hiddenExpiredBidsPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency}</span></span>`;
+}
+
 
 $(document).ready(function() {
   var cnt = $("div.container").first();
@@ -2474,6 +2512,14 @@ $(document).ready(function() {
         
         var name = $(this).val();
         var opt = $(this).find('option:selected');
+        $('span.hid').first().parent('div').find('span.productName').text(opt.text());
+        
+        if($('.multiSupp').length) {alert($(`span.unitPrice[suppId="${opt.attr('supplierId')}"]`).length);
+          $(`span.unitPrice[suppId="${opt.attr('supplierId')}"]`).parent('div').find('.productName').text(opt.text());
+        } else {
+          $('span.hid').eq(2).parent('div').find('span.productName').text(opt.text());
+        }
+        
         var price = opt.attr('price');
         var isSingle = $("#prodServiceInput").length > 0;
         if(isSingle) {

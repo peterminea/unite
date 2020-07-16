@@ -26,8 +26,8 @@ span.hid,span.supply {
   }
 }
 
-span.multiSupp,span.suppCurrency {
-  color: navy; 
+span.multiSupp,span.suppCurrency,span.productName {
+  color: navy;
   font-weight: bold
 }
 

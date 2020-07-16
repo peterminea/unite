@@ -141,8 +141,85 @@
         </tr>
         <% i++; } %>
         </tbody>
-      </table>
+      </table>    
     </div>
+    <div id="jqDiv" class="form-group">
+      <table id="supervBuyers">
+      </table>
+      <div id='sbPager'>
+      </div>
+    </div>
+    <script type="text/javascript">
+    var data = [];
+    var colModelSupervBuyers = [
+      { name: 'deptAgencyGroup', label: 'Department/Agency Group', align: 'center', search: true, width: 210},
+      { name: 'contactName', label: 'Contact Name', align: 'center', sorttype: 'text', search: true, width: 220},      
+      { name: 'balance', label: 'Buyer\'s Balance', align: 'center', template: 'number', sorttype: 'number', search: true, width: 100},
+      { name: 'isActive', label: 'Is Active?', align: 'center', search: true, width: 100 },
+      { name: 'totalBids', label: 'Total Bids Count', align: 'center', search: true, width: 210},
+      { name: 'totalBidsPrice', label: 'Total Bids Price', align: 'center', formatter: totalBidsPriceFormatter, unformat: priceUnformatter, sorttype: 'number', template: 'number', search: true, width: 220},      
+      { name: 'validBids', label: 'Valid Bids Count', align: 'center', template: 'number', sorttype: 'number', search: true, width: 100},
+      { name: 'validBidsPrice', label: 'Valid Bids Price', align: 'center', formatter: validBidsPriceFormatter, unformat: priceUnformatter, sorttype: 'number', template: 'number', search: true, width: 100 },
+      { name: 'cancelledBids', label: 'Cancelled Bids Count', align: 'center', search: true, width: 210},
+      { name: 'cancelledBidsPrice', label: 'Cancelled Bids Price', align: 'center', formatter: cancelledBidsPriceFormatter, unformat: priceUnformatter, sorttype: 'number', template: 'number', search: true, width: 220},      
+      { name: 'expiredBids', label: 'Expired Bids Count', align: 'center', template: 'number', sorttype: 'number', search: true, width: 100},
+      { name: 'expiredBidsPrice', label: 'Expired Bids Price', align: 'center', formatter: expiredBidsPriceFormatter, unformat: priceUnformatter, sorttype: 'number', template: 'number', search: true, width: 100 },
+      { name: 'removeBuyer', label: 'Process Removal', align: 'center', formatter: buyerRemovalFormatter, sortable: false, search: false, width: 100 },
+      { name: 'chat', label: 'Chat with Buyer', align: 'center', formatter: chatFormatter, unformat: priceUnformatter, sortable: false, search: false, width: 100 },
+      { name: "hiddenCurrency", hidden: true },
+      { name: "hiddenTotalBids", hidden: true },
+      { name: "hiddenTotalBidPrice", hidden: true },
+      { name: "hiddenValidBids", hidden: true },
+      { name: "hiddenValidBidsPrice", hidden: true },
+      { name: "hiddenCancelledBids", hidden: true },
+      { name: "hiddenCancelledBidsPrice", hidden: true },
+      { name: "hiddenExpiredBids", hidden: true },
+      { name: "hiddenExpiredBidsPrice", hidden: true },
+      { name: 'supervisorId', hidden: true },
+      { name: 'buyerId', hidden: true },
+      { name: 'buyerOrganizationName', hidden: true },
+      { name: 'supervisorOrganizationName', hidden: true },
+      { name: 'index', hidden: true }
+    ];
+      
+  <% i = 0; for (buyer of buyers) { %>
+  data.push({
+    index: "<%= i %> ",
+    supervisorId: "<%= supervisor._id %> ",
+    buyerId: "<%= buyer._id %> ",
+    buyerOrganizationName: "<%= buyer.organizationName %> ",
+    supervisorOrganizationName: "<%= supervisor.organizationName %> ",
+    deptAgencyGroup: "<%= buyer.deptAgencyGroup %> ",
+    contactName: "<%= buyer.contactName %> ",
+    balance: "<%= buyer.balance %> ",
+    isActive: "<%= buyer.isActive %> ",
+    hiddenCurrency: "<%= buyer.currency %> ",
+    <% if(buyer.bidData != null) { %>
+    hiddenTotalBids: "<%= buyer.bidData.totalBids %> ",
+    hiddenTotalBidsPrice: "<%= buyer.bidData.totalPrice %> ",
+    hiddenValidBids: "<%= buyer.bidData.validBids %> ",
+    hiddenValidBidsPrice: "<%= buyer.bidData.validBidsPrice %> ",
+    hiddenCancelledBids: "<%= buyer.bidData.cancelledBids %> ",
+    hiddenCancelledBidsPrice: "<%= buyer.bidData.cancelledBidsPrice %> ",
+    hiddenExpiredBids: "<%= buyer.bidData.expiredBids %>",
+    hiddenExpiredBidsPrice: "<%= buyer.bidData.expiredBidsPrice %> "
+    <% } else { %>
+    hiddenTotalBids: 0,
+    hiddenTotalBidsPrice: 0,
+    hiddenValidBids: 0,
+    hiddenValidBidsPrice: 0,
+    hiddenCancelledBids: 0,
+    hiddenCancelledBidsPrice: 0,
+    hiddenExpiredBids: 0,
+    hiddenExpiredBidsPrice: 0
+    <% } %>
+  });
+  <% %>
+      
+
+  initGrid(colModelGridBids, data, "#supervBuyers", '#sbPager', "bidName", 'Supervisor\'s Buyers List', 1900);
+  
+    </script>
         <% } else {%>
         <div>
           <p style="color: green; font-family: arial">
