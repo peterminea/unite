@@ -119,7 +119,7 @@ exports.getIndex = async (req, res) => {
             suppliers: null
             //catalogItems: catalogItems
           });
-        }, 1000);
+        }, 1600);
       })
     }); 
   }
