@@ -100,9 +100,9 @@
             var colModel = [
               { name: 'productName', label: 'Product name', formatter: productFormatter, search: true, width: 140},
               { name: 'supplierName', label: 'Supplier Name', align: 'center', search: true, width: 140},
-              { name: 'productPrice', label: 'Product price', formatter: productPriceFormatter, unformat: productPriceUnformatter, template: 'number', sorttype: 'number', align: 'center', search: true, width: 140},
+              { name: 'productPrice', label: 'Product price', formatter: priceFormatter, unformat: priceUnformatter, template: 'number', sorttype: 'number', align: 'center', search: true, width: 140},
               { name: 'amount', label: 'Amount', align: 'center', formatter: amountFormatter, unformat: amountUnformatter, sortname: 'hiddenAmount', template: 'number', sorttype: 'number', search: true, width: 140 },
-              { name: 'totalPrice', sortname: 'hiddenTotalPrice', label: 'Total price', align: 'center', template: 'number', sorttype: 'number', formatter: totalPriceFormatter, unformat: totalPriceUnformatter, search: true, width: 90},
+              { name: 'totalPrice', label: 'Total price', align: 'center', template: 'number', sorttype: 'number', formatter: totalPriceFormatter, unformat: totalPriceUnformatter, search: true, width: 90},
               { name: 'image', label: 'Product Image', align: 'center', formatter: productImageFormatter, search: false, sortable: false, width: 90},
               { name: 'placeBid', label: 'Place Bid', align: 'center', search: false, sortable: false, formatter: linkFormatter, width: 140},
               { name: 'hiddenAmount', hidden: true },
@@ -121,7 +121,7 @@
                 supplierId: data[i].supplierId, 
                 productName: data[i].productName,
                 supplierName: data[i].supplier,
-                productPrice: data[i].price + ' ' + data[i].currency,
+                hiddenPrice: data[i].price,
                 hiddenCurrency: data[i].currency,
                 hiddenAmount: data[i].amount,
                 hiddenTotalPrice: data[i].totalPrice,
@@ -458,11 +458,11 @@
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Buyer Organization</label>
-                    <input type="text" class="form-control" name="buyerName" value="<%= buyer.organizationName %>" disabled>
+                    <input type="text" class="form-control" name="buyerName" value="<%= buyer.organizationName %>" readonly>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Buyer's E-mail Address*</label>
-                    <input type="email" class="form-control" name="buyerEmail" value="<%= buyer.emailAddress %>" disabled>
+                    <input type="email" class="form-control" name="buyerEmail" value="<%= buyer.emailAddress %>" readonly>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Supplier's E-mail Address*</label>
@@ -572,7 +572,7 @@
                   </div>
                   <div class="form-group">
                     <label>Total number of items (Overall Amount):</label>
-                    <input class="form-control" type="number" disabled id="totalAmount_<%= i %>" name="amount" value="0">
+                    <input class="form-control" type="number" readonly id="totalAmount_<%= i %>" name="amount" value="0">
                   </div>
                    <div class="form-group">
                     <label class="col-form-label">Your price for selected product:</label>
@@ -584,8 +584,10 @@
                   <div class="form-group">
                     <label class=" col-form-label">Your total price:</label>
                     <span class="form-control hid">
-                      <span index="-1" class="bidPrice" id="price" name="buyerPrice">0</span>
-                      <span index="-1" class="bidCurrency" id="currency" name="buyerCurrency"></span>
+                      <span index="-1" class="bidPrice" id="sprice_<%= i %>">0</span>
+                      <span index="-1" class="bidCurrency" id="scurrency_<%= i %>"></span>
+                      <input type="hidden" index="-1" class="bidPrice" id="price_<%= i %>" name="buyerPrice" value="0">
+                      <input type="hidden" index="-1" class="bidCurrency" id="currency_<%= i %>" name="buyerCurrency">
                     </span>
                   </div>
                   <div class="form-group">
@@ -640,7 +642,7 @@
                     var data = [];
                     var colModel = [
                       { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
-                      { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, search: true, width: 140},                      
+                      { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, unformat: priceUnformatter, search: true, width: 140},                      
                       { name: 'amount', label: 'Amount', formatter: amountFormatter, unformat: amountUnformatter, align: 'center', search: true, template: 'number', sorttype: 'number', width: 70},
                       { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, unformatter: totalPriceUnformatter, search: true, template: 'number', sorttype: 'number', width: 90},            
                       { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},

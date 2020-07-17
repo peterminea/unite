@@ -38,8 +38,8 @@ const prel = (req, isFloat, isInt) => {
 }
 
 
-const sortLists = (productList, amountList, priceList, imagesList, currenciesList) => {
-  var arr = [], arr2 = [], arr3 = [], arr4 = [], arr5 = [];
+const sortLists = (productList, amountList, priceList, imagesList, suppCurrenciesList) => {
+  var arr = [], arr2 = [], arr3 = [], arr4 = [], arr5 = [], arr6 = [];
   
   for(var i in productList) {
     arr.push(productList[i]);
@@ -53,8 +53,10 @@ const sortLists = (productList, amountList, priceList, imagesList, currenciesLis
         arr2.push(amountList[j]);
         arr3.push(priceList[j]);
         arr4.push(imagesList[j]);
-        if(currenciesList)
-            arr5.push(currenciesList[j]);
+        if(suppCurrenciesList) {
+          arr5.push(suppCurrenciesList[j]);
+          //arr6.push(supplierCurrenciesListProd[i]);
+        }
         break;
       }
     }
@@ -65,8 +67,10 @@ const sortLists = (productList, amountList, priceList, imagesList, currenciesLis
     amountList[i] = arr2[i];
     priceList[i] = arr3[i];
     imagesList[i] = arr4[i];
-    if(currenciesList)
-      currenciesList[i] = arr5[i];
+    if(suppCurrenciesList) {
+      suppCurrenciesList[i] = arr5[i];
+      //supplierCurrenciesListProd[i] = arr6[i];
+    }
   }
 }
 
