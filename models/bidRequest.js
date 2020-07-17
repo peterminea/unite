@@ -77,7 +77,7 @@ const bidRequestSchema = new Schema({
   }],
   productImagesList: [{
     type: String,
-    required: true
+    required: false
   }],
   deliveryLocation: {
     type: String,

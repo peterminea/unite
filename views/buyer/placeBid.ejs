@@ -96,11 +96,11 @@
             
             <div class="form-group">
               <label class="col-form-label">Buyer Organization</label>
-              <input type="text" class="form-control" name="buyerName" value="<%= buyer.organizationName %>" disabled>
+              <input type="text" class="form-control" name="buyerName" value="<%= buyer.organizationName %>" readonly>
             </div>
             <div class="form-group">
               <label class="col-form-label">Buyer's E-mail Address*</label>
-              <input type="email" class="form-control" name="buyerEmail" value="<%= buyer.emailAddress %>" disabled>
+              <input type="email" class="form-control" name="buyerEmail" value="<%= buyer.emailAddress %>" readonly>
             </div>
             <div class="form-group">
               <label class="col-form-label">Item Description <b>(Short)</b>*</label>
@@ -146,14 +146,14 @@
             </div>
             <div class="form-group">
               <label class="col-form-label">Your currency*:</label>
-              <select class="form-control buyerCurrency" <% if(isSingleProd == true) { %> suppCurrency="<%= product.currency %>" <% } else { %> suppCurrency="<%= products[0].currency %>" <% } %> index="-1"></select>
+              <select class="form-control buyerCurrency<% if(isSingleProd == false) { %> multiplex<% } %>" <% if(isSingleProd == true) { %> suppCurrency="<%= product.currency %>" <% } else { %> suppCurrency="<%= products[0].currency %>" <% } %> index="-1"></select>
             </div>
             <p>
               You can either select products from drop-down or search for them via Autocomplete (please enter at least 3 characters).
             </p>
             <div class="form-group">
               <label class="col-form-label">Available products:</label>
-              <select index="-1" class="form-control productsList only" name="productsList" id="productsList">
+              <select index="-1" class="form-control productsList<% if(isSingleProd == false) { %> multiplex<% } %>" name="productsList" id="productsList">
               <% if(isSingleProd == false) { %>
                 <option title="Please select the product"></option>
                 <% for(product of products) { %>
@@ -185,7 +185,7 @@
               </div>
             <div class="form-group">
               <label class="col-form-label">Amount*</label>
-              <input type="number" min="1" step="1" class="form-control" id="amount" name="theAmount" value="0" required>
+              <input type="number" min="1" step="1" class="form-control" id="amount" name="theAmount" value="0">
             </div>
             <div class="form-group">
               <label>Upload a product image:</label>
@@ -202,7 +202,7 @@
               <input type="hidden" required id="amountList" name="amountList" value="">
               <input type="hidden" required id="priceList" name="priceList" value="">
               <input type="hidden" required id="priceOriginalList" name="priceOriginalList" value="">
-              <input type="hidden" required id="productImagesList>" name="productImagesList" value="">
+              <input type="hidden" required id="productImagesList" name="productImagesList" value="">
               <% if(isMultiBid == true) { %>
               <!-- <input type="hidden" id="productIdsList" name="productIdsList"> -->
               <input type="hidden" id="supplierIdsList" name="supplierIdsList">
@@ -217,7 +217,7 @@
             </div>
             <div class="form-group">
               <label>Total number of items (Overall Amount):</label>
-              <input class="form-control" type="number" disabled id="totalAmount" name="amount" value="0">
+              <input class="form-control" type="number" readonly id="totalAmount" name="amount" value="0">
             </div>
             <div class="form-group">
               <label class="col-form-label">Your price for selected product <span class='productName'></span>:</label>
@@ -229,8 +229,10 @@
             <div class="form-group">
               <label class=" col-form-label">Your Overall price:</label>
               <span class="form-control hid">
-                <span index="-1" class="bidPrice" id="price" name="buyerPrice">0</span>
-                <span index="-1" class="bidCurrency" id="currency" name="buyerCurrency"></span>
+                <span index="-1" class="bidPrice" id="sprice">0</span>
+                <span index="-1" class="bidCurrency" id="scurrency"></span>
+                <input type="hidden" index="-1" class="bidPrice" id="price" name="buyerPrice" value="0">
+                <input type="hidden" index="-1" class="bidCurrency" id="currency" name="buyerCurrency">
               </span>
             </div>
            <% if(isSingleBid == true) { %>
@@ -306,6 +308,7 @@
             <input type="hidden" id="supplierNamesList" name="supplierNamesList">
             <input type="hidden" id="supplierEmailsList" name="supplierEmailsList">
             <input type="hidden" id="supplierCurrenciesList" name="supplierCurrenciesList">
+            <input type="hidden" id="supplierCurrenciesListProd" name="supplierCurrenciesListProd">
             <% } %>
             <script type="text/javascript">
               function limitStatus(e) {
@@ -316,15 +319,18 @@
               }
 
               var index = '';
-              <% if(isSingleBid == false) { for(supplier of suppliers) { %>
-                var arr1 = [], arr2 = [], arr3 = [];               
+              
+              <% if(isSingleBid == false) { %>
+              var arr1 = [], arr2 = [], arr3 = [];
+              <% for(supplier of suppliers) { %>                
                 arr1.push('<%= supplier.companyName %>');
                 arr2.push('<%= supplier.emailAddress %>');
-                arr3.push('<%= supplier.currency %>');                          
+                arr3.push('<%= supplier.currency %>');
+              <% } %>
                 $('#supplierNamesList').val(arr1);
                 $('#supplierEmailsList').val(arr2);
                 $('#supplierCurrenciesList').val(arr3);
-              <% } } %>
+              <% } %>
 
               var data = [];
               var colModel = [
@@ -399,7 +405,7 @@
           </div>
           <div class="form-group">
             <a href="/buyer"><button type="button" class="btn btn-warning" style="float: left">Cancel</button></a>
-            <button index="" type="submit" class="placeBid btn btn-primary" style="float: right">Send request</button>
+            <button index="-1" type="submit" class="placeBid btn btn-primary" style="float: right">Send request</button>
           </div>
         </form>
       </div>

@@ -131,8 +131,15 @@ function prepareBidData(req) {
   var amountList = prel(req.body.amountList, false, true);
   var priceList = prel(req.body.priceList, true, false);
   var priceOriginalList = prel(req.body.priceOriginalList, true, false);
-  var imagesList = prel(req.body.productImagesList);
-  sortLists(productList, amountList, priceList, imagesList);
+  var imagesList = req.body.productImagesList? prel(req.body.productImagesList) : [];
+  var suppCurrListProd = (req.body.supplierCurrenciesListProd)?
+                          prel(req.body.supplierCurrenciesListProd) : [];
+  
+  sortLists(productList, amountList, priceList, imagesList, suppCurrListProd);
+  
+  if(!(suppCurrListProd.length) && req.body.supplierCurrency) {
+    suppCurrListProd.push(req.body.supplierCurrency);
+  }
 
   var products = [];
 
@@ -145,9 +152,8 @@ function prepareBidData(req) {
         ", price: " +
         (priceList[i]) +
         " " +
-        req.body.supplierCurrency +
-        (imagesList[i].length? ", image path: " + imagesList[i]  : '') +
-        "."
+        (req.body.supplierCurrency? req.body.supplierCurrency : suppCurrListProd[i]) +
+        (imagesList[i].length? `, image path: ${imagesList[i]}.` : '.')
     );
   }
   
@@ -157,7 +163,70 @@ function prepareBidData(req) {
     priceList: priceList, 
     priceOriginalList: priceOriginalList, 
     imagesList: imagesList, 
+    supplierCurrenciesListProd: suppCurrListProd,
     products: products
+  };
+}
+
+
+function isPresent(elem, array) {
+  if(array.length)
+  for(var i in array) {
+    if(elem == array[i])
+      return true;
+  }
+  
+  return false;
+}
+
+
+function arrangeMultiData(t, suppIds) {
+  var productLists = [], amountLists = [], productImagesLists = [], priceLists = [], priceOriginalLists = [], productDetailsLists = [];
+  var uniqueSuppIds = [];
+  var app = [];
+  
+  for(var i in suppIds) {//0, 1, 2, 3, 4 - 0=2=4, 1=3.
+    //i=0, app=[]
+    //i=1, app=024
+    //i=2, app=02413
+    //i=3, app=02413
+    //i=4, app=02413
+    var productList = [], amountList = [], productImagesList = [], priceList = [], priceOriginalList = [], productDetailsList = [];
+    
+    if(!isPresent(suppIds[i], app)) {
+      for(var j in suppIds) {//0: 0, 2, 4.
+        if(suppIds[i] == suppIds[j]) {
+          app.push(suppIds[j]);
+          productList.push(t.productList[j]);
+          amountList.push(t.amountList[j]);
+          productImagesList.push(t.imagesList[j]);
+          priceList.push(t.priceList[j]);
+          priceOriginalList.push(t.priceOriginalList[j]);
+          productDetailsList.push(t.products[j]);
+        }
+      }
+      
+      productLists.push(productList);
+      amountLists.push(amountList);
+      productImagesLists.push(productImagesList);
+      priceLists.push(priceList);
+      priceOriginalLists.push(priceOriginalList);
+      productDetailsLists.push(productDetailsList);
+      uniqueSuppIds.push(suppIds[i]);
+    }
+    
+    if(app.length == suppIds.length)
+      break;
+  }
+  
+  return {
+    productList: productLists, 
+    amountList: amountLists, 
+    priceList: priceLists, 
+    priceOriginalList: priceOriginalLists, 
+    imagesList: productImagesLists, 
+    products: productDetailsLists,
+    uniqueSuppIds: uniqueSuppIds
   };
 }
 
@@ -218,79 +287,113 @@ exports.postIndex = (req, res) => {
         });
       });
     });
-  } else if (req.body.itemDescription) {
-    //New Bid Request placed.
+  } else if (req.body.itemDescription) {    
+    if(!(fx.rates)) {
+      
+    }
     
-    var t = prepareBidData(req);
+    //New Bid Request placed.    
+    var suppIds = req.body.supplierIdsList? prel(req.body.supplierIdsList) : [];//Multi or not.
+    var t = prepareBidData(req), names, emails, suppCurrencies, suppCurrenciesByProd, totalPricesList;
+    
+    if(req.body.supplierId) {//Not Multi.
+      suppIds.push(req.body.supplierId)
+    } else {
+      names = req.body.supplierNamesList? prel(req.body.supplierNamesList) : [];
+      emails = req.body.supplierEmailsList? prel(req.body.supplierEmailsList) : [];
+      suppCurrencies = req.body.supplierCurrenciesList? prel(req.body.supplierCurrenciesList) : [];//currencies
+      totalPricesList = req.body.supplierTotalPricesList? prel(req.body.supplierTotalPricesList, true) : [];
+      t = arrangeMultiData(t, suppIds);
+      suppIds = suppIds.filter((v, i, a) => a.indexOf(v) === i);
+      //suppIds = t.uniqueSuppIds;
+    };   
+   
+    //Supplier's name, e-mail, currency, total price to be saved as lists in PlaceBid in case of Multi.
+    var backPath = '../../../../../../../';
+    console.log(suppIds);
+    
+     for(var i = 0; i < suppIds.length; i++) {
+       var buyerPrice = !(t.uniqueSuppIds)? req.body.buyerPrice :                                                               fx(parseFloat(totalPricesList[i]).toFixed(2))
+                .from(suppCurrencies[i])
+                .to(req.body.buyerCurrency);
+       
+      const bidRequest = new BidRequest({
+        requestName: req.body.requestName,
+        supplierName: req.body.supplierName? req.body.supplierName : names[i],
+        buyerName: req.body.buyerName,
+        buyerEmail: req.body.buyerEmail,
+        supplierEmail: req.body.supplierEmail? req.body.supplierEmail : emails[i],
+        itemDescription: req.body.itemDescription,
+        productList: !(t.uniqueSuppIds)? t.productList : t.productList[i],
+        amountList: !(t.uniqueSuppIds)? t.amountList : t.amountList[i],
+        productImagesList: !(t.uniqueSuppIds)? t.imagesList : t.imagesList[i],
+        priceList: !(t.uniqueSuppIds)? t.priceList : t.priceList[i],//Supplier's currency.
+        priceOriginalList: !(t.uniqueSuppIds)? t.priceOriginalList : t.priceOriginalList[i],
+        productDetailsList: !(t.uniqueSuppIds)? t.products : t.products[i],
+        itemDescriptionLong: req.body.itemDescriptionLong,
+        itemDescriptionUrl: req.itemDescriptionUrl,
+        amount: req.body.amount,
+        deliveryLocation: req.body.deliveryLocation,
+        deliveryRequirements: req.body.deliveryRequirements,
+        complianceRequirements: req.body.complianceRequirements,
+        complianceRequirementsUrl: req.body.complianceRequirementsUrl,
+        otherRequirements: req.body.otherRequirements,
+        status: req.body.status,
+        buyerPrice: buyerPrice,
+        supplierPrice: req.body.supplierPrice? req.body.supplierPrice : totalPricesList[i],
+        isCancelled: false,
+        isExpired: false,
+        isExtended: req.body.validityExtensionId? true : false,
+        buyerCurrency: req.body.buyerCurrency,
+        supplierCurrency: req.body.supplierCurrency? req.body.supplierCurrency : suppCurrencies[i],
+        validityExtensionId: req.body.validityExtensionId,
+        validityExtension: req.body.validityExtensionId,
+        specialMentions: req.body.specialMentions
+          ? req.body.specialMentions
+          : req.body.buyerName +
+            " has sent a new Order to " +
+            (req.body.supplierName? req.body.supplierName : names[i]) +
+            ", and the Bid price is " +
+            (req.body.supplierPrice? req.body.supplierPrice : totalPricesList[i]) +
+            " " +
+            (req.body.supplierCurrency? req.body.supplierCurrency : suppCurrencies[i]) +
+            ".",
+        createdAt: req.body.createdAt ? req.body.createdAt : Date.now(),
+        updatedAt: Date.now(),
+        expiryDate:
+          Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION + (req.body.validityExtensionId? process.env.DAYS_BID_EXTENDED * process.env.DAY_DURATION : 0),
+        createdAtFormatted: req.body.createdAt
+          ? normalFormat(req.body.createdAt)
+          : normalFormat(Date.now()),
+        updatedAtFormatted: normalFormat(Date.now()),
+        expiryDateFormatted: customFormat(
+          Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION + (req.body.validityExtensionId? process.env.DAYS_BID_EXTENDED * process.env.DAY_DURATION : 0)
+        ),
+        buyer: req.body.buyer,
+        supplier: suppIds[i]
+      });
 
-    const bidRequest = new BidRequest({
-      requestName: req.body.requestName,
-      supplierName: req.body.supplierName,
-      buyerName: req.body.buyerName,
-      buyerEmail: req.body.buyerEmail,
-      supplierEmail: req.body.supplierEmail,
-      itemDescription: req.body.itemDescription,
-      productList: t.productList,
-      amountList: t.amountList,
-      productImagesList: t.imagesList,
-      priceList: t.priceList, //Supplier's currency.
-      priceOriginalList: t.priceOriginalList,
-      productDetailsList: t.products,
-      itemDescriptionLong: req.body.itemDescriptionLong,
-      itemDescriptionUrl: req.itemDescriptionUrl,
-      amount: req.body.amount,
-      deliveryLocation: req.body.deliveryLocation,
-      deliveryRequirements: req.body.deliveryRequirements,
-      complianceRequirements: req.body.complianceRequirements,
-      complianceRequirementsUrl: req.body.complianceRequirementsUrl,
-      otherRequirements: req.body.otherRequirements,
-      status: req.body.status,
-      buyerPrice: req.body.buyerPrice,
-      supplierPrice: req.body.supplierPrice,
-      isCancelled: false,
-      isExpired: false,
-      isExtended: req.body.validityExtensionId? true : false,
-      buyerCurrency: req.body.buyerCurrency,
-      supplierCurrency: req.body.supplierCurrency,
-      validityExtensionId: req.body.validityExtensionId,
-      validityExtension: req.body.validityExtensionId,
-      specialMentions: req.body.specialMentions
-        ? req.body.specialMentions
-        : req.body.buyerName +
-          " has sent a new Order to " +
-          req.body.supplierName +
-          ", and the price is " +
-          req.body.price +
-          " " +
-          req.body.supplierCurrency +
-          ".",
-      createdAt: req.body.createdAt ? req.body.createdAt : Date.now(),
-      updatedAt: Date.now(),
-      expiryDate:
-        Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION + (req.body.validityExtensionId? process.env.DAYS_BID_EXTENDED * process.env.DAY_DURATION : 0),
-      createdAtFormatted: req.body.createdAt
-        ? normalFormat(req.body.createdAt)
-        : normalFormat(Date.now()),
-      updatedAtFormatted: normalFormat(Date.now()),
-      expiryDateFormatted: customFormat(
-        Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION + (req.body.validityExtensionId? process.env.DAYS_BID_EXTENDED * process.env.DAY_DURATION : 0)
-      ),
-      buyer: req.body.buyer,
-      supplier: req.body.supplier
-    });
-
-    return bidRequest
-      .save()
-      .then((err, result) => {
-        if(treatError(req, res, err, "buyer/index")) 
+      bidRequest
+        .save()
+        .then((err, result) => {        
+        console.log(i);
+        console.log(err);
+        
+        if(treatError(req, res, err, backPath+"buyer/index")) 
           return false;
         req.flash("success", "Bid requested successfully!");
-        return res.redirect("/buyer/index");
+
+        if(i == suppIds.length)
+          setTimeout(function() {
+            
+           return res.redirect("../buyer/index"); 
+          }, 4000);
       })
       .catch(console.error);
+    }
   } else if(req.body.bidProductList) {//Place bid on one or more products (+ 1 or more suppliers) from the Product Catalog grid.
     
-     var buyerId = req.body.buyerId, productIds = req.body.bidProductList, supplierIds = req.body.bidSupplierList;
+      var buyerId = req.body.buyerId, productIds = req.body.bidProductList, supplierIds = req.body.bidSupplierList;
       var productList = prel(productIds);
       var supplierList = prel(supplierIds);
       var prodIDs = [], suppIDs = [];
@@ -397,7 +500,6 @@ exports.getPlaceBid = (req, res) => {
         promise.then((statuses) => {          
           var success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
           req.session.flash = [];
-          
 
           res.render("buyer/placeBid", {
             successMessage: success,
@@ -423,155 +525,75 @@ exports.getPlaceBid = (req, res) => {
 }
 
 
-function isPresent(elem, array) {
-  for(var i in array) {
-    if(elem == array[i])
-      return true;
-  }
-  
-  return false;
-}
-
-
-function arrangeMultiData(t, suppIds) {
-  var productLists = [], amountLists = [], productImagesLists = [], priceLists = [], priceOriginalLists = [], productDetailsLists = [];
-  var uniqueSuppIds = [];
-  var app = [];
-  
-  for(var i in suppIds) {//0, 1, 2, 3, 4 - 0=2=4, 1=3.
-    //i=0, app=[]
-    //i=1, app=024
-    //i=2, app=02413
-    //i=3, app=02413
-    //i=4, app=02413
-    var productList = [], amountList = [], productImagesList = [], priceList = [], priceOriginalList = [], productDetailsList = [];
-    
-    if(!isPresent(suppIds[i], app)) {
-      for(var j in suppIds) {//0: 0, 2, 4.
-        if(suppIds[i] == suppIds[j]) {
-          app.push(j);
-          productList.push(t.productList[j]);
-          amountList.push(t.amountList[j]);
-          productImagesList.push(t.productImagesList[j]);
-          priceList.push(t.priceList[j]);
-          priceOriginalList.push(t.priceOriginalList[j]);
-          productDetailsList.push(t.productDetailsList[j]);
-        }
-      }
-      
-      productLists.push(productList);
-      amountLists.push(amountList);
-      productImagesLists.push(productImagesList);
-      priceLists.push(priceList);
-      priceOriginalLists.push(priceOriginalList);
-      productDetailsList.push(productDetailsList);
-      uniqueSuppIds.push(suppIds[i]);
-    }
-    
-    if(app.length == suppIds.length)
-      break;
-  }
-  
-  return {
-    productList: productLists, 
-    amountList: amountLists, 
-    priceList: priceLists, 
-    priceOriginalList: priceOriginalLists, 
-    imagesList: productImagesList, 
-    products: productDetailsList,
-    uniqueSuppIds: uniqueSuppIds
-  };
-}
-
-
 exports.postPlaceBid = async (req, res) => {
-  var suppIds = req.body.supplierIdsList? prel(req.body.supplierIdsList) : [];//Multi or not.
-  //var productIds = req.body.productIdsList? prel(req.body.productIdsList) : [];
-  var t = prepareBidData(req), names, emails, currencies, totalPricesList;
-  
-  if(req.body.supplierId) {//Not Multi.
-    suppIds.push(req.body.supplierId)
-  } else {
-    names = req.body.supplierNamesList? prel(req.body.supplierNamesList) : null;;
-    emails = req.body.supplierEmailsList? prel(req.body.supplierEmailsList) : null;
-    currencies = req.body.supplierCurrenciesList? prel(req.body.supplierCurrenciesList) : null;
-    totalPricesList = req.body.supplierTotalPricesList? prel(req.body.supplierTotalPricesList) : null;
-    t = arrangeMultiData(suppIds);
-    suppIds = suppIds.filter((v, i, a) => a.indexOf(v) === i);
-    //suppIds = t.uniqueSuppIds;
-  };
+  var t = prepareBidData(req);
   
   //Supplier's name, e-mail, currency, total price to be saved as lists in PlaceBid in case of Multi.
-  
-  for(var i in suppIds) {
-    const bidRequest = new BidRequest({
-      requestName: req.body.requestName,
-      supplierName: req.body.supplierName? req.body.supplierName : names[i],
-      buyerName: req.body.buyerName,
-      buyerEmail: req.body.buyerEmail,
-      supplierEmail: req.body.supplierEmail? req.body.supplierEmail : emails[i],
-      itemDescription: req.body.itemDescription,
-      productList: !(t.uniqueSuppIds)? t.productList : t.productList[i],
-      amountList: !(t.uniqueSuppIds)? t.amountList : t.amountList[i],
-      productImagesList: !(t.uniqueSuppIds)? t.imagesList : t.imagesList[i],
-      priceList: !(t.uniqueSuppIds)? t.priceList : t.priceList[i],//Supplier's currency.
-      priceOriginalList: !(t.uniqueSuppIds)? t.priceOriginalList : t.priceOriginalList[i],
-      productDetailsList: !(t.uniqueSuppIds)? t.products : t.products[i],
-      itemDescriptionLong: req.body.itemDescriptionLong,
-      itemDescriptionUrl: req.itemDescriptionUrl,
-      amount: req.body.amount,
-      deliveryLocation: req.body.deliveryLocation,
-      deliveryRequirements: req.body.deliveryRequirements,
-      complianceRequirements: req.body.complianceRequirements,
-      complianceRequirementsUrl: req.body.complianceRequirementsUrl,
-      otherRequirements: req.body.otherRequirements,
-      status: req.body.status,
-      buyerPrice: req.body.buyerPrice,
-      supplierPrice: req.body.supplierPrice? req.body.supplierPrice : totalPricesList[i],
-      isCancelled: false,
-      isExpired: false,
-      isExtended: req.body.validityExtensionId? true : false,
-      buyerCurrency: req.body.buyerCurrency,
-      supplierCurrency: req.body.supplierCurrency? req.body.supplierCurrency : currencies[i],
-      validityExtensionId: req.body.validityExtensionId,
-      validityExtension: req.body.validityExtensionId,
-      specialMentions: req.body.specialMentions
-        ? req.body.specialMentions
-        : req.body.buyerName +
-          " has sent a new Order to " +
-          req.body.supplierName? req.body.supplierName : 'Multiple Suppliers' +
-          ", and the Bid price is " +
-          req.body.price +
-          " " +
-          (req.body.supplierCurrency? req.body.supplierCurrency : currencies[i]) +
-          ".",
-      createdAt: req.body.createdAt ? req.body.createdAt : Date.now(),
-      updatedAt: Date.now(),
-      expiryDate:
-        Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION + (req.body.validityExtensionId? process.env.DAYS_BID_EXTENDED * process.env.DAY_DURATION : 0),
-      createdAtFormatted: req.body.createdAt
-        ? normalFormat(req.body.createdAt)
-        : normalFormat(Date.now()),
-      updatedAtFormatted: normalFormat(Date.now()),
-      expiryDateFormatted: customFormat(
-        Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION + (req.body.validityExtensionId? process.env.DAYS_BID_EXTENDED * process.env.DAY_DURATION : 0)
-      ),
-      buyer: req.body.buyer,
-      supplier: suppIds[i]
-    });
-    
-    return bidRequest
-      .save()
-      .then((err, result) => {
-        if(treatError(req, res, err, "buyer/index")) 
-          return false;
-        req.flash("success", "Bid requested successfully!");
-      
-        if(i == suppIds.length-1)
-           return res.redirect("/buyer/index");
-      })
-      .catch(console.error);
-  }
+  const bidRequest = new BidRequest({
+    requestName: req.body.requestName,
+    supplierName: req.body.supplierName,
+    buyerName: req.body.buyerName,
+    buyerEmail: req.body.buyerEmail,
+    supplierEmail: req.body.supplierEmail,
+    itemDescription: req.body.itemDescription,
+    productList: t.productList,
+    amountList: t.amountList,
+    productImagesList: t.imagesList,
+    priceList: t.priceList, //Supplier's currency.
+    priceOriginalList: t.priceOriginalList,
+    productDetailsList: t.products,
+    itemDescriptionLong: req.body.itemDescriptionLong,
+    itemDescriptionUrl: req.itemDescriptionUrl,
+    amount: req.body.amount,
+    deliveryLocation: req.body.deliveryLocation,
+    deliveryRequirements: req.body.deliveryRequirements,
+    complianceRequirements: req.body.complianceRequirements,
+    complianceRequirementsUrl: req.body.complianceRequirementsUrl,
+    otherRequirements: req.body.otherRequirements,
+    status: req.body.status,
+    buyerPrice: req.body.buyerPrice,
+    supplierPrice: req.body.supplierPrice,
+    isCancelled: false,
+    isExpired: false,
+    isExtended: req.body.validityExtensionId? true : false,
+    buyerCurrency: req.body.buyerCurrency,
+    supplierCurrency: req.body.supplierCurrency,
+    validityExtensionId: req.body.validityExtensionId,
+    validityExtension: req.body.validityExtensionId,
+    specialMentions: req.body.specialMentions
+      ? req.body.specialMentions
+      : req.body.buyerName +
+        " has sent a new Order to " +
+        req.body.supplierName +
+        ", and the price is " +
+        req.body.price +
+        " " +
+        req.body.supplierCurrency +
+        ".",
+    createdAt: req.body.createdAt ? req.body.createdAt : Date.now(),
+    updatedAt: Date.now(),
+    expiryDate:
+      Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION + (req.body.validityExtensionId? process.env.DAYS_BID_EXTENDED * process.env.DAY_DURATION : 0),
+    createdAtFormatted: req.body.createdAt
+      ? normalFormat(req.body.createdAt)
+      : normalFormat(Date.now()),
+    updatedAtFormatted: normalFormat(Date.now()),
+    expiryDateFormatted: customFormat(
+      Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION + (req.body.validityExtensionId? process.env.DAYS_BID_EXTENDED * process.env.DAY_DURATION : 0)
+    ),
+    buyer: req.body.buyer,
+    supplier: req.body.supplier
+  });
+
+  return bidRequest
+    .save()
+    .then((err, result) => {
+      if(treatError(req, res, err, "buyer/index")) 
+        return false;
+      req.flash("success", "Bid requested successfully!");
+      return res.redirect("/buyer/index");
+    })
+    .catch(console.error);
 }
 
 
