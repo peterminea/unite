@@ -177,7 +177,7 @@
         <div class="form-group">
           <label>Preferred Currency (Default: Euro)*</label>
           <input type="hidden" name="currency" required><br>
-          <select class="currency" class="form-control" title="Currency" required></select>
+          <select class="currency" id="selectCurrencies" class="form-control" title="Currency" required></select>
         </div>
         <div class="form-group">
           <label>Country*</label>
@@ -259,7 +259,7 @@
             <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload Product Image" />
           </div>
           
-          <ul class="list-group" id="prodServices">
+          <ul class="list-group" MAX="<%= parseInt(MAX_PROD) %>" id="prodServices">
           </ul>
           <p class='term'>
             You have a number of <span class='productsCount'>0</span> products.
@@ -270,6 +270,35 @@
           <input type="hidden" class="supply" name="amountsList" id="amountsList">
           <input type="hidden" class="supply" name="productImagesList" id="productImagesList">
         </div>
+        <div id="jqDiv" class="form-group">
+          <table id="grid" MAX="<%= parseInt(MAX_PROD) %>" >
+          </table>
+          <div id='prodPager'>
+          </div>
+        </div>
+        <script type="text/javascript">
+          var data = [];
+          var colModel = [
+            { name: 'hiddenAmount', hidden: true },
+            { name: 'hiddenPrice', hidden: true },
+            { name: 'hiddenTotalPrice', hidden: true },
+            { name: 'hiddenCurrency', hidden: true },
+            { name: 'productImageSource', hidden: true},
+            { name: 'productId', hidden: true },
+            { name: 'supplierId', hidden: true },
+            { name: 'supplierCurrency', hidden: true },
+            { name: 'maxAmount', hidden: true },
+            { name: 'bigPrice', hidden: true },
+            { name: 'name', label: 'Product name', align: 'center', formatter: productFormatter, search: true, width: 140},
+            { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, unformat: priceUnformatter, template: 'number', sorttype: 'number', search: true, width: 140},
+            { name: 'amount', label: 'Amount', formatter: amountFormatter, unformat: amountUnformatter, align: 'center', search: true, template: 'number', sorttype: 'number', width: 70},
+            { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, unformat: totalPriceUnformatter, template: 'number', sorttype: 'number', search: true, width: 90},
+            { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
+            { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
+          ];
+          
+          initGrid(colModel, data, "#grid", '#prodPager', "name", 'Products List', 1000);
+        </script>
         <div class="form-group">
           <label>Total Price of Supply*</label>
           <span type="text" class="form-control supply" id="totalSupplyPrice">0 <%= DEFAULT_CURR %></span>
