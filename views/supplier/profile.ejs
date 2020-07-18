@@ -145,7 +145,7 @@
         
         <div class="form-group">
           <label>Company Name*</label>
-          <input required type="text" id="companyName" name="companyName" class="form-control"
+          <input required type="text" id="supplierName" name="companyName" class="form-control"
             value="<%= profile.companyName %>">
         </div>
         <div class="form-group">
@@ -385,28 +385,11 @@
           $('#totalSupplyPrice').text(parseFloat(totalLoadedPrice/2).toFixed(2) + ' ' + "<%= profile.currency %>");
           
           var data = [];
-          var colModel = [
-            { name: 'hiddenAmount', hidden: true },
-            { name: 'hiddenPrice', hidden: true },
-            { name: 'hiddenTotalPrice', hidden: true },
-            { name: 'hiddenCurrency', hidden: true },
-            { name: 'productImageSource', hidden: true},
-            { name: 'productId', hidden: true },
-            { name: 'supplierId', hidden: true },
-            { name: 'supplierCurrency', hidden: true },
-            { name: 'maxAmount', hidden: true },
-            { name: 'bigPrice', hidden: true },
-            { name: 'name', label: 'Product name', align: 'center', formatter: productFormatter, search: true, width: 140},
-            { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, unformat: priceUnformatter, template: 'number', sorttype: 'number', search: true, width: 140},
-            { name: 'amount', label: 'Amount', formatter: amountFormatter, unformat: amountUnformatter, align: 'center', search: true, template: 'number', sorttype: 'number', width: 70},
-            { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, unformat: totalPriceUnformatter, template: 'number', sorttype: 'number', search: true, width: 90},
-            { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
-            { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
-          ];
           
           <% i = 0; if (products != null) { for (product of products) { i++; %>
             data.push({
               name: '<%= product.productName %>',
+              supplierName: '<%= profile.companyName %>',
               hiddenPrice: '<%= parseFloat(product.price).toFixed(2) %>',
               hiddenTotalPrice: '<%= parseFloat(product.totalPrice).toFixed(2) %>',
               hiddenCurrency: '<%= product.currency %>',
@@ -422,7 +405,7 @@
             });
           <% } } %>
           
-          initGrid(colModel, data, "#grid", '#prodPager', "name", 'Products List', 1000);
+          initGrid(productColModel, data, "#grid", '#prodPager', "name", 'Products List', 1000);
           bindHandleProduct($('.rem'), $('#prodServiceInput'), false, null, true, false);
           bindHandleProduct($('.inc'), $('#prodServiceInput'), false, null, false, true);
           bindHandleProduct($('.dec'), $('#prodServiceInput'), false, null, false, false);

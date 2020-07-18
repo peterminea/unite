@@ -72,7 +72,7 @@
             <%  if(isSingleBid == true) { %>
             <div class="form-group">
               <label class="col-form-label">Supplier Company</label>
-              <input type="text" class="form-control" name="supplierName" value="<%= supplier.companyName %>" disabled>
+              <input type="text" class="form-control" id="supplierName" name="supplierName" value="<%= supplier.companyName %>" disabled>
             </div>
             <div class="form-group">
               <label class="col-form-label">Supplier's E-mail Address*</label>
@@ -271,7 +271,7 @@
               </p>
               <% let i = 0; for(supplier of suppliers) { i++; %>
               <div class="form-group">
-                <label class="col-form-label">Supplier <%= i %> (<strong><%= supplier.companyName %></strong>) total price for selected product <span class='productName'></span>:</label>
+                <label class="col-form-label">Supplier <%= i %> (<span class='supplierNameListed'><strong><%= supplier.companyName %></strong></span>) total price for selected product <span class='productName'></span>:</label>
                 <span class='multiSupp totalPrice' suppId='<%= supplier._id %>' id="supplierPrice_<%= i %>">0</span>
                 <span index="<%= i %>" class="suppCurrency" id="supplierCurrency_<%= i %>"><%= supplier.currency %></span>
               </div>
@@ -333,26 +333,7 @@
               <% } %>
 
               var data = [];
-              var colModel = [
-                { name: 'hiddenPrice', hidden: true },
-                { name: 'hiddenAmount', hidden: true },
-                { name: 'hiddenTotalPrice', hidden: true},
-                { name: 'hiddenCurrency', hidden: true},
-                { name: 'productImageSource', hidden: true},
-                { name: 'productId', hidden: true },
-                { name: 'supplierId', hidden: true },
-                { name: 'supplierCurrency', hidden: true },
-                { name: 'maxAmount', hidden: true },
-                { name: 'bigPrice', hidden: true },
-                { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
-                { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, unformat: priceUnformatter,  search: true, width: 140},
-                { name: 'amount', label: 'Amount', formatter: amountFormatter, unformat: amountUnformatter,  align: 'center', search: true, width: 70},
-                { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, unformat: totalPriceUnformatter, template: 'number', sorttype: 'number', search: true, width: 90}, 
-                { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
-                { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
-              ];
-
-              initGrid(colModel, data, "#grid"+index, '#prodPager'+index, "name", 'Products List', 1000);
+              initGrid(productColModel, data, "#grid"+index, '#prodPager'+index, "name", 'Products List', 1000);
               
               <% if(isSingleBid == true) { %>
               setTimeout(function() {

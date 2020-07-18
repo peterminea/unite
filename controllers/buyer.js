@@ -2,7 +2,7 @@ const crypto = require("crypto");
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const mongoose = require("mongoose");
-const Token = require("../models/buyerToken");
+const Token = require("../models/userToken");
 const assert = require("assert");
 const process = require("process");
 const Schema = mongoose.Schema;
@@ -64,6 +64,8 @@ const statusesJson = {
   SUPPLIER_CANCELS_BID: parseInt(process.env.SUPP_CANCEL_BID),
   BUYER_CANCELS_BID: parseInt(process.env.BUYER_CANCEL_BID)
 };
+
+const TYPE = process.env.USER_BUYER;
 
 exports.getIndex = async (req, res) => {
   if (req.session) {
@@ -373,13 +375,13 @@ exports.postIndex = (req, res) => {
       bidRequest
         .save()
         .then((err, result) => {
-          if(++asyncCounter == suppIds.length)
-            //setTimeout(function() {      
-          if(treatError(req, res, err, "../../")) 
-            return false;
-          req.flash("success", "Bid requested successfully!");
-             return res.redirect("../../"); 
-          //}, 6400);
+          if(++asyncCounter == suppIds.length) {
+            if(treatError(req, res, err, "../../buyer/index")) 
+              return false;
+            
+            req.flash("success", "Bid requested successfully!");
+             return res.redirect("../../buyer/index"); 
+          }          
       })
       .catch(console.error);
     }
@@ -778,9 +780,10 @@ exports.postCancelBid = (req, res) => {
       var dbo = db.db(BASE);
 
       try {
-        await dbo.collection("bidcancelreasons").insertOne(
+        await dbo.collection("cancelreasons").insertOne(
           {
             title: req.body.reasonTitle, //Radio!
+            cancelType: process.env.BID_CANCEL_TYPE,
             userType: req.body.userType,
             reason: req.body.reason,
             userName: req.body.buyersName,
@@ -927,7 +930,7 @@ exports.postDeactivate = async function(req, res, next) {
 
 exports.postConfirmation = async function(req, res, next) {
   try {
-    await Token.findOne({ token: req.params.token }, async function(
+    await Token.findOne({ token: req.params.token, userType: TYPE }, async function(
       err,
       token
     ) {
@@ -1018,6 +1021,7 @@ exports.postResendToken = function(req, res, next) {
 
     var token = new Token({
       _userId: user._id,
+      userType: TYPE,
       token: crypto.randomBytes(16).toString("hex")
     });
 
@@ -1383,6 +1387,7 @@ exports.postSignUp = async (req, res) => {
 
                         var token = new Token({
                           _userId: buyer._id,
+                          userType: TYPE,
                           token: crypto.randomBytes(16).toString("hex")
                         });
 

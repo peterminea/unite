@@ -38,8 +38,9 @@ const removeAssociatedBuyerBids = async (req, res, dbo, id) => {
 
     for(var bid of bids) {//One by one.
       try {
-        await dbo.collection('bidcancelreasons').insertOne( {
-          title: 'User Cancellation',
+        await dbo.collection('cancelreasons').insertOne( {
+          title: 'Bid Cancellation',
+          cancelType: process.env.BID_CANCEL,
           userType: req.body.userType,
           reason: complexReason,
           userName: req.body.organizationName,
@@ -70,8 +71,9 @@ const removeAssociatedSuppBids = async (req, res, dbo, id) => {
 
     for(var bid of bids) {//One by one.          
       try {
-        await dbo.collection('bidcancelreasons').insertOne( {
+        await dbo.collection('cancelreasons').insertOne( {
           title: 'Account Deletion',//req.body.reasonTitle,
+          cancelType: process.env.USER_CANCEL,
           userType: req.body.userType,
           reason: complexReason,
           userName: req.body.companyName,
@@ -102,8 +104,9 @@ async function removeAssociatedBuyerBidsSuperDel(req, res, req2, dbo, id) {
   await promise.then(async (bids) => {   
     for(var bid of bids) {//One by one.
       try {
-        await dbo.collection('bidcancelreasons').insertOne( {
+        await dbo.collection('cancelreasons').insertOne( {
           title: 'User Cancellation',
+          cancelType: process.env.USER_CANCEL,
           userType: 'Buyer',
           reason: req2.body.reason,
           userName: req2.body.organizationName,
@@ -133,8 +136,9 @@ const buyerDelete = (req, res, id) => {
       var dbo = db.db(BASE);
       //A Reason why the User is deleted.
       try {
-        await dbo.collection('usercancelreasons').insertOne( {
+        await dbo.collection('cancelreasons').insertOne( {
           title: req.body.reasonTitle,
+          cancelType: process.env.USER_CANCEL,
           reason: req.body.reason,
           userType: req.body.userType,
           userName: req.body.organizationName,
@@ -183,8 +187,9 @@ const supervisorDelete = (req, res, id, uniteID) => {
       var dbo = db.db(BASE);
       
       try {
-        await dbo.collection('usercancelreasons').insertOne( {
+        await dbo.collection('cancelreasons').insertOne( {
           title: req.body.reasonTitle,
+          cancelType: process.env.USER_CANCEL,
           reason: req.body.reason,
           userType: req.body.userType,
           userName: req.body.organizationName,
@@ -250,8 +255,9 @@ const supplierDelete = (req, res, id) => {
       var dbo = db.db(BASE);
       
       try{
-        await dbo.collection('usercancelreasons').insertOne( {
+        await dbo.collection('cancelreasons').insertOne( {
           title: req.body.reasonTitle,
+          cancelType: process.env.USER_CANCEL,
           reason: req.body.reason,
           userType: req.body.userType,
           userName: req.body.companyName,

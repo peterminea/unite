@@ -38,7 +38,7 @@
       var defaultBidCurrency = '<%= BID_DEFAULT_CURR %>';
                    
       setTimeout(function() {
-        getCurrenciesList('select.buyerCurrency', '/currencyGetAutocomplete', token, defaultBidCurrency);//Preferred currency for Buyer.      
+        getCurrenciesList('select.buyerCurrency', '/currencyGetAutocomplete', token, defaultBidCurrency);//Preferred currency for Buyer.
       }, 1320);      
 
       $('#loadCatalog').on('click', function() {
@@ -67,7 +67,6 @@
              return false;
             }
             //Prepare the table:
-
             var str = '<div id="catalog"><h4>Catalog of Products</h4><table id="products" class="table table-striped table-hover table-condensed products">' 
             + '<thead><tr><th scope="col">#</th>' 
             + '<th colspan="2" scope="col">Product name</th><th scope="col">Supplier name</th><th colspan="2" scope="col">Product price</th><th scope="col">Currency</th>' 
@@ -111,7 +110,6 @@
               { name: 'totalPrice', label: 'Total price', align: 'center', template: 'number', sorttype: 'number', formatter: totalPriceFormatter, unformat: totalPriceUnformatter, search: true, width: 90},
               { name: 'image', label: 'Product Image', align: 'center', formatter: productImageFormatter, search: false, sortable: false, width: 90},
               { name: 'placeBid', label: 'Place Bid', align: 'center', search: false, sortable: false, formatter: linkFormatter, width: 140}
-             
             ];
             
             for(var i in data) {
@@ -455,7 +453,7 @@
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Supplier Company</label>
-                    <input type="text" class="form-control" name="supplierName" value="<%= supplier.companyName %>" disabled>
+                    <input type="text" class="form-control" id="supplierName_<%= i %>" name="supplierName" value="<%= supplier.companyName %>" disabled>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Buyer Organization</label>
@@ -639,28 +637,9 @@
                     }
                     
                     var index = '_' + "<%= i %>";
-
-                    var data = [];
-                    var colModel = [
-                      { name: 'hiddenPrice', hidden: true },
-                      { name: 'hiddenAmount', hidden: true },
-                      { name: 'hiddenTotalPrice', hidden: true },
-                      { name: 'hiddenCurrency', hidden: true },
-                      { name: 'productImageSource', hidden: true },
-                      { name: 'productId', hidden: true },
-                      { name: 'supplierId', hidden: true },
-                      { name: 'supplierCurrency', hidden: true },
-                      { name: 'maxAmount', hidden: true },
-                      { name: 'bigPrice', hidden: true },
-                      { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
-                      { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, unformat: priceUnformatter, search: true, width: 140},                      
-                      { name: 'amount', label: 'Amount', formatter: amountFormatter, unformat: amountUnformatter, align: 'center', search: true, template: 'number', sorttype: 'number', width: 70},
-                      { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, unformatter: totalPriceUnformatter, search: true, template: 'number', sorttype: 'number', width: 90},            
-                      { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
-                      { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}                      
-                    ];                 
+                    var data = []; 
+                    initGrid(productColModel, data, "#grid"+index, '#prodPager'+index, "name", 'Products List', 1000);
                     
-                    initGrid(colModel, data, "#grid"+index, '#prodPager'+index, "name", 'Products List', 1000);
                     setTimeout(function() {
                       var table = $("#grid"+index);
                       table.attr('supplierCurrency', "<%= supplier.currency %>");

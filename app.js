@@ -1,14 +1,12 @@
 //Classes:
 const BidRequest = require("./models/bidRequest");
 const BidStatus = require("./models/bidStatus");
-const BidCancelReasonTitle = require("./models/bidCancelReasonTitle");
+const CancelReasonTitle = require("./models/cancelReasonTitle");
 const Feedback = require("./models/feedback");
 const FeedbackSubject = require("./models/feedbackSubject");
 const Buyer = require("./models/buyer");
 const Supplier = require("./models/supplier");
 const Supervisor = require("./models/supervisor");
-const AdminCancelReasonTitle = require("./models/adminCancelReasonTitle");
-const UserCancelReasonTitle = require("./models/userCancelReasonTitle");
 const Currency = require("./models/currency");
 const Message = require("./models/message");
 const Country = require("./models/country");
@@ -64,11 +62,8 @@ app.use(express.json());
 app.use(express.static("public"));
 app.set("view engine", "ejs");
 //app.use("/public", express.static(__dirname + '/public'));
-
-//body parser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
 //app.use(express.static(path.join(__dirname, '..', "public")));
 //app.use([/(.*)\.js$/, '/public'], express.static(__dirname + '/public'));
 
@@ -832,45 +827,12 @@ app.get("/bidStatuses", function(req, res, next) {
   });
 });
 
-app.get("/bidCancelReasonTitles", async function(req, res, next) {
-  BidCancelReasonTitle.find({})
-    .exec()
-    .then((titles) => {
-      titles.sort(function(a, b) {
-        return a.name.localeCompare(b.name);
-      });
-
-      res.send(
-        titles,
-        {
-          "Content-Type": "application/json"
-        },
-        200
-      );
-    });
-});
-
-app.get("/userCancelReasonTitles", async function(req, res, next) {
-  UserCancelReasonTitle.find({})
-    .exec()
-    .then((titles) => {
-      titles.sort(function(a, b) {
-        return a.name.localeCompare(b.name);
-      });
-
-      res.send(
-        titles,
-        {
-          "Content-Type": "application/json"
-        },
-        200
-      );
-    });
-});
-
-
-app.get("/adminCancelReasonTitles", async function(req, res, next) {
-  AdminCancelReasonTitle.find({})
+app.post("/cancelReasonTitles", async function(req, res, next) {
+  var objectType = req.body.objectType;
+  var isAdmin = req.body.isAdmin;
+  var val = objectType && isAdmin? { type: objectType , isAdmin: true } : objectType? { type: objectType } : {};
+  
+  CancelReasonTitle.find({})
     .exec()
     .then((titles) => {
       titles.sort(function(a, b) {
@@ -1147,7 +1109,6 @@ let settings = { method: "Get" };
 fetch(url, settings)
     .then(res => res.json())
     .then((json) => {
-        // do something with JSON
       //console.log(JSON.stringify(json));
   var currency = JSON.stringify(json);
   currency = '[' + (currency).split('},').join('}},{') + ']';
@@ -1196,103 +1157,6 @@ if (1 == 2)
       console.error(err.message);
     });
     
-    var originalList = [];
-    for(var i = 0; i < 3; i++) {
-      originalList.push(3.25);
-    }
-    
-    var productList = [];
-    productList.push('Tempera');
-    productList.push('Paintbrushes');
-    productList.push('Frames');
-    
-    var productDetailsList = [];
-    productDetailsList.push("Product name: 'Tempera', amount: 2, price: 6 EUR.");
-    productDetailsList.push("Product name: 'Paintbrushes', amount: 5, price: 10 EUR.");
-    productDetailsList.push("Product name: 'Frames', amount: 3, price: 15 EUR.");
-    
-    var unset = { $unset: { products: 1, productsServicesOffered: 1 } };
-    var set = { $set: { productList: productList, productDetailsList: productDetailsList } };
-
-    
-    /*
-    Industry.find({}).exec().then((inds) => {//Ascending sorting of table contents by name, then resetting its contents based on this new sorting.
-      inds.sort(function (a, b) {
-        return a.name.localeCompare(b.name);
-      });
-      
-      console.log(inds);
-
-      for(var i in inds) {
-        var myQuery = {name: inds[i].name};      
-
-        var ind = new Industry({
-        //_id: inds[i]._id,
-        name: inds[i].name
-        , __v: inds[i].__v? inds[i].__v : 0
-        });
-
-        db.collection('industries').deleteOne(myQuery, function(err, obj) {});
-        console.log(ind);
-        ind.save();      
-      }
-    });*/
-    /*
-    
-    //db.collection('industries').deleteMany( { name : "Agriculture", _id: { $not: { $eq: new ObjectId("5ecfc60ee0558a504f587f78") } } } );
-    
-     var rawdata = fs.readFileSync('currencies.json');    
-     let currencies = JSON.parse(rawdata);
-     //console.log(currencies);
-    
-    Object.keys(currencies).forEach(function(key) {
-     // console.table('Key : ' + key + ', Value : ' + JSON.stringify(currencies[key]))
-      var t = JSON.stringify(currencies[key]);
-      var obj = JSON.parse(t.substring(7, t.length-1));
-      //console.log(obj);
-      
-    });
-    
-    var currs = [];
-    
-    for(var i of currencies) {
-      var t = JSON.stringify(i);
-      var obj = JSON.parse(t.substring(7, t.length-1));
-      //console.log(obj);
-      
-      currs.push({
-        name: obj.name,
-        value: obj.code
-      });
-    }
-    
-    currs.push({
-      name: 'Euro',
-      value: 'EUR'
-    });
-    
-    currs.sort(function(a, b) {
-      return a.value.localeCompare(b.value);
-    });
-    
-    db.collection("currencies").deleteMany({},  function(err, obj) {});
-    
-    var curr;    
-    
-    for(var i in currs) {
-      curr = new Currency({
-        name: currs[i].name,
-        value: currs[i].value
-      });
-      
-      console.log(curr);
-      curr.save();
-    }*/
-  
-    db.collection("bidrequests").updateMany({}, unset, {multi: true});
-    db.collection("bidrequests").updateMany({}, set, function(err, obj) {});
-    db.collection("bidrequests").updateMany({}, { $set: { priceOriginalList: originalList } }, function(err, obj) {});
-
  //db.close();
   });
 
