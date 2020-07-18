@@ -103,12 +103,12 @@
   <script type="text/javascript">
     var data = [];
     var colModelGridBids = [
+      { name: 'buyerPriceHref', hidden: true },
+      { name: 'supplierPriceHref', hidden: true },
       { name: 'bidName', label: 'Bid Request Name', search: true, width: 210},
       { name: 'supplierName', label: 'Bid Supplier Name', align: 'center', sorttype: 'text', search: true, width: 220},      
       { name: 'buyerPrice', label: 'Buyer\'s Price', align: 'center', formatter: buyerPriceFormatter, search: true, width: 100},
-      { name: 'supplierPrice', label: 'Supplier\'s Price', align: 'center', formatter: supplierPriceFormatter, search: true, width: 100 },
-      { name: 'buyerPriceHref', hidden: true },
-      { name: 'supplierPriceHref', hidden: true },
+      { name: 'supplierPrice', label: 'Supplier\'s Price', align: 'center', formatter: supplierPriceFormatter, search: true, width: 100 },      
       { name: 'dateCreated', label: 'Creation Date', align: 'center', search: true, width: 200},
       { name: 'expiryDate', label: 'Expiry Date', align: 'center', search: true, width: 100},
       { name: 'isCancelled', label: 'Is Cancelled?', align: 'center', search: true, width: 100},

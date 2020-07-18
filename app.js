@@ -43,8 +43,6 @@ const MAX_PROD = process.env.SUP_MAX_PROD;
 const stripeSecretKey = process.env.STRIPE_KEY_SECRET;
 const stripePublicKey = process.env.STRIPE_KEY_PUBLIC;
 const stripe = require("stripe")(stripeSecretKey);
-
-
 const cookieParser = require("cookie-parser");
 //require('dotenv').config();
 
@@ -108,8 +106,11 @@ app.use(require("flash")());
 //app.use(require('connect-flash')());
 //app.use(require('express-flash')());
 
-app.use((req, res, next) => {
-  res.locals.csrfToken = req.csrfToken();
+app.use(function (req, res, next) {
+  var token = req.csrfToken();
+  res.cookie('XSRF-TOKEN', token);
+  res.locals.csrfToken = token;
+  console.log(token);
   next();
 });
 

@@ -78,10 +78,10 @@
           <input type="checkbox" class="form-check-input" name="remember" id="remember">          
             <label style="color: green" class="form-check-label" for="remember">Remember me (?)</label>
         </div>
-        <br>
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+        <br>        
         <div class="g-recaptcha" data-sitekey="<%= captchaSiteKey %>"></div>
         <input type="hidden" name="captchaResponse">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
         <button type="submit" class="btn btn-primary btn-block btn-lg">Submit</button>
       </form>
     </div>

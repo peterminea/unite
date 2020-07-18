@@ -146,7 +146,7 @@
             </div>
             <div class="form-group">
               <label class="col-form-label">Your currency*:</label>
-              <select class="form-control buyerCurrency<% if(isSingleProd == false) { %> multiplex<% } %>" <% if(isSingleProd == true) { %> suppCurrency="<%= product.currency %>" <% } else { %> suppCurrency="<%= products[0].currency %>" <% } %> index="-1"></select>
+              <select id="selectCurrencies" class="form-control buyerCurrency<% if(isSingleProd == false) { %> multiplex<% } %>" <% if(isSingleProd == true) { %> supplierCurrency="<%= product.currency %>" <% } else { %> supplierCurrency="<%= products[0].currency %>" <% } %> index="-1"></select>
             </div>
             <p>
               You can either select products from drop-down or search for them via Autocomplete (please enter at least 3 characters).
@@ -210,7 +210,7 @@
               <% } %>
             </div>
             <div id="jqDiv" class="form-group">
-              <table id="grid" buyerCurrency="<%= buyer.currency %>">
+              <table id="grid" MAX="<%= MAX_PROD %>" buyerCurrency="<%= buyer.currency %>">
               </table>
               <div id='prodPager'>
               </div>
@@ -319,7 +319,7 @@
               }
 
               var index = '';
-              
+             
               <% if(isSingleBid == false) { %>
               var arr1 = [], arr2 = [], arr3 = [];
               <% for(supplier of suppliers) { %>                
@@ -334,17 +334,22 @@
 
               var data = [];
               var colModel = [
-                { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
-                { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, unformat: priceUnformatter, template: 'number', sorttype: 'number', search: true, width: 140},
-                { name: 'amount', label: 'Amount', formatter: amountFormatter, unformat: amountUnformatter, template: 'number', sorttype: 'number', align: 'center', search: true, template: 'number', width: 70},
-                { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, unformat: totalPriceUnformatter, template: 'number', sorttype: 'number', search: true, width: 90},            
-                { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
-                { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter},
                 { name: 'hiddenPrice', hidden: true },
                 { name: 'hiddenAmount', hidden: true },
-                { name: 'hiddenTotalPrice', hidden: true },
-                { name: 'hiddenCurrency', hidden: true },
-                { name: 'productImageSource', hidden: true}
+                { name: 'hiddenTotalPrice', hidden: true},
+                { name: 'hiddenCurrency', hidden: true},
+                { name: 'productImageSource', hidden: true},
+                { name: 'productId', hidden: true },
+                { name: 'supplierId', hidden: true },
+                { name: 'supplierCurrency', hidden: true },
+                { name: 'maxAmount', hidden: true },
+                { name: 'bigPrice', hidden: true },
+                { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
+                { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, unformat: priceUnformatter,  search: true, width: 140},
+                { name: 'amount', label: 'Amount', formatter: amountFormatter, unformat: amountUnformatter,  align: 'center', search: true, width: 70},
+                { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, unformat: totalPriceUnformatter, template: 'number', sorttype: 'number', search: true, width: 90}, 
+                { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
+                { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
               ];
 
               initGrid(colModel, data, "#grid"+index, '#prodPager'+index, "name", 'Products List', 1000);
@@ -352,7 +357,7 @@
               <% if(isSingleBid == true) { %>
               setTimeout(function() {
                 var table = $("#jqDiv"+index).find('table').eq(1);                
-                table.attr('suppCurrency', "<%= supplier.currency %>");                
+                table.attr('supplierCurrency', "<%= supplier.currency %>");                
               }, 1000);
               <% } %>
 

@@ -371,18 +371,23 @@
                       var index = "<%= i %>";
                       
                       var data = [];
-                      var colModel = [
+                      var colModel = [                        
+                        { name: 'hiddenPrice', hidden: true },
+                        { name: 'hiddenAmount', hidden: true },
+                        { name: 'hiddenTotalPrice', hidden: true },
+                        { name: 'hiddenCurrency', hidden: true },
+                        { name: 'productImageSource', hidden: true },
+                        { name: 'productId', hidden: true },
+                        { name: 'supplierId', hidden: true },
+                        { name: 'supplierCurrency', hidden: true },
+                        { name: 'maxAmount', hidden: true },
+                        { name: 'bigPrice', hidden: true },
                         { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
                         { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, unformat: priceUnformatter, template: 'number', sorttype: 'number', search: true, width: 140},
                         { name: 'amount', label: 'Amount', formatter: amountFormatter, unformat: amountUnformatter, align: 'center', search: true, sortable: true, template: 'number', sorttype: 'number', width: 70},
                         { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, unformat: totalPriceUnformatter, template: 'number', sorttype: 'number', search: true, width: 90},
                         { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
-                         { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter},
-                        { name: 'hiddenAmount', hidden: true },
-                        { name: 'hiddenPrice', hidden: true },
-                        { name: 'hiddenTotalPrice', hidden: true },
-                        { name: 'hiddenCurrency', hidden: true },
-                        { name: 'productImageSource', hidden: true}
+                        { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
                       ];
 
                       $('#cartList_'+index).find('li').not(':first').each(function(i, e) {

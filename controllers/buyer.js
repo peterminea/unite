@@ -136,7 +136,6 @@ function prepareBidData(req) {
                           prel(req.body.supplierCurrenciesListProd) : [];
   
   sortLists(productList, amountList, priceList, imagesList, suppCurrListProd);
-  
   if(!(suppCurrListProd.length) && req.body.supplierCurrency) {
     suppCurrListProd.push(req.body.supplierCurrency);
   }
@@ -153,7 +152,7 @@ function prepareBidData(req) {
         (priceList[i]) +
         " " +
         (req.body.supplierCurrency? req.body.supplierCurrency : suppCurrListProd[i]) +
-        (imagesList[i].length? `, image path: ${imagesList[i]}.` : '.')
+        (imagesList[i] != null && imagesList[i].length > 0? `, image path: ${imagesList[i]}.` : '.')
     );
   }
   
@@ -287,15 +286,12 @@ exports.postIndex = (req, res) => {
         });
       });
     });
-  } else if (req.body.itemDescription) {    
-    if(!(fx.rates)) {
-      
-    }
-    
+  } else if (req.body.itemDescription) {
     //New Bid Request placed.    
     var suppIds = req.body.supplierIdsList? prel(req.body.supplierIdsList) : [];//Multi or not.
+    console.log(suppIds.length);
     var t = prepareBidData(req), names, emails, suppCurrencies, suppCurrenciesByProd, totalPricesList;
-    
+    console.log('BOMBAMBIN');
     if(req.body.supplierId) {//Not Multi.
       suppIds.push(req.body.supplierId)
     } else {
@@ -303,6 +299,7 @@ exports.postIndex = (req, res) => {
       emails = req.body.supplierEmailsList? prel(req.body.supplierEmailsList) : [];
       suppCurrencies = req.body.supplierCurrenciesList? prel(req.body.supplierCurrenciesList) : [];//currencies
       totalPricesList = req.body.supplierTotalPricesList? prel(req.body.supplierTotalPricesList, true) : [];
+      console.log(1992);
       t = arrangeMultiData(t, suppIds);
       suppIds = suppIds.filter((v, i, a) => a.indexOf(v) === i);
       //suppIds = t.uniqueSuppIds;
@@ -310,10 +307,10 @@ exports.postIndex = (req, res) => {
    
     //Supplier's name, e-mail, currency, total price to be saved as lists in PlaceBid in case of Multi.
     var backPath = '../../../../../../../';
-    console.log(suppIds);
-    
+    var asyncCounter = 0;
+    console.log(suppIds.length);
      for(var i = 0; i < suppIds.length; i++) {
-       var buyerPrice = !(t.uniqueSuppIds)? req.body.buyerPrice :                                                               fx(parseFloat(totalPricesList[i]).toFixed(2))
+       var buyerPrice = !(t.uniqueSuppIds)? req.body.buyerPrice :fx(parseFloat(totalPricesList[i]).toFixed(2))
                 .from(suppCurrencies[i])
                 .to(req.body.buyerCurrency);
        
@@ -372,27 +369,21 @@ exports.postIndex = (req, res) => {
         buyer: req.body.buyer,
         supplier: suppIds[i]
       });
-
+       
       bidRequest
         .save()
-        .then((err, result) => {        
-        console.log(i);
-        console.log(err);
-        
-        if(treatError(req, res, err, backPath+"buyer/index")) 
-          return false;
-        req.flash("success", "Bid requested successfully!");
-
-        if(i == suppIds.length)
-          setTimeout(function() {
-            
-           return res.redirect("../buyer/index"); 
-          }, 4000);
+        .then((err, result) => {
+          if(++asyncCounter == suppIds.length)
+            //setTimeout(function() {      
+          if(treatError(req, res, err, "../../")) 
+            return false;
+          req.flash("success", "Bid requested successfully!");
+             return res.redirect("../../"); 
+          //}, 6400);
       })
       .catch(console.error);
     }
   } else if(req.body.bidProductList) {//Place bid on one or more products (+ 1 or more suppliers) from the Product Catalog grid.
-    
       var buyerId = req.body.buyerId, productIds = req.body.bidProductList, supplierIds = req.body.bidSupplierList;
       var productList = prel(productIds);
       var supplierList = prel(supplierIds);
@@ -1052,7 +1043,7 @@ exports.getSignIn = (req, res) => {
   var success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
   req.session.flash = [];
-
+console.log('STB')
   if (!req.session.buyerId || !req.session.buyer.isVerified)
     return res.render("buyer/sign-in", {
       captchaSiteKey: captchaSiteKey,

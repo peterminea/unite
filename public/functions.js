@@ -72,7 +72,7 @@ function getCurrenciesList(elem, url, token, defaultBidCurrency) {
       }
       //res(data);
       //autocomp(obj, data, isEnter);
-      initBaseRates(fx, elem);
+      initBaseRates(fx, elem);     
       
       $('select.buyerCurrency')
         .find('option[value="' + defaultBidCurrency + '"]')
@@ -84,7 +84,7 @@ function getCurrenciesList(elem, url, token, defaultBidCurrency) {
 
       var opt = $('select.productsList').find('option:selected');     
       
-      if(opt && opt.length && opt.attr('value').length) {
+      if(opt && opt.length && opt.attr('value')) {
         $('select.productsList')
           .addClass('init')
           .trigger('change');
@@ -652,33 +652,26 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
           .attr('filePath', null)
           .attr('value', '');
         
-        var src = imagePath && imagePath.length? imagePath : null;
+        var src = imagePath && imagePath.length? imagePath : null;     
 
         var data = {
                   id: lis,
                   name: prodVal,
                   price: priceVal + ' ' + currencyVal,
+                  productId: productId,
+                  supplierId: suppId,
+                  supplierCurrency: suppCurr,
+                  bigPrice: bigPrice,
+                  maxAmount: (input.attr('maxAmount')? input.attr('maxAmount') : input.attr('defaultMaxAmount')),
                   hiddenAmount: parseInt(amountVal),
                   hiddenPrice: priceVal,
                   hiddenTotalPrice: addedPrice,
                   hiddenCurrency: currencyVal,
                   productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '',                  
                   totalPrice: addedPrice + ' ' + currencyVal
-        };
+        };    
     
         grid.jqGrid('addRowData', lis, data, 'last');
-          //.then(() => {
-            //var table = gridId;//divId.find('table').eq(1);//Last
-            var tr = grid.find('tbody tr').eq(lis);
-            tr.attr('price', addedPrice);
-            tr.attr('totalPrice', bigPrice);
-            tr.attr('amount', amountVal);
-            tr.attr('productId', productId);
-            tr.attr('supplierId', suppId);
-            tr.attr('supplierCurrency', suppCurr);
-            tr.attr('maxAmount', (input.attr('maxAmount')? input.attr('maxAmount') : input.attr('defaultMaxAmount')));
-       // });
-
         var counter = elem.parent('div').find('span.productsCount');
         var newValue = 1 + parseInt(counter.text()? counter.text() : 0);
         var totalAmount = $('#totalAmount'+id).val()? parseInt($('#totalAmount'+id).val()) : 0;
@@ -695,16 +688,17 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
         bindHandleProduct(grid.find('.inc').last(), input, isNewBid, id, false, true);
         bindHandleProduct(grid.find('.dec').last(), input, isNewBid, id, false, false);                        
         delegateUpload(grid.find('.uploadImage').last());
+     
 
         if(isNewBid || !($('span.multiSupp').length)) {
-          var suppPriceUnit = fx.convert(parseFloat(priceUnit), {from: buyerCurrSpan.text(), to: suppCurr});
+          var suppPriceUnit = fx.convert(parseFloat(priceVal), {from: buyerCurrSpan.text(), to: suppCurr});
           $('#supplierPriceUnit'+id).text(parseFloat(suppPriceUnit).toFixed(2));
           var supp = fx.convert(parseFloat(bigPrice).toFixed(2), {from: buyerCurrSpan.text(), to: suppCurr});
           $('#supplierPrice'+id).text(parseFloat(supp).toFixed(2));
         } else if($('span.multiSupp').length) {//Place Bid MultiSupplier from the Catalog.
           var unitPrice = $(`span.unitPrice[suppId="${suppId}"]`);
           var totalPrice = $(`span.totalPrice[suppId="${suppId}"]`);
-          var suppPriceUnit = fx.convert((priceUnit), {from: buyerCurrSpan.text(), to: suppCurr});
+          var suppPriceUnit = fx.convert((priceVal), {from: buyerCurrSpan.text(), to: suppCurr});
           var supp = fx.convert((addedPrice), {from: buyerCurrSpan.text(), to: suppCurr});
           unitPrice.text(parseFloat(suppPriceUnit).toFixed(2));
           totalPrice.text(parseFloat(supp).toFixed(2));
@@ -814,13 +808,30 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
       ul = li.parent("ul");
       isUl = true;
     }
+    
+    var bidSuppCurr, bidBigPrice, bidAmount, bidUnitPrice, prodSuppId, bidMaxAmount;
+    var index = isUl ? ul.find("li").index(li) : ul.find("tr").index(li);
+    var rowid = "" + index;
+    rowId = gridId.jqGrid("getRowData", rowid);
+    
+    if(!isUl) {
+ //Start from tr.find('td').eq(2).
+      /*
+      Price, amount, currency, total price, image source, product id, supplier id, supplier currency, max amount, big price.
+      td 2 to 11.
+      */
+      bidSuppCurr = rowId.supplierCurrency;//li.find('td').eq(9).html();
+      bidBigPrice = rowId.bigPrice;//li.find('td').eq(11).html();
+      bidAmount = rowId.hiddenAmount;//li.find('td').eq(3).html();
+      bidUnitPrice = rowId.hiddenPrice;//li.find('td').eq(2).html();
+      prodSuppId = rowId.supplierId;//li.find('td').eq(8).html();
+      bidMaxAmount = rowId.maxAmount;//li.find('td').eq(10).html();
+    }
 
     var counter = divId.prev("div").find("p.term span");
     var entireAmount = parseInt(li.find(".amount").text());
-    var index = isUl ? ul.find("li").index(li) : ul.find("tr").index(li);
-    var rowid = "gb1_" + index;
-
-    if (isAdd && entireAmount == parseInt(li.attr("maxAmount"))) {
+    
+    if (isAdd && entireAmount == bidMaxAmount) {
       Swal.fire({
         icon: "error",
         title: "Error!",
@@ -845,21 +856,18 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
           .first()
           .text();
     
-    var supplierCurrency = fromBid? li.attr("supplierCurrency") : theCurrency;
-    //alert(supplierCurrency);
-    var totalPagePrice = fromBid? parseFloat(li.attr("totalPrice")).toFixed(2)
-      : parseFloat($("#hiddenTotalPrice").val()).toFixed(2);
+    var supplierCurrency = fromBid? bidSuppCurr : theCurrency;
+    var totalPagePrice = fromBid? parseFloat(bidBigPrice).toFixed(2) : parseFloat($("#hiddenTotalPrice").val()).toFixed(2);
 
     var canContinue = true;
     var localAmount = isAdd? entireAmount + handledAmount
       : entireAmount - handledAmount;
     var localPrice = isAdd? parseFloat(parseFloat(rowPrice) + parseFloat(handledPrice)).toFixed(2)
       : parseFloat(rowPrice - handledPrice).toFixed(2);
-    var totalAmountInput = fromBid? $("#totalAmount" + id)
-      : $("#totalSupplyAmount");
+    var totalAmountInput = fromBid? $("#totalAmount" + id)  : $("#totalSupplyAmount");
     var newAmount = isAdd? parseInt(totalAmountInput.val()) + handledAmount
       : parseInt(totalAmountInput.val()) - handledAmount;
-    var newPrice = isAdd? parseFloat(parseFloat(totalPagePrice) + parseFloat(handledPrice)     ).toFixed(2)
+    var newPrice = isAdd? parseFloat(parseFloat(totalPagePrice) + parseFloat(handledPrice) ).toFixed(2)
       : parseFloat(totalPagePrice - handledPrice).toFixed(2);
     var totalPrice = newPrice + " " + theCurrency,
       addedPrice = localPrice + " " + theCurrency;
@@ -875,12 +883,13 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
         confirmButtonText: "Confirm",
         cancelButtonText: "Dismiss"
         //, reverseButtons: true
-      }).then(result => {
+      }).then((result) => {
         if (result.value) {
           li.remove();
           var newValue = -1 + parseInt(counter.text());
           counter.text(newValue);
-          if (!isUl) gridId.jqGrid("delRowData", rowId);
+          if(!isUl) 
+            gridId.jqGrid("delRowData", rowId);
         } else if (result.dismiss === Swal.DismissReason.cancel) {
           canContinue = false;
         }
@@ -888,24 +897,18 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     } else {
       isUl
         ? ul.find("li").attr("totalPrice", parseFloat(newPrice))
-        : ul.find("tr").attr("totalPrice", parseFloat(newPrice));
+        : ul.find("tr td:eq(11)").html(parseFloat(newPrice));
       totalAmountInput.val(parseInt(newAmount));
 
       li.find("span.amount").text(localAmount);
       li.find("span.totalPrice").text(localPrice);
-      if (!fromBuyer) {
-        li.attr("amount", localAmount);
-        li.attr("price", localPrice);
-      }
-
-      if (!isUl && !isRow && (entireAmount > 1 || isAdd)) {
-        //No deletion.
-        //gridId.jqGrid('editRow', index, true);
-        rowId = gridId.jqGrid("getRowData", rowid);
-        rowId.hiddenAmount = localAmount;
-        rowId.hiddenTotalPrice = addedPrice;
-        gridId.jqGrid("setRowData", rowid, rowId);
-        //gridId.jqGrid('saveRow', rowid);
+      
+      if (!isUl && !isRow && (entireAmount > 1 || isAdd)) {//No deletion.
+        gridId.jqGrid("setRowData", rowid, {
+          hiddenAmount: parseInt(localAmount),
+          hiddenTotalPrice: parseFloat(localPrice).toFixed(2),
+          bigPrice: parseFloat(newPrice).toFixed(2)
+        });
       }
     }
 
@@ -925,15 +928,7 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
       $("#sprice" + id).text(parseFloat(newPrice).toFixed(2));
       
       if($('span.multiSupp').length) {
-        /*
-var unitPrice = $(`span.unitPrice[suppId="${suppId}"]`);
-          var totalPrice = $(`span.totalPrice[suppId="${suppId}"]`);
-          var suppPriceUnit = fx.convert((priceUnit), {from: buyerCurrSpan.text(), to: suppCurr});
-          var supp = fx.convert((addedPrice), {from: buyerCurrSpan.text(), to: suppCurr});
-          unitPrice.text(parseFloat(suppPriceUnit).toFixed(2));
-          totalPrice.text(parseFloat(supp).toFixed(2));
-        */
-        var supplierId = li.attr('supplierId');
+        var supplierId = prodSuppId;
         var unitSpan = $(`span.unitPrice[suppId="${supplierId}"]`);
         var totalSpan = $(`span.totalPrice[suppId="${supplierId}"]`);
         var suppUnitVal = parseFloat(fx.convert(unitPrice, {from: span.text(), to: supplierCurrency})).toFixed(2);
@@ -947,10 +942,11 @@ var unitPrice = $(`span.unitPrice[suppId="${suppId}"]`);
         $("#supplierPrice" + id).text(supp);
       }
       
-      //gridId.trigger("reloadGrid");
+      gridId.trigger("reloadGrid");
     }
   });
 }
+
 
 function removeAllProducts() {
   //Supplier products.
@@ -1000,7 +996,7 @@ function addition(
   supplierId
 ) {
   var isPresent = false;
-  elem.find(".product").each(function() {
+  elem.find("span.product").each(function() {
     if ($(this).text() == prodVal) {
       isPresent = true;
       return false;
@@ -1019,7 +1015,6 @@ function addition(
   } else {
     var id = fromBuyer ? '_' + getId(elem.attr("id")) : '';
     var fromBid = fromBuyer || !($("#hiddenTotalPrice").length);
-        
     var addedPrice = parseFloat(priceVal * amountVal).toFixed(2);
     var priceInput = fromBid ? $("#price" + id) : $("#totalSupplyPrice");
     var pageCurrency = fromBid? $("#currency" + id).val()
@@ -1052,15 +1047,17 @@ function addition(
       currencyVal = pageCurrency;
       bigPrice = fx.convert(bigPrice, { from: currencyVal, to: pageCurrency });
     }
+    
+    var elem2 = elem.parent('div').prev('div').find('ul');
 
-    if (!elem.find("li").length) {
-      elem.append(`<li class='list-group-item' style='color: brown'><span class='cnt'>#</span><span class='product0'>Name</span><span class='buttonsWrapper'>Buttons</span><span class='imageWrapper'>Images</span><span class='priceWrapper'>Total</span><span class='amountWrapper'>Count</span>
+    if (!elem2.find("li").length) {
+      elem2.append(`<li class='list-group-item' style='color: brown'><span class='cnt'>#</span><span class='product0'>Name</span><span class='buttonsWrapper'>Buttons</span><span class='imageWrapper'>Images</span><span class='priceWrapper'>Total</span><span class='amountWrapper'>Count</span>
 <span class='basicPriceWrapper'>Price</span></span></li>`);
     }
 
-    var lis = elem.find("li").length; //table.find('tbody tr').length;
+    var lis = elem2.find("li").length; //table.find('tbody tr').length;
 
-    elem.append(
+    elem2.append(
       "<li class='list-group-item' price='" +
         addedPrice +
       "' supplierId='" +
@@ -1092,42 +1089,33 @@ function addition(
     var totalAmountInput = fromBid
       ? $("#totalAmount" + id)
       : $("#totalSupplyAmount");
-    totalAmountInput.val(
-      parseInt(totalAmountInput.val()) + parseInt(amountVal)
-    );
+    totalAmountInput.val(  parseInt(totalAmountInput.val()) + parseInt(amountVal));
+    
     var gridId = fromBuyer ? $("#grid" + id) : $("#grid");
     var divId = fromBuyer ? $("#jqDiv" + id) : $("#jqDiv");
     var src = imagePath && imagePath.length ? imagePath : null;
+    lis = 1 + elem.find('tr').length;
+    var sel = fromBid? $('#productsList'+id) : null;
+    var opt = sel? sel.find('option:selected') : null;
+    var selCurr = $('#selectCurrencies'+id);
+    var optCurr = selCurr.find('option:selected');
 
     var data = {
       id: lis,
       name: prodVal,
-      price: priceVal + " " + currencyVal,
-      hiddenPrice: priceVal,
+      hiddenPrice: priceVal,      
       hiddenTotalPrice: addedPrice,
       hiddenCurrency: currencyVal,
-      productImageSource: src
-        ? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">`
-        : "",
-      amount: parseInt(amountVal),
-      totalPrice: addedPrice + " " + currencyVal
+      productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : "",
+      productId: fromBid && opt.attr('productId')? opt.attr('productId') : null,
+      supplierId: fromBid && opt.attr('supplierId')? opt.attr('supplierId') : elem.attr('supplierId')? elem.attr('supplierId') : null,
+      maxAmount: fromBid && opt.attr('maxAmount')? opt.attr('maxAmount') : elem.attr('MAX'),
+      supplierCurrency: fromBid && opt.attr('supplierCurrency')? opt.attr('supplierCurrency') : elem.attr('supplierCurrency')? elem.attr('supplierCurrency') : (!fromBid && optCurr.text())? optCurr.text() : null,
+      hiddenAmount: parseInt(amountVal),
+      bigPrice: addedPrice
     };
 
-    gridId.jqGrid("addRowData", lis, data, "last")
-    .then(() => {
-      var tr = gridId.find("tbody tr").eq(lis);
-      tr.attr("price", addedPrice);
-      tr.attr("totalPrice", bigPrice);
-      tr.attr("amount", amountVal);
-      if(fromBid) {
-        tr.attr(
-          "maxAmount",
-          buyerInput.attr("maxAmount")
-            ? buyerInput.attr("maxAmount")
-            : buyerInput.attr('defaultMaxAmount'));
-      }
-    });
-
+    gridId.jqGrid("addRowData", lis, data, "last");
 
     if (!fromBid) {
       $("#totalSupplyPrice").text(bigPrice + " " + currencyVal);
@@ -1139,14 +1127,12 @@ function addition(
         from: $('span.bidCurrency[index="' + getId(id) + '"]')
           .first()
           .text(),
-        to: elem.attr("suppCurrency")
+        to: elem.attr("supplierCurrency")
       });
       
       $("#supplierPrice" + id).text(supp);
-      elem.find("li").attr("totalPrice", bigPrice);
     }
 
-    //var counter = elem.parent('div').find('p.term span');
     var counter = divId.prev("div").find("p.term span");
     var newValue = 1 + parseInt(counter.text());
     counter.text(newValue);
@@ -1715,6 +1701,7 @@ function initGrid(
     rowNum: 30,
     //scroll: 1,
     shrinkToFit: true,
+    loadonce: true,
     //autowidth: true,
     multiselect: true,
     rownumbers: true,
@@ -1740,7 +1727,7 @@ function initGrid(
           .on("click", function() {
             removeFile(this);
           });
-      } else if (table.find(".rem").length) {
+      } else if(table.find(".rem").length) {
         var id = '_' + getId(divId.attr("id"));
         if(id.length == 1)
           id = '';
@@ -1755,7 +1742,9 @@ function initGrid(
       } else {
       }
     },
-    gridComplete: function() {},
+    gridComplete: function() {
+      
+    },
     onSelectRow : function(id) { 
       var ids = $(`${gridId}`).jqGrid("getGridParam", "selarrrow");
       if($('#bidOnProds').length) {
@@ -1911,7 +1900,7 @@ function productFormatter(cellvalue, options, rowObject) {
 }
 
 function amountFormatter(cellvalue, options, rowObject) {
-  return `<span class='amountWrapper0'><span class='amount'>${parseInt(rowObject.hiddenAmount )}</span> items </span>`;
+  return `<span class='amountWrapper0'><span class='amount'>${parseInt(rowObject.hiddenAmount)}</span><span> items</span> </span>`;
 }
 
 function priceFormatter(cellvalue, options, rowObject) {
@@ -1919,7 +1908,7 @@ function priceFormatter(cellvalue, options, rowObject) {
 }
 
 function totalPriceFormatter(cellvalue, options, rowObject) {
-  return `<span class='priceWrapper0'><span class='totalPrice'>${parseFloat(rowObject.hiddenTotalPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency }</span></span>`;
+  return `<span class='priceWrapper0'><span class='totalPrice'>${parseFloat(rowObject.hiddenTotalPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency}</span></span>`;
 }
 
 function buttonsWrapperFormatter(cellvalue, options, rowObject) {
@@ -1969,7 +1958,7 @@ function supplierPriceFormatter(cellvalue, options, rowObject) {
 }
 
 function productImageFormatter(cellvalue, options, rowObject) {
-  return `<img src="${rowObject.hiddenImageSrc}" title="Product Image" style="height: 20px; width: 20px" onclick="window.open(this.src)">`;
+  return `<img src="${rowObject.productImageSource}" title="Product Image" style="height: 20px; width: 20px" onclick="window.open(this.src)">`;
 }
 
 function getExt(name) {
@@ -1998,17 +1987,16 @@ function chatFormatter(cellvalue, options, rowObject) {
 
 
 //Unformatters:
-
 function priceUnformatter(cellvalue, options, cell) {
-  return parseFloat($('span.price', cell).text()).toFixed(2);// + ' ' + $('.currency', cell).text();
+  return parseFloat($('span.price', cell).text()).toFixed(2);
 }
 
 function amountUnformatter(cellvalue, options, cell) {
   return parseInt($('span.amount', cell).text());
 }
 
-function totalPriceUnformatter(cellvalue, options, cell) {//Also for productPriceFormatter.
-  return parseFloat($('span.totalPrice', cell).text()).toFixed(2);// + ' ' + $('.currency', cell).text();
+function totalPriceUnformatter(cellvalue, options, cell) {
+  return parseFloat($('span.totalPrice', cell).text()).toFixed(2);
 }
 
 
@@ -2254,6 +2242,8 @@ $(document).ready(function() {
     
     $('input[name="currency"]').val(val);
     $("#currency").val(val);
+    
+    $('#prodServices,#grid').attr('supplierCurrency', val);
 
     //Re-make the list of products accordingly, with the new currency.
     if (!$("#prodServices").length) 
@@ -2349,12 +2339,15 @@ $(document).ready(function() {
         var origCurrency = $(elem).attr('buyerCurrency');  
         $('#currency'+id).val(origCurrency);
         $('#scurrency'+id).text(origCurrency);
-        
-        elem.find('tr').not(':first').each(function(ind, element) {
-          var suppCurrency = $(element).attr('supplierCurrency');
+
+        elem.find('tr').not(':first').each(function(ind, element) {          
+          var trId =  $(element).attr('id');
+          var row = elem.jqGrid('getRowData', trId);
+          var suppCurrency = row.supplierCurrency;
+          console.log(JSON.stringify(row));
           
           arr.push($(element).find('span.product').text());
-          arr1.push($(element).attr('amount'));
+          arr1.push(parseInt(row.hiddenAmount));
           var originalPrice = parseFloat($(element).find('span.totalPrice').text()).toFixed(2);
           var val = fx.convert(originalPrice, {from: origCurrency, to: suppCurrency});
           arr2.push(parseFloat(val).toFixed(2));
@@ -2367,7 +2360,7 @@ $(document).ready(function() {
           arr3.push(src);
           
           if($('#supplierIdsList').length) {//PlaceBid Multi Supplier.
-            arr5.push($(element).attr('supplierId'));
+            arr5.push(row.supplierId);
             arr7.push(suppCurrency);
             //arr8.push($(this).attr('productId'));
           }
@@ -2381,7 +2374,6 @@ $(document).ready(function() {
         
         if(arr5.length) {
           $('#supplierIdsList').val(arr5);
-          
           $('#supplierCurrenciesListProd').val(arr7);
           //$('#productIdsList').val(arr8;
           
@@ -2443,12 +2435,11 @@ $(document).ready(function() {
         $('#buyerPriceUnit'+id).text(price);
         
         var supplierCurrency = $('#supplierCurrency'+id).text();
-        var suppPrice = fx.convert(price, {from: $('span.bidCurrency[index="'+ (id.length? id : '-1') +'"]').first().text(), to: supplierCurrency
-        });
+        var suppPrice = fx.convert(price, {from: $('span.bidCurrency[index="'+ (id.length? id : '-1') +'"]').first().text(), to: supplierCurrency       });
         $('#supplierPriceUnit'+id).text(suppPrice);
       });
 
-      $('select.buyerCurrency').on('change', function() {        
+      $('select.buyerCurrency').on('change', function() {
         var curr = $(this).find('option:selected').text();
         var id = '_' + $(this).attr('index');
         if(id.charAt(1) == '-')
@@ -2460,7 +2451,7 @@ $(document).ready(function() {
         $('#currency'+id).val(curr);
         $('#scurrency'+id).text(curr);
         
-        var suppCurrency = elem.attr('suppCurrency')? elem.attr('suppCurrency') : null; 
+        var suppCurrency = elem.attr('supplierCurrency')? elem.attr('supplierCurrency') : null; 
         if(!($(this).hasClass('multiplex')) && suppCurrency && curr && curr != suppCurrency) {          
           
           Swal.fire({
@@ -2547,7 +2538,7 @@ $(document).ready(function() {
         var currency = opt.attr('currency');
         
         if(isSingle) {
-          $('#prodServices').attr('suppCurrency', currency);          
+          $('#prodServices').attr('supplierCurrency', currency);          
         }
         
         var maxAmount = opt.attr('maxAmount');
@@ -2785,11 +2776,14 @@ $(document).ready(function() {
             var table = ul
               .parent("div")
               .next("div")
-              .find("table")
-              .eq(1); //Last
+              .find("table[id^='grid']");
+            
             var tr = table.find("tbody tr").eq(index);
             var span2 = tr.find("span.productImage");
             var img2 = span2.find("img");
+            table.jqGrid('setRowData', tr.attr('id'), {
+              productImageSource : res
+            });
 
             if (img != null && img.attr("src") != null) {
               img.attr("src", res);
@@ -2822,7 +2816,8 @@ $(document).ready(function() {
         } else if (isExcel) {
           var fromBuyer = input.hasClass("fromBuyer");
           var div = fromBuyer ? input.parent("div").next("div") : null;
-          var el = fromBuyer ? div.find("ul") : $("#prodServices");
+          //var el = fromBuyer ? div.find("ul") : $("#prodServices");
+          var el = div.find('table[id^="grid"]');
           var productInput = fromBuyer
             ? div.find('input[id^="prodServiceInput"]')
             : $("#prodServiceInput");
@@ -2835,7 +2830,7 @@ $(document).ready(function() {
               if (i < 1) continue;
               var elem = response[i]; //Assume that elem fields are called name, price, and currency.
 
-              if (el.find("li").length >= MAX) {
+              if (el.find("tr").length > MAX) {
                 Swal.fire({
                   icon: "error",
                   title: "Error!",

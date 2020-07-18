@@ -97,20 +97,21 @@
             $('div.bodyBuilder').append(str);
             
             var data2 = [];
-            var colModel = [
+            var colModel = [              
+              { name: 'productId', hidden: true },
+              { name: 'buyerId', hidden: true },
+              { name: 'supplierId', hidden: true },
+              { name: 'hiddenAmount', hidden: true },
+              { name: 'hiddenTotalPrice', hidden: true },
+              { name: 'productImageSource', hidden: true },
               { name: 'productName', label: 'Product name', formatter: productFormatter, search: true, width: 140},
               { name: 'supplierName', label: 'Supplier Name', align: 'center', search: true, width: 140},
               { name: 'productPrice', label: 'Product price', formatter: priceFormatter, unformat: priceUnformatter, template: 'number', sorttype: 'number', align: 'center', search: true, width: 140},
               { name: 'amount', label: 'Amount', align: 'center', formatter: amountFormatter, unformat: amountUnformatter, sortname: 'hiddenAmount', template: 'number', sorttype: 'number', search: true, width: 140 },
               { name: 'totalPrice', label: 'Total price', align: 'center', template: 'number', sorttype: 'number', formatter: totalPriceFormatter, unformat: totalPriceUnformatter, search: true, width: 90},
               { name: 'image', label: 'Product Image', align: 'center', formatter: productImageFormatter, search: false, sortable: false, width: 90},
-              { name: 'placeBid', label: 'Place Bid', align: 'center', search: false, sortable: false, formatter: linkFormatter, width: 140},
-              { name: 'hiddenAmount', hidden: true },
-              { name: 'productId', hidden: true },
-              { name: 'buyerId', hidden: true },
-              { name: 'supplierId', hidden: true },
-              { name: 'hiddenImageSrc', hidden: true },
-              { name: 'hiddenTotalPrice', hidden: true }
+              { name: 'placeBid', label: 'Place Bid', align: 'center', search: false, sortable: false, formatter: linkFormatter, width: 140}
+             
             ];
             
             for(var i in data) {
@@ -125,7 +126,7 @@
                 hiddenCurrency: data[i].currency,
                 hiddenAmount: data[i].amount,
                 hiddenTotalPrice: data[i].totalPrice,
-                hiddenImageSrc: '../' + data[i].productImage.substring(7)
+                productImageSource: '../' + data[i].productImage.substring(7)
               });
             }
 
@@ -214,7 +215,7 @@
     <% if(bidsLength != null) { %>
       <div class="mt-4">
         <p class='term'>
-          You have made a total of <%= bidsLength %> bids, their overall price (expressed in your currency) is <%= totalBidsPrice %> <%= BID_DEFAULT_CURR %>.
+          You have made a total of <%= bidsLength %> bids, their overall price (expressed in your currency) is <%= parseFloat(totalBidsPrice).toFixed(2) %> <%= BID_DEFAULT_CURR %>.
         </p>
         <a href="../buyer/bidsCatalog/<%= buyer._id %>/<%= buyer.organizationName %>"><b>Load full table of Bids</b></a>
       </div>
@@ -512,7 +513,7 @@
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Your currency*:</label>
-                    <select class="form-control buyerCurrency" suppCurrency="<%= supplier.currency %>" index="<%= i %>" ></select>
+                    <select class="form-control buyerCurrency" id="selectCurrencies_<%= i %>" supplierCurrency="<%= supplier.currency %>" index="<%= i %>" ></select>
                   </div>
                   <p>
                     You can either select products from drop-down or search for them via Autocomplete (please enter at least 3 characters).
@@ -553,7 +554,7 @@
                     <input class="form-control upload productimageupload" type="file" id="productImage_<%= i %>" name="products" single>
                     <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload Product Image" />                    
                   </div>
-                    <ul class="list-group" MAX="<%= MAX_PROD %>" buyerCurrency="<%= buyer.currency %>" suppCurrency="<%= supplier.currency %>" id="prodServices_<%= i %>">
+                    <ul class="list-group" MAX="<%= MAX_PROD %>" buyerCurrency="<%= buyer.currency %>" supplierCurrency="<%= supplier.currency %>" id="prodServices_<%= i %>">
                     </ul>
                     <p class='term'>
                       You have a number of <span class='productsCount'>0</span> products.
@@ -565,7 +566,7 @@
                     <input type="hidden" required id="productImagesList_<%= i %>" name="productImagesList" value="">
                   </div>
                   <div id="jqDiv_<%= i %>" class="form-group">
-                    <table id="grid_<%= i %>" buyerCurrency="<%= buyer.currency %>">
+                    <table id="grid_<%= i %>" MAX="<%= MAX_PROD %>" supplierId="<%= supplier._id %>" buyerCurrency="<%= buyer.currency %>" supplierCurrency="<%= supplier.currency %>">
                     </table>
                     <div id='prodPager_<%= i %>'>
                     </div>
@@ -641,23 +642,28 @@
 
                     var data = [];
                     var colModel = [
+                      { name: 'hiddenPrice', hidden: true },
+                      { name: 'hiddenAmount', hidden: true },
+                      { name: 'hiddenTotalPrice', hidden: true },
+                      { name: 'hiddenCurrency', hidden: true },
+                      { name: 'productImageSource', hidden: true },
+                      { name: 'productId', hidden: true },
+                      { name: 'supplierId', hidden: true },
+                      { name: 'supplierCurrency', hidden: true },
+                      { name: 'maxAmount', hidden: true },
+                      { name: 'bigPrice', hidden: true },
                       { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
                       { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, unformat: priceUnformatter, search: true, width: 140},                      
                       { name: 'amount', label: 'Amount', formatter: amountFormatter, unformat: amountUnformatter, align: 'center', search: true, template: 'number', sorttype: 'number', width: 70},
                       { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, unformatter: totalPriceUnformatter, search: true, template: 'number', sorttype: 'number', width: 90},            
                       { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
-                       { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter},
-                      { name: 'hiddenPrice', hidden: true },
-                      { name: 'hiddenAmount', hidden: true },
-                      { name: 'hiddenTotalPrice', hidden: true },
-                      { name: 'hiddenCurrency', hidden: true },
-                      { name: 'productImageSource', hidden: true}
-                    ];
+                      { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}                      
+                    ];                 
                     
                     initGrid(colModel, data, "#grid"+index, '#prodPager'+index, "name", 'Products List', 1000);
                     setTimeout(function() {
-                      var table = $("#jqDiv"+index).find('table').eq(1);
-                      table.attr('suppCurrency', "<%= supplier.currency %>");
+                      var table = $("#grid"+index);
+                      table.attr('supplierCurrency', "<%= supplier.currency %>");
                     }, 1000);
 
                     $('#status'+index).on('keypress keyon keyup', function(e) {
