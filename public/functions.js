@@ -128,12 +128,13 @@ function imageFormatter(cellvalue, options, rowObject) {
 
 
 function buyerRemovalFormatter(cellvalue, options, rowObject) {
-  return `<a href="../../../supervisor/chatLogin/${rowObject.supervisorId}/${rowObject.buyerId}/0/None/${rowObject. buyerOrganizationName}/(Supervisor)-${rowObject.supervisorOrganizationName}>`;
+  //return `<button title="Remove selected Buyer from UNITE" id="process_${rowObject.index}" class="btn btn-primary">Process</button>`;
+  return `<a href="delete/${rowObject.buyerId}"><button title="Remove selected Buyer from UNITE" id="process_${rowObject.index}" class="btn btn-danger">Process</button></a>`;
 }
 
 
 function chatFormatter(cellvalue, options, rowObject) {
-  return `<button title="Remove selected Buyer from UNITE" id="process_${rowObject.index}" class="btn btn-primary">Process</button>`;
+  return `<a href="../../../supervisor/chatLogin/${rowObject.supervisorId}/${rowObject.buyerId}/0/None/${rowObject. buyerOrganizationName}/(Supervisor)-${rowObject.supervisorOrganizationName}>`;
 }
 
 
@@ -1477,7 +1478,7 @@ function userInputs(id, role, avatar, name, type, ul) {
   }
 }
 
-function getCancelReasonTitles(obj, token, url, objectType, isAdmin) {
+function getCancelReasonTitles(obj, token, url, objectType, isAdmin, isSupervisor) {
   //For deleting user accounts and cancelling bids. Types (titles) of reasons, expressed as radio buttons, should be chosen.
   $.ajax({
     url: url,
@@ -1486,7 +1487,8 @@ function getCancelReasonTitles(obj, token, url, objectType, isAdmin) {
     datatype: "application/json",
     data: {
       objectType: objectType,
-      isAdmin: isAdmin
+      isAdmin: isAdmin,
+      isSupervisor: isSupervisor
     },
     error: function() {},
     success: function(data) {

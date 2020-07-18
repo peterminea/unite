@@ -31,7 +31,7 @@
       getAutocomplete('.country', '/countryAutocomplete', token);
       getAutocomplete('#industry', '/industryGetAutocomplete', token);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
-      getCurrenciesList('select.currency', '/currencyGetAutocomplete', token);      
+      getCurrenciesList('select.currency', '/currencyAutocomplete', token);      
       initBaseRates(fx, 'select.currency');
       
       var defaultCurr = "<%= DEFAULT_CURR %>";

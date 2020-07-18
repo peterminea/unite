@@ -14,6 +14,10 @@ const cancelReasonTitleSchema = new Schema({
   isAdmin: {
     type: Boolean,
     required: true
+  },
+  isSupervisor: {
+    type: Boolean,
+    required: true
   }
 });
 
