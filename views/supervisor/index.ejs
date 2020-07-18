@@ -25,28 +25,6 @@
       var token = $("input[name^='_csrf']").first().val();
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       prepareSortTable();
-      
-      $('button[id^="process"]').click(function(e) {
-        var tr = $(this).parent('tr');
-        var id = $(this).attr('id');
-        
-        if(confirm('Are you sure you want to remove the selected buyer from the UNITE Platform?')) {
-          $.ajax({
-              url: "/processBuyer",
-              headers: { "X-CSRF-Token": token },
-              datatype: "application/json",
-              type: "POST",
-              data: {id: id},
-              success: function(data) {
-                tr.remove();
-                alert('The Buyer has been removed!');
-              },
-              error: function(err) {
-                alert(err.message);
-              }
-            });
-          }
-      });
     });
   </script>
 </head>
@@ -130,7 +108,10 @@
           <td scope="col"></td>
           <% } %>
           <td scope="col">
-            <button title="Remove selected Buyer from UNITE" id="process_<%= i %>" class="btn btn-primary">Process</button>
+            <a href="delete/<%= buyer._id %>">
+              <button title="Remove selected Buyer from UNITE" id="process_<%= i %>" class="btn btn-primary">Process
+              </button>
+            </a>
           </td>
           <td scope="col">
             <a href="../../../supervisor/chatLogin/<%= supervisor._id %>/<%= buyer._id %>/0/None/<%= buyer.organizationName %>/(Supervisor)-<%= supervisor.organizationName %>">

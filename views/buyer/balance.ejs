@@ -20,29 +20,6 @@
   <script src="/sweetalert2@9.min.js"></script>
   <script src="/https.js"></script>
   <script src="/money.min.js"></script>
-<!-- 
-  <script type="text/javascript">
-      // Load exchange rates data via AJAX:
-    if(1==2)
-      $.getJSON(
-        // NB: using Open Exchange Rates here, but you can use any source!
-          'https://openexchangerates.org/api/latest.json?app_id=' + <%= appId %> + '',
-          function(data) {
-              // Check money.js has finished loading:
-              if ( typeof fx !== "undefined" && fx.rates ) {
-                  fx.rates = data.rates;
-                  fx.base = data.base;
-              } else {
-                  // If not, apply to fxSetup global:
-                  var fxSetup = {
-                      rates : data.rates,
-                      base : data.base
-                  }
-              }
-          }
-      );
-  </script>
-  -->
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
@@ -50,7 +27,7 @@
       var defaultBalance = $('#defaultBalance').val();
       
       $('#balance').val(parseFloat(defaultBalance).toFixed(2) + ' ' + defaultCurr);
-      getCurrenciesList('#currency', '/currencyGetAutocomplete', $('#token').val());//For selects.
+      getCurrenciesList('#currency', '/currencyAutocomplete', $('#token').val());//For selects.
       //errorSuccess(Swal, '< %= errorMessage %>', '< %= successMessage %>');
       initBaseRates(fx, '#currency').then((fx) => {   
         $('#currency').on('change', function() {

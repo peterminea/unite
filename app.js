@@ -142,22 +142,6 @@ server2.on("stream", (stream, headers) => {
 server2.listen(8443);*/
 
 
-app.post("/processBuyer", (req, res) => {
-  MongoClient.connect(URI, { useUnifiedTopology: true }, function(err, db) {
-    if (err) throw err;
-
-    var dbo = db.db(BASE),
-      myquery = { _id: req.body.id };
-    dbo.collection("buyers").deleteOne(myquery, function(err, resp) {
-      if (err) {
-        return console.error(err.message);
-      }
-
-      db.close();
-    });
-  });
-});
-
 /*
 function compareTimes(a, b) {
   if ( a.time < b.time ){
@@ -742,7 +726,6 @@ app.post("/purchase", (req, res, next) => {
     });
 });
 
-//Autocomplete fields:
 const jsonp = require("jsonp");
 
 app.post("/deleteBid", function(req, res, next) {
@@ -799,7 +782,6 @@ app.post("/exists", function(req, res) {
 });
 
 
-
 app.get("/bidStatuses", function(req, res, next) {
   var statusFilter = BidStatus.find({});
 
@@ -827,10 +809,15 @@ app.get("/bidStatuses", function(req, res, next) {
   });
 });
 
+
 app.post("/cancelReasonTitles", async function(req, res, next) {
   var objectType = req.body.objectType;
-  var isAdmin = req.body.isAdmin;
-  var val = objectType && isAdmin? { type: objectType , isAdmin: true } : objectType? { type: objectType } : {};
+  const isAdmin = req.body.isAdmin;
+  const isSupervisor = req.body.isSupervisor;
+  
+  var val = objectType && isAdmin? { type: objectType , isAdmin: true } 
+  : objectType && isSupervisor? { type: objectType, isSupervisor: isSupervisor } 
+  : objectType? { type: objectType } : {};
   
   CancelReasonTitle.find({})
     .exec()
@@ -878,6 +865,7 @@ app.get("/feedbackSubjects", async function(req, res, next) {
     });
 });
 
+
 app.get("/feedbacks", async function(req, res, next) {
   Feedback.find({})
     .exec()
@@ -896,40 +884,8 @@ app.get("/feedbacks", async function(req, res, next) {
     });
 });
 
-app.get("/uniteIDAutocomplete", function(req, res, next) {
-  var regex = new RegExp(req.query["term"], "i");
-  var val = regex? { organizationUniteID: regex } : {};
-  
-  var uniteIDFilter = Supervisor.find(
-    val,
-    { organizationUniteID: 1 }
-  )
-    .sort({ organizationUniteID: 1 })
-    .limit(15); //Negative sort means descending.
 
-  uniteIDFilter.exec(function(err, data) {
-    var result = [];
-
-    if (!err) {
-      if (data && data.length && data.length > 0) {
-        data.forEach(item => {
-          let obj = {
-            id: item._id,
-            name: item.organizationUniteID
-          };
-
-          result.push(obj);
-        });
-      }
-
-      res.jsonp(result);
-    } else {
-      req.flash("error", err.message);
-      throw err;
-    }
-  });
-});
-
+//Autocomplete fields:
 app.post("/uniteIDAutocomplete", function(req, res, next) {
   var regex = new RegExp(req.query["term"], "i");
   var val = regex? { organizationUniteID: regex } : {};
@@ -939,7 +895,7 @@ app.post("/uniteIDAutocomplete", function(req, res, next) {
     { organizationUniteID: 1 }
   )
     .sort({ organizationUniteID: 1 })
-    .limit(15); //Negative sort means descending.
+    .limit(regex? 15 : 100); //Negative sort means descending.
 
   uniteIDFilter.exec(function(err, data) {
     var result = [];
@@ -964,45 +920,13 @@ app.post("/uniteIDAutocomplete", function(req, res, next) {
   });
 });
 
-/*
+
 app.post("/currencyAutocomplete", function(req, res, next) {
   var regex = new RegExp(req.query["term"], "i");
   var val = regex? { value: regex } : {};
-
   var currencyFilter = Currency.find(val, { value: 1, name: 1 })
     .sort({ value: 1 })
-    .limit(10); //Negative sort means descending.
-
-  currencyFilter.exec(function(err, data) {
-    var result = [];
-
-    if (!err) {
-      if (data && data.length && data.length > 0) {
-        data.forEach(item => {
-          let obj = {
-            id: item._id,
-            name: item.value + "-" + item.name,
-            value: item.name
-          };
-
-          result.push(obj);
-        });
-      }
-
-      res.jsonp(result);
-    } else {
-      req.flash("error", err.message);
-      throw err;
-    }
-  });
-});*/
-
-app.get("/currencyGetAutocomplete", function(req, res, next) {
-  var regex = new RegExp(req.query["term"], "i");
-  var val = regex? { value: regex } : {};
-  var currencyFilter = Currency.find(val, { value: 1, name: 1 })
-    .sort({ value: 1 })
-    .limit(regex? 210 : 230); //Negative sort means descending.
+    .limit(regex? 20 : 200); //Negative sort means descending.
 
   currencyFilter.exec(function(err, data) {
     var result = [];
@@ -1027,6 +951,7 @@ app.get("/currencyGetAutocomplete", function(req, res, next) {
     }
   });
 });
+
 
 app.post("/prodServiceAutocomplete", function(req, res, next) {
   var regex = new RegExp(req.query["term"], "i");
@@ -1069,6 +994,7 @@ app.post("/prodServiceAutocomplete", function(req, res, next) {
   });
 });
 
+
 app.get("/capabilityInputAutocomplete", function(req, res, next) {
   var regex = new RegExp(req.query["term"], "i");
   var val = regex? { capabilityDescription: regex } : {};
@@ -1101,6 +1027,7 @@ app.get("/capabilityInputAutocomplete", function(req, res, next) {
     }
   });
 });
+
 
 const fetch = require('node-fetch');
 let url = "https://www.floatrates.com/daily/eur.json";
@@ -1156,6 +1083,8 @@ if (1 == 2)
     process.on("uncaughtException", function(err) {
       console.error(err.message);
     });
+    
+    db.collection('cancelreasontitles').updateMany({},  { $set: { isSupervisor: false } }, function(err, obj) {} );
     
  //db.close();
   });

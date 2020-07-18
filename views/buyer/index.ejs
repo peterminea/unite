@@ -38,7 +38,7 @@
       var defaultBidCurrency = '<%= BID_DEFAULT_CURR %>';
                    
       setTimeout(function() {
-        getCurrenciesList('select.buyerCurrency', '/currencyGetAutocomplete', token, defaultBidCurrency);//Preferred currency for Buyer.
+        getCurrenciesList('select.buyerCurrency', '/currencyAutocomplete', token, defaultBidCurrency);//Preferred currency for Buyer.
       }, 1320);      
 
       $('#loadCatalog').on('click', function() {

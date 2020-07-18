@@ -21,7 +21,7 @@
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-      getCancelReasonTitles($('#mainForm'), $('input[name="_csrf"]').val(), '/cancelReasonTitles', 'User', false);
+      getCancelReasonTitles($('#mainForm'), $('input[name="_csrf"]').val(), '/cancelReasonTitles', 'User', false, false);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       
       $('#mainForm').submit(function(e) {
@@ -48,7 +48,7 @@
         <legend>
           Delete Buyer Account - Please fill in the required (*) fields
         </legend>
-        <form id="mainForm" action="/buyer/delete/<%= id %>" method="POST">
+        <form id="mainForm" method="POST">
           <div class="form-group">
             <label for="email">E-mail*:</label>
             <input required class="form-control" type="email" name="emailAddress" autofocus="autofocus"></input>

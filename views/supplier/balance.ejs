@@ -48,7 +48,7 @@
       var defaultBalance = $('#defaultBalance').val();
       
       $('#balance').val(parseFloat(defaultBalance).toFixed(2) + ' ' + defaultCurr);
-      getCurrenciesList('#currency', '/currencyGetAutocomplete', $('#token').val());//For selects.
+      getCurrenciesList('#currency', '/currencyAutocomplete', $('#token').val());//For selects.
       //errorSuccess(Swal, '< %= errorMessage %>', '< %= successMessage %>');
       initBaseRates(fx, '#currency').then((fx) => {   
         $('#currency').on('change', function() {

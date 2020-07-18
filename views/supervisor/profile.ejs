@@ -220,11 +220,13 @@
         <div class="form-group mr-2">
         <br>
         <div class="form-group mr-2">          
-          <a href="deactivate/<%= profile._id %>/<%= profile.organizationUniteID %>"><button class="btn-secondary btn" id="deactivation" title="Temporarily deactivate your Account">Deactivate Account</button></a>
+          <a href="deactivate/<%= profile._id %>/<%= profile.organizationUniteID %>">
+            <button class="btn-warning btn" id="deactivation" title="Temporarily deactivate your Account">Deactivate Account</button>
+          </a>
         </div>
-        <button class="btn-secondary btn" id="termination" title="Close Account">Delete Account</button>
-        <form action="delete/<%= profile._id %>/<%= profile.organizationUniteID %>">
-        </form>
+        <a href="delete/<%= profile._id %>/<%= profile.organizationUniteID %>">
+          <button class="btn-danger btn" id="termination" title="Close Account">Delete Account</button>
+        </a>
       </div>
       <div id="dialog">
       </div>

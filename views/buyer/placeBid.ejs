@@ -33,7 +33,7 @@
         var token = $("input[name='_csrf']").val();
         errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
         var defaultBidCurrency = '<%= BID_DEFAULT_CURR %>';
-        getCurrenciesList('select.buyerCurrency', '/currencyGetAutocomplete', token, defaultBidCurrency); 
+        getCurrenciesList('select.buyerCurrency', '/currencyAutocomplete', token, defaultBidCurrency); 
     });
   </script>
   </head>
