@@ -7,7 +7,7 @@ const ProductService = require("../models/productService");
 const Capability = require("../models/capability");
 const Industry = require("../models/industry");
 const Message = require("../models/message");
-const Token = require("../models/supplierToken");
+const Token = require("../models/userToken");
 const assert = require("assert");
 const process = require("process");
 const { basicFormat, customFormat, normalFormat } = require("../middleware/dateConversions");
@@ -28,6 +28,8 @@ const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
 const fetch = require('node-fetch');
 var fx = require('money'), initConversions = require('../middleware/exchangeRates');
 const Country = require('../models/country');
+
+const TYPE = process.env.USER_SUPPLIER;
 
 
 const statusesJson = {
@@ -130,8 +132,9 @@ exports.postCancelBid = (req, res) => {
       var dbo = db.db(BASE);
     
       try {
-        await dbo.collection('bidcancelreasons').insertOne( {
+        await dbo.collection('cancelreasons').insertOne( {
           title: req.body.cancelTitle,
+          cancelType: process.env.BID_CANCEL_TYPE,
           userType: req.body.userType,
           reason: req.body.reason,
           userName: req.body.suppliersName,
@@ -146,7 +149,7 @@ exports.postCancelBid = (req, res) => {
         req.flash('error', e.message);
       }//Cancelled bids, either by Buyer or by Supplier, do not have an expiry date any longer:
     
-      await dbo.collection("bidrequests").updateOne({ _id: new ObjectId(req.body.bidId) }, { $set: {isCancelled: true, expiryDate: null, expiryDateFormatted: null, status: parseInt(process.env.SUPP_BID_CANCEL)} }, async function(err, resp) {
+      await dbo.collection("bidrequests").updateOne({ _id: new ObjectId(req.body.bidId) }, { $set: { isCancelled: true, expiryDate: null, expiryDateFormatted: null, status: parseInt(process.env.SUPP_BID_CANCEL)} }, async function(err, resp) {
         if(err) {
           console.error(err.message);
           return res.status(500).send({ 
@@ -280,7 +283,7 @@ exports.postConfirmation = async function(req, res, next) {
   //var errors = req.validationErrors();
   //if (errors) return res.status(400).send(errors);  
 
-  await Token.findOne({ token: req.params.token }, async function(err, token) {
+  await Token.findOne({ token: req.params.token, userType: TYPE }, async function(err, token) {
     if (!token) {
       req.flash(
         'error', "We were unable to find a valid token. It may have expired. Please request a new confirmation token."
@@ -335,6 +338,7 @@ exports.postResendToken = function(req, res, next) {
 
     var token = new Token({
       _userId: user._id,
+      userType: TYPE,
       token: crypto.randomBytes(16).toString("hex")
     });
 
@@ -542,6 +546,7 @@ exports.postSignUp = async (req, res) => {
 
                     var token = new Token({
                       _userId: supplier._id,
+                      userType: TYPE,
                       token: crypto.randomBytes(16).toString("hex")
                     });
 

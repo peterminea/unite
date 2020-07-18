@@ -40,6 +40,162 @@ var autocomp = function(obj, data, enter) {
   });*/
 };
 
+
+//jqGrid Formatters:
+function productFormatter(cellvalue, options, rowObject) {
+  return `<span class='product'>${cellvalue}</span>`;
+}
+
+function supplierFormatter(cellvalue, options, rowObject) {
+  return `<span class='supplierName'>${cellvalue}</span>`;
+}
+
+function amountFormatter(cellvalue, options, rowObject) {
+  return `<span class='amountWrapper0'><span class='amount'>${parseInt(rowObject.hiddenAmount)}</span><span> items</span> </span>`;
+}
+
+function priceFormatter(cellvalue, options, rowObject) {
+  return `<span class='basicPriceWrapper0'><span class='price'>${parseFloat(rowObject.hiddenPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency}</span></span>`;
+}
+
+function totalPriceFormatter(cellvalue, options, rowObject) {
+  return `<span class='priceWrapper0'><span class='totalPrice'>${parseFloat(rowObject.hiddenTotalPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency}</span></span>`;
+}
+
+function buttonsWrapperFormatter(cellvalue, options, rowObject) {
+  return `<span class='buttonsWrapper' style="text-align: center"><span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span></span>`;
+}
+
+function imageWrapperFormatter(cellvalue, options, rowObject) {
+  return `<span class='imageWrapper0'><span style='text-align: center' class='uploadImage'>Upload Image</span>  <span class='productImage' title="Product Image">${rowObject.productImageSource}</span></span>`;
+}
+
+function productPriceFormatter(cellvalue, options, rowObject) {
+  return `<span class='priceWrapper0'><span class='totalPrice'>${parseFloat(rowObject.hiddenTotalPrice).toFixed(2)}</span> <span class='currency'>${rowObject.currency }</span></span>`;
+}
+
+function removalFormatter(cellvalue, options, rowObject) {
+  return rowObject.hiddenHref.length
+    ? `<a href="${rowObject.hiddenHref}"><span class="adminDelete">Remove User</span></a>`
+    : "";
+}
+
+function downloadFormatter(cellvalue, options, rowObject) {
+  return `<span class='downloadFile'><a href="${rowObject.downloadHref}" title="Download ${rowObject.downloadName}" class="downloadFileHref" download>Download file</a></span>`;
+}
+
+function linkFormatter(cellvalue, options, rowObject) {
+  return (
+    '<span class="placeBid" style="font-weight: bold"><a href="../buyer/placeBid/' +
+    rowObject.buyerId +
+    "/" +
+    rowObject.productId +
+    "/" +
+    rowObject.supplierId +
+    '"><b>Bid on this Product</b></a></span>'
+  );
+}
+
+function fileRemovalFormatter(cellvalue, options, rowObject) {
+  return `<span name="${rowObject.deletionHref}" class="deleteFile">Remove</span>`;
+}
+
+function buyerPriceFormatter(cellvalue, options, rowObject) {
+  return `<span>${rowObject.buyerPriceHref}</span>`;
+}
+
+function supplierPriceFormatter(cellvalue, options, rowObject) {
+  return `<span>${rowObject.supplierPriceHref}</span>`;
+}
+
+function productImageFormatter(cellvalue, options, rowObject) {
+  return `<img src="${rowObject.productImageSource}" title="Product Image" style="height: 20px; width: 20px" onclick="window.open(this.src)">`;
+}
+
+function getExt(name) {
+  var ind = name.lastIndexOf(".");
+  ind = name.substring(ind + 1);
+  return ind.toLowerCase();
+}
+
+function imageFormatter(cellvalue, options, rowObject) {
+  var ext = getExt(rowObject.downloadHref);
+
+  return ext == "png" || ext == "jpg" || ext == "jpeg"
+    ? `<img src="${rowObject.downloadHref}" title="Image" style="height: 30px; width: 30px" onclick="window.open(this.src)">`
+    : `<span style="cursor: pointer" name="${rowObject.downloadHref}" onclick="window.open('https://www.google.com/')">No image</span>`;
+}
+
+
+function buyerRemovalFormatter(cellvalue, options, rowObject) {
+  return `<a href="../../../supervisor/chatLogin/${rowObject.supervisorId}/${rowObject.buyerId}/0/None/${rowObject. buyerOrganizationName}/(Supervisor)-${rowObject.supervisorOrganizationName}>`;
+}
+
+
+function chatFormatter(cellvalue, options, rowObject) {
+  return `<button title="Remove selected Buyer from UNITE" id="process_${rowObject.index}" class="btn btn-primary">Process</button>`;
+}
+
+
+//Unformatters:
+function priceUnformatter(cellvalue, options, cell) {
+  return parseFloat($('span.price', cell).text()).toFixed(2);
+}
+
+function amountUnformatter(cellvalue, options, cell) {
+  return parseInt($('span.amount', cell).text());
+}
+
+function totalPriceUnformatter(cellvalue, options, cell) {
+  return parseFloat($('span.totalPrice', cell).text()).toFixed(2);
+}
+
+
+//Formatters for Supervisor's Buyers Table:
+
+function totalBidsPriceFormatter(cellvalue, options, rowObject) {
+  return `<span class='basicPriceWrapper0'><span class='price'>${parseFloat(rowObject.hiddenTotalBidsPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency}</span></span>`;
+}
+
+
+function validBidsPriceFormatter(cellvalue, options, rowObject) {
+  return `<span class='basicPriceWrapper0'><span class='price'>${parseFloat(rowObject.hiddenValidBidsPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency}</span></span>`;
+}
+
+
+function cancelledBidsPriceFormatter(cellvalue, options, rowObject) {
+  return `<span class='basicPriceWrapper0'><span class='price'>${parseFloat(rowObject.hiddenCancelledBidsPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency}</span></span>`;
+}
+
+
+function expiredBidsPriceFormatter(cellvalue, options, rowObject) {
+  return `<span class='basicPriceWrapper0'><span class='price'>${parseFloat(rowObject.hiddenExpiredBidsPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency}</span></span>`;
+}
+
+
+//Products Grid Col Model:
+  const productColModel = [
+    { name: 'hiddenPrice', hidden: true },
+    { name: 'hiddenAmount', hidden: true },
+    { name: 'hiddenTotalPrice', hidden: true},
+    { name: 'hiddenCurrency', hidden: true},
+    { name: 'productImageSource', hidden: true},
+    { name: 'productId', hidden: true },
+    { name: 'supplierId', hidden: true },
+    { name: 'supplierCurrency', hidden: true },
+    { name: 'maxAmount', hidden: true },
+    { name: 'bigPrice', hidden: true },
+    { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
+    { name: 'supplierName', label: 'Supplier name', formatter: supplierFormatter, search: true, width: 140},
+    { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, unformat: priceUnformatter, template: 'number', sorttype: 'number',  search: true, width: 140},
+    { name: 'amount', label: 'Amount', formatter: amountFormatter, unformat: amountUnformatter, template: 'number', sorttype: 'number',  align: 'center', search: true, width: 70},
+    { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, unformat: totalPriceUnformatter, template: 'number', sorttype: 'number', search: true, width: 90}, 
+    { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
+    { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
+  ];
+
+
+
 function getCurrenciesList(elem, url, token, defaultBidCurrency) {
   //For <select> drop-down currencies.
   var obj = $("" + elem + "");
@@ -652,7 +808,14 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
           .attr('filePath', null)
           .attr('value', '');
         
-        var src = imagePath && imagePath.length? imagePath : null;     
+        var src = imagePath && imagePath.length? imagePath : null;        
+        const supplierNameInput = (id.length? $('#supplierName'+id) 
+                                 : !($('#span.multisupp').length)? $('#supplierName') : $(`span.multisupp[suppId=${suppId}]`).parent('div').find('span.supplierNameListed'));
+      
+       var val = supplierNameInput.is('input')? supplierNameInput.val() : supplierNameInput.text();
+    if(!val || !val.length) {
+      val = 'No supplier';
+    }
 
         var data = {
                   id: lis,
@@ -667,9 +830,9 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
                   hiddenPrice: priceVal,
                   hiddenTotalPrice: addedPrice,
                   hiddenCurrency: currencyVal,
-                  productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '',                  
+                  productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '',                                 supplierName: val,
                   totalPrice: addedPrice + ' ' + currencyVal
-        };    
+        };
     
         grid.jqGrid('addRowData', lis, data, 'last');
         var counter = elem.parent('div').find('span.productsCount');
@@ -687,8 +850,7 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
         bindHandleProduct(grid.find('.rem').last(), input, isNewBid, id, true, false);
         bindHandleProduct(grid.find('.inc').last(), input, isNewBid, id, false, true);
         bindHandleProduct(grid.find('.dec').last(), input, isNewBid, id, false, false);                        
-        delegateUpload(grid.find('.uploadImage').last());
-     
+        delegateUpload(grid.find('.uploadImage').last());     
 
         if(isNewBid || !($('span.multiSupp').length)) {
           var suppPriceUnit = fx.convert(parseFloat(priceVal), {from: buyerCurrSpan.text(), to: suppCurr});
@@ -1099,6 +1261,15 @@ function addition(
     var opt = sel? sel.find('option:selected') : null;
     var selCurr = $('#selectCurrencies'+id);
     var optCurr = selCurr.find('option:selected');
+    var supplierId = fromBid && opt.attr('supplierId')? opt.attr('supplierId') : elem.attr('supplierId')? elem.attr('supplierId') : null;
+    var supplierNameInput = fromBid? ((id.length? $('#supplierName'+id) 
+                                 : !($('#span.multisupp').length)? $('#supplierName') : $(`span.multisupp[suppId=${supplierId}]`).parent('div').find('span.supplierNameListed'))) : $('#supplierName');
+    
+    var val = supplierNameInput.is('input')? supplierNameInput.val() : supplierNameInput.text();
+    if(!val || !val.length) {
+      val = 'No supplier';
+    }
+    
 
     var data = {
       id: lis,
@@ -1108,7 +1279,8 @@ function addition(
       hiddenCurrency: currencyVal,
       productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : "",
       productId: fromBid && opt.attr('productId')? opt.attr('productId') : null,
-      supplierId: fromBid && opt.attr('supplierId')? opt.attr('supplierId') : elem.attr('supplierId')? elem.attr('supplierId') : null,
+      supplierId: supplierId,
+      supplierName: val,
       maxAmount: fromBid && opt.attr('maxAmount')? opt.attr('maxAmount') : elem.attr('MAX'),
       supplierCurrency: fromBid && opt.attr('supplierCurrency')? opt.attr('supplierCurrency') : elem.attr('supplierCurrency')? elem.attr('supplierCurrency') : (!fromBid && optCurr.text())? optCurr.text() : null,
       hiddenAmount: parseInt(amountVal),
@@ -1305,13 +1477,17 @@ function userInputs(id, role, avatar, name, type, ul) {
   }
 }
 
-function getCancelReasonTitles(obj, token, url) {
+function getCancelReasonTitles(obj, token, url, objectType, isAdmin) {
   //For deleting user accounts and cancelling bids. Types (titles) of reasons, expressed as radio buttons, should be chosen.
   $.ajax({
-    url: url, //bidCancelReasonTitles or userCancelReasonTitles.
-    type: "GET",
+    url: url,
+    type: "POST",
     headers: { "X-CSRF-Token": token },
     datatype: "application/json",
+    data: {
+      objectType: objectType,
+      isAdmin: isAdmin
+    },
     error: function() {},
     success: function(data) {
       //data = titles.
@@ -1892,133 +2068,6 @@ function checkPresence(obj) {
   if (isPresent) {
     obj.addClass("present");
   }
-}
-
-//jqGrid Formatters:
-function productFormatter(cellvalue, options, rowObject) {
-  return `<span class='product'>${cellvalue}</span>`;
-}
-
-function amountFormatter(cellvalue, options, rowObject) {
-  return `<span class='amountWrapper0'><span class='amount'>${parseInt(rowObject.hiddenAmount)}</span><span> items</span> </span>`;
-}
-
-function priceFormatter(cellvalue, options, rowObject) {
-  return `<span class='basicPriceWrapper0'><span class='price'>${parseFloat(rowObject.hiddenPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency}</span></span>`;
-}
-
-function totalPriceFormatter(cellvalue, options, rowObject) {
-  return `<span class='priceWrapper0'><span class='totalPrice'>${parseFloat(rowObject.hiddenTotalPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency}</span></span>`;
-}
-
-function buttonsWrapperFormatter(cellvalue, options, rowObject) {
-  return `<span class='buttonsWrapper' style="text-align: center"><span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span></span>`;
-}
-
-function imageWrapperFormatter(cellvalue, options, rowObject) {
-  return `<span class='imageWrapper0'><span style='text-align: center' class='uploadImage'>Upload Image</span>  <span class='productImage' title="Product Image">${rowObject.productImageSource}</span></span>`;
-}
-
-function productPriceFormatter(cellvalue, options, rowObject) {
-  return `<span class='priceWrapper0'><span class='totalPrice'>${parseFloat(rowObject.hiddenTotalPrice).toFixed(2)}</span> <span class='currency'>${rowObject.currency }</span></span>`;
-}
-
-function removalFormatter(cellvalue, options, rowObject) {
-  return rowObject.hiddenHref.length
-    ? `<a href="${rowObject.hiddenHref}"><span class="adminDelete">Remove User</span></a>`
-    : "";
-}
-
-function downloadFormatter(cellvalue, options, rowObject) {
-  return `<span class='downloadFile'><a href="${rowObject.downloadHref}" title="Download ${rowObject.downloadName}" class="downloadFileHref" download>Download file</a></span>`;
-}
-
-function linkFormatter(cellvalue, options, rowObject) {
-  return (
-    '<span class="placeBid" style="font-weight: bold"><a href="../buyer/placeBid/' +
-    rowObject.buyerId +
-    "/" +
-    rowObject.productId +
-    "/" +
-    rowObject.supplierId +
-    '"><b>Bid on this Product</b></a></span>'
-  );
-}
-
-function fileRemovalFormatter(cellvalue, options, rowObject) {
-  return `<span name="${rowObject.deletionHref}" class="deleteFile">Remove</span>`;
-}
-
-function buyerPriceFormatter(cellvalue, options, rowObject) {
-  return `<span>${rowObject.buyerPriceHref}</span>`;
-}
-
-function supplierPriceFormatter(cellvalue, options, rowObject) {
-  return `<span>${rowObject.supplierPriceHref}</span>`;
-}
-
-function productImageFormatter(cellvalue, options, rowObject) {
-  return `<img src="${rowObject.productImageSource}" title="Product Image" style="height: 20px; width: 20px" onclick="window.open(this.src)">`;
-}
-
-function getExt(name) {
-  var ind = name.lastIndexOf(".");
-  ind = name.substring(ind + 1);
-  return ind.toLowerCase();
-}
-
-function imageFormatter(cellvalue, options, rowObject) {
-  var ext = getExt(rowObject.downloadHref);
-
-  return ext == "png" || ext == "jpg" || ext == "jpeg"
-    ? `<img src="${rowObject.downloadHref}" title="Image" style="height: 30px; width: 30px" onclick="window.open(this.src)">`
-    : `<span style="cursor: pointer" name="${rowObject.downloadHref}" onclick="window.open('https://www.google.com/')">No image</span>`;
-}
-
-
-function buyerRemovalFormatter(cellvalue, options, rowObject) {
-  return `<a href="../../../supervisor/chatLogin/${rowObject.supervisorId}/${rowObject.buyerId}/0/None/${rowObject. buyerOrganizationName}/(Supervisor)-${rowObject.supervisorOrganizationName}>`;
-}
-
-
-function chatFormatter(cellvalue, options, rowObject) {
-  return `<button title="Remove selected Buyer from UNITE" id="process_${rowObject.index}" class="btn btn-primary">Process</button>`;
-}
-
-
-//Unformatters:
-function priceUnformatter(cellvalue, options, cell) {
-  return parseFloat($('span.price', cell).text()).toFixed(2);
-}
-
-function amountUnformatter(cellvalue, options, cell) {
-  return parseInt($('span.amount', cell).text());
-}
-
-function totalPriceUnformatter(cellvalue, options, cell) {
-  return parseFloat($('span.totalPrice', cell).text()).toFixed(2);
-}
-
-
-//Formatters for Supervisor's Buyers Table:
-
-function totalBidsPriceFormatter(cellvalue, options, rowObject) {
-  return `<span class='basicPriceWrapper0'><span class='price'>${parseFloat(rowObject.hiddenTotalBidsPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency}</span></span>`;
-}
-
-
-function validBidsPriceFormatter(cellvalue, options, rowObject) {
-  return `<span class='basicPriceWrapper0'><span class='price'>${parseFloat(rowObject.hiddenValidBidsPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency}</span></span>`;
-}
-
-
-function cancelledBidsPriceFormatter(cellvalue, options, rowObject) {
-  return `<span class='basicPriceWrapper0'><span class='price'>${parseFloat(rowObject.hiddenCancelledBidsPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency}</span></span>`;
-}
-
-
-function expiredBidsPriceFormatter(cellvalue, options, rowObject) {
-  return `<span class='basicPriceWrapper0'><span class='price'>${parseFloat(rowObject.hiddenExpiredBidsPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency}</span></span>`;
 }
 
 

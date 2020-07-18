@@ -21,7 +21,7 @@
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-      getCancelReasonTitles($('#mainForm'), $('input[name="_csrf"]').val(), '/adminCancelReasonTitles');
+      getCancelReasonTitles($('#mainForm'), $('input[name="_csrf"]').val(), '/cancelReasonTitles', 'User', true);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
 
       $('#mainForm').submit(function(e) {

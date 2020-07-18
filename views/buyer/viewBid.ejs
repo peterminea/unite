@@ -370,26 +370,7 @@
                     <script type="text/javascript">
                       var index = "<%= i %>";
                       
-                      var data = [];
-                      var colModel = [                        
-                        { name: 'hiddenPrice', hidden: true },
-                        { name: 'hiddenAmount', hidden: true },
-                        { name: 'hiddenTotalPrice', hidden: true },
-                        { name: 'hiddenCurrency', hidden: true },
-                        { name: 'productImageSource', hidden: true },
-                        { name: 'productId', hidden: true },
-                        { name: 'supplierId', hidden: true },
-                        { name: 'supplierCurrency', hidden: true },
-                        { name: 'maxAmount', hidden: true },
-                        { name: 'bigPrice', hidden: true },
-                        { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
-                        { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, unformat: priceUnformatter, template: 'number', sorttype: 'number', search: true, width: 140},
-                        { name: 'amount', label: 'Amount', formatter: amountFormatter, unformat: amountUnformatter, align: 'center', search: true, sortable: true, template: 'number', sorttype: 'number', width: 70},
-                        { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, unformat: totalPriceUnformatter, template: 'number', sorttype: 'number', search: true, width: 90},
-                        { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
-                        { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
-                      ];
-
+                      var data = [];                     
                       $('#cartList_'+index).find('li').not(':first').each(function(i, e) {
                         var src = $(this).find('.productImage img').length?
                             $(this).find('.productImage img').attr('src') : null;
@@ -397,16 +378,20 @@
                         data.push({
                           id: i,
                           name: $(this).find('.product').text(),
+                          supplierName: "<%= bid.supplierName %>",
                           price: $(this).find('.price').text() + ' ' + $(this).find('.currency').text(),
                           hiddenPrice: $(this).find('.price').text(),
                           hiddenTotalPrice: $(this).find('.totalPrice').text(),
                           hiddenCurrency: $(this).find('.currency').text(),
                           productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '',
+                          supplierId: "<%= bid.supplier %>",
+                          productId: null,,
+                          supplierCurrency: "<%= bid.supplierCurrency %>",
                           hiddenAmount: parseInt($(this).find('.amount').text())
                         });
                       });             
 
-                      initGrid(colModel, data, "#grid_"+index, '#prodPager_'+index, "name", 'Products List', 1000);
+                      initGrid(productColModel, data, "#grid_"+index, '#prodPager_'+index, "name", 'Products List', 1000);
                       $('#mainForm_'+index).submit(function(e) {
                         //e.preventDefault();
                         

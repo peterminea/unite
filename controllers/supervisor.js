@@ -4,7 +4,7 @@ const ObjectId = require("mongodb").ObjectId;
 const Supervisor = require("../models/supervisor");
 const Buyer = require("../models/buyer");
 const BidRequest = require("../models/bidRequest");
-const Token = require('../models/supervisorToken');
+const Token = require("../models/userToken");
 const assert = require('assert');
 const process = require('process');
 const { basicFormat, customFormat, normalFormat } = require("../middleware/dateConversions");
@@ -21,6 +21,7 @@ const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
 const fetch = require('node-fetch');
 const Country = require('../models/country');
 
+const TYPE = process.env.USER_SPV;
 
 function getBidsData(bids) {
   var validBids = 0, validBidsPrice = 0;
@@ -255,7 +256,7 @@ exports.postDelete = function (req, res, next) {
 
 exports.postConfirmation = async function (req, res, next) {
   try {
-  await Token.findOne({ token: req.params.token }, async function (err, token) {
+  await Token.findOne({ token: req.params.token, userType: TYPE }, async function (err, token) {
     if (!token) {
       req.flash('error', 'We were unable to find a valid token. It may have expired. Please request a new token.');
       return res.redirect('/supervisor/resend');
@@ -310,8 +311,9 @@ exports.postResendToken = function (req, res, next) {
           return res.status(400).send({ msg: 'This account has already been verified. Please log in.' });
 
         var token = new Token({ 
-          _userId: user._id, token: 
-          crypto.randomBytes(16).toString('hex') });
+          _userId: user._id, 
+          userType: TYPE,
+          token: crypto.randomBytes(16).toString('hex') });
 
         await token.save((err) => {
             if (err) {
@@ -553,6 +555,7 @@ exports.postSignUp = async (req, res) => {
 
                 var token = new Token({ 
                   _userId: supervisor._id,
+                  userType: TYPE, 
                   token: crypto.randomBytes(16).toString('hex') });
 
                 token.save(async function (err) {
