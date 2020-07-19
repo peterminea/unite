@@ -21,7 +21,8 @@
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-      getCancelReasonTitles($('#cancelForm'), $('input[name="_csrf"]').val(), '/cancelReasonTitles', 'Bid', false, false);
+      const x = JSON.parse($('#cancelReasonTypesValues span:first').text());
+      getCancelReasonTitles($('#cancelForm'), $('input[name="_csrf"]').val(), '/cancelReasonTitles', x.BID_CANCEL, false, false);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
     
       $('#cancelForm').submit(function(e) {
@@ -57,8 +58,15 @@
             <input type="hidden" name="suppliersName" value="<%= supplierName %>">
             <input type="hidden" name="buyersEmail" value="<%= buyerEmail %>">
             <input type="hidden" name="suppliersEmail" value="<%= supplierEmail %>">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button style="float: right" type="submit" id="submitCancel" title="Cancel Order" class="btn-primary btn">Cancel your Order</button><br>
+          <% if (cancelReasonTypesJson != null) { %>
+            <div style="visibility: hidden" id="cancelReasonTypesValues">            
+                <span class='statuses'><%= cancelReasonTypesJson %></span>          
+            </div>
+          <% } %>
+            <div class="form-group">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button style="float: right" type="submit" id="submitCancel" title="Cancel Order" class="btn-primary btn">Cancel your Order</button><br>
+            </div>
           </form>
       </div>
     </div>

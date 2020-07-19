@@ -21,26 +21,19 @@ const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const search = require('../middleware/searchFlash');
 var Recaptcha = require('express-recaptcha').RecaptchaV3;
-const { sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, prel, sortLists, postSignInBody, updateBidBody } = require('../middleware/templates');
+const { sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, prel, sortLists, getUsers, getBidStatusesJson, getCancelTypesJson, postSignInBody, updateBidBody } = require('../middleware/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
 const fetch = require('node-fetch');
 var fx = require('money'), initConversions = require('../middleware/exchangeRates');
 const Country = require('../models/country');
-
+const personalToken = process.env.TOKEN_IP;
 const TYPE = process.env.USER_SUPPLIER;
+const internalIp = require('internal-ip');
+const { verifyBanNewUser, verifyBanExistingUser } = require('../middleware/verifyBanned');
+const fs = require('fs');
 
-
-const statusesJson = {
-  BUYER_REQUESTED_BID: parseInt(process.env.BUYER_REQ_BID),
-  WAIT_BUYER_PROCESS_INFO: parseInt(process.env.BUYER_PROC_INFO),
-  BUYER_WANTS_FOR_PRICE: parseInt(process.env.BUYER_ACCEPT_PRICE),
-  SUPP_STARTED_DELIVERY: parseInt(process.env.SUPP_START_DELIVERY),
-  PAYMENT_DELIVERY_DONE: parseInt(process.env.PAYMENT_DELIVERY_DONE),
-  SUPPLIER_CANCELS_BID: parseInt(process.env.SUPP_CANCEL_BID),
-  BUYER_CANCELS_BID: parseInt(process.env.BUYER_CANCEL_BID)
-};
 
 exports.getIndex = (req, res) => {
   if (!req || !req.session) 
@@ -191,6 +184,7 @@ exports.getDelete = (req, res) => {
   
   res.render('supplier/delete', {
     id: req.params.id,
+    cancelReasonTypesJson: JSON.stringify(getCancelTypesJson()),
     successMessage: success,
     errorMessage: error
   });
@@ -418,7 +412,9 @@ exports.postSignUp = async (req, res) => {
   const captchaVerified = await fetch('https://www.google.com/recaptcha/api/siteverify?secret=' + captchaSecretKey + '&response=' + req.body.captchaResponse, {method: 'POST'})
   .then((res0) => res0.json());
   
+  const ipv4 = await internalIp.v4();
   console.log(captchaVerified);
+  
   if(((req.body.captchaResponse).length == 0) || captchaVerified.success === true) {
     if(req.body.emailAddress) {
       const email = req.body.emailAddress;
@@ -431,17 +427,27 @@ exports.postSignUp = async (req, res) => {
         if (final_domain.toLowerCase().includes(prohibitedArray[i].toLowerCase())) {
           req.flash("error", "E-mail address must belong to a custom company domain.");
           return res.redirect("/supplier/sign-up"); //supplier/sign-up
+          
         } else {
           if (req.body.password.length < 6) {
             req.flash("error", "Password must have at least 6 characters.");
             return res.redirect("/supplier/sign-up");
             var supplier;
+            
             //Prevent duplicate attempts:
           } else if (global++ < 1) {
-            await Supplier.findOne({ emailAddress: req.body.emailAddress }, function(err,  user) {
+            await Supplier.findOne({ emailAddress: req.body.emailAddress }, async function(err,  user) {
               if(treatError(req, res, err, '/supplier/sign-up'))
                 return false;
 
+              const ipv4 = await internalIp.v4();
+              
+              if(verifyBanNewUser(req, res, req.body.emailAddress, ipv4)) {
+                return res.status(400).send({
+                  msg: 'You are trying to join UNITE from the part of an already banned user. Please refrain from doing so.'
+                });
+              }
+              
               if (user)
                 return res.status(400).send({
                   msg:
@@ -470,6 +476,7 @@ exports.postSignUp = async (req, res) => {
                     password: hash,
                     isVerified: false,
                     isActive: false,
+                    ipv4: ipv4,
                     registeredCountry: req.body.registeredCountry,
                     companyAddress: req.body.companyAddress,
                     areaCovered: req.body.areaCovered,
@@ -732,13 +739,20 @@ exports.postResetPasswordToken = (req, res) => {
         return res.redirect('back');
       }
         
-    if (req.body.password === req.body.passwordRepeat) {
+    if(req.body.password === req.body.passwordRepeat) {
         MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
           if(treatError(req, res, err, 'back'))
             return false;
           var dbo = db.db(BASE);
+          let hash = bcrypt.hashSync(req.body.password, 16);
           
-          dbo.collection("suppliers").updateOne({ _id: user._id }, { $set: {password: req.body.password, resetPasswordToken: undefined, resetPasswordExpires: undefined} }, function(err, resp) {
+          dbo.collection("suppliers").updateOne({ _id: user._id }, 
+            { $set: {
+              password: hash, 
+              resetPasswordToken: undefined, 
+              resetPasswordExpires: undefined } },
+
+            function(err, resp) {
             if(treatError(req, res, err, 'back'))
               return false;
             db.close();
@@ -764,16 +778,23 @@ exports.postResetPasswordToken = (req, res) => {
 
 
 function generateData(countries, industries) {
-  
+  $.get(`https://ipinfo.io?token=${personalToken}`, function(response) {
+  console.log(response.ip, response.country);
+  }, "jsonp")
+}
+
+
+function fileExists(path) {
+  return fs.existsSync(path);
 }
 
 
 exports.getProfile = (req, res) => {
   if (!req || !req.session) 
     return false;
-  
+  console.log(5);
+  console.log(req.connection.remoteAddress);  
   const supplier = req.session.supplier;
-
   ProductService.find({ supplier: supplier._id })
     .then((products) => {
       products.sort(function(a, b) {
@@ -818,7 +839,7 @@ exports.getProfile = (req, res) => {
               productName: products[i].productName,
               currency: products[i].currency,
               totalPrice: products[i].totalPrice,
-              productImage: products[i].productImage
+              productImage: fileExists(products[i].productImage) == true? products[i].productImage : ''
             });
           }
 
@@ -946,7 +967,7 @@ exports.getBidRequest = (req, res) => {
         successMessage: success,
         errorMessage: error,
         statuses: statuses,
-        statusesJson: JSON.stringify(statusesJson)
+        statusesJson: JSON.stringify(getBidStatusesJson())
         });
       });
     })
@@ -961,6 +982,7 @@ exports.postBidRequest = (req, res) => {
 
 exports.postProfile = async (req, res) => {
   global = 0;
+  const ipv4 = await internalIp.v4();
   
   try {
   await Supplier.findOne({ _id: req.body._id }, async (err, doc) => {
@@ -985,6 +1007,7 @@ exports.postProfile = async (req, res) => {
     doc.password = req.body.password;
     doc.isVerified = true;
     doc.isActive = true;
+    doc.ipv4 = ipv4;
     doc.companyRegistrationNo = req.body.companyRegistrationNo;
     doc.registeredCountry = req.body.registeredCountry;
     doc.balance = req.body.balance;
@@ -996,7 +1019,7 @@ exports.postProfile = async (req, res) => {
     doc.industry = req.body.industry;
     doc.employeeNumbers = req.body.employeeNumbers;
     doc.lastYearTurnover = req.body.lastYearTurnover;
-    doc.website = req.body.website;    
+    doc.website = req.body.website;
     doc.productsServicesOffered = productList;
     doc.pricesList = pricesList;
     doc.currenciesList = currenciesList;

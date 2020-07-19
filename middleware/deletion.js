@@ -6,10 +6,10 @@ const BidRequest = require("../models/bidRequest");
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
-const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, postSignInBody } = require('../middleware/templates');
+const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendBanEmail, sendCancelBidEmail, postSignInBody } = require('../middleware/templates');
 
 
-async function removeSupervisor(id, req, res, db) {
+async function removeSupervisor(id, req, res, db, isBan) {
   //Now delete the messages sent/received by Supervisor:
   await db.collection('messages').deleteMany({ $or: [ { from: id }, { to: id } ] }, function(err, resp1) {
     treatError(req, res, err, 'back');
@@ -19,15 +19,35 @@ async function removeSupervisor(id, req, res, db) {
   await db.collection('supervisortokens').deleteMany({ _userId: id }, function(err, resp1) {
     treatError(req, res, err, 'back');
   });
-
-  await db.collection('supervisors').deleteOne({ _id: id }, function(err, resp2) {
-    treatError(req, res, err, 'back');    
-  });
   
+  if(isBan) {
+    await db.collection('bannedusers').insertOne({
+            name: req.body.organizationName,
+            type: process.env.USER_SPV,
+            email: req.body.emailAddress,
+            userId: id,
+            ip: req.body.ipv4Address,
+            banDate: Date.now(),
+            banExpiryDate: req.body.endDate//To format.
+          });
+
+    await sendBanEmail('Supervisor', req, 'sent/received messages and all your associated Buyers, including their personal data such as placed orders, sent/received messages', req.body.endDate, req.body.reason);
+    
+    db.close();    
+    req.flash('success', 'This Supervisor account has been banned. Affected users have been notified upon it.');
+    res.redirect("back");
+  } else {
+    await db.collection('supervisors').deleteOne({ _id: id }, function(err, resp2) {
+      treatError(req, res, err, 'back');    
+    });
+
   //Mail to the ex-Supervisor to confirm their final deletion:
-  sendCancellationEmail('Supervisor', req, 'sent/received messages and all your associated Buyers, including their personal data such as placed orders, sent/received messages');
-  db.close();
-  return res.redirect("/supervisor/sign-in");
+    await sendCancellationEmail('Supervisor', req, 'sent/received messages and all your associated Buyers, including their personal data such as placed orders, sent/received messages');
+    
+    db.close();    
+    req.flash('success', 'You have deleted your Supervisor account. We hope that you and your Buyers will be back with us!');
+    res.redirect("/supervisor/sign-in");
+  }
 }
 
 
@@ -130,7 +150,7 @@ async function removeAssociatedBuyerBidsSuperDel(req, res, req2, dbo, id) {
 }
 
 
-const buyerDelete = (req, res, id) => {  
+const buyerDelete = (req, res, id, isBan) => {  
   try {    
     MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
       var dbo = db.db(BASE);
@@ -138,7 +158,7 @@ const buyerDelete = (req, res, id) => {
       try {
         await dbo.collection('cancelreasons').insertOne( {
           title: req.body.reasonTitle,
-          cancelType: process.env.USER_CANCEL,
+          cancelType: isBan? process.env.USER_BAN_TYPE : process.env.USER_CANCEL_TYPE,
           reason: req.body.reason,
           userType: req.body.userType,
           userName: req.body.organizationName,
@@ -163,16 +183,36 @@ const buyerDelete = (req, res, id) => {
       await dbo.collection('buyertokens').deleteMany({ _userId: id }, function(err, resp1) {
         treatError(req, res, err, 'back');
       });
-
-      //And now, remove the Buyer themselves:
-      await dbo.collection('buyers').deleteOne({ _id: id }, function(err, resp2) {
-        treatError(req, res, err, 'back');
-      });
-    //Finally, send a mail to the ex-Buyer:
-    sendCancellationEmail('Buyer', req, 'placed orders, sent/received messages', req.body.reason);
+      
+      if(isBan) {//Update the Ban table.        
+        await dbo.collection('bannedusers').insertOne({
+          name: req.body.organizationName,
+          type: process.env.USER_BUYER,
+          email: req.body.emailAddress,
+          userId: id,
+          ip: req.body.ipv4Address,
+          banDate: Date.now(),
+          banExpiryDate: req.body.endDate//To format.
+        });
+       
+      sendBanEmail('Buyer', req, 'placed orders, sent/received messages', req.body.reason);
+      } else {
+        //And now, remove the Buyer themselves:
+        await dbo.collection('buyers').deleteOne({ _id: id }, function(err, resp2) {
+          treatError(req, res, err, 'back');
+        });
+      //Finally, send a mail to the ex-Buyer:
+      sendCancellationEmail('Buyer', req, 'placed orders, sent/received messages', req.body.reason);
+      }
+      
     db.close();
-    req.flash('success', 'You have deleted your Buyer account. We hope that you will be back with us!');
-    res.redirect("/buyer/sign-in");
+      if(isBan) {
+        req.flash('success', 'You have banned this User account successfully.');
+        res.redirect("back");
+      } else {
+        req.flash('success', 'You have deleted your Buyer account. We hope that you will be back with us!');
+        res.redirect("/buyer/sign-in");
+      }
     });
   } catch {
     //res.redirect("/buyer");
@@ -180,7 +220,7 @@ const buyerDelete = (req, res, id) => {
 };
 
 
-const supervisorDelete = (req, res, id, uniteID) => {  
+const supervisorDelete = (req, res, id, uniteID, isBan) => {  
   try {
     //Find Supervisor's Buyers first:
     MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
@@ -189,7 +229,7 @@ const supervisorDelete = (req, res, id, uniteID) => {
       try {
         await dbo.collection('cancelreasons').insertOne( {
           title: req.body.reasonTitle,
-          cancelType: process.env.USER_CANCEL,
+          cancelType: isBan? process.env.USER_BAN_TYPE : process.env.USER_CANCEL_TYPE,
           reason: req.body.reason,
           userType: req.body.userType,
           userName: req.body.organizationName,
@@ -203,10 +243,12 @@ const supervisorDelete = (req, res, id, uniteID) => {
       
       await dbo.collection('buyers').find({ organizationUniteID: uniteID }).exec().then(async (buyers) => {
         if(!buyers || !buyers.length) {//No buyer data, let's directly pass to Supervisor.
-          await removeSupervisor(id, req, res, db);
+          await removeSupervisor(id, req, res, db, isBan);
         } else {
           var len = buyers.length;
-          var complexReason = 'Buyer\'s account was deleted because their Supervisor did the same. See more details:\n' + req.body.reason;
+          var complexReason = 'Buyer\'s account was deleted because their Supervisor ' 
+          + (isBan? 'was banned.' : 'did the same.') 
+          + ' Please see more details on the Supervisor:\n' + req.body.reason;
           
           //Delete buyers data one by one:
           for(var i in buyers) {
@@ -233,14 +275,11 @@ const supervisorDelete = (req, res, id, uniteID) => {
 
             //Finally, send a mail to the ex-Buyer:
             await sendCancellationEmail('Buyer', req2, 'placed orders, sent/received messages', req.body.reason);
-          }
-          //Get rid of the Supervisor themselves too.
-          await removeSupervisor(id, req, res, db);
-        }
+          }          
         
-        db.close();
-        req.flash('success', 'You have deleted your Supervisor account. We hope that you and your Buyers will be back with us!');
-        res.redirect("/supervisor/sign-in");
+          //Get rid of the Supervisor themselves too.
+          await removeSupervisor(id, req, res, db, isBan);        
+          }
       });
     });
   } catch {
@@ -248,16 +287,16 @@ const supervisorDelete = (req, res, id, uniteID) => {
 };
 
 
-const supplierDelete = (req, res, id) => {  
+const supplierDelete = (req, res, id, isBan) => {  
   try {
     //Delete Supplier's Capabilities first:
-    MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
+    MongoClient.connect(URL, { useUnifiedTopology: true }, async function(err, db) {
       var dbo = db.db(BASE);
       
       try{
         await dbo.collection('cancelreasons').insertOne( {
           title: req.body.reasonTitle,
-          cancelType: process.env.USER_CANCEL,
+          cancelType: isBan? process.env.USER_BAN_TYPE : process.env.USER_CANCEL_TYPE,
           reason: req.body.reason,
           userType: req.body.userType,
           userName: req.body.companyName,
@@ -291,17 +330,38 @@ const supplierDelete = (req, res, id) => {
       await dbo.collection('suppliertokens').deleteMany({ _userId: id }, function(err, resp3) {
         treatError(req, res, err, 'back');
       });
+      
+      if(isBan) {//Update the Ban table.        
+        await dbo.collection('bannedusers').insertOne({
+          name: req.body.companyName,
+          type: process.env.USER_SUPPLIER,
+          email: req.body.emailAddress,
+          userId: id,
+          ip: req.body.ipv4Address,
+          banDate: Date.now(),
+          banExpiryDate: req.body.endDate//To format.
+        });
+       
+      sendBanEmail(process.env.USER_SUPPLIER, req, 'received orders, products/services offered, listed capabilities, sent/received messages', req.body.reason);
+      } else {
+        //And now, remove the Supplier themselves:
+        await dbo.collection('suppliers').deleteOne({ _id: id }, function(err, resp4) {
+          treatError(req, res, err, 'back');
+        });
 
-      //And now, remove the Supplier themselves:
-      await dbo.collection('suppliers').deleteOne({ _id: id }, function(err, resp4) {
-        treatError(req, res, err, 'back');
-      });
+        //Finally, send a mail to the ex-Supplier:
+        sendCancellationEmail('Supplier', req, 'received orders, products/services offered, listed capabilities, sent/received messages', req.body.reason);
+      }      
+      
+      if(isBan) {
+        req.flash('success', 'You have banned this User account successfully.');
+        res.redirect("back");
+      } else {
+        req.flash('success', 'You have deleted your Supplier account. We hope that you will be back with us!');
+        res.redirect("/supplier/sign-in");
+      }
 
-      //Finally, send a mail to the ex-Supplier:
-      sendCancellationEmail('Supplier', req, 'received orders, products/services offered, listed capabilities, sent/received messages', req.body.reason);
-      db.close();
-      req.flash('success', 'You have deleted your Supplier account. We hope that you will be back with us!');
-      return res.redirect("/supplier/sign-in");
+      db.close();      
     });
   } catch {
   }

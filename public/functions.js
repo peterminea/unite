@@ -75,8 +75,14 @@ function productPriceFormatter(cellvalue, options, rowObject) {
 }
 
 function removalFormatter(cellvalue, options, rowObject) {
-  return rowObject.hiddenHref.length
-    ? `<a href="${rowObject.hiddenHref}"><span class="adminDelete">Remove User</span></a>`
+  return rowObject.hiddenDeleteHref.length
+    ? `<a href="${rowObject.hiddenDeleteHref}"><span class="adminDelete">Remove User</span></a>`
+    : "";
+}
+
+function banFormatter(cellvalue, options, rowObject) {
+  return rowObject.hiddenBanHref.length
+    ? `<a href="${rowObject.hiddenBanHref}"><span class="adminBan">Ban User</span></a>`
     : "";
 }
 
@@ -205,7 +211,7 @@ function getCurrenciesList(elem, url, token, defaultBidCurrency) {
     url: url,
     headers: { "X-CSRF-Token": token },
     datatype: "jsonp",
-    type: "GET",
+    type: "POST",
     //data: req,
     success: function(data) {
       if (!data || !data.length || treatError(data, "loading currencies")) {
@@ -783,7 +789,7 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
       
       var productId = option && option.attr('productId')?
         option.attr('productId') : null;
-
+/*
       if(elem.find('li').length) {
         elem.find('li').attr('totalPrice', bigPrice);
       } else {
@@ -791,7 +797,7 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
 <span class='basicPriceWrapper'>Price</span></span></li>`);
       }
 
-      var lis = elem.find('li').length;
+      var lis = 1+grid.find('tr').length;
       var divId = $('#jqDiv'+id);
 
       elem.append("<li class='list-group-item' price='" 
@@ -803,7 +809,7 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
 <span class='priceWrapper'><span class='totalPrice'>${parseFloat(addedPrice).toFixed(2)}</span> ${currencyVal}</span>
 <span class='amountWrapper'><span class='amount'>${amountVal}</span> items</span>
 <span class='basicPriceWrapper'><span class='price'>${parseFloat(priceVal).toFixed(2)}</span> <span class='currency'>${currencyVal}</span></span>
-</li>`);
+</li>`);*/
 
         imageInput
           .attr('filePath', null)
@@ -813,10 +819,12 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
         const supplierNameInput = (id.length? $('#supplierName'+id) 
                                  : !($('#span.multisupp').length)? $('#supplierName') : $(`span.multisupp[suppId=${suppId}]`).parent('div').find('span.supplierNameListed'));
       
-       var val = supplierNameInput.is('input')? supplierNameInput.val() : supplierNameInput.text();
-    if(!val || !val.length) {
-      val = 'No supplier';
-    }
+      var val = supplierNameInput.is('input')? supplierNameInput.val() : supplierNameInput.text();
+      if(!val || !val.length) {
+        val = 'No supplier';
+      }
+      
+      var lis = 1+grid.find('tr').length;
 
         var data = {
                   id: lis,
@@ -842,11 +850,11 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
         counter.text(newValue);
         $('#totalAmount'+id).val(totalAmount + parseInt(amountVal));
         var isNewBid = (id.length > 0);//New Bid BuyerIndex
-
+/*
         bindHandleProduct(elem.find('.rem').last(), input, isNewBid, id, true, false);
         bindHandleProduct(elem.find('.inc').last(), input, isNewBid, id, false, true);
         bindHandleProduct(elem.find('.dec').last(), input, isNewBid, id, false, false);                        
-        delegateUpload(elem.find('.uploadImage').last());
+        delegateUpload(elem.find('.uploadImage').last());*/
 
         bindHandleProduct(grid.find('.rem').last(), input, isNewBid, id, true, false);
         bindHandleProduct(grid.find('.inc').last(), input, isNewBid, id, false, true);
@@ -1212,7 +1220,7 @@ function addition(
     }
     
     var elem2 = elem.parent('div').prev('div').find('ul');
-
+/*
     if (!elem2.find("li").length) {
       elem2.append(`<li class='list-group-item' style='color: brown'><span class='cnt'>#</span><span class='product0'>Name</span><span class='buttonsWrapper'>Buttons</span><span class='imageWrapper'>Images</span><span class='priceWrapper'>Total</span><span class='amountWrapper'>Count</span>
 <span class='basicPriceWrapper'>Price</span></span></li>`);
@@ -1247,7 +1255,7 @@ function addition(
 <span class='amountWrapper'><span class='amount'>${amountVal}</span> items</span>
 <span class='basicPriceWrapper'><span class='price'>${priceVal}</span> <span class='currency'>${currencyVal}</span></span>
 </li>`
-    );
+    );*/
 
     var totalAmountInput = fromBid
       ? $("#totalAmount" + id)
@@ -1257,7 +1265,7 @@ function addition(
     var gridId = fromBuyer ? $("#grid" + id) : $("#grid");
     var divId = fromBuyer ? $("#jqDiv" + id) : $("#jqDiv");
     var src = imagePath && imagePath.length ? imagePath : null;
-    lis = 1 + elem.find('tr').length;
+    var lis = 1 + elem.find('tr').length;
     var sel = fromBid? $('#productsList'+id) : null;
     var opt = sel? sel.find('option:selected') : null;
     var selCurr = $('#selectCurrencies'+id);
@@ -1671,7 +1679,7 @@ function treatLastLi() {
 }
 
 function supplierValidateFields(fx) {
-  if ($("#prodServices li").length == 0) {
+  if ($("#grid tr").length == 1) {
     var obj =
       '<p class="productRequired littleNote">You are required to include at least one product or service.</p>';
     $(obj).insertBefore($(this));
@@ -1725,8 +1733,6 @@ function supplierValidateFields(fx) {
   var isChanged = false;
   $("span.currency").each(function(ind, elem) {
     var curr = $(this).text();
-    //var last = text.lastIndexOf(' ');
-    //var curr = text.substring(last+1);
 
     if (preferred != curr) {
       isChanged = true;
@@ -1795,9 +1801,7 @@ function registrationDialog(accountType) {
 }
 
 function delegateUpload(obj) {
-  obj.off("click").on("click", function() {
-    //var isTable = 
-    
+  obj.off("click").on("click", function() {  
     var uploadInput,
       li = $(this)
         .parent("span")
@@ -1828,6 +1832,7 @@ function delegateUpload(obj) {
   });
 }
 
+
 function prepareSortTable() {
   if ($("th").length) {
     $("th")
@@ -1836,6 +1841,7 @@ function prepareSortTable() {
     $("th").on("click", sortTable);
   }
 }
+
 
 function errorSuccess(Swal, errorMessage, successMessage) {
   if (errorMessage.length > 0) {
@@ -2819,10 +2825,10 @@ $(document).ready(function() {
             var ul = div
               .parent("div")
               .find("ul")
-              .last();
+              .last();/*
             var li = ul.find("li").eq(index);
             var span = li.find(".productImage");
-            var img = span.find("img");
+            var img = span.find("img");*/
 
             var table = ul
               .parent("div")
@@ -2835,13 +2841,13 @@ $(document).ready(function() {
             table.jqGrid('setRowData', tr.attr('id'), {
               productImageSource : res
             });
-
+/*
             if (img != null && img.attr("src") != null) {
               img.attr("src", res);
             } else {
               var str = `<img src="${res}" style="height: 25px; width: 30px" onclick="window.open(this.src)">`;
               span.append(str);
-            }
+            }*/
 
             if (img2 != null && img2.attr("src") != null) {
               img2.attr("src", res);

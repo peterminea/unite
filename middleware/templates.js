@@ -7,6 +7,8 @@ const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
 const fetch = require('node-fetch');
+const internalIp = require('internal-ip');
+const { verifyBanNewUser, verifyBanExistingUser } = require('../middleware/verifyBanned');
 
 const sendConfirmationEmail = (name, link, token, req) => {
     sgMail.send({
@@ -90,6 +92,25 @@ const sendCancellationEmail = (type, req, data, reason) => {//Buyer: placed orde
 
       console.log('A termination confirmation email has been sent to ' + req.body.emailAddress + '.');
       req.flash('success', 'A termination confirmation email has been sent to ' + req.body.emailAddress + '.\n' + `${type} account finished off successfully!`);
+    });
+};
+
+
+const sendBanEmail = (type, req, data, date, reason) => {//Ban!
+  sgMail.send({
+    from: 'peter@uniteprocurement.com',
+    to: req.body.emailAddress, 
+    subject: `UNITE - ${type} Account Banned`,
+    text: 
+      `Hello ${req.body.organizationName? req.body.organizationName : req.body.companyName},\n\nWe are sorry to inform you that you have been banned from the UNITE Public Procurement Platform.\n\nYour ${type} account will no longer be accssible until the date of ${date}, and also your specific user data like  ${data} and any user tokens saved by you have also been lost.\nWe hope to see you back in the coming future, with an improved behaviour.\n\nUNITE counts on education level and seriety of its users!\n\nWith kind regards,\nThe UNITE Public Procurement Platform Team`,
+    html: reason? '<p style="color: brown; font-size: 12pt; font-weight: bold italic; word-wrap: break-word; font-face: arial"><br>' + reason + '</p>' : null
+  }, function (err, resp) {
+     if (err ) {
+      return console.log(err.message);
+    }
+
+      console.log('A ban notification email has been sent to ' + req.body.emailAddress + '.');
+      req.flash('success', 'A ban notification email has been sent to ' + req.body.emailAddress + '.\n' + `${type} account banned!`);
     });
 };
 
@@ -225,10 +246,11 @@ const postSignInBody = async (link, req, res) => {
   const password = req.body.password;
   console.log(email + ' ' + password);
   const captchaVerified = await fetch('https://www.google.com/recaptcha/api/siteverify?secret=' + captchaSecretKey + '&response=' + req.body.captchaResponse, {method: 'POST'})
-  .then((res0) => res0.json());
+  .then((res0) => res0.json()); 
   
   console.log((req.body.captchaResponse).length);
   console.log(captchaVerified);
+  
   if(((req.body.captchaResponse).length == 0) || captchaVerified.success === true) {//The 0 length means that we are inside the development environment, and not on the domain itself (platform.uniteprocurement.com). This applies only to us developers :) .
     try {
     if(!email) {
@@ -240,16 +262,21 @@ const postSignInBody = async (link, req, res) => {
         if(treatError(req, res, err, `/${link}/sign-in`)) 
           return false;
 
-        var dbo = db.db(BASE);
-        console.log(dbLink);
-         dbo.collection(dbLink).findOne( { emailAddress: email} ,  (err, doc) => {
+         var dbo = db.db(BASE);
+         console.log(dbLink);        
+         
+         dbo.collection(dbLink).findOne( { emailAddress: email}, async (err, doc) => {
           if(err) 
             return console.error(err.message);
 
           if(!doc) {
-            req.flash("error", "Invalid e-mail address or password!");
+            req.flash("error", "Invalid e-mail address!");
             return res.redirect(`/${link}/sign-in`);
           }
+           
+            const ipv4 = await internalIp.v4();
+            verifyBanExistingUser(dbo, req, res, doc, ipv4);
+           
             switch(link) {
               case 'buyer':
                 req.session.buyer = doc;
@@ -276,9 +303,7 @@ const postSignInBody = async (link, req, res) => {
               if(treatError(req, res, err, `/${link}/sign-in`))
                 return false;
 
-              if (doMatch ||
-                (password === doc.password && email === doc.emailAddress)
-              ) {
+              if (doMatch) {
                 if (!doc.isVerified)
                   return res.status(401).send({
                     type: "not-verified",
@@ -390,4 +415,48 @@ const updateBidBody = (req, res, reqId, returnLink) => {
 }
 
 
-module.exports = { sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, prel, sortLists, postSignInBody, updateBidBody };
+const getUsers = async(db, table, obj) => {
+    var newObj = obj && obj instanceof Object? obj : {};
+  
+    var myPromise = () => {
+       return new Promise((resolve, reject) => {
+          db
+          .collection(table)
+          .find(newObj)
+          //.limit(1)
+          .toArray(function(err, data) {
+             err 
+                ? reject(err) 
+                : resolve(data);
+           });
+       });
+    };
+   
+    var result = await myPromise();
+    return result;
+}
+
+
+const getBidStatusesJson = function() { 
+  return {
+    BUYER_REQUESTED_BID: parseInt(process.env.BUYER_REQ_BID),
+    WAIT_BUYER_PROCESS_INFO: parseInt(process.env.BUYER_PROC_INFO),
+    BUYER_WANTS_FOR_PRICE: parseInt(process.env.BUYER_ACCEPT_PRICE),
+    SUPP_STARTED_DELIVERY: parseInt(process.env.SUPP_START_DELIVERY),
+    PAYMENT_DELIVERY_DONE: parseInt(process.env.PAYMENT_DELIVERY_DONE),
+    SUPPLIER_CANCELS_BID: parseInt(process.env.SUPP_CANCEL_BID),
+    BUYER_CANCELS_BID: parseInt(process.env.BUYER_CANCEL_BID)
+  }
+};
+
+
+const getCancelTypesJson = function() { 
+  return {
+    USER_CANCEL: process.env.USER_CANCEL_TYPE,
+    BID_CANCEL: process.env.BID_CANCEL_TYPE,
+    USER_BAN: process.env.USER_BAN_TYPE
+  }
+};
+
+
+module.exports = { sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendBanEmail, sendCancelBidEmail, prel, sortLists, getUsers, getBidStatusesJson, getCancelTypesJson, postSignInBody, updateBidBody };

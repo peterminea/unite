@@ -17,6 +17,7 @@ const BadWords = require('bad-words');
 const search = require('../middleware/searchFlash');
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const fs = require("fs");
+const { getCancelTypesJson } = require('../middleware/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
@@ -26,6 +27,21 @@ var userData = require('../middleware/userHome');
 
 exports.getIndex = (req, res) => {
   var obj = userData(req);
+  
+  const { promisify } = require('util'); //<-- Require promisify
+  const getIP = promisify(require('external-ip')({
+    replace: true,
+    services: ['https://myexternalip.com/raw', 'https://ipinfo.io/ip', 'http://icanhazip.com/', 'http://ident.me/'],
+    timeout: 900,
+    getIP: 'sequential',
+    verbose: false
+})); // <-- And then wrap the library
+ 
+  getIP().then((ip) => {
+      console.log(ip);
+  }).catch((error) => {
+      console.error(error);
+  });  
 
   res.render("index", {
     role: obj.role,
@@ -48,15 +64,36 @@ exports.getDeleteUser = (req, res) => {
     //isAdmin: obj.role == process.env.USER_ADMIN,
     //userId: obj.userId,
     //avatar: obj.avatar,
+    banId: req.params.id,
+    banType: req.params.type,
+    name: req.params.name,
+    uniteID: req.params.uniteID,
+    emailAddress: req.params.email,
+    cancelReasonTypesJson: JSON.stringify(getCancelTypesJson()),
+    successMessage: success,
+    errorMessage: error
+    //userName: obj.userName,
+    //userType: obj.userType
+  });
+};
+
+
+exports.getBanUser = (req, res) => {
+  var obj = userData(req);
+  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  
+  res.render("deleteUser", {
+    role: obj.role,
     deleteId: req.params.id,
     deleteType: req.params.type,
     name: req.params.name,
     uniteID: req.params.uniteID,
     emailAddress: req.params.email,
+    ipv4Address: req.params.ipv4Address,
+    cancelReasonTypesJson: JSON.stringify(getCancelTypesJson()),
     successMessage: success,
     errorMessage: error
-    //userName: obj.userName,
-    //userType: obj.userType
   });
 };
 
@@ -325,20 +362,49 @@ exports.postDeleteUser = async (req, res) => {
   switch(type) {
     case process.env.USER_BUYER:
       req.body.organizationName = req.body.name;
-      await buyerDelete(req, res, id);
+      await buyerDelete(req, res, id, false);
       return res.redirect('/memberList');
       break;
       
     case process.env.USER_SPV:
       req.body.organizationName = req.body.name;
       req.body.organizationUniteID = req.body.uniteID;
-      await supervisorDelete(req, res, id, req.body.organizationUniteID);
+      await supervisorDelete(req, res, id, req.body.organizationUniteID, false);
       return res.redirect('/memberList');
       break;
       
     case process.env.USER_SUPPLIER:
       req.body.companyName = req.body.name;
-      await supplierDelete(req, res, id);
+      await supplierDelete(req, res, id, false);
+      return res.redirect('/memberList');
+      break;
+      
+    default:
+      break;
+  }
+};
+
+
+exports.postBanUser = async (req, res) => {
+  var id = req.body.deleteId, type = req.body.userType;
+  
+  switch(type) {
+    case process.env.USER_BUYER:
+      req.body.organizationName = req.body.name;
+      await buyerDelete(req, res, id, true);
+      return res.redirect('/memberList');
+      break;
+      
+    case process.env.USER_SPV:
+      req.body.organizationName = req.body.name;
+      req.body.organizationUniteID = req.body.uniteID;
+      await supervisorDelete(req, res, id, req.body.organizationUniteID, true);
+      return res.redirect('/memberList');
+      break;
+      
+    case process.env.USER_SUPPLIER:
+      req.body.companyName = req.body.name;
+      await supplierDelete(req, res, id, true);
       return res.redirect('/memberList');
       break;
       

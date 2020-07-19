@@ -22,6 +22,10 @@ const supervisorSchema = new Schema({
     unique: true,
     required: true
   },
+  ipv4: {
+    type: String,
+    required: true
+  },
   contactName: {
     type: String,
     required: true

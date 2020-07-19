@@ -288,11 +288,11 @@
                 <option disabled title="<%= status.name %>" value="<%= status.value %>"><%= status.name %></option>
                 <% } } %>
               </select>
-              <div style="visibility: hidden" id="statusJsonValues">
-                <% if (statusesJson != null) { %>
-                  <span class='statuses'><%= statusesJson %></span>
-                <% } %>
+              <% if (statusesJson != null) { %>
+              <div style="visibility: hidden" id="statusJsonValues">                
+                <span class='statuses'><%= statusesJson %></span>                
               </div>
+              <% } %>
             </div>
             <div class="form-group">
               <label>Bid extension letter</label>
@@ -357,7 +357,7 @@
                 .prop('selected', true);
 
               sel.attr('title', sel.find('option:selected').text());
-              var x = JSON.parse($('#statusJsonValues'+index+' span:first').text());
+              const x = JSON.parse($('#statusJsonValues'+index+' span:first').text());
               
               <% if(isSingleProd == true) { %>
               $('select.productsList')
