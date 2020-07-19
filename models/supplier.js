@@ -12,6 +12,10 @@ const supplierSchema = new Schema({
     type: String,
     required: false
   },
+  ipv4: {
+    type: String,
+    required: true
+  },
   companyName: {
     type: String,
     unique: true,

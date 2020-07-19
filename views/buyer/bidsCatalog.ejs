@@ -29,7 +29,6 @@
     $(document).ready(function() {
       //errorSuccess(Swal, '< %= errorMessage %>', '< %= successMessage %>');
       initBaseRates(fx, '#currency');
-      prepareSortTable();
     });
   </script>
   </head>
@@ -62,36 +61,6 @@
   <br>
 <% if(bids != null && bids.length > 0) {%>
   <div class="container form-group mt-4" style="text-align: center">
-    <table id="buyers" class="table table-striped table-hover table-condensed members">
-      <thead>
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">Bid name</th>
-          <th scope="col">Supplier name</th>
-          <th colspan="2" scope="col">Price (Original)</th>
-          <th colspan="2" scope="col">Price (Supplier's currency)</th>
-          <th scope="col">Expiry date</th>
-          <th scope="col">Creation date</th>
-          <th scope="col">Cancelled</th>
-          <th scope="col">Expired</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% let i = 0; for (bid of bids) { %>
-        <tr id="<%= bid._id %>">
-          <td scope="col"><%= i+1 %></td>
-          <td scope="col"><%= bid.requestName %></td>
-          <td scope="col"><%= bid.supplierName %></td>
-          <td colspan="2" scope="col"><%= bid.buyerPrice %> <%= bid.buyerCurrency %></td>
-          <td colspan="2" scope="col"><%= bid.supplierPrice %> <%= bid.supplierCurrency %></td>
-          <td scope="col"><%= bid.expiryDateFormatted %></td>
-          <td scope="col"><%= bid.createdAtFormatted %></td>
-          <td scope="col"><%= bid.isCancelled %></td>
-          <td scope="col"><%= bid.isExpired %></td>
-        </tr>
-        <% i++; } %>
-        </tbody>
-      </table>
     </div>
     <div id="jqDiv_0" class="form-group">
       <table id="gridBids">
@@ -144,7 +113,7 @@
         <% }%>
   </div>
   
-  </body>
-  
+</body>
+
 </html>
   

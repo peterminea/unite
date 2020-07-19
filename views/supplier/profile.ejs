@@ -36,7 +36,8 @@
       getAutocomplete('#industry', '/industryGetAutocomplete', token);      
       //getAutocomplete('select.currency', '/currencyAutocomplete', token);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');      
-      getCurrenciesList('select.currency', '/currencyAutocomplete', token);      
+      getCurrenciesList('select.currency', '/currencyAutocomplete', token);  
+      getAutocomplete('#capabilityDescription', '/capabilityInputAutocomplete', token);
       initBaseRates(fx, 'select.currency');
       var defaultCurr = "<%= profile.currency %>";
    
@@ -396,10 +397,10 @@
               productImageSource: <% if(product.productImage.length > 0) { %> `<img src="../` + '<%= product.productImage.substring(7) %>' 
               + `" style="height: 25px; width: 30px" onclick="window.open(this.src)">`
                 <% } else { %> '' <% } %>,
-              productId: <%= product.id %>,
-              supplierId: <%= profile._id %>,
+              productId: '<%= product.id %>',
+              supplierId: '<%= profile._id %>',
               maxAmount: parseInt("<%= MAX_PROD %>"),
-              supplierCurrency: <%= profile.currency %>,
+              supplierCurrency: '<%= profile.currency %>',
               hiddenAmount: '<%= product.amount %>',
               bigPrice: <%= parseFloat(product.totalPrice).toFixed(2) %>
             });

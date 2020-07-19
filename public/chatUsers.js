@@ -42,6 +42,6 @@ const getUsersInRoom = (room) => {
 }
 
 
-module.exports = {
+if(typeof module !== 'undefined') module.exports = {
   addUser, removeUser, getUser, getUsersInRoom
 };

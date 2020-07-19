@@ -32,8 +32,7 @@
     name = "<%= userName %>", 
     type = "<%= userType %>";
     userInputs(id, role, avatar, name, type, $('ul.mr-auto'));
-
-    prepareSortTable();
+    
     var token = $('input[name="_csrf"]').val();
     $('.downloadFile,.deleteFile').attr('token', token);
     $('.deleteFile').on('click', function() {
@@ -83,39 +82,13 @@
   <br>
 <% if(files != null && files.length > 0) {%>
   <div class="container form-group mt-4" style="text-align: center">
-    <table id="files" class="table table-striped table-hover table-condensed files">
-      <thead>
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">File name</th>
-          <th scope="col">File folder</th>
-          <th scope="col">File Size</th>
-          <th scope="col">Upload Date</th>
-          <th scope="col">Download File</th>
-          <th scope="col">Delete</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% let i = 0; for (file of files) { %>
-        <tr id="<%= file._id %>">
-          <td scope="col"><%= i+1 %></td>
-          <td scope="col"><%= file.name %></td>
-          <td scope="col"><%= file.folder %></td>
-          <td scope="col"><%= file.size %></td>
-          <td scope="col"><%= file.date %></td>
-          <td><a href="../<%= file.path.substring(7) %>" title="Download <%= file.name %>" class="downloadFile" download>Download file</a></td>
-          <td><span name="<%= file.path %>" class="deleteFile">Remove</span></td>
-        </tr>
-        <% i++; } %>
-        </tbody>
-      </table>
+  </div>
+  <div id="jqDiv_0" class="form-group">
+    <table id="gridProdImages">
+    </table>
+    <div id='prodImagePager'>
     </div>
-    <div id="jqDiv_0" class="form-group">
-      <table id="gridProdImages">
-      </table>
-      <div id='prodImagePager'>
-      </div>
-    </div>
+  </div>
   
   <script type="text/javascript">
     var data = [];
@@ -164,32 +137,7 @@
   <br>
 <% if(uploads != null && uploads.length > 0) {%>
   <div class="container form-group mt-4" style="text-align: center">
-    <table id="files" class="table table-striped table-hover table-condensed files">
-      <thead>
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">File name</th>
-          <th scope="col">File folder</th>
-          <th scope="col">File Size (bytes)</th>
-          <th scope="col">Upload Date</th>
-          <th scope="col">Download File</th>
-          <th scope="col">Delete</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% let i = 0; for (file of uploads) { %>
-        <tr id="<%= file._id %>">
-          <td scope="col"><%= i+1 %></td>
-          <td scope="col"><%= file.name %></td>
-          <td scope="col"><%= file.folder %></td>
-          <td scope="col"><%= file.size %></td>
-          <td scope="col"><%= file.date %></td>
-          <td><a href="../<%= file.path.substring(7) %>" title="Download <%= file.name %>" class="downloadFile" download>Download file</a></td>
-          <td><span name="<%= file.path %>" class="deleteFile">Remove</span></td>
-        </tr>
-        <% i++; } %>
-        </tbody>
-      </table>
+   
     </div>
     <div id="jqDiv_1" class="form-group">
       <table id="gridUploads">
@@ -244,33 +192,7 @@
   </h3>
   <br>
 <% if(avatars != null && avatars.length > 0) {%>
-  <div class="container form-group mt-4" style="text-align: center">
-    <table id="files" class="table table-striped table-hover table-condensed files">
-      <thead>
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">File name</th>
-          <th scope="col">File folder</th>
-          <th scope="col">File Size (bytes)</th>
-          <th scope="col">Upload Date</th>
-          <th scope="col">Download File</th>
-          <th scope="col">Delete</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% let i = 0; for (file of avatars) { %>
-        <tr id="<%= file._id %>">
-          <td scope="col"><%= i+1 %></td>
-          <td scope="col"><%= file.name %></td>
-          <td scope="col"><%= file.folder %></td>
-          <td scope="col"><%= file.size %></td>
-          <td scope="col"><%= file.date %></td>
-          <td><a href="../<%= file.path.substring(7) %>" title="Download <%= file.name %>" class="downloadFile" download>Download file</a></td>
-          <td><span name="<%= file.path %>" class="deleteFile">Remove</span></td>
-        </tr>
-        <% i++; } %>
-        </tbody>
-      </table>
+  <div class="container form-group mt-4" style="text-align: center">   
     </div>
     <div id="jqDiv_2" class="form-group">
       <table id="gridAvatars">

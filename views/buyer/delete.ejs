@@ -21,7 +21,8 @@
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-      getCancelReasonTitles($('#mainForm'), $('input[name="_csrf"]').val(), '/cancelReasonTitles', 'User', false, false);
+      const x = JSON.parse($('#cancelReasonTypesValues span:first').text());
+      getCancelReasonTitles($('#mainForm'), $('input[name="_csrf"]').val(), '/cancelReasonTitles', x.USER_CANCEL, false, false);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       
       $('#mainForm').submit(function(e) {
@@ -64,6 +65,11 @@
           </div>
           <input type="hidden" name="type" value="User Cancellation">          
           <input type="hidden" name="userType" value="Buyer">
+          <% if (cancelReasonTypesJson != null) { %>
+            <div style="visibility: hidden" id="cancelReasonTypesValues">            
+                <span class='statuses'><%= cancelReasonTypesJson %></span>          
+            </div>
+          <% } %>
           <div class="form-group">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <button type="submit" id="delete" title="Delete Account" class="btn btn-primary btn-block btn-lg">Delete Account</button>

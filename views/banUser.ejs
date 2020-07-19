@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>UNITE - Remove User as Admin</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A cool thing made with Glitch">
+  <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/messages.css">
+  <link rel="stylesheet" href="/jquery-ui.css">
+  <link rel="stylesheet" href="/bootstrap.min.css">
+  <script src="/jquery.min.js"></script>
+  <script src="/jquery-ui.min.js"></script>
+  <script src="/popper.min.js"></script>
+  <script src="/bootstrap.min.js"></script>
+  <script src="/sweetalert2@9.min.js"></script>
+  <script src="/https.js"></script>
+  <script src="/functions.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      const x = JSON.parse($('#cancelReasonTypesValues span:first').text());
+      getCancelReasonTitles($('#mainForm'), $('input[name="_csrf"]').val(), '/cancelReasonTitles', x.USER_BAN, true);
+      errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
+      $('#endDate').datepicker();
+      
+      $('#loadBannedUsers').on('click', function(e) {
+        $.ajax({
+          url: '/loadBannedUsers',
+          headers: { "X-CSRF-Token": token },
+          datatype: 'application/json',
+          type: "GET",
+          scroll: true,
+          success: function(data) {
+            if(!data || !data.length) {              
+             return false;
+            }
+           
+            let str = '';
+            str += '<div id="jqDiv" class="jqGridProd form-group"><table id="gridBans"></table><div id="banPager"></div></div>';
+            $('div.bodyBuilder').append(str);
+            
+            var data2 = [];
+            var colModel = [             
+              { name: 'name', label: 'User Name', search: true, width: 140},
+              { name: 'type', label: 'User Type', align: 'center', search: true, width: 140},
+              { name: 'email', label: 'E-mail Address', sorttype: 'text', align: 'center', search: true, width: 140},
+              { name: 'ip', label: 'IPv4 Address', align: 'center', sorttype: 'text', search: true, width: 140 },
+              { name: 'banDate', label: 'Ban Date', align: 'center', formatter: 'date', formatoptions: { srcformat: 'd/m/Y', newformat: 'd/m/Y'}, search: true, width: 90},
+              { name: 'banExpiryDate', label: 'Ban Expiry Date', align: 'center', formatter: 'date', formatoptions: { srcformat: 'd/m/Y', newformat: 'd/m/Y'}, search: true, width: 90}
+            ];
+            
+            for(var i of data) {
+             data2.push({
+               name: i.name,
+               type: i.type,
+               email: i.email,
+               ip: i.ip,
+               banDate: i.banDate,
+               banExpiryDate: i.banExpiryDate
+              });
+            }
+
+            initGrid(colModel, data2, "#gridBans", '#banPager', "userName", 'Banned Users List', 1100);
+            $('#loadBannedUsers').off('click');
+          }
+        });        
+      });
+
+      $('#mainForm').submit(function(e) {
+        var radio = $(this).find('input[type="radio"]:checked');
+        radio.attr('name', 'reasonTitle');
+        if(!confirm('You are about to ban this User from using UNITE. This can be time-limited.\Banning a UNITE User is a serious event, it should be motivated and the User notified about the reason. Please provide accurate information about it.')) {
+          return false;
+        }
+      });
+  });
+  </script>
+</head>
+
+<body>
+  <nav user="supplier" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
+    <a class="navbar-brand" href="/">UNITE - Delete User Account - Admin</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </nav>
+    <div class="container">
+       <div class="col-md-12">
+        <legend>
+          Ban UNITE User Account - Admin Reserved - Please fill in the required (*) fields:
+        </legend>
+        <form id="mainForm" method="POST">
+          <div class="form-group">
+            <label for="reason">Reason for banning account*:</label>
+            <textarea required rows="10" cols="50" class="form-control" id="reason" name="reason"></textarea>
+          </div>
+          <input type="hidden" name="type" value="User Ban by Admin">
+          <input type="hidden" name="id" value="<%= banId %>">
+          <input type="hidden" name="userType" value="<%= banType %>">
+          <input type="hidden" name="emailAddress" value="<%= emailAddress %>">
+          <input type="hidden" name="ipv4Address" value="<%= ipv4Address %>">          
+          <div class="form-group">
+            <label for="name">Name of the User:</label>
+            <input readonly type="text" name="name" value="<%= name %>">  
+          </div>
+          <div class="form-group">
+            <label for="endDate">Preferred Date for ban ending:</label>
+            <input type="text" class="form-control" required id="endDate" name="endDate">
+          </div>
+          <input type="hidden" name="uniteID" value="<%= uniteID %>">
+          <% if (cancelReasonTypesJson != null) { %>
+          <div style="visibility: hidden" id="cancelReasonTypesValues">            
+              <span class='statuses'><%= cancelReasonTypesJson %></span>          
+          </div>
+          <% } %>
+          <div class="form-group">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button type="submit" id="delete" title="Delete User" class="btn btn-primary btn-block btn-lg">Delete User</button>
+          </div>
+        </form>
+      </div>
+      <div class="col-md-12">
+        <div class="form-group">
+          <label>Load list of Banned Users</label>
+          <button class="form-control btn btn-outline-warning" id="loadBannedUsers">
+            Load
+          </button>
+        </div>
+        <div class="bodyBuilder">
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -28,6 +28,7 @@ const URL = process.env.MONGODB_URI,
 const treatError = require("../middleware/treatError");
 const search = require("../middleware/searchFlash");
 var Recaptcha = require("express-recaptcha").RecaptchaV2;
+
 const {
   sendConfirmationEmail,
   sendCancellationEmail,
@@ -39,9 +40,13 @@ const {
   sendCancelBidEmail,
   prel,
   sortLists,
+  getUsers,
+  getBidStatusesJson,
+  getCancelTypesJson,
   postSignInBody,
   updateBidBody
 } = require("../middleware/templates");
+
 const {
   removeAssociatedBuyerBids,
   removeAssociatedSuppBids,
@@ -49,21 +54,16 @@ const {
   supervisorDelete,
   supplierDelete
 } = require("../middleware/deletion");
+
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
 const fetch = require("node-fetch");
+const internalIp = require('internal-ip');
+const { verifyBanNewUser, verifyBanExistingUser } = require('../middleware/verifyBanned');
+
+
 var fx = require("money"),
   initConversions = require("../middleware/exchangeRates");
-
-const statusesJson = {
-  BUYER_REQUESTED_BID: parseInt(process.env.BUYER_REQ_BID),
-  WAIT_BUYER_PROCESS_INFO: parseInt(process.env.BUYER_PROC_INFO),
-  BUYER_WANTS_FOR_PRICE: parseInt(process.env.BUYER_ACCEPT_PRICE),
-  SUPP_STARTED_DELIVERY: parseInt(process.env.SUPP_START_DELIVERY),
-  PAYMENT_DELIVERY_DONE: parseInt(process.env.PAYMENT_DELIVERY_DONE),
-  SUPPLIER_CANCELS_BID: parseInt(process.env.SUPP_CANCEL_BID),
-  BUYER_CANCELS_BID: parseInt(process.env.BUYER_CANCEL_BID)
-};
 
 const TYPE = process.env.USER_BUYER;
 
@@ -283,7 +283,7 @@ exports.postIndex = (req, res) => {
             statuses: statuses,
             successMessage: success,
             errorMessage: error,
-            statusesJson: JSON.stringify(statusesJson)
+            statusesJson: JSON.stringify(getBidStatusesJson())            
           });
         });
       });
@@ -450,7 +450,7 @@ exports.postIndex = (req, res) => {
             MAX_AMOUNT: process.env.MAX_PROD_PIECES,
             BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
             statuses: statuses,
-            statusesJson: JSON.stringify(statusesJson),
+            statusesJson: JSON.stringify(getBidStatusesJson()),
             buyer: buyer[0],
             product: products[0],
             supplier: supps[0],
@@ -501,7 +501,7 @@ exports.getPlaceBid = (req, res) => {
             MAX_AMOUNT: process.env.MAX_PROD_PIECES,
             BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
             statuses: statuses,
-            statusesJson: JSON.stringify(statusesJson),
+            statusesJson: JSON.stringify(getBidStatusesJson()),
             isMultiProd: false,
             isMultiSupp: false,
             isMultiBid: false,
@@ -856,6 +856,7 @@ exports.getDelete = (req, res) => {
 
   res.render("buyer/delete", {
     id: req.params.id,
+    cancelReasonTypesJson: JSON.stringify(getCancelTypesJson()),
     successMessage: success,
     errorMessage: error
   });
@@ -1176,7 +1177,8 @@ exports.postForgotPassword = (req, res, next) => {
       }
     ],
     function(err) {
-      if (treatError(req, res, err, "back")) return false;
+      if (treatError(req, res, err, "back")) 
+        return false;
       return res.redirect("/buyer/forgotPassword");
     }
   );
@@ -1233,15 +1235,19 @@ exports.postResetPasswordToken = (req, res) => {
                 err,
                 db
               ) {
-                if (err) throw err;
+                if (treatError(req, res, err, "back")) 
+                  return false;
+                
                 var dbo = db.db(BASE);
+                let hash = bcrypt.hashSync(req.body.password, 16);
+                
                 dbo
                   .collection("buyers")
                   .updateOne(
                     { _id: user._id },
                     {
                       $set: {
-                        password: req.body.password,
+                        password: hash,
                         resetPasswordToken: undefined,
                         resetPasswordExpires: undefined
                       }
@@ -1290,6 +1296,7 @@ exports.postSignUp = async (req, res) => {
   ).then((res0) => res0.json());
 
   console.log(captchaVerified);
+  
   if (
     req.body.captchaResponse.length == 0 ||
     captchaVerified.success === true
@@ -1312,15 +1319,16 @@ exports.postSignUp = async (req, res) => {
         if (
           final_domain.toLowerCase().includes(prohibitedArray[i].toLowerCase())
         ) {
-          req.flash("error", "E-mail address must be a custom company domain.");
+          req.flash("error", "E-mail address must belong to a custom company domain.");
           return res.redirect("/buyer/sign-up");
+          
         } else {
-          if (req.body.password.length < 6) {
-            req.flash("error", "Password must have at least 6 characters.");
+          if (req.body.password.length < 6 || req.body.password.length > 16) {
+            req.flash("error", "Password must have between 6 and 16 characters.");
             return res.redirect("/buyer/sign-up");
           } else {
+            
             var promise = getSupers(req.body.organizationUniteID);
-
             promise.then(async function(supers) {
               if (supers && supers.length && !supers[0].isActive) {
                 req.flash(
@@ -1329,15 +1337,28 @@ exports.postSignUp = async (req, res) => {
                 );
                 return res.redirect("/buyer/sign-up");
               } else if (1 == 2 && (!supers || supers.length == 0)) {
+                
                 req.flash(
                   "error",
                   "Invalid UNITE ID. Please select an appropriate ID from the list."
                 );
+                
                 return res.redirect("/buyer/sign-up");
               } else if (global++ < 1) {
+                const ipv4 = await internalIp.v4();
+                
                 await Buyer.findOne(
                   { emailAddress: req.body.emailAddress },
-                  function(err, user) {
+                  async function(err, user) {
+                    if(treatError(req, res, err, '/supplier/sign-up'))
+                      return false;
+                    
+                    if(verifyBanNewUser(req, res, req.body.emailAddress, ipv4)) {
+                      return res.status(400).send({
+                        msg: 'You are trying to join UNITE from the part of an already banned user. Please refrain from doing so.'
+                      });
+                    }
+                    
                     if (user)
                       return res
                         .status(400)
@@ -1345,7 +1366,9 @@ exports.postSignUp = async (req, res) => {
                           msg:
                             "The e-mail address you have entered is already associated with another account."
                         });
+                    
                     var buyer;
+                    
                     try {
                       bcrypt.hash(req.body.password, 16, async function(
                         err,
@@ -1359,6 +1382,7 @@ exports.postSignUp = async (req, res) => {
                           contactName: req.body.contactName,
                           emailAddress: req.body.emailAddress,
                           password: hash,
+                          ipv4: ipv4,
                           isVerified: false,
                           isActive: false,
                           contactMobileNumber: req.body.contactMobileNumber,
@@ -1459,8 +1483,11 @@ exports.getProfile = (req, res) => {
 
 exports.postProfile = (req, res) => {
   try {
-    Buyer.findOne({ _id: req.body._id }, (err, doc) => {
-      if (treatError(req, res, err, "/buyer/profile")) return false;
+    Buyer.findOne({ _id: req.body._id }, async (err, doc) => {
+      if (treatError(req, res, err, "/buyer/profile")) 
+        return false;
+      
+      const ipv4 = await internalIp.v4();
 
       doc._id = req.body._id;
       doc.avatar = req.body.avatar;
@@ -1470,6 +1497,7 @@ exports.postProfile = (req, res) => {
       doc.contactName = req.body.contactName;
       doc.emailAddress = req.body.emailAddress;
       doc.password = req.body.password;
+      doc.ipvs = ipv4;
       doc.isVerified = true;
       doc.isActive = true;
       doc.contactMobileNumber = req.body.contactMobileNumber;
