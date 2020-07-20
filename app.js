@@ -370,6 +370,8 @@ socket.on("connection", sock => {
   });
 });
 
+const { fileExists } = require('./middleware/templates');
+
 //Buyers should load a Catalog of Products by clicking on a button in their Index page:
 app.get("/loadProductsCatalog", (req, res) => {
   ProductService.find({}, async (err, products) => {
@@ -396,7 +398,7 @@ app.get("/loadProductsCatalog", (req, res) => {
             price: products[i].price,
             amount: products[i].amount,
             totalPrice: products[i].totalPrice,
-            productImage: products[i].productImage,
+            productImage: fileExists(products[i].productImage)? products[i].productImage : '',
             currency: products[i].currency,
             supplier: obj.companyName
           });
@@ -407,7 +409,7 @@ app.get("/loadProductsCatalog", (req, res) => {
       return a.productName.localeCompare(b.productName);
     });
 
-    console.log((catalogItems.length));
+    console.log((catalogItems[0].productImage));
     res.json(catalogItems);
   });
 });
@@ -933,7 +935,7 @@ app.post("/currencyAutocomplete", function(req, res, next) {
   var val = regex? { value: regex } : {};
   var currencyFilter = Currency.find(val, { value: 1, name: 1 })
     .sort({ value: 1 })
-    .limit(regex? 20 : 200); //Negative sort means descending.
+    .limit(regex? 150 : 200); //Negative sort means descending.
 
   currencyFilter.exec(function(err, data) {
     var result = [];
@@ -1203,7 +1205,7 @@ async function getUsers2(db, table) {
   return promise;
 }
 
-if (1 == 2)
+//f (1 == 2)
   MongoClient.connect(URI, { useUnifiedTopology: true }, (err, client) => {
     if (err) {
       console.error(err.message);
@@ -1216,6 +1218,9 @@ if (1 == 2)
       console.error(err.message);
     });
     
+    
+    db.collection('bidrequests').updateMany({}, { $set: { preferredDeliveryDate: new Date(Date.now() + 3 * 86400000) } }, function(err, obj) {});
+    /*
     db.collection('cancelreasontitles').updateMany({},  { $set: { isSupervisor: false } }, function(err, obj) {} );
     (async () => {
 	//console.log(await internalIp.v6());
@@ -1252,8 +1257,8 @@ if (1 == 2)
       await db.collection('suppliers').updateOne({ _id: i._id }, upd, function(err, resp) { if(err) throw err; })
     }
   }
-  
-      console.log('Suppliers updated.');
+  */
+    //  console.log('Suppliers updated.');
      // buyers.then((buyers) => {
        // console.log(buyers.length);
       //})
@@ -1263,7 +1268,7 @@ if (1 == 2)
  // db.collection('supervisors').updateMany({}, upd, function(err, obj) {} );
  // db.collection('suppliers').updateMany({}, upd, function(err, obj) {} );   
 	//=> '10.0.0.79'
-    })();
+    //})();
     
  //db.close();
   });

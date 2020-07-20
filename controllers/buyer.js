@@ -30,6 +30,7 @@ const search = require("../middleware/searchFlash");
 var Recaptcha = require("express-recaptcha").RecaptchaV2;
 
 const {
+  fileExists,
   sendConfirmationEmail,
   sendCancellationEmail,
   sendExpiredBidEmails,
@@ -68,7 +69,10 @@ var fx = require("money"),
 const TYPE = process.env.USER_BUYER;
 
 exports.getIndex = async (req, res) => {
-  if (req.session) {
+  if(!req.session || !req.session.buyer) {
+    return;
+  }
+  
       try {
         initConversions(fx);
       }
@@ -76,7 +80,7 @@ exports.getIndex = async (req, res) => {
       }
     
     var promise = BidRequest.find({
-      buyer: req.session.buyer ? req.session.buyer._id : null
+      buyer: req.session.buyer._id
     }).exec();
 
     promise.then((bids) => {
@@ -107,9 +111,15 @@ exports.getIndex = async (req, res) => {
                 .to(process.env.BID_DEFAULT_CURR);          
             }
           }
+          
+          var buyer = req.session.buyer;
+          
+          if(buyer.avatar && buyer.avatar.length && !fileExists('public/' + buyer.avatar.substring(3))) {
+            buyer.avatar = '';
+          }          
 
           res.render("buyer/index", {
-            buyer: req.session ? req.session.buyer : null,
+            buyer: buyer,
             MAX_PROD: process.env.BID_MAX_PROD,
             BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
             bidsLength: bids && bids.length ? bids.length : null,
@@ -123,8 +133,7 @@ exports.getIndex = async (req, res) => {
           });
         }, 1600);
       })
-    }); 
-  }
+    });   
 };
 
 
@@ -336,6 +345,7 @@ exports.postIndex = (req, res) => {
         deliveryRequirements: req.body.deliveryRequirements,
         complianceRequirements: req.body.complianceRequirements,
         complianceRequirementsUrl: req.body.complianceRequirementsUrl,
+        preferredDeliveryDate: req.body.preferredDeliveryDate,
         otherRequirements: req.body.otherRequirements,
         status: req.body.status,
         buyerPrice: buyerPrice,
@@ -542,6 +552,7 @@ exports.postPlaceBid = async (req, res) => {
     deliveryRequirements: req.body.deliveryRequirements,
     complianceRequirements: req.body.complianceRequirements,
     complianceRequirementsUrl: req.body.complianceRequirementsUrl,
+    preferredDeliveryDate: req.body.preferredDeliveryDate,
     otherRequirements: req.body.otherRequirements,
     status: req.body.status,
     buyerPrice: req.body.buyerPrice,
