@@ -432,9 +432,9 @@ var storage = multer.diskStorage({
   },
   filename: function(req, file, callback) {
     // + path.extname(file.originalname)
-    var date = dateformat(new Date(), "dddd-mmmm-dS-yyyy-h:MM:ss-TT"); //Date.now()
-    var date2 = moment(new Date().getTime()).format("HH:mm:ss:a");
-    callback(null, file.fieldname + "-" + date2 + "-" + file.originalname); //The name itself.
+    var date = dateformat(new Date(), "dddd_mmmm_dS_yyyy_h.MM.ss_TT"); //Date.now()
+    var date2 = moment(new Date().getTime()).format("HH.mm.ss.a");
+    callback(null, file.fieldname + "_" + date2 + "_" + file.originalname); //The name itself.
   }
 });
 
@@ -492,9 +492,9 @@ var prodImageStorage = multer.diskStorage({
   },
   filename: function(req, file, callback) {
     // + path.extname(file.originalname)
-    var date = dateformat(new Date(), "dddd-mmmm-dS-yyyy-h:MM:ss-TT"); //Date.now()
-    var date2 = moment(new Date().getTime()).format("HH:mm:ss:a");
-    callback(null, file.originalname.substring(file.originalname.lastIndexOf('.')+1) + "-" + date + "-" + file.originalname); //The name itself.
+    var date = dateformat(new Date(), "dddd_mmmm_dS_yyyy_h.MM.ss_TT"); //Date.now()
+    var date2 = moment(new Date().getTime()).format("HH.mm.ss.a");
+    callback(null, file.originalname.substring(file.originalname.lastIndexOf('.')+1) + "_" + date + "_" + file.originalname); //The name itself.
   }
 });
 
@@ -1258,14 +1258,10 @@ if (1 == 2)
        // console.log(buyers.length);
       //})
       
-      
-  //let hash = bcrypt.hashSync(req.body.password, 16);
-      
+  //let hash = bcrypt.hashSync(req.body.password, 16);      
   //db.collection('buyers').updateMany({}, upd, function(err, obj) {} );
  // db.collection('supervisors').updateMany({}, upd, function(err, obj) {} );
- // db.collection('suppliers').updateMany({}, upd, function(err, obj) {} );
-      
-      
+ // db.collection('suppliers').updateMany({}, upd, function(err, obj) {} );   
 	//=> '10.0.0.79'
     })();
     

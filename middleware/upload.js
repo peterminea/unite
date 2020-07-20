@@ -17,9 +17,9 @@ var storage = multer.diskStorage({
       return callback(message, null);
     }
 
-    var date = dateformat(new Date(), 'dddd, mmmm dS, yyyy, h:MM:ss TT');//Date.now()
-    var date2 = moment(new Date().getTime()).format('h:mm:a');
-    var filename =  'UNITE-'+ date2 + '-' + file.originalname;
+    var date = dateformat(new Date(), 'dddd_mmmm_dS_yyyy_h.MM.ss.TT');//Date.now()
+    var date2 = moment(new Date().getTime()).format('h.mm.a');
+    var filename =  'UNITE-'+ date2 + '_' + file.originalname;
     callback(null, filename);
   }
 });
