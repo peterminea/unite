@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const process = require('process');
 const Buyer = require('../models/buyer'), Supplier = require('../models/supplier');
-var buyer = mongoose.model('Buyer'), supplier = mongoose.model('Supplier');
+const buyer = mongoose.model('Buyer'), supplier = mongoose.model('Supplier');
 
 const bidRequestSchema = new Schema({
   requestName: {

@@ -24,12 +24,10 @@
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-      var token = $("input[name='_csrf']").val();
+      let token = $("input[name='_csrf']").val();
       getAutocomplete('#country', '/countryAutocomplete', token);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
-      getCurrenciesList('select.currency', '/currencyAutocomplete', token);      
-      initBaseRates(fx, 'select.currency');
-      $('select.currency').css('width', '100px');
+      initBaseRates(fx, 'select.currency', '/currencyAutocomplete', token, 'EUR');
 
       $("input,select,textarea").on('change', function() {
         $('#updateProfile').prop('disabled', false);
@@ -41,11 +39,6 @@
           if(!validCountry($('.country'))) {
             return false;
           }
-/*
-          $('input.autocomp').not('.country').each(function() {
-            var cls = !($(this).hasClass('present')) && !($(this).hasClass('changed'));
-            $(this).next('input').val(cls? 'canSave' : '');
-          });*/
 
           $('#updateForm').submit();
         });

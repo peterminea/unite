@@ -29,14 +29,14 @@ router.post("/", isAuth, sessionExit, buyerController.postIndex);
 router.post("/sign-in", buyerController.postSignIn);
 router.post("/sign-up", buyerController.postSignUp);
 router.post('/profile', isAuth, sessionExit, buyerController.postProfile);
-router.post("/deactivate", isAuth, sessionExit, buyerController.postDeactivate);
-router.post("/delete", isAuth, sessionExit, buyerController.postDelete);
+router.post("/deactivate/:id", isAuth, sessionExit, buyerController.postDeactivate);
+router.post("/delete/:id", isAuth, sessionExit, buyerController.postDelete);
 router.post('/confirmation/:token', sessionExit, buyerController.postConfirmation);
 router.post('/resend', /*isAuth,*/ sessionExit, buyerController.postResendToken);
 router.post("/forgotPassword", isAuth, sessionExit, buyerController.postForgotPassword);
 router.post("/resetPassword/:token", isAuth, sessionExit, buyerController.postResetPasswordToken);
 router.post("/viewBid", isAuth, sessionExit, buyerController.postViewBids);
-router.post("/cancelBid", isAuth, sessionExit, buyerController.postCancelBid);
-router.post("/placeBid", isAuth, sessionExit, buyerController.postPlaceBid);
+router.post("/cancelBid/:bidId/:bidName/:userType/:buyerName/:supplierName/:buyerEmail/:supplierEmail", isAuth, sessionExit, buyerController.postCancelBid);
+router.post("/placeBid/:buyerId/:productId/:supplierId", isAuth, sessionExit, buyerController.postPlaceBid);
 
 module.exports = router;

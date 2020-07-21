@@ -24,13 +24,13 @@
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-      var token = $("input[name='_csrf']").val();
+      const token = $("input[name='_csrf']").val();
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       
       if($('.delete').length()) {
         $('.delete').on('click', function() {          
-          var bidId = $(this).attr('id');
-          var div1 = $(this).parent('div'), div2 = div1.prev('div');
+          let bidId = $(this).attr('id');
+          let div1 = $(this).parent('div'), div2 = div1.prev('div');
           
           if(confirm('Are you sure you want to remove this bid from your Supplier Dashboard forever?')) {
             $.ajax({

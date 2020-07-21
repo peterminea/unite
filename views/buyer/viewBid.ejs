@@ -30,7 +30,7 @@
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-      var token = $("input[name='_csrf']").first().val();
+      let token = $("input[name='_csrf']").first().val();
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       $('.rem,.inc,.dec,.uploadImage').off('click');//Off in View Mode.
 
@@ -46,12 +46,12 @@
                 if(!data || !data.length)
                   return false;
                 
-                var x = JSON.parse($('[id^="statusJsonValues_"]').first().val());
+                let x = JSON.parse($('[id^="statusJsonValues_"]').first().val());
                 //alert(x.PAYMENT_DELIVERY_DONE + ' ' + $('select[id^="statuses_"]').length);
                 if($('.delete').length) {
                   $('.delete').bind('click', function() {          
-                    var bidId = $(this).attr('id');
-                    var div1 = $(this).parent('div'), div2 = div1.prev('div');
+                    let bidId = $(this).attr('id');
+                    let div1 = $(this).parent('div'), div2 = div1.prev('div');
 
                     if(confirm('Are you sure you want to remove this bid from your Buyer Dashboard forever?')) {
                       $.ajax({
@@ -88,13 +88,13 @@
                 setTimeout(function() {
                   $('select[id^="statuses_"]')
                     .each(function(index, el) {
-                    for(var i in data) {
-                      var opt = '<option ' + (i > x.PAYMENT_DELIVERY_DONE? 'disabled ' : '') + 'style="word-wrap: break-word; width: 100px" title="' + data[i].name +'" value="' + data[i].value + '">' + data[i].name + '</option>';
+                    for(let i in data) {
+                      let opt = '<option ' + (i > x.PAYMENT_DELIVERY_DONE? 'disabled ' : '') + 'style="word-wrap: break-word; width: 100px" title="' + data[i].name +'" value="' + data[i].value + '">' + data[i].name + '</option>';
                       $(el).append(opt);
                       }
 
                     //setTimeout(function() {                    
-                      var statusInput = $(el)
+                      let statusInput = $(el)
                         .parent('div')
                         .prev('div')
                         .find('input[id^="status_"]');                   
@@ -109,9 +109,9 @@
                 
                 $('select[id^="statuses_"]')
                   .on('change', function() {//Difficult DOM jQuery navigation in modals.                  
-                  var theVal = $(this).find('option:selected').attr('value');
-                  var index = getId($(this).attr('id'));
-                  var statusDiv = $(this).parent('div').parent('div').next('div');
+                  let theVal = $(this).find('option:selected').attr('value');
+                  let index = getId($(this).attr('id'));
+                  let statusDiv = $(this).parent('div').parent('div').next('div');
 
                   ($(this)
                     .parent('div')
@@ -120,12 +120,12 @@
                     .val(theVal);
                   
                   if(theVal == x.SUPP_START_DELIVERY) {
-                    var amount = $('#price_'+index).val();
+                    let amount = $('#price_'+index).val();
                     
                     statusDiv.append('<button type="button" style="float: left; position: center" title="Pay ' + amount + '" class="btn btn-primary" id="purchase_'+index+'">Go to Purchase</button>');
                   } else {
                     statusDiv.find('button[id^="purchase"]').remove();
-                    $('#cartList_'+index).find('li').css({"title": "Already ordered!", "border": "2px"});
+                    $('#grid_'+index).find('tr:not(:first)').css({"title": "Already ordered!", "border": "2px solid gray", background-color: 'teal'});
                   }
                   
                   statusDiv
@@ -232,33 +232,7 @@
                       %>
                     <Code>The product prices are expressed in your currency.<br></Code>
                     <label>Products / Services Ordered:</label>      
-                    <ul id="cartList_<%= i %>" class="list-group">
-                      <% let h = 0; if (products != null) { %> 
-                        <li class='list-group-item' style='color: brown'>
-                        <span class='cnt'>#</span>
-                        <span class='product0'>Name</span>
-                        <span class='buttonsWrapper'>Buttons</span>
-                        <span class='imageWrapper'>Images</span>
-                        <span class='priceWrapper'>Total</span>
-                        <span class='amountWrapper'>Count</span>
-                        <span class='basicPriceWrapper'>Price</span></span>
-                      </li>
-                      <% for (h in products) { %>
-                      <li class='list-group-item'>
-                        <span class='cnt'><%= parseInt(h)+1 %></span>
-                        <span class='product'><%= products[h] %></span>
-                        <span class='buttonsWrapper'><span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span></span>
-                        <span class='imageWrapper'><span class='uploadImage'>Upload Image</span>  <span class='productImage' title="Product Image"> 
-                          <% if(images[h].length > 0) { %>
-                          <img src="<%= path + '../' + images[h].substring(7) %>" style="height: 25px; width: 30px" onclick="window.open(this.src)">
-                          <% } %>
-                          </span>
-                        </span>
-                        <span class='priceWrapper'><span class='totalPrice'><%= parseFloat(parseInt(amounts[h])*parseFloat(prices[h])).toFixed(2) %></span> <%= bid.buyerCurrency %></span>
-                        <span class='amountWrapper'><span class='amount'><%= amounts[h] %></span> items </span>
-                        <span class='basicPriceWrapper'><span class='price'><%= parseFloat(prices[h]).toFixed(2) %></span> <span class='currency'><%= bid.buyerCurrency %></span></span>
-                      </li>
-                      <% } }%>
+                    <ul id="cartList_<%= i %>" class="list-group">                    
                     </ul>
                   </div>
                    <div id="jqDiv_<%= i %>" class="form-group">
@@ -372,32 +346,30 @@
                     <button style="float: right" class="btn btn-primary" title="Update status/Send message" disabled type="submit" id="updateBidStatus_<%= i %>">Update Status & Send Message
                     </button>
                     <script type="text/javascript">
-                      var index = "<%= i %>";
-                      
-                      var data = [];                     
-                      $('#cartList_'+index).find('li').not(':first').each(function(i, e) {
-                        var src = $(this).find('.productImage img').length?
-                            $(this).find('.productImage img').attr('src') : null;
-
+                      let index = "<%= i %>";                 
+                      let data = [];
+                          
+                      <% let h = 0; if (products != null) { for( h in products) { %>                       
                         data.push({
-                          name: $(this).find('.product').text(),
-                          supplierName: "<%= bid.supplierName %>",
-                          price: $(this).find('.price').text() + ' ' + $(this).find('.currency').text(),
-                          hiddenPrice: $(this).find('.price').text(),
-                          hiddenTotalPrice: $(this).find('.totalPrice').text(),
-                          hiddenCurrency: $(this).find('.currency').text(),
-                          productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '',
+                          name: '<%= products[h] %>',
+                          supplierName: "<%= bid.supplierName %>",                          
+                          hiddenPrice: '<%= parseFloat(prices[h]).toFixed(2) %>',
+                          hiddenTotalPrice: '<%= parseFloat(parseInt(amounts[h])*parseFloat(prices[h])).toFixed(2) %>',
+                          hiddenCurrency: '<%= bid.buyerCurrency %>',
+                          productImageSource: <% if(images[h].length > 0) { %>
+                            "<%= path + '../' + images[h].substring(7) %>"
+                          <% } else { %>
+                            ''
+                          <% } %>,
                           supplierId: "<%= bid.supplier %>",
-                          productId: null,,
+                          productId: '<%= products[h]._id %>',
                           supplierCurrency: "<%= bid.supplierCurrency %>",
-                          hiddenAmount: parseInt($(this).find('.amount').text())
-                        });
-                      });             
-
+                          hiddenAmount: '<%= parseInt(amounts[h]) %>'
+                        });                      
+                      <% } } %>
+                      
                       initGrid(productColModel, data, "#grid_"+index, '#prodPager_'+index, "name", 'Products List', 1000);
                       $('#mainForm_'+index).submit(function(e) {
-                        //e.preventDefault();
-                        
                         if(!($(this).find('textarea[name="specialMentions"]').text()) 
                            && !confirm('Are you sure you want to update Bid Status without any mentions for the Supplier ' + $(this).find('input[name="supplierName"]').val() + '?')) {
                           return false;
@@ -409,14 +381,14 @@
                         $('#updateBidStatus_'+getId($(this).attr('id'))).prop('disabled', false);
                       });
                       
-                      var x = JSON.parse($('[id^="statusJsonValues_"]').first().val());
-                      var stripePublicKey = "<%= stripePublicKey %>";
-                      var status = $('#status_'+index).val();
+                      let x = JSON.parse($('[id^="statusJsonValues_"]').first().val());
+                      let stripePublicKey = "<%= stripePublicKey %>";
+                      let status = $('#status_'+index).val();
                       
                       if($('#status_'+index).val() == x.SUPP_STARTED_DELIVERY) {//Ready to pay -> STRIPE in action!
-                        var amount = $('#price_'+index).val();//Not to be confused with the number of items!
-                        var currency = $('#currency_'+index).val();
-                        var balance = $('#balance').val();
+                        let amount = $('#price_'+index).val();//Not to be confused with the number of items!
+                        let currency = $('#currency_'+index).val();
+                        let balance = $('#balance').val();
                         if(amount > balance) {
                           //alert('Your current balance is not enough for completing this purchase. Please add some more funds to your account.');
                           Swal.fire({
@@ -428,18 +400,18 @@
                           return false;
                         }
                         
-                        var newBalance = balance - amount;                        
-                        var from = "<%= bid.supplierName %>",
+                        let newBalance = balance - amount;                        
+                        let from = "<%= bid.supplierName %>",
                         to = "<%= bid.buyerName %>",
                         desc = "<%= bid.requestName %>",
                         emailAddress = "<%= bid.buyerEmail %>";
-                        var that = index;
+                        let that = index;
                         
                         $('#message_'+index)
                           .parent('div')
                           .append('<button type="button" style="float: left" title="Pay ' + amount + '" class="btn btn-primary" id="purchase_'+index+'">Purchase</button>');
 						  
-						              var stripeHandler = StripeCheckout.configure({
+						              let stripeHandler = StripeCheckout.configure({
                             key: stripePublicKey,
                             locale: 'en',
                             token: function(token) {
@@ -468,7 +440,7 @@
                                   $('#purchase_'+that).remove();
                                   $('#status_'+that).val(x.PAYMENT_DELIVERY_DONE);
                                   $('#statuses_'+that).find('option:eq('+x.PAYMENT_DELIVERY_DONE+')').prop('selected', true);
-                                  $('#cartList_'+that).find('li').css({"title": "Already ordered!", "border": "2px"});
+                                  $('#grid_'+that).find('tr:not(:first)').css({"title": "Already ordered!", "border": "2px solid gray", background-color: 'teal'});
                                 });
                               }
                             });
@@ -487,7 +459,7 @@
                       } else {
                         $('#purchase_'+index).remove();
                         if(status >= x.PAYMENT_DELIVERY_DONE) {//Beyond the purchase phase.
-                          $('#cartList_'+index).find('li').css({"title": "Already ordered!", "border": "2px"});//Mark them!
+                          $('#grid_'+index).find('tr:not(:first)').css({"title": "Already ordered!", "border": "2px solid gray", background-color: 'teal'});//Mark them!
                         }
                       }
                     </script>

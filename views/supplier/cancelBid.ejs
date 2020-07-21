@@ -26,7 +26,7 @@
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
     
     $('#cancelForm').submit(function(e) {
-      var radio = $(this).find('input[type="radio"]:checked');
+      let radio = $(this).find('input[type="radio"]:checked');
       radio.attr('name', 'reasonTitle');
       });
     });

@@ -52,11 +52,11 @@ async function removeSupervisor(id, req, res, db, isBan) {
 
 
 const removeAssociatedBuyerBids = async (req, res, dbo, id) => {
-  var promise = BidRequest.find( { buyer: id } ).exec();
+  let promise = BidRequest.find( { buyer: id } ).exec();
   await promise.then(async (bids) => {
-    var complexReason = 'The Buyer deleted their account. More details:\n' + req.body.reason;
+    let complexReason = 'The Buyer deleted their account. More details:\n' + req.body.reason;
 
-    for(var bid of bids) {//One by one.
+    for(let bid of bids) {//One by one.
       try {
         await dbo.collection('cancelreasons').insertOne( {
           title: 'Bid Cancellation',
@@ -85,11 +85,11 @@ const removeAssociatedBuyerBids = async (req, res, dbo, id) => {
 
 
 const removeAssociatedSuppBids = async (req, res, dbo, id) => {
-  var promise = BidRequest.find( { supplier: id } ).exec();
+  let promise = BidRequest.find( { supplier: id } ).exec();
   await promise.then(async (bids) => {
-    var complexReason = 'The Supplier deleted their account. More details:\n' + req.body.reason;
+    let complexReason = 'The Supplier deleted their account. More details:\n' + req.body.reason;
 
-    for(var bid of bids) {//One by one.          
+    for(let bid of bids) {//One by one.          
       try {
         await dbo.collection('cancelreasons').insertOne( {
           title: 'Account Deletion',//req.body.reasonTitle,
@@ -120,9 +120,9 @@ const removeAssociatedSuppBids = async (req, res, dbo, id) => {
 
 
 async function removeAssociatedBuyerBidsSuperDel(req, res, req2, dbo, id) {
-  var promise = BidRequest.find( { buyer: id } ).exec();
+  let promise = BidRequest.find( { buyer: id } ).exec();
   await promise.then(async (bids) => {   
-    for(var bid of bids) {//One by one.
+    for(let bid of bids) {//One by one.
       try {
         await dbo.collection('cancelreasons').insertOne( {
           title: 'User Cancellation',
@@ -153,7 +153,7 @@ async function removeAssociatedBuyerBidsSuperDel(req, res, req2, dbo, id) {
 const buyerDelete = (req, res, id, isBan) => {  
   try {    
     MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-      var dbo = db.db(BASE);
+      let dbo = db.db(BASE);
       //A Reason why the User is deleted.
       try {
         await dbo.collection('cancelreasons').insertOne( {
@@ -224,7 +224,7 @@ const supervisorDelete = (req, res, id, uniteID, isBan) => {
   try {
     //Find Supervisor's Buyers first:
     MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-      var dbo = db.db(BASE);
+      let dbo = db.db(BASE);
       
       try {
         await dbo.collection('cancelreasons').insertOne( {
@@ -245,15 +245,15 @@ const supervisorDelete = (req, res, id, uniteID, isBan) => {
         if(!buyers || !buyers.length) {//No buyer data, let's directly pass to Supervisor.
           await removeSupervisor(id, req, res, db, isBan);
         } else {
-          var len = buyers.length;
-          var complexReason = 'Buyer\'s account was deleted because their Supervisor ' 
+          let len = buyers.length;
+          let complexReason = 'Buyer\'s account was deleted because their Supervisor ' 
           + (isBan? 'was banned.' : 'did the same.') 
           + ' Please see more details on the Supervisor:\n' + req.body.reason;
           
           //Delete buyers data one by one:
-          for(var i in buyers) {
-            var theId = buyers[i]._id;
-            var req2 = { body: { reason: complexReason, emailAddress : buyers[i].emailAddress, organizationName : buyers[i].organizationName } };
+          for(let i in buyers) {
+            let theId = buyers[i]._id;
+            let req2 = { body: { reason: complexReason, emailAddress : buyers[i].emailAddress, organizationName : buyers[i].organizationName } };
             
             //Bids:
             await removeAssociatedBuyerBidsSuperDel(req, res, req2, dbo, theId);          
@@ -291,7 +291,7 @@ const supplierDelete = (req, res, id, isBan) => {
   try {
     //Delete Supplier's Capabilities first:
     MongoClient.connect(URL, { useUnifiedTopology: true }, async function(err, db) {
-      var dbo = db.db(BASE);
+      let dbo = db.db(BASE);
       
       try{
         await dbo.collection('cancelreasons').insertOne( {

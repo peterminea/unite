@@ -27,7 +27,7 @@ const URL = process.env.MONGODB_URI,
   BASE = process.env.BASE;
 const treatError = require("../middleware/treatError");
 const search = require("../middleware/searchFlash");
-var Recaptcha = require("express-recaptcha").RecaptchaV2;
+let Recaptcha = require("express-recaptcha").RecaptchaV2;
 
 const {
   fileExists,
@@ -63,7 +63,7 @@ const internalIp = require('internal-ip');
 const { verifyBanNewUser, verifyBanExistingUser } = require('../middleware/verifyBanned');
 
 
-var fx = require("money"),
+let fx = require("money"),
   initConversions = require("../middleware/exchangeRates");
 
 const TYPE = process.env.USER_BUYER;
@@ -79,18 +79,18 @@ exports.getIndex = async (req, res) => {
       catch {
       }
     
-    var promise = BidRequest.find({
+    let promise = BidRequest.find({
       buyer: req.session.buyer._id
     }).exec();
 
     promise.then((bids) => {
-      var success = search(req.session.flash, "success"),
+      let success = search(req.session.flash, "success"),
         error = search(req.session.flash, "error");
       req.session.flash = [];
       
       Capability.find({}).then((caps) => {
-        var cap = [];
-        for(var i in caps) {
+        let cap = [];
+        for(let i in caps) {
           cap.push({
             id: i,
             name: caps[i].capabilityDescription
@@ -102,17 +102,17 @@ exports.getIndex = async (req, res) => {
         });        
         
         setTimeout(function() {
-          var totalBidsPrice = 0;      
+          let totalBidsPrice = 0;      
 
           if (bids && bids.length && fx) {
-            for (var i in bids) {
+            for (let i in bids) {
               totalBidsPrice += fx(parseFloat(bids[i].buyerPrice).toFixed(2))
                 .from(bids[i].supplierCurrency)
                 .to(process.env.BID_DEFAULT_CURR);          
             }
           }
           
-          var buyer = req.session.buyer;
+          let buyer = req.session.buyer;
           
           if(buyer.avatar && buyer.avatar.length && !fileExists('public/' + buyer.avatar.substring(3))) {
             buyer.avatar = '';
@@ -138,12 +138,12 @@ exports.getIndex = async (req, res) => {
 
 
 function prepareBidData(req) {
-  var productList = prel(req.body.productList);
-  var amountList = prel(req.body.amountList, false, true);
-  var priceList = prel(req.body.priceList, true, false);
-  var priceOriginalList = prel(req.body.priceOriginalList, true, false);
-  var imagesList = req.body.productImagesList? prel(req.body.productImagesList) : [];
-  var suppCurrListProd = (req.body.supplierCurrenciesListProd)?
+  let productList = prel(req.body.productList);
+  let amountList = prel(req.body.amountList, false, true);
+  let priceList = prel(req.body.priceList, true, false);
+  let priceOriginalList = prel(req.body.priceOriginalList, true, false);
+  let imagesList = req.body.productImagesList? prel(req.body.productImagesList) : [];
+  let suppCurrListProd = (req.body.supplierCurrenciesListProd)?
                           prel(req.body.supplierCurrenciesListProd) : [];
   
   sortLists(productList, amountList, priceList, imagesList, suppCurrListProd);
@@ -151,9 +151,9 @@ function prepareBidData(req) {
     suppCurrListProd.push(req.body.supplierCurrency);
   }
 
-  var products = [];
+  let products = [];
 
-  for (var i in productList) {
+  for (let i in productList) {
     products.push(
       "Product name: '" +
         productList[i] +
@@ -181,7 +181,7 @@ function prepareBidData(req) {
 
 function isPresent(elem, array) {
   if(array.length)
-  for(var i in array) {
+  for(let i in array) {
     if(elem == array[i])
       return true;
   }
@@ -191,20 +191,20 @@ function isPresent(elem, array) {
 
 
 function arrangeMultiData(t, suppIds) {
-  var productLists = [], amountLists = [], productImagesLists = [], priceLists = [], priceOriginalLists = [], productDetailsLists = [];
-  var uniqueSuppIds = [];
-  var app = [];
+  let productLists = [], amountLists = [], productImagesLists = [], priceLists = [], priceOriginalLists = [], productDetailsLists = [];
+  let uniqueSuppIds = [];
+  let app = [];
   
-  for(var i in suppIds) {//0, 1, 2, 3, 4 - 0=2=4, 1=3.
+  for(let i in suppIds) {//0, 1, 2, 3, 4 - 0=2=4, 1=3.
     //i=0, app=[]
     //i=1, app=024
     //i=2, app=02413
     //i=3, app=02413
     //i=4, app=02413
-    var productList = [], amountList = [], productImagesList = [], priceList = [], priceOriginalList = [], productDetailsList = [];
+    let productList = [], amountList = [], productImagesList = [], priceList = [], priceOriginalList = [], productDetailsList = [];
     
     if(!isPresent(suppIds[i], app)) {
-      for(var j in suppIds) {//0: 0, 2, 4.
+      for(let j in suppIds) {//0: 0, 2, 4.
         if(suppIds[i] == suppIds[j]) {
           app.push(suppIds[j]);
           productList.push(t.productList[j]);
@@ -249,7 +249,7 @@ exports.postIndex = (req, res) => {
     const key = req.body.capabilityInput;
 
     Supplier.find({}, (err, suppliers) => {
-      if (treatError(req, res, err, "buyer/index")) return false;
+      if (treatError(req, res, err, "buyer")) return false;
 
       const suppliers2 = [];
       for (const supplier of suppliers) {
@@ -262,23 +262,23 @@ exports.postIndex = (req, res) => {
         }
       }
 
-      var promise = BidStatus.find({}).exec();
+      let promise = BidStatus.find({}).exec();
       promise.then((statuses) => {
-        var promise2 = BidRequest.find({
+        let promise2 = BidRequest.find({
           buyer: req.session.buyer ? req.session.buyer._id : null
         }).exec();
 
         promise2.then((bids) => {
-          var totalBidsPrice = 0;
+          let totalBidsPrice = 0;
           if (bids && bids.length) {
-            for (var i in bids) {
+            for (let i in bids) {
               totalBidsPrice += fx(parseFloat(bids[i].buyerPrice).toFixed(2))
                 .from(bids[i].supplierCurrency)
                 .to(process.env.BID_DEFAULT_CURR);
             }
           }
 
-          var success = search(req.session.flash, "success"),
+          let success = search(req.session.flash, "success"),
             error = search(req.session.flash, "error");
           req.session.flash = [];
           res.render("buyer/index", {
@@ -298,11 +298,12 @@ exports.postIndex = (req, res) => {
       });
     });
   } else if (req.body.itemDescription) {
+    console.log(req.body.preferredDeliveryDate);
     //New Bid Request placed.    
-    var suppIds = req.body.supplierIdsList? prel(req.body.supplierIdsList) : [];//Multi or not.
+    let suppIds = req.body.supplierIdsList? prel(req.body.supplierIdsList) : [];//Multi or not.
     console.log(suppIds.length);
-    var t = prepareBidData(req), names, emails, suppCurrencies, suppCurrenciesByProd, totalPricesList;
-    console.log('BOMBAMBIN');
+    let t = prepareBidData(req), names, emails, suppCurrencies, suppCurrenciesByProd, totalPricesList;
+    
     if(req.body.supplierId) {//Not Multi.
       suppIds.push(req.body.supplierId)
     } else {
@@ -310,20 +311,22 @@ exports.postIndex = (req, res) => {
       emails = req.body.supplierEmailsList? prel(req.body.supplierEmailsList) : [];
       suppCurrencies = req.body.supplierCurrenciesList? prel(req.body.supplierCurrenciesList) : [];//currencies
       totalPricesList = req.body.supplierTotalPricesList? prel(req.body.supplierTotalPricesList, true) : [];
-      console.log(1992);
+      
       t = arrangeMultiData(t, suppIds);
       suppIds = suppIds.filter((v, i, a) => a.indexOf(v) === i);
       //suppIds = t.uniqueSuppIds;
     };   
    
     //Supplier's name, e-mail, currency, total price to be saved as lists in PlaceBid in case of Multi.
-    var backPath = '../../../../../../../';
-    var asyncCounter = 0;
-    console.log(suppIds.length);
-     for(var i = 0; i < suppIds.length; i++) {
-       var buyerPrice = !(t.uniqueSuppIds)? req.body.buyerPrice :fx(parseFloat(totalPricesList[i]).toFixed(2))
+    let backPath = '../../../../../../../';
+    let asyncCounter = 0;
+    
+     for(let i = 0; i < suppIds.length; i++) {
+       let buyerPrice = !(t.uniqueSuppIds)? req.body.buyerPrice :fx(parseFloat(totalPricesList[i]).toFixed(2))
                 .from(suppCurrencies[i])
                 .to(req.body.buyerCurrency);
+       
+       console.log(req.body.supplierPrice);
        
       const bidRequest = new BidRequest({
         requestName: req.body.requestName,
@@ -386,30 +389,30 @@ exports.postIndex = (req, res) => {
         .save()
         .then((err, result) => {
           if(++asyncCounter == suppIds.length) {
-            if(treatError(req, res, err, "../../buyer/index")) 
+            if(treatError(req, res, err, "../../buyer")) 
               return false;
             
-            req.flash("success", "Bid requested successfully!");
-             return res.redirect("../../buyer/index"); 
-          }          
+             req.flash("success", "Bid requested successfully!");
+             return res.redirect("../../buyer"); 
+          }
       })
       .catch(console.error);
     }
   } else if(req.body.bidProductList) {//Place bid on one or more products (+ 1 or more suppliers) from the Product Catalog grid.
-      var buyerId = req.body.buyerId, productIds = req.body.bidProductList, supplierIds = req.body.bidSupplierList;
-      var productList = prel(productIds);
-      var supplierList = prel(supplierIds);
-      var prodIDs = [], suppIDs = [];
+      let buyerId = req.body.buyerId, productIds = req.body.bidProductList, supplierIds = req.body.bidSupplierList;
+      let productList = prel(productIds);
+      let supplierList = prel(supplierIds);
+      let prodIDs = [], suppIDs = [];
 
-      for(var i in productList) {
+      for(let i in productList) {
         prodIDs.push(new ObjectId(productList[i]));
       }
 
-      for(var i in supplierList) {
+      for(let i in supplierList) {
         suppIDs.push(new ObjectId(supplierList[i]));
       }
     
-    var uniqueSupplierIds = suppIDs.filter((v, i, a) => a.indexOf(v) === i);
+    let uniqueSupplierIds = suppIDs.filter((v, i, a) => a.indexOf(v) === i);
     
   // { $in : [1,2,3,4] }
   //Or array
@@ -431,22 +434,23 @@ exports.postIndex = (req, res) => {
           return res.redirect('back');
         }
         
-        var promise = BidStatus.find({}).exec();
+        let promise = BidStatus.find({}).exec();
         promise.then((statuses) => {
-          var products = [], supps = [];
+          let products = [], supps = [];
           
-          for(var i in prods) {
+          for(let i in prods) {
             products.push(prods[i]);
           }
           
-          for(var i in sups) {
+          for(let i in sups) {
             supps.push(sups[i]);  
           }
           
-          var success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
+          let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
           req.session.flash = [];
-          var isMultiProd = prodIDs.length > 1;
-          var isMultiSupp = uniqueSupplierIds.length > 1;
+          let isMultiProd = prodIDs.length > 1;
+          let isMultiSupp = uniqueSupplierIds.length > 1;
+          console.log(!isMultiSupp);
 
           res.render("buyer/placeBid", {
             successMessage: success,
@@ -478,7 +482,11 @@ exports.postIndex = (req, res) => {
 
 
 exports.getPlaceBid = (req, res) => {
-  var buyerId = new ObjectId(req.params.buyerId), productId = new ObjectId(req.params.productId), supplierId = new ObjectId(req.params.supplierId);
+  console.log(req.params.buyerId)
+  console.log(req.params.productId)
+  console.log(req.params.supplierId)  
+  
+  let buyerId = (req.params.buyerId), productId = (req.params.productId), supplierId = (req.params.supplierId);
   // { $in : [1,2,3,4] }
   //Or array
   Buyer.find({ _id: new ObjectId(buyerId) }).then((buyer) => {
@@ -499,10 +507,10 @@ exports.getPlaceBid = (req, res) => {
           return res.redirect('back');
         }
         
-        var promise = BidStatus.find({}).exec();
+        let promise = BidStatus.find({}).exec();
         promise.then((statuses) => {          
-          var success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
-          req.session.flash = [];
+          let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
+          req.session.flash = [];          
 
           res.render("buyer/placeBid", {
             successMessage: success,
@@ -529,7 +537,8 @@ exports.getPlaceBid = (req, res) => {
 
 
 exports.postPlaceBid = async (req, res) => {
-  var t = prepareBidData(req);
+  console.log(req.body.supplierCurrency);
+  let t = prepareBidData(req);
   
   //Supplier's name, e-mail, currency, total price to be saved as lists in PlaceBid in case of Multi.
   const bidRequest = new BidRequest({
@@ -592,10 +601,12 @@ exports.postPlaceBid = async (req, res) => {
   return bidRequest
     .save()
     .then((err, result) => {
-      if(treatError(req, res, err, "buyer/index")) 
-        return false;
+    let path = '../../../../../';
+      if(treatError(req, res, err, path+"buyer")) 
+        return false;    
+    
       req.flash("success", "Bid requested successfully!");
-      return res.redirect("/buyer/index");
+      return res.redirect(path+"/buyer");
     })
     .catch(console.error);
 }
@@ -606,8 +617,8 @@ exports.getBidsCatalog = (req, res) => {
     if (treatError(req, res, err, "back")) 
       return false;
 
-    var dbo = db.db(BASE);
-    var query = { buyer: new ObjectId(req.params.buyerId) };
+    let dbo = db.db(BASE);
+    let query = { buyer: new ObjectId(req.params.buyerId) };
     dbo
       .collection("bidrequests")
       .find(query)
@@ -624,7 +635,7 @@ exports.getBidsCatalog = (req, res) => {
           return a.requestName.localeCompare(b.requestName);
         });
       
-        var success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
+        let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
         req.session.flash = [];
 
         res.render("buyer/bidsCatalog", {
@@ -639,7 +650,7 @@ exports.getBidsCatalog = (req, res) => {
 
 exports.getChatLogin = (req, res) => {
   //We need a username, a room name, and a socket-based ID.
-  var success = search(req.session.flash, "success"),
+  let success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
   req.session.flash = [];
 
@@ -657,7 +668,7 @@ exports.getChatLogin = (req, res) => {
 
 exports.getChat = (req, res) => {
   //Coming from the getLogin above.
-  var success = search(req.session.flash, "success"),
+  let success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
   req.session.flash = [];
 
@@ -676,20 +687,20 @@ exports.getChat = (req, res) => {
 };
 
 exports.getViewBids = (req, res) => {
-  var promise = BidRequest.find({
+  let promise = BidRequest.find({
     supplier: req.params.supplierId,
     buyer: req.params.buyerId
   }).exec();
 
   promise.then(async (bids) => {
     //Verify bids:
-    var validBids = [],
+    let validBids = [],
       cancelledBids = [],
       expiredBids = [];
     if (bids && bids.length) {
-      for (var i in bids) {
-        var date = Date.now();
-        var bidDate = bids[i].expiryDate;
+      for (let i in bids) {
+        let date = Date.now();
+        let bidDate = bids[i].expiryDate;
         bidDate > date
           ? bids[i].isCancelled == true
             ? cancelledBids.push(bids[i])
@@ -700,12 +711,12 @@ exports.getViewBids = (req, res) => {
 
     await sendExpiredBidEmails(req, res, expiredBids);
     await initConversions(fx);
-    var totalPrice = 0,
+    let totalPrice = 0,
       validPrice = 0,
       cancelledPrice = 0,
       expiredPrice = 0;
 
-    for (var i in validBids) {
+    for (let i in validBids) {
       //validPrice += fx(parseFloat(validBids[i].price)).from(validBids[i].supplierCurrency).to(req.params.currency);
       if(validBids[i].expirationDate <= Date.now() + process.env.DAYS_BEFORE_BID_EXPIRES * process.env.DAY_DURATION) {
         validBids[i].warningExpiration = true;
@@ -718,19 +729,19 @@ exports.getViewBids = (req, res) => {
 
     totalPrice = parseFloat(validPrice);
 
-    for (var i in cancelledBids) {
+    for (let i in cancelledBids) {
       cancelledPrice += parseFloat(cancelledBids[i].buyerPrice);
     }
 
     totalPrice += parseFloat(cancelledPrice);
 
-    for (var i in expiredBids) {
+    for (let i in expiredBids) {
       expiredPrice += parseFloat(expiredBids[i].buyerPrice);
     }
 
     totalPrice += parseFloat(expiredPrice);
 
-    var success = search(req.session.flash, "success"),
+    let success = search(req.session.flash, "success"),
       error = search(req.session.flash, "error");
     req.session.flash = [];
 
@@ -764,7 +775,7 @@ exports.postViewBids = (req, res) => {
 };
 
 exports.getCancelBid = (req, res) => {
-  var success = search(req.session.flash, "success"),
+  let success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
   req.session.flash = [];
 
@@ -788,7 +799,7 @@ exports.postCancelBid = (req, res) => {
       db
     ) {
       if (treatError(req, res, err, "back")) return false;
-      var dbo = db.db(BASE);
+      let dbo = db.db(BASE);
 
       try {
         await dbo.collection("cancelreasons").insertOne(
@@ -849,7 +860,7 @@ exports.getConfirmation = (req, res) => {
       req.params && req.params.token ? req.params.token._userId : null;
   }
 
-  var success = search(req.session.flash, "success"),
+  let success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
   req.session.flash = [];
 
@@ -861,7 +872,7 @@ exports.getConfirmation = (req, res) => {
 };
 
 exports.getDelete = (req, res) => {
-  var success = search(req.session.flash, "success"),
+  let success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
   req.session.flash = [];
 
@@ -874,7 +885,7 @@ exports.getDelete = (req, res) => {
 };
 
 exports.getDeactivate = (req, res) => {
-  var success = search(req.session.flash, "success"),
+  let success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
   req.session.flash = [];
 
@@ -886,7 +897,7 @@ exports.getDeactivate = (req, res) => {
 };
 
 exports.getResendToken = (req, res) => {
-  var success = search(req.session.flash, "success"),
+  let success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
   req.session.flash = [];
 
@@ -897,19 +908,19 @@ exports.getResendToken = (req, res) => {
 };
 
 exports.postDelete = async function(req, res, next) {
-  var id = req.body.id;
+  let id = req.body.id;
   buyerDelete(req, res, id);
 };
 
 exports.postDeactivate = async function(req, res, next) {
-  var id = req.body.id;
+  let id = req.body.id;
   try {
     //Firstly, a Reason why deactivating the account:
     MongoClient.connect(URL, { useUnifiedTopology: true }, async function(
       err,
       db
     ) {
-      var dbo = db.db(BASE);
+      let dbo = db.db(BASE);
 
       //Delete Buyer's Bid Requests first:
       await removeAssociatedBuyerBids(req, dbo, id);
@@ -979,7 +990,7 @@ exports.postConfirmation = async function(req, res, next) {
             async function(err, db) {
               if (treatError(req, res, err, "back")) return false;
 
-              var dbo = db.db(BASE);
+              let dbo = db.db(BASE);
               await dbo
                 .collection("buyers")
                 .updateOne(
@@ -1016,7 +1027,7 @@ exports.postResendToken = function(req, res, next) {
     req.assert('emailAddress', 'Email is not valid').isEmail();
     req.assert('emailAddress', 'Email cannot be blank').notEmpty();
     req.sanitize('emailAddress').normalizeEmail({ remove_dots: false });   
-    var errors = req.validationErrors();
+    let errors = req.validationErrors();
     if (errors) return res.status(400).send(errors);*/
 
   Buyer.findOne({ emailAddress: req.body.emailAddress }, function(err, user) {
@@ -1031,7 +1042,7 @@ exports.postResendToken = function(req, res, next) {
           msg: "This account has already been verified. Please log in."
         });
 
-    var token = new Token({
+    let token = new Token({
       _userId: user._id,
       userType: TYPE,
       token: crypto.randomBytes(16).toString("hex")
@@ -1056,7 +1067,7 @@ exports.postResendToken = function(req, res, next) {
 };
 
 exports.getSignIn = (req, res) => {
-  var success = search(req.session.flash, "success"),
+  let success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
   req.session.flash = [];
 console.log('STB')
@@ -1070,23 +1081,23 @@ console.log('STB')
 };
 
 exports.getSignUp = (req, res) => {
-  var success = search(req.session.flash, "success"),
+  let success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
   req.session.flash = [];
   
   if (!req.session.buyerId) {
     Country.find({}).then((countries) => {
-        var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+        let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
         req.session.flash = [];
 
-        var country = [];
-        for(var i in countries) {
+        let country = [];
+        for(let i in countries) {
           country.push({id: i, name: countries[i].name});
         }
       
       Supervisor.find({}, { organizationUniteID: 1 }).then((ids) => {
-        var uniteIds = [];
-        for(var i in ids) {
+        let uniteIds = [];
+        for(let i in ids) {
           uniteIds.push({
             id: i,
             name: ids[i].organizationUniteID
@@ -1120,7 +1131,7 @@ exports.getBalance = (req, res) => {
 };
 
 exports.getForgotPassword = (req, res) => {
-  var success = search(req.session.flash, "success"),
+  let success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
   req.session.flash = [];
 
@@ -1136,7 +1147,7 @@ exports.postForgotPassword = (req, res, next) => {
     [
       function(done) {
         crypto.randomBytes(20, function(err, buf) {
-          var token = buf.toString("hex");
+          let token = buf.toString("hex");
           done(err, token);
         });
       },
@@ -1159,7 +1170,7 @@ exports.postForgotPassword = (req, res, next) => {
           ) {
             if (treatError(req, res, err, "back")) return false;
 
-            var dbo = db.db(BASE);
+            let dbo = db.db(BASE);
             dbo
               .collection("buyers")
               .updateOne(
@@ -1210,7 +1221,7 @@ exports.getResetPasswordToken = (req, res) => {
         return res.redirect("/forgotPassword");
       }
 
-      var success = search(req.session.flash, "success"),
+      let success = search(req.session.flash, "success"),
         error = search(req.session.flash, "error");
       req.session.flash = [];
 
@@ -1249,7 +1260,7 @@ exports.postResetPasswordToken = (req, res) => {
                 if (treatError(req, res, err, "back")) 
                   return false;
                 
-                var dbo = db.db(BASE);
+                let dbo = db.db(BASE);
                 let hash = bcrypt.hashSync(req.body.password, 16);
                 
                 dbo
@@ -1293,7 +1304,7 @@ exports.postSignIn = (req, res) => {
 
 let global = 0;
 function getSupers(id) {
-  var promise = Supervisor.find({ organizationUniteID: id }).exec();
+  let promise = Supervisor.find({ organizationUniteID: id }).exec();
   return promise;
 }
 
@@ -1317,7 +1328,7 @@ exports.postSignUp = async (req, res) => {
       const email_str_arr = email.split("@");
       const domain_str_location = email_str_arr.length - 1;
       const final_domain = email_str_arr[domain_str_location];
-      var prohibitedArray = [
+      let prohibitedArray = [
         "gmaid.com",
         "hotmaix.com",
         "outloop.com",
@@ -1326,7 +1337,7 @@ exports.postSignUp = async (req, res) => {
         "gmx"
       ];
       
-      for (var i = 0; i < prohibitedArray.length; i++)
+      for (let i = 0; i < prohibitedArray.length; i++)
         if (
           final_domain.toLowerCase().includes(prohibitedArray[i].toLowerCase())
         ) {
@@ -1339,7 +1350,7 @@ exports.postSignUp = async (req, res) => {
             return res.redirect("/buyer/sign-up");
           } else {
             
-            var promise = getSupers(req.body.organizationUniteID);
+            let promise = getSupers(req.body.organizationUniteID);
             promise.then(async function(supers) {
               if (supers && supers.length && !supers[0].isActive) {
                 req.flash(
@@ -1378,7 +1389,7 @@ exports.postSignUp = async (req, res) => {
                             "The e-mail address you have entered is already associated with another account."
                         });
                     
-                    var buyer;
+                    let buyer;
                     
                     try {
                       bcrypt.hash(req.body.password, 16, async function(
@@ -1420,7 +1431,7 @@ exports.postSignUp = async (req, res) => {
                             return false;
                         });
 
-                        var token = new Token({
+                        let token = new Token({
                           _userId: buyer._id,
                           userType: TYPE,
                           token: crypto.randomBytes(16).toString("hex")
@@ -1469,16 +1480,16 @@ exports.postSignUp = async (req, res) => {
 exports.getProfile = (req, res) => {
   if (!req || !req.session) return false;
 
-  var success = search(req.session.flash, "success"),
+  let success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
   req.session.flash = [];
   
   Country.find({}).then((countries) => {
-      var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+      let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
       req.session.flash = [];
 
-      var country = [];
-      for(var i in countries) {
+      let country = [];
+      for(let i in countries) {
         country.push({id: i, name: countries[i].name});
       }
         
@@ -1528,7 +1539,7 @@ exports.postProfile = (req, res) => {
         db
       ) {
         if (treatError(req, res, err, "/buyer/profile")) return false;
-        var dbo = db.db(BASE);
+        let dbo = db.db(BASE);
 
         await dbo
           .collection("buyers")

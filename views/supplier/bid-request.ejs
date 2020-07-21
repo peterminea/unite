@@ -270,9 +270,9 @@
 				</div>
         <input type="hidden" name="requestId" value="<%= request._id %>">
         <script type="text/javascript">          
-          var data = [];          
+          let data = [];          
           $('#productsListUl').find('li').not(':first').each(function(i, e) {
-            var src = $(this).find('.productImage img').length?
+            let src = $(this).find('.productImage img').length?
                 $(this).find('.productImage img').attr('src') : null;
                        
             data.push({
@@ -290,7 +290,7 @@
           });             
 
           initGrid(productColModel, data, "#grid", '#prodPager', "name", 'Products List', 1000);
-          var x = JSON.parse($('#statusJsonValues span').first().text());
+          let x = JSON.parse($('#statusJsonValues span').first().text());
           
            $('#statuses')
             .on('change', function() {
@@ -299,7 +299,7 @@
                    .find('option:selected')
                    .attr('value'));
              
-             var that = $(this);             
+             let that = $(this);             
              if($('#status').val() == x.BUYER_ACCEPT_PRICE) {
                 $('#acceptBid').show();
                 $('#acceptButton').off('click').on('click', function() {

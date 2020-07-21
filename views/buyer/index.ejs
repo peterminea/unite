@@ -31,15 +31,12 @@
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-      var token = $("input[name='_csrf']").val();
+      let token = $("input[name='_csrf']").val();
       getProductsList('.productsList', '/prodServiceAutocomplete', token);
       getAutocomplete('#search', '/capabilityInputAutocomplete', token, true);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>'); 
-      var defaultBidCurrency = '<%= BID_DEFAULT_CURR %>';
-                   
-      setTimeout(function() {
-        getCurrenciesList('select.buyerCurrency', '/currencyAutocomplete', token, defaultBidCurrency);//Preferred currency for Buyer.
-      }, 1320);
+      let defaultBidCurrency = '<%= BID_DEFAULT_CURR %>';      
+      initBaseRates(fx, 'select.buyerCurrency', '/currencyAutocomplete', token, defaultBidCurrency);//Preferred currency for Buyer.
 
       $('#loadCatalog').on('click', function() {
         if($('div.suppliersLive').length)
@@ -52,7 +49,7 @@
           text: 'Please wait a while until the Catalog of Products is loaded...'
         });
        
-        var that = $(this);
+        let that = $(this);
         
         $.ajax({
           url: '/loadProductsCatalog',
@@ -68,12 +65,12 @@
             }
             
             //jqGrid:            
-            var str = '';
+            let str = '';
             str += '<div id="jqDiv1" class="jqGridProd form-group"><table id="gridProds"></table><div id="prodPager"></div></div>';
             $('div.bodyBuilder').append(str);
             
-            var data2 = [];
-            var colModel = [              
+            let data2 = [];
+            let colModel = [              
               { name: 'productId', hidden: true },
               { name: 'buyerId', hidden: true },
               { name: 'supplierId', hidden: true },
@@ -86,10 +83,10 @@
               { name: 'amount', label: 'Amount', align: 'center', formatter: amountFormatter, unformat: amountUnformatter, sortname: 'hiddenAmount', template: 'number', sorttype: 'number', search: true, width: 140 },
               { name: 'totalPrice', label: 'Total price', align: 'center', template: 'number', sorttype: 'number', formatter: totalPriceFormatter, unformat: totalPriceUnformatter, search: true, width: 90},
               { name: 'image', label: 'Product Image', align: 'center', formatter: productImageFormatter, search: false, sortable: false, width: 90},
-              { name: 'placeBid', label: 'Place Bid', align: 'center', search: false, sortable: false, formatter: linkFormatter, width: 140}
+              { name: 'newBid', label: 'Place Bid', align: 'center', search: false, sortable: false, formatter: linkFormatter, width: 140}
             ];
             
-            for(var i in data) {
+            for(let i in data) {
              data2.push({
                 productId: data[i].productId,
                 buyerId: $('#loadCatalog').attr('buyer'),
@@ -121,7 +118,7 @@
             $('#bidOnProds').click(function(e) {
               e.preventDefault();
               
-              var selIds = $('#gridProds').jqGrid("getGridParam", "selarrrow");
+              let selIds = $('#gridProds').jqGrid("getGridParam", "selarrrow");
               if(!selIds || !selIds.length) {
                 Swal.fire({
                   icon: 'warning',
@@ -132,7 +129,7 @@
                 return false;
               }
               
-              var MAX = parseInt($('#loadCatalog').attr('MAX'));
+              let MAX = parseInt($('#loadCatalog').attr('MAX'));
               
               if(selIds.length > MAX) {
                  Swal.fire({
@@ -142,9 +139,9 @@
                 });
               }
               
-              var prodIds = [], buyerId, suppIds = [];
-              for(var i in selIds) {
-                var data = $('#gridProds').jqGrid('getRowData', selIds[i]);
+              let prodIds = [], buyerId, suppIds = [];
+              for(let i in selIds) {
+                let data = $('#gridProds').jqGrid('getRowData', selIds[i]);
                 if(prodIds.length == 0) 
                   buyerId = data.buyerId;
                 prodIds.push(data.productId);
@@ -610,18 +607,18 @@
                   <input type="hidden" name="supplier" value="<%= supplier._id %>">
                   <script type="text/javascript">
                     function limitStatus(e) {
-                        var ASCIICode = (e.which) ? e.which : e.keyCode;
+                        let ASCIICode = (e.which) ? e.which : e.keyCode;
                         if (ASCIICode > 31 && (ASCIICode < 48 || ASCIICode > 54)) 
                             return false;
                         return true; 
                     }
                     
-                    var index = '_' + "<%= i %>";
-                    var data = []; 
+                    let index = '_' + "<%= i %>";
+                    let data = []; 
                     initGrid(productColModel, data, "#grid"+index, '#prodPager'+index, "name", 'Products List', 1000);
                     
                     setTimeout(function() {
-                      var table = $("#grid"+index);
+                      let table = $("#grid"+index);
                       table.attr('supplierCurrency', "<%= supplier.currency %>");
                     }, 1000);
 
@@ -629,8 +626,8 @@
                         return limitStatus(e);
                     });
                     
-                    var sel = $('#statuses'+index);
-                    var statusVector = [];
+                    let sel = $('#statuses'+index);
+                    let statusVector = [];
                     sel.find('option').each(function(index, element) {
                       statusVector.push($(element).text());
                     });
@@ -640,7 +637,7 @@
                       .prop('selected', true);
                     
                     sel.attr('title', sel.find('option:selected').text());
-                    var x = JSON.parse($('#statusJsonValues'+index+' span:first').text());
+                    let x = JSON.parse($('#statusJsonValues'+index+' span:first').text());
                     
                     $('#status'+index).change(function(e) {//Read-only select, though.
                       if($(this).val() < x.BUYER_REQUESTED_BID
@@ -648,11 +645,11 @@
                         return false;
                       }
                     
-                      var id = '_' + getId($(this).attr('id'));
+                      let id = '_' + getId($(this).attr('id'));
                       if(id.length == 1)
                         id = '';
                       
-                      var statusText = statusVector[parseInt($(this).val())];
+                      let statusText = statusVector[parseInt($(this).val())];
                       if($("#statusText"+id).length)
                         $("#statusText"+id).remove();
                       
@@ -660,18 +657,18 @@
                         .insertAfter($('#status'+id).parent('div'));
                     });
                     
-                    var elem0 = $("#prodServices"+index);
+                    let elem0 = $("#prodServices"+index);
                     $('<a><span style="color: green; cursor: pointer" id="massRemove'+index+'">Remove All Products</span></a><br>').insertBefore(elem0);
                     
                     $('#massRemove'+index).on('click', function() {
-                      var id = getId($(this).attr('id'));
+                      let id = getId($(this).attr('id'));
                       
                       if(id.length)
                         id = '_' + id;
                       removeAllItems(id);
                     });
                     
-                    var suppCurr = '<%= supplier.currency %>';
+                    let suppCurr = '<%= supplier.currency %>';
                     bindAddBid($('button[id="addProdService'+index+'"]'), suppCurr);
                   </script>
                 </div>

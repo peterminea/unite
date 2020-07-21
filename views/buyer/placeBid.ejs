@@ -30,11 +30,10 @@
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function () {
-        var token = $("input[name='_csrf']").val();
+        let token = $("input[name='_csrf']").val();
         errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
-        var defaultBidCurrency = '<%= BID_DEFAULT_CURR %>';
-        $('.select.buyerCurrency').find(`option[value=${defaultBidCurrency}]`).prop('selected', true);                     
-        getCurrenciesList('select.buyerCurrency', '/currencyAutocomplete', token, defaultBidCurrency); 
+        let defaultBidCurrency = '<%= BID_DEFAULT_CURR %>';
+        initBaseRates(fx, 'select.buyerCurrency', '/currencyAutocomplete', token, defaultBidCurrency);
     });
   </script>
   </head>
@@ -73,11 +72,11 @@
             <%  if(isSingleBid == true) { %>
             <div class="form-group">
               <label class="col-form-label">Supplier Company</label>
-              <input type="text" class="form-control" id="supplierName" name="supplierName" value="<%= supplier.companyName %>" disabled>
+              <input type="text" class="form-control" id="supplierName" name="supplierName" value="<%= supplier.companyName %>" readonly>
             </div>
             <div class="form-group">
               <label class="col-form-label">Supplier's E-mail Address*</label>
-              <input type="email" class="form-control" name="supplierEmail" value="<%= supplier.emailAddress %>" disabled>
+              <input type="email" class="form-control" name="supplierEmail" value="<%= supplier.emailAddress %>" readonly>
             </div>
             <input type="hidden" name="supplierId" value="<%= supplier._id %>">
             <% } else if(suppliers.length > 1) { %>
@@ -195,7 +194,7 @@
             <div class="form-group">
               <label>Upload a product image:</label>
               <input type="hidden" class="fileId" name="productImage" value="">
-              <input class="form-control upload productimageupload" type="file" id="productImage" name="products" single>
+              <input class="form-control upload productimageupload multiparam" type="file" id="productImage" name="products" single>
               <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload Product Image" />                    
             </div>
               <ul class="list-group" MAX="<%= MAX_PROD %>" buyerCurrency="<%= buyer.currency %>" id="prodServices">
@@ -266,8 +265,10 @@
             <div class="form-group">
               <label class="col-form-label">Supplier's equivalent total price:</label>
               <span class="form-control hid">
-                <span id="supplierPrice" name="supplierPrice">0</span>
-                <span index="0" class="suppCurrency" id="supplierCurrency" name="supplierCurrency"><%= supplier.currency %></span>
+                <span id="supplierPrice">0</span>
+                <input type="hidden" id="isupplierPrice" name="supplierPrice" value='0'>
+                <span index="0" class="suppCurrency" id="supplierCurrency"><%= supplier.currency %></span>
+                <input type="hidden" name="supplierCurrency" value="<%= supplier.currency %>">
               </span>
             </div>
             <% } else { %>
@@ -317,16 +318,16 @@
             <% } %>
             <script type="text/javascript">
               function limitStatus(e) {
-                  var ASCIICode = (e.which) ? e.which : e.keyCode;
+                  let ASCIICode = (e.which) ? e.which : e.keyCode;
                   if (ASCIICode > 31 && (ASCIICode < 48 || ASCIICode > 54)) 
                       return false;
                   return true; 
               }
 
-              var index = '';
+              let index = '';
              
               <% if(isSingleBid == false) { %>
-              var arr1 = [], arr2 = [], arr3 = [];
+              let arr1 = [], arr2 = [], arr3 = [];
               <% for(supplier of suppliers) { %>                
                 arr1.push('<%= supplier.companyName %>');
                 arr2.push('<%= supplier.emailAddress %>');
@@ -337,12 +338,12 @@
                 $('#supplierCurrenciesList').val(arr3);
               <% } %>
 
-              var data = [];
-              initGrid(productColModel, data, "#grid"+index, '#prodPager'+index, "name", 'Products List', 1000);
+              let data = [];
+              initGrid(productColModel, data, "#grid"+index, '#prodPager'+index, "name", 'Products List', 1080);
               
               <% if(isSingleBid == true) { %>
               setTimeout(function() {
-                var table = $("#jqDiv"+index).find('table').eq(1);                
+                let table = $("#jqDiv"+index).find('table').eq(1);                
                 table.attr('supplierCurrency', "<%= supplier.currency %>");                
               }, 1000);
               <% } %>
@@ -351,8 +352,8 @@
                   return limitStatus(e);
               });
 
-              var sel = $('#statuses'+index);
-              var statusVector = [];
+              let sel = $('#statuses'+index);
+              let statusVector = [];
               sel.find('option').each(function(index, element) {
                 statusVector.push($(element).text());
               });
@@ -376,7 +377,7 @@
                   return false;
                 }
 
-                var statusText = statusVector[parseInt($(this).val())];
+                let statusText = statusVector[parseInt($(this).val())];
                 if($("#statusText").length)
                   $("#statusText").remove();
 
@@ -384,7 +385,7 @@
                   .insertAfter($('#status').parent('div'));
               });
 
-              var elem0 = $("#prodServices"+index);
+              let elem0 = $("#prodServices"+index);
               $('<a><span style="color: green; cursor: pointer" id="massRemove'+index+'">Remove All Products</span></a><br>').insertBefore(elem0);
 
               $('#massRemove'+index).on('click', function() {
