@@ -17,16 +17,25 @@ const BadWords = require('bad-words');
 const search = require('../middleware/searchFlash');
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const fs = require("fs");
-const { getCancelTypesJson } = require('../middleware/templates');
+const { fileExists, getCancelTypesJson } = require('../middleware/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
 const fetch = require('node-fetch');
 
-var userData = require('../middleware/userHome');
+let userData = require('../middleware/userHome');
+
+function checkFile(file) {
+  if(file && file.length && fileExists(file.length)) {
+    return file;
+  }
+  
+  return '';
+}
+
 
 exports.getIndex = (req, res) => {
-  var obj = userData(req);
+  let obj = userData(req);
   
   const { promisify } = require('util'); //<-- Require promisify
   const getIP = promisify(require('external-ip')({
@@ -47,7 +56,7 @@ exports.getIndex = (req, res) => {
     role: obj.role,
     isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
-    avatar: obj.avatar,
+    avatar: checkFile(obj.avatar),
     userName: obj.userName,
     userType: obj.userType
   });
@@ -55,8 +64,8 @@ exports.getIndex = (req, res) => {
 
 
 exports.getDeleteUser = (req, res) => {
-  var obj = userData(req);
-  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  let obj = userData(req);
+  let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   
   res.render("deleteUser", {
@@ -79,8 +88,8 @@ exports.getDeleteUser = (req, res) => {
 
 
 exports.getBanUser = (req, res) => {
-  var obj = userData(req);
-  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  let obj = userData(req);
+  let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   
   res.render("deleteUser", {
@@ -106,16 +115,16 @@ function getFiles(folder) {/*
     });
   });*/
 
-  var t = fs.readdirSync(folder, {withFileTypes: true})
+  let t = fs.readdirSync(folder, {withFileTypes: true})
   .filter(item => !item.isDirectory())
   .map((item) => item.name);
 
-  var fileData = [];
+  let fileData = [];
     t.forEach((file) => {
-      var name = folder+'/'+file;
-      var stats = fs.statSync(name);
-      var fileSizeInBytes = stats["size"];
-      var obj = {
+      let name = folder+'/'+file;
+      let stats = fs.statSync(name);
+      let fileSizeInBytes = stats["size"];
+      let obj = {
         path: name,
         name: file,
         folder: folder,
@@ -130,12 +139,12 @@ function getFiles(folder) {/*
 
 
 exports.getFilesList = async (req, res) => {
-  var obj = userData(req);
-  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  let obj = userData(req);
+  let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = []; 
-  var uploads = await getFiles('public/uploads');
-  var avatars = await getFiles('public/avatars');
-  var files = await getFiles('public/productImages');  
+  let uploads = await getFiles('public/uploads');
+  let avatars = await getFiles('public/avatars');
+  let files = await getFiles('public/productImages');  
 
   res.render("filesList", {
     role: obj.role,
@@ -146,7 +155,7 @@ exports.getFilesList = async (req, res) => {
     uploads: uploads,
     avatars: avatars,
     userId: obj.userId,
-    avatar: obj.avatar,
+    avatar: checkFile(obj.avatar),
     userName: obj.userName,
     userType: obj.userType
   });
@@ -154,8 +163,8 @@ exports.getFilesList = async (req, res) => {
 };
 
 exports.getFeedback = (req, res) => {
-  var obj = userData(req);
-  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  let obj = userData(req);
+  let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   
   res.render("feedback", {
@@ -165,56 +174,56 @@ exports.getFeedback = (req, res) => {
     successMessage: success,
     errorMessage: error,
     userId: obj.userId,
-    avatar: obj.avatar,
+    avatar: checkFile(obj.avatar),
     userName: obj.userName,
     userType: obj.userType
   });
 };
 
 exports.getViewFeedbacks = (req, res) => {
-  var obj = userData(req);  
+  let obj = userData(req);  
   res.render("viewFeedbacks", {
     
     role: obj.role,
     isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
-    avatar: obj.avatar,
+    avatar: checkFile(obj.avatar),
     userName: obj.userName,
     userType: obj.userType
   });
 };
 
 exports.getAbout = (req, res) => {
-  var obj = userData(req);
+  let obj = userData(req);
   res.render("about", {
     role: obj.role,
     isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
-    avatar: obj.avatar,
+    avatar: checkFile(obj.avatar),
     userName: obj.userName,
     userType: obj.userType
   });
 }
 
 exports.getAntibriberyAgreement = (req, res) => {
-  var obj = userData(req);
+  let obj = userData(req);
   res.render("antibriberyAgreement", {
     role: obj.role,
     isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
-    avatar: obj.avatar,
+    avatar: checkFile(obj.avatar),
     userName: obj.userName,
     userType: obj.userType
   });
 };
 
 exports.getTermsConditions = (req, res) => {
-  var obj = userData(req);
+  let obj = userData(req);
   res.render("termsConditions", {
     role: obj.role,
     isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
-    avatar: obj.avatar,
+    avatar: checkFile(obj.avatar),
     userName: obj.userName,
     userType: obj.userType
   });
@@ -225,7 +234,7 @@ exports.getBidsList = (req, res) => {
     if(treatError(req, res, err, 'back'))
       return false;
 
-    var dbo = db.db(BASE);
+    let dbo = db.db(BASE);
     dbo.collection("bidrequests").find({}).toArray(function(err, bids) {
       if(err) {
         console.error(err.message);
@@ -239,13 +248,13 @@ exports.getBidsList = (req, res) => {
         return a.requestName.localeCompare(b.requestName);
       });
       
-      var obj = userData(req);
+      let obj = userData(req);
 
       res.render('bidsCatalog', {
         role: obj.role,
         isAdmin: obj.role == process.env.USER_ADMIN,
         userId: obj.userId,
-        avatar: obj.avatar,
+        avatar: checkFile(obj.avatar),
         userName: obj.userName,
         userType: obj.userType,
         bids: bids
@@ -256,53 +265,53 @@ exports.getBidsList = (req, res) => {
 
 exports.getMemberList = async (req, res) => {
   //Get all buyers, suppliers, supervisors.
-  var buys = [], supers = [], supps = [];
+  let buys = [], supers = [], supps = [];
   
-  var promise = Buyer.find({}).exec();
+  let promise = Buyer.find({}).exec();
   await promise.then((buyers) => {
     buyers.sort(function (a, b) {
       return a.organizationName.localeCompare(b.organizationName);
     });
    // buys = buyers;
    // if(1==2)
-    for(var i in buyers) {
+    for(let i in buyers) {
       buys.push(buyers[i]);
     }
   });
   
-  var promise1 = Supervisor.find({}).exec();
+  let promise1 = Supervisor.find({}).exec();
   await promise1.then((sups) => {
     sups.sort(function (a, b) {
       return a.organizationName.localeCompare(b.organizationName);
     });
    // supers = sup;
    // if(1==2)
-    for(var i in sups) {      
+    for(let i in sups) {      
       supers.push(sups[i]);
     }
   });
 
-  var promise2 = Supplier.find({}).exec();
+  let promise2 = Supplier.find({}).exec();
   await promise2.then((suppliers) => {
     suppliers.sort(function (a, b) {
       return a.companyName.localeCompare(b.companyName);
     });
     //supps = suppliers;
    // if(1==2)
-    for(var i in suppliers) {      
+    for(let i in suppliers) {      
       supps.push(suppliers[i]);
     }
   });
   
-  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
-  var obj = userData(req);
+  let obj = userData(req);
   
   res.render("memberList", {
     buyers: buys,
     role: obj.role,
     isAdmin: obj.role == process.env.USER_ADMIN,
-    avatar: obj.avatar,
+    avatar: checkFile(obj.avatar),
     suppliers: supps,
     supervisors: supers,
     userId: obj.userId,
@@ -331,7 +340,7 @@ exports.postFeedback = async (req, res) => {
       MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
          if(treatError(req, res, err, 'back'))
            return false;
-          var dbo = db.db(BASE);
+          let dbo = db.db(BASE);
           await dbo.collection("feedbacks").insertOne({
             userName: req.body.name,
             userEmail: req.body.emailAddress,
@@ -357,7 +366,7 @@ exports.postFeedback = async (req, res) => {
 
 
 exports.postDeleteUser = async (req, res) => {  
-  var id = req.body.deleteId, type = req.body.userType;
+  let id = req.body.deleteId, type = req.body.userType;
   
   switch(type) {
     case process.env.USER_BUYER:
@@ -386,7 +395,7 @@ exports.postDeleteUser = async (req, res) => {
 
 
 exports.postBanUser = async (req, res) => {
-  var id = req.body.deleteId, type = req.body.userType;
+  let id = req.body.deleteId, type = req.body.userType;
   
   switch(type) {
     case process.env.USER_BUYER:

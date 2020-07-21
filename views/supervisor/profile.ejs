@@ -23,7 +23,7 @@
   
   <script type="text/javascript">
       $(document).ready(function() {        
-        var token = $("input[name='_csrf']").val();
+        let token = $("input[name='_csrf']").val();
         getAutocomplete('#country', '/countryAutocomplete', token);
         errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
 

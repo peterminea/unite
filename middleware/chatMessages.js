@@ -1,5 +1,5 @@
 const generateMessage = (username, textData) => {
-  var message = textData.message,
+  let message = textData.message,
       from = textData.from? textData.from : 0,
       to = textData.to? textData.to : 1,
       fromName = textData.fromName? textData.fromName : "Sender",

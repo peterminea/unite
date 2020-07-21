@@ -35,10 +35,10 @@ const  fileExists = (path) => {
 
 
 const prel = (req, isFloat, isInt) => {
-  var arr = (req);
+  let arr = (req);
   arr = arr.split(',');
-  var newProd = [];
-  for (var i in arr) {
+  let newProd = [];
+  for (let i in arr) {
     newProd.push(isFloat? parseFloat(arr[i]).toFixed(2) : isInt? parseInt(arr[i]) : String(arr[i]));
     }
   
@@ -47,16 +47,16 @@ const prel = (req, isFloat, isInt) => {
 
 
 const sortLists = (productList, amountList, priceList, imagesList, suppCurrenciesList) => {
-  var arr = [], arr2 = [], arr3 = [], arr4 = [], arr5 = [], arr6 = [];
+  let arr = [], arr2 = [], arr3 = [], arr4 = [], arr5 = [], arr6 = [];
   
-  for(var i in productList) {
+  for(let i in productList) {
     arr.push(productList[i]);
   }
   
   arr.sort();
   
-  for(var i in arr) {
-    for(var j in productList) {
+  for(let i in arr) {
+    for(let j in productList) {
       if(arr[i] == productList[j]) {
         arr2.push(amountList[j]);
         arr3.push(priceList[j]);
@@ -70,7 +70,7 @@ const sortLists = (productList, amountList, priceList, imagesList, suppCurrencie
     }
   }
   
-  for(var i in productList) {
+  for(let i in productList) {
     productList[i] = arr[i];
     amountList[i] = arr2[i];
     priceList[i] = arr3[i];
@@ -138,7 +138,7 @@ const sendCancelBidEmail = (req, victim, actor, victimMail, actorMail, victimTyp
               return console.log(err.message);
             }
           
-          var msg = "The Bid Request has been cancelled by the " + actorType + actor + '.\n' + victimType + victim + ' has been notified via e-mail about the Order cancellation.';
+          let msg = "The Bid Request has been cancelled by the " + actorType + actor + '.\n' + victimType + victim + ' has been notified via e-mail about the Order cancellation.';
           console.log(msg);
           req.flash('success', msg);
       });
@@ -247,7 +247,7 @@ const sendResetPasswordEmail = (user, type, req) => {
 
 
 const postSignInBody = async (link, req, res) => {
-  var dbLink = link + 's';
+  let dbLink = link + 's';
   const email = req.body.emailAddress;
   const password = req.body.password;
   console.log(email + ' ' + password);
@@ -268,7 +268,7 @@ const postSignInBody = async (link, req, res) => {
         if(treatError(req, res, err, `/${link}/sign-in`)) 
           return false;
 
-         var dbo = db.db(BASE);
+         let dbo = db.db(BASE);
          console.log(dbLink);        
          
          dbo.collection(dbLink).findOne( { emailAddress: email}, async (err, doc) => {
@@ -363,13 +363,13 @@ const postSignInBody = async (link, req, res) => {
 
 const sendExpiredBidEmails = (req, res, expiredBids) => {
   if(expiredBids.length) {
-    for(var i in expiredBids) {
+    for(let i in expiredBids) {
       if(expiredBids[i].isExpired == false) {
         MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {//db or client.
           if(treatError(req, res, err, 'back'))
             return false;
 
-          var dbo = db.db(BASE);
+          let dbo = db.db(BASE);
           dbo.collection("bidrequests").updateOne({ _id: expiredBids[i]._id }, { $set: {isExpired: true} }, function(err, resp) {
             sendExpiredBidEmail(req, expiredBids[i], expiredBids[i].buyerEmail, expiredBids[i].buyerName, 'outgoing');
             sendExpiredBidEmail(req, expiredBids[i], expiredBids[i].supplierEmail, expiredBids[i].supplierName, 'incoming');
@@ -387,17 +387,17 @@ const updateBidBody = (req, res, reqId, returnLink) => {
     if (treatError(req, res, err, "back")) 
       return false;    
 
-    var dbo = db.db(BASE);
+    let dbo = db.db(BASE);
     
-    var bid = await dbo.collection("bidrequests").findOne({ _id: reqId }, function(err, bid) {
+    let bid = await dbo.collection("bidrequests").findOne({ _id: reqId }, function(err, bid) {
       if (treatError(req, res, err, "back") || !bid) 
         return false;
-      var values;
+      let values;
       
       if(!bid.isExpired && !bid.isExtended && bid.validityExtensionId) {
-        var extDuration = process.env.DAYS_BID_EXTENDED * process.env.DAY_DURATION;
-        var newDate = bid.expiryDate + extDuration;
-        var newDateFormatted = customFormat(newDate);
+        let extDuration = process.env.DAYS_BID_EXTENDED * process.env.DAY_DURATION;
+        let newDate = bid.expiryDate + extDuration;
+        let newDateFormatted = customFormat(newDate);
         values = { $set: { isExtended: true, expiryDate: newDate, expiryDateFormatted: newDateFormatted, status: req.body.status } };
       } else {
         values = { $set: { status: req.body.status } };
@@ -422,9 +422,9 @@ const updateBidBody = (req, res, reqId, returnLink) => {
 
 
 const getUsers = async(db, table, obj) => {
-    var newObj = obj && obj instanceof Object? obj : {};
+    let newObj = obj && obj instanceof Object? obj : {};
   
-    var myPromise = () => {
+    let myPromise = () => {
        return new Promise((resolve, reject) => {
           db
           .collection(table)
@@ -438,7 +438,7 @@ const getUsers = async(db, table, obj) => {
        });
     };
    
-    var result = await myPromise();
+    let result = await myPromise();
     return result;
 }
 

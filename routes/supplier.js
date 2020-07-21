@@ -28,14 +28,14 @@ router.get("/cancelBid/:bidId/:bidName/:userType/:buyerName/:supplierName/:buyer
 router.post("/sign-in", supplierController.postSignIn);
 router.post("/sign-up", supplierController.postSignUp);
 router.post("/profile", isAuth, sessionExit, supplierController.postProfile);
-router.post("/deactivate", isAuth, sessionExit, supplierController.postDeactivate);
-router.post("/delete", isAuth, sessionExit, supplierController.postDelete);
+router.post("/deactivate/:id", isAuth, sessionExit, supplierController.postDeactivate);
+router.post("/delete/:id", isAuth, sessionExit, supplierController.postDelete);
 router.post("/bid-requests/:id", isAuth, sessionExit, supplierController.postBidRequest);
 router.post("/addproduct", isAuth, sessionExit, supplierController.postAddProduct);
 router.post('/confirmation/:token', sessionExit, supplierController.postConfirmation);
 router.post('/resend', /*isAuth,*/ sessionExit, supplierController.postResendToken);
 router.post("/forgotPassword", isAuth, sessionExit, supplierController.postForgotPassword);
 router.post("/resetPassword/:token", isAuth, sessionExit, supplierController.postResetPasswordToken);
-router.post("/cancelBid", isAuth, sessionExit, supplierController.postCancelBid);
+router.post("/cancelBid/:bidId/:bidName/:userType/:buyerName/:supplierName/:buyerEmail/:supplierEmail", isAuth, sessionExit, supplierController.postCancelBid);
 
 module.exports = router;

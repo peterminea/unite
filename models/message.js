@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const BidRequest = require('../models/bidRequest');
-var bid = mongoose.model('BidRequest');
+const bid = mongoose.model('BidRequest');
 
 const messageSchema = new Schema({
     from: {

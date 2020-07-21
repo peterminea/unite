@@ -26,12 +26,12 @@ router.get("/deleteBuyer/:id", isAuth, sessionExit, buyerController.getDelete);
 router.post("/sign-in", supervisorController.postSignIn);
 router.post("/sign-up", supervisorController.postSignUp);
 router.post('/profile', isAuth, sessionExit, supervisorController.postProfile);
-router.post("/deactivate", isAuth, sessionExit, supervisorController.postDeactivate);
-router.post("/delete", isAuth, sessionExit, supervisorController.postDelete);
+router.post("/deactivate:id/:organizationUniteID", isAuth, sessionExit, supervisorController.postDeactivate);
+router.post("/delete/:id/:organizationUniteID", isAuth, sessionExit, supervisorController.postDelete);
 router.post('/confirmation/:token', sessionExit, supervisorController.postConfirmation);
 router.post('/resend', /*isAuth,*/ sessionExit, supervisorController.postResendToken);
 router.post("/forgotPassword", isAuth, sessionExit, supervisorController.postForgotPassword);
 router.post("/resetPassword/:token", isAuth, sessionExit, supervisorController.postResetPasswordToken);
-router.post("/deleteBuyer", isAuth, sessionExit, buyerController.postDelete);
+router.post("/deleteBuyer/:id", isAuth, sessionExit, buyerController.postDelete);
 
 module.exports = router;

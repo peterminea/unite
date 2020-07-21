@@ -70,15 +70,14 @@
 	var getRate = function(to, from) {
     try {
       // Save bytes in minified version
-      var rates = fx.rates;
-      alert(rates + ' ' + to + ' ' + from);
+      var rates = fx.rates;      
 
       // Make sure the base rate is in the rates object:
       rates[fx.base] = 1;
 
       // Throw an error if either rate isn't in the rates array
       if ( !rates[to] || !rates[from] ) {
-        alert('Rate missing!')
+        console.log('Rate is missing!')
         throw "fx error";
       }
 

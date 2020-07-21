@@ -30,11 +30,10 @@
       var token = $("input[name='_csrf']").val();
       getAutocomplete('.country', '/countryAutocomplete', token);
       getAutocomplete('#industry', '/industryGetAutocomplete', token);
-      errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
-      getCurrenciesList('select.currency', '/currencyAutocomplete', token);      
-      initBaseRates(fx, 'select.currency');
-      
+      getAutocomplete('#capabilityDescription', '/capabilityInputAutocomplete', token);
+      errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');      
       var defaultCurr = "<%= DEFAULT_CURR %>";
+      initBaseRates(fx, 'select.currency', '/currencyAutocomplete', token, defaultCurr);
       
       $("input.number").inputFilter(function(value) {
         return /^\d*$/.test(value);
@@ -214,7 +213,13 @@
         </div>
         <div class="form-group">
           <label>Capability Description*</label>
-          <input type="text" class="form-control" name="capabilityDescription" required>
+          <input type="text" class="form-control autocomp" name="capabilityDescription" required>
+          <input type="hidden" name="saveCapability">
+          <select class='autocomp'>
+            <% for(cap of capabilities) { %>
+            <option id="<%= cap.id %>" value="<%= cap.name %>"><%= cap.name %></option>
+            <% } %>
+          </select>
         </div>
         <div class="form-group">
           <label>Relevant Experience*</label>

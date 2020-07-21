@@ -1,8 +1,9 @@
 module.exports = (req, res, err, page) => {
-  if(!err)
+  if(!err || !err.message)
     return false;
   
-  console.error(err.message);
+  console.error(err.message + ' ' + ' POLLY STEERFORTH');
   req.flash('error', err.message);
-  return res.redirect(page);
+  res.redirect(page);
+  return true;
 };

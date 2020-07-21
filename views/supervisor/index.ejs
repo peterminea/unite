@@ -22,7 +22,7 @@
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-      var token = $("input[name^='_csrf']").first().val();
+      let token = $("input[name^='_csrf']").first().val();
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       prepareSortTable();
     });

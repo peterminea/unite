@@ -19,7 +19,7 @@ router.get("/deleteUser/:id/:type/:name/:uniteID/:email", sessionExit, homeContr
 router.get("/banUser/:id/:type/:name/:uniteID/:email/:ipv4Address", sessionExit, homeController.getBanUser);
 
 router.post("/feedback", sessionExit, homeController.postFeedback);
-router.post("/deleteUser", sessionExit, homeController.postDeleteUser);
-router.post("/banUser", sessionExit, homeController.postBanUser);
+router.post("/deleteUser/:id/:type/:name/:uniteID/:email", sessionExit, homeController.postDeleteUser);
+router.post("/banUser/:id/:type/:name/:uniteID/:email/:ipv4Address", sessionExit, homeController.postBanUser);
 
 module.exports = router;

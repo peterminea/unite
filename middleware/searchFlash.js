@@ -3,10 +3,10 @@ module.exports = (flash, type) => {
     return null;
   }
   
-  var message = "";
-  var cnt = 0;
+  let message = "";
+  let cnt = 0;
   
-  for(var i in flash) {
+  for(let i in flash) {
     if(flash[i].type == type) {
       if(cnt)
         message += '\n';

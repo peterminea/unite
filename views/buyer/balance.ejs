@@ -23,18 +23,18 @@
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-      var defaultCurr = $('#defaultCurrency').val();
-      var defaultBalance = $('#defaultBalance').val();
-      
+      let defaultCurr = $('#defaultCurrency').val();
+      let defaultBalance = $('#defaultBalance').val();
+      //errorSuccess(Swal, '< %= errorMessage %>', '< %= successMessage %>');      
       $('#balance').val(parseFloat(defaultBalance).toFixed(2) + ' ' + defaultCurr);
-      getCurrenciesList('#currency', '/currencyAutocomplete', $('#token').val());//For selects.
-      //errorSuccess(Swal, '< %= errorMessage %>', '< %= successMessage %>');
-      initBaseRates(fx, '#currency').then((fx) => {   
-        $('#currency').on('change', function() {
-          var val = fx.convert(defaultBalance, {from: defaultCurr, to: $(this).val()});
+      
+      initBaseRates(fx, '#currency', '/currencyAutocomplete', $('#token').val())
+        .then((fx) => {
+        $('#currency').off('change').on('change', function() {
+          let val = fx.convert(defaultBalance, {from: defaultCurr, to: $(this).val()});
           $('#balance').val(val.toFixed(2) + ' ' + $(this).val());
         });
-      }) 
+      });
     });
   </script>
 </head>

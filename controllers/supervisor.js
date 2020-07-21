@@ -13,7 +13,7 @@ const MongoClient = require('mongodb').MongoClient;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const search = require('../middleware/searchFlash');
-var Recaptcha = require('express-recaptcha').RecaptchaV3;
+let Recaptcha = require('express-recaptcha').RecaptchaV3;
 const { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, prel, sortLists, getUsers, getBidStatusesJson, getCancelTypesJson, postSignInBody, updateBidBody } = require('../middleware/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
@@ -26,15 +26,15 @@ const { verifyBanNewUser, verifyBanExistingUser } = require('../middleware/verif
 const TYPE = process.env.USER_SPV;
 
 function getBidsData(bids) {
-  var validBids = 0, validBidsPrice = 0;
-  var cancelledBids = 0, cancelledBidsPrice = 0;
-  var expiredBids = 0, expiredBidsPrice = 0;
-  var obj = {};
+  let validBids = 0, validBidsPrice = 0;
+  let cancelledBids = 0, cancelledBidsPrice = 0;
+  let expiredBids = 0, expiredBidsPrice = 0;
+  let obj = {};
   
   if(bids && bids.length) {
     obj.totalBids = bids.length;
     
-    for(var i in bids) {
+    for(let i in bids) {
       if(!bids[i].isCancelled && !bids[i].isExpired) {
         validBids++;
         validBidsPrice += parseFloat(bids[i].buyerPrice).toFixed(2);
@@ -67,22 +67,22 @@ function getBidsData(bids) {
 
 
 function getBuyerBidsData(req, res, buyers) {
-  var bidData = [];
+  let bidData = [];
   
   if(buyers && buyers.length) {
     MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
       if(treatError(req, res, err, 'back'))
         return false;
       
-      var dbo = db.db(BASE);
+      let dbo = db.db(BASE);
       
-      for(var i in buyers) {
+      for(let i in buyers) {
         await dbo.collection('bidRequests').find({ buyer: new ObjectId(buyers[i]._id) }).toArray(function(err, bids) {
           if(treatError(err, req, res, 'back')) {
             return false;
           }
           
-          var obj = getBidsData(bids);
+          let obj = getBidsData(bids);
           bidData.push(obj);
           
         if(i == buyers.length - 1) {
@@ -108,14 +108,14 @@ exports.getIndex = (req, res) => {
       if(treatError(req, res, err, 'back'))
         return false;
       
-      var bidData = await getBuyerBidsData(req, res, results);
+      let bidData = await getBuyerBidsData(req, res, results);
       console.log(bidData? bidData.length : 'Null');
       if(bidData.length)
-      for(var i in results) {
+      for(let i in results) {
         results[i].bidData = bidData[i];
       }
       
-      var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+      let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
       req.session.flash = [];
                   
       if(supervisor.avatar && supervisor.avatar.length && !fileExists('public/' + supervisor.avatar.substring(3))) {
@@ -139,7 +139,7 @@ exports.getConfirmation = (req, res) => {
     req.session.supervisorId = req.params && req.params.token? req.params.token._userId : null;
   }
   
-  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   
   res.render('supervisor/confirmation', {
@@ -151,7 +151,7 @@ exports.getConfirmation = (req, res) => {
 
 
 exports.getDeactivate = (req, res) => {
-  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   
   res.render('supervisor/deactivate', {
@@ -164,7 +164,7 @@ exports.getDeactivate = (req, res) => {
 
 
 exports.getDelete = (req, res) => {
-  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   
   res.render('supervisor/delete', {
@@ -178,7 +178,7 @@ exports.getDelete = (req, res) => {
 
 
 exports.getResendToken = (req, res) => {
-  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   
   res.render('supervisor/resend', {
@@ -189,7 +189,7 @@ exports.getResendToken = (req, res) => {
 
 
 exports.getChatLogin = (req, res) => {//We need a username, a room name, and a socket-based ID.
-  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   
   res.render("supervisor/chatLogin", {
@@ -206,7 +206,7 @@ exports.getChatLogin = (req, res) => {//We need a username, a room name, and a s
 
 
 exports.getChat = (req, res) => {//Coming from the getLogin above.
-  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   
   res.render("supplier/chat", {
@@ -225,9 +225,9 @@ exports.getChat = (req, res) => {//Coming from the getLogin above.
 
 
 exports.postDeactivate = (req, res) => {
-  var id = req.body.id, uniteId = req.body.uniteID;
+  let id = req.body.id, uniteId = req.body.uniteID;
   
-  var prom = Buyer.find({organizationUniteID: uniteId, isActive: true}).exec();
+  let prom = Buyer.find({organizationUniteID: uniteId, isActive: true}).exec();
   prom.then((buyers) => {
     if(buyers && buyers.length) {
       req.flash('error', 'You have at least one active Buyer associated to your Supervisor account. It is not advisable to deactivate your account at this time.');
@@ -238,7 +238,7 @@ exports.postDeactivate = (req, res) => {
       MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
         if(treatError(req, res, err, 'back'))
           return false;
-        var dbo = db.db(BASE);
+        let dbo = db.db(BASE);
         //And now, deactivate the Supplier themselves:
         await dbo.collection('supervisors').updateOne( { _id: id }, { $set: { isActive: false } }, function(err, resp) {
           if(treatError(req, res, err, 'back'))
@@ -255,8 +255,8 @@ exports.postDeactivate = (req, res) => {
 
 
 exports.postDelete = function (req, res, next) {  
-  var id = req.body.id;
-  var uniteID = req.body.organizationUniteID;
+  let id = req.body.id;
+  let uniteID = req.body.organizationUniteID;
   supervisorDelete(req, res, id, uniteID);
 }
 
@@ -283,7 +283,7 @@ exports.postConfirmation = async function (req, res, next) {
           await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
             if(treatError(req, res, err, 'back'))
               return false;
-            var dbo = db.db(BASE);
+            let dbo = db.db(BASE);
                 
             await dbo.collection("supervisors").updateOne({ _id: user._id }, { $set: {isVerified: true} }, function(err, resp) {
                   if(err) {
@@ -317,7 +317,7 @@ exports.postResendToken = function (req, res, next) {
         if (user.isVerified) 
           return res.status(400).send({ msg: 'This account has already been verified. Please log in.' });
 
-        var token = new Token({ 
+        let token = new Token({ 
           _userId: user._id, 
           userType: TYPE,
           token: crypto.randomBytes(16).toString('hex') });
@@ -337,7 +337,7 @@ exports.postResendToken = function (req, res, next) {
 
 
 exports.getForgotPassword = (req, res) => {
-  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   
   res.render("supervisor/forgotPassword", {
@@ -352,7 +352,7 @@ exports.postForgotPassword = (req, res, next) => {
   async.waterfall([
     function(done) {
       crypto.randomBytes(20, function(err, buf) {
-        var token = buf.toString('hex');
+        let token = buf.toString('hex');
         done(err, token);
       });
     },
@@ -367,7 +367,7 @@ exports.postForgotPassword = (req, res, next) => {
           if(treatError(req, res, err, 'back'))
             return false;
           
-          var dbo = db.db(BASE);
+          let dbo = db.db(BASE);
           dbo.collection("supervisors").updateOne({ _id: user._id }, { $set: {resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000} }, function(err, res) {        
             if(treatError(req, res, err, 'back'))
               return false;
@@ -388,7 +388,7 @@ exports.postForgotPassword = (req, res, next) => {
 
 
 exports.getResetPasswordToken = (req, res) => {
-  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   
   Supervisor.findOne({resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() }}, function(err, user) {
@@ -422,7 +422,7 @@ exports.postResetPasswordToken = (req, res) => {
           if(treatError(req, res, err, 'back'))
             return false;
           
-            var dbo = db.db(BASE);
+            let dbo = db.db(BASE);
             let hash = bcrypt.hashSync(req.body.password, 16);
             dbo.collection("supervisors").updateOne({ _id: user._id }, 
               { $set: {
@@ -455,7 +455,7 @@ exports.postResetPasswordToken = (req, res) => {
 
 
 exports.getSignIn = (req, res) => {
-  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   
   if (!req.session.supervisorId || !req.session.supervisor.isVerified)
@@ -470,16 +470,16 @@ exports.getSignIn = (req, res) => {
 
 
 exports.getSignUp = (req, res) => {
-  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   
   if(!req.session.supervisorId) {
     Country.find({}).then((countries) => {
-        var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+        let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
         req.session.flash = [];
 
-        var country = [];
-        for(var i in countries) {
+        let country = [];
+        for(let i in countries) {
           country.push({id: i, name: countries[i].name});
         }
 
@@ -512,9 +512,9 @@ exports.postSignUp = async (req, res) => {
       const email_str_arr = email.split("@");
       const domain_str_location = email_str_arr.length - 1;
       const final_domain = email_str_arr[domain_str_location];
-      var prohibitedArray = ["gmaid.com", "hotmaix.com", "outloop.com", "yandex.com", "yahuo.com", "gmx"];
+      let prohibitedArray = ["gmaid.com", "hotmaix.com", "outloop.com", "yandex.com", "yahuo.com", "gmx"];
 
-      for(var i = 0; i < prohibitedArray.length; i++)
+      for(let i = 0; i < prohibitedArray.length; i++)
       if (final_domain.toLowerCase().includes(prohibitedArray[i].toLowerCase())) {
         req.flash("error", "E-mail address must be a custom company domain.");
         return res.redirect("/supervisor/sign-up");
@@ -539,7 +539,7 @@ exports.postSignUp = async (req, res) => {
               
               if (user) 
                 return res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
-                var supervisor;
+                let supervisor;
                 try {
                   bcrypt.hash(req.body.password, 16, async function(err, hash) {
                   //user = new Promise((resolve, reject) => {
@@ -585,7 +585,7 @@ exports.postSignUp = async (req, res) => {
                       req.session.supervisorId = supervisor._id;
                       req.session.save();
 
-                      var token = new Token({ 
+                      let token = new Token({ 
                         _userId: supervisor._id,
                         userType: TYPE, 
                         token: crypto.randomBytes(16).toString('hex') });
@@ -624,14 +624,14 @@ exports.getProfile = (req, res) => {
   if (!req || !req.session) 
     return false;
   
-  var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   Country.find({}).then((countries) => {
-    var success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+    let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
     req.session.flash = [];
 
-    var country = [];
-    for(var i in countries) {
+    let country = [];
+    for(let i in countries) {
       country.push({id: i, name: countries[i].name});
     }
     
@@ -690,7 +690,7 @@ exports.postProfile = (req, res) => {
       if(treatError(req, res, err, '/supervisor/profile'))
         return false;
       
-      var dbo = db.db(BASE);
+      let dbo = db.db(BASE);
       dbo.collection("supervisors").updateOne({ _id: doc._id }, { $set: doc }, function(err, resp) {
         if(treatError(req, res, err, '/supervisor/profile'))
           return false;

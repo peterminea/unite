@@ -1095,69 +1095,6 @@ for (let inet in networkInterfaces) {
   }
 }
 
-//console.log('DROSOS');
-//console.log(nonLocalInterfaces);
-
-//const internalIp = require('internal-ip');
-//console.log(internalIp.v6.sync())
-//=> 'fe80::1'
-
-//console.log(internalIp.v4.sync())
-//=> '10.0.0.79'
-//var ifaces = os.networkInterfaces();
-
-//console.log(ifaces);
-/*
-console.log('ZOSO');
-
-Object.keys(ifaces).forEach(function (ifname) {
-  var alias = 0;
-
-  ifaces[ifname].forEach(function (iface) {
-    if ('IPv4' !== iface.family || iface.internal !== false) {
-      // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
-      return;
-    }
-
-    if (alias >= 1) {
-      // this single interface has multiple ipv4 addresses
-      console.log(ifname + ':' + alias, iface.address);
-    } else {
-      // this interface has only one ipv4 adress
-      console.log(ifname, iface.address);
-    }
-    ++alias;
-  });
-});
-
-var interfaces = os.networkInterfaces();
-var addresses = [];
-for (var k in interfaces) {
-    for (var k2 in interfaces[k]) {
-        var address = interfaces[k][k2];
-        if (address.family === 'IPv4' && !address.internal) {
-            addresses.push(address.address);
-        }
-    }
-}
-
-console.log('STROSO');
-console.log(addresses);
-
-const { promisify } = require('util'); //<-- Require promisify
-const getIP = promisify(require('external-ip')({
-    replace: true,
-    services: ['https://myexternalip.com/raw', 'https://ipinfo.io/ip', 'http://icanhazip.com/', 'http://ident.me/'],
-    timeout: 900,
-    getIP: 'sequential',
-    verbose: false
-})); // <-- And then wrap the library
- 
-getIP().then((ip) => {
-    console.log(ip);
-}).catch((error) => {
-    console.error(error);
-});*/
 
 async function getUsers(db, table, obj) {
     var newObj = obj && obj instanceof Object? obj : {};
@@ -1182,20 +1119,6 @@ async function getUsers(db, table, obj) {
 }
 
 
-const publicIp = require('public-ip');
- if(1==2)
-(async () => {
-    console.log(await publicIp.v4({
-        fallbackUrls: [
-            'https://ifconfig.co/ip'
-        ]
-    }));
-    //=> '46.5.21.123'
- 
-    //console.log(await publicIp.v6());
-    //=> 'fe80::200:f8ff:fe21:67cf'
-})();
-
 const bcrypt = require('bcryptjs');
 var db;
 
@@ -1216,60 +1139,8 @@ async function getUsers2(db, table) {
     db = client.db(BASE); //Right connection!
     process.on("uncaughtException", function(err) {
       console.error(err.message);
-    });
-    
-    
-    db.collection('bidrequests').updateMany({}, { $set: { preferredDeliveryDate: new Date(Date.now() + 3 * 86400000) } }, function(err, obj) {});
-    /*
-    db.collection('cancelreasontitles').updateMany({},  { $set: { isSupervisor: false } }, function(err, obj) {} );
-    (async () => {
-	//console.log(await internalIp.v6());
-	//=> 'fe80::1'
-
-	//console.log(await internalIp.v4());
-  //const t = await internalIp.v4();
-  //console.log(t);      
-  //const upd = { $set: { ipv4: t } };
-      
-  const buyers = await getUsers(db, 'buyers'), supervisors = await getUsers(db, 'supervisors'), suppliers = await getUsers(db, 'suppliers');  
-  //console.log(buyers.length);
-      
-  for(var i of buyers) {console.log(i.password);
-    if(i.password.length < 20) {
-      let hash = bcrypt.hashSync(i.password, 16);      
-      const upd = { $set: { password: hash } };
-      await db.collection('buyers').updateOne({ _id: i._id }, upd, function(err, resp) { if(err) throw err; })
-    }
-  }
-      console.log('Buyers finished off.');
-  for(var i of supervisors) {console.log(i.password);
-    if(i.password.length < 20) {
-      let hash = bcrypt.hashSync(i.password, 16);      
-      const upd = { $set: { password: hash } };
-      await db.collection('supervisors').updateOne({ _id: i._id }, upd, function(err, resp) { if(err) throw err; })
-    }
-  }
-      console.log('Supervisors also.');
-  for(var i of suppliers) {console.log(i.password);
-    if(i.password.length < 24) {
-      let hash = bcrypt.hashSync(i.password, 16);      
-      const upd = { $set: { password: hash } };
-      await db.collection('suppliers').updateOne({ _id: i._id }, upd, function(err, resp) { if(err) throw err; })
-    }
-  }
-  */
-    //  console.log('Suppliers updated.');
-     // buyers.then((buyers) => {
-       // console.log(buyers.length);
-      //})
-      
-  //let hash = bcrypt.hashSync(req.body.password, 16);      
-  //db.collection('buyers').updateMany({}, upd, function(err, obj) {} );
- // db.collection('supervisors').updateMany({}, upd, function(err, obj) {} );
- // db.collection('suppliers').updateMany({}, upd, function(err, obj) {} );   
-	//=> '10.0.0.79'
-    //})();
-    
+    });    
+        
  //db.close();
   });
 

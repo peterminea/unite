@@ -18,9 +18,9 @@ const verifyBanNewUser = (req, res, email, ip) => {
     if(treatError(req, res, err, "back")) 
       return false;    
 
-    var dbo = db.db(BASE);
+    let dbo = db.db(BASE);
     
-    var filter = { $or: [ { email: email }, { ip: ip } ] };
+    let filter = { $or: [ { email: email }, { ip: ip } ] };
     
     dbo.collection('bannedusers').findOne(filter, (err, obj) => {
       if(treatError(req, res, err, "back")) 
@@ -39,7 +39,7 @@ const verifyBanNewUser = (req, res, email, ip) => {
 };
 
 const verifyBanExistingUser = (dbo, req, res, doc, ip) => {
-  var filter = { $or: [ { email: doc.emailAddress }, { ip: ip }, { userId: doc._id } ] };
+  let filter = { $or: [ { email: doc.emailAddress }, { ip: ip }, { userId: doc._id } ] };
   
   dbo.collection('bannedusers').findOne(filter, (err, obj) => {
     if(treatError(req, res, err, "back")) 

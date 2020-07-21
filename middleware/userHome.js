@@ -1,6 +1,6 @@
 module.exports = function getUserHome(req) {
-  var ses = req.session? req.session : null;
-  var userId = null, role = null, userName = null, userType = null, avatar = null;
+  let ses = req.session? req.session : null;
+  let userId = null, role = null, userName = null, userType = null, avatar = null;
   
   if(ses) {
     userId = ses.buyerId && ses.buyer? 
