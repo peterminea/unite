@@ -1,6 +1,7 @@
 const sgMail = require('@sendgrid/mail');
 const MongoClient = require('mongodb').MongoClient;
 const bcrypt = require("bcryptjs");
+const fs = require('fs');
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
@@ -26,6 +27,11 @@ const sendConfirmationEmail = (name, link, token, req) => {
       req.flash('success', 'A verification email has been sent to ' + req.body.emailAddress + '.\n');
     });
 };
+
+
+const  fileExists = (path) => {
+  return fs.existsSync(path);
+}
 
 
 const prel = (req, isFloat, isInt) => {
@@ -459,4 +465,4 @@ const getCancelTypesJson = function() {
 };
 
 
-module.exports = { sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendBanEmail, sendCancelBidEmail, prel, sortLists, getUsers, getBidStatusesJson, getCancelTypesJson, postSignInBody, updateBidBody };
+module.exports = { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendBanEmail, sendCancelBidEmail, prel, sortLists, getUsers, getBidStatusesJson, getCancelTypesJson, postSignInBody, updateBidBody };

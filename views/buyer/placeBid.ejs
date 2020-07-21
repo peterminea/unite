@@ -21,7 +21,7 @@
   <script src="/bootstrap.min.js"></script>
   <script src="/sweetalert2@9.min.js"></script>
   <script src="/index.min.js"></script>
-  <script src="/money.min.js"></script>
+  <script src="/money.js"></script>
   <script src="/jquery.simulate.js"></script>
   <script src="/jquery.jqgrid.min.js"></script>
   <script src="/grid.locale-en.js"></script>
@@ -33,6 +33,7 @@
         var token = $("input[name='_csrf']").val();
         errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
         var defaultBidCurrency = '<%= BID_DEFAULT_CURR %>';
+        $('.select.buyerCurrency').find(`option[value=${defaultBidCurrency}]`).prop('selected', true);                     
         getCurrenciesList('select.buyerCurrency', '/currencyAutocomplete', token, defaultBidCurrency); 
     });
   </script>
@@ -130,6 +131,10 @@
             <div class="form-group">
               <label class="col-form-label">Compliance Requirements*</label>
               <textarea class="form-control" name="complianceRequirements" required></textarea>
+            </div>
+             <div class="form-group">
+              <label class="col-form-label">Preferred Delivery Date</label>
+              <input type="text" class="form-control prefDate" id="prefDate" name="preferredDeliveryDate">
             </div>
             <div class="form-group">
               <label class="col-form-label">Compliance Requirements URL</label>

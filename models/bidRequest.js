@@ -99,6 +99,11 @@ const bidRequestSchema = new Schema({
     type: String,
     required: false
   },
+  preferredDeliveryDate: {
+    type: Date,
+    default: Date.now() + 3 * process.env.DAY_DURATION,
+    required: false
+  },
   specialMentions: {
     type: String,
     required: false
