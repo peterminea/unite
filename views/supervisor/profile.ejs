@@ -87,6 +87,10 @@
     <br><br>
     <div class="profile-form smooth-shadow mt-4 mb-4">
       <form id="updateForm" method="POST">
+        <h2>
+          Update your Details
+        </h2>
+        <input type="hidden" id="uploadSize" value="<%= FILE_UPLOAD_MAX_SIZE %>">
         <input type="hidden" name="_id" value="<%= profile._id %>">
         <input type="hidden" name="role" value="<%= profile.role %>">
         <input type="hidden" name="createdAt" id="createdAt" value="<%= profile.createdAt %>">

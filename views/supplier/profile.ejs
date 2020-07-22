@@ -37,7 +37,7 @@
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       let defaultCurr = "<%= profile.currency %>";
       initBaseRates(fx, 'select.currency', '/currencyAutocomplete', token, defaultCurr);  
-   
+   //FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
       $("input.number").inputFilter(function(value) {
         return /^\d*$/.test(value);
       });
@@ -136,6 +136,10 @@
     <br>
     <div class="smooth-shadow profile-form">
       <form method="POST">
+        <h2>
+          Update your Details
+        </h2>
+        <input type="hidden" id="uploadSize" value="<%= FILE_UPLOAD_MAX_SIZE %>">
         <input type="hidden" name="_id" value="<%= profile._id %>">
         <input type="hidden" name="role" value="<%= profile.role %>">
         <input type="hidden" id="balance" name="balance" value="<%= profile.balance %>">

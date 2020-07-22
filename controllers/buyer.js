@@ -73,67 +73,68 @@ exports.getIndex = async (req, res) => {
     return;
   }
   
-      try {
-        initConversions(fx);
-      }
-      catch {
-      }
-    
-    let promise = BidRequest.find({
-      buyer: req.session.buyer._id
-    }).exec();
+    try {
+      initConversions(fx);
+    }
+    catch {
+    }
 
-    promise.then((bids) => {
-      let success = search(req.session.flash, "success"),
-        error = search(req.session.flash, "error");
-      req.session.flash = [];
-      
-      Capability.find({}).then((caps) => {
-        let cap = [];
-        for(let i in caps) {
-          cap.push({
-            id: i,
-            name: caps[i].capabilityDescription
-          });
-        }
-          
-        cap.sort(function (a, b) {
-          return a.name.localeCompare(b.name);
-        });        
-        
-        setTimeout(function() {
-          let totalBidsPrice = 0;      
+  let promise = BidRequest.find({
+    buyer: req.session.buyer._id
+  }).exec();
 
-          if (bids && bids.length && fx) {
-            for (let i in bids) {
-              totalBidsPrice += fx(parseFloat(bids[i].buyerPrice).toFixed(2))
-                .from(bids[i].supplierCurrency)
-                .to(process.env.BID_DEFAULT_CURR);          
-            }
+  promise.then((bids) => {
+    let success = search(req.session.flash, "success"),
+      error = search(req.session.flash, "error");
+    req.session.flash = [];
+
+    Capability.find({}).then((caps) => {
+      let cap = [];
+      for(let i in caps) {
+        cap.push({
+          id: i,
+          name: caps[i].capabilityDescription
+        });
+      }
+
+      cap.sort(function (a, b) {
+        return a.name.localeCompare(b.name);
+      });        
+
+      setTimeout(function() {
+        let totalBidsPrice = 0;      
+
+        if (bids && bids.length && fx) {
+          for (let i in bids) {
+            totalBidsPrice += fx(parseFloat(bids[i].buyerPrice).toFixed(2))
+              .from(bids[i].supplierCurrency)
+              .to(process.env.BID_DEFAULT_CURR);          
           }
-          
-          let buyer = req.session.buyer;
-          
-          if(buyer.avatar && buyer.avatar.length && !fileExists('public/' + buyer.avatar.substring(3))) {
-            buyer.avatar = '';
-          }          
+        }
 
-          res.render("buyer/index", {
-            buyer: buyer,
-            MAX_PROD: process.env.BID_MAX_PROD,
-            BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
-            bidsLength: bids && bids.length ? bids.length : null,
-            totalBidsPrice: totalBidsPrice,
-            capabilities: cap,
-            statuses: null,
-            successMessage: success,
-            errorMessage: error,
-            suppliers: null
-            //catalogItems: catalogItems
-          });
-        }, 1600);
-      })
-    });   
+        let buyer = req.session.buyer;
+
+        if(buyer.avatar && buyer.avatar.length && !fileExists('public/' + buyer.avatar.substring(3))) {
+          buyer.avatar = '';
+        }          
+
+        res.render("buyer/index", {
+          buyer: buyer,
+          MAX_PROD: process.env.BID_MAX_PROD,
+          BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+          bidsLength: bids && bids.length ? bids.length : null,
+          totalBidsPrice: totalBidsPrice,
+          FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
+          capabilities: cap,
+          statuses: null,
+          successMessage: success,
+          errorMessage: error,
+          suppliers: null
+          //catalogItems: catalogItems
+        });
+      }, 600);
+    })
+  });   
 };
 
 
@@ -287,6 +288,7 @@ exports.postIndex = (req, res) => {
             MAX_PROD: process.env.BID_MAX_PROD,
             MAX_AMOUNT: process.env.MAX_PROD_PIECES,
             BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+            FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
             bidsLength: bids && bids.length ? bids.length : null,
             totalBidsPrice: totalBidsPrice,
             statuses: statuses,
@@ -463,6 +465,7 @@ exports.postIndex = (req, res) => {
             MAX_PROD: process.env.BID_MAX_PROD,
             MAX_AMOUNT: process.env.MAX_PROD_PIECES,
             BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+            FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
             statuses: statuses,
             statusesJson: JSON.stringify(getBidStatusesJson()),
             buyer: buyer[0],
@@ -518,6 +521,7 @@ exports.getPlaceBid = (req, res) => {
             MAX_PROD: process.env.BID_MAX_PROD,
             MAX_AMOUNT: process.env.MAX_PROD_PIECES,
             BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+            FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
             statuses: statuses,
             statusesJson: JSON.stringify(getBidStatusesJson()),
             isMultiProd: false,

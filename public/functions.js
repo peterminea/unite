@@ -619,7 +619,7 @@ function removeFile(obj) {
 
   let name = $(obj).attr("name")
     ? $(obj).attr("name")
-    : "public/" + file.substring(3);
+    : file.charAt(0) == 'p'? file : "public/" + file.substring(3);
 
   SwalCustom.fire({
     title: "Are you sure?",
@@ -1782,7 +1782,7 @@ function initGrid(
           .find(".deleteFile")
           .off("click")
           .on("click", function() {
-            removeFile(this);
+            removeFile(this, Swal);
           });
       } else if(table.find(".rem").length) {
         let id = '_' + getId(divId.attr("id"));
@@ -1797,8 +1797,7 @@ function initGrid(
         bindHandleProduct(table.find(".dec"), prod, false, null, false, false);
         delegateUpload(table.find(".uploadImage"));
       } else if($('span.newBid').length) {
-        //$('span.newBid').off('click').on('click', function() {
-          //alert(5);
+        //$('span.newBid').off('click').on('click', function() {          
         //});
       }
     },
@@ -1913,6 +1912,10 @@ function processSingleFile(response, val, ob, input, prevInput, token, theDiv) {
   val = response.path
     ? "../" + response.path.substring(7)
     : response.file.originalname;
+  
+  if(input.hasClass('multiparam')) {
+    val = '../../../' + val;
+  }
   input.attr("value", val);
   let file = response.path ? response.path : response.file.id;
   if (prevInput && prevInput.length) prevInput.attr("value", val); //file
@@ -1953,6 +1956,52 @@ function checkPresence(obj) {
   if (isPresent) {
     obj.addClass("present");
   }
+}
+
+
+
+
+function hasExtension(file, vec) {
+  let ext = file.name.substring(file.name.lastIndexOf('.'));
+  
+  for(let i of vec) {
+    
+    if(ext === i) {
+      return true;
+    }  
+  
+  if(i > ext)
+    return false;
+  }
+  
+  return false;  
+}
+
+
+function verifyDocument(file, limit, vec) {
+  if(file.size > limit) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Size Error!',
+      html: `<p style='color: navy'>File too large!<br>Selected file ${file.name} is ${file.size} bytes large.<br>Please upload a file with a maximum size of ${limit} bytes.<p>`
+    });
+    
+    return false;    
+  }
+  
+  vec.sort();
+  
+  if(!hasExtension(file, vec)) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Extension Error!',
+      html: `<p style='color: navy'>File name ${file.name} not suitable!<br>Please upload a file whose extension matches [${vec}].<p>`
+    });
+    
+    return false;
+  }
+  
+  return true;
 }
 
 
@@ -2438,10 +2487,10 @@ $(document).ready(function() {
           let addedPrice = $(element).attr('price'), totalPrice = $(element).attr('totalPrice'), shownPrice = $(element).find('span.price').text(), theCurr = $(element).find('span.currency').first().text();
           
           addedPrice = fx.convert(parseFloat(addedPrice), {from: theCurr, to: curr});
-          totalPrice = fx.convert(parseFloat(totalPrice)., {from: theCurr, to: curr});
+          totalPrice = fx.convert(parseFloat(totalPrice), {from: theCurr, to: curr});
           shownPrice = fx.convert(parseFloat(shownPrice), {from: theCurr, to: curr});
           
-          $(element).attr('price', parseFloat(addedPrice).toFixed(2);
+          $(element).attr('price', parseFloat(addedPrice).toFixed(2));
           $(element).attr('totalPrice', parseFloat(totalPrice).toFixed(2));
           $(element).find('span.price').text(parseFloat(shownPrice).toFixed(2));
           $(element).find('span.currency').text(curr);
@@ -2633,14 +2682,37 @@ $(document).ready(function() {
   });
 
   delegateUpload($(".uploadImage"));
+  /*
+let extArray = [".png", ".jpg", ".jpeg", ".gif", ".bmp", '.csv', ".pdf", ".txt", ".doc", ".docx", ".rtf", '.xls', '.xlsx', '.ppt', '.pptx'],
+  prodImageArray = ['.png', '.jpg', '.jpeg', '.bmp', '.csv', '.gif'],
+  excelArray = [".xls", ".xlsx"];
+//1 MB
+*/
 
   $(".single,.multiple").click(function(e) {
-    let input = $(this).prev("input");
-    let isExcel = input.hasClass("fileexcelupload") ? true : false;
-    let isProduct = input.hasClass("productimageupload") ? true : false;
-    let isAvatar = input.hasClass("avatarupload") ? true : false;
-
-    let isMultiple = $(this).hasClass("multiple");
+    const input = $(this).prev("input");
+    const isExcel = input.hasClass("fileexcelupload") ? true : false;
+    const isProduct = input.hasClass("productimageupload") ? true : false;
+    const isAvatar = input.hasClass("avatarupload") ? true : false;
+    const isMultiple = $(this).hasClass("multiple");
+    const fileSizeLimit = parseInt($('#uploadSize').val());
+    
+    const extArray = isExcel? [".xls", ".xlsx"] 
+      : (isProduct || isAvatar)? ['.png', '.jpg', '.jpeg', '.bmp', '.csv', '.gif'] 
+      : [".png", ".jpg", ".jpeg", ".gif", ".bmp", '.csv', ".pdf", ".txt", ".doc", ".docx", ".rtf", '.xls', '.xlsx', '.ppt', '.pptx'];
+    
+    let isValidFile = true;
+    
+    if(isMultiple) {
+      for(let i of input[0].files) {
+        if(!verifyDocument(i, fileSizeLimit, extArray))
+          return false;
+      }
+    } else {
+      if(!verifyDocument(input[0].files[0], fileSizeLimit, extArray))
+      return false;
+    }
+    
     let formData = new FormData();
     formData.append("_csrf", token);
     formData.append("upload_file", true);
@@ -2690,6 +2762,9 @@ $(document).ready(function() {
         } else if (isProduct) {
           //Supplier Profile/Sign-up pages; Add Product page.
           let res = "../" + response.path.substring(7);
+          if(input.hasClass('multiparam')) {
+              res = '../../../' + res;
+            }
 
           input.attr("filePath", res);
           if (input.hasClass("separated")) {
@@ -2707,10 +2782,7 @@ $(document).ready(function() {
             
             let tr = table.find("tbody tr").eq(index);
             let span = tr.find("span.productImage");
-            let img = span.find("img");
-            if(input.hasClass('multiparam')) {
-              res = '../../../' + res;
-            }
+            let img = span.find("img");           
             
             table.jqGrid('setRowData', tr.attr('id'), {
               productImageSource : res

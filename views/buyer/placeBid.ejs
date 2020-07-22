@@ -48,6 +48,7 @@
     </nav>
 
     <div class="container">
+      <input type="hidden" id="uploadSize" value="<%= FILE_UPLOAD_MAX_SIZE %>">
       <br><br>
       <div class="card">
         <h5 class="card-header">Welcome!</h5>
@@ -176,7 +177,7 @@
             <div class="form-group">
               <label>Please choose your prepared product/service list (*.xls/xlsx, name+price+currency+amount on each row):</label>
               <input type="hidden" class="fileId" name="excel" value="">
-              <input class="form-control upload fileexcelupload fromBuyer" type="file" id="products" name="excel" single>
+              <input class="form-control upload fileexcelupload fromBuyer multiparam" type="file" id="products" name="excel" single>
               <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Process Excel File" />
             </div>
             <div class="form-group">

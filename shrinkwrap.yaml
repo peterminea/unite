@@ -1,5 +1,5 @@
 dependencies:
-  '@sendgrid/mail': 7.2.1
+  '@sendgrid/mail': 7.2.2
   akismet-api: 5.0.0
   assert: 2.0.0
   async: 3.2.0
@@ -43,13 +43,13 @@ dependencies:
   socket.io: 2.3.0
   socket.io-client: 2.3.0
   ssl: 1.0.0
-  stripe: 8.77.0
+  stripe: 8.78.0
   sweetalert: 2.1.2
   token: 0.1.0
   utf-8-validate: 5.0.2
   validator: 13.1.1
 packages:
-  /@sendgrid/client/7.2.1:
+  /@sendgrid/client/7.2.2:
     dependencies:
       '@sendgrid/helpers': 7.2.0
       axios: 0.19.2
@@ -57,7 +57,7 @@ packages:
     engines:
       node: 6.* || 8.* || >=10.*
     resolution:
-      integrity: sha512-QizSa+qKnq5xquMyeB2x0l2JNH3jvg3zHmGt0Ghz+DLUGpW8i1m/zvrqSZ0wdcGVO4/2lW3WFN0drv1+jOxVgA==
+      integrity: sha512-O2ensbYCZu7B7vMqcyaf5O8XqhDEyzwDYOxBvQYUenAqtpO+Fo5Xq6ZcZ+brCTxHQe1ytKQ9UCNKm/IZohRSPw==
   /@sendgrid/helpers/7.2.0:
     dependencies:
       chalk: 2.4.2
@@ -67,15 +67,15 @@ packages:
       node: '>= 6.0.0'
     resolution:
       integrity: sha512-Ps8rc3xFpaQvIWoW1zlWi9G7QnxYwXFOeq0915DzXf5knoiOgXdFk/XBXbCFjr2lf/JIzjgFUtAV/dN8Z8jzHw==
-  /@sendgrid/mail/7.2.1:
+  /@sendgrid/mail/7.2.2:
     dependencies:
-      '@sendgrid/client': 7.2.1
+      '@sendgrid/client': 7.2.2
       '@sendgrid/helpers': 7.2.0
     dev: false
     engines:
       node: 6.* || 8.* || >=10.*
     resolution:
-      integrity: sha512-LBAdwL+c6HmN2B/Q24LFy2do/IzBFeFoF05xBqgELxp8lMUwis4fbqgo09Zyj1CY0qHN+CfWcUfLNvHfVCh8oQ==
+      integrity: sha512-DFXyMEY0c8iXi2lfIfuuQZlRUrlAriE7yeh8D5MDyIPmmHuNKRfKe9Buu/5vT37iWZM2N2BNFdAKPWNUgXRkDQ==
   /@sindresorhus/is/0.14.0:
     dev: false
     engines:
@@ -2114,7 +2114,7 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-BrpvfNAE3dcvq7ll3xVumzjKjZQ5tI1sEUIKr3Uoks0XUl45St3FlatVqef9prk4jRDzhW6WZg+3bk93y6pLjA==
-  /stripe/8.77.0:
+  /stripe/8.78.0:
     dependencies:
       '@types/node': 14.0.24
       qs: 6.9.4
@@ -2122,7 +2122,7 @@ packages:
     engines:
       node: ^8.1 || >=10.*
     resolution:
-      integrity: sha512-uMZlcKzzQQuxHe4n+D3cbvsc1MPFCRF46NzRXSO2E0ns9sR1OGAYXPrfAfkauIhlV6APR88Yw6unlp8ZPPmIjQ==
+      integrity: sha512-G/mcFDzqDdcNnt8jS/9bQHtWMx2loRt6VvpjhxIvADPM2VyQEImeMQdHz2/IsNuXqu4qvgyDU3MtvGM7TGq9Sg==
   /superagent/5.3.1:
     dependencies:
       component-emitter: 1.3.0
@@ -2345,7 +2345,7 @@ registry: 'https://registry.npmjs.org/'
 shrinkwrapMinorVersion: 9
 shrinkwrapVersion: 3
 specifiers:
-  '@sendgrid/mail': ^7.2.1
+  '@sendgrid/mail': ^7.2.2
   akismet-api: ^5.0.0
   assert: ^2.0.0
   async: ^3.2.0
@@ -2389,7 +2389,7 @@ specifiers:
   socket.io: ^2.3.0
   socket.io-client: ^2.3.0
   ssl: ^1.0.0
-  stripe: ^8.77.0
+  stripe: ^8.78.0
   sweetalert: ^2.1.2
   token: ^0.1.0
   utf-8-validate: ^5.0.2

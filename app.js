@@ -422,8 +422,8 @@ const uploadAvatarController = require("./controllers/uploadAvatar");
 let methodOverride = require("method-override");
 app.use(methodOverride("_method"));
 
-let extArray = [".png", ".jpg", ".jpeg", ".gif", ".bmp", ".pdf", ".txt", ".doc", ".docx", ".rtf"],
-  prodImageArray = ['.png', '.jpg', '.jpeg'],
+let extArray = [".png", ".jpg", ".jpeg", ".gif", ".bmp", '.csv', ".pdf", ".txt", ".doc", ".docx", ".rtf", '.xls', '.xlsx', '.ppt', '.pptx'],
+  prodImageArray = ['.png', '.jpg', '.jpeg', '.bmp', '.csv', '.gif'],
   excelArray = [".xls", ".xlsx"];
 
 //Upload files to Glitch:
@@ -459,7 +459,7 @@ let upload = multer({
     callback(null, true);
   },
   limits: {
-    fileSize: 1024 * 1024 //1 MB
+    fileSize: process.env.FILE_UPLOAD_MAX_SIZE
   }
 });
 
@@ -482,7 +482,7 @@ let uploadExcel = multer({
     callback(null, true);
   },
   limits: {
-    fileSize: 1024 * 1024 //1 MB
+    fileSize: process.env.FILE_UPLOAD_MAX_SIZE
   }
 });
 
@@ -519,7 +519,7 @@ let uploadProdImage = multer({
     callback(null, true);
   },
   limits: {
-    fileSize: 1024 * 1024 //1 MB
+    fileSize: process.env.FILE_UPLOAD_MAX_SIZE
   }
 });
 
@@ -1128,15 +1128,12 @@ async function getUsers2(db, table) {
 }
 
 
-
-
 if (1 == 2)
   MongoClient.connect(URI, { useUnifiedTopology: true }, async (err, client) => {
     if (err) {
       console.error(err.message);
       throw err;
-    } 
-
+    }
 
     db = client.db(BASE); //Right connection!
     let sup = await getUsers(db, 'suppliers');    
