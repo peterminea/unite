@@ -300,8 +300,6 @@ function getProductsList(elem, url, token) {
 
         obj.append(opt);
       }
-      //res(data);
-      //autocomp(obj, data, isEnter);
     },
     error: function(err) {
       alert(err);
@@ -694,6 +692,15 @@ function checkName(arr, name) {
 function getId(val) {
   return !val ? '' :
     val.indexOf("_") != -1? val.substr(val.indexOf("_") + 1) : '';
+}
+
+
+function getIdClear(obj) {
+  let id = '_' + getId(obj.attr('id'));
+  if(id.length == 1)
+    id = '';
+  
+  return id;
 }
 
 
@@ -2320,55 +2327,64 @@ $(document).ready(function() {
         if($('#supplierPrice'+id).length) 
           $('#supplierPrice'+id).text(parseFloat(totalPriceConverted).toFixed(2));
           $('#isupplierPrice'+id).val(parseFloat(totalPriceConverted).toFixed(2));
-      });
+      });   
+    
     
       $('input[id^="prodServiceInput"]').on('change', function() {
         if($(this).val()) {
-          let id = '_' + getId($(this).attr('id'));
-          if(id.length == 1)
-            id = '';
+          let id = getIdClear($(this));
+          var amount = $('#amount'+id).val();
           
-          $("#addProdService"+id).prop('disabled', false);
-          let price = $(this).attr('price')? $(this).attr('price') : 1;
-          price *= parseInt($('#amount'+id).val());
-          $('#buyerPriceUnit'+id).text(price);
+          if(amount && amount > 0) {
+            $("#addProdService"+id).prop('disabled', false);
           
-          let supplierCurrency = $('#supplierCurrency'+id).text();
-          let suppPrice = fx.convert(price, {from: $('span.bidCurrency[index="'+ (id.length? id : '-1') +'"]').first().text(), to: supplierCurrency
-       });
-          $('#supplierPriceUnit'+id).text(suppPrice);
+            let price = $(this).attr('price')? parseFloat($(this).attr('price')) : 1;
+            price *= parseInt($('#amount'+id).val());
+            $('#buyerPriceUnit'+id).text(parseFloat(price).toFixed(2));
+
+            let supplierCurrency = $('#supplierCurrency'+id).text();
+            let suppPrice = fx.convert(price, 
+                                       {from: $('span.bidCurrency[index="'+ (id.length? id : '-1') +'"]').first().text(), to: supplierCurrency
+             });
+            
+            $('#supplierPriceUnit'+id).text(parseFloat(suppPrice).toFixed(2));
+          }
         }
       });
+    
       
-      $('input[id^="amount"]').inputFilter(function(value) {
+      $('input.amountInput').inputFilter(function(value) {
         return /^\d*$/.test(value);
       });
+    
 
-      $('input[id^="amount"]').on('change', function() {
-        let id = '_' + getId($(this).attr('id'));
-        if(id.length == 1)
-            id = '';
+      $('input.amountInput').off('change').on('change', function() {
+        let id = getIdClear($(this));
+        var validValues = $(this).val() > 0 && ($('#prodServiceInput'+id).val());
+        $("#addProdService"+id).prop('disabled', validValues? false : true);
         
-        let price = $("#prodServiceInput"+id).attr('price')? $("#prodServiceInput"+id).attr('price') : 1;
-        price *= parseInt($(this).val());
-        let maxAmount = $("#prodServiceInput"+id).attr('maxAmount');
+        if(validValues) {
+          let price = $("#prodServiceInput"+id).attr('price')? parseFloat($("#prodServiceInput"+id).attr('price')) : 1;
+          price *= parseInt($(this).val());
+          let maxAmount = parseInt($("#prodServiceInput"+id).attr('maxAmount'));
 
-        if(maxAmount && $(this).val() > maxAmount) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error!',
-            text: 'You have reached the limit of ' + maxAmount + ' samples of this product. Supplier\'s stock is not enough.'
-          });
+          if(maxAmount && parseInt($(this).val()) > maxAmount) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error!',
+              text: 'You have reached the limit of ' + maxAmount + ' samples of this product. Supplier\'s stock is not enough.'
+            });
 
-          return false;
+            return false;
+          }
+
+          $('#buyerPriceUnit'+id).text(parseFloat(price).toFixed(2)); 
+          let supplierCurrency = $('#supplierCurrency'+id).text();
+          let suppPrice = fx.convert(price, {from: $('span.bidCurrency[index="'+ (id.length? id : '-1') +'"]').first().text(), to: supplierCurrency});
+          $('#supplierPriceUnit'+id).text(parseFloat(suppPrice).toFixed(2));
         }
-
-        $('#buyerPriceUnit'+id).text(price);
-        
-        let supplierCurrency = $('#supplierCurrency'+id).text();
-        let suppPrice = fx.convert(price, {from: $('span.bidCurrency[index="'+ (id.length? id : '-1') +'"]').first().text(), to: supplierCurrency       });
-        $('#supplierPriceUnit'+id).text(suppPrice);
       });
+    
 
       $('select.buyerCurrency').on('change', function() {
         let curr = $(this).find('option:selected').text();
@@ -2412,8 +2428,8 @@ $(document).ready(function() {
         
         let buyerPriceUnit = $('#buyerPriceUnit'+id), buyerPriceCurr = $('#buyerPriceCurrency'+id);
         if(buyerPriceUnit.text() != null && buyerPriceUnit.text() != '0') {
-          let newPriceUnit = fx.convert(parseFloat(buyerPriceUnit.text()).toFixed(2), {from: buyerPriceCurr.text(), to: curr});
-          buyerPriceUnit.text(newPriceUnit);
+          let newPriceUnit = fx.convert(parseFloat(buyerPriceUnit.text()), {from: buyerPriceCurr.text(), to: curr});
+          buyerPriceUnit.text(parseFloat(newPriceUnit).toFixed(2));
         }
       
         buyerPriceCurr.text(curr);        
@@ -2421,16 +2437,17 @@ $(document).ready(function() {
         grid.find('tr:not(:first)').each(function(ind, element) {
           let addedPrice = $(element).attr('price'), totalPrice = $(element).attr('totalPrice'), shownPrice = $(element).find('span.price').text(), theCurr = $(element).find('span.currency').first().text();
           
-          addedPrice = fx.convert(parseFloat(addedPrice).toFixed(2), {from: theCurr, to: curr});
-          totalPrice = fx.convert(parseFloat(totalPrice).toFixed(2), {from: theCurr, to: curr});
-          shownPrice = fx.convert(parseFloat(shownPrice).toFixed(2), {from: theCurr, to: curr});
+          addedPrice = fx.convert(parseFloat(addedPrice), {from: theCurr, to: curr});
+          totalPrice = fx.convert(parseFloat(totalPrice)., {from: theCurr, to: curr});
+          shownPrice = fx.convert(parseFloat(shownPrice), {from: theCurr, to: curr});
           
-          $(element).attr('price', addedPrice);
-          $(element).attr('totalPrice', totalPrice);
-          $(element).find('span.price').text(shownPrice);
+          $(element).attr('price', parseFloat(addedPrice).toFixed(2);
+          $(element).attr('totalPrice', parseFloat(totalPrice).toFixed(2));
+          $(element).find('span.price').text(parseFloat(shownPrice).toFixed(2));
           $(element).find('span.currency').text(curr);
         });
       });
+    
     
       $('select.productsList').on('change', function() {
         let opt = $(this).find('option:selected');
@@ -2439,11 +2456,11 @@ $(document).ready(function() {
           return false;
         }
         
-        let name = $(this).val();
-        
+        let name = $(this).val();        
         $('span.hid').first().parent('div').find('span.productName').text(opt.text());
         
-        if($('.multiSupp').length) {          $(`span.unitPrice[suppId="${opt.attr('supplierId')}"]`).parent('div').find('.productName').text(opt.text());
+        if($('.multiSupp').length) { 
+          $(`span.unitPrice[suppId="${opt.attr('supplierId')}"]`).parent('div').find('.productName').text(opt.text());
         } else {
           $('span.hid').eq(2).parent('div').find('span.productName').text(opt.text());
         }
@@ -2461,8 +2478,7 @@ $(document).ready(function() {
           $('#prodServices').attr('supplierCurrency', currency);          
         }
         
-        let maxAmount = opt.attr('maxAmount');
-      
+        let maxAmount = opt.attr('maxAmount');      
         let bidCurrency = $('select.buyerCurrency')
           .find('option:selected')
           .text();
@@ -2470,10 +2486,7 @@ $(document).ready(function() {
         if(isSingle) {
           $('#prodServiceInput')
             .val(opt.text());
-         
-          //$('#prodServiceInput')
-            //.trigger('change');
-          
+       
           $('#addProdService').removeAttr('disabled');
         }
         
@@ -2497,7 +2510,7 @@ $(document).ready(function() {
         input.trigger('change');
       });
     
-      $('input[readonly]').css('background-color', 'lightgray');//No names on spans.    
+      $('input[readonly]').css('background-color', 'lightgray');//No names on spans. Also, disabled inputs means no readability for back-end.
     
       $('input.prodInput').not(':disabled').autocomplete({
         source: function(req, res) {
@@ -2555,7 +2568,8 @@ $(document).ready(function() {
   }
   
 
-  if (!$("input.upload").length) return false;
+  if (!$("input.upload").length) 
+    return false;
 
   let token = $("input[name='_csrf']:first").val();
 

@@ -43,7 +43,7 @@ dependencies:
   socket.io: 2.3.0
   socket.io-client: 2.3.0
   ssl: 1.0.0
-  stripe: 8.76.0
+  stripe: 8.77.0
   sweetalert: 2.1.2
   token: 0.1.0
   utf-8-validate: 5.0.2
@@ -90,10 +90,10 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-XIB2XbzHTN6ieIjfIMV9hlVcfPU26s2vafYWQcZHWXHOxiaRZYEDKEwdl129Zyg50+foYV2jCgtrqSA6qNuNSA==
-  /@types/node/14.0.23:
+  /@types/node/14.0.24:
     dev: false
     resolution:
-      integrity: sha512-Z4U8yDAl5TFkmYsZdFPdjeMa57NOvnaf1tljHzhouaPEp7LCj2JKkejpI1ODviIAQuW4CcQmxkQ77rnLsOOoKw==
+      integrity: sha512-btt/oNOiDWcSuI721MdL8VQGnjsKjlTMdrKyTcLCKeQp/n4AAMFJ961wMbp+09y8WuGPClDEv07RIItdXKIXAA==
   /accepts/1.3.7:
     dependencies:
       mime-types: 2.1.27
@@ -2114,15 +2114,15 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-BrpvfNAE3dcvq7ll3xVumzjKjZQ5tI1sEUIKr3Uoks0XUl45St3FlatVqef9prk4jRDzhW6WZg+3bk93y6pLjA==
-  /stripe/8.76.0:
+  /stripe/8.77.0:
     dependencies:
-      '@types/node': 14.0.23
+      '@types/node': 14.0.24
       qs: 6.9.4
     dev: false
     engines:
       node: ^8.1 || >=10.*
     resolution:
-      integrity: sha512-5KJ9tom3eOOwPzyRZXW7tNqZmNqiRl66xqw30p6W/i1c9ZmVizmriTgRZ0PJldjsoZhrwlr4X6ddcGndc6H93g==
+      integrity: sha512-uMZlcKzzQQuxHe4n+D3cbvsc1MPFCRF46NzRXSO2E0ns9sR1OGAYXPrfAfkauIhlV6APR88Yw6unlp8ZPPmIjQ==
   /superagent/5.3.1:
     dependencies:
       component-emitter: 1.3.0
@@ -2389,7 +2389,7 @@ specifiers:
   socket.io: ^2.3.0
   socket.io-client: ^2.3.0
   ssl: ^1.0.0
-  stripe: ^8.76.0
+  stripe: ^8.77.0
   sweetalert: ^2.1.2
   token: ^0.1.0
   utf-8-validate: ^5.0.2

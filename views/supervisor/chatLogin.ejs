@@ -25,7 +25,7 @@
       
       $('input.form-control').on('change', function () {
         if($('#username').val() && $('#room').val()) {
-          var string = "../../../../../../../supervisor/chat/";
+          let string = "../../../../../../../supervisor/chat/";
           string += $('#from').val() + '/' + $('#to').val() + '/' 
           + $('#username').val() + '/' + $('#room').val() + '/' 
           + $('#reqId').val() + '/' + $('#reqName').val() + '/' 

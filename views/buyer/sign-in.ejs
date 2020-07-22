@@ -27,8 +27,8 @@
     errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
                  
     $('#login').on('submit', function() {
-      var formData = new FormData(document.getElementById('login'));
-      var captchaResponse = formData.get('g-recaptcha-response');
+      let formData = new FormData(document.getElementById('login'));
+      let captchaResponse = formData.get('g-recaptcha-response');
       $('input[name="captchaResponse"]').val(captchaResponse);
     });
   });

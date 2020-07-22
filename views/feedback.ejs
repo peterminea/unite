@@ -22,7 +22,7 @@
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-      var id = "<%= userId %>", 
+      let id = "<%= userId %>", 
       role = "<%= role %>", 
       avatar = "<%= avatar %>", 
       name = "<%= userName %>", 
@@ -32,11 +32,11 @@
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
 
       $('#feedbackForm').submit(function(e) {
-        var formData = new FormData(document.getElementById('feedbackForm'));
-        var captchaResponse = formData.get('g-recaptcha-response');
+        let formData = new FormData(document.getElementById('feedbackForm'));
+        let captchaResponse = formData.get('g-recaptcha-response');
         $('input[name="captchaResponse"]').val(captchaResponse);
         
-        var option = $(this).find('select option:not(:eq(0)):selected');
+        let option = $(this).find('select option:not(:eq(0)):selected');
         
         if(!option.length) {
           alert('Please choose a feedback type from the list.');

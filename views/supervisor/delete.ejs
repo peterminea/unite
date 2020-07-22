@@ -27,7 +27,7 @@
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       
       $('#mainForm').submit(function(e) {
-        var radio = $(this).find('input[type="radio"]:checked');
+        let radio = $(this).find('input[type="radio"]:checked');
         radio.attr('name', 'reasonTitle');
         if(!confirm('Are you sure you want to delete your Supervisor account?\nThis will also remove:\n\nYour associated Buyers and their adjacent data (sent orders, message history, user tokens);\nYour personal data (tokens included) from UNITE.')) {
           return false;

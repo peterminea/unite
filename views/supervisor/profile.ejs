@@ -37,11 +37,6 @@
           if(!validCountry($('.country'))) {
             return false;
           }
-/*
-          $('input.autocomp').not('.country').each(function() {
-            var cls = !($(this).hasClass('present')) && !($(this).hasClass('changed'));
-            $(this).next('input').val(cls? 'canSave' : '');
-          });*/
 
           $('#updateForm').submit();
         });

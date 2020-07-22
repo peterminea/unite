@@ -102,6 +102,7 @@
             }
 
             initGrid(colModel, data2, "#gridProds", '#prodPager', "productName", 'Products List', 1100);
+            $('#loadCatalog').prop('disabled', true);
 
             str = '';
             str += '<br><div class=" profile-form"> <form id="bidProdsForm" method="POST">' 
@@ -212,7 +213,7 @@
     </form>
     
     <div class="mt-4">
-      <button class="form-control btn btn-warning" MAX="<%= MAX_PROD %>" id="loadCatalog" buyer="<%= buyer._id %>" avatar="<%= buyer.avatar %>">
+      <button class="form-control btn btn-warning" style="margin-bottom: 20px" MAX="<%= MAX_PROD %>" id="loadCatalog" buyer="<%= buyer._id %>" avatar="<%= buyer.avatar %>">
         Load Catalog of Products
       </button>
     </div>
@@ -519,92 +520,92 @@
                         <button class="btn btn-outline-secondary prodButton" type="button" disabled MAX="<%= MAX_PROD %>" id="addProdService_<%= i %>">Add</button>
                       </div>
                     </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Amount*</label>
-                    <input type="number" min="1" step="1" class="form-control" id="amount_<%= i %>" name="theAmount" value="0" required>
-                  </div>
-                  <div class="form-group">
-                    <label>Upload a product image:</label>
-                    <input type="hidden" class="fileId" name="productImage" value="">
-                    <input class="form-control upload productimageupload" type="file" id="productImage_<%= i %>" name="products" single>
-                    <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload Product Image" />                    
-                  </div>
-                    <ul class="list-group" MAX="<%= MAX_PROD %>" buyerCurrency="<%= buyer.currency %>" supplierCurrency="<%= supplier.currency %>" id="prodServices_<%= i %>">
-                    </ul>
-                    <p class='term'>
-                      You have a number of <span class='productsCount'>0</span> products.
-                    </p>
-                    <input type="hidden" required id="hiddenProdServicesList_<%= i %>" name="productList" value="">
-                    <input type="hidden" required id="amountList_<%= i %>" name="amountList" value="">
-                    <input type="hidden" required id="priceList_<%= i %>" name="priceList" value="">
-                    <input type="hidden" required id="priceOriginalList_<%= i %>" name="priceOriginalList" value="">
-                    <input type="hidden" required id="productImagesList_<%= i %>" name="productImagesList" value="">
-                  </div>
-                  <div id="jqDiv_<%= i %>" class="form-group">
-                    <table id="grid_<%= i %>" MAX="<%= MAX_PROD %>" supplierId="<%= supplier._id %>" buyerCurrency="<%= buyer.currency %>" supplierCurrency="<%= supplier.currency %>">
-                    </table>
-                    <div id='prodPager_<%= i %>'>
+                    <div class="form-group">
+                      <label class="col-form-label">Amount*</label>
+                      <input type="number" min="1" step="1" class="form-control amountInput" id="amount_<%= i %>" name="theAmount" value="0" required>
                     </div>
-                  </div>
-                  <div class="form-group">
-                    <label>Total number of items (Overall Amount):</label>
-                    <input class="form-control" type="number" readonly id="totalAmount_<%= i %>" name="amount" value="0">
-                  </div>
-                   <div class="form-group">
-                    <label class="col-form-label">Your price for selected product:</label>
-                    <span class="form-control hid">
-                      <span id="buyerPriceUnit">0</span>
-                      <span index="-1" class="bidCurrency" id="buyerCurrencyUnit"></span>
-                    </span>
-                  </div>
-                  <div class="form-group">
-                    <label class=" col-form-label">Your total price:</label>
-                    <span class="form-control hid">
-                      <span index="-1" class="bidPrice" id="sprice_<%= i %>">0</span>
-                      <span index="-1" class="bidCurrency" id="scurrency_<%= i %>"></span>
-                      <input type="hidden" index="-1" class="bidPrice" id="price_<%= i %>" name="buyerPrice" value="0">
-                      <input type="hidden" index="-1" class="bidCurrency" id="currency_<%= i %>" name="buyerCurrency">
-                    </span>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Supplier's price for selected product:</label>
-                    <span class="form-control hid">
-                      <span id="supplierPriceUnit_<%= i %>">0</span>
-                      <span index="<%= i %>" class="suppCurrency" id="supplierCurrencyUnit_<%= i %>"><%= supplier.currency %></span>
-                    </span>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Supplier's equivalent total price:</label>
-                    <span class="form-control hid">
-                      <span id="supplierPrice_<%= i %>" name="supplierPrice">0</span>
-                      <span index="<%= i %>" class="suppCurrency" id="supplierCurrency_<%= i %>" name="supplierCurrency"><%= supplier.currency %></span>
-                    </span>
-                  </div>
-                   <div class="form-group">
-                    <label class="col-form-label">Status*</label>
-                    <input type="number" id="status_<%= i %>" class="form-control" name="status" min="0" max="4" step="1" value="<%= statuses[0].value %>" readonly>
-                  </div>
-                  <div class="form-group">
-                    <select class='statuses' style="width: 100%" id="statuses_<%= i %>">
-                      <% if (statuses != null) { for (status of statuses) { %>
-                      <option disabled title="<%= status.name %>" value="<%= status.value %>"><%= status.name %></option>
-                      <% } } %>
-                    </select>
-                    <% if (statusesJson != null) { %>
-                      <div style="visibility: hidden" id="statusJsonValues">                
-                        <span class='statuses'><%= statusesJson %></span>                
+                    <div class="form-group">
+                      <label>Upload a product image:</label>
+                      <input type="hidden" class="fileId" name="productImage" value="">
+                      <input class="form-control upload productimageupload" type="file" id="productImage_<%= i %>" name="products" single>
+                      <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload Product Image" />                    
+                    </div>
+                      <ul class="list-group" MAX="<%= MAX_PROD %>" buyerCurrency="<%= buyer.currency %>" supplierCurrency="<%= supplier.currency %>" id="prodServices_<%= i %>">
+                      </ul>
+                      <p class='term'>
+                        You have a number of <span class='productsCount'>0</span> products.
+                      </p>
+                      <input type="hidden" required id="hiddenProdServicesList_<%= i %>" name="productList" value="">
+                      <input type="hidden" required id="amountList_<%= i %>" name="amountList" value="">
+                      <input type="hidden" required id="priceList_<%= i %>" name="priceList" value="">
+                      <input type="hidden" required id="priceOriginalList_<%= i %>" name="priceOriginalList" value="">
+                      <input type="hidden" required id="productImagesList_<%= i %>" name="productImagesList" value="">
+                    </div>
+                    <div id="jqDiv_<%= i %>" class="form-group">
+                      <table id="grid_<%= i %>" MAX="<%= MAX_PROD %>" supplierId="<%= supplier._id %>" buyerCurrency="<%= buyer.currency %>" supplierCurrency="<%= supplier.currency %>">
+                      </table>
+                      <div id='prodPager_<%= i %>'>
                       </div>
-                    <% } %>
-                  </div>
-                  <div class="form-group">
-                    <label>Bid extension letter</label>
-                    <input type="hidden" class="fileId" name="validityExtensionId">
-                    <input class="form-control upload" type="file" id="validityExtension" name="validityExtension"/>
-                    <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
-                  </div>
-                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                  <input type="hidden" name="buyer" value="<%= buyer._id %>">
-                  <input type="hidden" name="supplier" value="<%= supplier._id %>">
+                    </div>
+                    <div class="form-group">
+                      <label>Total number of items (Overall Amount):</label>
+                      <input class="form-control" type="number" readonly id="totalAmount_<%= i %>" name="amount" value="0">
+                    </div>
+                     <div class="form-group">
+                      <label class="col-form-label">Your price for selected product:</label>
+                      <span class="form-control hid">
+                        <span id="buyerPriceUnit">0</span>
+                        <span index="-1" class="bidCurrency" id="buyerCurrencyUnit"></span>
+                      </span>
+                    </div>
+                    <div class="form-group">
+                      <label class=" col-form-label">Your total price:</label>
+                      <span class="form-control hid">
+                        <span index="-1" class="bidPrice" id="sprice_<%= i %>">0</span>
+                        <span index="-1" class="bidCurrency" id="scurrency_<%= i %>"></span>
+                        <input type="hidden" index="-1" class="bidPrice" id="price_<%= i %>" name="buyerPrice" value="0">
+                        <input type="hidden" index="-1" class="bidCurrency" id="currency_<%= i %>" name="buyerCurrency">
+                      </span>
+                    </div>
+                    <div class="form-group">
+                      <label class="col-form-label">Supplier's price for selected product:</label>
+                      <span class="form-control hid">
+                        <span id="supplierPriceUnit_<%= i %>">0</span>
+                        <span index="<%= i %>" class="suppCurrency" id="supplierCurrencyUnit_<%= i %>"><%= supplier.currency %></span>
+                      </span>
+                    </div>
+                    <div class="form-group">
+                      <label class="col-form-label">Supplier's equivalent total price:</label>
+                      <span class="form-control hid">
+                        <span id="supplierPrice_<%= i %>" name="supplierPrice">0</span>
+                        <span index="<%= i %>" class="suppCurrency" id="supplierCurrency_<%= i %>" name="supplierCurrency"><%= supplier.currency %></span>
+                      </span>
+                    </div>
+                     <div class="form-group">
+                      <label class="col-form-label">Status*</label>
+                      <input type="number" id="status_<%= i %>" class="form-control" name="status" min="0" max="4" step="1" value="<%= statuses[0].value %>" readonly>
+                    </div>
+                    <div class="form-group">
+                      <select class='statuses' style="width: 100%" id="statuses_<%= i %>">
+                        <% if (statuses != null) { for (status of statuses) { %>
+                        <option disabled title="<%= status.name %>" value="<%= status.value %>"><%= status.name %></option>
+                        <% } } %>
+                      </select>
+                      <% if (statusesJson != null) { %>
+                        <div style="visibility: hidden" id="statusJsonValues">                
+                          <span class='statuses'><%= statusesJson %></span>                
+                        </div>
+                      <% } %>
+                    </div>
+                    <div class="form-group">
+                      <label>Bid extension letter</label>
+                      <input type="hidden" class="fileId" name="validityExtensionId">
+                      <input class="form-control upload" type="file" id="validityExtension" name="validityExtension"/>
+                      <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
+                    </div>
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="buyer" value="<%= buyer._id %>">
+                    <input type="hidden" name="supplier" value="<%= supplier._id %>">
                   <script type="text/javascript">
                     function limitStatus(e) {
                         let ASCIICode = (e.which) ? e.which : e.keyCode;
