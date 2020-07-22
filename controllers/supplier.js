@@ -67,6 +67,7 @@ exports.getAddProduct = (req, res) => {
   
   res.render("supplier/addProduct", {
     supplierId: req.session.supplier._id,
+    FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
     successMessage: success,
     errorMessage: error
   });
@@ -414,6 +415,7 @@ exports.getSignUp = (req, res) => {
           return res.render("supplier/sign-up", {
             MAX_PROD: process.env.SUPP_MAX_PROD,
             DEFAULT_CURR: process.env.SUPP_DEFAULT_CURR,
+            FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
             countries: country,
             industries: industry,
             capabilities: cap,
@@ -875,6 +877,7 @@ exports.getProfile = (req, res) => {
             capabilities: cap,
             MAX_PROD: process.env.SUPP_MAX_PROD,
             DEFAULT_CURR: process.env.SUPP_DEFAULT_CURR,
+            FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
             successMessage: success,
             errorMessage: error,
             profile: req.session.supplier

@@ -56,6 +56,7 @@
     <div class="container">
       <div class="col-md-12">
         <form method="POST">
+          <input type="hidden" id="uploadSize" value="<%= FILE_UPLOAD_MAX_SIZE %>">
           <input type="hidden" name="_id" value="<%= supplierId %>">
          <legend>
             Add new Service/Product

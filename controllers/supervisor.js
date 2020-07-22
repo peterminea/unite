@@ -486,6 +486,7 @@ exports.getSignUp = (req, res) => {
       res.render("supervisor/sign-up", {
         captchaSiteKey: captchaSiteKey,
         countries: country,
+        FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
         successMessage: success,
         errorMessage: error
       });
@@ -638,6 +639,7 @@ exports.getProfile = (req, res) => {
     res.render("supervisor/profile", {
       successMessage: success,
       errorMessage: error,
+      FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
       countries: country,
       profile: req.session.supervisor
     });
