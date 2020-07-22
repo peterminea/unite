@@ -67,6 +67,7 @@ exports.getAddProduct = (req, res) => {
   
   res.render("supplier/addProduct", {
     supplierId: req.session.supplier._id,
+    FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
     successMessage: success,
     errorMessage: error
   });
