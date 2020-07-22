@@ -26,14 +26,14 @@
   <script src="/functions.js"></script>
   <script type="text/javascript">
   $(document).ready(function() {
-    var id = "<%= userId %>", 
+    let id = "<%= userId %>", 
     role = "<%= role %>", 
     avatar = "<%= avatar %>", 
     name = "<%= userName %>", 
     type = "<%= userType %>";
     userInputs(id, role, avatar, name, type, $('ul.mr-auto'));
     
-    var token = $('input[name="_csrf"]').val();
+    let token = $('input[name="_csrf"]').val();
     $('.downloadFile,.deleteFile').attr('token', token);
     $('.deleteFile').on('click', function() {
       removeFile(this);

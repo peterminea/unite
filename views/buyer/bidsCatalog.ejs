@@ -77,13 +77,14 @@
       { name: 'supplierName', label: 'Bid Supplier Name', align: 'center', sorttype: 'text', search: true, width: 220},      
       { name: 'buyerPrice', label: 'Buyer\'s Price', align: 'center', formatter: buyerPriceFormatter, search: true, width: 100},
       { name: 'supplierPrice', label: 'Supplier\'s Price', align: 'center', formatter: supplierPriceFormatter, search: true, width: 100 }, 
+      { name: 'preferredDeliveryDate', label: 'Preferred Delivery Date', align: 'center', search: true, width: 100},
       { name: 'dateCreated', label: 'Creation Date', align: 'center', search: true, width: 200},
       { name: 'expiryDate', label: 'Expiry Date', align: 'center', search: true, width: 100},
       { name: 'isCancelled', label: 'Is Cancelled?', align: 'center', search: true, width: 100},
       { name: 'isExpired', label: 'Is Expired?', align: 'center', search: true, width: 100 }
     ];
 
-  initGrid(colModelGridBids, data, "#gridBids", '#bidsPager', "bidName", 'Bids List', 1300);
+  initGrid(colModelGridBids, data, "#gridBids", '#bidsPager', "bidName", 'Bids List', 1500);
   </script>
   <% i = 0; for (bid of bids) { %>
   <script type="text/javascript">
@@ -92,6 +93,7 @@
           id: "<%= i %>",
           bidName: "<%= bid.requestName %>",
           supplierName: "<%= bid.supplierName %>",
+          preferredDeliveryDate: "<%= bid.preferredDeliveryDate %>",
           expiryDate: "<%= bid.expiryDateFormatted %>",
           dateCreated: "<%= bid.createdAtFormatted %>",
           isCancelled: "<%= bid.isCancelled %>",

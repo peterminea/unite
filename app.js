@@ -48,7 +48,7 @@ const stripe = require("stripe")(stripeSecretKey);
 const cookieParser = require("cookie-parser");
 //require('dotenv').config();
 
-//const MONGODB_URI = "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";//The DB url is actually saved as an Environment variable, it will be easier to use anywhere in the application that way.
+//const MONGODB_URI = "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";//The DB url is actually saved as an Environment letiable, it will be easier to use anywhere in the application that way.
 //Syntax: process.env.MONGODB_URI
 
 const app = express();
@@ -74,7 +74,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/public', (req, res, next) => {
   console.log(req);
   if (!req.session || process.env.ENV != 'dev') {
-    var result = req.url.match(/(.*)\.js$/)
+    let result = req.url.match(/(.*)\.js$/)
     if(result) {
       return res.status(403).end('403 Forbidden')
     }
@@ -106,7 +106,7 @@ app.use(require("flash")());
 //app.use(require('express-flash')());
 
 app.use(function (req, res, next) {
-  var token = req.csrfToken();
+  let token = req.csrfToken();
   res.cookie('XSRF-TOKEN', token);
   res.locals.csrfToken = token;
   next();
@@ -156,7 +156,7 @@ server2.on("stream", (stream, headers) => {
 });
 
 server2.listen(8443);*/
-//Lambda variant: messages.sort((a,b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0));
+//Lambda letiant: messages.sort((a,b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0));
 app.get("/messages", (req, res) => {
   Message.find(
     {
@@ -182,7 +182,7 @@ server.listen(port, () => {
 });
 
 app.post("/messages", (req, res) => {
-  var message = new Message(req.body);
+  let message = new Message(req.body);
 
   message.save(err => {
     if (err) return res.sendStatus(500);
@@ -212,7 +212,7 @@ socket.on("connection", sock => {
   sock.on("join", (obj, callback) => {
     console.log("New WebSocket Connection: " + obj.username);
 
-    var { error, user } = addUser({
+    let { error, user } = addUser({
       id: sock.id,
       username: obj.username,
       room: obj.room
@@ -231,9 +231,9 @@ socket.on("connection", sock => {
     }
 
     sock.join(user.room);
-    var msg = generateSimpleMessage("Admin", "Welcome to the UNITE chat!");
+    let msg = generateSimpleMessage("Admin", "Welcome to the UNITE chat!");
     sock.emit("message", msg);
-    var users = getUsersInRoom(user.room);
+    let users = getUsersInRoom(user.room);
     console.log(users.length + " " + users[0].username);
     socket.to(user.room).emit("roomData", {
       room: user.room,
@@ -258,7 +258,7 @@ socket.on("connection", sock => {
 
   sock.on("disconnect", function() {
     console.log("User disconnected!");
-    var user = removeUser(sock.id);
+    let user = removeUser(sock.id);
     console.log(JSON.stringify(user));
     if (user) {
       socket
@@ -280,7 +280,7 @@ socket.on("connection", sock => {
 
   sock.on("sendMessage", function(msgData, callback) {
     //console.log(sock);
-    var user = getUser(sock.id);
+    let user = getUser(sock.id);
 
     if (!user) {
       user = {
@@ -305,7 +305,7 @@ socket.on("connection", sock => {
       );
     }
 
-    var mesg = new Message(msgData);
+    let mesg = new Message(msgData);
 
     mesg.save(err => {
       if (err) {
@@ -324,7 +324,7 @@ socket.on("connection", sock => {
 
   sock.on("sendLocation", (coords, callback) => {
     console.log(coords);
-    var user = getUser(sock.id);
+    let user = getUser(sock.id);
     if (!user) {
       user = {
         id: sock.id,
@@ -353,7 +353,7 @@ socket.on("connection", sock => {
   });
 
   sock.on("typing", data => {
-    var user = getUser(sock.id);
+    let user = getUser(sock.id);
     if (!user) {
       user = {
         id: sock.id,
@@ -379,10 +379,10 @@ app.get("/loadProductsCatalog", (req, res) => {
       return false;
     }
 
-    var catalogItems = [];
+    let catalogItems = [];
 
-    for (var i in products) {
-      var supId = products[i].supplier;
+    for (let i in products) {
+      let supId = products[i].supplier;
 
       await Supplier.findOne({ _id: supId }, function(err, obj) {
         if (err) {
@@ -419,35 +419,35 @@ const ObjectId = require("mongodb").ObjectId;
 const uploadController = require("./controllers/upload");
 const uploadAvatarController = require("./controllers/uploadAvatar");
 
-var methodOverride = require("method-override");
+let methodOverride = require("method-override");
 app.use(methodOverride("_method"));
 
-var extArray = [".png", ".jpg", ".jpeg", ".gif", ".bmp", ".pdf", ".txt", ".doc", ".docx", ".rtf"],
+let extArray = [".png", ".jpg", ".jpeg", ".gif", ".bmp", ".pdf", ".txt", ".doc", ".docx", ".rtf"],
   prodImageArray = ['.png', '.jpg', '.jpeg'],
   excelArray = [".xls", ".xlsx"];
 
 //Upload files to Glitch:
-var storage = multer.diskStorage({
+let storage = multer.diskStorage({
   destination: function(req, file, callback) {
     callback(null, path.join("${__dirname}/../public/uploads"));
     //callback(null, 'public/uploads/');
   },
   filename: function(req, file, callback) {
     // + path.extname(file.originalname)
-    var date = dateformat(new Date(), "dddd_mmmm_dS_yyyy_h.MM.ss_TT"); //Date.now()
-    var date2 = moment(new Date().getTime()).format("HH.mm.ss.a");
+    let date = dateformat(new Date(), "dddd_mmmm_dS_yyyy_h.MM.ss_TT"); //Date.now()
+    let date2 = moment(new Date().getTime()).format("HH.mm.ss.a");
     callback(null, file.fieldname + "_" + date2 + "_" + file.originalname); //The name itself.
   }
 });
 
 
-var upload = multer({
+let upload = multer({
   storage: storage,
   fileFilter: function(req, file, callback) {
-    var ext = path.extname(file.originalname);
-    var isItIn = false;
+    let ext = path.extname(file.originalname);
+    let isItIn = false;
 
-    for (var i in extArray)
+    for (let i in extArray)
       if (ext.toLowerCase() == extArray[i].toLowerCase()) {
         isItIn = true;
         break;
@@ -464,13 +464,13 @@ var upload = multer({
 });
 
 
-var uploadExcel = multer({
+let uploadExcel = multer({
   storage: storage,
   fileFilter: function(req, file, callback) {
-    var ext = path.extname(file.originalname);
-    var isItIn = false;
+    let ext = path.extname(file.originalname);
+    let isItIn = false;
 
-    for (var i in excelArray)
+    for (let i in excelArray)
       if (ext.toLowerCase() == excelArray[i].toLowerCase()) {
         isItIn = true;
         break;
@@ -487,27 +487,27 @@ var uploadExcel = multer({
 });
 
 
-var prodImageStorage = multer.diskStorage({
+let prodImageStorage = multer.diskStorage({
   destination: function(req, file, callback) {
     callback(null, path.join("${__dirname}/../public/productImages"));
     //callback(null, 'public/uploads/');
   },
   filename: function(req, file, callback) {
     // + path.extname(file.originalname)
-    var date = dateformat(new Date(), "dddd_mmmm_dS_yyyy_h.MM.ss_TT"); //Date.now()
-    var date2 = moment(new Date().getTime()).format("HH.mm.ss.a");
+    let date = dateformat(new Date(), "dddd_mmmm_dS_yyyy_h.MM.ss_TT"); //Date.now()
+    let date2 = moment(new Date().getTime()).format("HH.mm.ss.a");
     callback(null, file.originalname.substring(file.originalname.lastIndexOf('.')+1) + "_" + date + "_" + file.originalname); //The name itself.
   }
 });
 
 
-var uploadProdImage = multer({
+let uploadProdImage = multer({
   storage: prodImageStorage,
   fileFilter: function(req, file, callback) {
-    var ext = path.extname(file.originalname);
-    var isItIn = false;
+    let ext = path.extname(file.originalname);
+    let isItIn = false;
 
-    for (var i in prodImageArray)
+    for (let i in prodImageArray)
       if (ext.toLowerCase() == prodImageArray[i].toLowerCase()) {
         isItIn = true;
         break;
@@ -536,10 +536,10 @@ app.post("/uploadfile", upload.single("single"), (req, res, next) => {
   res.send(file);
   return true;
   
-  var tmp_path = req.file.path;
-  var target_path = "custom/uploads/" + req.file.originalname;
-  var src = fs.createReadStream(tmp_path);
-  var dest = fs.createWriteStream(target_path);
+  let tmp_path = req.file.path;
+  let target_path = "custom/uploads/" + req.file.originalname;
+  let src = fs.createReadStream(tmp_path);
+  let dest = fs.createWriteStream(target_path);
   src.pipe(dest);
   src.on("end", function() {
     res.render("complete");
@@ -562,7 +562,7 @@ app.post("/uploadProductImage", uploadProdImage.single("single"), (req, res, nex
 });
 
 
-var xlsx = require("node-xlsx");
+let xlsx = require("node-xlsx");
 app.post("/uploadExcel", uploadExcel.single("single"), (req, res, next) => {
   const file = req.file;
 
@@ -572,12 +572,12 @@ app.post("/uploadExcel", uploadExcel.single("single"), (req, res, next) => {
     return next(error);
   }
 
-  var obj = xlsx.parse(fs.readFileSync(file.path));
+  let obj = xlsx.parse(fs.readFileSync(file.path));
   fs2.unlinkSync(file);
 
   if(obj && obj.length) {
     console.log(obj[0].data);
-    //Treat the obj variable as an array of rows
+    //Treat the obj letiable as an array of rows
     res.send(obj[0].data);
   } else {
     res.send("Error!");
@@ -686,7 +686,7 @@ app.post("/purchase", (req, res, next) => {
       );
 
       //Send an e-mail to user:
-      var mailOptions = {
+      let mailOptions = {
         from: "peter@uniteprocurement.com",
         to: req.body.emailAddress,
         subject: "Order Paid Successfully!",
@@ -741,7 +741,7 @@ app.post("/deleteBid", function(req, res, next) {
       //res.redirect('back');
     }
 
-    var dbo = db.db(BASE), myquery = { _id: req.body.bidId };
+    let dbo = db.db(BASE), myquery = { _id: req.body.bidId };
 
     dbo.collection("bidrequests").deleteOne(myquery, function(err, resp) {
       if (err) {
@@ -792,10 +792,10 @@ app.post("/exists", function(req, res) {
 
 
 app.get("/bidStatuses", function(req, res, next) {
-  var statusFilter = BidStatus.find({});
+  let statusFilter = BidStatus.find({});
 
   statusFilter.exec(function(err, data) {
-    var result = [];
+    let result = [];
 
     if(!err) {
       if (data && data.length && data.length > 0) {
@@ -820,11 +820,11 @@ app.get("/bidStatuses", function(req, res, next) {
 
 
 app.post("/cancelReasonTitles", async function(req, res, next) {
-  var objectType = req.body.objectType;
+  let objectType = req.body.objectType;
   const isAdmin = req.body.isAdmin;
   const isSupervisor = req.body.isSupervisor;
   
-  var val = objectType && isAdmin? { type: objectType , isAdmin: true } 
+  let val = objectType && isAdmin? { type: objectType , isAdmin: true } 
   : objectType && isSupervisor? { type: objectType, isSupervisor: isSupervisor } 
   : objectType? { type: objectType } : {};
   
@@ -896,10 +896,10 @@ app.get("/feedbacks", async function(req, res, next) {
 
 //Autocomplete fields:
 app.post("/uniteIDAutocomplete", function(req, res, next) {
-  var regex = new RegExp(req.query["term"], "i");
-  var val = regex? { organizationUniteID: regex } : {};
+  let regex = new RegExp(req.query["term"], "i");
+  let val = regex? { organizationUniteID: regex } : {};
   
-  var uniteIDFilter = Supervisor.find(
+  let uniteIDFilter = Supervisor.find(
     val,
     { organizationUniteID: 1 }
   )
@@ -907,7 +907,7 @@ app.post("/uniteIDAutocomplete", function(req, res, next) {
     .limit(regex? 15 : 100); //Negative sort means descending.
 
   uniteIDFilter.exec(function(err, data) {
-    var result = [];
+    let result = [];
 
     if (!err) {
       if (data && data.length && data.length > 0) {
@@ -931,14 +931,14 @@ app.post("/uniteIDAutocomplete", function(req, res, next) {
 
 
 app.post("/currencyAutocomplete", function(req, res, next) {
-  var regex = new RegExp(req.query["term"], "i");
-  var val = regex? { value: regex } : {};
-  var currencyFilter = Currency.find(val, { value: 1, name: 1 })
+  let regex = new RegExp(req.query["term"], "i");
+  let val = regex? { value: regex } : {};
+  let currencyFilter = Currency.find(val, { value: 1, name: 1 })
     .sort({ value: 1 })
     .limit(regex? 150 : 200); //Negative sort means descending.
 
   currencyFilter.exec(function(err, data) {
-    var result = [];
+    let result = [];
 
     if (!err) {
       if (data && data.length && data.length > 0) {
@@ -963,12 +963,12 @@ app.post("/currencyAutocomplete", function(req, res, next) {
 
 
 app.post("/prodServiceAutocomplete", function(req, res, next) {
-  var regex = new RegExp(req.query["term"], "i");
-  var id = req.body["supplierId"];
+  let regex = new RegExp(req.query["term"], "i");
+  let id = req.body["supplierId"];
   console.log(id);
-  var values = regex && id? { productName: regex, supplier: new ObjectId(id) } : { supplier: (id) };
+  let values = regex && id? { productName: regex, supplier: new ObjectId(id) } : { supplier: (id) };
 
-  var prodServiceFilter = ProductService.find(
+  let prodServiceFilter = ProductService.find(
     values,
     { productName: 1, price: 1, currency: 1 }
   )
@@ -976,7 +976,7 @@ app.post("/prodServiceAutocomplete", function(req, res, next) {
     .limit(regex && id? parseInt(MAX_PROD) : 100); //Negative sort means descending.
 
   prodServiceFilter.exec(function(err, data) {
-    var result = [];
+    let result = [];
     console.log(data.length);
     if (!err) {
       if (data && data.length && data.length > 0) {
@@ -1005,17 +1005,17 @@ app.post("/prodServiceAutocomplete", function(req, res, next) {
 
 
 app.post("/capabilityInputAutocomplete", function(req, res, next) {  
-  var regex = new RegExp(req.query["term"], "i");
-  var val = regex? { capabilityDescription: regex } : {};
+  let regex = new RegExp(req.query["term"], "i");
+  let val = regex? { capabilityDescription: regex } : {};
 
-  var capDescriptionFilter = Supplier.find(
+  let capDescriptionFilter = Supplier.find(
     val,
     { capabilityDescription: 1 }
   )
     .sort({ capabilityDescription: 1 })
     .limit(15);
   capDescriptionFilter.exec(function(err, data) {
-    var result = [];
+    let result = [];
 
     if (!err) {
       if (data && data.length && data.length > 0) {
@@ -1046,21 +1046,21 @@ fetch(url, settings)
     .then(res => res.json())
     .then((json) => {
       //console.log(JSON.stringify(json));
-  var currency = JSON.stringify(json);
+  let currency = JSON.stringify(json);
   currency = '[' + (currency).split('},').join('}},{') + ']';
   currency = JSON.parse(currency);
  
-  for(var i of currency) {
-    var t = JSON.stringify(i);
-    var obj = JSON.parse(t.substring(7, t.length-1));
+  for(let i of currency) {
+    let t = JSON.stringify(i);
+    let obj = JSON.parse(t.substring(7, t.length-1));
     //console.log(obj);
   }
   
-  var fx = {
+  let fx = {
     base: process.env.APP_DEFAULT_CURR,
   }, t, obj = [], str = 'fx.rates = {\n';
   
-  for(var i in currency) {
+  for(let i in currency) {
     t = JSON.stringify(currency[i]);
     obj.push(JSON.parse(t.substring(7, t.length-1)));
   }
@@ -1069,7 +1069,7 @@ fetch(url, settings)
       return a.code.localeCompare(b.code);
     });
   
-  for(var i in obj) {
+  for(let i in obj) {
     str += obj[i].code + ': ' + obj[i].rate + (i == obj.length-1? '' : ',\n');
   } 
 
@@ -1097,9 +1097,9 @@ for (let inet in networkInterfaces) {
 
 
 async function getUsers(db, table, obj) {
-    var newObj = obj && obj instanceof Object? obj : {};
+    let newObj = obj && obj instanceof Object? obj : {};
   
-    var myPromise = () => {
+    let myPromise = () => {
        return new Promise((resolve, reject) => {
           db
           .collection(table)
@@ -1113,23 +1113,25 @@ async function getUsers(db, table, obj) {
        });
     };
    
-    var result = await myPromise();
-    //console.log(result);
+    let result = await myPromise();    
     return result;
 }
 
 
 const bcrypt = require('bcryptjs');
-var db;
+let db;
 
 async function getUsers2(db, table) {
   const promise =  await db.collection(''+table+'').find({});
-  //console.log(promise);  
+ 
   return promise;
 }
 
-//f (1 == 2)
-  MongoClient.connect(URI, { useUnifiedTopology: true }, (err, client) => {
+
+
+
+if (1 == 2)
+  MongoClient.connect(URI, { useUnifiedTopology: true }, async (err, client) => {
     if (err) {
       console.error(err.message);
       throw err;
@@ -1137,6 +1139,21 @@ async function getUsers2(db, table) {
 
 
     db = client.db(BASE); //Right connection!
+    let sup = await getUsers(db, 'suppliers');    
+    
+    for(let i of sup) {
+      let currency = i.currency;//i.currenciesList && i.currenciesList.length? i.currenciesList[0] : i.currency;
+      //if(currency.length > 3) currency = currency.substring(0, 3);
+      //if(currency.length < 3 && currency.charAt(0) == 'E') currency = 'EUR';
+      db.collection('productservices').updateMany({supplier: i._id}, { $set: { currency: i.currency } }, function(err, obj) {});
+     // let currenciesList = [];
+     // for(let j = 0; j < i.currenciesList.length; j++)
+     //   currenciesList.push(currency);
+      
+      //db.collection('suppliers').updateOne({ _id: i._id}, { $set: { currenciesList: currenciesList } }, function(err, obj) {});
+      console.log(currency);
+    }
+    
     process.on("uncaughtException", function(err) {
       console.error(err.message);
     });    
@@ -1150,7 +1167,7 @@ mongoose
     useCreateIndex: true,
     useUnifiedTopology: true
   })
-  .then(result => {
+  .then((result) => {
     return null;
   })
   .then(() => {

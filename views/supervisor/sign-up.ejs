@@ -25,7 +25,7 @@
   <script type="text/javascript">        
     $(document).ready(function () {
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
-      var token = $("input[name='_csrf']").val();
+      let token = $("input[name='_csrf']").val();
       getAutocomplete('#country', '/countryAutocomplete', token);
 
     $('.cb').click(function() {
@@ -38,14 +38,9 @@
       if(!validCountry($('.country'))) {
         return false;
       }
-/*
-      $('input.autocomp').not('.country').each(function() {
-        var cls = !($(this).hasClass('present'));
-        $(this).next('input').val(cls? 'canSave' : '');
-      });*/
 
-      var formData = new FormData(document.getElementById('registration'));
-      var captchaResponse = formData.get('g-recaptcha-response');
+      let formData = new FormData(document.getElementById('registration'));
+      let captchaResponse = formData.get('g-recaptcha-response');
       $('input[name="captchaResponse"]').val(captchaResponse);
       
       registrationDialog('Supervisor');

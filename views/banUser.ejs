@@ -42,8 +42,8 @@
             str += '<div id="jqDiv" class="jqGridProd form-group"><table id="gridBans"></table><div id="banPager"></div></div>';
             $('div.bodyBuilder').append(str);
             
-            var data2 = [];
-            var colModel = [             
+            let data2 = [];
+            let colModel = [             
               { name: 'name', label: 'User Name', search: true, width: 140},
               { name: 'type', label: 'User Type', align: 'center', search: true, width: 140},
               { name: 'email', label: 'E-mail Address', sorttype: 'text', align: 'center', search: true, width: 140},
@@ -52,7 +52,7 @@
               { name: 'banExpiryDate', label: 'Ban Expiry Date', align: 'center', formatter: 'date', formatoptions: { srcformat: 'd/m/Y', newformat: 'd/m/Y'}, search: true, width: 90}
             ];
             
-            for(var i of data) {
+            for(let i of data) {
              data2.push({
                name: i.name,
                type: i.type,
@@ -70,7 +70,7 @@
       });
 
       $('#mainForm').submit(function(e) {
-        var radio = $(this).find('input[type="radio"]:checked');
+        let radio = $(this).find('input[type="radio"]:checked');
         radio.attr('name', 'reasonTitle');
         if(!confirm('You are about to ban this User from using UNITE. This can be time-limited.\Banning a UNITE User is a serious event, it should be motivated and the User notified about the reason. Please provide accurate information about it.')) {
           return false;

@@ -23,8 +23,8 @@
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-      var defaultCurr = $('#defaultCurrency').val();
-      var defaultBalance = $('#defaultBalance').val();      
+      let defaultCurr = $('#defaultCurrency').val();
+      let defaultBalance = $('#defaultBalance').val();      
       $('#balance').val(parseFloat(defaultBalance).toFixed(2) + ' ' + defaultCurr);      
       //errorSuccess(Swal, '< %= errorMessage %>', '< %= successMessage %>');
       

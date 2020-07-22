@@ -26,7 +26,7 @@
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
 
       $('#mainForm').submit(function(e) {
-        var radio = $(this).find('input[type="radio"]:checked');
+        let radio = $(this).find('input[type="radio"]:checked');
         radio.attr('name', 'reasonTitle');
         if(!confirm('You are about to remove all this User data from UNITE. This cannot be undone.\nDeleting a UNITE User is a serious issue and it needs a well-elaborated reason. Please proceed only if you are really sure about it.')) {
           return false;

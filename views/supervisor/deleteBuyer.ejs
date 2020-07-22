@@ -25,7 +25,7 @@
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       
       $('#mainForm').submit(function(e) {
-        var radio = $(this).find('input[type="radio"]:checked');
+        let radio = $(this).find('input[type="radio"]:checked');
         radio.attr('name', 'reasonTitle');
         if(!confirm('You are about to remove all your Buyer\'s data from UNITE. This cannot be undone. Please proceed only if you are really sure.')) {
           return false;

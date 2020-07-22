@@ -32,8 +32,8 @@
       const sock = io();
      
       //Inputs (plain JS):
-      var messages = document.getElementById("messages");
-      var $messages = document.getElementById("messages2");
+      let messages = document.getElementById("messages");
+      let $messages = document.getElementById("messages2");
       let messageInput = document.getElementById("message");
       let sender = document.getElementById("from");
       let receiver = document.getElementById("to");
@@ -129,7 +129,7 @@
               console.log('error');
             },
             success: function(data) {
-              for(var item of data) {
+              for(let item of data) {
                 putMessages(messages, item);
               }
               $(messages).append('<br>');
@@ -163,7 +163,7 @@
       
         $("#message-form").submit(function(e) {
             e.preventDefault();//prevents page reloading
-            var msg = {
+            let msg = {
                from: sender.value,
                to: receiver.value,
                sender: $('#fromName').val(),
