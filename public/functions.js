@@ -107,11 +107,11 @@ function fileRemovalFormatter(cellvalue, options, rowObject) {
 }
 
 function buyerPriceFormatter(cellvalue, options, rowObject) {
-  return `<span>${rowObject.buyerPriceHref}</span>`;
+  return `${rowObject.buyerPriceHref} ${rowObject.buyerCurrencyHref}`;
 }
 
 function supplierPriceFormatter(cellvalue, options, rowObject) {
-  return `<span>${rowObject.supplierPriceHref}</span>`;
+  return `${rowObject.supplierPriceHref} ${rowObject.supplierCurrencyHref}`;
 }
 
 function productImageFormatter(cellvalue, options, rowObject) {
@@ -179,7 +179,7 @@ function cancelledBidsPriceFormatter(cellvalue, options, rowObject) {
 function expiredBidsPriceFormatter(cellvalue, options, rowObject) {
   return `<span class='basicPriceWrapper0'><span class='price'>${parseFloat(rowObject.hiddenExpiredBidsPrice).toFixed(2)}</span> <span class='currency'>${rowObject.hiddenCurrency}</span></span>`;
 }
-
+// function (cellValue, rowObject) {return parseInt(rowObject.ipDecimal,10);}
 
 //Products Grid Col Model:
   const productColModel = [
@@ -195,9 +195,9 @@ function expiredBidsPriceFormatter(cellvalue, options, rowObject) {
     { name: 'bigPrice', hidden: true },
     { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
     { name: 'supplierName', label: 'Supplier name', formatter: supplierFormatter, search: true, width: 140},
-    { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, unformat: priceUnformatter, template: 'number', sorttype: 'number',  search: true, width: 140},
-    { name: 'amount', label: 'Amount', formatter: amountFormatter, unformat: amountUnformatter, template: 'number', sorttype: 'number',  align: 'center', search: true, width: 70},
-    { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, unformat: totalPriceUnformatter, template: 'number', sorttype: 'number', search: true, width: 90}, 
+    { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, unformat: priceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(rowObject.hiddenPrice).toFixed(2);}, search: true, width: 140},
+    { name: 'amount', label: 'Amount', formatter: amountFormatter, unformat: amountUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseInt(rowObject.hiddenAmount);}, align: 'center', search: true, width: 70},
+    { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, unformat: totalPriceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(rowObject.hiddenTotalPrice).toFixed(2);}, search: true, width: 90}, 
     { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
     { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
   ];
@@ -706,10 +706,7 @@ function getIdClear(obj) {
 
 function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
   obj.on('click', function() {
-    let id = '_' + getId($(this).attr('id'));
-    if(id.length == 1)
-      id = '';
-
+    let id = getIdClear($(this));
     let elem = $("#prodServices"+id);
     let grid = $('#grid'+id);
     let amount = $('#amount'+id);
@@ -1688,11 +1685,7 @@ function registrationDialog(accountType) {
 
 function delegateUpload(obj) {
   obj.off("click").on("click", function() {  
-    let uploadInput, index, id = '_' + getId($(this).attr("id"));
-    
-    if(id.length == 1)
-      id = '';
-
+    let uploadInput, index, id = getIdClear($(this));
     //jqGrid
     let divId = $("#jqDiv" + id);
     let tr = $(this).closest("tr");//parent('span').parent('td').parent('tr');
@@ -1747,8 +1740,8 @@ function initGrid(
   $(`${gridId}`).jqGrid({
     colModel: colModel,
     data: data,
-    guiStyle: "bootstrap4",
-    iconSet: "glyph",
+    guiStyle: "bootstrap",
+    iconSet: "fontAwesome",
     idPrefix: "gb1_",
     datatype: "clientSide",
     viewrecords: true,
@@ -1785,9 +1778,7 @@ function initGrid(
             removeFile(this, Swal);
           });
       } else if(table.find(".rem").length) {
-        let id = '_' + getId(divId.attr("id"));
-        if(id.length == 1)
-          id = '';
+        let id = getIdClear(divId);
         
         let prod = $("#prodServiceInput").length
           ? $("#prodServiceInput")
@@ -1909,15 +1900,14 @@ function fileExists(absolutePath, isMulti, ob, theDiv, fileId, i, val, token) {
 
 
 function processSingleFile(response, val, ob, input, prevInput, token, theDiv) {
-  val = response.path
-    ? "../" + response.path.substring(7)
-    : response.file.originalname;
+  val = "../" + response.path.substring(7);
   
   if(input.hasClass('multiparam')) {
     val = '../../../' + val;
   }
+  
   input.attr("value", val);
-  let file = response.path ? response.path : response.file.id;
+  let file = response.path;// ? response.path : response.file.id;
   if (prevInput && prevInput.length) prevInput.attr("value", val); //file
 
   ob =
@@ -2593,10 +2583,7 @@ $(document).ready(function() {
                 .insertAfter(obj.parent('div'))
                 .find('li')
                 .click(function() {
-                  let id = '_' + getId(obj.attr('id'));
-                  if(id.length == 1)
-                    id = '';
-                
+                  let id = getIdClear(obj);
                   let buyerCurr = $('select.buyerCurrency[index="' + id.length? id : '-1' +'"]').val();
                   let val = fx.convert(parseFloat($(this).attr('id')).toFixed(2), {from: $(this).attr('currency'), to: buyerCurr});
                 
@@ -2849,20 +2836,23 @@ let extArray = [".png", ".jpg", ".jpeg", ".gif", ".bmp", '.csv', ".pdf", ".txt",
             return false;
           }
         } else if (isMultiple) {
-          //response.file.filename, originalname, fieldname,
           let hasDiv = theDiv.next("div").hasClass("fileWrapper");
           ob = hasDiv ? "" : '<div class="fileWrapper">';
+          
           for (let i in response) {
             let absolutePath = response[i].path
               ? "../" + response[i].path.substring(7)
               : response[i].file.originalname;
+            
             val = !(input.attr("value") && input.attr("value").length)
               ? absolutePath + ""
               : input.attr("value") + absolutePath + "";
+            
             input.attr("value", val);
             let file = response[i].path
               ? response[i].path
               : response[i].file.id;
+            
             prevInput.attr(
               "value",
               !(prevInput.val() && prevInput.val().length)

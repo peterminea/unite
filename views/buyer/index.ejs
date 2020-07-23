@@ -75,13 +75,14 @@
               { name: 'buyerId', hidden: true },
               { name: 'supplierId', hidden: true },
               { name: 'hiddenAmount', hidden: true },
+              { name: 'hiddenCurrency', hidden: true },
               { name: 'hiddenTotalPrice', hidden: true },
               { name: 'productImageSource', hidden: true },
               { name: 'productName', label: 'Product name', formatter: productFormatter, search: true, width: 140},
               { name: 'supplierName', label: 'Supplier Name', align: 'center', search: true, width: 140},
-              { name: 'productPrice', label: 'Product price', formatter: priceFormatter, unformat: priceUnformatter, template: 'number', sorttype: 'number', align: 'center', search: true, width: 140},
-              { name: 'amount', label: 'Amount', align: 'center', formatter: amountFormatter, unformat: amountUnformatter, sortname: 'hiddenAmount', template: 'number', sorttype: 'number', search: true, width: 140 },
-              { name: 'totalPrice', label: 'Total price', align: 'center', template: 'number', sorttype: 'number', formatter: totalPriceFormatter, unformat: totalPriceUnformatter, search: true, width: 90},
+              { name: 'productPrice', label: 'Product price', formatter: priceFormatter, unformat: priceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(rowObject.hiddenPrice).toFixed(2);}, align: 'center', search: true, width: 140},
+              { name: 'amount', label: 'Amount', align: 'center', formatter: amountFormatter, unformat: amountUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseInt(rowObject.hiddenAmount);}, search: true, width: 140 },
+              { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, unformat: totalPriceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(rowObject.hiddenTotalPrice).toFixed(2);}, search: true, width: 90},
               { name: 'image', label: 'Product Image', align: 'center', formatter: productImageFormatter, search: false, sortable: false, width: 90},
               { name: 'newBid', label: 'Place Bid', align: 'center', search: false, sortable: false, formatter: linkFormatter, width: 140}
             ];
@@ -617,7 +618,7 @@
                     
                     let index = '_' + "<%= i %>";
                     let data = []; 
-                    initGrid(productColModel, data, "#grid"+index, '#prodPager'+index, "name", 'Products List', 1000);
+                    initGrid(productColModel, data, "#grid"+index, '#prodPager'+index, "name", 'Products List', 1080);
                     
                     setTimeout(function() {
                       let table = $("#grid"+index);
