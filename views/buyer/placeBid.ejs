@@ -215,7 +215,7 @@
               <% } %>
             </div>
             <div id="jqDiv" class="form-group">
-              <table id="grid" MAX="<%= MAX_PROD %>" buyerCurrency="<%= buyer.currency %>">
+              <table id="grid" MAX="<%= MAX_PROD %>" buyerCurrency="<%= buyer.currency %>" <% if(isSingleBid == true) %> supplierId="<%= supplier._id %>" supplierCurrency="<%= supplier.currency %>" <% } else { %> <% } %>>
               </table>
               <div id='prodPager'>
               </div>

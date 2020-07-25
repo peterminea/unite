@@ -63,29 +63,17 @@
               //obj.next('.prodButton').prop('disabled', true);
              return false;
             }
-            
-            //jqGrid:            
+           
             let str = '';
             str += '<div id="jqDiv1" class="jqGridProd form-group"><table id="gridProds"></table><div id="prodPager"></div></div>';
             $('div.bodyBuilder').append(str);
-            
             let data2 = [];
-            let colModel = [              
-              { name: 'productId', hidden: true },
-              { name: 'buyerId', hidden: true },
-              { name: 'supplierId', hidden: true },
-              { name: 'hiddenAmount', hidden: true },
-              { name: 'hiddenCurrency', hidden: true },
-              { name: 'hiddenTotalPrice', hidden: true },
-              { name: 'productImageSource', hidden: true },
-              { name: 'productName', label: 'Product name', formatter: productFormatter, search: true, width: 140},
-              { name: 'supplierName', label: 'Supplier Name', align: 'center', search: true, width: 140},
-              { name: 'productPrice', label: 'Product price', formatter: priceFormatter, unformat: priceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(rowObject.hiddenPrice).toFixed(2);}, align: 'center', search: true, width: 140},
-              { name: 'amount', label: 'Amount', align: 'center', formatter: amountFormatter, unformat: amountUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseInt(rowObject.hiddenAmount);}, search: true, width: 140 },
-              { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, unformat: totalPriceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(rowObject.hiddenTotalPrice).toFixed(2);}, search: true, width: 90},
-              { name: 'image', label: 'Product Image', align: 'center', formatter: productImageFormatter, search: false, sortable: false, width: 90},
-              { name: 'newBid', label: 'Place Bid', align: 'center', search: false, sortable: false, formatter: linkFormatter, width: 140}
-            ];
+            let colModel = productColModel;
+            var length = colModel.length;
+            colModel.splice(length-2, 2);
+            colModel.splice(9, 2);
+            colModel.push({ name: 'image', label: 'Product Image', align: 'center', formatter: productImageFormatter, search: false, sortable: false, width: 90});
+            colModel.push({ name: 'newBid', label: 'Place Bid', align: 'center', search: false, sortable: false, formatter: linkFormatter, width: 140});
             
             for(let i in data) {
              data2.push({
@@ -93,11 +81,13 @@
                 buyerId: $('#loadCatalog').attr('buyer'),
                 supplierId: data[i].supplierId, 
                 productName: data[i].productName,
-                supplierName: data[i].supplier,
+                supplierName: data[i].supplierName,
                 hiddenPrice: data[i].price,
                 hiddenCurrency: data[i].currency,
                 hiddenAmount: data[i].amount,
                 hiddenTotalPrice: data[i].totalPrice,
+                supplierCurrency: data[i].supplierCurrency,
+               // maxAmount, bigPrice are as true as hiddenPrice and hiddenAmount of Product here.
                 productImageSource: data[i].productImage.length? '../' + data[i].productImage.substring(7) : ''
               });
             }

@@ -28,7 +28,6 @@
   <script type="text/javascript">
     $(document).ready(function() {
       //errorSuccess(Swal, '< %= errorMessage %>', '< %= successMessage %>');
-      //initBaseRates(fx, '#currency');
     });
   </script>
   </head>
@@ -62,36 +61,17 @@
 <% if(bids != null && bids.length > 0) {%>
   <div class="container form-group mt-4" style="text-align: center">
     </div>
-    <div id="jqDiv_0" class="form-group">
+    <div id="jqDiv" class="form-group">
       <table id="gridBids">
       </table>
       <div id='bidsPager'>
       </div>
     </div>
   <script type="text/javascript">
-    var data = [];
-    var colModelGridBids = [      
-      { name: 'bidName', label: 'Bid Request Name', search: true, width: 210},
-      { name: 'supplierName', label: 'Bid Supplier Name', align: 'center', sorttype: 'text', search: true, width: 220},      
-      { name: 'buyerPrice', label: 'Buyer\'s Price', align: 'center', formatter: buyerPriceFormatter, sorttype: function(cellValue, rowObject) { return parseFloat(rowObject.buyerPriceHref).toFixed(2);}, search: true, width: 100},
-      { name: 'supplierPrice', label: 'Supplier\'s Price', align: 'center', formatter: supplierPriceFormatter, sorttype: function(cellValue, rowObject) { return parseFloat(rowObject.supplierPriceHref).toFixed(2);}, search: true, width: 100 }, 
-      { name: 'preferredDeliveryDate', label: 'Preferred Delivery Date', align: 'center', search: true, width: 100},
-      { name: 'dateCreated', label: 'Creation Date', align: 'center', search: true, width: 200},
-      { name: 'expiryDate', label: 'Expiry Date', align: 'center', search: true, width: 100},
-      { name: 'isCancelled', label: 'Is Cancelled?', align: 'center', search: true, width: 100},
-      { name: 'isExpired', label: 'Is Expired?', align: 'center', search: true, width: 100 },
-      { name: 'buyerPriceHref', hidden: true },
-      { name: 'buyerCurrencyHref', hidden: true },
-      { name: 'supplierPriceHref', hidden: true },
-      { name: 'supplierCurrencyHref', hidden: true }
-    ];
-
-  initGrid(colModelGridBids, data, "#gridBids", '#bidsPager', "bidName", 'Bids List', 1500);
-  </script>
+    let data = [];        
+ 
   <% i = 0; for (bid of bids) { %>
-  <script type="text/javascript">
-    
-    var data = {
+    data.push({
           id: "<%= i %>",
           bidName: "<%= bid.requestName %>",
           supplierName: "<%= bid.supplierName %>",
@@ -104,12 +84,12 @@
           supplierPriceHref: "<%= parseFloat(bid.supplierPrice).toFixed(2) %>",
           buyerCurrencyHref: "<%= bid.buyerCurrency %>",
           supplierCurrencyHref: "<%= bid.supplierCurrency %>"
-    };
-
-    $("#gridBids").jqGrid('addRowData', data.id, data, 'last');        
-  </script>
+    });
      <% i++; } %>
-
+    
+     //$("#gridBids").jqGrid('addRowData', data.id, data, 'last');
+     initGrid(colModelGridBids, data, "#gridBids", '#bidsPager', "bidName", 'Bids List', 1500);
+  </script>
         <% } else {%>
         <div>
           <p style="color: green; font-family: arial">
@@ -117,9 +97,7 @@
           </p>
         </div>
         <% }%>
-  </div>
-  
+  </div>  
 </body>
-
 </html>
   

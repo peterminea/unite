@@ -91,8 +91,8 @@
   </div>
   
   <script type="text/javascript">
-    var data = [];
-    var colModelProdImages = [
+    let data = [];
+    const colModelProdImages = [
       { name: 'filename', label: 'File Name', align: 'center', search: true, width: 160},
       { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 160},
       { name: 'length', label: 'File Length', align: 'center', sorttype: 'number', search: true, width: 160},
@@ -103,13 +103,10 @@
       { name: 'downloadHref', hidden: true },
       { name: 'downloadName', hidden: true },
       { name: 'deletionHref', hidden: true }
-    ];   
-
-    initGrid(colModelProdImages, data, "#gridProdImages", '#prodImagePager', "filename", 'Product Image Files', 1200, "<%= csrfToken %>");
-  </script>
+    ];
+ 
     <% i = 0; for (file of files) { %>
-  <script type="text/javascript">                 
-    var data = {
+    data.push({
           id: "<%= i %>",
           filename: "<%= file.name %>",
           folder: "<%= file.folder %>",
@@ -118,11 +115,11 @@
           downloadHref: "../<%= file.path.substring(7) %>",
           downloadName: "<%= file.name %>",
           deletionHref: "<%= file.path %>"
-    };
-
-    $("#gridProdImages").jqGrid('addRowData', data.id, data, 'last');        
-  </script>
-     <% i++; } %>
+    }); 
+     <% i++; } %>    
+   
+    initGrid(colModelProdImages, data, "#gridProdImages", '#prodImagePager', "filename", 'Product Image Files', 1280, "<%= csrfToken %>");
+    </script>
         <% } else {%>
         <div>
           <p style="color: green; font-family: arial">
@@ -136,8 +133,7 @@
   </h3>
   <br>
 <% if(uploads != null && uploads.length > 0) {%>
-  <div class="container form-group mt-4" style="text-align: center">
-   
+  <div class="container form-group mt-4" style="text-align: center">   
     </div>
     <div id="jqDiv_1" class="form-group">
       <table id="gridUploads">
@@ -147,8 +143,8 @@
     </div>  
  
   <script type="text/javascript">
-    var data = [];
-    var colModelUploadIFiles = [
+    let data0 = [];
+    let colModelUploadFiles = [
       { name: 'filename', label: 'File Name', align: 'center', search: true, width: 160},
       { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 160},
       { name: 'length', label: 'File Length', align: 'center', search: true, sorttype: 'number', width: 160},
@@ -159,13 +155,10 @@
       { name: 'downloadHref', hidden: true },
       { name: 'downloadName', hidden: true },
       { name: 'deletionHref', hidden: true }
-    ];   
-
-  initGrid(colModelUploadIFiles, data, "#gridUploads", '#uploadPager', "filename", 'Uploaded Files', 1200, "<%= csrfToken %>");
-  </script>
+    ];
+ 
     <% i = 0; for (file of uploads) { %>
-  <script type="text/javascript">                 
-    var data = {
+     data0.push({
           id: "<%= i %>",
           filename: "<%= file.name %>",
           folder: "<%= file.folder %>",
@@ -174,11 +167,11 @@
           downloadHref: "../<%= file.path.substring(7) %>",
           downloadName: "<%= file.name %>",
           deletionHref: "<%= file.path %>"
-    };
-
-    $("#gridUploads").jqGrid('addRowData', data.id, data, 'last');        
-  </script>
+    });
      <% i++; } %>
+    
+    initGrid(colModelUploadFiles, data0, "#gridUploads", '#uploadPager', "filename", 'Uploaded Files', 1280, "<%= csrfToken %>");
+    </script>
         <% } else {%>
         <div>
           <p style="color: green; font-family: arial">
@@ -202,8 +195,8 @@
     </div>
  
   <script type="text/javascript">
-    var data = [];
-    var colModelAvatarImages = [
+    let data1 = [];
+    let colModelAvatarImages = [
       { name: 'filename', label: 'File Name', align: 'center', search: true, width: 160},
       { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 160},
       { name: 'length', label: 'File Length', align: 'center', sorttype: 'number', search: true, width: 160},
@@ -215,12 +208,9 @@
       { name: 'downloadName', hidden: true },
       { name: 'deletionHref', hidden: true }
     ];
-
-  initGrid(colModelAvatarImages, data, "#gridAvatars", '#avatarPager', "filename", 'Avatar Files', 1200, "<%= csrfToken %>");
-  </script>
-    <% i = 0; for (file of avatars) { %>
-  <script type="text/javascript">                 
-    var data = {
+  
+    <% i = 0; for (file of avatars) { %>  
+     data1.push({
           id: "<%= i %>",
           filename: "<%= file.name %>",
           folder: "<%= file.folder %>",
@@ -229,11 +219,11 @@
           downloadHref: "../<%= file.path.substring(7) %>",
           downloadName: "<%= file.name %>",
           deletionHref: "<%= file.path %>"
-    };
-
-    $("#gridAvatars").jqGrid('addRowData', data.id, data, 'last');        
-  </script>
+    });
      <% i++; } %>
+    
+    initGrid(colModelAvatarImages, data1, "#gridAvatars", '#avatarPager', "filename", 'Avatar Files', 1280, "<%= csrfToken %>");
+    </script>
         <% } else {%>
         <div>
           <p style="color: green; font-family: arial">
@@ -242,8 +232,6 @@
         </div>
         <% }%> 
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-    </div>
-    
-  </body>
-  
+    </div>    
+  </body>  
 </html>
