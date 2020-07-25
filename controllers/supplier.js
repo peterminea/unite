@@ -1075,8 +1075,8 @@ exports.postProfile = async (req, res) => {
     doc.twitterURL = req.body.twitterURL;
     doc.linkedinURL = req.body.linkedinURL;
     doc.otherSocialMediaURL = req.body.otherSocialMediaURL;
-    doc.UNITETermsAndConditions = req.body.UNITETermsAndConditions == "on" ? true : false;
-    doc.antibriberyAgreement = req.body.antibriberyAgreement == "on" ? true : false;
+    doc.UNITETermsAndConditions = true;
+    doc.antibriberyAgreement = true;
     doc.createdAt = req.body.createdAt;
     doc.updatedAt = Date.now();
     doc.createdAtFormatted = normalFormat(req.body.createdAt);

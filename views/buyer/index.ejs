@@ -491,15 +491,15 @@
                     <select index="<%= i %>" supplierId="<%= supplier._id %>" class="form-control productsList" name="productsList" id="productsList_<%= i %>"></select>
                   </div>
                   <div>
-                    <p class='term'>
-                      You can use an Excel file with your desired products list, formatted as product name + product price + product currency + amount i.e. Number of items (4 cells per row), and after you click Process, our system will automatically add the products on page.<br>If the currency you use in Excel is different from the one from the Buyer page, conversion will be automatically applied. Also, the first row of your document must contain the column names.
+                    <p class='excel'>
+            You can use an Excel file with the products list, with each row as product name + product price + product currency + product amount + optionally Supplier name (4 or 5 cells/row, the first row must contain column names). When clicking Process, your items are instantly added to the Page.
                     </p>
                   </div>
                   <div class="form-group">
                     <label>Please choose your prepared product/service list (*.xls/xlsx, name+price+currency+amount on each row):</label>
                     <input type="hidden" class="fileId" name="excel" value="">
                     <input class="form-control upload fileexcelupload fromBuyer" type="file" id="products" name="excel" single>
-                    <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Process Excel File" />
+                    <input class="form-control single btn upload-button btn-success mt-2" type="button" disabled value="Process Excel File" />
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Products / Services Requested*</label>
@@ -520,7 +520,7 @@
                       <label>Upload a product image:</label>
                       <input type="hidden" class="fileId" name="productImage" value="">
                       <input class="form-control upload productimageupload" type="file" id="productImage_<%= i %>" name="products" single>
-                      <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload Product Image" />                    
+                      <input class="form-control single btn upload-button btn-success mt-2" type="button" disabled value="Upload Product Image" />                    
                     </div>
                       <ul class="list-group" MAX="<%= MAX_PROD %>" buyerCurrency="<%= buyer.currency %>" supplierCurrency="<%= supplier.currency %>" id="prodServices_<%= i %>">
                       </ul>
@@ -593,7 +593,7 @@
                       <label>Bid extension letter</label>
                       <input type="hidden" class="fileId" name="validityExtensionId">
                       <input class="form-control upload" type="file" id="validityExtension" name="validityExtension"/>
-                      <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
+                      <input class="form-control single btn btn-success mt-2" type="button" disabled value="Upload File" />
                     </div>
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <input type="hidden" name="buyer" value="<%= buyer._id %>">

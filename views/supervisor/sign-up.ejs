@@ -28,10 +28,6 @@
       let token = $("input[name='_csrf']").val();
       getAutocomplete('#country', '/countryAutocomplete', token);
 
-    $('.cb').click(function() {
-      $('#register').prop('disabled', $(':checkbox:checked').length == 2? false : true);
-    });
-
     $('#register').click(function(e) {
       e.preventDefault();
       
@@ -119,75 +115,79 @@
           </select>
         </div>
 
-        <div class="form-group">
-          <label>User Avatar</label>
-          <input type="hidden" name="avatar">
-          <input class="form-control upload avatarupload" type="file" id="avatar" name="avatarImg">
-          <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
-        </div>
-        
-        <div class="form-group">
-          <label>Certificates</label>
-          <input type="hidden" class="fileId" name="certificatesIds">
-          <input class="form-control upload" type="file" id="certificates" name="certificates" multiple>
-          <input class="form-control multiple btn btn-dark mt-2" type="button" disabled value="Upload Files" />
-        </div>
+        <div class='upload-section'>
+          <div class="form-group">
+            <label>User Avatar</label>
+            <input type="hidden" name="avatar">
+            <input class="form-control upload avatarupload" type="file" id="avatar" name="avatarImg">
+            <input class="form-control single btn upload-button btn-dark mt-2" type="button" disabled value="Upload File" />
+          </div>
 
-        <div class="form-group">
-          <label>Antibribery policy</label>
-          <input type="hidden" class="fileId" name="antibriberyPolicyId">
-          <input class="form-control upload" type="file" id="antibriberyPolicy" name="antibriberyPolicy"/>
-          <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
-        </div>
+          <div class="form-group">
+            <label>Certificates</label>
+            <input type="hidden" class="fileId" name="certificatesIds">
+            <input class="form-control upload" type="file" id="certificates" name="certificates" multiple>
+            <input class="form-control multiple btn upload-button btn-dark mt-2" type="button" disabled value="Upload Files" />
+          </div>
 
-        <div class="form-group">
-          <label>Environment policy</label>
-          <input type="hidden" class="fileId" name="environmentPolicyId">
-          <input class="form-control upload" type="file" id="environmentPolicy" name="environmentPolicy"/>
-          <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
-        </div>
+          <div class="form-group">
+            <label>Antibribery policy</label>
+            <input type="hidden" class="fileId" name="antibriberyPolicyId">
+            <input class="form-control upload" type="file" id="antibriberyPolicy" name="antibriberyPolicy"/>
+            <input class="form-control single btn upload-button btn-dark mt-2" type="button" disabled value="Upload File" />
+          </div>
 
-        <div class="form-group">
-          <label>Quality management policy</label>
-          <input type="hidden" class="fileId" name="qualityManagementPolicyId">
-          <input class="form-control upload" type="file" id="qualityManagementPolicy" name="qualityManagementPolicy"/>
-          <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
-        </div>
+          <div class="form-group">
+            <label>Environment policy</label>
+            <input type="hidden" class="fileId" name="environmentPolicyId">
+            <input class="form-control upload" type="file" id="environmentPolicy" name="environmentPolicy"/>
+            <input class="form-control single btn upload-button btn-dark mt-2" type="button" disabled value="Upload File" />
+          </div>
 
-        <div class="form-group">
-          <label>Occupational Safety and Health</label>
-          <input type="hidden" class="fileId" name="occupationalSafetyAndHealthPolicyId">
-          <input class="form-control upload" type="file" id="occupationalSafetyAndHealthPolicy" name="occupationalSafetyAndHealthPolicy"/>
-          <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
-        </div>
+          <div class="form-group">
+            <label>Quality management policy</label>
+            <input type="hidden" class="fileId" name="qualityManagementPolicyId">
+            <input class="form-control upload" type="file" id="qualityManagementPolicy" name="qualityManagementPolicy"/>
+            <input class="form-control single btn upload-button btn-dark mt-2" type="button" disabled value="Upload File" />
+          </div>
 
-        <div class="form-group">
-          <label>Other relevant files</label>
-          <input type="hidden" class="fileId" name="otherRelevantFilesIds">
-          <input class="form-control upload" type="file" id="otherRelevantFiles" name="otherRelevantFiles" multiple>
-          <input class="form-control multiple btn btn-dark mt-2" type="button" disabled value="Upload Files" />
-        </div>    
+          <div class="form-group">
+            <label>Occupational Safety and Health</label>
+            <input type="hidden" class="fileId" name="occupationalSafetyAndHealthPolicyId">
+            <input class="form-control upload" type="file" id="occupationalSafetyAndHealthPolicy" name="occupationalSafetyAndHealthPolicy"/>
+            <input class="form-control single btn upload-button btn-dark mt-2" type="button" disabled value="Upload File" />
+          </div>
 
-        <!--Mandatory check of agreements -->
-        <div class="form-group">
-          <div class="form-check">
-            <input class="form-check-input cb" name="UNITETermsAndConditions" id="termscon" type="checkbox" required>
-            <a href="../termsConditions">
-              <label class="form-check-label cb" for="termscon">
-                UNITE Terms And Conditions              
-              </label>
-            </a>
+          <div class="form-group">
+            <label>Other relevant files</label>
+            <input type="hidden" class="fileId" name="otherRelevantFilesIds">
+            <input class="form-control upload" type="file" id="otherRelevantFiles" name="otherRelevantFiles" multiple>
+            <input class="form-control multiple btn upload-button btn-dark mt-2" type="button" disabled value="Upload Files" />
           </div>
         </div>
-        
-        <div class="form-group">
-          <div class="form-check">
-            <input class="form-check-input cb" name="antibriberyAgreement" id="antibrib" type="checkbox" required>          
-            <a href="../antibriberyAgreement">
-              <label class="form-check-label cb" for="antibrib">
-                  Antibribery Agreement
-              </label>
-            </a>
+
+        <!--Mandatory check of agreements -->
+        <div class='checkbox-alignment'>
+          <div class="form-group">
+            <div class="form-check">
+              <input class="form-check-input cb" name="UNITETermsAndConditions" id="termscon" type="checkbox" required>
+              <a href="../termsConditions">
+                <label class="form-check-label cb" for="termscon">
+                  I agree with the UNITE Terms And Conditions              
+                </label>
+              </a>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="form-check">
+              <input class="form-check-input cb" name="antibriberyAgreement" id="antibrib" type="checkbox" required>          
+              <a href="../antibriberyAgreement">
+                <label class="form-check-label cb" for="antibrib">
+                    I acknowledge the Antibribery Agreement
+                </label>
+              </a>
+            </div>
           </div>
         </div>
 
