@@ -139,54 +139,56 @@
           </select>
         </div>
 
-        <!-- Uploading files field section-->  
-        <div class="form-group">
-          <label>User Avatar</label>
-          <input type="hidden" name="avatar" value="<%= profile.avatar %>">
-          <input class="form-control upload avatarupload" type="file" id="avatar" name="avatarImg">
-          <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
-        </div>
-        
-        <div class="form-group">
-          <label>Certificates</label>
-          <input type="hidden" class="fileId" name="certificatesIds" value="<%= profile.certificatesIds %>">
-          <input class="form-control upload" type="file" id="certificates" name="certificates" multiple value="<%= profile.certificates %>">
-          <input class="form-control multiple btn btn-dark mt-2" type="button" disabled value="Upload Files" />
-        </div>
+        <div class='upload-section'>
+          <!-- Uploading files field section-->  
+          <div class="form-group">
+            <label>User Avatar</label>
+            <input type="hidden" name="avatar" value="<%= profile.avatar %>">
+            <input class="form-control upload avatarupload" type="file" id="avatar" name="avatarImg">
+            <input class="form-control single btn upload-button btn-dark mt-2" type="button" disabled value="Upload File" />
+          </div>
 
-        <div class="form-group">
-          <label>Antibribery policy</label>
-          <input type="hidden" class="fileId" name="antibriberyPolicyId" value="<%= profile.antibriberyPolicyId %>">
-          <input class="form-control upload" type="file" id="antibriberyPolicy" name="antibriberyPolicy" value="<%= profile.antibriberyPolicy %>"/>
-          <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
-        </div>
+          <div class="form-group">
+            <label>Certificates</label>
+            <input type="hidden" class="fileId" name="certificatesIds" value="<%= profile.certificatesIds %>">
+            <input class="form-control upload" type="file" id="certificates" name="certificates" multiple value="<%= profile.certificates %>">
+            <input class="form-control multiple btn upload-button btn-dark mt-2" type="button" disabled value="Upload Files" />
+          </div>
 
-        <div class="form-group">
-          <label>Environment policy</label>
-          <input type="hidden" class="fileId" name="environmentPolicyId" value="<%= profile.environmentPolicyId %>">
-          <input class="form-control upload" type="file" id="environmentPolicy" name="environmentPolicy" value="<%= profile.environmentPolicy %>"/>
-          <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
-        </div>
+          <div class="form-group">
+            <label>Antibribery policy</label>
+            <input type="hidden" class="fileId" name="antibriberyPolicyId" value="<%= profile.antibriberyPolicyId %>">
+            <input class="form-control upload" type="file" id="antibriberyPolicy" name="antibriberyPolicy" value="<%= profile.antibriberyPolicy %>"/>
+            <input class="form-control single btn upload-button btn-dark mt-2" type="button" disabled value="Upload File" />
+          </div>
 
-        <div class="form-group">
-          <label>Quality management policy</label>
-          <input type="hidden" class="fileId" name="qualityManagementPolicyId" value="<%= profile.qualityManagementPolicyId %>">
-          <input class="form-control upload" type="file" id="qualityManagementPolicy" name="qualityManagementPolicy" value="<%= profile.qualityManagementPolicy %>"/>
-          <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
-        </div>
+          <div class="form-group">
+            <label>Environment policy</label>
+            <input type="hidden" class="fileId" name="environmentPolicyId" value="<%= profile.environmentPolicyId %>">
+            <input class="form-control upload" type="file" id="environmentPolicy" name="environmentPolicy" value="<%= profile.environmentPolicy %>"/>
+            <input class="form-control single btn upload-button btn-dark mt-2" type="button" disabled value="Upload File" />
+          </div>
 
-        <div class="form-group">
-          <label>Occupational Safety and Health</label>
-          <input type="hidden" class="fileId" name="occupationalSafetyAndHealthPolicyId" value="<%= profile.occupationalSafetyAndHealthPolicyId %>">
-          <input class="form-control upload" type="file" id="occupationalSafetyAndHealthPolicy" name="occupationalSafetyAndHealthPolicy" value="<%= profile.occupationalSafetyAndHealthPolicy %>"/>
-          <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
-        </div>
+          <div class="form-group">
+            <label>Quality management policy</label>
+            <input type="hidden" class="fileId" name="qualityManagementPolicyId" value="<%= profile.qualityManagementPolicyId %>">
+            <input class="form-control upload" type="file" id="qualityManagementPolicy" name="qualityManagementPolicy" value="<%= profile.qualityManagementPolicy %>"/>
+            <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
+          </div>
 
-        <div class="form-group">
-          <label>Other relevant files</label>
-          <input type="hidden" class="fileId" name="otherRelevantFilesIds" value="<%= profile.otherRelevantFilesIds %>">
-          <input class="form-control upload" type="file" id="otherRelevantFiles" name="otherRelevantFiles" multiple value="<%= profile.otherRelevantFiles %>">
-          <input class="form-control multiple btn btn-dark mt-2" type="button" disabled value="Upload Files" />
+          <div class="form-group">
+            <label>Occupational Safety and Health</label>
+            <input type="hidden" class="fileId" name="occupationalSafetyAndHealthPolicyId" value="<%= profile.occupationalSafetyAndHealthPolicyId %>">
+            <input class="form-control upload" type="file" id="occupationalSafetyAndHealthPolicy" name="occupationalSafetyAndHealthPolicy" value="<%= profile.occupationalSafetyAndHealthPolicy %>"/>
+            <input class="form-control single btn upload-button btn-dark mt-2" type="button" disabled value="Upload File" />
+          </div>
+
+          <div class="form-group">
+            <label>Other relevant files</label>
+            <input type="hidden" class="fileId" name="otherRelevantFilesIds" value="<%= profile.otherRelevantFilesIds %>">
+            <input class="form-control upload" type="file" id="otherRelevantFiles" name="otherRelevantFiles" multiple value="<%= profile.otherRelevantFiles %>">
+            <input class="form-control multiple btn upload-button btn-dark mt-2" type="button" disabled value="Upload Files" />
+          </div>
         </div>
         
         <div class="form-group">
@@ -195,38 +197,44 @@
         </div>
         
         <!--Mandatory check of agreements -->
+        <div class='checkbox-alignment'>
           <div class="form-group">
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="UNITETermsAndConditions" id="uniteTermsAndConditions" <%= profile.UNITETermsAndConditions ? "checked" : "" %> required>
+              <input class="form-check-input cb" type="checkbox" name="UNITETermsAndConditions" id="uniteTermsAndConditions" <%= profile.UNITETermsAndConditions ? "checked" : "" %> disabled>
               <label class="form-check-label" for="uniteTermsAndConditions">
-                <a href="../termsConditions">UNITE Terms And Conditions</a>
+                <a href="../termsConditions">I agree with the UNITE Terms And Conditions</a>
               </label>
             </div>
           </div>
           <div class="form-group">
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="antibriberyAgreement" id="antibriberyAgreement" <%= profile.antibriberyAgreement ? "checked" : "" %> required>
+              <input class="form-check-input cb" type="checkbox" name="antibriberyAgreement" id="antibriberyAgreement" <%= profile.antibriberyAgreement ? "checked" : "" %> disabled>
               <label class="form-check-label" for="antibriberyAgreement">
-                <a href="../antibriberyAgreement">Antibribery Agreement </a>
+                <a href="../antibriberyAgreement">I acknowledge the UNITE Anti-Bribery Agreement</a>
               </label>
             </div>
           </div>
+        </div>
         <br>       
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" >
-        <button type="submit" disabled id="updateProfile" value="Update Profile" class="btn btn-primary btn-block btn-lg">Update Profile</button>
-        </form>
-        <br>
-        <div class="form-group mr-2">
-        <br>
-        <div class="form-group mr-2">          
-          <a href="deactivate/<%= profile._id %>/<%= profile.organizationUniteID %>">
-            <button class="btn-warning btn" id="deactivation" title="Temporarily deactivate your Account">Deactivate Account</button>
-          </a>
+        <div class="update-profile">          
+          <button type="submit" disabled id="updateProfile" value="Update Profile" class="btn btn-primary update-button btn-block btn-lg">Update Profile</button>
         </div>
-        <a href="delete/<%= profile._id %>/<%= profile.organizationUniteID %>">
-          <button class="btn-danger btn" id="termination" title="Close Account">Delete Account</button>
-        </a>
-      </div>
+        </form>
+        <br><br>
+        <div class='bottom-buttons'>
+          <div class="form-group mr-2">          
+            <a href="deactivate/<%= profile._id %>/<%= profile.organizationUniteID %>">
+              <button class="btn-warning profile-button btn" id="deactivation" title="Temporarily deactivate your Account">Deactivate Account</button>
+            </a>
+          </div>
+          <div class="form-group mr-2">
+            <br>
+            <a href="delete/<%= profile._id %>/<%= profile.organizationUniteID %>">
+              <button class="btn-danger profile-button btn" id="termination" title="Close Account">Delete Account</button>
+            </a>
+          </div>
+        </div>
       <div id="dialog">
       </div>
     </div>

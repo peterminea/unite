@@ -755,6 +755,7 @@ app.post("/deleteBid", function(req, res, next) {
   });
 });
 
+
 app.post("/deleteFile", function(req, res, next) {
   //fs2.unlinkSync(req.body.file);
   console.log(req.body.file);
@@ -771,22 +772,13 @@ app.post("/deleteFile", function(req, res, next) {
   });
 });
 
+
 app.post("/exists", function(req, res) {
   const path = req.body.path;
   
   if (fs2.existsSync(path)) {
-    return res.json({ exists: true });
+    return res.json({ exists: fs2.existsSync(path)? true : false });
   }
-
-  fs2.access(path, fs.F_OK, (err) => {
-    if (err) {
-      console.error(err);
-      res.json(err);
-      //throw err;
-    }
-
-    return res.json({ exists: true });
-  });
 });
 
 

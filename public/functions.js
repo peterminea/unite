@@ -2,7 +2,7 @@ const autocomp = function(obj, data, enter) {
   //Not suitable for modals.
   let sel = obj.parent("div").find("select");
   for (let i in data) {
-    let opt =
+    const opt =
       "<option " +
       'style="word-wrap: break-word; width: 120px" title="' +
       data[i].name +
@@ -192,7 +192,7 @@ function expiredBidsPriceFormatter(cellvalue, options, rowObject) {
     { name: 'supplierCurrency', hidden: true },
     { name: 'maxAmount', hidden: true },
     { name: 'bigPrice', hidden: true },
-    { name: 'productName', label: 'Product name', formatter: productFormatter, search: true, width: 140},
+    { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
     { name: 'supplierName', label: 'Supplier name', formatter: supplierFormatter, search: true, width: 140},
     { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, unformat: priceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(rowObject.hiddenPrice).toFixed(2);}, search: true, width: 140},
     { name: 'amount', label: 'Amount', formatter: amountFormatter, unformat: amountUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseInt(rowObject.hiddenAmount);}, align: 'center', search: true, width: 70},
@@ -201,7 +201,7 @@ function expiredBidsPriceFormatter(cellvalue, options, rowObject) {
     { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
   ];
 
-  const colModelGridBids = [      
+  const colModelGridBids = [
       { name: 'bidName', label: 'Bid Request Name', search: true, width: 210},
       { name: 'supplierName', label: 'Bid Supplier Name', align: 'center', sorttype: 'text', search: true, width: 220},      
       { name: 'buyerPrice', label: 'Buyer\'s Price', align: 'center', formatter: buyerPriceFormatter, sorttype: function(cellValue, rowObject) { return parseFloat(rowObject.buyerPriceHref).toFixed(2);}, search: true, width: 100},
@@ -353,6 +353,7 @@ function openDropdown(obj) {
     .focus();
 }
 
+
 function getAutocomplete(elem, url, token, isEnter) {
   $("" + elem + "").autocomplete({
     source: function(req, res) {
@@ -409,6 +410,7 @@ function getAutocomplete(elem, url, token, isEnter) {
   });
 }
 
+
 function validatePassword(password) {
   // Do not show anything when the length of password is zero.
   if (password.length === 0) {
@@ -461,10 +463,12 @@ function validatePassword(password) {
     .text(strength);
 }
 
+
 function verifyMatch(password) {
   let mainPass = $("#password").val();
   $("#match").text(password !== mainPass ? "Passwords do not match!" : "");
 }
+
 
 (function($) {
   $.fn.inputFilter = function(inputFilter) {
@@ -485,6 +489,7 @@ function verifyMatch(password) {
     );
   };
 })(jQuery);
+
 
 function sortTable() {
   //Ascending or descending. Each <th> column tag is involved.
@@ -563,6 +568,7 @@ function sortTable() {
   }
 }
 
+
 function treatError(data, message) {
   if (data && data.message) {
     //Error!
@@ -599,6 +605,7 @@ function treatDiv(div, isMulti, val, input) {
   input.trigger("change"); //Enable Profile button!
   div.remove();
 }
+
 
 function removeFile(obj) {
   //remove from Glitch
@@ -679,6 +686,7 @@ function removeFile(obj) {
   });
 }
 
+
 function isJson(obj) {
   if (!obj || !obj.length || !Array.isArray(obj)) return false;
   if (obj.toString().charAt(0) == "[")
@@ -687,10 +695,12 @@ function isJson(obj) {
   return true;
 }
 
+
 function isUnique(value, index, self) {
   //Unique values in JS arrays.
   return self.indexOf(value) === index;
 }
+
 
 //let unique = myArray.filter(isUnique);
 //let unique = myArray.filter((v, i, a) => a.indexOf(v) === i);
@@ -931,32 +941,23 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
 
   obj.off("click").on("click", function() {
     let li = $(this)
-        .parent("span")
-        .closest('tr'),
-      ul = li.parent("table");
+        .closest('tr');
     
     let divId = fromBuyer ? $("#jqDiv" + id) : $("#jqDiv");
     let gridId = fromBuyer ? $("#grid" + id) : $("#grid");
     let fromBid = fromBuyer || !($("#hiddenTotalPrice").length);
-    let rowId;
-    
+    let rowId;    
     let bidSuppCurr, bidBigPrice, bidAmount, bidUnitPrice, prodSuppId, bidMaxAmount;
-    let index = ul.find("tr").index(li);
-    let rowid = "" + index;
+    let index = gridId.find("tr").index(li);
+    let rowid = li.attr('id');
+    
     rowId = gridId.jqGrid("getRowData", rowid);
-    
-    
- //Start from tr.find('td').eq(2).
-    /*
-    Price, amount, currency, total price, image source, product id, supplier id, supplier currency, max amount, big price.
-    td 2 to 11.
-    */
-    bidSuppCurr = rowId.supplierCurrency;//li.find('td').eq(9).html();
-    bidBigPrice = rowId.bigPrice;//li.find('td').eq(11).html();
-    bidAmount = rowId.hiddenAmount;//li.find('td').eq(3).html();
-    bidUnitPrice = rowId.hiddenPrice;//li.find('td').eq(2).html();
-    prodSuppId = rowId.supplierId;//li.find('td').eq(8).html();
-    bidMaxAmount = rowId.maxAmount;//li.find('td').eq(10).html();    
+    bidSuppCurr = rowId.supplierCurrency;
+    bidBigPrice = rowId.bigPrice;
+    bidAmount = rowId.hiddenAmount;
+    bidUnitPrice = rowId.hiddenPrice;
+    prodSuppId = rowId.supplierId;
+    bidMaxAmount = rowId.maxAmount;
 
     let counter = divId.prev("div").find("p.term span");
     let entireAmount = parseInt(li.find(".amount").text());
@@ -1002,7 +1003,7 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     let totalPrice = newPrice + " " + theCurrency,
       addedPrice = localPrice + " " + theCurrency;
  
-    if (isRow || (entireAmount == 1 && !isAdd)) {
+    if (isRow || (entireAmount == 1 && !isAdd)) {//Row deletion.
       SwalCustom.fire({
         title: "Are you sure?",
         text: "You are about to remove the entire product row.",
@@ -1024,12 +1025,12 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
         }
       });
     } else {
-      ul.find("tr td:eq(11)").html(parseFloat(newPrice));
+      gridId.find("tr td:eq(10)").html(parseFloat(newPrice));
       totalAmountInput.val(parseInt(newAmount));
-      li.find("span.amount").text(localAmount);
-      li.find("span.totalPrice").text(localPrice);
+      li.find("span.amount").text(parseInt(localAmount));
+      li.find("span.totalPrice").text(parseFloat(localPrice).toFixed(2));
       
-      if (!isRow && (entireAmount > 1 || isAdd)) {//No deletion.
+      if (!isRow && (entireAmount > 1 || isAdd)) {//No row deletion.
         gridId.jqGrid("setRowData", rowid, {
           hiddenAmount: parseInt(localAmount),
           hiddenTotalPrice: parseFloat(localPrice).toFixed(2),
@@ -1069,7 +1070,7 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
         $('#isupplierPrice'+id).val(parseFloat(supp).toFixed(2));
       }
       
-      //gridId.trigger("reloadGrid");
+      gridId.trigger("reloadGrid");
     }
   });
 }
@@ -1077,54 +1078,89 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
 
 function removeAllProducts() {
   //Supplier products.
-  /*$("#grid")
-    .find("tr:not(:first)")
-    .remove();*/
-  
-  const dataIDs = $("#grid").getDataIDs();
-  
-  for(let ind of dataIDs) {
-    $("#grid").jqGrid("delRowData", ind);
-  }
-  
-  $("input.supply").each(function() {
-    $(this).val("");
-  });
-  $("span.supply").each(function() {
-    $(this).text("0");
+   const SwalCustom = Swal.mixin({
+    customClass: {
+      confirmButton: "btn btn-warning",
+      cancelButton: "btn btn-danger"
+    },
+    buttonsStyling: true
   });
 
-  $("#totalSupplyAmount").val(0);
-  $("#totalSupplyPrice").text("0 " + $('input[name="currency"]').val());
-  $("#hiddenTotalPrice").val("0 " + $('input[name="currency"]').val());
-  $("#hiddenTotalAmount").val(0);
+  SwalCustom.fire({
+    title: "Are you sure?",
+    html: "<p style='color: teal'>You will not be able to revert the products deletion!<br>Instead, you will have to re-make your list.<br>Please be certain about the removal.</p>",
+    icon: "warning",
+    showCancelButton: true,
+    //confirmButtonColor: "#86fd42",
+    //cancelButtonColor: "#00ff00",
+    confirmButtonText: "I understand!"
+  }).then((result) => {
+    if (result.value) {
+       const dataIDs = $("#grid").getDataIDs();
+  
+      for(let ind of dataIDs) {
+        $("#grid").jqGrid("delRowData", ind);
+      }
+
+      $("input.supply").each(function() {
+        $(this).val("");
+      });
+      $("span.supply").each(function() {
+        $(this).text("0");
+      });
+
+      $("#totalSupplyAmount").val(0);
+      $("#totalSupplyPrice").text("0 " + $('input[name="currency"]').val());
+      $("#hiddenTotalPrice").val("0 " + $('input[name="currency"]').val());
+      $("#hiddenTotalAmount").val(0);
+      $('span.productsCount').text(0);
+    }
+  });
 }
+
 
 function removeAllItems(index) {
   //Bid items.
-  const grid = $("#grid" + index);
-  /*grid
-    .find("tr:not(:first)")
-    .remove();*/
-  
-  const dataIDs = grid.getDataIDs();
-  
-  for(let ind of dataIDs) {
-    grid.jqGrid("delRowData", ind);
-  }
-  
-  $("#hiddenProdServicesList" + index).val("");
-  $("#amountList" + index).val("");
-  $("#priceList" + index).val("");
-  $("#productImagesList" + index).val("");
-  $("#totalAmount" + index).val("0");
-  $("span.hid").each(function() {
-    let procSpan = $(this)
-      .find("span")
-      .first();
-    procSpan.text(0);
+   const SwalCustom = Swal.mixin({
+    customClass: {
+      confirmButton: "btn btn-warning",
+      cancelButton: "btn btn-danger"
+    },
+    buttonsStyling: true
+  });
+
+  SwalCustom.fire({
+    title: "Are you sure?",
+    html: "<p style='color: teal'>You will not be able to revert the products deletion!<br>You will need to re-build the list.<br>Please be certain about the removal.</p>",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#840440",
+    cancelButtonColor: "#00ff00",
+    confirmButtonText: "I understand!"
+  }).then((result) => {
+     const grid = $("#grid" + index);
+    const dataIDs = grid.getDataIDs();
+
+    for(let ind of dataIDs) {
+      grid.jqGrid("delRowData", ind);
+    }
+
+    $("#hiddenProdServicesList" + index).val("");
+    $("#amountList" + index).val("");
+    $("#priceList" + index).val("");
+    $("#productImagesList" + index).val("");
+    $("#totalAmount" + index).val("0");
+    $('span.productsCount').text(0);
+
+    $("span.hid").each(function() {
+      let procSpan = $(this)
+        .find("span")
+        .first();
+      procSpan.text(0);
+    });
   });
 }
+
 
 function addition(
   prod,
@@ -1132,6 +1168,7 @@ function addition(
   priceVal,
   currencyVal,
   amountVal,
+  supplierValExcel,
   imagePath,
   elem,
   fromBuyer,
@@ -1195,7 +1232,7 @@ function addition(
     let totalAmountInput = fromBid
       ? $("#totalAmount" + id)
       : $("#totalSupplyAmount");
-    totalAmountInput.val(  parseInt(totalAmountInput.val()) + parseInt(amountVal));
+    totalAmountInput.val(parseInt(totalAmountInput.val()) + parseInt(amountVal));
     
     let gridId = fromBuyer ? $("#grid" + id) : $("#grid");
     let divId = fromBuyer ? $("#jqDiv" + id) : $("#jqDiv");
@@ -1206,25 +1243,24 @@ function addition(
     let selCurr = $('#selectCurrencies'+id);
     let optCurr = selCurr.find('option:selected');
     let supplierId = fromBid && opt.attr('supplierId')? opt.attr('supplierId') : elem.attr('supplierId')? elem.attr('supplierId') : null;
-    let supplierNameInput = fromBid? ((id.length? $('#supplierName'+id) 
-                                 : !($('#span.multisupp').length)? $('#supplierName') : $(`span.multisupp[suppId=${supplierId}]`).parent('div').find('span.supplierNameListed'))) : $('#supplierName');
+    let supplierNameInput = (fromBid? ((id.length? $('#supplierName'+id) 
+                                 : !($('#span.multisupp').length)? $('#supplierName') : $(`span.multisupp[suppId=${supplierId}]`).parent('div').find('span.supplierNameListed'))) : $('#supplierName'));
     
-    let val = supplierNameInput.is('input')? supplierNameInput.val() : supplierNameInput.text();
+    let val = supplierValExcel? supplierValExcel : supplierNameInput.is('input')? supplierNameInput.val() : supplierNameInput.text();
     
     if(!val || !val.length) {
       val = 'No supplier';
-    }    
-
-    let data = {
-      id: lis,
+    }
+ 
+    let data = {      
       name: prodVal,
+      supplierName: val,
       hiddenPrice: priceVal,      
       hiddenTotalPrice: addedPrice,
       hiddenCurrency: currencyVal,
       productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : "",
       productId: fromBid && opt.attr('productId')? opt.attr('productId') : null,
       supplierId: supplierId,
-      supplierName: val,
       maxAmount: fromBid && opt.attr('maxAmount')? opt.attr('maxAmount') : elem.attr('MAX'),
       supplierCurrency: fromBid && opt.attr('supplierCurrency')? opt.attr('supplierCurrency') : elem.attr('supplierCurrency')? elem.attr('supplierCurrency') : (!fromBid && optCurr.text())? optCurr.text() : null,
       hiddenAmount: parseInt(amountVal),
@@ -1307,7 +1343,7 @@ function addProduct(obj) {
       Number.isInteger(parseFloat($("#amount").val()));
     let imagePath = $("input.productimageupload").attr("filePath");
 
-    if (req) {
+    if(req) {
       $("#prodServiceInput,#price,#currency").removeClass("errorField");
       addition(
         input,
@@ -1315,6 +1351,7 @@ function addProduct(obj) {
         $("#price").val(),
         $("#currency").val(),
         $("#amount").val(),
+        null,
         imagePath,
         elem,
         false,
@@ -1867,7 +1904,8 @@ function fileExists(absolutePath, isMulti, ob, theDiv, fileId, i, val, token) {
     datatype: "application/json",
     error: function() {
       Swal.fire({
-        title: "Not found!",
+        title: "Error - Not found!",
+        timer: 1500,
         text: "Your file, " + absolutePath + ", was not found.",
         icon: "error"
       });
@@ -1876,7 +1914,8 @@ function fileExists(absolutePath, isMulti, ob, theDiv, fileId, i, val, token) {
       if (!data || !data.exists) {
         Swal.fire({
           title: "Not found!",
-          text: "Your file, " + absolutePath + ", was not found.",
+          timer: 1500,
+          text: "Your file, " + absolutePath + ", was not found. Please upload another valid file.",
           icon: "error"
         });
         return false;
@@ -2272,6 +2311,11 @@ $(document).ready(function() {
     }
     
     $("#grid").trigger('reloadGrid');
+    
+    if(!$(this).hasClass('initial')) {
+          $(this).addClass('initial');
+          $('#updateProfile').prop('disabled', true);
+        };    
   });
   
   if($('.prefDate').length) {
@@ -2403,7 +2447,7 @@ $(document).ready(function() {
       $('input[id^="prodServiceInput"]').on('change', function() {
         if($(this).val()) {
           let id = getIdClear($(this));
-          var amount = $('#amount'+id).val();
+          let amount = $('#amount'+id).val();
           
           if(amount && amount > 0) {
             $("#addProdService"+id).prop('disabled', false);
@@ -2430,7 +2474,7 @@ $(document).ready(function() {
 
       $('input.amountInput').off('change').on('change', function() {
         let id = getIdClear($(this));
-        var validValues = $(this).val() > 0 && ($('#prodServiceInput'+id).val());
+        let validValues = $(this).val() > 0 && ($('#prodServiceInput'+id).val());
         $("#addProdService"+id).prop('disabled', validValues? false : true);
         
         if(validValues) {
@@ -2455,6 +2499,68 @@ $(document).ready(function() {
         }
       });
     
+    
+      $('select.productsList').on('change', function() {
+        let opt = $(this).find('option:selected');
+        
+        if(!opt || !opt.text() || !opt.text().length || !$(this).val() || !$(this).val().length) {//alert('FLORILE DE MĂRU');
+          return false;
+        }
+        
+        let name = $(this).val();        
+        $('span.hid').first().parent('div').find('span.productName').text(opt.text());
+        
+        if($('.multiSupp').length) { 
+          $(`span.unitPrice[suppId="${opt.attr('supplierId')}"]`).parent('div').find('.productName').text(opt.text());
+        } else {
+          $('span.hid').eq(2).parent('div').find('span.productName').text(opt.text());
+        }
+        
+        let price = opt.attr('price');
+        let isSingle = $("#prodServiceInput").length > 0;
+        if(isSingle) {
+          $("#prodServiceInput").attr('price', price);
+        }
+        
+        let totalPrice = opt.attr('totalPrice');
+        let currency = opt.attr('currency');
+        
+        if(isSingle) {
+          $('#prodServices').attr('supplierCurrency', currency);          
+        }
+        
+        let maxAmount = opt.attr('maxAmount');      
+        let bidCurrency = $('select.buyerCurrency')
+          .find('option:selected')
+          .text();
+     
+        if(isSingle) {
+          $('#prodServiceInput')
+            .val(opt.text());
+       
+          $('#addProdService').removeAttr('disabled');
+        }
+        
+         if(!($(this).hasClass('init'))) {
+          if(bidCurrency != currency && !($(this).hasClass('multiplex'))) {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Warning',
+              timer: 2000,
+              html: "The currency of your order is different from the Supplier's.<br>Yours is " + bidCurrency + ', theirs is ' + currency  + '.<br>Please note that conversion rates will be applied.'
+            });
+          }
+         } else {
+           $(this).removeClass('init');           
+         }
+       
+        let val = fx.convert(parseFloat(price), {from: currency, to: bidCurrency});
+        let input = $(this).parent('div').next('div').find('.prodInput');       
+        input.attr({'price': val, 'maxAmount': maxAmount});
+        input.val(name);
+        input.trigger('change');
+      });
+    
 
       $('select.buyerCurrency').on('change', function() {
         let curr = $(this).find('option:selected').text();
@@ -2472,6 +2578,12 @@ $(document).ready(function() {
         grid.attr('buyerCurrency', curr);
         $('#currency'+id).val(curr);
         $('#scurrency'+id).text(curr);
+        
+        if(!$(this).hasClass('initial')) {
+          $(this).addClass('initial');
+          $('#updateProfile').prop('disabled', true);
+        };
+        
         
         let suppCurrency = elem.attr('supplierCurrency')? elem.attr('supplierCurrency') : null; 
         if(!($(this).hasClass('multiplex')) && suppCurrency && curr && curr != suppCurrency) {
@@ -2529,68 +2641,7 @@ $(document).ready(function() {
         
         grid.trigger('reloadGrid');
       });
-    
-    
-      $('select.productsList').on('change', function() {
-        let opt = $(this).find('option:selected');
-        
-        if(!opt || !opt.text() || !opt.text().length || !$(this).val() || !$(this).val().length) {//alert('FLORILE DE MĂRU');
-          return false;
-        }
-        
-        let name = $(this).val();        
-        $('span.hid').first().parent('div').find('span.productName').text(opt.text());
-        
-        if($('.multiSupp').length) { 
-          $(`span.unitPrice[suppId="${opt.attr('supplierId')}"]`).parent('div').find('.productName').text(opt.text());
-        } else {
-          $('span.hid').eq(2).parent('div').find('span.productName').text(opt.text());
-        }
-        
-        let price = opt.attr('price');
-        let isSingle = $("#prodServiceInput").length > 0;
-        if(isSingle) {
-          $("#prodServiceInput").attr('price', price);
-        }
-        
-        let totalPrice = opt.attr('totalPrice');
-        let currency = opt.attr('currency');
-        
-        if(isSingle) {
-          $('#prodServices').attr('supplierCurrency', currency);          
-        }
-        
-        let maxAmount = opt.attr('maxAmount');      
-        let bidCurrency = $('select.buyerCurrency')
-          .find('option:selected')
-          .text();
-     
-        if(isSingle) {
-          $('#prodServiceInput')
-            .val(opt.text());
-       
-          $('#addProdService').removeAttr('disabled');
-        }
-        
-         if(!($(this).hasClass('init'))) {
-          if(bidCurrency != currency && !($(this).hasClass('multiplex'))) {
-            Swal.fire({
-              icon: 'warning',
-              title: 'Warning',
-              timer: 2000,
-              html: "The currency of your order is different from the Supplier's.<br>Yours is " + bidCurrency + ', theirs is ' + currency  + '.<br>Please note that conversion rates will be applied.'
-            });
-          }
-         } else {
-           $(this).removeClass('init');
-         }
-       
-        let val = fx.convert(parseFloat(price), {from: currency, to: bidCurrency});
-        let input = $(this).parent('div').next('div').find('.prodInput');       
-        input.attr({'price': val, 'maxAmount': maxAmount});
-        input.val(name);
-        input.trigger('change');
-      });
+  }
     
       $('input[readonly]').css('background-color', 'lightgray');//No names on spans. Also, disabled inputs means no readability for back-end.
     
@@ -2643,8 +2694,14 @@ $(document).ready(function() {
           });
         },
         minLength: 3
-      });    
-  }
+      });
+  
+  
+  $('input.cb').on('change', function() {
+        let len = $('.cb:checked').length;
+        let button = $('#updateProfile').length? $('#updateProfile') : $('#register');
+        button.prop('disabled', (len == 2? false : true));
+  });
   
 
   if (!$("input.upload").length) 
@@ -2712,12 +2769,6 @@ $(document).ready(function() {
   });
 
   delegateUpload($(".uploadImage"));
-  /*
-let extArray = [".png", ".jpg", ".jpeg", ".gif", ".bmp", '.csv', ".pdf", ".txt", ".doc", ".docx", ".rtf", '.xls', '.xlsx', '.ppt', '.pptx'],
-  prodImageArray = ['.png', '.jpg', '.jpeg', '.bmp', '.csv', '.gif'],
-  excelArray = [".xls", ".xlsx"];
-//1 MB
-*/
 
   $(".single,.multiple").click(function(e) {
     const input = $(this).prev("input");
@@ -2853,7 +2904,7 @@ let extArray = [".png", ".jpg", ".jpeg", ".gif", ".bmp", '.csv', ".pdf", ".txt",
             for (let i in response) {
               //Each Supplier product should come here.
               if (i < 1) continue;
-              let elem = response[i];//Name, price, currency, amount.
+              let elem = response[i];//Name, price, currency, amount, maybe Supplier Name.
 
               if (el.find("tr").length > MAX) {
                 Swal.fire({
@@ -2867,7 +2918,7 @@ let extArray = [".png", ".jpg", ".jpeg", ".gif", ".bmp", '.csv', ".pdf", ".txt",
               
               let prodList = div.find('select.productsList');
               let suppId = prodList.attr('supplierId')? prodList.attr('supplierId') : null;
-              addition(productInput, elem[0], elem[1], elem[2], elem[3], null, el, fromBuyer, suppId);
+              addition(productInput, elem[0], elem[1], elem[2], elem[3], elem[4]? elem[4] : null, null, el, fromBuyer, suppId);
             }
           } else {
             Swal.fire({

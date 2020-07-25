@@ -16,6 +16,40 @@ body {
   font-size: 16pt;
 }
 
+.profile-button {
+  width: 180px
+}
+
+.update-profile {
+  text-align: center;
+  font-weight: bold;
+  margin-left: 40%;
+  width: 80%
+}
+
+.bottom-buttons {
+  margin-left: 40.5%;
+  width: 64%
+}
+
+p.excel {
+  font-size: 14px;
+  font-weight: bold
+}
+
+.upload-section,.totals,.checkbox-alignment {
+  margin-left: 37.5%;
+  width: 102%
+}
+
+.btn-block.update-button {
+  width: 25%
+}
+
+.totals .form-control,.form-control.upload-button,input.upload {
+  width: 25%
+}
+
 span.hid,span.supply {
   background-color: lightgray
 }

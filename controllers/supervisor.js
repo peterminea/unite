@@ -681,8 +681,8 @@ exports.postProfile = (req, res) => {
     doc.qualityManagementPolicyId = req.body.qualityManagementPolicyId;
     doc.occupationalSafetyAndHealthPolicyId = req.body.occupationalSafetyAndHealthPolicyId;
     doc.otherRelevantFilesIds = req.body.otherRelevantFilesIds;
-    doc.UNITETermsAndConditions = req.body.UNITETermsAndConditions == 'on'? true : false;
-    doc.antibriberyAgreement = req.body.antibriberyAgreement == 'on'? true : false;
+    doc.UNITETermsAndConditions = true;
+    doc.antibriberyAgreement = true;
     doc.createdAt = req.body.createdAt;
     doc.updatedAt = Date.now();
     doc.createdAtFormatted = normalFormat(req.body.createdAt);
