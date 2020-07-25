@@ -34,7 +34,6 @@
       name = "<%= userName %>", 
       type = "<%= userType %>";
       userInputs(id, role, avatar, name, type, $('ul.mr-auto'));
-      //initBaseRates(fx, '#currency');
     });
   </script>
   </head>
@@ -76,29 +75,12 @@
       </div>
     </div>
   <script type="text/javascript">
-    var data = [];
-    var colModelGridBids = [
-      { name: 'bidName', label: 'Bid Request Name', search: true, width: 210},
-      { name: 'buyerName', label: 'Bid Buyer Name', align: 'center', search: true, width: 220},
-      { name: 'supplierName', label: 'Bid Supplier Name', align: 'center', sorttype: 'text', search: true, width: 220},      
-      { name: 'buyerPrice', label: 'Buyer\'s Price', align: 'center', formatter: buyerPriceFormatter, sorttype: function(cellValue, rowObject) { return parseFloat(rowObject.buyerPriceHref).toFixed(2);}, search: true, width: 100},
-      { name: 'supplierPrice', label: 'Supplier\'s Price', align: 'center', formatter: supplierPriceFormatter, sorttype: function(cellValue, rowObject) { return parseFloat(rowObject.supplierPriceHref).toFixed(2);}, search: true, width: 100 },
-      { name: 'dateCreated', label: 'Creation Date', align: 'center', search: true, width: 200},
-      { name: 'expiryDate', label: 'Expiry Date', align: 'center', search: true, width: 100},
-      { name: 'isCancelled', label: 'Is Cancelled?', align: 'center', search: true, width: 100},
-      { name: 'isExpired', label: 'Is Expired?', align: 'center', search: true, width: 100 },
-      { name: 'buyerPriceHref', hidden: true },
-      { name: 'buyerCurrencyHref', hidden: true },
-      { name: 'supplierPriceHref', hidden: true },
-      { name: 'supplierCurrencyHref', hidden: true }
-    ];
-
-    initGrid(colModelGridBids, data, "#gridBids", '#bidsPager', "bidName", 'Bids List');
-  </script>
-  <% i = 0; for (bid of bids) { %>
-  <script type="text/javascript">
-    
-    var data = {
+    let data = [];
+    let colModel = colModelGridBids;
+    colModelGridBids.splice(1, 0, { name: 'buyerName', label: 'Bid Buyer Name', align: 'center', search: true, width: 220});
+  
+  <% i = 0; for (bid of bids) { %>    
+    data.push({
           id: "<%= i %>",
           bidName: "<%= bid.requestName %>",
           buyerName: "<%= bid.buyerName %>",
@@ -109,11 +91,12 @@
           isExpired: "<%= bid.isExpired %>",
           buyerPriceHref: "<%= parseFloat(bid.buyerPrice) %> <%= bid.buyerCurrency %>",
           supplierPriceHref: "<%= parseFloat(bid.supplierPrice) %> <%= bid.supplierCurrency %>"
-    };
-
-    $("#gridBids").jqGrid('addRowData', data.id, data, 'last');        
-  </script>
+    });
      <% i++; } %>
+    
+    initGrid(colModel, data, "#gridBids", '#bidsPager', "bidName", 'Bids List', 1200);
+    //$("#gridBids").jqGrid('addRowData', data.id, data, 'last');
+    </script>
         <% } else {%>
         <div>
           <p style="color: green; font-family: arial">
@@ -121,9 +104,6 @@
           </p>
         </div>
         <% }%>
-  </div>
-  
-  </body>
-  
-</html>
-  
+  </div>  
+  </body>  
+</html>  

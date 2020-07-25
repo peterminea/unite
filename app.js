@@ -399,8 +399,9 @@ app.get("/loadProductsCatalog", (req, res) => {
             amount: products[i].amount,
             totalPrice: products[i].totalPrice,
             productImage: fileExists(products[i].productImage)? products[i].productImage : '',
-            currency: products[i].currency,
-            supplier: obj.companyName
+            buyerCurrency: products[i].currency,
+            supplierCurrency: obj.currency,
+            supplierName: obj.companyName
           });
       });
     }
@@ -430,7 +431,6 @@ let extArray = [".png", ".jpg", ".jpeg", ".gif", ".bmp", '.csv', ".pdf", ".txt",
 let storage = multer.diskStorage({
   destination: function(req, file, callback) {
     callback(null, path.join("${__dirname}/../public/uploads"));
-    //callback(null, 'public/uploads/');
   },
   filename: function(req, file, callback) {
     // + path.extname(file.originalname)
@@ -489,8 +489,7 @@ let uploadExcel = multer({
 
 let prodImageStorage = multer.diskStorage({
   destination: function(req, file, callback) {
-    callback(null, path.join("${__dirname}/../public/productImages"));
-    //callback(null, 'public/uploads/');
+    callback(null, path.join("${__dirname}/../public/productImages"));    
   },
   filename: function(req, file, callback) {
     // + path.extname(file.originalname)

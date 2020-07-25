@@ -75,8 +75,8 @@
     </div>
   
   <script type="text/javascript">
-    var data = [];
-    var colModelBuyer = [
+    let data = [];
+    let colModelBuyer = [
       { name: 'organizationName', label: 'Organization name', search: true, width: 210},
       { name: 'deptAgencyGroup', label: 'Dept. Agency Group', align: 'center', search: true, width: 220},
       { name: 'contactName', label: 'Contact Name', align: 'center', search: true, width: 200},
@@ -91,13 +91,10 @@
       { name: 'ban', label: 'Ban User', align: 'center', formatter: banFormatter, search: false, width: 100},
       { name: 'hiddenDeleteHref', hidden: true },
       { name: 'hiddenBanHref', hidden: true }
-    ];   
-    
-    initGrid(colModelBuyer, data, "#gridBuyer", '#buyerPager', "organizationName", 'Buyers');
-  </script>
+    ];
+  
   <% i = 0; for (buyer of buyers) { %>
-    <script type="text/javascript">                 
-      var data = {
+      data.push({
             id: "<%= i %>",
             organizationName: "<%= buyer.organizationName %>",
             deptAgencyGroup: "<%= buyer.deptAgencyGroup %>",
@@ -111,11 +108,11 @@
             ipv4: "<%= buyer.ipv4 %>",
             hiddenDeleteHref: <% if(buyer.role != 'Admin') { %> "deleteUser/<%= buyer._id %>/Buyer/<%= buyer.organizationName %>/None/<%= buyer.emailAddress %>" <% } else { %> '' <% } %>,
         hiddenBanHref: <% if(buyer.role != 'Admin') { %> "banUser/<%= buyer._id %>/Buyer/<%= buyer.organizationName %>/None/<%= buyer.emailAddress %>/<%= buyer.ipv4 %>" <% } else { %> '' <% } %>
-      };
-        
-      $("#gridBuyer").jqGrid('addRowData', data.id, data, 'last');        
-    </script>
+      });
      <% i++; } %>
+    
+    initGrid(colModelBuyer, data, "#gridBuyer", '#buyerPager', "organizationName", 'Buyers', 1600);
+    </script>
         <% } else { %>
         <div>
           <p style="color: green; font-family: arial">
@@ -142,8 +139,8 @@
     </div>
   
   <script type="text/javascript">
-    var data = [];
-    var colModelSupervisor = [
+    let data0 = [];
+    let colModelSupervisor = [
       { name: 'organizationName', label: 'Organization name', search: true, width: 240},
       { name: 'organizationUniteID', label: 'Organization UNITE ID', align: 'center', search: true, width: 140},
       { name: 'contactName', label: 'Contact Name', align: 'center', search: true, width: 200},
@@ -158,12 +155,9 @@
       { name: 'hiddenDeleteHref', hidden: true },
       { name: 'hiddenBanHref', hidden: true }
     ];
-    
-    initGrid(colModelSupervisor, data, "#gridSupervisor", '#supervPager', "organizationName", 'Supervisors');
-  </script>
-  <% i = 0; for (supervisor of supervisors) { %>
-    <script type="text/javascript">                 
-      var data = {
+ 
+  <% i = 0; for (supervisor of supervisors) { %>  
+      data0.push({
             id: "<%= i %>",
             organizationName: "<%= supervisor.organizationName %>",
             organizationUniteID: "<%= supervisor.organizationUniteID %>",
@@ -176,11 +170,11 @@
             ipv4: "<%= supervisor.ipv4 %>",
             hiddenHref: <% if(supervisor.role != 'Admin') { %> "deleteUser/<%= supervisor._id %>/Supervisor/<%= supervisor.organizationName %>/<%= supervisor.organizationUniteID %>/<%= supervisor.emailAddress %>" <% } else { %> '' <% } %>,
             hiddenBanHref: <% if(supervisor.role != 'Admin') { %> "banUser/<%= supervisor._id %>/Supervisor/<%= supervisor.organizationName %>/None/<%= supervisor.emailAddress %>/<%= supervisor.ipv4 %>" <% } else { %> '' <% } %>
-      };
-        
-      $("#gridSupervisor").jqGrid('addRowData', data.id, data, 'last');        
-    </script>
+      });
      <% i++; } %>
+    
+    initGrid(colModelSupervisor, data0, "#gridSupervisor", '#supervPager', "organizationName", 'Supervisors', 1600);
+    </script>
         <% } else { %>
         <div>
           <p style="color: green; font-family: arial">
@@ -208,8 +202,8 @@
     </div>
   
   <script type="text/javascript">
-    var data = [];
-    var colModelSupplier = [
+    let data1 = [];
+    let colModelSupplier = [
       { name: 'companyName', label: 'Company name', search: true, width: 150},
       { name: 'directorsName', label: 'Director\'s Name', align: 'center', search: true, width: 180},
       { name: 'contactName', label: 'Contact Name', align: 'center', search: true, width: 225},
@@ -230,13 +224,9 @@
       { name: 'hiddenDeleteHref', hidden: true },
       { name: 'hiddenBanHref', hidden: true }
     ];   
-    
-    initGrid(colModelSupplier, data, "#gridSupplier", '#suppPager', "companyName", 'Suppliers');    
-  
-  </script>
+   
   <% i = 0; for (supplier of suppliers) { %>
-    <script type="text/javascript">                 
-      var data = {
+      data1.push({
             id: "<%= i %>",
             companyName: "<%= supplier.companyName %>",
             directorsName: "<%= supplier.directorsName %>",
@@ -255,11 +245,11 @@
             ipv4: "<%= supplier.ipv4 %>",
             hiddenHref: <% if(supplier.role != 'Admin') { %> "deleteUser/<%= supplier._id %>/Supplier/<%= supplier.companyName %>/None/<%= supplier.emailAddress %>" <% } else { %> '' <% } %>,
             hiddenBanHref: <% if(supplier.role != 'Admin') { %> "banUser/<%= supplier._id %>/Supplier/<%= supplier.organizationName %>/None/<%= supplier.emailAddress %>/<%= supplier.ipv4 %>" <% } else { %> '' <% } %>
-      };
-        
-      $("#gridSupplier").jqGrid('addRowData', data.id, data, 'last');        
-    </script>
+      });
      <% i++; } %>
+    
+    initGrid(colModelSupplier, data, "#gridSupplier", '#suppPager', "companyName", 'Suppliers', 1600);    
+    </script>
         <% } else { %>
         <div>
           <p style="color: green; font-family: arial">
@@ -267,8 +257,6 @@
           </p>          
         </div>
         <% }%>
-    </div>
-    
-  </body>
-  
+    </div>    
+  </body>  
 </html>
