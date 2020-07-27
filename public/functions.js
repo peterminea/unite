@@ -1,7 +1,7 @@
 const autocomp = function(obj, data, enter) {
   //Not suitable for modals.
   let sel = obj.parent("div").find("select");
-  for (let i in data) {
+  for (const i in data) {
     const opt =
       "<option " +
       'style="word-wrap: break-word; width: 120px" title="' +
@@ -907,7 +907,7 @@ function initBaseRates(fx, elem, url, token, defaultBidCurrency) {
       fx.base = "EUR";
       obj = [];
 
-      for(let i in currency) {
+      for(const i in currency) {
         t = JSON.stringify(currency[i]);
         obj.push(JSON.parse(t.substring(7, t.length-1)));
       }
@@ -916,13 +916,12 @@ function initBaseRates(fx, elem, url, token, defaultBidCurrency) {
           return a.code.localeCompare(b.code);
         });
 
-      for(let i in obj) {
+      for(const i in obj) {
         str += obj[i].code + ': ' + obj[i].rate + (i == obj.length-1? '' : ',\n');
       } 
 
       str += '\n}';
-      eval(str);
-      console.log(fx.rates);
+      eval(str);      
       getCurrenciesList(elem, url, token, defaultBidCurrency);     
       return fx;
   });
@@ -940,7 +939,7 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
   });
 
   obj.off("click").on("click", function() {
-    let li = $(this)
+    let tr = $(this)
         .closest('tr');
     
     let divId = fromBuyer ? $("#jqDiv" + id) : $("#jqDiv");
@@ -948,8 +947,8 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     let fromBid = fromBuyer || !($("#hiddenTotalPrice").length);
     let rowId;    
     let bidSuppCurr, bidBigPrice, bidAmount, bidUnitPrice, prodSuppId, bidMaxAmount;
-    let index = gridId.find("tr").index(li);
-    let rowid = li.attr('id');
+    let index = gridId.find("tr").index(tr);
+    let rowid = tr.attr('id');
     
     rowId = gridId.jqGrid("getRowData", rowid);
     bidSuppCurr = rowId.supplierCurrency;
@@ -960,7 +959,7 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     bidMaxAmount = rowId.maxAmount;
 
     let counter = divId.prev("div").find("p.term span");
-    let entireAmount = parseInt(li.find(".amount").text());
+    let entireAmount = parseInt(tr.find(".amount").text());
     
     if (isAdd && entireAmount == bidMaxAmount) {
       Swal.fire({
@@ -968,7 +967,7 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
         title: "Error!",
         text:
           "The maximum stock of the Supplier for the Product " +
-          li.find(".product").text() +
+          tr.find(".product").text() +
           " is " +
           entireAmount +
           "."
@@ -978,11 +977,11 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     }
 
     let handledAmount = isRow? entireAmount : 1;
-    let rowPrice = parseFloat(li.find("span.totalPrice").text()).toFixed(2);
-    let unitPrice = parseFloat(li.find("span.price").text()).toFixed(2);
+    let rowPrice = parseFloat(tr.find("span.totalPrice").text()).toFixed(2);
+    let unitPrice = parseFloat(tr.find("span.price").text()).toFixed(2);
     let handledPrice = handledAmount * unitPrice;
-    let theCurrency = fromBid? ul.attr("buyerCurrency")
-      : li
+    let theCurrency = fromBid? gridId.attr("buyerCurrency")
+      : tr
           .find("span.currency")
           .first()
           .text();
@@ -1016,7 +1015,7 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
         //, reverseButtons: true
       }).then((result) => {
         if (result.value) {
-          li.remove();
+          tr.remove();
           let newValue = -1 + parseInt(counter.text());
           counter.text(newValue);          
           gridId.jqGrid("delRowData", rowId);
@@ -1027,8 +1026,8 @@ function bindHandleProduct(obj, prodServiceInput, fromBuyer, id, isRow, isAdd) {
     } else {
       gridId.find("tr td:eq(10)").html(parseFloat(newPrice));
       totalAmountInput.val(parseInt(newAmount));
-      li.find("span.amount").text(parseInt(localAmount));
-      li.find("span.totalPrice").text(parseFloat(localPrice).toFixed(2));
+      tr.find("span.amount").text(parseInt(localAmount));
+      tr.find("span.totalPrice").text(parseFloat(localPrice).toFixed(2));
       
       if (!isRow && (entireAmount > 1 || isAdd)) {//No row deletion.
         gridId.jqGrid("setRowData", rowid, {
@@ -1098,7 +1097,7 @@ function removeAllProducts() {
     if (result.value) {
        const dataIDs = $("#grid").getDataIDs();
   
-      for(let ind of dataIDs) {
+      for(const ind of dataIDs) {
         $("#grid").jqGrid("delRowData", ind);
       }
 
@@ -1139,9 +1138,9 @@ function removeAllItems(index) {
     confirmButtonText: "I understand!"
   }).then((result) => {
      const grid = $("#grid" + index);
-    const dataIDs = grid.getDataIDs();
+     const dataIDs = grid.getDataIDs();
 
-    for(let ind of dataIDs) {
+    for(const ind of dataIDs) {
       grid.jqGrid("delRowData", ind);
     }
 
@@ -1192,7 +1191,7 @@ function addition(
         " to the list. Please refine your selection."
     });
   } else {
-    let id = fromBuyer ? '_' + getId(elem.attr("id")) : '';
+    const id = fromBuyer ? '_' + getId(elem.attr("id")) : '';
     let fromBid = fromBuyer || !($("#hiddenTotalPrice").length);
     let addedPrice = parseFloat(priceVal * amountVal).toFixed(2);
     let priceInput = fromBid ? $("#price" + id) : $("#totalSupplyPrice");
@@ -1225,9 +1224,7 @@ function addition(
       
       currencyVal = pageCurrency;
       bigPrice = fx.convert(bigPrice, { from: currencyVal, to: pageCurrency });
-    }
-    
-    let elem2 = elem.parent('div').prev('div').find('ul');
+    }    
 
     let totalAmountInput = fromBid
       ? $("#totalAmount" + id)
@@ -1269,13 +1266,13 @@ function addition(
 
     gridId.jqGrid("addRowData", lis, data, "last");
 
-    if (!fromBid) {
+    if(!fromBid) {
       $("#totalSupplyPrice").text(bigPrice + " " + currencyVal);
     } else {
       $("#price" + id).val(parseFloat(bigPrice).toFixed(2));
       $("#sprice" + id).text(parseFloat(bigPrice).toFixed(2));
       
-      let supp = fx.convert(parseFloat($("#price" + id).val()), {
+      const supp = fx.convert(parseFloat($("#price" + id).val()), {
         from: $('span.bidCurrency[index="' + getId(id) + '"]')
           .first()
           .text(),
@@ -1287,7 +1284,7 @@ function addition(
     }
 
     let counter = divId.prev("div").find("p.term span");
-    let newValue = 1 + parseInt(counter.text());
+    const newValue = 1 + parseInt(counter.text());
     counter.text(newValue);
 
     bindHandleProduct(
@@ -2022,7 +2019,7 @@ function checkPresence(obj) {
 function hasExtension(file, vec) {
   let ext = file.name.substring(file.name.lastIndexOf('.'));
   
-  for(let i of vec) {
+  for(const i of vec) {
     
     if(ext === i) {
       return true;
@@ -2289,7 +2286,7 @@ $(document).ready(function() {
     
     const dataIDs = $("#grid").getDataIDs();
   
-    for(let ind of dataIDs) {
+    for(const ind of dataIDs) {
       let row = $("#grid").jqGrid('getRowData', ind);
       let currentCurr = row.hiddenCurrency;      
       let newPrice = fx.convert(parseFloat(row.hiddenPrice), { from: currentCurr, to: val });
@@ -2618,7 +2615,7 @@ $(document).ready(function() {
 
         const dataIDs = grid.getDataIDs();
 
-        for(let ind of dataIDs) {
+        for(const ind of dataIDs) {
           let row = grid.jqGrid('getRowData', ind);
           let currentCurr = row.hiddenCurrency;      
           let newPrice = fx.convert(parseFloat(row.hiddenPrice), { from: currentCurr, to: curr });
@@ -2668,7 +2665,7 @@ $(document).ready(function() {
               res(data);
               //autocomp(obj, data);
               let $obj = '<div class="prov"><ul class="autocomp">';
-              for(let i in data) {
+              for(const i in data) {
                 $obj += '<li id="' + data[i].price + '" amount="' + data[i].amount + '" totalPrice="' + data[i].totalPrice + '" productImage="' + data[i].productImage + '" currency="' + data[i].currency + '">' + data[i].name + '</li>';
               }
 
@@ -2785,7 +2782,7 @@ $(document).ready(function() {
     let isValidFile = true;
     
     if(isMultiple) {
-      for(let i of input[0].files) {
+      for(const i of input[0].files) {
         if(!verifyDocument(i, fileSizeLimit, extArray))
           return false;
       }
