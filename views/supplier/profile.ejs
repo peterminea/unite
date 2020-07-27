@@ -261,19 +261,19 @@
           <label>Supporting Information</label>
           <input type="text" class="form-control" id="supportingInformation" name="supportingInformation" value="<%= profile.supportingInformation %>">
         </div>
-        <div class="form-group">
-          <label>Preferred Currency (Default: Euro)*</label>
-          <input type="hidden" name="currency" value="<%= profile.currency %>" required><br>
-          <select class="currency" id="selectCurrencies" style="width: 100px" class="form-control" title="Currency" value="<%= profile.currency %>" required></select>
-        </div>
-        <div>
-          <p class='excel'>
-            You can use an Excel file with the products list, with each row as product name + product price + product currency + product amount + optionally Supplier name (4 or 5 cells/row, the first row must contain column names). When clicking Process, your items are instantly added to the Page.
-          </p>
-        </div>
         <div class='upload-section'>
           <div class="form-group">
-            <label>Please upload your product list:</label>
+            <label>Preferred Currency (Default: Euro)*</label>
+            <input type="hidden" name="currency" value="<%= profile.currency %>" required><br>
+            <select class="currency" id="selectCurrencies" style="width: 100px" class="form-control" title="Currency" value="<%= profile.currency %>" required></select>
+          </div>
+          <div>
+            <p class='excel'>
+              You can use an Excel file with the products list, with each row as product name + product price + product currency + product amount + optionally Supplier name (4 or 5 cells/row, the first row must contain column names). When clicking Process, your items are instantly added to the Page.
+            </p>
+          </div>
+          <div class="form-group">
+            <label>Please upload your Excel product list:</label>
             <input type="hidden" class="fileId" name="excel" value="">
             <input class="form-control upload fileexcelupload" type="file" id="products" name="excel" single>
             <input class="form-control single btn upload-button btn-success mt-2" type="button" disabled value="Process Excel File" />
@@ -294,13 +294,14 @@
             </div>
             <br>
           </div>
-          <div class='upload-section'>
-            <div id="prodImage" class="form-group">
-              <label>Upload a product image:</label>
-              <input type="hidden" class="fileId" name="productImage" value="">
-              <input class="form-control upload productimageupload" type="file" id="productImage" name="products" single>
-              <input class="form-control single btn upload-button btn-success mt-2" type="button" disabled value="Upload Product Image"/>
-            </div>
+        </div>
+        <div class='upload-section'>
+          <div id="prodImage" class="form-group">
+            <label>Upload a product image:</label>
+            <input type="hidden" class="fileId" name="productImage" value="">
+            <input class="form-control upload productimageupload" type="file" id="productImage" name="products" single>
+            <input class="form-control single btn upload-button btn-success mt-2" type="button" disabled value="Upload Product Image"/>
+          </div>
           <ul class="list-group" MAX="<%= parseInt(MAX_PROD) %>" id="prodServices">
           </ul>
           <p class='term'>
@@ -319,7 +320,7 @@
           <input type="hidden" class="supply" name="productImagesList" id="productImagesList" value="<%= profile.productImagesList %>">
         </div>
         <div id="jqDiv" class="form-group">
-          <table id="grid" MAX="<%= parseInt(MAX_PROD) %>" supplierCurrency="<%= profile.currency %>" supplierId="<%= profile._id %>" >
+          <table id="grid" MAX="<%= parseInt(MAX_PROD) %>" supplierCurrency="<%= profile.currency %>" supplierId="<%= profile._id %>">
           </table>
           <div id='prodPager'>
           </div>

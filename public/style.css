@@ -34,20 +34,26 @@ body {
 
 p.excel {
   font-size: 14px;
+  width: 290px;
+  word-wrap: break-word;
   font-weight: bold
 }
 
 .upload-section,.totals,.checkbox-alignment {
-  margin-left: 37.5%;
-  width: 102%
+  margin-left: 35%;
+  width: 128%
 }
 
 .btn-block.update-button {
   width: 25%
 }
 
-.totals .form-control,.form-control.upload-button,input.upload {
+.totals .form-control,.upload-section .form-control, .form-control.upload-button,input.upload {
   width: 25%
+}
+
+.prodButton {
+  width: 5%
 }
 
 span.hid,span.supply {
