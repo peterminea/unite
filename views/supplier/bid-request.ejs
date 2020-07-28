@@ -46,66 +46,68 @@
 		</button>
 	</nav>
 
-	<div class="container">
+	<div class="container" style="width: 1200px">
     <br>
     <br>
-		<div class="smooth-shadow profile-form">			
-      <div class="modal-content">
+		<div class="smooth-shadow profile-form" style="width: 1200px">
+      <div class="modal-content" style="width: 100%">
         <div class="form-group">
           <label>Buyer's Organization Name</label>
           <input type="text" class="form-control" value="<%= buyer.organizationName %>" readonly>
           <br>
           <button type="button" class="btn btn-dark" data-target="#buyerDetailsModal" data-toggle="modal">View Buyer Details</button>
+        </div>        
+        <div class="modal fade" id="comp_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLongTitle">Buyer</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label>Buyer's Organization UNITE ID</label>
+                <input type="text" class="form-control" value="<%= buyer.organizationUniteID %>" readonly>
+              </div>
+              <div class="form-group">
+                <label>Buyer's Contact name</label>
+                <input type="text" class="form-control" value="<%= buyer.contactName %>" readonly>
+              </div>
+              <div class="form-group">
+                <label>Buyer's Email address</label>
+                <input type="email" class="form-control" value="<%= buyer.emailAddress %>" readonly>
+              </div>
+              <div class="form-group">
+                <label>Buyer's Currency</label>
+                <input type="text" class="form-control" value="<%= buyer.currency %>" readonly>
+              </div>
+              <div class="form-group">
+                <label>Buyer's Department / Agency / Group</label>
+                <input type="text" class="form-control" value="<%= buyer.deptAgencyGroup %>" readonly>
+              </div>
+              <div class="form-group">
+                <label>Buyer's Qualification / Experience</label>
+                <input type="text" class="form-control" value="<%= buyer.qualification %>" readonly>
+              </div>
+              <div class="form-group">
+                <label>Buyer's Address</label>
+                <input type="text" class="form-control" value="<%= buyer.address %>" readonly>
+              </div>
+              <div class="form-group">
+                <label>Buyer's Country</label>
+                <input type="text" class="form-control" value="<%= buyer.country %>" readonly>
+              </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
         </div>
-        <form method="POST" id="mainForm">
-          <div class="modal fade" id="buyerDetailsModal" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-							<div class="modal-header">
-								<h5 class="modal-title" id="exampleModalLongTitle">Buyer</h5>
-								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-									<span aria-hidden="true">&times;</span>
-								</button>
-							</div>
-							<div class="modal-body">
-								<div class="form-group">
-									<label>Buyer's Organization UNITE ID</label>
-									<input type="text" class="form-control" value="<%= buyer.organizationUniteID %>" disabled>
-								</div>
-								<div class="form-group">
-									<label>Buyer's Contact name</label>
-									<input type="text" class="form-control" value="<%= buyer.contactName %>" disabled>
-								</div>
-								<div class="form-group">
-									<label>Buyer's Email address</label>
-									<input type="email" class="form-control" value="<%= buyer.emailAddress %>" disabled>
-								</div>
-                <div class="form-group">
-									<label>Buyer's Currency</label>
-									<input type="text" class="form-control" value="<%= buyer.currency %>" disabled>
-								</div>
-								<div class="form-group">
-									<label>Buyer's Department / Agency / Group</label>
-									<input type="text" class="form-control" value="<%= buyer.deptAgencyGroup %>" disabled>
-								</div>
-								<div class="form-group">
-									<label>Buyer's Qualification / Experience</label>
-									<input type="text" class="form-control" value="<%= buyer.qualification %>" disabled>
-								</div>
-								<div class="form-group">
-									<label>Buyer's Address</label>
-									<input type="text" class="form-control" value="<%= buyer.address %>" disabled>
-								</div>
-								<div class="form-group">
-									<label>Buyer's Country</label>
-									<input type="text" class="form-control" value="<%= buyer.country %>" disabled>
-								</div>
-							</div>
-							<div class="modal-footer">
-								<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-							</div>
-						</div>
-					</div>				
         
+        <form method="POST" id="mainForm">
         <input type='hidden' name='createdAt' value="<%= request.createdAt %>">
         <% if(request.warningExpiration != null) { %>
         <div>
@@ -124,43 +126,7 @@
             const prices = request.priceList;
             const amounts = request.amountList;
             const images = request.productImagesList;
-            %>
-					<Code>The product prices are expressed in your currency.<br></Code>
-					<label>Products / Services Ordered</label>
-          <ul id="productsListUl" class="list-group">
-            <% let h = 0; if (products != null) { %> 
-              <li class='list-group-item' style='color: brown'>
-              <span class='cnt'>#</span>
-              <span class='product0'>Name</span>
-              <span class='buttonsWrapper'>Buttons</span>
-              <span class='imageWrapper'>Images</span>
-              <span class='priceWrapper'>Total</span>
-              <span class='amountWrapper'>Count</span>
-              <span class='basicPriceWrapper'>Price</span></span>
-            </li>
-            <% for (h in products) { %>
-            <li class='list-group-item'>
-              <span class='cnt'><%= parseInt(h)+1 %></span>
-              <span class='product'><%= products[h] %></span>
-              <span class='buttonsWrapper'><span class='rem' title="Delete"></span><span class='dec' title='Remove item'></span><span class='inc' title='Add item'></span></span>
-              <span class='imageWrapper'><span class='uploadImage'>Upload Image</span>  <span class='productImage' title="Product Image"> 
-                <% if(images[h].length > 0) { %>
-                <img src="<%= path + '../' + images[h].substring(7) %>" style="height: 25px; width: 30px" onclick="window.open(this.src)">
-                <% } %>
-                </span>
-              </span>
-              <span class='priceWrapper'><span class='totalPrice'><%= parseFloat(parseInt(amounts[h])*parseFloat(prices[h])).toFixed(2) %></span> <%= request.supplierCurrency %></span>
-              <span class='amountWrapper'><span class='amount'><%= amounts[h] %></span> items </span>
-              <span class='basicPriceWrapper'><span class='price'><%= parseFloat(prices[h]).toFixed(2) %></span> <span class='currency'><%= request.supplierCurrency %></span></span>
-            </li>
-            <% } }%>
-          </ul>
-				</div>
-       <div id="jqDiv" class="form-group">
-          <table id="grid">
-          </table>
-         <div id='prodPager'>
-          </div>
+            %>					
         </div>
         <div class="form-group">
           <label class="col-form-label">Request Name*</label>
@@ -184,74 +150,84 @@
         </div>
 				<div class="form-group">
 					<label>Item Description (Long)</label>
-          <textarea disabled class="form-control"><%= request.itemDescriptionLong %></textarea>
+          <textarea readonly class="form-control"><%= request.itemDescriptionLong %></textarea>
 				</div>
         <div class="form-group">
 					<label>Item Description (URL)</label>
 					<input type="url" readonly class="form-control" value=<%= request.itemDescriptionUrl %>>
-				</div>
-				<div class="form-group">
-					<label>Amount</label>
-          <% j = 0; for(h in request.amountList) {j += request.amountList[h];} %>
-          <input title="Total number of items" type="text" disabled id="totalAmount" name="amount" value="<%= j %>">					
-				</div>
+				</div>				
 				<div class="form-group">
 					<label>Delivery Location</label>
-					<textarea class="form-control" disabled><%= request.deliveryLocation %></textarea>
+					<textarea class="form-control" readonly><%= request.deliveryLocation %></textarea>
 				</div>
 				<div class="form-group">
 					<label>Delivery Requirements</label>
-					<textarea class="form-control" disabled><%= request.deliveryRequirements %></textarea>
+					<textarea class="form-control" readonly><%= request.deliveryRequirements %></textarea>
 				</div>
 				<div class="form-group">
 					<label>Compliance Requirements</label>
-					<textarea class="form-control" disabled><%= request.complianceRequirements %></textarea>
+					<textarea class="form-control" readonly><%= request.complianceRequirements %></textarea>
 				</div>
-         <div class="form-group">
-          <label class="col-form-label">Preferred Delivery Date</label>
-          <input type="text" readonly class="form-control prefDate" id="prefDate" name="preferredDeliveryDate" value="<%= request.preferredDeliveryDate %>">
-        </div>
         <div class="form-group">
 					<label>Other Requirements</label>
-					<textarea class="form-control" disabled><%= request.otherRequirements %></textarea>
+					<textarea class="form-control" readonly><%= request.otherRequirements %></textarea>
 				</div>
-        <div class="form-group">
-          <label class="col-form-label">Date Created:</label>
-          <textarea disabled class="form-control" name="createdAtFormatted"><%= request.createdAtFormatted %></textarea>
+        <div id="jqDiv" class="form-group">
+          <Code>The product prices are expressed in your currency.<br></Code>
+					<label>Products / Services Ordered</label>
+          <table id="grid">
+          </table>
+          <div id='prodPager'>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="col-form-label">Date of Expiration:</label>
-          <textarea disabled class="form-control" name="expiryDateFormatted"><%= request.expiryDateFormatted %></textarea>
+        <div class='totals'>
+          <div class="form-group">
+            <label>Amount</label>
+            <% j = 0; for(let h of request.amountList) {j += h;} %>
+            <input class='form-control' title="Total number of items" type="text" readonly id="totalAmount" name="amount" value="<%= j %>">					
+          </div>
+          <div class="form-group">
+            <label class="col-form-label">Preferred Delivery Date</label>
+            <input type="text" readonly class="form-control prefDate" id="prefDate" name="preferredDeliveryDate" value="<%= request.preferredDeliveryDate %>">
+          </div>
+          <div class="form-group">
+            <label class="col-form-label">Date Created:</label>
+            <textarea readonly class="form-control" name="createdAtFormatted"><%= request.createdAtFormatted %></textarea>
+          </div>
+          <div class="form-group">
+            <label class="col-form-label">Date of Expiration:</label>
+            <textarea readonly class="form-control" name="expiryDateFormatted"><%= request.expiryDateFormatted %></textarea>
+          </div>
+          <div class="form-group">
+            <label>Price (Your Currency):</label>
+            <% l = 0; for(let m of request.priceList) {l += m;} %> <!-- Also request.supplierPrice .-->
+            <input type="text" title="Total order price" value="<%= l %> <%= request.supplierCurrency %>" class="form-control" id="price" name="supplierPrice" readonly>
+          </div>
+          <div class="form-group">
+            <label>Price (Buyer's Currency):</label>
+            <input type="text" title="Total original order price" value="<%= request.buyerPrice %> <%= request.buyerCurrency %>" class="form-control" id="price" name="buyerPrice" readonly>
+          </div>
+          <div class="form-group">
+            <label>Currency (yours):</label>
+            <input type="text" readonly class="form-control" readonly name="supplierCurrency" value="<%= request.supplierCurrency %>">
+          </div>
+          <div class="form-group">
+            <label>Currency (Buyer's original):</label>
+            <input type="text" readonly class="form-control" readonly name="buyerCurrency" value="<%= request.buyerCurrency %>">
+          </div>
+          <% if(request.isExtended == false) { %>
+              <div class="form-group">
+                <label>Extension letter</label>
+                <input type="hidden" class="fileId" name="validityExtensionId">
+                <input class="form-control upload" type="file" id="validityExtension" name="validityExtension"/>
+                <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
+              </div>
+          <% } %>
+          <div class="form-group">
+            <label>Status</label>
+            <input type="text" readonly id="status" name="status" class="form-control" value="<%= request.status %>">
+          </div>
         </div>
-        <div class="form-group">
-					<label>Price (Your Currency):</label>
-					<% l = 0; for(m in request.priceList) {l += request.priceList[m];} %> <!-- Also request.supplierPrice .-->
-          <input type="text" title="Total order price" value="<%= l %> <%= request.supplierCurrency %>" class="form-control" id="price" name="supplierPrice" readonly>
-				</div>
-        <div class="form-group">
-					<label>Price (Buyer's Currency):</label>
-          <input type="text" title="Total original order price" value="<%= request.buyerPrice %> <%= request.buyerCurrency %>" class="form-control" id="price" name="buyerPrice" readonly>
-				</div>
-        <div class="form-group">
-					<label>Currency (yours):</label>
-					<input type="text" disabled class="form-control" readonly name="supplierCurrency" value="<%= request.supplierCurrency %>">
-				</div>
-        <div class="form-group">
-					<label>Currency (Buyer's original):</label>
-					<input type="text" disabled class="form-control" readonly name="buyerCurrency" value="<%= request.buyerCurrency %>">
-				</div>
-        <% if(request.isExtended == false) { %>
-            <div class="form-group">
-              <label>Extension letter</label>
-              <input type="hidden" class="fileId" name="validityExtensionId">
-              <input class="form-control upload" type="file" id="validityExtension" name="validityExtension"/>
-              <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
-            </div>
-        <% } %>
-        <div class="form-group">
-					<label>Status</label>
-					<input type="text" disabled id="status" name="status" class="form-control" readonly value="<%= request.status %>">
-				</div>        
         <div class="form-group selectstatus">
           <select style="width: 100%" id="statuses">
             <% if (statuses != null) { for (status of statuses) { %>
@@ -264,32 +240,33 @@
             <span><%= statusesJson %></span>
           <% }  %>
         </div>
-        <div class="form-group" id="acceptBid" style="display: none">
-					<label>Currency</label>
-          <button class="btn-primary btn" id="acceptButton" title="Accept Buyer's Bid"></button>
-				</div>
+        <div class='totals'>        
+          <div class="form-group" id="acceptBid" style="display: none">
+            <label>Currency</label>
+            <button class="btn-primary bid-button-wide btn" id="acceptButton" title="Accept Buyer's Bid"></button>
+          </div>
+        </div>
         <input type="hidden" name="requestId" value="<%= request._id %>">
-        <script type="text/javascript">          
-          let data = [];          
-          $('#productsListUl').find('li').not(':first').each(function(i, e) {
-            let src = $(this).find('.productImage img').length?
-                $(this).find('.productImage img').attr('src') : null;
-                       
+        <script type="text/javascript">
+          let data = [];
+            <% let h = 0; if (products != null) { for(h in products) { %>              
             data.push({
-              name: $(this).find('.product').text(),
+              name: '<%= products[h] %>',
               supplierName: '<%= request.supplierName %>',
-              price: $(this).find('.price').text() + ' ' + $(this).find('.currency').text(),
-              hiddenPrice: $(this).find('.price').text(),
-              hiddenTotalPrice: $(this).find('.totalPrice').text(),
-              hiddenCurrency: $(this).find('.currency').text(),
-              productImageSource: src? `<img src="${src}" style="height: 25px; width: 30px" onclick="window.open(this.src)">` : '',                       supplierId: "<%= request.supplier %>",
-              productId: null,,
+              hiddenPrice: '<%= parseFloat(prices[h]).toFixed(2) %>',
+              hiddenTotalPrice: '<%= parseFloat(parseInt(amounts[h])*parseFloat(prices[h])).toFixed(2) %>',
+              hiddenCurrency: '<%= request.supplierCurrency %>',
+              productImageSource: <% if(images[h].length > 0) { %>
+                '<img src="<%= path + '../' + images[h].substring(7) %>" style="height: 25px; width: 30px" onclick="window.open(this.src)">'
+                <% } else { %>''<% } %>,
+              supplierId: "<%= request.supplier %>",
+              productId: null,
               supplierCurrency: "<%= request.supplierCurrency %>",
-              hiddenAmount: parseInt($(this).find('.amount').text())
+              hiddenAmount: '<%= amounts[h] %>'
             });
-          });             
+            <% } }%>
 
-          initGrid(productColModel, data, "#grid", '#prodPager', "name", 'Products List', 1000);
+          initGrid(productColModel, data, "#grid", '#prodPager', "name", 'Products List', 1024);
           let x = JSON.parse($('#statusJsonValues span').first().text());
           
            $('#statuses')
@@ -303,18 +280,33 @@
              if($('#status').val() == x.BUYER_ACCEPT_PRICE) {
                 $('#acceptBid').show();
                 $('#acceptButton').off('click').on('click', function() {
-
-                  if(confirm('Are you sure you want to accept this Bid from ' + $('#buyerName').val() + '?')) {
-                    $('#status').val(x.SUPP_START_DELIVERY);
+                  Swal.fire({
+                    title: '<strong>Go to Payment</strong>',
+                    icon: 'warning',
+                    html:
+                      'Are you sure you want to accept this Bid from <strong>' + $('#buyerName').val() + '</strong>?',
+                    showCloseButton: true,
+                    showCancelButton: true,
+                    focusConfirm: false,
+                    confirmButtonText:
+                      '<i class="fa fa-thumbs-up"></i> OK',
+                    confirmButtonAriaLabel: 'Thumbs up!',
+                    cancelButtonText:
+                      '<i class="fa fa-thumbs-down"></i> Cancel',
+                    cancelButtonAriaLabel: 'Thumbs down'
+                  }).then((result) => {
+                    if (result.value) {
+                      $('#status').val(x.SUPP_START_DELIVERY);
                     
-                    that.find('option')
-                      .eq(x.SUPP_START_DELIVERY)
-                      .prop('selected', true);
+                      that.find('option')
+                        .eq(x.SUPP_START_DELIVERY)
+                        .prop('selected', true);
 
-                    $('#updateBidStatus').trigger('click');
-                  } else {
-                    return false;
-                  }
+                      $('#updateBidStatus').trigger('click');
+                    } else {
+                      return false;
+                    }
+                  });
                 });
              } else {
                $('#acceptBid').hide();
@@ -342,11 +334,11 @@
             $('#statuses').attr('title', $('#statuses').find('option:selected').text());            
           </script>
           
-          <div class="form-group">
+          <div class="form-group totals">
             <h3>Mentions for Buyer</h3>
             <br>
             <label>Type your message below</label>
-            <textarea name="specialMentions" id="messageArea" class="form-control"><%= request.specialMentions %></textarea>
+            <textarea name="specialMentions" id="messageArea" style="height: 150px; cols: 60; rows: 20" class="form-control"><%= request.specialMentions %></textarea>
             <input type="hidden" name="from" value="<%= supplier._id %>">
             <input type="hidden" name="to" value="<%= buyer._id %>">
             <input type="hidden" name="reqId" value="<%= request._id %>">
@@ -354,7 +346,7 @@
             <input type="hidden" name="sender" value="<%= supplier.companyName %>">
             <input type="hidden" name="receiver" value="<%= buyer.organizationName %>">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button class="btn btn-primary" title="Update Bid Status / Message Buyer" disabled type="submit" id="updateBidStatus">
+            <button class="btn bid-button-wide btn-warning" style='margin-top: 20px' title="Update Bid Status / Message Buyer" disabled type="submit" id="updateBidStatus">
                 Update Status & Send Mentions
             </button>
           </div>
@@ -372,14 +364,18 @@
           </div>
       </form>
 <!-- Supplier=sender, buyer=receiver. -->
-        <div class="container mt-4">
-          	<div class="form-group">
-							<a href="../../../supplier/chatLogin/<%= supplier._id %>/<%= buyer._id %>/<%= request._id %>/<%= request.requestName %>/<%= buyer.organizationName %>/<%= supplier.companyName %>">
-                <button style="float: left" title="Chat" id="chat" class="btn-primary btn">Chat with your buyer</button>
-              </a>
-              <a href="../../../supplier/cancelBid/<%= request._id %>/<%= request.requestName %>/Supplier/<%= request.buyerName %>/<%= request.supplierName %>/<%= request.buyerEmail %>/<%= request.supplierEmail %>">
-                <button style="float: right" title="Cancel Bid" id="cancelBid" class="btn-primary btn">Cancel Buyer's Order</button>
-              </a>
+        <div class="totals">
+          <div class="form-group">
+            <span><a href="../../../supplier/chatLogin/<%= supplier._id %>/<%= buyer._id %>/<%= request._id %>/<%= request.requestName %>/<%= buyer.organizationName %>/<%= supplier.companyName %>">
+              <button title="Chat" id="chat" class="btn-success bid-button btn">Chat with your buyer</button>
+            </a>
+            </span>
+          </div>
+          <div class="form-group">
+            <span><a href="../../../supplier/cancelBid/<%= request._id %>/<%= request.requestName %>/Supplier/<%= request.buyerName %>/<%= request.supplierName %>/<%= request.buyerEmail %>/<%= request.supplierEmail %>">
+              <button title="Cancel Bid" id="cancelBid" class="btn-danger bid-button btn">Cancel Buyer's Order</button>
+            </a>
+            </span>
           </div>
         </div>
       </div>

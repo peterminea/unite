@@ -972,8 +972,16 @@ exports.getBidRequest = (req, res) => {
   req.session.flash = [];
 
   BidRequest.findOne({ _id: id })
-    .then( (reqresult) => {
+    .then((reqresult) => {
       request = reqresult;
+    
+    for(let j in request.productImagesList) {
+        if(!fileExists(request.productImagesList[j])) {
+          console.log('MALFUNCTION');
+          request.productImagesList[j] = '';
+        }
+      }
+    
       return Buyer.findOne({ _id: request.buyer });
     })
     .then((buyer) => {
