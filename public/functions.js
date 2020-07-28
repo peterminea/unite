@@ -651,7 +651,7 @@ function removeFile(obj) {
     cancelButtonColor: "#d33d33",
     confirmButtonText: "I understand!" //,
     //reverseButtons: true
-  }).then(result => {
+  }).then((result) => {
     if (result.value) {
       //OK pressed. Undefined if Cancel.
       //return false;
@@ -794,8 +794,7 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
       let buyerCurrSpan = $('span.bidCurrency[index="'+ (id.length? id : '-1') +'"]').first();
       buyerPriceUnit.text(parseFloat(addedPrice).toFixed(2));
       buyerPriceCurr.text(buyerCurrSpan.text());
-      let option = $(`#productsList${id} option:selected`);      
-      
+      let option = $(`#productsList${id} option:selected`);
       let suppCurr = option && option.attr('currency')? option.attr('currency') : $('#supplierCurrency'+id).text();
       let price = parseFloat($('#price'+id).val()? $('#price'+id).val() : 0) + parseFloat(addedPrice);
       let bigPrice = parseFloat(price).toFixed(2);
@@ -2640,7 +2639,7 @@ $(document).ready(function() {
       });
   }
     
-      $('input[readonly]').css('background-color', 'lightgray');//No names on spans. Also, disabled inputs means no readability for back-end.
+      $('input[readonly].textarea[readonly]').css('background-color', 'lightgray');//No names on spans. Also, disabled inputs means no readability for back-end.
     
       $('input.prodInput').not(':disabled').autocomplete({
         source: function(req, res) {

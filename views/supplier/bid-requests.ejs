@@ -27,7 +27,7 @@
       const token = $("input[name='_csrf']").val();
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       
-      if($('.delete').length()) {
+      if($('.delete').length) {
         $('.delete').on('click', function() {          
           let bidId = $(this).attr('id');
           let div1 = $(this).parent('div'), div2 = div1.prev('div');

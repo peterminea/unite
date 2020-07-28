@@ -79,7 +79,7 @@
     let colModel = colModelGridBids;
     colModelGridBids.splice(1, 0, { name: 'buyerName', label: 'Bid Buyer Name', align: 'center', search: true, width: 220});
   
-  <% i = 0; for (bid of bids) { %>    
+  <% i = 0; for (let bid of bids) { %>    
     data.push({
           id: "<%= i %>",
           bidName: "<%= bid.requestName %>",

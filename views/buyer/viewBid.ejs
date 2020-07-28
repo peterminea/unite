@@ -34,7 +34,6 @@
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       $('.rem,.inc,.dec,.uploadImage').off('click');//Off in View Mode.
 
-      //setTimeout({
       $.ajax({
               url: "/bidStatuses",
               headers: { "X-CSRF-Token": token },
@@ -111,6 +110,7 @@
                   .on('change', function() {//Difficult DOM jQuery navigation in modals.                  
                   let theVal = $(this).find('option:selected').attr('value');
                   let index = getId($(this).attr('id'));
+                  
                   let statusDiv = $(this).parent('div').parent('div').next('div');
 
                   ($(this)
@@ -121,11 +121,10 @@
                   
                   if(theVal == x.SUPP_START_DELIVERY) {
                     let amount = $('#price_'+index).val();
-                    
                     statusDiv.append('<button type="button" style="float: left; position: center" title="Pay ' + amount + '" class="btn btn-primary" id="purchase_'+index+'">Go to Purchase</button>');
                   } else {
                     statusDiv.find('button[id^="purchase"]').remove();
-                    $('#grid_'+index).find('tr:not(:first)').css({"title": "Already ordered!", "border": "2px solid gray", background-color: 'teal'});
+                    $('#grid_'+index).find('tr:not(:first)').css({"title": "Already ordered!", "border": "2px solid gray", 'background-color': 'teal'});
                   }
                   
                   statusDiv
@@ -134,7 +133,6 @@
                 });
               }
       });
-    //}, 40);
     });
   </script>
 </head>
@@ -173,7 +171,7 @@
    
         <!-- Modal window for the new, valid Bid Request -->
         <div class="modal fade" style="width: 100%; max-width: 95%; overflow: scroll" id="request_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
-          <div class="modal-dialog" style="max-width: 1000px; overflow: scroll" role="document">
+          <div class="modal-dialog" style="max-width: 1080px; overflow: scroll" role="document">
             <div class="modal-content" style="width: 100%; overflow: visible">
               <div class="modal-header">
                 <h5 class="modal-title">View Bid Request</h5>
@@ -200,21 +198,23 @@
                     <label class="col-form-label">Request Name*</label>
                     <input readonly type="text" class="form-control" name="requestName" value="<%= bid.requestName %>">
                   </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Supplier Company*</label>
-                    <input readonly type="text" class="form-control" name="supplierName" value="<%= bid.supplierName %>">
-                  </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Buyer Organization*</label>
-                    <input readonly type="text" class="form-control" name="buyerName" value="<%= bid.buyerName %>">
-                  </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Buyer's E-mail Address*</label>
-                    <input readonly type="text" class="form-control" name="buyerEmail" value="<%= bid.buyerEmail %>">
-                  </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Buyer's E-mail Address*</label>
-                    <input readonly type="text" class="form-control" name="supplierEmail" value="<%= bid.supplierEmail %>">
+                  <div class='totals'>
+                    <div class="form-group">
+                      <label class="col-form-label">Supplier Company*</label>
+                      <input readonly type="text" class="form-control" name="supplierName" value="<%= bid.supplierName %>">
+                    </div>
+                    <div class="form-group">
+                      <label class="col-form-label">Buyer Organization*</label>
+                      <input readonly type="text" class="form-control" name="buyerName" value="<%= bid.buyerName %>">
+                    </div>
+                    <div class="form-group">
+                      <label class="col-form-label">Buyer's E-mail Address*</label>
+                      <input readonly type="text" class="form-control" name="buyerEmail" value="<%= bid.buyerEmail %>">
+                    </div>
+                    <div class="form-group">
+                      <label class="col-form-label">Supplier's E-mail Address*</label>
+                      <input readonly type="text" class="form-control" name="supplierEmail" value="<%= bid.supplierEmail %>">
+                    </div>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Item Description (Short*)</label>
@@ -231,9 +231,7 @@
                     const images = bid.productImagesList;
                       %>
                     <Code>The product prices are expressed in your currency.<br></Code>
-                    <label>Products / Services Ordered:</label>      
-                    <ul id="cartList_<%= i %>" class="list-group">                    
-                    </ul>
+                    <label>Products / Services Ordered:</label>                    
                   </div>
                    <div id="jqDiv_<%= i %>" class="form-group">
                     <table id="grid_<%= i %>">
@@ -242,8 +240,14 @@
                      </div>
                   </div>
                   <div class="form-group">
+                    <label class="col-form-label">Amount*</label>
+                    <input type="hidden" class="form-control" id="amount_<%= i %>" name="theAmount" value="0">
+                    <% j = 0; for(let k of bid.amountList) {j += k;} %>
+                    <input type="text" title="Total number of items" readonly id="totalAmount_<%= i %>" name="amount" value="<%= j %>">
+                  </div>
+                  <div class="form-group">
                     <label class="col-form-label">Item Description (Long)*</label>
-                    <textarea disabled class="form-control" name="itemDescriptionLong"><%= bid.itemDescriptionLong %></textarea>
+                    <textarea readonly class="form-control" name="itemDescriptionLong"><%= bid.itemDescriptionLong %></textarea>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Item Description URL (Long)</label>
@@ -251,26 +255,20 @@
                       <div class="input-group-prepend">
                         <span class="input-group-text" id="basic-addon3">http(s)://</span>
                       </div>
-                      <input disabled type="text" class="form-control" aria-describedby="basic-addon3" value="<%= bid.itemDescriptionUrl %>" name="itemDescriptionUrl">
+                      <input readonly type="text" class="form-control" aria-describedby="basic-addon3" value="<%= bid.itemDescriptionUrl %>" name="itemDescriptionUrl">
                     </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Amount*</label>
-                    <input type="hidden" class="form-control" id="amount_<%= i %>" name="theAmount" value="0">
-                    <% j = 0; for(h in bid.amountList) {j += bid.amountList[h];} %>
-                    <input type="text" title="Total number of items" disabled id="totalAmount_<%= i %>" name="amount" value="<%= j %>">
-                  </div>
+                  </div>                  
                   <div class="form-group">
                     <label class="col-form-label">Delivery Location*</label>
-                    <textarea disabled class="form-control" name="deliveryLocation"><%= bid.deliveryLocation %></textarea>
+                    <textarea readonly class="form-control" name="deliveryLocation"><%= bid.deliveryLocation %></textarea>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Delivery Requirements*</label>
-                    <textarea disabled class="form-control" name="deliveryRequirements"><%= bid.deliveryRequirements %></textarea>
+                    <textarea readonly class="form-control" name="deliveryRequirements"><%= bid.deliveryRequirements %></textarea>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Compliance Requirements*</label>
-                    <textarea disabled class="form-control" name="complianceRequirements"><%= bid.complianceRequirements %></textarea>
+                    <textarea readonly class="form-control" name="complianceRequirements"><%= bid.complianceRequirements %></textarea>
                   </div>
                    <div class="form-group">
                     <label class="col-form-label">Preferred Delivery Date</label>
@@ -282,55 +280,57 @@
                       <div class="input-group-prepend">
                         <span class="input-group-text" id="basic-addon3">http(s)://</span>
                       </div>
-                      <input disabled type="text" class="form-control" value="<%= bid.complianceRequirementsUrl %>" name="complianceRequirementsUrl" aria-describedby="basic-addon3">
+                      <input readonly type="text" class="form-control" value="<%= bid.complianceRequirementsUrl %>" name="complianceRequirementsUrl" aria-describedby="basic-addon3">
                     </div>
                   </div>
                    <div class="form-group">
                     <label class="col-form-label">Other Requirements</label>
-                    <textarea disabled class="form-control" name="otherRequirements"><%= bid.otherRequirements %></textarea>
+                    <textarea readonly class="form-control" name="otherRequirements"><%= bid.otherRequirements %></textarea>
                   </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Date Created:</label>
-                    <textarea disabled class="form-control" name="createdAtFormatted"><%= bid.createdAtFormatted %></textarea>
+                  <div class='totals'>
+                    <div class="form-group">
+                      <label class="col-form-label">Date Created:</label>
+                      <textarea readonly class="form-control" name="createdAtFormatted"><%= bid.createdAtFormatted %></textarea>
+                    </div>
+                    <div class="form-group">
+                      <label class="col-form-label">Date of Expiration:</label>
+                      <textarea readonly class="form-control" name="expiryDateFormatted"><%= bid.expiryDateFormatted %></textarea>
+                    </div>
+                     <div class="form-group">
+                      <label class="col-form-label">Price (Your currency):</label>
+                      <input type="text" title="Original order price" value="<%= bid.buyerPrice %> <%= bid.buyerCurrency %>" class="form-control" id="price_<%= i %>" name="buyerPrice" readonly>
+                    </div>
+                    <div class="form-group">
+                      <label class="col-form-label">Price (Supplier's currency):</label>
+                       <% l = 0; for(m in bid.priceList) {l += bid.priceList[m];} %> <!-- Same as bid.supplierPrice .-->
+                      <input type="text" title="Order price as seen by Supplier" value="<%= l %> <%= bid.supplierCurrency %>" class="form-control" id="supplierPrice_<%= i %>" name="supplierPrice" readonly>
+                    </div>
+                <% if(bid.isExtended == false) { %>
+                    <div class="form-group">
+                      <label>Extension letter</label>
+                      <input type="hidden" class="fileId" name="validityExtensionId">
+                      <input class="form-control upload" type="file" id="validityExtension" name="validityExtension"/>
+                      <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
+                    </div>
+                <% } %>
                   </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Date of Expiration:</label>
-                    <textarea disabled class="form-control" name="expiryDateFormatted"><%= bid.expiryDateFormatted %></textarea>
-                  </div>
-                   <div class="form-group">
-                    <label class="col-form-label">Price (Your currency):</label>
-                    <input type="text" title="Original order price" value="<%= bid.buyerPrice %> <%= bid.buyerCurrency %>" class="form-control" id="price_<%= i %>" name="buyerPrice" disabled>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Price (Supplier's currency):</label>
-                     <% l = 0; for(m in bid.priceList) {l += bid.priceList[m];} %> <!-- Same as bid.supplierPrice .-->
-                    <input type="text" title="Order price as seen by Supplier" value="<%= l %> <%= bid.supplierCurrency %>" class="form-control" id="supplierPrice_<%= i %>" name="supplierPrice" disabled>
-                  </div>
-              <% if(bid.isExtended == false) { %>
-                  <div class="form-group">
-                    <label>Extension letter</label>
-                    <input type="hidden" class="fileId" name="validityExtensionId">
-                    <input class="form-control upload" type="file" id="validityExtension" name="validityExtension"/>
-                    <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload File" />
-                  </div>
-              <% } %>
-                   <div class="form-group">
-                    <label class="col-form-label">Status*</label>
-                    <input type="hidden" id="status_<%= i %>" class="form-control" name="status" value="<%= bid.status %>">
-                  </div>
-                  <div class="form-group selectstatus">
-                    <select style="width: 100%" id="statuses_<%= i %>">
-                    </select>
-                  </div>
-                    <% if (statusesJson != null) {  %>
-                      <input type="hidden" id="statusJsonValues_<%= i %>" value="<%= statusesJson %>">
-                    <% }  %>                  
-                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                  <input type="hidden" name="buyer" value="<%= bid.buyer %>">
-                  <input type="hidden" name="supplier" value="<%= bid.supplier %>">
+                     <div class="form-group">
+                      <label class="col-form-label">Status*</label>
+                      <input type="hidden" id="status_<%= i %>" class="form-control" name="status" value="<%= bid.status %>">
+                    </div>                  
+                    <div class="form-group selectstatus">
+                      <select style="width: 100%" id="statuses_<%= i %>">
+                      </select>
+                    </div>
+                      <% if (statusesJson != null) {  %>
+                        <input type="hidden" id="statusJsonValues_<%= i %>" value="<%= statusesJson %>">
+                      <% }  %>                  
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="buyer" value="<%= bid.buyer %>">
+                    <input type="hidden" name="supplier" value="<%= bid.supplier %>">                  
                 </div>
                 <div class="modal-body" style="position: center">
-                  <div class="form-group">
+                  <div class="form-group totals">
                     <h3>Mentions for Supplier</h3>
                     <br>
                     <label>Type your mentions below:</label>
@@ -343,13 +343,13 @@
                     <input type="hidden" name="sender" value="<%= bid.buyerName %>">
                     <input type="hidden" name="receiver" value="<%= bid.supplierName %>">
                     <input type="hidden" name="_csrf" id="csrf_<%= i %>" value="<%= csrfToken %>">
-                    <button style="float: right" class="btn btn-primary" title="Update status/Send message" disabled type="submit" id="updateBidStatus_<%= i %>">Update Status & Send Message
+                    <button class="btn btn-warning bid-button-wide" title="Update status/Send message" disabled type="submit" id="updateBidStatus_<%= i %>">Update Status & Send Message
                     </button>
                     <script type="text/javascript">
                       let index = "<%= i %>";                 
                       let data = [];
                           
-                      <% let h = 0; if (products != null) { for( h in products) { %>                       
+                      <% let h = 0; if (products != null) { for(h in products) { %>                       
                         data.push({
                           name: '<%= products[h] %>',
                           supplierName: "<%= bid.supplierName %>",                          
@@ -357,7 +357,7 @@
                           hiddenTotalPrice: '<%= parseFloat(parseInt(amounts[h])*parseFloat(prices[h])).toFixed(2) %>',
                           hiddenCurrency: '<%= bid.buyerCurrency %>',
                           productImageSource: <% if(images[h].length > 0) { %>
-                            "<%= path + '../' + images[h].substring(7) %>"
+                            "<img src='<%= path + '../' + images[h].substring(7) %>' style='height: 25px; width: 30px' onclick='window.open(this.src)'>"
                           <% } else { %>
                             ''
                           <% } %>,
@@ -365,9 +365,9 @@
                           productId: '<%= products[h]._id %>',
                           supplierCurrency: "<%= bid.supplierCurrency %>",
                           hiddenAmount: '<%= parseInt(amounts[h]) %>'
-                        });                      
+                        });
                       <% } } %>
-                      
+                     
                       initGrid(productColModel, data, "#grid_"+index, '#prodPager_'+index, "name", 'Products List', 1000);
                       $('#mainForm_'+index).submit(function(e) {
                         if(!($(this).find('textarea[name="specialMentions"]').text()) 
@@ -382,22 +382,22 @@
                       });
                       
                       let x = JSON.parse($('[id^="statusJsonValues_"]').first().val());
-                      let stripePublicKey = "<%= stripePublicKey %>";
+                      const stripePublicKey = "<%= stripePublicKey %>";
                       let status = $('#status_'+index).val();
                       
                       if($('#status_'+index).val() == x.SUPP_STARTED_DELIVERY) {//Ready to pay -> STRIPE in action!
                         let amount = $('#price_'+index).val();//Not to be confused with the number of items!
                         let currency = $('#currency_'+index).val();
                         let balance = $('#balance').val();
-                        if(amount > balance) {
-                          //alert('Your current balance is not enough for completing this purchase. Please add some more funds to your account.');
+                        
+                        if(amount > balance) {                         
                           Swal.fire({
                             icon: 'error',
                             confirmButtonColor: '#335577',
                             title: 'Error!',
                             text: 'Your current balance is not enough for completing this purchase. Please add some more funds to your account.'
                           });
-                          return false;
+                          throw new Error();
                         }
                         
                         let newBalance = balance - amount;                        
@@ -406,6 +406,7 @@
                         desc = "<%= bid.requestName %>",
                         emailAddress = "<%= bid.buyerEmail %>";
                         let that = index;
+                        alert(that + ' ' + that);
                         
                         $('#message_'+index)
                           .parent('div')
@@ -440,46 +441,68 @@
                                   $('#purchase_'+that).remove();
                                   $('#status_'+that).val(x.PAYMENT_DELIVERY_DONE);
                                   $('#statuses_'+that).find('option:eq('+x.PAYMENT_DELIVERY_DONE+')').prop('selected', true);
-                                  $('#grid_'+that).find('tr:not(:first)').css({"title": "Already ordered!", "border": "2px solid gray", background-color: 'teal'});
+                                  $('#grid_'+that).find('tr:not(:first)').css({"title": "Already ordered!", "border": "2px solid gray", 'background-color': 'teal'});
                                 });
                               }
                             });
                         
                         $('#purchase_'+index).on('click', function() {
-                          if(confirm('IMPORTANT NOTICE: Unite currently uses the Stripe Payment Gateway in TEST MODE.\nNo real charges are done on you. You must use a fictitious card number like 4242 4242 4242 4242, and also to invent the CCV and the expiry date.\nDo you want to proceed?')) {
-                            amount = parseInt(amount)*100;
-                            stripeHandler.open({
-                              amount: amount,
-                              currency: currency,
-                              emailAddress: emailAddress,
-                              description: desc
-                            });
+                          Swal.fire({
+                            title: '<strong>Go to Payment</strong>',
+                            icon: 'warning',
+                            html:
+                              'IMPORTANT NOTICE: Unite currently uses the Stripe Payment Gateway in TEST MODE.<br>No real charges are done on you. You must use a fictitious card number like 4242 4242 4242 4242, and also to invent the CCV and the expiry date.<br>Do you want to proceed?',
+                            showCloseButton: true,
+                            showCancelButton: true,
+                            focusConfirm: false,
+                            confirmButtonText:
+                              '<i class="fa fa-thumbs-up"></i> OK',
+                            confirmButtonAriaLabel: 'Thumbs up, great!',
+                            cancelButtonText:
+                              '<i class="fa fa-thumbs-down"></i> Cancel',
+                            cancelButtonAriaLabel: 'Thumbs down'
+                          }).then((result) => {
+                            if (result.value) {
+                              amount = parseInt(amount) * 100;
+                              stripeHandler.open({
+                                amount: amount,
+                                currency: currency,
+                                emailAddress: emailAddress,
+                                description: desc
+                              });
+                            } else {
+                              alert('Payment cancelled!');
+                            }
                           });
-                        }
+                        });
                       } else {
                         $('#purchase_'+index).remove();
                         if(status >= x.PAYMENT_DELIVERY_DONE) {//Beyond the purchase phase.
-                          $('#grid_'+index).find('tr:not(:first)').css({"title": "Already ordered!", "border": "2px solid gray", background-color: 'teal'});//Mark them!
+                          $('#grid_'+index).find('tr:not(:first)').css({"title": "Already ordered!", "border": "2px solid gray", 'background-color': 'teal'});//Mark them!
                         }
                       }
                     </script>
                   </div>
               </div>
           </form>
-             
-     <!-- Buyer=sender, supplier=receiver. -->     
-          <div class="container mt-4">
-            <div class="form-group">
-              <a href="../../../../../buyer/chatLogin/<%= bid.buyer %>/<%= bid.supplier %>/<%= bid._id %>/<%= bid.requestName %>/<%= bid.supplierName %>/<%= bid.buyerName %>">
-                <button style="float: left" title="Chat" id="chat" class="btn-primary btn">Chat with your supplier</button>
+
+     <!-- Buyer=sender, supplier=receiver. -->          
+          <div class='totals'>
+            <div class='form-group'>
+              <span><a href="../../../../../buyer/chatLogin/<%= bid.buyer %>/<%= bid.supplier %>/<%= bid._id %>/<%= bid.requestName %>/<%= bid.supplierName %>/<%= bid.buyerName %>">
+                <button title="Chat" id="chat" class="btn-success bid-button btn">Chat with your supplier</button>
+                </a>
+              </span>
+            </div>
+            <div class='form-group'>
+              <span><a href="../../../../../buyer/cancelBid/<%= bid._id %>/<%= bid.requestName %>/Buyer/<%= bid.buyerName %>/<%= bid.supplierName %>/<%= bid.buyerEmail %>/<%= bid.supplierEmail %>">
+                <button title="Cancel Bid" id="cancelBid" class="btn-danger bid-button btn">Cancel your Order</button>
               </a>
-              <a href="../../../../../buyer/cancelBid/<%= bid._id %>/<%= bid.requestName %>/Buyer/<%= bid.buyerName %>/<%= bid.supplierName %>/<%= bid.buyerEmail %>/<%= bid.supplierEmail %>">
-                <button style="float: right" title="Cancel Bid" id="cancelBid" class="btn-primary btn">Cancel your Order</button>
-              </a>
+              </span>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" style="position: center;" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn bid-button btn-secondary" data-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
@@ -487,7 +510,7 @@
   <% } } i = 0; if(cancelledBids.length > 0) { %> 
     <br>
       <h3 style="color: green">
-        The following <%= cancelledBids.length %> bids are Bid Requests that were cancelled. We advise you to delete them.  Their total price is <span class='cancelledPrice'><%= cancelledPrice %></span> <span class='currency'><%= currency %>.</span>
+        The following <%= cancelledBids.length %> bids are Bid Requests that were cancelled. We advise you to delete them. Their total price is <span class='cancelledPrice'><%= cancelledPrice %></span> <span class='currency'><%= currency %>.</span>
       </h3>
     <hr>
   <% for(bid of cancelledBids) { i++; %>

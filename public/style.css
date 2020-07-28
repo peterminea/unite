@@ -32,6 +32,14 @@ body {
   width: 64%
 }
 
+.bid-button {
+  width: 210px;
+}
+
+.bid-button-wide {
+  width: 288px;
+}
+
 p.excel {
   font-size: 14px;
   width: 290px;

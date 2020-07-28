@@ -299,8 +299,7 @@ exports.postIndex = (req, res) => {
         });
       });
     });
-  } else if (req.body.itemDescription) {
-    console.log(req.body.preferredDeliveryDate);
+  } else if (req.body.itemDescription) {    
     //New Bid Request placed.    
     let suppIds = req.body.supplierIdsList? prel(req.body.supplierIdsList) : [];//Multi or not.
     console.log(suppIds.length);
@@ -313,7 +312,6 @@ exports.postIndex = (req, res) => {
       emails = req.body.supplierEmailsList? prel(req.body.supplierEmailsList) : [];
       suppCurrencies = req.body.supplierCurrenciesList? prel(req.body.supplierCurrenciesList) : [];//currencies
       totalPricesList = req.body.supplierTotalPricesList? prel(req.body.supplierTotalPricesList, true) : [];
-      
       t = arrangeMultiData(t, suppIds);
       suppIds = suppIds.filter((v, i, a) => a.indexOf(v) === i);
       //suppIds = t.uniqueSuppIds;
@@ -729,6 +727,12 @@ exports.getViewBids = (req, res) => {
         }
       }
       validPrice += parseFloat(validBids[i].buyerPrice);
+      for(let j in validBids[i].productImagesList) {
+        if(!fileExists(validBids[i].productImagesList[j])) {
+          console.log('MALFUNCTION');
+          validBids[i].productImagesList[j] = '';
+        }
+      }
     }
 
     totalPrice = parseFloat(validPrice);
@@ -748,6 +752,7 @@ exports.getViewBids = (req, res) => {
     let success = search(req.session.flash, "success"),
       error = search(req.session.flash, "error");
     req.session.flash = [];
+    
 
     res.render("buyer/viewBid", {
       bids: validBids,
@@ -766,7 +771,7 @@ exports.getViewBids = (req, res) => {
       currency: req.params.currency,
       path: '../../../../',
       bidExtensionDays: process.env.DAYS_BID_EXTENDED,
-      statusesJson: JSON.stringify(statusesJson),
+      statusesJson: JSON.stringify(getBidStatusesJson()),
       supplierId: req.params.supplierId,
       buyerId: req.params.buyerId,
       balance: req.params.balance
