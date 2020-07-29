@@ -2377,6 +2377,40 @@ $(document).ready(function() {
     $("#match").css({ color: "red" });
   }
   
+  if($('button.cancel').length) {
+    $('button.cancel').on('click', function(e) {
+      e.preventDefault();
+      
+      Swal.fire({
+        title: '<strong>Cancel Bid Request Creation</strong>',
+        icon: 'warning',
+        html:
+          'Are you sure you want to cancel the Bid you are creating?',
+        showCloseButton: true,
+        showCancelButton: true,
+        focusConfirm: false,
+        confirmButtonText:
+          '<i class="fa fa-thumbs-up"></i> Yes',
+        confirmButtonAriaLabel: 'Thumbs up!',
+        cancelButtonText:
+          '<i class="fa fa-thumbs-down"></i> No',
+        cancelButtonAriaLabel: 'Thumbs down'
+      }).then((result) => {
+        if(result.value) {
+          if($('button.close').length) {//index.ejs
+            $('#close_'+$(this).attr('index')).trigger('click');
+          } else {//placeBid.ejs
+            let str = '<a href="/buyer"><span id="cancelBid"></span></a>';
+            $(str).insertAfter($(this));
+            $('#cancelBid').trigger('click');
+          }
+        } else {
+          return false;
+        }
+      });
+    });
+  }
+  
   
   if($('button.placeBid').length) {//Placing a bid from Buyer Index or PlaceBid.    
       $('button.placeBid').on('click', function() {

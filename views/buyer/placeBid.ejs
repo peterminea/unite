@@ -393,9 +393,13 @@
               bindAddBid($('button[id="addProdService"]'), null);
             </script>
           </div>
-          <div class="form-group">
-            <a href="/buyer"><button type="button" class="btn btn-warning" style="float: left">Cancel</button></a>
-            <button index="-1" type="submit" class="placeBid btn btn-primary" style="float: right">Send request</button>
+          <div class='totals'>
+            <div class='form-group'>              
+              <button class="btn bid-button btn-warning cancel">Cancel</button>
+            </div>
+            <div class='form-group'>
+              <button index="-1" type="submit" class="placeBid bid-button btn btn-primary">Send request</button>
+            </div>
           </div>
         </form>
       </div>

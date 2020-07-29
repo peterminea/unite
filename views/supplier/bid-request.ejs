@@ -55,17 +55,19 @@
           <label>Buyer's Organization Name</label>
           <input type="text" class="form-control" value="<%= buyer.organizationName %>" readonly>
           <br>
-          <button type="button" class="btn btn-dark" data-target="#buyerDetailsModal" data-toggle="modal">View Buyer Details</button>
-        </div>        
-        <div class="modal fade" id="comp_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
+          <button class="btn btn-dark" data-target="#buyerDetailsModal" data-toggle="modal">Buyer Details</button>          
+        </div>   
+        
+        <!-- Modal view of Buyer Details (read-only mode) -->
+        <div class="modal fade" id="buyerDetailsModal" tabindex="-1" role="dialog" aria-hidden="true">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
               <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLongTitle">Buyer</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
+                <h5 class="modal-title" id="exampleModalLabel"><%= buyer.organizationName %></h5>
+                <button class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
             <div class="modal-body">
               <div class="form-group">
                 <label>Buyer's Organization UNITE ID</label>
@@ -281,7 +283,7 @@
                 $('#acceptBid').show();
                 $('#acceptButton').off('click').on('click', function() {
                   Swal.fire({
-                    title: '<strong>Go to Payment</strong>',
+                    title: '<strong>Accept Bid Request</strong>',
                     icon: 'warning',
                     html:
                       'Are you sure you want to accept this Bid from <strong>' + $('#buyerName').val() + '</strong>?',
