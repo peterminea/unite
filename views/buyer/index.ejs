@@ -399,12 +399,12 @@
         </div>
 
         <!-- Modal window for the new Bid Request -->
-        <div class="modal fade" style="width: 100%; max-width: 95%; overflow: auto" id="request_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
-          <div class="modal-dialog" style="max-width: 1000px; overflow: auto" role="document">
+        <div class="modal fade" style="width: 100%; max-width: 96%; overflow: auto" id="request_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog" style="max-width: 1024px; overflow: auto" role="document">
             <div class="modal-content" style="width: 100%; overflow: visible">
               <div class="modal-header">
                 <h5 class="modal-title">New Bid Request</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" id='close_<%= i %>' class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
@@ -669,9 +669,13 @@
                     bindAddBid($('button[id="addProdService'+ind+'"]'), suppCurr);
                   </script>
                 </div>
-                <div class="modal-footer">
-                  <button class="btn btn-warning" style="float: left">Cancel</button>
-                  <button index="<%= i %>" type="submit" class="placeBid btn btn-primary">Send request</button>
+                <div class='totals'>
+                  <div class='form-group'>
+                    <a href="/buyer"><button index="<%= i %>" class="btn bid-button btn-warning cancel">Cancel</button></a>
+                  </div>
+                  <div class='form-group'>
+                    <button index="<%= i %>" type="submit" class="placeBid bid-button btn btn-primary">Send request</button>
+                  </div>
                 </div>
               </form>
             </div>
