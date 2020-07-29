@@ -227,45 +227,53 @@ function getCurrenciesList(elem, url, token, defaultBidCurrency) {
     datatype: "jsonp",
     type: "POST",
     success: function(data) {
-      if (!data || !data.length || treatError(data, "loading currencies")) {
-        //obj.val('');
-        obj.append("<option>No results found.</option>");
-        return false;
-      }
-
-      obj.append("<option></option>");
-      for (let i in data) {
-        let opt =
-          "<option " +
-          'style="word-wrap: break-word; width: 50px" title="' +
-          data[i].value +
-          '" value="' +
-          data[i].name +
-          '">' +
-          data[i].name +
-          "</option>";
-        obj.append(opt);
-      }
-
-      obj
-        .find('option[value="' + defaultBidCurrency + '"]')
-        .prop('selected', true);
-
-      if($('span.bidCurrency').length) {
-        $('span.bidCurrency').each(function() {
-          $(this).text(defaultBidCurrency);
-          });
-
-        let opt = $('select.productsList').length? $('select.productsList').find('option:selected') : null;
-
-        if(opt && opt.length && opt.attr('value')) {
-          $('select.productsList')
-            .addClass('init')
-            .trigger('change');
+       obj.each(function(ind, elem) {
+         let obj2 = $(elem);
+         
+        if (!data || !data.length || treatError(data, "loading currencies")) {
+          //obj2.val('');
+          obj2.append("<option>No results found.</option>");
+          return false;
         }
-      }
 
-      obj.trigger('change');
+        obj2.append("<option></option>");
+        for (let i in data) {
+          let opt =
+            "<option " +
+            'style="word-wrap: break-word; width: 50px" title="' +
+            data[i].value +
+            '" value="' +
+            data[i].name +
+            '">' +
+            data[i].name +
+            "</option>";
+          obj2.append(opt);
+        }
+
+        obj2
+          .find('option[value="' + defaultBidCurrency + '"]')
+          .prop('selected', true);
+
+        if($('span.bidCurrency').length) {
+          $('span.bidCurrency').each(function() {
+            $(this).text(defaultBidCurrency);
+            });
+
+          if($('select.productsList').length) {
+            $('select.productsList').each(function(ind, elem) {
+              let opt = $(elem).find('option:selected');
+
+              if(opt && opt.length && opt.text() && !(opt.text().toLowerCase().includes('no results found'))) {
+                $(elem)
+                  .addClass('init')
+                  .trigger('change');
+              }
+            });
+          }
+        }
+
+        obj2.trigger('change');
+      });
     },
     error: function(err) {
       alert(err);
@@ -791,7 +799,7 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
       let priceUnit = parseFloat(priceVal? priceVal : 1).toFixed(2);
       let addedPrice = parseInt(amountVal? amountVal : 1) * priceUnit;
       let buyerPriceUnit = $('#buyerPriceUnit'+id), buyerPriceCurr = $('#buyerPriceCurrency'+id);
-      let buyerCurrSpan = $('span.bidCurrency[index="'+ (id.length? id : '-1') +'"]').first();
+      let buyerCurrSpan = $('span.bidCurrency[index="'+ (id.length? id.substring(1) : '-1') +'"]').first();
       buyerPriceUnit.text(parseFloat(addedPrice).toFixed(2));
       buyerPriceCurr.text(buyerCurrSpan.text());
       let option = $(`#productsList${id} option:selected`);
@@ -920,7 +928,9 @@ function initBaseRates(fx, elem, url, token, defaultBidCurrency) {
       } 
 
       str += '\n}';
-      eval(str);      
+      console.log(str);
+    
+      eval(str);
       getCurrenciesList(elem, url, token, defaultBidCurrency);     
       return fx;
   });
@@ -2274,7 +2284,16 @@ $(document).ready(function() {
   });
 
   $("select.currency").on("change", function() {
-    let val = $(this).val();    
+    let val = $(this).val();
+    let opt = $(this).find('option:selected');
+    
+    if(!val || !(val.length) || !opt || !(opt.length) 
+      || !opt.text() || (opt.text().toLowerCase().includes('no results found'))
+      ) {
+      return false;
+    }
+    
+    val = opt.text();
     $('input[name="currency"]').val(val);
     $("#currency").val(val);    
     $('#prodServices,#grid').attr('supplierCurrency', val);
@@ -2454,7 +2473,7 @@ $(document).ready(function() {
 
             let supplierCurrency = $('#supplierCurrency'+id).text();
             let suppPrice = fx.convert(price, 
-                                       {from: $('span.bidCurrency[index="'+ (id.length? id : '-1') +'"]').first().text(), to: supplierCurrency
+                                       {from: $('span.bidCurrency[index="'+ (id.length? id.substring(1) : '-1') +'"]').first().text(), to: supplierCurrency
              });
             
             $('#supplierPriceUnit'+id).text(parseFloat(suppPrice).toFixed(2));
@@ -2490,7 +2509,7 @@ $(document).ready(function() {
 
           $('#buyerPriceUnit'+id).text(parseFloat(price).toFixed(2)); 
           let supplierCurrency = $('#supplierCurrency'+id).text();
-          let suppPrice = fx.convert(price, {from: $('span.bidCurrency[index="'+ (id.length? id : '-1') +'"]').first().text(), to: supplierCurrency});
+          let suppPrice = fx.convert(price, {from: $('span.bidCurrency[index="'+ (id.length? id.substring(1) : '-1') +'"]').first().text(), to: supplierCurrency});
           $('#supplierPriceUnit'+id).text(parseFloat(suppPrice).toFixed(2));
         }
       });
@@ -2499,7 +2518,9 @@ $(document).ready(function() {
       $('select.productsList').on('change', function() {
         let opt = $(this).find('option:selected');
         
-        if(!opt || !opt.text() || !opt.text().length || !$(this).val() || !$(this).val().length) {//alert('FLORILE DE MĂRU');
+        if(!opt || !opt.text() || !opt.text().length 
+           || (opt.text().toLowerCase().includes('no results found'))
+           || !$(this).val() || !$(this).val().length) {
           return false;
         }
         
@@ -2561,7 +2582,7 @@ $(document).ready(function() {
       $('select.buyerCurrency').on('change', function() {
         let curr = $(this).find('option:selected').text();
         
-        if(!curr || !curr.length) {
+        if(!curr || !curr.length || (curr.toLowerCase().includes('no results found'))) {
           return false;  
         }
         
@@ -2580,7 +2601,6 @@ $(document).ready(function() {
           $('#updateProfile').prop('disabled', true);
         };
         
-        
         let suppCurrency = elem.attr('supplierCurrency')? elem.attr('supplierCurrency') : null; 
         if(!($(this).hasClass('multiplex')) && suppCurrency && curr && curr != suppCurrency) {
           Swal.fire({
@@ -2592,31 +2612,32 @@ $(document).ready(function() {
         }
         
         let priceInput = $('#price'+id);
-        let oldBidCurrencySpan = $('span.bidCurrency[index="'+ (id.length? id : '-1') +'"]').first();
+        let oldBidCurrencySpan = $('span.bidCurrency[index="'+ (id.length? id.substring(1) : '-1') +'"]').first();
        
-        if(curr && oldBidCurrencySpan.text() && priceInput.val().length) {
+        if(curr && oldBidCurrencySpan.text() && oldBidCurrencySpan.text().length && priceInput.val().length) {
           let val = fx.convert(parseFloat(priceInput.val()).toFixed(2), {from: oldBidCurrencySpan.text(), to: curr});
           priceInput.val(parseFloat(val).toFixed(2));
           $('#sprice'+id).text(parseFloat(val).toFixed(2));
         }
        
-        $('span.bidCurrency[index="'+ (id.length? id : '-1') +'"]').each(function(i, el) {
+        $('span.bidCurrency[index="'+ (id.length? id.substring(1) : '-1') +'"]').each(function(i, el) {
           $(el).text(curr);
         });
         
-        let buyerPriceUnit = $('#buyerPriceUnit'+id), buyerPriceCurr = $('#buyerPriceCurrency'+id);
-        if(buyerPriceUnit.text() != null && buyerPriceUnit.text() != '0') {
+        let buyerPriceUnit = $('#buyerPriceUnit'+id), buyerPriceCurr = $('#buyerCurrencyUnit'+id);
+        //alert(id.substring(1) + ' S ' + oldBidCurrencySpan.length + ' T ' + buyerPriceCurr.length);
+        
+        if(buyerPriceUnit.text() != null && buyerPriceUnit.text().length && buyerPriceUnit.text() != '0') {
           let newPriceUnit = fx.convert(parseFloat(buyerPriceUnit.text()), {from: buyerPriceCurr.text(), to: curr});
           buyerPriceUnit.text(parseFloat(newPriceUnit).toFixed(2));
         }
       
         buyerPriceCurr.text(curr);
-
         const dataIDs = grid.getDataIDs();
 
         for(const ind of dataIDs) {
           let row = grid.jqGrid('getRowData', ind);
-          let currentCurr = row.hiddenCurrency;      
+          let currentCurr = row.hiddenCurrency;
           let newPrice = fx.convert(parseFloat(row.hiddenPrice), { from: currentCurr, to: curr });
           let newTotalPrice = fx.convert(parseFloat(row.hiddenTotalPrice), { from: currentCurr, to: curr });
           let newBigPrice = fx.convert(parseFloat(row.bigPrice), { from: currentCurr, to: curr });
@@ -2674,7 +2695,7 @@ $(document).ready(function() {
                 .find('li')
                 .click(function() {
                   let id = getIdClear(obj);
-                  let buyerCurr = $('select.buyerCurrency[index="' + id.length? id : '-1' +'"]').val();
+                  let buyerCurr = $('select.buyerCurrency[index="' + id.length? id.substring(1) : '-1' +'"]').val();
                   let val = fx.convert(parseFloat($(this).attr('id')).toFixed(2), {from: $(this).attr('currency'), to: buyerCurr});
                 
                   obj

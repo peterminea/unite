@@ -252,7 +252,7 @@
                 <label class="col-form-label">Supplier's price for selected product <span class='productName'></span>:</label>
                 <span class="form-control hid">
                   <span id="supplierPriceUnit">0</span>
-                  <span index="0" class="suppCurrency" id="supplierCurrencyUnit"><%= supplier.currency %></span>
+                  <span index="-1" class="suppCurrency" id="supplierCurrencyUnit"><%= supplier.currency %></span>
                 </span>
               </div>
               <% } else { %>
@@ -275,7 +275,7 @@
                 <span class="form-control hid">
                   <span id="supplierPrice">0</span>
                   <input type="hidden" id="isupplierPrice" name="supplierPrice" value='0'>
-                  <span index="0" class="suppCurrency" id="supplierCurrency"><%= supplier.currency %></span>
+                  <span index="-1" class="suppCurrency" id="supplierCurrency"><%= supplier.currency %></span>
                   <input type="hidden" name="supplierCurrency" value="<%= supplier.currency %>">
                 </span>
               </div>

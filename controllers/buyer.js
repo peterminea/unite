@@ -277,7 +277,7 @@ exports.postIndex = (req, res) => {
                 .from(bids[i].supplierCurrency)
                 .to(process.env.BID_DEFAULT_CURR);
             }
-          }
+          }         
 
           let success = search(req.session.flash, "success"),
             error = search(req.session.flash, "error");
@@ -302,7 +302,6 @@ exports.postIndex = (req, res) => {
   } else if (req.body.itemDescription) {    
     //New Bid Request placed.    
     let suppIds = req.body.supplierIdsList? prel(req.body.supplierIdsList) : [];//Multi or not.
-    console.log(suppIds.length);
     let t = prepareBidData(req), names, emails, suppCurrencies, suppCurrenciesByProd, totalPricesList;
     
     if(req.body.supplierId) {//Not Multi.
@@ -324,10 +323,8 @@ exports.postIndex = (req, res) => {
      for(let i = 0; i < suppIds.length; i++) {
        let buyerPrice = !(t.uniqueSuppIds)? req.body.buyerPrice :fx(parseFloat(totalPricesList[i]).toFixed(2))
                 .from(suppCurrencies[i])
-                .to(req.body.buyerCurrency);
-       
-       console.log(req.body.supplierPrice);
-       
+                .to(req.body.buyerCurrency);       
+      
       const bidRequest = new BidRequest({
         requestName: req.body.requestName,
         supplierName: req.body.supplierName? req.body.supplierName : names[i],
@@ -450,7 +447,6 @@ exports.postIndex = (req, res) => {
           req.session.flash = [];
           let isMultiProd = prodIDs.length > 1;
           let isMultiSupp = uniqueSupplierIds.length > 1;
-          console.log(!isMultiSupp);
 
           res.render("buyer/placeBid", {
             successMessage: success,
@@ -482,11 +478,7 @@ exports.postIndex = (req, res) => {
 };
 
 
-exports.getPlaceBid = (req, res) => {
-  console.log(req.params.buyerId)
-  console.log(req.params.productId)
-  console.log(req.params.supplierId)  
-  
+exports.getPlaceBid = (req, res) => {  
   let buyerId = (req.params.buyerId), productId = (req.params.productId), supplierId = (req.params.supplierId);
   // { $in : [1,2,3,4] }
   //Or array

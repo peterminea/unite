@@ -1113,11 +1113,9 @@ const bcrypt = require('bcryptjs');
 let db;
 
 async function getUsers2(db, table) {
-  const promise =  await db.collection(''+table+'').find({});
- 
+  const promise =  await db.collection(''+table+'').find({}); 
   return promise;
 }
-
 
 if (1 == 2)
   MongoClient.connect(URI, { useUnifiedTopology: true }, async (err, client) => {
@@ -1127,19 +1125,27 @@ if (1 == 2)
     }
 
     db = client.db(BASE); //Right connection!
-    let sup = await getUsers(db, 'suppliers');    
+    let sup = await getUsers(db, 'bidrequests');    
     
     for(let i of sup) {
-      let currency = i.currency;//i.currenciesList && i.currenciesList.length? i.currenciesList[0] : i.currency;
+      let priceList = i.priceOriginalList;//i.currenciesList && i.currenciesList.length? i.currenciesList[0] : i.currency;
       //if(currency.length > 3) currency = currency.substring(0, 3);
       //if(currency.length < 3 && currency.charAt(0) == 'E') currency = 'EUR';
-      db.collection('productservices').updateMany({supplier: i._id}, { $set: { currency: i.currency } }, function(err, obj) {});
+      
+      let buyerPrice = parseFloat(0);
+      
+      for(let jj in priceList) {
+        console.log(priceList[jj] + ' ' + i.amountList[jj]);
+        buyerPrice += parseFloat(parseFloat(priceList[jj]) * (i.amountList[jj]? parseFloat(i.amountList[jj]) : parseFloat(1.0)));
+        //console.log(parseFloat(parseFloat(priceList[jj]) * (i.amountList[jj]? parseFloat(i.amountList[jj]) : parseFloat(1.0))));
+      }
+      
+      buyerPrice = parseFloat(buyerPrice).toFixed(2);
+      db.collection('bidrequests').updateMany({}, { $set: { buyerPrice: parseFloat(buyerPrice) } }, function(err, obj) {});
      // let currenciesList = [];
      // for(let j = 0; j < i.currenciesList.length; j++)
-     //   currenciesList.push(currency);
-      
-      //db.collection('suppliers').updateOne({ _id: i._id}, { $set: { currenciesList: currenciesList } }, function(err, obj) {});
-      console.log(currency);
+     //   currenciesList.push(currency);      
+    //db.collection('suppliers').updateOne({ _id: i._id}, { $set: { currenciesList: currenciesList } }, function(err, obj) {});     
     }
     
     process.on("uncaughtException", function(err) {

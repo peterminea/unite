@@ -22,7 +22,8 @@
   <script src="/bootstrap.min.js"></script>
   <script src="/sweetalert2@9.min.js"></script>
   <script src="/index.min.js"></script>
-  <script src="/money.min.js"></script>
+  <!-- <script src="/money.min.js"></script> -->
+  <script src="/money.js"></script>
   <script src="/jquery.simulate.js"></script>
   <script src="/jquery.jqgrid.min.js"></script>
   <script src="/grid.locale-en.js"></script>
@@ -517,9 +518,9 @@
                     </div>                  
                     <div class="form-group">
                       <label class="col-form-label">Products / Services Requested*</label>
-                        <span class='littleNote form-control'>
+                        <p class='littleNote form-control'>
                           You can also request products that are not in the list of the supplier.
-                        </span>
+                        </p>
                         <input type="text" required class="form-control prodInput" defaultMaxAmount="<%= MAX_AMOUNT %>" placeholder="Add Product/Service*" id="prodServiceInput_<%= i %>">
                         <br>
                         <button class="btn btn-outline-secondary prodButton" type="button" disabled MAX="<%= MAX_PROD %>" id="addProdService_<%= i %>">Add</button>
@@ -554,17 +555,17 @@
                        <div class="form-group">
                         <label class="col-form-label">Your price for selected product:</label>
                         <span class="form-control hid">
-                          <span id="buyerPriceUnit">0</span>
-                          <span index="-1" class="bidCurrency" id="buyerCurrencyUnit"></span>
+                          <span id="buyerPriceUnit_<%= i %>">0</span>
+                          <span index="<%= i %>" class="bidCurrency" id="buyerCurrencyUnit_<%= i %>"></span>
                         </span>
                       </div>
                       <div class="form-group">
                         <label class=" col-form-label">Your total price:</label>
                         <span class="form-control hid">
-                          <span index="-1" class="bidPrice" id="sprice_<%= i %>">0</span>
-                          <span index="-1" class="bidCurrency" id="scurrency_<%= i %>"></span>
-                          <input type="hidden" index="-1" class="bidPrice" id="price_<%= i %>" name="buyerPrice" value="0">
-                          <input type="hidden" index="-1" class="bidCurrency" id="currency_<%= i %>" name="buyerCurrency">
+                          <span index="<%= i %>" class="bidPrice" id="sprice_<%= i %>">0</span>
+                          <span index="<%= i %>" class="bidCurrency" id="scurrency_<%= i %>"></span>
+                          <input type="hidden" index="<%= i %>" class="bidPrice" id="price_<%= i %>" name="buyerPrice" value="0">
+                          <input type="hidden" index="<%= i %>" class="bidCurrency" id="currency_<%= i %>" name="buyerCurrency">
                         </span>
                       </div>
                       <div class="form-group">
@@ -593,7 +594,7 @@
                         <% } } %>
                       </select>
                       <% if (statusesJson != null) { %>
-                        <div style="visibility: hidden" id="statusJsonValues">                
+                        <div style="visibility: hidden" id="statusJsonValues_<%= i %>">
                           <span class='statuses'><%= statusesJson %></span>                
                         </div>
                       <% } %>
@@ -609,33 +610,33 @@
                         return true; 
                     }
                     
-                    let index = '_' + "<%= i %>";
+                    const ind = '_' + "<%= i %>";
                     let data = []; 
-                    initGrid(productColModel, data, "#grid"+index, '#prodPager'+index, "name", 'Products List', 1080);
+                    initGrid(productColModel, data, "#grid"+ind, '#prodPager'+ind, "name", 'Products List', 1080);
                     
                     setTimeout(function() {
-                      let table = $("#grid"+index);
+                      let table = $("#grid"+ind);
                       table.attr('supplierCurrency', "<%= supplier.currency %>");
-                    }, 1000);
+                    }, 1024);
 
-                    $('#status'+index).on('keypress keyon keyup', function(e) {
+                    $('#status'+ind).on('keypress keyon keyup', function(e) {
                         return limitStatus(e);
                     });
                     
-                    let sel = $('#statuses'+index);
+                    let sel = $('#statuses'+ind);
                     let statusVector = [];
                     sel.find('option').each(function(index, element) {
                       statusVector.push($(element).text());
                     });
                     
                     sel
-                      .find('option[value="' + $('#status'+index).val() + '"]')
+                      .find('option[value="' + $('#status'+ind).val() + '"]')
                       .prop('selected', true);
                     
                     sel.attr('title', sel.find('option:selected').text());
-                    let x = JSON.parse($('#statusJsonValues'+index+' span:first').text());
+                    let x = JSON.parse($('#statusJsonValues'+ind).find('span.statuses').text());
                     
-                    $('#status'+index).change(function(e) {//Read-only select, though.
+                    $('#status'+ind).change(function(e) {//Read-only select, though.
                       if($(this).val() < x.BUYER_REQUESTED_BID
                          || $(this).val() > x.PAYMENT_DELIVERY_DONE) {//The last two options can be triggered by the corresponding Cancel Bid button. 5 for Supplier cancellation, 6 for Buyer cancellation.
                         return false;
@@ -653,10 +654,10 @@
                         .insertAfter($('#status'+id).parent('div'));
                     });
                     
-                    let elem0 = $("#prodServices"+index);
-                    $('<a><span style="color: green; cursor: pointer" id="massRemove'+index+'">Remove All Products</span></a><br>').insertBefore(elem0);
+                    let elem0 = $("#prodServices"+ind);
+                    $('<a><span style="color: green; cursor: pointer" id="massRemove'+ind+'">Remove All Products</span></a><br>').insertBefore(elem0);
                     
-                    $('#massRemove'+index).on('click', function() {
+                    $('#massRemove'+ind).on('click', function() {
                       let id = getId($(this).attr('id'));
                       
                       if(id.length)
@@ -665,7 +666,7 @@
                     });
                     
                     let suppCurr = '<%= supplier.currency %>';
-                    bindAddBid($('button[id="addProdService'+index+'"]'), suppCurr);
+                    bindAddBid($('button[id="addProdService'+ind+'"]'), suppCurr);
                   </script>
                 </div>
                 <div class="modal-footer">
