@@ -14,7 +14,7 @@ const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const search = require('../middleware/searchFlash');
 let Recaptcha = require('express-recaptcha').RecaptchaV3;
-const { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, prel, sortLists, getUsers, getBidStatusesJson, getCancelTypesJson, postSignInBody, updateBidBody } = require('../middleware/templates');
+const { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, prel, sortLists, getUsers, getBidStatusesJson, getCancelTypesJson, postSignInBody, updateBidBody, encryptionNotice } = require('../middleware/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
@@ -423,7 +423,7 @@ exports.postResetPasswordToken = (req, res) => {
             return false;
           
             let dbo = db.db(BASE);
-            let hash = bcrypt.hashSync(req.body.password, 16);
+            let hash = bcrypt.hashSync(req.body.password, 10);
             dbo.collection("supervisors").updateOne({ _id: user._id }, 
               { $set: {
                 password: hash, 
@@ -487,6 +487,7 @@ exports.getSignUp = (req, res) => {
         captchaSiteKey: captchaSiteKey,
         countries: country,
         FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
+        encryptionNotice: encryptionNotice,
         successMessage: success,
         errorMessage: error
       });
@@ -541,8 +542,9 @@ exports.postSignUp = async (req, res) => {
               if (user) 
                 return res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
                 let supervisor;
+                let hash = bcrypt.hashSync(req.body.password, 10);
+              
                 try {
-                  bcrypt.hash(req.body.password, 16, async function(err, hash) {
                   //user = new Promise((resolve, reject) => {
                     supervisor = new Supervisor({
                       role: process.env.USER_REGULAR,
@@ -606,7 +608,6 @@ exports.postSignUp = async (req, res) => {
                           return res.redirect("/supervisor/sign-in");
                   }, 250);
                   });
-                });
               });
             } catch {
             }

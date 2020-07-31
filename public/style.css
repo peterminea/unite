@@ -20,6 +20,14 @@ body {
   width: 180px
 }
 
+.signup-notice {  
+  margin-top: 40px;  
+}
+
+.signup-notice p {  
+    color: teal;  
+}
+
 .update-profile {
   text-align: center;
   font-weight: bold;
@@ -56,7 +64,7 @@ p.excel {
   width: 25%
 }
 
-.totals .form-control,.upload-section .form-control, .form-control.upload-button,input.upload {
+.totals .form-control,.upload-section .form-control,.form-control.upload-button,input.upload {
   width: 25%
 }
 

@@ -298,7 +298,7 @@ exports.getMemberList = async (req, res) => {
     });
     //supps = suppliers;
    // if(1==2)
-    for(let i in suppliers) {      
+    for(let i in suppliers) {
       supps.push(suppliers[i]);
     }
   });

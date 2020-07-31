@@ -86,7 +86,7 @@
       { name: 'qualification', label: 'Qualification', align: 'center', search: true, width: 200},
       { name: 'role', label: 'Role', align: 'center', search: true, width: 75},
       { name: 'isActive', label: 'Is Active?', align: 'center', search: true, width: 60},
-      { name: 'ipv4', label: 'IP Address (v4)', align: 'center', sorttype: "text", search: true, width: 60},
+      { name: 'ipv4', label: 'IP Address (v4)', align: 'center', sorttype: "text", search: true, width: 180},
       { name: 'deletion', label: 'Remove User', align: 'center', formatter: removalFormatter, search: false, width: 100},
       { name: 'ban', label: 'Ban User', align: 'center', formatter: banFormatter, search: false, width: 100},
       { name: 'hiddenDeleteHref', hidden: true },
@@ -149,7 +149,7 @@
       { name: 'country', label: 'Country', align: 'center', search: true, width: 105},
       { name: 'role', label: 'Role', align: 'center', search: true, width: 75},
       { name: 'isActive', label: 'Is Active?', align: 'center', search: true, width: 60},
-      { name: 'ipv4', label: 'IP Address (v4)', align: 'center', sorttype: "text", search: true, width: 60},
+      { name: 'ipv4', label: 'IP Address (v4)', align: 'center', sorttype: "text", search: true, width: 180},
       { name: 'deletion', label: 'Removal', align: 'center', formatter: removalFormatter, search: false, width: 100},
       { name: 'ban', label: 'Ban User', align: 'center', formatter: banFormatter, search: false, width: 100},
       { name: 'hiddenDeleteHref', hidden: true },
@@ -168,7 +168,7 @@
             role: "<%= supervisor.role %>",
             isActive: "<%= supervisor.isActive %>",
             ipv4: "<%= supervisor.ipv4 %>",
-            hiddenHref: <% if(supervisor.role != 'Admin') { %> "deleteUser/<%= supervisor._id %>/Supervisor/<%= supervisor.organizationName %>/<%= supervisor.organizationUniteID %>/<%= supervisor.emailAddress %>" <% } else { %> '' <% } %>,
+            hiddenDeleteHref: <% if(supervisor.role != 'Admin') { %> "deleteUser/<%= supervisor._id %>/Supervisor/<%= supervisor.organizationName %>/<%= supervisor.organizationUniteID %>/<%= supervisor.emailAddress %>" <% } else { %> '' <% } %>,
             hiddenBanHref: <% if(supervisor.role != 'Admin') { %> "banUser/<%= supervisor._id %>/Supervisor/<%= supervisor.organizationName %>/None/<%= supervisor.emailAddress %>/<%= supervisor.ipv4 %>" <% } else { %> '' <% } %>
       });
      <% i++; } %>
@@ -219,7 +219,7 @@
       { name: 'role', label: 'Role', align: 'center', search: true, width: 75},
       { name: 'isActive', label: 'Is Active?', align: 'center', search: true, width: 60},
       { name: 'deletion', label: 'Removal', align: 'center', formatter: removalFormatter, search: false, width: 100},
-      { name: 'ipv4', label: 'IP Address (v4)', align: 'center', sorttype: "text", search: true, width: 60},
+      { name: 'ipv4', label: 'IP Address (v4)', align: 'center', sorttype: "text", search: true, width: 180},
       { name: 'ban', label: 'Ban User', align: 'center', formatter: banFormatter, search: false, width: 100},
       { name: 'hiddenDeleteHref', hidden: true },
       { name: 'hiddenBanHref', hidden: true }
@@ -243,12 +243,12 @@
             role: "<%= supplier.role %>",
             isActive: "<%= supplier.isActive %>",
             ipv4: "<%= supplier.ipv4 %>",
-            hiddenHref: <% if(supplier.role != 'Admin') { %> "deleteUser/<%= supplier._id %>/Supplier/<%= supplier.companyName %>/None/<%= supplier.emailAddress %>" <% } else { %> '' <% } %>,
+            hiddenDeleteHref: <% if(supplier.role != 'Admin') { %> "deleteUser/<%= supplier._id %>/Supplier/<%= supplier.companyName %>/None/<%= supplier.emailAddress %>" <% } else { %> '' <% } %>,
             hiddenBanHref: <% if(supplier.role != 'Admin') { %> "banUser/<%= supplier._id %>/Supplier/<%= supplier.organizationName %>/None/<%= supplier.emailAddress %>/<%= supplier.ipv4 %>" <% } else { %> '' <% } %>
       });
      <% i++; } %>
     
-    initGrid(colModelSupplier, data, "#gridSupplier", '#suppPager', "companyName", 'Suppliers', 1600);    
+    initGrid(colModelSupplier, data1, "#gridSupplier", '#suppPager', "companyName", 'Suppliers', 1600);    
     </script>
         <% } else { %>
         <div>

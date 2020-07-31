@@ -133,7 +133,6 @@
         <input type="hidden" id="uploadSize" value="<%= FILE_UPLOAD_MAX_SIZE %>">
         <input type="hidden" name="_id" value="<%= profile._id %>">
         <input type="hidden" name="role" value="<%= profile.role %>">
-        <input type="hidden" id="balance" name="balance" value="<%= profile.balance %>">
         <input type="hidden" name="createdAt" id="createdAt" value="<%= profile.createdAt %>">        
         
         <div class="form-group">
@@ -143,9 +142,8 @@
         </div>
         <div class="form-group">
           <label>Email address*</label>
-          <input required type="email" id="emailAddress" name="emailAddress" class="form-control"
-            value="<%= profile.emailAddress %>">
-          <small class="text-muted form-text">Only companies' domains are allowed.</small>
+          <input required type="email" id="emailAddress" name="emailAddress" class="form-control" value="<%= profile.emailAddress %>">
+          <small class="text-muted form-text">Only company domains are allowed.</small>
         </div>
         <div class="form-group">
           <label>Password*</label>
@@ -338,7 +336,11 @@
           </div>
           <div class="form-group">
             <label>Date Created</label>
-            <input type="text" disabled class="form-control" id="dateCreated" name="createdAtFormatted" value="<%= profile.createdAtFormatted %>">
+            <input type="text" readonly class="form-control" id="dateCreated" name="createdAtFormatted" value="<%= profile.createdAtFormatted %>">
+          </div>
+          <div class='form-group'>
+            <label>Balance:</label>
+            <input type="text" class='form-control' readonly id="balance" name="balance" value="<%= profile.balance %>">
           </div>
         </div>
         <script type="text/javascript">

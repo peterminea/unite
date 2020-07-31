@@ -45,7 +45,8 @@ const {
   getBidStatusesJson,
   getCancelTypesJson,
   postSignInBody,
-  updateBidBody
+  updateBidBody,
+  encryptionNotice
 } = require("../middleware/templates");
 
 const {
@@ -1067,19 +1068,24 @@ exports.postResendToken = function(req, res, next) {
   });
 };
 
+
 exports.getSignIn = (req, res) => {
   let success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
   req.session.flash = [];
-console.log('STB')
-  if (!req.session.buyerId || !req.session.buyer.isVerified)
+  console.log('Success: ' + success);
+  
+  if (!req.session.buyerId || !req.session.buyer.isVerified) {
     return res.render("buyer/sign-in", {
       captchaSiteKey: captchaSiteKey,
       successMessage: success,
       errorMessage: error
     });
-  else return res.redirect("/buyer");
+  }
+  
+ return res.redirect('/buyer');
 };
+
 
 exports.getSignUp = (req, res) => {
   let success = search(req.session.flash, "success"),
@@ -1112,7 +1118,9 @@ exports.getSignUp = (req, res) => {
         return res.render("buyer/sign-up", {
           DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
           captchaSiteKey: captchaSiteKey,
+          FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
           uniteIds: uniteIds,
+          encryptionNotice: (encryptionNotice),
           countries: country,
           successMessage: success,
           errorMessage: error
@@ -1262,7 +1270,7 @@ exports.postResetPasswordToken = (req, res) => {
                   return false;
                 
                 let dbo = db.db(BASE);
-                let hash = bcrypt.hashSync(req.body.password, 16);
+                let hash = bcrypt.hashSync(req.body.password, 10);
                 
                 dbo
                   .collection("buyers")
@@ -1320,11 +1328,11 @@ exports.postSignUp = async (req, res) => {
 
   console.log(captchaVerified);
   
-  if (
+  if(
     req.body.captchaResponse.length == 0 ||
     captchaVerified.success === true
   ) {
-    if (req.body.emailAddress) {
+    if(req.body.emailAddress) {
       const email = req.body.emailAddress;
       const email_str_arr = email.split("@");
       const domain_str_location = email_str_arr.length - 1;
@@ -1350,14 +1358,16 @@ exports.postSignUp = async (req, res) => {
             req.flash("error", "Password must have between 6 and 16 characters.");
             return res.redirect("/buyer/sign-up");
           } else {
-            
             let promise = getSupers(req.body.organizationUniteID);
             promise.then(async function(supers) {
-              if (supers && supers.length && !supers[0].isActive) {
+              console.log(supers);
+              if (supers && supers.length && !(supers[0].isActive)) {
+                
                 req.flash(
                   "error",
                   "Your Supervisor is currently not active. Please contact them."
                 );
+                console.log(supers[0]);
                 return res.redirect("/buyer/sign-up");
               } else if (1 == 2 && (!supers || supers.length == 0)) {
                 
@@ -1382,21 +1392,25 @@ exports.postSignUp = async (req, res) => {
                       });
                     }
                     
-                    if (user)
+                    if(user) {
                       return res
                         .status(400)
                         .send({
                           msg:
                             "The e-mail address you have entered is already associated with another account."
                         });
+                    }
                     
                     let buyer;
-                    
+                    console.log(4);
                     try {
+                      let hash = bcrypt.hashSync(req.body.password, 10);
+                      console.log(6);
+                      /*
                       bcrypt.hash(req.body.password, 16, async function(
                         err,
                         hash
-                      ) {
+                      ) {*/
                         buyer = new Buyer({
                           role: process.env.USER_REGULAR,
                           avatar: req.body.avatar,
@@ -1427,7 +1441,7 @@ exports.postSignUp = async (req, res) => {
 
                         req.session.buyer = buyer;
                         req.session.buyerId = buyer._id;
-                        await req.session.save(err => {
+                        await req.session.save((err) => {
                           if (treatError(req, res, err, "/buyer/sign-up"))
                             return false;
                         });
@@ -1456,14 +1470,14 @@ exports.postSignUp = async (req, res) => {
                         );
                         req.flash(
                           "success",
-                          "Buyer signed up successfully! Please confirm your account by visiting " +
-                            req.body.emailAddress + ""
+                          "Buyer signed up successfully! Please confirm your account by checking your e-mail address: " +
+                            req.body.emailAddress + " ."
                         );
                         setTimeout(function() {
                           return res.redirect("/buyer/sign-in");
                         }, 250);
                       });
-                    });
+                    //});
                     } catch {}
                   }
                 );
@@ -1496,6 +1510,7 @@ exports.getProfile = (req, res) => {
         
     res.render("buyer/profile", {
       DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+      FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
       successMessage: success,
       countries: country,
       errorMessage: error,

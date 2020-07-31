@@ -23,7 +23,7 @@ const sendConfirmationEmail = (name, link, token, req) => {
          throw err;
       }
 
-      console.log('A verification email has been sent to ' + req.body.emailAddress  + '.');
+      //console.log('A verification email has been sent to ' + req.body.emailAddress  + '.');
       req.flash('success', 'A verification email has been sent to ' + req.body.emailAddress + '.\n');
     });
 };
@@ -403,6 +403,12 @@ const updateBidBody = (req, res, reqId, returnLink) => {
         values = { $set: { status: req.body.status } };
       }
       
+      if(req.body.status == process.env.PAYMENT_DELIVERY_DONE) {//Update the balance of the Supplier.
+        let supplier = getUsers(dbo, 'suppliers', { _id: bid.supplier });
+        let newBalance = parseFloat(bid.supplierPrice) + (supplier && supplier.balance? parseFloat(supplier.balance) : 0);
+        dbo.collection('suppliers').updateOne({ _id: supplier._id }, { $set: { balance: parseFloat(newBalance).toFixed(2) } }, function(err, obj) {});
+      }
+      
       dbo
       .collection("bidrequests")
       .updateOne(
@@ -465,4 +471,7 @@ const getCancelTypesJson = function() {
 };
 
 
-module.exports = { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendBanEmail, sendCancelBidEmail, prel, sortLists, getUsers, getBidStatusesJson, getCancelTypesJson, postSignInBody, updateBidBody };
+const encryptionNotice = 'For your protection, UNITE uses encryption for your stored passwords.\nThus, it may take a certain amount of time for your encrypted password to be saved, after you press Sign Up or when you reset the password.\nThank you for your understanding, and remember that UNITE strives for ensuring a safe climate to its Users!';
+
+
+module.exports = { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendBanEmail, sendCancelBidEmail, prel, sortLists, getUsers, getBidStatusesJson, getCancelTypesJson, postSignInBody, updateBidBody, encryptionNotice };
