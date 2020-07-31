@@ -17,6 +17,7 @@
   <script src="/popper.min.js"></script>
   <script src="/bootstrap.min.js"></script>  
   <script src="/index.min.js"></script>
+  <script src="/money.js"></script>
   <script src="/https.js"></script>
   <script src="/sweetalert2@9.min.js"></script>
   <script src="/chatUsers.js"></script>
@@ -24,8 +25,21 @@
   <script type="text/javascript">
       $(document).ready(function () {
         errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
+        let token = $("input[name='_csrf']").val();
+        let defaultCurr = "<%= DEFAULT_CURR %>";
+        initBaseRates(fx, 'select.currency', '/currencyAutocomplete', token, defaultCurr, true);
         
-        $('#addProduct').click(function() {
+        $('#price,#amount').on('change paste', function() {
+          let price = $('#price').val(), amount = $('#amount').val();
+          
+          if(price && amount) {
+            let total = parseFloat(parseInt(amount) * parseFloat(price)).toFixed(2);            
+            $('#totalPrice').val(total);
+            $('#totalPriceSpan').text(total + ' ' + $('#selectCurrencies option:selected').text());
+          }
+        });
+        
+        $('#addProduct').on('click', function() {
           if($('#price').val() <= 0) {
             Swal.fire({
               icon: 'error',
@@ -36,11 +50,31 @@
             return false;
           }
           
-          $('#totalPrice').val(parseFloat($('#price').val() * $('#amount').val()).toFixed(2));
+          $('#totalPrice').val(parseFloat(parseFloat($('#price').val()) * parseInt($('#amount').val())).toFixed(2));
         });
         
-      var token = $("input[name='_csrf']").val();
-      getAutocomplete('#currency', '/currencyGetAutocomplete', token);
+        $('#selectCurrencies').off('change').on('change', function() {/*
+          if($(this).hasClass('init')) {
+            $(this).removeClass('init');
+            return false;
+          }*/
+          
+          let price = $('#price').val(), amount = $('#amount').val();
+          if(!price || !amount) {
+            return false;
+          }
+          
+          let oldCurr = $('#currency').val(), newCurr = $(this).val();
+          
+          alert(oldCurr + ' ' + newCurr);
+          let newPrice = fx.convert(parseFloat(price), {from: oldCurr, to: newCurr});
+          let newTotalPrice = parseFloat(amount * parseFloat(newPrice)).toFixed(2);
+          
+          $('#price').val(newPrice);
+          $('#currency').val(newCurr);
+          $('#totalPrice').val(newTotalPrice);
+          $('#totalPriceSpan').text(newTotalPrice + ' ' + newCurr);
+        });
       });
   </script>
 </head>
@@ -54,47 +88,47 @@
     </button>
   </nav>
     <div class="container">
-      <div class="col-md-12">
+      <div class="col-md-12 totals">
         <form method="POST">
           <input type="hidden" id="uploadSize" value="<%= FILE_UPLOAD_MAX_SIZE %>">
           <input type="hidden" name="_id" value="<%= supplierId %>">
-         <legend>
-            Add new Service/Product
+         <legend style='color: forestgreen; fon t-weight: bold; margin-bottom: 15px'>
+            Add new Product/Service
           </legend>
           <div class="form-group">
-            <label for="product">Product / Service name:</label>
+            <label for="productName">Product / Service name:</label>
             <input required class="form-control" type="text" name="productName" id="product" autofocus="autofocus"></input>
           </div>
           <div class="form-group">
-            <label for="addProduct">Price:</label>
+            <label for="price">Price:</label>
             <input required class="form-control" type="number" min="1" id="price" name="price"></input>
           </div>
           <div class="form-group">
-            <label for="currency">Currency:</label>
-            <input required class="form-control" type="text" id="currency" name="currency"></input>
+            <label for="currency">Preferred Currency (Default: Euro)*</label>
+            <input type="hidden" id='currency' name="currency" value="<%= DEFAULT_CURR %>" required><br>
+            <select class="currency" id="selectCurrencies" class="form-control" title="Currency" value="<%= DEFAULT_CURR %>" required></select>
           </div>
           <div class="form-group">
             <label>Upload a product image:</label>
-            <input class="form-control productimageupload separated" type="file" id="productImage" name="productImage" single>
+            <input class="form-control upload productimageupload separated" type="file" id="productImage" name="productImage" single>
             <input class="form-control single btn btn-dark mt-2" type="button" disabled value="Upload Product Image" />
             <input type="hidden" name="productImage" id="productImage">
           </div>
           <div class="form-group">
-            <label for="currency">Amount:</label>
+            <label for="amount">Amount:</label>
             <input required min="1" class="form-control" type="number" id="amount" name="amount"></input>
           </div>
           <div class="form-group">
-            <label for="currency">Total price:</label>
-            <input readonly min="1" class="form-control" type="number" id="totalPrice" name="totalPrice"></input>
+            <label for="totalPrice">Total price:</label>
+            <input type="hidden" id="totalPrice" name="totalPrice"></input>
+            <span style='background-color: lightgray' class="form-control" id="totalPriceSpan"></input>
           </div>
           <div class="form-group">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button type="submit" id="addProduct" value="Add Product" class="btn btn-primary btn-block btn-lg">Add Product</button>
+            <button type="submit" id="addProduct" value="Add Product" class="btn btn-primary btn-block btn-lg form-control">Add Product</button>
           </div>            
         </form>
       </div>
-    </div>
-    
-  </body>
-  
+    </div>    
+  </body>  
 </html>

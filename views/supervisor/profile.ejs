@@ -89,12 +89,14 @@
       <form id="updateForm" method="POST">
         <h2>
           Update your Details
-        </h2>
-        <input type="hidden" id="uploadSize" value="<%= FILE_UPLOAD_MAX_SIZE %>">
+        </h2>        
         <input type="hidden" name="_id" value="<%= profile._id %>">
-        <input type="hidden" name="role" value="<%= profile.role %>">
+        <input type="hidden" id="uploadSize" value="<%= FILE_UPLOAD_MAX_SIZE %>">
         <input type="hidden" name="createdAt" id="createdAt" value="<%= profile.createdAt %>">
-        
+        <div class="form-group">
+          <label>UNITE Role</label>
+          <input type="text" readonly class='form-control' name="role" value="<%= profile.role %>">
+        </div>
         <div class="form-group">
           <label for="organizationName">Organization name*</label>
           <input type="text" class="form-control" id="organizationName" aria-describedby="organizationName"
@@ -194,7 +196,7 @@
         
         <div class="form-group">
           <label>Date Created</label>
-          <input type="text" disabled class="form-control" id="dateCreated" name="createdAtFormatted" value="<%= profile.createdAtFormatted %>">
+          <input type="text" readonly class="form-control" id="dateCreated" name="createdAtFormatted" value="<%= profile.createdAtFormatted %>">
         </div>
         
         <!--Mandatory check of agreements -->

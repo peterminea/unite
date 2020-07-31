@@ -373,7 +373,7 @@
                   <!--Mandatory check of agreements -->
                   <div class="form-group">
                     <div class="form-check">
-                      <input readonly disabled name='terms' class="form-check-input" type="checkbox"
+                      <input disabled name='terms' class="form-check-input" type="checkbox"
                         <%= supplier.UNITETermsAndConditions ? "checked" : "" %>>
                       <label class="form-check-label" for="terms">
                         UNITE Terms And Conditions
@@ -382,7 +382,7 @@
                   </div>
                   <div class="form-group">
                     <div class="form-check">
-                      <input readonly disabled class="form-check-input" type="checkbox" name='antibrib' <%= supplier.antibriberyAgreement ? "checked" : "" %> disabled readonly>
+                      <input disabled class="form-check-input" type="checkbox" name='antibrib' <%= supplier.antibriberyAgreement ? "checked" : "" %>>
                       <label class="form-check-label" for="antibrib">
                         Antibribery Agreement
                       </label>
@@ -401,7 +401,7 @@
         <!-- Modal window for the new Bid Request -->
         <div class="modal fade" style="width: 100%; max-width: 96%; overflow: auto" id="request_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
           <div class="modal-dialog" style="max-width: 1024px; overflow: auto" role="document">
-            <div class="modal-content" style="width: 100%; overflow: visible">
+            <div class="modal-content" style="width: 100%; overflow: hidden">
               <div class="modal-header">
                 <h5 class="modal-title">New Bid Request</h5>
                 <button type="button" id='close_<%= i %>' class="close" data-dismiss="modal" aria-label="Close">
@@ -421,7 +421,7 @@
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Supplier Company</label>
-                    <input type="text" class="form-control" id="supplierName_<%= i %>" name="supplierName" value="<%= supplier.companyName %>" disabled>
+                    <input type="text" class="form-control" id="supplierName_<%= i %>" name="supplierName" value="<%= supplier.companyName %>" readonly>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Buyer Organization</label>
@@ -433,7 +433,7 @@
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Supplier's E-mail Address*</label>
-                    <input type="email" class="form-control" name="supplierEmail" value="<%= supplier.emailAddress %>" disabled>
+                    <input type="email" class="form-control" name="supplierEmail" value="<%= supplier.emailAddress %>" readonly>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Item Description <b>(Short)</b>*</label>

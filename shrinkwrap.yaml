@@ -32,7 +32,7 @@ dependencies:
   mobile-detect: 1.4.4
   moment: 2.27.0
   money: 0.2.0
-  mongoose: 5.9.26
+  mongoose: 5.9.27
   multer: 1.4.2
   node-fetch: 2.6.0
   node-sass: 4.14.1
@@ -2070,6 +2070,20 @@ packages:
     dev: false
     resolution:
       integrity: sha1-fq2i3xAJ35NfoY1PsdYg3azOAsI=
+  /mongodb/3.5.10:
+    dependencies:
+      bl: 2.2.0
+      bson: 1.1.4
+      denque: 1.4.1
+      require_optional: 1.0.1
+      safe-buffer: 5.2.1
+    dev: false
+    engines:
+      node: '>=4'
+    optionalDependencies:
+      saslprep: 1.0.3
+    resolution:
+      integrity: sha512-p/C48UvTU/dr/PQEDKfb9DsCVDJWXGmdJNFC+u5FPmTQVtog69X6D8vrWHz+sJx1zJnd96sjdh9ueo7bx2ILTw==
   /mongodb/3.5.9:
     dependencies:
       bl: 2.2.0
@@ -2090,11 +2104,11 @@ packages:
       mongoose: '*'
     resolution:
       integrity: sha512-Yo/7qQU4/EyIS8YDFSeenIvXxZN+ld7YdV9LqFVQJzTLye8unujAWPZ4NWKfFA+RNjh+wvTWKY9Z3E5XM6ZZiQ==
-  /mongoose/5.9.26:
+  /mongoose/5.9.27:
     dependencies:
       bson: 1.1.4
       kareem: 2.3.1
-      mongodb: 3.5.9
+      mongodb: 3.5.10
       mongoose-legacy-pluralize: 1.0.2
       mpath: 0.7.0
       mquery: 3.2.2
@@ -2107,7 +2121,7 @@ packages:
     engines:
       node: '>=4.0.0'
     resolution:
-      integrity: sha512-mVddZM1mB8xg9oJQZAXaN762B01puV+jL5mPqg1HBXpEs7TG6ZZ/hEk98YRJMJff/YhIzuK3a3oos6XWtTaVUQ==
+      integrity: sha512-N8zj4pj9J2xJ2BnQ4NiIHEtmjPldtbmbEZOMz4phLTQr3KFWPR0T0I6EzQxNioHwmDbHD4VFzbEd755oD2SJxA==
   /mpath/0.5.1:
     dev: false
     engines:
@@ -3572,7 +3586,7 @@ specifiers:
   mobile-detect: ^1.4.4
   moment: ^2.27.0
   money: ^0.2.0
-  mongoose: ^5.9.26
+  mongoose: ^5.9.27
   multer: ^1.4.2
   node-fetch: ^2.6.0
   node-sass: ^4.14.1

@@ -218,7 +218,7 @@ function expiredBidsPriceFormatter(cellvalue, options, rowObject) {
     ];
 
 
-function getCurrenciesList(elem, url, token, defaultBidCurrency) {
+function getCurrenciesList(elem, url, token, defaultBidCurrency, cancelChange) {
   let obj = $("" + elem + "");
   
   $.ajax({
@@ -272,7 +272,8 @@ function getCurrenciesList(elem, url, token, defaultBidCurrency) {
           }
         }
 
-        obj2.trigger('change');
+        if(!cancelChange)
+          obj2.addClass('init').trigger('change');
       });
     },
     error: function(err) {
@@ -913,7 +914,7 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
 }
 
 
-function initBaseRates(fx, elem, url, token, defaultBidCurrency) {
+function initBaseRates(fx, elem, url, token, defaultBidCurrency, cancelChange) {
   if (typeof fx == undefined) 
     return false;
 
@@ -941,10 +942,8 @@ function initBaseRates(fx, elem, url, token, defaultBidCurrency) {
       } 
 
       str += '\n}';
-      console.log(str);
-    
       eval(str);
-      getCurrenciesList(elem, url, token, defaultBidCurrency);     
+      getCurrenciesList(elem, url, token, defaultBidCurrency, (typeof cancelChange != 'undefined')? true : false);
       return fx;
   });
 }
@@ -1251,6 +1250,7 @@ function addition(
     let totalAmountInput = fromBid
       ? $("#totalAmount" + id)
       : $("#totalSupplyAmount");
+    
     totalAmountInput.val(parseInt(totalAmountInput.val()) + parseInt(amountVal));
     
     let gridId = fromBuyer ? $("#grid" + id) : $("#grid");
@@ -2354,6 +2354,14 @@ $(document).ready(function() {
     .css({ width: "100%" })
     .find("option.first")
     .prop("selected", true);
+  
+  $("select.autocomp").each(function(index, element) {
+    var div = $(element).parent('div').parent('div');
+    if(div.hasClass('totals')) {
+      $(element).css('width', '28%');
+    }
+    
+  });
 
   $("select.autocomp").on("change", function() {
     let input = $(this)
@@ -2920,7 +2928,7 @@ $(document).ready(function() {
           input.attr("filePath", res);
           if (input.hasClass("separated")) {
             //The separated Add Product Page.
-            $("#productImage").val(response.path);
+            $("#productImage").attr('value', response.path);
           }
 
           if (input.attr("fromOutside") != null) {

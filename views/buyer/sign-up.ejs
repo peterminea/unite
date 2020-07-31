@@ -37,8 +37,7 @@
           .find('option[value="'+defaultCurr+'"]')
           .prop('selected', true);
         
-        $('select.currency')
-          .css('width', '100px')
+        $('select.currency')          
           .trigger('change');
         
         $('#register').click(function(e) {
@@ -135,12 +134,12 @@
           <label>Address*</label>
           <input type="text" class="form-control" name="address" required>
         </div>
-        <div>
+        <div class='totals'>
           <div class="form-group">
             <label>Country*</label>
             <input type="text" class="form-control autocomp" id="country" class="country" name="country" required>
             <input type="hidden" name="saveCountry">
-            <select class='autocomp'>
+            <select class='autocomp' style='width: 25%'>
               <option id="" value=""></option>
               <% for(country of countries) { %>
               <option id="<%= country.id %>" value="<%= country.name %>"><%= country.name %></option>
@@ -162,11 +161,11 @@
             <input class="form-control upload avatarupload" type="file" id="avatar" name="avatarImg">
             <input class="form-control single btn upload-button btn-success mt-2" type="button" disabled value="Upload File" />
           </div>
+          <div class="g-recaptcha" data-sitekey="<%= captchaSiteKey %>"></div>
+          <input type="hidden" name="captchaResponse">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+          <button type="submit" id="register" class="btn btn-primary btn-block">Sign Up</button>
         </div>
-        <div class="g-recaptcha" data-sitekey="<%= captchaSiteKey %>"></div>
-        <input type="hidden" name="captchaResponse">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
-        <button type="submit" id="register" class="btn btn-primary btn-block">Sign Up</button>        
       </form>
     </div>  
     <div id="dialog">

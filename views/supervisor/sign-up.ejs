@@ -106,18 +106,19 @@
           <label for="address">Address*</label>
           <input type="text" class="form-control" name="address" required>
         </div>
-        <div class="form-group">
-          <label for="country">Country*</label>
-          <input type="text" class="form-control autocomp" class="country" id="country" name="country" required>
-          <input type="hidden" name="saveCountry">
-          <select class='autocomp'>
-            <option id="" value=""></option>
-            <% for(country of countries) { %>
-            <option id="<%= country.id %>" value="<%= country.name %>"><%= country.name %></option>
-            <% } %>
-          </select>
+        <div class='totals'>
+          <div class="form-group">
+            <label for="country">Country*</label>
+            <input type="text" class="form-control autocomp" class="country" id="country" name="country" required>
+            <input type="hidden" name="saveCountry">
+            <select class='autocomp'>
+              <option id="" value=""></option>
+              <% for(country of countries) { %>
+              <option id="<%= country.id %>" value="<%= country.name %>"><%= country.name %></option>
+              <% } %>
+            </select>
+          </div>
         </div>
-
         <div class='upload-section'>
           <div class="form-group">
             <label>User Avatar</label>
@@ -193,15 +194,16 @@
             </div>
           </div>
         </div>
-
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        <div class="g-recaptcha" data-sitekey="<%= captchaSiteKey %>"></div>
-        <input type="hidden" name="captchaResponse">
-        <button disabled id="register" type="submit" class="btn btn-primary btn-block">Sign Up</button>
-        <div class="form-group">
-          <label class="text-muted form-text">
-            By clicking the "Sign Up" button, you accept <a href="../termsConditions">the UNITE Terms And Conditions</a> and <a href="../antibriberyAgreement">the Antibribery Agreement</a>.
-          </label>
+        <div class='totals'>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <div class="g-recaptcha" data-sitekey="<%= captchaSiteKey %>"></div>
+          <input type="hidden" name="captchaResponse">
+          <button disabled id="register" type="submit" class="btn btn-primary btn-block">Sign Up</button>
+          <div class="form-group">
+            <label class="text-muted form-text conditions">
+              By clicking the "Sign Up" button, you accept <a href="../termsConditions">the UNITE Terms And Conditions</a> and <a href="../antibriberyAgreement">the Antibribery Agreement</a>.
+            </label>
+          </div>
         </div>
       </form>
     </div>
