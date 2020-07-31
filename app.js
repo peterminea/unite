@@ -1125,9 +1125,9 @@ if (1 == 2)
     }
 
     db = client.db(BASE); //Right connection!
-    let sup = await getUsers(db, 'bidrequests');    
+    let sup = await getUsers(db, 'suppliers');    
     
-    for(let i of sup) {
+    for(let i of sup) {/*
       let priceList = i.priceOriginalList;//i.currenciesList && i.currenciesList.length? i.currenciesList[0] : i.currency;
       //if(currency.length > 3) currency = currency.substring(0, 3);
       //if(currency.length < 3 && currency.charAt(0) == 'E') currency = 'EUR';
@@ -1140,8 +1140,23 @@ if (1 == 2)
         //console.log(parseFloat(parseFloat(priceList[jj]) * (i.amountList[jj]? parseFloat(i.amountList[jj]) : parseFloat(1.0))));
       }
       
-      buyerPrice = parseFloat(buyerPrice).toFixed(2);
-      db.collection('bidrequests').updateMany({}, { $set: { buyerPrice: parseFloat(buyerPrice) } }, function(err, obj) {});
+      buyerPrice = parseFloat(buyerPrice).toFixed(2);*/
+      
+      let bids = await getUsers(db, 'bidrequests', { supplier: i._id });
+      let balance2 = i.balance != null? parseFloat(i.balance) : 0;
+      for(let j of bids) {
+        balance2 += (j.supplierPrice != null? parseFloat(j.supplierPrice) : 0);
+      }
+      
+      //if(bids.length) console.log(bids.length);
+      //if(i.balance && i.balance > 0) 
+      balance2 = parseFloat(balance2).toFixed(2);
+      console.log(i.balance);
+      //console.log(parseFloat(balance2).toFixed(2));
+      
+      //db.collection('suppliers').updateOne({ _id: i._id }, { $set: { balance: balance2 } }, function(err, obj) {});
+      //db.collection('suppliers').updateMany({}, { $set: { balance: balance2 } }, function(err, obj) {});
+      //db.collection('supervisors').updateMany({}, { $set: { isActive: true, isVerified: true } }, function(err, obj) {});
      // let currenciesList = [];
      // for(let j = 0; j < i.currenciesList.length; j++)
      //   currenciesList.push(currency);      

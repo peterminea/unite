@@ -85,7 +85,6 @@ const supplierSchema = new Schema({
   },
   balance: {
     type: Number,
-    default: 0,
     validate(value) {
       if(value < 0) {
         throw new Error('Balance must be 0 or positive.');

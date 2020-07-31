@@ -82,11 +82,10 @@ const buyerSchema = new Schema({
     type: Number,
     validate(value) {
       if(value < 0) {
-        throw new Error('Balance must be 0 or positive');
+        throw new Error('Balance must be 0 or positive.');
       }
     },
-    required: true,
-    default: 0
+    required: true
   },
   currency: {
     type: String,

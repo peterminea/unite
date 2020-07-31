@@ -21,7 +21,7 @@ const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const search = require('../middleware/searchFlash');
 let Recaptcha = require('express-recaptcha').RecaptchaV3;
-const { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, prel, sortLists, getUsers, getBidStatusesJson, getCancelTypesJson, postSignInBody, updateBidBody } = require('../middleware/templates');
+const { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, prel, sortLists, getUsers, getBidStatusesJson, getCancelTypesJson, postSignInBody, updateBidBody, encryptionNotice } = require('../middleware/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
@@ -416,6 +416,7 @@ exports.getSignUp = (req, res) => {
             MAX_PROD: process.env.SUPP_MAX_PROD,
             DEFAULT_CURR: process.env.SUPP_DEFAULT_CURR,
             FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
+            encryptionNotice: encryptionNotice,
             countries: country,
             industries: industry,
             capabilities: cap,
@@ -480,8 +481,11 @@ exports.postSignUp = async (req, res) => {
                 });
             }).catch(console.error);
 
+            let supplier;
+            let hash = bcrypt.hashSync(req.body.password, 10);
+            console.log(req.body.currenciesList);
+            
             try {
-              await bcrypt.hash(req.body.password, 16, async function(err, hash) {
                   let productList = prel(req.body.productsServicesOffered);
                   let amountsList = prel(req.body.amountsList, false, true);
                   let pricesList = prel(req.body.pricesList, true, false);
@@ -607,11 +611,13 @@ exports.postSignUp = async (req, res) => {
 
                     if (Array.isArray(supplier.productsServicesOffered)) {
                       for (let i in supplier.productsServicesOffered) {
+                        console.log(supplier.currenciesList[i]);
+                        
                         let productService = new ProductService({
                           supplier: supplier._id,
                           productName: supplier.productsServicesOffered[i],
                           price: parseFloat(supplier.pricesList[i]).toFixed(2),
-                          currency: supplier.currenciesList[i],
+                          currency: supplier.currency,//supplier.currenciesList[i],
                           productImage: supplier.productImagesList[i].length? supplier.productImagesList[i] : '',
                           amount: parseInt(supplier.amountsList[i]),
                           totalPrice: parseFloat(supplier.pricesList[i] * supplier.amountsList[i]).toFixed(2),
@@ -632,7 +638,6 @@ exports.postSignUp = async (req, res) => {
                       }, 250);
                     }
               });
-            });
          } catch {              
          }
         }
@@ -769,7 +774,7 @@ exports.postResetPasswordToken = (req, res) => {
           if(treatError(req, res, err, 'back'))
             return false;
           let dbo = db.db(BASE);
-          let hash = bcrypt.hashSync(req.body.password, 16);
+          let hash = bcrypt.hashSync(req.body.password, 10);
           
           dbo.collection("suppliers").updateOne({ _id: user._id }, 
             { $set: {

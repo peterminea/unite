@@ -74,13 +74,13 @@ function productPriceFormatter(cellvalue, options, rowObject) {
 }
 
 function removalFormatter(cellvalue, options, rowObject) {
-  return rowObject.hiddenDeleteHref.length
+  return rowObject.hiddenDeleteHref && rowObject.hiddenDeleteHref.length
     ? `<a href="${rowObject.hiddenDeleteHref}"><span class="adminDelete">Remove User</span></a>`
     : "";
 }
 
 function banFormatter(cellvalue, options, rowObject) {
-  return rowObject.hiddenBanHref.length
+  return rowObject.hiddenBanHref && rowObject.hiddenBanHref.length
     ? `<a href="${rowObject.hiddenBanHref}"><span class="adminBan">Ban User</span></a>`
     : "";
 }
@@ -425,14 +425,14 @@ function validatePassword(password) {
     $("#msg").text("");
     return;
   }
-  // Create an array and push all possible values that you want in password
+  // Create an array and push all possible values that you want in password:
   let matchedCase = new Array();
   matchedCase.push("[$@$!%*#?&]"); // Special Character
   matchedCase.push("[A-Z]"); // Uppercase letters
   matchedCase.push("[0-9]"); // Numbers
   matchedCase.push("[a-z]"); // Lowercase letters
 
-  // Check the conditions
+  // Check the conditions:
   let ctr = 0;
   for (let i = 0; i < matchedCase.length; i++) {
     if (new RegExp(matchedCase[i]).test(password)) {
@@ -458,7 +458,7 @@ function validatePassword(password) {
       break;
     case 3:
       strength = "Good";
-      color = "yellow";
+      color = "blue";
       break;
     case 4:
       strength = "Strong";
@@ -469,12 +469,25 @@ function validatePassword(password) {
   $("#msg")
     .css({ color: color })
     .text(strength);
+  
+  $("#match").text(checkMatch()? "" : "Passwords do not match!");
 }
 
 
 function verifyMatch(password) {
   let mainPass = $("#password").val();
   $("#match").text(password !== mainPass ? "Passwords do not match!" : "");
+}
+
+
+function checkMatch() {
+  let password = $('input[name="password"]').val(),
+  passwordRepeat = $('input[name="passwordRepeat"]').val();
+  if (password !== passwordRepeat) {
+    return false;
+  }
+  
+  return true;
 }
 
 
@@ -1640,7 +1653,7 @@ function supplierValidateFields(fx) {
     return false;
   }
 
-  if (!validCountry($(".country"))) {
+  if(!validCountry($(".country"))) {
     return false;
   }
 
@@ -1667,7 +1680,7 @@ function supplierValidateFields(fx) {
     .each(function(index, el) {
       let product = $(this).find("span.product"),
         price = $(this).find("span.price"),
-        currency = $(this).find("span.currency"),
+        currency = $(this).find("span.currency").first(),
         quantity = $(this).find("span.amount"),
         productImageSpan = $(this).find("span.productImage");
       let src = productImageSpan.find("img").length
@@ -1720,9 +1733,8 @@ function registrationDialog(accountType) {
     width: 300,
     height: 450,
     open: function(event, ui) {
-      let password = $('input[name="password"]').val(),
-        passwordRepeat = $('input[name="passwordRepeat"]').val();
-      if (password !== passwordRepeat) {
+      
+      if(!checkMatch()) {
         $("#registration").addClass("error");
         $("#dialog").append("<p><b>Passwords do not match.</b></p>");
       } else {
@@ -2347,7 +2359,10 @@ $(document).ready(function() {
     let input = $(this)
       .parent("div")
       .find("input.form-control");
+    
     input.val($(this).val());
+    input.trigger('change');
+    
     $(this)
       .find("option.autocomp")
       .remove();
@@ -2547,6 +2562,10 @@ $(document).ready(function() {
           $('#supplierPriceUnit'+id).text(parseFloat(suppPrice).toFixed(2));
         }
       });
+    
+   // $('#password,#confirmPassword').on('change paste', function() {
+      
+    //});
     
     
       $('select.productsList').on('change', function() {
