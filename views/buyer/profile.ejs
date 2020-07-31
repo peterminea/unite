@@ -95,11 +95,14 @@
 
     <br><br>
     <div class="smooth-shadow profile-form">
-      <form id="updateForm" method="POST">
+      <form id="updateForm" method="POST">        
         <input type="hidden" name="_id" value="<%= profile._id %>">
-        <input type="hidden" name="role" value="<%= profile.role %>">
+        <input type="hidden" id="uploadSize" value="<%= FILE_UPLOAD_MAX_SIZE %>">       
         <input type="hidden" name="createdAt" id="createdAt" value="<%= profile.createdAt %>">
-
+        <div class="form-group">
+          <label>UNITE Role</label>
+          <input type="text" readonly class='form-control' name="role" value="<%= profile.role %>">
+        </div>
         <div class="form-group">
           <label class="text-muted form-text">
             Please fill in all the required (*) fields.
@@ -144,7 +147,7 @@
           <label>Address*</label>
           <input type="text" class="form-control" id="address" name="address" value="<%= profile.address %>" required>
         </div>
-        <div class='totals'
+        <div class='totals'>
           <div class="form-group">
             <label>Country*</label>
             <input type="text" class="form-control autocomp" id="country" class="country" name="country" value="<%= profile.country %>" required>
@@ -175,12 +178,12 @@
             <input class="form-control upload avatarupload" type="file" id="avatar" name="avatarImg">
             <input class="form-control single btn upload-button btn-success mt-2" type="button" disabled value="Upload File">
           </div>
-        </div>
-        <br>
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-        <div class="update-profile">          
-          <button type="submit" disabled id="updateProfile" value="Update Profile" class="btn btn-primary update-button btn-block btn-lg">Update Profile</button>
-        </div>
+          <br>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <div class="update-profile">          
+            <button type="submit" disabled id="updateProfile" value="Update Profile" class="btn btn-primary update-button btn-block btn-lg">Update Profile</button>
+          </div>
+        </div>        
       </form>
         <br><br>
       <div class='bottom-buttons'>

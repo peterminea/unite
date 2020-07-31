@@ -46,10 +46,7 @@
        $('select.currency')
           .find('option[value="' + defaultCurr + '"]')
           .prop('selected', true)
-          .trigger('change');    
-
-      $('select.currency')
-        .css('width', '100px');
+          .trigger('change');
 
       $('#prodServiceInput').on('change', function() {
         $('#addProdService').prop('disabled', $(this).val()? false : true);
@@ -234,7 +231,7 @@
         </div>
         <div class="form-group">
           <label class="col-form-label">Products / Services Offered*</label>
-          <br><a href="addproduct">Add new product</a>
+          <br><a href="addproduct" title='You can also add manually a product directly to the database'>Add new product</a><br>
           <div class="input-group">
             <input type="text" class="form-control prodInput" placeholder="Product*" title="Add Product/Service" id="prodServiceInput">
             <br>
@@ -290,7 +287,7 @@
           </div>        
           <div class="form-group">
             <label>Total Amount of Supply*</label>
-            <input type="number" disabled class="form-control supply2" id="totalSupplyAmount" value="0">
+            <input type="number" readonly class="form-control supply2" id="totalSupplyAmount" value="0">
             <input type="hidden" class="supply2" id="hiddenTotalAmount" name="totalSupplyAmount" value="0">
           </div>
           <div class="form-group">
@@ -367,7 +364,6 @@
               </a>
             </div>
           </div>
-
           <div class="form-group">
             <div class="form-check">
               <input class="form-check-input cb" name="antibriberyAgreement" id="antibrib" type="checkbox" required>          
@@ -378,15 +374,17 @@
               </a>
             </div>
           </div>
-        </div>
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        <div class="g-recaptcha" data-sitekey="<%= captchaSiteKey %>"></div>
-        <input type="hidden" name="captchaResponse">
-        <button disabled id="register" type="submit" class="btn btn-primary btn-block">Sign Up</button>
-        <div class="form-group">
-          <label class="text-muted form-text">
-            By clicking the "Sign Up" button, you accept <a href="../termsConditions">the UNITE Terms And Conditions</a> and <a href="../antibriberyAgreement">the Antibribery Agreement</a>.
-          </label>
+        </div>        
+        <div class='totals'>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <div class="g-recaptcha" data-sitekey="<%= captchaSiteKey %>"></div>
+          <input type="hidden" name="captchaResponse">
+          <button disabled id="register" type="submit" class="btn btn-primary btn-block">Sign Up</button>
+          <div class="form-group">
+            <label class="text-muted form-text conditions">
+              By clicking the "Sign Up" button, you accept <a href="../termsConditions">the UNITE Terms And Conditions</a> and <a href="../antibriberyAgreement">the Antibribery Agreement</a>.
+            </label>
+          </div>
         </div>
       </form>
     </div>
