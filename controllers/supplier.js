@@ -7,7 +7,7 @@ const ProductService = require("../models/productService");
 const Capability = require("../models/capability");
 const Industry = require("../models/industry");
 const Message = require("../models/message");
-const Token = require("../models/userToken");
+const UserToken = require("../models/userToken");
 const assert = require("assert");
 const process = require("process");
 const { basicFormat, customFormat, normalFormat } = require("../middleware/dateConversions");
@@ -20,8 +20,31 @@ const ObjectId = require("mongodb").ObjectId;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const search = require('../middleware/searchFlash');
-let Recaptcha = require('express-recaptcha').RecaptchaV3;
-const { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, prel, sortLists, getUsers, getBidStatusesJson, getCancelTypesJson, postSignInBody, updateBidBody, encryptionNotice } = require('../middleware/templates');
+let Recaptcha = require('express-recaptcha').RecaptchaV2;
+
+const {
+  fileExists,
+  sendConfirmationEmail,
+  sendCancellationEmail,
+  sendExpiredBidEmails,
+  sendInactivationEmail,
+  resendTokenEmail,
+  sendForgotPasswordEmail,
+  sendResetPasswordEmail,
+  sendCancelBidEmail,
+  prel,
+  sortLists,
+  getObjectMongo,
+  getObjectMongoose,
+  getDataMongo,
+  getDataMongoose,
+  getBidStatusesJson,
+  getCancelTypesJson,
+  postSignInBody,
+  saveBidBody,
+  updateBidBody,
+  encryptionNotice
+} = require("../middleware/templates");
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
@@ -35,29 +58,26 @@ const { verifyBanNewUser, verifyBanExistingUser } = require('../middleware/verif
 const fs = require('fs');
 
 
-exports.getIndex = (req, res) => {
+exports.getIndex = async (req, res) => {
   if (!req || !req.session) 
     return false;
+  
   const supplier = req.session.supplier;
   let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
+  let requests = await getDataMongoose('BidRequest', { supplier: supplier._id }); 
+  const requestsCount = requests.length;
 
-  BidRequest.find({ supplier: supplier._id })
-    .then((requests) => {
-      const requestsCount = requests.length;
-    
-      if(supplier.avatar && supplier.avatar.length && !fileExists('public/' + supplier.avatar.substring(3))) {
-        supplier.avatar = '';
-      }
+  if(supplier.avatar && supplier.avatar.length && !fileExists('public/' + supplier.avatar.substring(3))) {
+    supplier.avatar = '';
+  }
 
-      res.render("supplier/index", {
-        supplier: supplier,
-        requestsCount: requestsCount,
-        successMessage: success,
-        errorMessage: error
-      });
-    })
-    .catch(console.error);
+  res.render("supplier/index", {
+    supplier: supplier,
+    requestsCount: requestsCount,
+    successMessage: success,
+    errorMessage: error
+  });
 }
 
 
@@ -184,6 +204,7 @@ exports.getConfirmation = (req, res) => {
   });
 }
 
+
 exports.getDelete = (req, res) => {
   let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
@@ -195,6 +216,7 @@ exports.getDelete = (req, res) => {
     errorMessage: error
   });
 }
+
 
 exports.getDeactivate = (req, res) => {
   let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
@@ -282,75 +304,75 @@ exports.postConfirmation = async function(req, res, next) {
   //req.sanitize("emailAddress").normalizeEmail({ remove_dots: false });
   //let errors = req.validationErrors();
   //if (errors) return res.status(400).send(errors);  
-
-  await Token.findOne({ token: req.params.token, userType: TYPE }, async function(err, token) {
-    if (!token) {
-      req.flash(
-        'error', "We were unable to find a valid token. It may have expired. Please request a new confirmation token."
-      );
   
-      return res.redirect("/supplier/resend");
-    }
+  let token = await getObjectMongoose('UserToken', { token: req.params.token, userType: TYPE });  
+
+  if(!token) {
+    req.flash(
+      'error', "We were unable to find a valid token. It may have expired. Please request a new confirmation token."
+    );
+
+    return res.redirect("/supplier/resend");
+    }  
   
-    await Supplier.findOne({ _id: token._userId, emailAddress: req.body.emailAddress }, async function (err, user) {
-      if (!user) 
-        return res.status(400).send({
-        msg: 'We were unable to find a user for this token.' 
-      });
+  const user = await getObjectMongoose('Supplier', { _id: token._userId, emailAddress: req.body.emailAddress });
+  
+  if(!user) 
+    return res.status(400).send({
+    msg: 'We were unable to find a user for this token.' 
+  });
 
-      if (user.isVerified) 
-        return res.status(400).send({ 
-        type: 'already-verified', 
-        msg: 'This user has already been verified.' });
-      
+  if(user.isVerified) 
+    return res.status(400).send({ 
+    type: 'already-verified', 
+    msg: 'This user has already been verified.' });
 
-      await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
-        if(treatError(req, res, err, 'back'))
-          return false;
-        let dbo = db.db(BASE);
-            
-        await dbo.collection("suppliers").updateOne({ _id: user._id }, { $set: { isVerified: true, isActive: true } }, function(err, resp) {
-              if(err) {
-                res.status(500).send(err.message);
-              }
-        });
+  await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
+    if(treatError(req, res, err, 'back'))
+      return false;
+    let dbo = db.db(BASE);
 
-        console.log("The account has been verified. Please log in.");
-        req.flash('success', "The account has been verified. Please log in.");
-        db.close();
-        res.status(200).send("The account has been verified. Please log in.");
-      });
-    });         
+    await dbo.collection("suppliers").updateOne({ _id: user._id }, { $set: { isVerified: true, isActive: true } }, function(err, resp) {
+          if(err) {
+            res.status(500).send(err.message);
+          }
+    });
+
+    console.log("The account has been verified. Please log in.");
+    req.flash('success', "The account has been verified. Please log in.");        
+    db.close();
+    res.redirect('/supervisor/sign-in');
+    //res.status(200).send("The account has been verified. Please log in.");          
   });
 }
 
 
-exports.postResendToken = function(req, res, next) {
-  Supplier.findOne({ emailAddress: req.body.emailAddress }, function(err, user) {
-    if (!user)
-      return res
-        .status(400)
-        .send({ msg: "We were unable to find a user with that email." });
-    if (user.isVerified)
-      return res.status(400).send({
-        msg: "This account has already been verified. Please log in."
-      });
-
-    let token = new Token({
-      _userId: user._id,
-      userType: TYPE,
-      token: crypto.randomBytes(16).toString("hex")
+exports.postResendToken = async function(req, res, next) {
+  const user = await getObjectMongoose('Supplier', { emailAddress: req.body.emailAddress });
+  
+  if (!user)
+    return res
+      .status(400)
+      .send({ msg: "We were unable to find a user with that email." });
+  if (user.isVerified)
+    return res.status(400).send({
+      msg: "This account has already been verified. Please log in."
     });
 
-    // Save the token
-    token.save(async function(err) {
-      if (err) {
-        return res.status(500).send({ msg: err.message });
-      }
+  let token = new UserToken({
+    _userId: user._id,
+    userType: TYPE,
+    token: crypto.randomBytes(16).toString("hex")
+  });
 
-      await resendTokenEmail(user, token.token, '/supplier/confirmation/', req);
-      return res.status(200).send('A verification email has been sent to ' + user.emailAddress + '.');
-    });
+  // Save the token
+  token.save(async function(err) {
+    if (err) {
+      return res.status(500).send({ msg: err.message });
+    }
+
+    await resendTokenEmail(user, token.token, '/supplier/confirmation/', req);
+    return res.status(200).send('A verification email has been sent to ' + user.emailAddress + '.');
   });
 }
 
@@ -375,58 +397,38 @@ exports.postSignIn = async (req, res) => {
 }
 
 
-exports.getSignUp = (req, res) => {
-  let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
-  req.session.flash = [];
-  
-  if (!req.session.supplierId) {
-    Country.find({}).then((countries) => {
-      Industry.find({}).then((industries) => {
-        Capability.find({}).then((caps) => {
-        
-          let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
-          req.session.flash = [];
+exports.getSignUp = async (req, res) => {
+  if(!req.session.supplierId) {
+    let countries = await getDataMongoose('Country');
+    let industries = await getDataMongoose('Industry');
+    let capabilities = await getDataMongoose('Capability');
+   
+    let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+    req.session.flash = [];
 
-          let country = [], industry = [], product = [], cap = [];
-          
-          for(let i in countries) {
-            country.push({id: i, name: countries[i].name});
-          }
+    countries.sort(function (a, b) {
+      return a.name.localeCompare(b.name);
+    });
 
-          for(let i in industries) {
-            industry.push({id: i, name: industries[i].name});
-          }        
-          
-          for(let i in caps) {
-            cap.push({id: i, name: caps[i].capabilityDescription});
-          }
-          
-          countries.sort(function (a, b) {
-            return a.name.localeCompare(b.name);
-          });
-          
-          industries.sort(function (a, b) {
-            return a.name.localeCompare(b.name);
-          });
-          
-          cap.sort(function (a, b) {
-            return a.name.localeCompare(b.name);
-          });
-    
-          return res.render("supplier/sign-up", {
-            MAX_PROD: process.env.SUPP_MAX_PROD,
-            DEFAULT_CURR: process.env.SUPP_DEFAULT_CURR,
-            FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
-            encryptionNotice: encryptionNotice,
-            countries: country,
-            industries: industry,
-            capabilities: cap,
-            captchaSiteKey: captchaSiteKey,
-            successMessage: success,
-            errorMessage: error
-          });
-        });    
-      });
+    industries.sort(function (a, b) {
+      return a.name.localeCompare(b.name);
+    });
+
+    capabilities.sort(function (a, b) {
+      return a.name.localeCompare(b.name);
+    });
+
+    return res.render("supplier/sign-up", {
+      MAX_PROD: process.env.SUPP_MAX_PROD,
+      DEFAULT_CURR: process.env.SUPP_DEFAULT_CURR,
+      FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
+      encryptionNotice: encryptionNotice,
+      countries: countries,
+      industries: industries,
+      capabilities: capabilities,
+      captchaSiteKey: captchaSiteKey,
+      successMessage: success,
+      errorMessage: error
     });
   }
   else 
@@ -462,24 +464,20 @@ exports.postSignUp = async (req, res) => {
             let supplier;
             
             //Prevent duplicate attempts:
-          } else if (global++ < 1) {
-            await Supplier.findOne({ emailAddress: req.body.emailAddress }, async function(err,  user) {
-              if(treatError(req, res, err, '/supplier/sign-up'))
-                return false;
+          } else if (global++ < 1) {            
+            const user = await getObjectMongoose('Supplier', { emailAddress: req.body.emailAddress });           
+            const ipv4 = await internalIp.v4();
 
-              const ipv4 = await internalIp.v4();
-              
-              if(verifyBanNewUser(req, res, req.body.emailAddress, ipv4)) {
-                return res.status(400).send({
-                  msg: 'You are trying to join UNITE from the part of an already banned user. Please refrain from doing so.'
-                });
-              }
-              
-              if (user)
-                return res.status(400).send({
-                  msg:
-                    "The e-mail address you have entered is already associated with another account."
-                });
+            if(verifyBanNewUser(req, res, req.body.emailAddress, ipv4)) {
+              return res.status(400).send({
+                msg: 'You are trying to join UNITE from the part of an already banned user. Please refrain from doing so.'
+              });
+            }
+
+            if (user)
+              return res.status(400).send({
+                msg:
+                  "The e-mail address you have entered is already associated with another account."               
             }).catch(console.error);
 
             let supplier;
@@ -487,126 +485,126 @@ exports.postSignUp = async (req, res) => {
             console.log(req.body.currenciesList);
             
             try {
-                  let productList = prel(req.body.productsServicesOffered);
-                  let amountsList = prel(req.body.amountsList, false, true);
-                  let pricesList = prel(req.body.pricesList, true, false);
-                  let imagesList = prel(req.body.productImagesList);
-                  let currenciesList = prel(req.body.currenciesList);
-                  sortLists(productList, amountsList, pricesList, imagesList, currenciesList);
-                
-                  supplier = new Supplier({
-                    role: process.env.USER_REGULAR,
-                    avatar: req.body.avatar,
-                    companyName: req.body.companyName,
-                    directorsName: req.body.directorsName,
-                    contactName: req.body.contactName,
-                    title: req.body.title,
-                    companyRegistrationNo: req.body.companyRegistrationNo,
-                    emailAddress: req.body.emailAddress,
-                    password: hash,
-                    isVerified: false,
-                    isActive: false,
-                    ipv4: ipv4,
-                    registeredCountry: req.body.registeredCountry,
-                    companyAddress: req.body.companyAddress,
-                    areaCovered: req.body.areaCovered,
-                    contactMobileNumber: req.body.contactMobileNumber,
-                    country: req.body.country,
-                    industry: req.body.industry,
-                    employeeNumbers: req.body.employeeNumbers,
-                    lastYearTurnover: req.body.lastYearTurnover,
-                    website: req.body.website,
-                    productsServicesOffered: productList,
-                    pricesList: pricesList,
-                    currenciesList: currenciesList,
-                    productImagesList: imagesList,
-                    amountsList: amountsList,
-                    totalSupplyPrice: req.body.totalSupplyPrice,
-                    totalSupplyAmount: req.body.totalSupplyAmount,
-                    capabilityDescription: req.body.capabilityDescription,
-                    relevantExperience: req.body.relevantExperience,
-                    supportingInformation: req.body.supportingInformation,
-                    certificates: req.body.certificatesIds,
-                    antibriberyPolicy: req.body.antibriberyPolicyId,
-                    environmentPolicy: req.body.environmentPolicyId,
-                    qualityManagementPolicy: req.body.qualityManagementPolicyId,
-                    occupationalSafetyAndHealthPolicy: req.body.occupationalSafetyAndHealthPolicyId,
-                    otherRelevantFiles: req.body.otherRelevantFilesIds,
-                    certificatesIds: req.body.certificatesIds,
-                    antibriberyPolicyId: req.body.antibriberyPolicyId,
-                    environmentPolicyId: req.body.environmentPolicyId,
-                    qualityManagementPolicyId: req.body.qualityManagementPolicyId,
-                    occupationalSafetyAndHealthPolicyId: req.body.occupationalSafetyAndHealthPolicyId,
-                    otherRelevantFilesIds: req.body.otherRelevantFilesIds,
-                    balance: req.body.balance,
-                    currency: req.body.currency,
-                    facebookURL: req.body.facebookURL,
-                    instagramURL: req.body.instagramURL,
-                    twitterURL: req.body.twitterURL,
-                    linkedinURL: req.body.linkedinURL,
-                    otherSocialMediaURL: req.body.otherSocialMediaURL,
-                    UNITETermsAndConditions: true,//We assume that user was constrainted to check them.
-                    antibriberyAgreement: true,
+              let productList = prel(req.body.productsServicesOffered);
+              let amountsList = prel(req.body.amountsList, false, true);
+              let pricesList = prel(req.body.pricesList, true, false);
+              let imagesList = prel(req.body.productImagesList);
+              let currenciesList = prel(req.body.currenciesList);
+              sortLists(productList, amountsList, pricesList, imagesList, currenciesList);
+
+              supplier = new Supplier({
+                role: process.env.USER_REGULAR,
+                avatar: req.body.avatar,
+                companyName: req.body.companyName,
+                directorsName: req.body.directorsName,
+                contactName: req.body.contactName,
+                title: req.body.title,
+                companyRegistrationNo: req.body.companyRegistrationNo,
+                emailAddress: req.body.emailAddress,
+                password: hash,
+                isVerified: false,
+                isActive: false,
+                ipv4: ipv4,
+                registeredCountry: req.body.registeredCountry,
+                companyAddress: req.body.companyAddress,
+                areaCovered: req.body.areaCovered,
+                contactMobileNumber: req.body.contactMobileNumber,
+                country: req.body.country,
+                industry: req.body.industry,
+                employeeNumbers: req.body.employeeNumbers,
+                lastYearTurnover: req.body.lastYearTurnover,
+                website: req.body.website,
+                productsServicesOffered: productList,
+                pricesList: pricesList,
+                currenciesList: currenciesList,
+                productImagesList: imagesList,
+                amountsList: amountsList,
+                totalSupplyPrice: req.body.totalSupplyPrice,
+                totalSupplyAmount: req.body.totalSupplyAmount,
+                capabilityDescription: req.body.capabilityDescription,
+                relevantExperience: req.body.relevantExperience,
+                supportingInformation: req.body.supportingInformation,
+                certificates: req.body.certificatesIds,
+                antibriberyPolicy: req.body.antibriberyPolicyId,
+                environmentPolicy: req.body.environmentPolicyId,
+                qualityManagementPolicy: req.body.qualityManagementPolicyId,
+                occupationalSafetyAndHealthPolicy: req.body.occupationalSafetyAndHealthPolicyId,
+                otherRelevantFiles: req.body.otherRelevantFilesIds,
+                certificatesIds: req.body.certificatesIds,
+                antibriberyPolicyId: req.body.antibriberyPolicyId,
+                environmentPolicyId: req.body.environmentPolicyId,
+                qualityManagementPolicyId: req.body.qualityManagementPolicyId,
+                occupationalSafetyAndHealthPolicyId: req.body.occupationalSafetyAndHealthPolicyId,
+                otherRelevantFilesIds: req.body.otherRelevantFilesIds,
+                balance: req.body.balance,
+                currency: req.body.currency,
+                facebookURL: req.body.facebookURL,
+                instagramURL: req.body.instagramURL,
+                twitterURL: req.body.twitterURL,
+                linkedinURL: req.body.linkedinURL,
+                otherSocialMediaURL: req.body.otherSocialMediaURL,
+                UNITETermsAndConditions: true,//We assume that user was constrainted to check them.
+                antibriberyAgreement: true,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+                createdAtFormatted: normalFormat(Date.now()),
+                updatedAtFormatted: normalFormat(Date.now())
+              });
+
+              await supplier.save(async (err) => {
+                if (err) {
+                  req.flash('error', err.message);
+                  console.error(err);
+                   return res.status(500).send({
+                       msg: err.message
+                       });
+                }                  
+
+                req.session.supplier = supplier;
+                req.session.supplierId = supplier._id;
+                await req.session.save();
+
+                //if(req.body.saveCapability.length) {
+                  let capability = new Capability({
+                    supplier: supplier._id,
+                    capabilityDescription: supplier.capabilityDescription,
                     createdAt: Date.now(),
-                    updatedAt: Date.now(),
-                    createdAtFormatted: normalFormat(Date.now()),
-                    updatedAtFormatted: normalFormat(Date.now())
+                    updatedAt: Date.now()
                   });
 
-                  await supplier.save(async (err) => {
-                    if (err) {
-                      req.flash('error', err.message);
-                      console.error(err);
-                       return res.status(500).send({
-                           msg: err.message
-                           });
-                    }                  
+                  await capability.save(function(err) {
+                    if(treatError(req, res, err, '/supplier/sign-up'))
+                      return false;
+                    console.log('Capability saved!');
+                  });
+                //}
 
-                    req.session.supplier = supplier;
-                    req.session.supplierId = supplier._id;
-                    await req.session.save();
-                    
-                    //if(req.body.saveCapability.length) {
-                      let capability = new Capability({
-                        supplier: supplier._id,
-                        capabilityDescription: supplier.capabilityDescription,
-                        createdAt: Date.now(),
-                        updatedAt: Date.now()
-                      });
+                let token = new UserToken({
+                  _userId: supplier._id,
+                  userType: TYPE,
+                  token: crypto.randomBytes(16).toString("hex")
+                });
 
-                      await capability.save(function(err) {
-                        if(treatError(req, res, err, '/supplier/sign-up'))
-                          return false;
-                        console.log('Capability saved!');
-                      });
-                    //}
-
-                    let token = new Token({
-                      _userId: supplier._id,
-                      userType: TYPE,
-                      token: crypto.randomBytes(16).toString("hex")
-                    });
-
-                    await token.save(async function(err) {
-                      if (err) {
-                        req.flash('error', err.message);
-                        console.error(err.message);
-                        return res.status(500).send({
-                          msg: err.message
-                         });
-                          }
-                    });
-                    
-                      if(req.body.saveIndustry.length) {
-                        let industry = new Industry({
-                          name: req.body.industry
-                        });
-
-                        industry.save((err) => {
-                          if(treatError(req, res, err, '/supplier/sign-up'))
-                            return false;//If that industry already exists.
-                        });
+                await token.save(async function(err) {
+                  if (err) {
+                    req.flash('error', err.message);
+                    console.error(err.message);
+                    return res.status(500).send({
+                      msg: err.message
+                     });
                       }
+                    });
+                    
+                    if(req.body.saveIndustry.length) {
+                      let industry = new Industry({
+                        name: req.body.industry
+                      });
+
+                      industry.save((err) => {
+                        if(treatError(req, res, err, '/supplier/sign-up'))
+                          return false;//If that industry already exists.
+                      });
+                    }
 
                     await sendConfirmationEmail(supplier.companyName, "/supplier/confirmation/", token.token, req);
 
@@ -708,25 +706,24 @@ exports.postForgotPassword = (req, res, next) => {
           done(err, token);
         });
       },
-      function(token, done) {
-        Supplier.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
-          if (!user) {
-            req.flash('error', 'Sorry. We were unable to find a user with this e-mail address.');
-            return res.redirect('supplier/forgotPassword');
-          }
+      async function(token, done) {
+        const user = await getObjectMongoose('Supplier', { emailAddress: req.body.emailAddress });       
+        if (!user) {
+          req.flash('error', 'Sorry. We were unable to find a user with this e-mail address.');
+          return res.redirect('supplier/forgotPassword');
+        }
 
-          MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
+        MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
+          if(treatError(req, res, err, 'back'))
+            return false;
+
+          let dbo = db.db(BASE);
+          dbo.collection("suppliers").updateOne({ _id: user._id }, { $set: {resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000} }, function(err, resp) {        
             if(treatError(req, res, err, 'back'))
               return false;
-            
-            let dbo = db.db(BASE);
-            dbo.collection("suppliers").updateOne({ _id: user._id }, { $set: {resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000} }, function(err, resp) {        
-              if(treatError(req, res, err, 'back'))
-                return false;
-              db.close();
-            });
+            db.close();
           });
-        });
+        });      
       },
       function(token, user, done) {
         sendForgotPasswordEmail(user, 'Supplier', "/supplier/reset/", token, req);
@@ -739,32 +736,34 @@ exports.postForgotPassword = (req, res, next) => {
     });
 };
 
-exports.getResetPasswordToken = (req, res) => {
+
+exports.getResetPasswordToken = async (req, res) => {
   let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   
-  Supplier.findOne({
+  const user = await getObjectMongoose('Supplier', {
       resetPasswordToken: req.params.token,
       resetPasswordExpires: { $gt: Date.now() }
-    }, function(err, user) {
-      if (!user) {
-        req.flash("error", "Password reset token is either invalid or expired.");
-        return res.redirect("supplier/forgotPassword");
-      }
-      res.render("supplier/resetPassword", { 
-        token: req.params.token,
-        successMessage: success,
-        errorMessage: error
-      });
+    });
+  
+    if (!user) {
+      req.flash("error", "Password reset token is either invalid or expired.");
+      return res.redirect("supplier/forgotPassword");
+    }
+    res.render("supplier/resetPassword", { 
+      token: req.params.token,
+      successMessage: success,
+      errorMessage: error
     });
 };
 
+
 exports.postResetPasswordToken = (req, res) => {
   async.waterfall([
-    function(done) {
-      Supplier.findOne({resetPasswordToken: req.params.token, 
+    async function(done) {
+      const user = await getObjectMongoose('Supplier', {resetPasswordToken: req.params.token, 
                      resetPasswordExpires: { $gt: Date.now() }
-                    }, function(err, user) {
+                    });
       if(!user) {
         req.flash('error', 'Password reset token is either invalid or expired.');
         return res.redirect('back');
@@ -793,7 +792,6 @@ exports.postResetPasswordToken = (req, res) => {
         req.flash('error', 'Passwords do not match.');
         return res.redirect('back');
       }
-    });
     },
       function(user, done) {
         sendResetPasswordEmail(user, 'Supplier', req);
@@ -815,110 +813,80 @@ function generateData(countries, industries) {
 }
 
 
-exports.getProfile = (req, res) => {
+exports.getProfile = async (req, res) => {
   if (!req || !req.session) 
     return false;  
   console.log(req.connection.remoteAddress);  
+  
+  let products = await getDataMongoose('ProductService', { supplier: supplier._id });
+  let countries = await getDataMongoose('Country');
+  let industries = await getDataMongoose('Industry');
+  let capabilities = await getDataMongoose('Capability', { supplier: supplier._id });
+  
   const supplier = req.session.supplier;
-  ProductService.find({ supplier: supplier._id })
-    .then((products) => {
-      products.sort(function(a, b) {
-        return a.productName.localeCompare(b.productName);
-      });
-    
-      req.session.supplier.productsServicesOffered = [];
-    
-      for(let i in products) {
-        req.session.supplier.productsServicesOffered.push(products[i].productName);
-      }
-    
-    Country.find({}).then((countries) => {
-      Industry.find({}).then((industries) => {
-        Capability.find({}).then((caps) => {
-          let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
-          req.session.flash = [];
+ 
+  products.sort(function(a, b) {
+    return a.productName.localeCompare(b.productName);
+  });
 
-          let country = [], industry = [], cap = [], product = [];
-          
-          for(let i in countries) {
-            country.push({id: i, name: countries[i].name});
-          }
+  req.session.supplier.productsServicesOffered = [];
 
-          for(let i in industries) {
-            industry.push({id: i, name: industries[i].name});
-          }
-          
-          for(let i in caps) {
-            cap.push({id: i, name: caps[i].capabilityDescription});
-          }
-          
-          countries.sort(function (a, b) {
-            return a.name.localeCompare(b.name);
-          });
-          
-          industries.sort(function (a, b) {
-            return a.name.localeCompare(b.name);
-          });
-          
-          cap.sort(function (a, b) {
-            return a.name.localeCompare(b.name);
-          });
+  for(let i in products) {
+    req.session.supplier.productsServicesOffered.push(products[i].productName);
+  }
 
-          for(let i in products) {
-            product.push({
-              id: i,
-              price: products[i].price,
-              amount: products[i].amount,
-              productName: products[i].productName,
-              currency: products[i].currency,
-              totalPrice: products[i].totalPrice,
-              productImage: fileExists(products[i].productImage) == true? products[i].productImage : ''
-            });
-          }
+  let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
 
-          res.render("supplier/profile", {
-            products: product,
-            countries: country,
-            industries: industry,
-            capabilities: cap,
-            MAX_PROD: process.env.SUPP_MAX_PROD,
-            DEFAULT_CURR: process.env.SUPP_DEFAULT_CURR,
-            FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
-            successMessage: success,
-            errorMessage: error,
-            profile: req.session.supplier
-          });
-        });
-      });
-    });
-    })
-    .catch(console.error);
+  countries.sort(function (a, b) {
+    return a.name.localeCompare(b.name);
+  });
+
+  industries.sort(function (a, b) {
+    return a.name.localeCompare(b.name);
+  });
+
+  capabilities.sort(function (a, b) {
+    return a.name.localeCompare(b.name);
+  });
+
+  res.render("supplier/profile", {
+    products: products,
+    countries: countries,
+    industries: industries,
+    capabilities: capabilities,
+    MAX_PROD: process.env.SUPP_MAX_PROD,
+    DEFAULT_CURR: process.env.SUPP_DEFAULT_CURR,
+    FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
+    successMessage: success,
+    errorMessage: error,
+    profile: req.session.supplier         
+})
+.catch(console.error);
 }
 
 
-exports.getBidRequests = (req, res) => {
+exports.getBidRequests = async (req, res) => {
   const supplier = req.session.supplier;
   try {
     initConversions(fx);
   } catch {
   }
   
-  BidRequest.find({ supplier: supplier._id })
-    .then(async (requests) => {
-    
-      let validBids = [], cancelledBids = [], expiredBids = [];
-      if(requests && requests.length) {
-        for(let i in requests) {
-          let date = Date.now();
-          let bidDate = requests[i].expiryDate;
-          bidDate > date? 
-            (requests[i].isCancelled == true? cancelledBids.push(requests[i]) : validBids.push(requests[i]))
-          : expiredBids.push(requests[i]);
-        }
+  let requests = await getDataMongoose('BidRequest', { supplier: supplier._id });
+  
+  let validBids = [], cancelledBids = [], expiredBids = [];
+  if(requests && requests.length) {
+    for(let i in requests) {
+      let date = Date.now();
+      let bidDate = requests[i].expiryDate;
+      bidDate > date? 
+        (requests[i].isCancelled == true? cancelledBids.push(requests[i]) : validBids.push(requests[i]))
+      : expiredBids.push(requests[i]);
       }
-    
-    await sendExpiredBidEmails(req, res, expiredBids);
-    
+    }
+
+    await sendExpiredBidEmails(req, res, expiredBids);    
     let totalPrice = 0, validPrice = 0, cancelledPrice = 0, expiredPrice = 0;
     
     for(let i in validBids) {
@@ -956,8 +924,6 @@ exports.getBidRequests = (req, res) => {
       cancelledRequests: cancelledBids,
       expiredRequests: expiredBids
     });
-  })
-  .catch(console.error);
 };
 
 
@@ -970,50 +936,41 @@ exports.getBalance = (req, res) => {
 }
 
 
-exports.getBidRequest = (req, res) => {
-  const supplier = req.session.supplier;
-  let request;
+exports.getBidRequest = async (req, res) => {
+  const supplier = req.session.supplier;  
   const id = req.params.id;
   let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
-  req.session.flash = [];
+  req.session.flash = [];  
+  let request = await getObjectMongoose('BidRequest', { _id: id });
+  let buyer = await getObjectMongoose('Buyer', { _id: request.buyer });
 
-  BidRequest.findOne({ _id: id })
-    .then((reqresult) => {
-      request = reqresult;
-    
-    for(let j in request.productImagesList) {
-        if(!fileExists(request.productImagesList[j])) {
-          console.log('MALFUNCTION');
-          request.productImagesList[j] = '';
-        }
-      }
-    
-      return Buyer.findOne({ _id: request.buyer });
-    })
-    .then((buyer) => {
-    if(request.expirationDate <= Date.now() + process.env.DAYS_BEFORE_BID_EXPIRES * process.env.DAY_DURATION) {
-      request.warningExpiration = true;
-      if(request.isExtended == true) {
-        request.cannotExtendMore = true;
-      }
+  for(let j in request.productImagesList) {
+    if(!fileExists(request.productImagesList[j])) {
+      request.productImagesList[j] = '';
     }
-    
-    let promise = BidStatus.find({}).exec();
-    promise.then((statuses) => {
-      res.render("supplier/bid-request", {
-        supplier: supplier,
-        request: request,
-        buyer: buyer,
-        path: '../',
-        bidExtensionDays: process.env.DAYS_BID_EXTENDED,
-        successMessage: success,
-        errorMessage: error,
-        statuses: statuses,
-        statusesJson: JSON.stringify(getBidStatusesJson())
-        });
+  }
+
+  if(request.expirationDate <= Date.now() + process.env.DAYS_BEFORE_BID_EXPIRES * process.env.DAY_DURATION) {
+    request.warningExpiration = true;
+    if(request.isExtended == true) {
+      request.cannotExtendMore = true;
+    }
+  }
+
+  let promise = BidStatus.find({}).exec();
+  promise.then((statuses) => {
+    res.render("supplier/bid-request", {
+      supplier: supplier,
+      request: request,
+      buyer: buyer,
+      path: '../',
+      bidExtensionDays: process.env.DAYS_BID_EXTENDED,
+      successMessage: success,
+      errorMessage: error,
+      statuses: statuses,
+      statusesJson: JSON.stringify(getBidStatusesJson())
       });
-    })
-    .catch(console.error);
+    });
 }
 
 
@@ -1027,10 +984,7 @@ exports.postProfile = async (req, res) => {
   const ipv4 = await internalIp.v4();
   
   try {
-  await Supplier.findOne({ _id: req.body._id }, async (err, doc) => {
-    if(treatError(req, res, err, '/supplier/profile'))
-      return false;
-
+    let doc = await getObjectMongoose('Supplier', { _id: req.body._id });
     let productList = prel(req.body.productsServicesOffered);
     let amountsList = prel(req.body.amountsList, false, true);
     let pricesList = prel(req.body.pricesList, true, false);
@@ -1192,8 +1146,7 @@ exports.postProfile = async (req, res) => {
           return res.redirect("/supplier/profile");
           }, 400);
         });
-      });
-    })
+      });   
     //.catch(console.error);
   } catch {
     //return res.redirect("/supplier/profile");

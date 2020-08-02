@@ -54,6 +54,8 @@ const cookieParser = require("cookie-parser");
 const app = express();
 const server = http.createServer(app);
 const socket = socketio(server);
+const bcrypt = require('bcryptjs');
+const { getObjectMongo, getObjectMongoose, getDataMongo, getDataMongoose } = require('./middleware/templates');
 mongoose.Promise = global.Promise;
 mongoose.set("useCreateIndex", true);
 
@@ -595,7 +597,7 @@ app.post("/purchase", (req, res, next) => {
       //card: '4242424242424242'//
       source: req.body.stripeTokenId
     })
-    .then(customer =>
+    .then((customer) =>
       stripe.charges.create({
         amount: req.body.amount,
         receipt_email: req.body.emailAddress,
@@ -605,7 +607,7 @@ app.post("/purchase", (req, res, next) => {
         currency: req.body.currency.toLowerCase()
       })
     )
-    .then(async charge => {
+    .then(async (charge) => {
       console.log("Payment successful!\n" + charge);
       const response = {
         headers,
@@ -694,7 +696,6 @@ app.post("/deleteBid", function(req, res, next) {
     if (err) {
       console.error(err.message);
       res.json(err);
-      //res.redirect('back');
     }
 
     let dbo = db.db(BASE), myquery = { _id: req.body.bidId };
@@ -739,31 +740,27 @@ app.post("/exists", function(req, res) {
 });
 
 
-app.get("/bidStatuses", function(req, res, next) {
-  let statusFilter = BidStatus.find({});
+app.get("/bidStatuses", async function(req, res, next) {
+  let data = await getDataMongoose('BidStatus');
+ 
+  if(data && data.length && data.length > 0) {
+    let result;
 
-  statusFilter.exec(function(err, data) {
-    let result = [];
+    data.forEach((item) => {
+      let obj = {
+        id: item._id,
+        value: item.value,
+        name: item.value + " - " + item.name
+      };
 
-    if(!err) {
-      if (data && data.length && data.length > 0) {
-        data.forEach(item => {
-          let obj = {
-            id: item._id,
-            value: item.value,
-            name: item.value + " - " + item.name
-          };
+      result.push(obj);
+    });
 
-          result.push(obj);
-        });
-      }
-
-      res.jsonp(result);
-    } else {
-      req.flash("error", err.message);
-      res.json(err);
-    }
-  });
+    res.jsonp(result);
+  } else {
+    req.flash('error', 'Bids not found!');
+    res.jsonp('Error!');
+  }
 });
 
 
@@ -773,24 +770,21 @@ app.post("/cancelReasonTitles", async function(req, res, next) {
   const isSupervisor = req.body.isSupervisor;
   
   let val = objectType && isAdmin? { type: objectType , isAdmin: true } 
-  : objectType && isSupervisor? { type: objectType, isSupervisor: isSupervisor } 
-  : objectType? { type: objectType } : {};
+    : objectType && isSupervisor? { type: objectType, isSupervisor: isSupervisor } 
+    : objectType? { type: objectType } : {};
   
-  CancelReasonTitle.find({})
-    .exec()
-    .then((titles) => {
-      titles.sort(function(a, b) {
-        return a.name.localeCompare(b.name);
-      });
+  let titles = await getDataMongoose('CancelReasonTitle');
 
-      res.send(
-        titles,
-        {
-          "Content-Type": "application/json"
-        },
-        200
-      );
-    });
+  titles.sort(function(a, b) {
+    return a.name.localeCompare(b.name);
+  });
+
+  res.send(titles,
+    {
+      "Content-Type": "application/json"
+    },
+    200
+  );   
 });
 
 
@@ -805,115 +799,98 @@ app.post('/getFiles', function(req, res) {
 
 
 app.get("/feedbackSubjects", async function(req, res, next) {
-  FeedbackSubject.find({})
-    .exec()
-    .then((subjects) => {
-      subjects.sort(function(a, b) {
-        return a.name.localeCompare(b.name);
-      });
+  let subjects = await getDataMongoose('FeedbackSubject');
+  
+  subjects.sort(function(a, b) {
+    return a.name.localeCompare(b.name);
+  });
 
-      res.send(
-        subjects,
-        {
-          "Content-Type": "application/json"
-        },
-        200
-      );
-    });
+  res.send(subjects,
+    {
+      "Content-Type": "application/json"
+    },
+    200);
 });
 
 
 app.get("/feedbacks", async function(req, res, next) {
-  Feedback.find({})
-    .exec()
-    .then(feedbacks => {
-      feedbacks.sort((a, b) =>
-        a.createdAt > b.createdAt ? 1 : b.createdAt > a.createdAt ? -1 : 0
-      );
+  let feedbacks = await getDataMongoose('Feedback');
+ 
+  feedbacks.sort((a, b) =>
+    a.createdAt > b.createdAt ? 1 : b.createdAt > a.createdAt ? -1 : 0
+  );
 
-      res.send(
-        feedbacks,
-        {
-          "Content-Type": "application/json"
-        },
-        200
-      );
-    });
+  res.send(feedbacks,
+    {
+      "Content-Type": "application/json"
+    },
+    200);
 });
 
 
 //Autocomplete fields:
-app.post("/uniteIDAutocomplete", function(req, res, next) {
+app.post("/uniteIDAutocomplete", async function(req, res, next) {
   let regex = new RegExp(req.query["term"], "i");
-  let val = regex? { organizationUniteID: regex } : {};
-  
-  let uniteIDFilter = Supervisor.find(
-    val,
-    { organizationUniteID: 1 }
-  )
-    .sort({ organizationUniteID: 1 })
-    .limit(regex? 15 : 100); //Negative sort means descending.
+  let val = regex? { organizationUniteID: regex } : {};  
+  let data = await getDataMongoose('Supervisor', val);
 
-  uniteIDFilter.exec(function(err, data) {
+  if (data && data.length && data.length > 0) {
     let result = [];
+    
+    data.sort(function(a, b) {
+      return a.organizationUniteID.localeCompare(b.organizationUniteID);
+    });
+    
+    data.forEach(item => {
+      let obj = {
+        id: item._id,
+        name: item.organizationUniteID
+      };
 
-    if (!err) {
-      if (data && data.length && data.length > 0) {
-        data.forEach(item => {
-          let obj = {
-            id: item._id,
-            name: item.organizationUniteID
-          };
+      result.push(obj);
+    }); 
 
-          result.push(obj);
-        });
-      }
-
-      res.jsonp(result);
+    res.jsonp(result);
     } else {
-      req.flash("error", err.message);
-      throw err;
-    }
-  });
+    req.flash("error", 'UNITE IDs not found!');
+  }  
 });
 
 
-app.post("/currencyAutocomplete", function(req, res, next) {
+app.post("/currencyAutocomplete", async function(req, res, next) {
   let regex = new RegExp(req.query["term"], "i");
   let val = regex? { value: regex } : {};
-  let currencyFilter = Currency.find(val, { value: 1, name: 1 })
-    .sort({ value: 1 })
-    .limit(regex? 150 : 200); //Negative sort means descending.
-
-  currencyFilter.exec(function(err, data) {
+  let data = await getDataMongoose('Currency', val);
+  
+  if (data && data.length && data.length > 0) {
     let result = [];
+    data.sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
 
-    if (!err) {
-      if (data && data.length && data.length > 0) {
-        data.forEach(item => {
-          let obj = {
-            id: item._id,
-            name: item.value,
-            value: item.name
-          };
+    data.forEach(item => {
+      let obj = {
+        id: item._id,
+        name: item.value,
+        value: item.name
+      };
 
-          result.push(obj);
-        });
-      }
+      result.push(obj);
+    });
 
-      res.jsonp(result);
+    res.jsonp(result);
     } else {
-      req.flash("error", err.message);
-      throw err;
-    }
-  });
+    req.flash("error", 'Currencies not found!');
+    res.jsonp('Error!');
+  }
 });
 
 
+/*
 app.post("/prodServiceAutocomplete", function(req, res, next) {
   let regex = new RegExp(req.query["term"], "i");
   let id = req.body["supplierId"];
-  let values = regex && id? { productName: regex, supplier: new ObjectId(id) } : { supplier: (id) };
+  let values = regex && id? { productName: regex, supplier: new ObjectId(id) } : { supplier: new ObjectId(id) };
 
   let prodServiceFilter = ProductService.find(
     values,
@@ -952,58 +929,43 @@ app.post("/prodServiceAutocomplete", function(req, res, next) {
 });
 
 
-app.post("/capabilityInputAutocomplete", function(req, res, next) {  
+app.post("/capabilityInputAutocomplete", async function(req, res, next) {  
   let regex = new RegExp(req.query["term"], "i");
-  let val = regex? { capabilityDescription: regex } : {};
+  let val = regex? { supplier: new ObjectId(req.body["supplierId"]), capabilityDescription: regex } : { supplier: new ObjectId(req.body["supplierId"]) };
+  let data = await getDataMongoose('Capability', val);
 
-  let capDescriptionFilter = Supplier.find(
-    val,
-    { capabilityDescription: 1 }
-  )
-    .sort({ capabilityDescription: 1 })
-    .limit(15);
-  capDescriptionFilter.exec(function(err, data) {
+  if (data && data.length && data.length > 0) {
     let result = [];
 
-    if (!err) {
-      if (data && data.length && data.length > 0) {
-        data.forEach(item => {
-          let obj = {
-            id: item._id,
-            name: item.capabilityDescription
-          };
+    data.forEach(item => {
+      let obj = {
+        id: item._id,
+        name: item.capabilityDescription
+      };
 
-          result.push(obj);
-        });
-      }
+      result.push(obj);
+    });
 
-      res.jsonp(result);
+    res.jsonp(result);
     } else {
-      req.flash("error", err.message);
-      throw err;
-    }
-  });
-});
+    req.flash("error", 'Capabilities not found!');
+    res.json('Error!');
+  }
+});*/
 
 
 const fetch = require('node-fetch');
-let url = "https://www.floatrates.com/daily/eur.json";
+let url = "https://www.floatrates.com/daily/eur.json";/*
 let settings = { method: "Get" };
 
 fetch(url, settings)
-    .then(res => res.json())
+    .then((res) => res.json())
     .then((json) => {
       //console.log(JSON.stringify(json));
   let currency = JSON.stringify(json);
   currency = '[' + (currency).split('},').join('}},{') + ']';
-  currency = JSON.parse(currency);
- 
-  for(let i of currency) {
-    let t = JSON.stringify(i);
-    let obj = JSON.parse(t.substring(7, t.length-1));
-    //console.log(obj);
-  }
-  
+  currency = JSON.parse(currency); 
+
   let fx = {
     base: process.env.APP_DEFAULT_CURR,
   }, t, obj = [], str = 'fx.rates = {\n';
@@ -1022,9 +984,7 @@ fetch(url, settings)
   } 
 
   str += '\n}';
-  
   eval(str);
-  //console.log(fx);  
   });
 
 let networkInterfaces = os.networkInterfaces();
@@ -1041,40 +1001,10 @@ for (let inet in networkInterfaces) {
       nonLocalInterfaces[inet].push(address);
     }
   }
-}
+}*/
 
 
-async function getUsers(db, table, obj) {
-    let newObj = obj && obj instanceof Object? obj : {};
-    //console.log(newObj);
-  
-    let myPromise = () => {
-       return new Promise((resolve, reject) => {
-          db
-          .collection(table)
-          .find(newObj)
-          //.limit(1)
-          .toArray(function(err, data) {
-             err 
-                ? reject(err) 
-                : resolve(data);
-           });
-       });
-    };
-   
-    let result = await myPromise();    
-    return result;
-}
-
-
-const bcrypt = require('bcryptjs');
 let db;
-
-async function getUsers2(db, table) {
-  const promise =  await db.collection(''+table+'').find({}); 
-  return promise;
-}
-
 if (1 == 2)
   MongoClient.connect(URI, { useUnifiedTopology: true }, async (err, client) => {
     if (err) {
@@ -1083,12 +1013,15 @@ if (1 == 2)
     }
 
     db = client.db(BASE); //Right connection!
-    let sup = await getUsers(db, 'bidrequests');    
+    let sup = await getDataMongo(db, 'suppliers');
+    let sup2 = await getDataMongoose('Supplier');
+    console.log(sup.length);
     
+    if(1==2)
     for(let i of sup) {
       
       let productDetailsList = [];
-      let buyerPrice = 0, supplierPrice = 0;      
+      let buyerPrice = 0, supplierPrice = 0;
       
       for(let j of i.productDetailsList) {
         

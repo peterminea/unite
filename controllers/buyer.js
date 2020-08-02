@@ -2,7 +2,7 @@ const crypto = require("crypto");
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const mongoose = require("mongoose");
-const Token = require("../models/userToken");
+const UserToken = require("../models/userToken");
 const assert = require("assert");
 const process = require("process");
 const Schema = mongoose.Schema;
@@ -43,7 +43,10 @@ const {
   sendCancelBidEmail,
   prel,
   sortLists,
-  getUsers,
+  getObjectMongo,
+  getObjectMongoose,
+  getDataMongo,
+  getDataMongoose,
   getBidStatusesJson,
   getCancelTypesJson,
   postSignInBody,
@@ -65,11 +68,7 @@ const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
 const fetch = require("node-fetch");
 const internalIp = require('internal-ip');
 const { verifyBanNewUser, verifyBanExistingUser } = require('../middleware/verifyBanned');
-
-
-let fx = require("money"),
-  initConversions = require("../middleware/exchangeRates");
-
+let fx = require("money"), initConversions = require("../middleware/exchangeRates");
 const TYPE = process.env.USER_BUYER;
 
 exports.getIndex = async (req, res) => {
@@ -77,120 +76,95 @@ exports.getIndex = async (req, res) => {
     return;
   }
   
-    try {
-      initConversions(fx);
+  try {
+   await initConversions(fx);
+  }
+  catch {
+  }
+
+  let bids = await getDataMongoose('BidRequest', {buyer: req.session.buyer._id});
+  let caps = await getDataMongoose('Capability');  
+  let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
+  req.session.flash = [];  
+  let buyer = req.session.buyer, cap = [], totalBidsPrice = 0;
+
+  caps.sort(function (a, b) {
+    return a.name.localeCompare(b.name);
+  });
+
+  if (bids && bids.length && fx) {
+    for (let i in bids) {
+      totalBidsPrice += fx(parseFloat(bids[i].buyerPrice).toFixed(2))
+        .from(bids[i].supplierCurrency)
+        .to(process.env.BID_DEFAULT_CURR);          
     }
-    catch {
-    }
+  }
 
-  let promise = BidRequest.find({
-    buyer: req.session.buyer._id
-  }).exec();
+  if(buyer.avatar && buyer.avatar.length && !fileExists('public/' + buyer.avatar.substring(3))) {
+    buyer.avatar = '';
+  }
 
-  promise.then((bids) => {
-    let success = search(req.session.flash, "success"),
-      error = search(req.session.flash, "error");
-    req.session.flash = [];
-
-    Capability.find({}).then((caps) => {
-      let cap = [];
-      for(let i in caps) {
-        cap.push({
-          id: i,
-          name: caps[i].capabilityDescription
-        });
-      }
-
-      cap.sort(function (a, b) {
-        return a.name.localeCompare(b.name);
-      });        
-
-      setTimeout(function() {
-        let totalBidsPrice = 0;      
-
-        if (bids && bids.length && fx) {
-          for (let i in bids) {
-            totalBidsPrice += fx(parseFloat(bids[i].buyerPrice).toFixed(2))
-              .from(bids[i].supplierCurrency)
-              .to(process.env.BID_DEFAULT_CURR);          
-          }
-        }
-
-        let buyer = req.session.buyer;
-
-        if(buyer.avatar && buyer.avatar.length && !fileExists('public/' + buyer.avatar.substring(3))) {
-          buyer.avatar = '';
-        }          
-
-        res.render("buyer/index", {
-          buyer: buyer,
-          MAX_PROD: process.env.BID_MAX_PROD,
-          BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
-          bidsLength: bids && bids.length ? bids.length : null,
-          totalBidsPrice: totalBidsPrice,
-          FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
-          capabilities: cap,
-          statuses: null,
-          successMessage: success,
-          errorMessage: error,
-          suppliers: null
-          //catalogItems: catalogItems
-        });
-      }, 600);
-    })
-  });   
+  res.render("buyer/index", {
+    buyer: buyer,
+    MAX_PROD: process.env.BID_MAX_PROD,
+    BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+    bidsLength: bids && bids.length ? bids.length : null,
+    totalBidsPrice: totalBidsPrice,
+    FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
+    capabilities: caps,
+    statuses: null,
+    successMessage: success,
+    errorMessage: error,
+    suppliers: null
+    //catalogItems: catalogItems
+  });
 };
 
 
-//Buyers should load a Catalog of Products by clicking on a button in their Index page:
-exports.getProductsCatalog = (req, res) => {
-  
-  ProductService.find({}, async (err, products) => {
-    if (!products || !products.length) {
-      return false;
-    }
+async function getCatalogItems() {
+  let products = await getDataMongoose('ProductService');
+  let catalogItems = [];
 
-    let catalogItems = [];
+  for (let i in products) {
+    let supId = products[i].supplier;
+    let obj = await getObjectMongoose('Supplier', { _id: products[i].supplier });
 
-    for (let i in products) {
-      let supId = products[i].supplier;
-
-      await Supplier.findOne({ _id: supId }, function(err, obj) {
-        if(treatError(req, res, err, 'back'))
-          return false;
-
-        if (obj) {
-          catalogItems.push({
-            productId: products[i]._id,
-            supplierId: obj._id,
-            productName: products[i].productName,
-            price: products[i].price,
-            amount: products[i].amount,
-            totalPrice: products[i].totalPrice,
-            productImage: fileExists(products[i].productImage)? products[i].productImage : '',
-            buyerCurrency: products[i].currency,
-            supplierCurrency: obj.currency,
-            supplierName: obj.companyName
-          });
-        }
+    if(obj) {
+      catalogItems.push({
+        productId: products[i]._id,
+        supplierId: obj._id,
+        productName: products[i].productName,
+        price: products[i].price,
+        amount: products[i].amount,
+        totalPrice: products[i].totalPrice,
+        productImage: fileExists(products[i].productImage)? products[i].productImage : '',
+        buyerCurrency: products[i].currency,
+        supplierCurrency: obj.currency,
+        supplierName: obj.companyName
       });
     }
+  }
 
-    catalogItems.sort(function(a, b) {
-      return a.productName.localeCompare(b.productName);
-    });
-    
-    let success = search(req.session.flash, "success"),
-      error = search(req.session.flash, "error");
-    req.session.flash = [];
-    
-    res.render("buyer/productsCatalog", {
-      data: catalogItems,
-      MAX: process.env.BID_MAX_PROD,
-      buyerId: req.session.buyer._id,
-      successMessage: success,
-      errorMessage: error
-    });
+  catalogItems.sort(function(a, b) {
+    return a.productName.localeCompare(b.productName);
+  });
+  
+  return catalogItems;
+}
+
+
+//Buyers should load a Catalog of Products by clicking on a button in their Index page:
+exports.getProductsCatalog = async (req, res) => {
+  let catalogItems = await getCatalogItems();
+  let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
+  req.session.flash = [];
+
+  res.render("buyer/productsCatalog", {
+    data: catalogItems,
+    MAX: process.env.BID_MAX_PROD,
+    buyerId: req.session.buyer._id,
+    successMessage: success,
+    errorMessage: error
   });
 }
 
@@ -227,63 +201,57 @@ async function suggest(prod, buyerId) {
 }
 
 
-exports.postIndex = (req, res) => {
+exports.postIndex = async (req, res) => {
    initConversions(fx);
 
   if (req.body.capabilityInput) {
     //req.term for Autocomplete - We started the search and become able to place a Bid Request.
     const key = req.body.capabilityInput;
+    let suppliers = await getDataMongoose('Supplier');
+    let statuses = await getDataMongoose('BidStatus');
+    let bids = await getDataMongoose('BidRequest', { buyer: req.session.buyer ? req.session.buyer._id : null });
+    
+    if(!suppliers.length || !statuses.length || !bids.length) {
+      return false;
+    }
 
-    Supplier.find({}, (err, suppliers) => {
-      if (treatError(req, res, err, "/buyer")) 
-        return false;
-
-      const suppliers2 = [];
-      for (const supplier of suppliers) {
-        if (
-          supplier.capabilityDescription
-            .toLowerCase()
-            .includes(key.toLowerCase())
-        ) {
-          suppliers2.push(supplier);
-        }
+    const suppliers2 = [];
+    for(const supplier of suppliers) {
+      if(supplier.capabilityDescription
+          .toLowerCase()
+          .includes(key.toLowerCase())) {
+        suppliers2.push(supplier);
       }
+    }
 
-      let promise = BidStatus.find({}).exec();
-      promise.then((statuses) => {
-        let promise2 = BidRequest.find({
-          buyer: req.session.buyer ? req.session.buyer._id : null
-        }).exec();
+      let totalBidsPrice = 0;
 
-        promise2.then((bids) => {
-          let totalBidsPrice = 0;
-          if (bids && bids.length) {
-            for (let i in bids) {
-              totalBidsPrice += fx(parseFloat(bids[i].buyerPrice).toFixed(2))
-                .from(bids[i].supplierCurrency)
-                .to(process.env.BID_DEFAULT_CURR);
-            }
-          }         
+      for (let i in bids) {
+        totalBidsPrice += fx(parseFloat(bids[i].buyerPrice).toFixed(2))
+          .from(bids[i].supplierCurrency)
+          .to(process.env.BID_DEFAULT_CURR);
+      }              
 
-          let success = search(req.session.flash, "success"),
-            error = search(req.session.flash, "error");
-          req.session.flash = [];
-          res.render("buyer/index", {
-            buyer: req.session.buyer,
-            suppliers: suppliers2,
-            MAX_PROD: process.env.BID_MAX_PROD,
-            MAX_AMOUNT: process.env.MAX_PROD_PIECES,
-            BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
-            FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
-            bidsLength: bids && bids.length ? bids.length : null,
-            totalBidsPrice: totalBidsPrice,
-            statuses: statuses,
-            successMessage: success,
-            errorMessage: error,
-            statusesJson: JSON.stringify(getBidStatusesJson())            
-          });
-        });
-      });
+      let success = search(req.session.flash, "success"),
+        error = search(req.session.flash, "error");
+      req.session.flash = [];
+      let catalogItems = await getCatalogItems();
+    
+      res.render("buyer/index", {
+        buyer: req.session.buyer,
+        suppliers: suppliers2,
+        allSuppliers: suppliers,
+        MAX_PROD: process.env.BID_MAX_PROD,
+        MAX_AMOUNT: process.env.MAX_PROD_PIECES,
+        BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+        FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
+        bidsLength: bids && bids.length ? bids.length : null,
+        totalBidsPrice: totalBidsPrice,
+        statuses: statuses,
+        products: catalogItems,
+        successMessage: success,
+        errorMessage: error,
+        statusesJson: JSON.stringify(getBidStatusesJson())
     });
   } else if (req.body.itemDescription) {
     saveBidBody(req, res, '/');
@@ -293,7 +261,7 @@ exports.postIndex = (req, res) => {
 };
 
 
-exports.getPlaceBid = (req, res) => {
+exports.getPlaceBid = async (req, res) => {
   let buyerId = (req.params.buyerId? req.params.buyerId : req.body.buyerId), productId = (req.params.productId), supplierId = (req.params.supplierId);
   let productIds = req.body.bidProductList? req.body.bidProductList : [], supplierIds = req.body.bidSupplierList? req.body.bidSupplierList : [];
   
@@ -307,95 +275,74 @@ exports.getPlaceBid = (req, res) => {
   
   let productList = prel(productIds);
   let supplierList = prel(supplierIds);
-  let prodIDs = [], suppIDs = [];
+  let prodIds = [], suppIds = [];
 
   for(let i in productList) {
-    prodIDs.push(new ObjectId(productList[i]));
+    prodIds.push(new ObjectId(productList[i]));
   }
 
   for(let i in supplierList) {
-    suppIDs.push(new ObjectId(supplierList[i]));
+    suppIds.push(new ObjectId(supplierList[i]));
   }
 
-  let uniqueSupplierIds = suppIDs.filter((v, i, a) => a.indexOf(v) === i);
+  let uniqueSupplierIds = suppIds.filter((v, i, a) => a.indexOf(v) === i);
+  let buyer = await getObjectMongoose('Buyer', { _id: buyerId });
+  let products = await getDataMongoose('ProductService', { _id: { $in: prodIds } });
+  let suppliers = await getDataMongoose('Supplier', { _id: { $in: uniqueSupplierIds } });
+  let statuses = await getDataMongoose('BidStatus');
+  
+  if(!buyer || !products.length || !suppliers.length || !statuses.length) {
+    req.flash('error', 'Data not found in the database!');
+    res.redirect('back');
+  }
     
   // { $in : [1,2,3,4] }
   //Or array
-  Buyer.find({ _id: buyerId }).then((buyer) => {
-    if(!buyer) {
-        req.flash('error', 'Buyer not found in the database!');
-        return res.redirect('back');
-      }
-  
-    ProductService.find({ _id: { $in: prodIDs } }).then((prods) => {
-      if(!prods) {
-        req.flash('error', 'Products not found!');
-        return res.redirect('back');
-      }
+  let suggestionsList = [];
 
-      Supplier.find({ _id: { $in: uniqueSupplierIds } }).then(async (sups) => {
-        if(!sups) {
-        req.flash('error', 'Suppliers for the products not found!');
-        return res.redirect('back');
-      }
+  for(let i in products) {
 
-      let promise = await BidStatus.find({}).exec();
-      promise.then(async (statuses) => {
-        let products = [], supps = [];
-        let suggestionsList = [];
+    //Find a suggestion for this product:
+    let suggestions = await suggest(products[i], buyer[0]._id);
 
-        for(let i in prods) {
-          products.push(prods[i]);
-          //Find a suggestion for this product:
-          let suggestions = await suggest(prods[i], buyer[0]._id);
+    for(let i of suggestions) {
+      suggestionsList.push(i);
+    }
+  }
+  /*
+  suggestionsList.sort(function(a, b) {
+    return a.id.localeCompare(b.id);
+  });*/
 
-          for(let i of suggestions) {
-            suggestionsList.push(i);
-          }
-        }
-        /*
-        suggestionsList.sort(function(a, b) {
-          return a.id.localeCompare(b.id);
-        });*/
+  suggestionsList = _.uniq(suggestionsList, false, function(item) { return item.id; });
+  //Keep the first [const] sugestions:
+  suggestionsList.length = process.env.MAX_PROD_SUGGESTED;
 
-        suggestionsList = _.uniq(suggestionsList, false, function(item) { return item.id; });
+  let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
+  req.session.flash = [];
+  let isMultiProd = prodIds.length > 1;
+  let isMultiSupp = uniqueSupplierIds.length > 1;
 
-        //Keep the first [const] sugestions:
-        suggestionsList.length = process.env.MAX_PROD_SUGGESTED;
-
-        for(let i in sups) {
-          supps.push(sups[i]);  
-        }
-
-        let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
-        req.session.flash = [];
-        let isMultiProd = prodIDs.length > 1;
-        let isMultiSupp = uniqueSupplierIds.length > 1;
-
-        res.render("buyer/placeBid", {
-          successMessage: success,
-          errorMessage: error,
-          isMultiProd: isMultiProd,
-          isMultiSupp: isMultiSupp,
-          isMultiBid: isMultiSupp,
-          isSingleBid: !isMultiSupp, 
-          isSingleProd: !isMultiProd,
-          MAX_PROD: process.env.BID_MAX_PROD,
-          MAX_AMOUNT: process.env.MAX_PROD_PIECES,
-          BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
-          FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
-          statuses: statuses,
-          statusesJson: JSON.stringify(getBidStatusesJson()),
-          suggestions: suggestionsList,
-          buyer: buyer[0],
-          product: products[0],
-          supplier: supps[0],
-          products: products,
-          suppliers: supps
-          });
-        });
-      });
-    });
+  res.render("buyer/placeBid", {
+    successMessage: success,
+    errorMessage: error,
+    isMultiProd: isMultiProd,
+    isMultiSupp: isMultiSupp,
+    isMultiBid: isMultiSupp,
+    isSingleBid: !isMultiSupp, 
+    isSingleProd: !isMultiProd,
+    MAX_PROD: process.env.BID_MAX_PROD,
+    MAX_AMOUNT: process.env.MAX_PROD_PIECES,
+    BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+    FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
+    statuses: statuses,
+    statusesJson: JSON.stringify(getBidStatusesJson()),
+    suggestions: suggestionsList,
+    buyer: buyer,
+    product: products[0],
+    supplier: suppliers[0],
+    products: products,
+    suppliers: suppliers
   });
 }
 
@@ -405,39 +352,25 @@ exports.postPlaceBid = async (req, res) => {
 }
 
 
-exports.getBidsCatalog = (req, res) => {
-  MongoClient.connect(URL, { useUnifiedTopology: true }, function(err, db) {
-    if (treatError(req, res, err, "back")) 
-      return false;
+exports.getBidsCatalog = async (req, res) => {
+  let bids = await getDataMongoose('BidRequest', { buyer: new ObjectId(req.params.buyerId) });
+  if(!bids.length) {
+    req.flash('error', 'Error when retrieving Bids Catalog!');
+    res.redirect('back');
+  }
+  
+  bids.sort(function(a, b) {
+    return a.requestName.localeCompare(b.requestName);
+  });
 
-    let dbo = db.db(BASE);
-    let query = { buyer: new ObjectId(req.params.buyerId) };
-    dbo
-      .collection("bidrequests")
-      .find(query)
-      .toArray(function(err, bids) {
-        if (err) {
-          console.error(err.message);
-          return res.status(500).send({
-            msg: err.message
-          });
-        }
+  let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
+  req.session.flash = [];
 
-        db.close();
-        bids.sort(function(a, b) {
-          return a.requestName.localeCompare(b.requestName);
-        });
-      
-        let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
-        req.session.flash = [];
-
-        res.render("buyer/bidsCatalog", {
-          buyerName: req.params.buyerName,
-          successMessage: success,
-          errorMessage: error,
-          bids: bids
-        });
-      });
+  res.render("buyer/bidsCatalog", {
+    buyerName: req.params.buyerName,
+    successMessage: success,
+    errorMessage: error,
+    bids: bids
   });
 };
 
@@ -460,6 +393,7 @@ exports.getChatLogin = (req, res) => {
   });
 };
 
+
 exports.getChat = (req, res) => {
   //Coming from the getLogin above.
   let success = search(req.session.flash, "success"),
@@ -480,99 +414,101 @@ exports.getChat = (req, res) => {
   });
 };
 
-exports.getViewBids = (req, res) => {
-  let promise = BidRequest.find({
+
+exports.getViewBids = async (req, res) => {
+  let bids = await getDataMongoose('BidRequest', {
     supplier: req.params.supplierId,
     buyer: req.params.buyerId
-  }).exec();
+  });  
 
-  promise.then(async (bids) => {
-    //Verify bids:
-    let validBids = [],
-      cancelledBids = [],
-      expiredBids = [];
-    if (bids && bids.length) {
-      for (let i in bids) {
-        let date = Date.now();
-        let bidDate = bids[i].expiryDate;
-        bidDate > date
-          ? bids[i].isCancelled == true
-            ? cancelledBids.push(bids[i])
-            : validBids.push(bids[i])
-          : expiredBids.push(bids[i]);
+  //Verify bids:
+  let validBids = [],
+    cancelledBids = [],
+    expiredBids = [];
+  if (bids && bids.length) {
+    for (let i in bids) {
+      let date = Date.now();
+      let bidDate = bids[i].expiryDate;
+      bidDate > date
+        ? bids[i].isCancelled == true
+          ? cancelledBids.push(bids[i])
+          : validBids.push(bids[i])
+        : expiredBids.push(bids[i]);
+    }
+  }
+
+  await sendExpiredBidEmails(req, res, expiredBids);
+  await initConversions(fx);
+  let totalPrice = 0,
+    validPrice = 0,
+    cancelledPrice = 0,
+    expiredPrice = 0;
+
+  for (let i in validBids) {
+    //validPrice += fx(parseFloat(validBids[i].price)).from(validBids[i].supplierCurrency).to(req.params.currency);
+    if(validBids[i].expirationDate <= Date.now() + process.env.DAYS_BEFORE_BID_EXPIRES * process.env.DAY_DURATION) {
+      validBids[i].warningExpiration = true;
+      if(validBids[i].isExtended == true) {
+        validBids[i].cannotExtendMore = true;
       }
     }
-
-    await sendExpiredBidEmails(req, res, expiredBids);
-    await initConversions(fx);
-    let totalPrice = 0,
-      validPrice = 0,
-      cancelledPrice = 0,
-      expiredPrice = 0;
-
-    for (let i in validBids) {
-      //validPrice += fx(parseFloat(validBids[i].price)).from(validBids[i].supplierCurrency).to(req.params.currency);
-      if(validBids[i].expirationDate <= Date.now() + process.env.DAYS_BEFORE_BID_EXPIRES * process.env.DAY_DURATION) {
-        validBids[i].warningExpiration = true;
-        if(validBids[i].isExtended == true) {
-          validBids[i].cannotExtendMore = true;
-        }
-      }
-      validPrice += parseFloat(validBids[i].buyerPrice);
-      for(let j in validBids[i].productImagesList) {
-        if(!fileExists(validBids[i].productImagesList[j])) {
-          validBids[i].productImagesList[j] = '';
-        }
+    validPrice += parseFloat(validBids[i].buyerPrice);
+    for(let j in validBids[i].productImagesList) {
+      if(!fileExists(validBids[i].productImagesList[j])) {
+        validBids[i].productImagesList[j] = '';
       }
     }
+  }
 
-    totalPrice = parseFloat(validPrice);
+  totalPrice = parseFloat(validPrice);
 
-    for (let i in cancelledBids) {
-      cancelledPrice += parseFloat(cancelledBids[i].buyerPrice);
-    }
+  for (let i in cancelledBids) {
+    cancelledPrice += parseFloat(cancelledBids[i].buyerPrice);
+  }
 
-    totalPrice += parseFloat(cancelledPrice);
+  totalPrice += parseFloat(cancelledPrice);
 
-    for (let i in expiredBids) {
-      expiredPrice += parseFloat(expiredBids[i].buyerPrice);
-    }
+  for (let i in expiredBids) {
+    expiredPrice += parseFloat(expiredBids[i].buyerPrice);
+  }
 
-    totalPrice += parseFloat(expiredPrice);
+  totalPrice += parseFloat(expiredPrice);
 
-    let success = search(req.session.flash, "success"),
-      error = search(req.session.flash, "error");
-    req.session.flash = [];
-    
+  let success = search(req.session.flash, "success"),
+    error = search(req.session.flash, "error");
+  req.session.flash = [];
 
-    res.render("buyer/viewBid", {
-      bids: validBids,
-      cancelledBids: cancelledBids,
-      expiredBids: expiredBids,
-      totalBidLength: bids && bids.length ? bids.length : 0,
-      buyerCancelBidStatus: process.env.BUYER_CANCEL_BID,
-      stripePublicKey: process.env.STRIPE_KEY_PUBLIC,
-      stripeSecretKey: process.env.STRIPE_KEY_SECRET,
-      successMessage: success,
-      errorMessage: error,
-      totalPrice: totalPrice,
-      validPrice: validPrice,
-      expiredPrice: expiredPrice,
-      cancelledPrice: cancelledPrice,
-      currency: req.params.currency,
-      path: '../../../../',
-      bidExtensionDays: process.env.DAYS_BID_EXTENDED,
-      statusesJson: JSON.stringify(getBidStatusesJson()),
-      supplierId: req.params.supplierId,
-      buyerId: req.params.buyerId,
-      balance: req.params.balance
-    });
+
+  res.render("buyer/viewBid", {
+    bids: validBids,
+    cancelledBids: cancelledBids,
+    expiredBids: expiredBids,
+    totalBidLength: bids && bids.length ? bids.length : 0,
+    buyerCancelBidStatus: process.env.BUYER_CANCEL_BID,
+    stripePublicKey: process.env.STRIPE_KEY_PUBLIC,
+    stripeSecretKey: process.env.STRIPE_KEY_SECRET,
+    successMessage: success,
+    errorMessage: error,
+    totalPrice: totalPrice,
+    validPrice: validPrice,
+    expiredPrice: expiredPrice,
+    cancelledPrice: cancelledPrice,
+    currency: req.params.currency,
+    path: '../../../../',
+    bidExtensionDays: process.env.DAYS_BID_EXTENDED,
+    statusesJson: JSON.stringify(getBidStatusesJson()),
+    supplierId: req.params.supplierId,
+    buyerId: req.params.buyerId,
+    balance: req.params.balance
   });
+
 };
+
 
 exports.postViewBids = (req, res) => {
   updateBidBody(req, res, req.body.id, 'back');
 };
+
 
 exports.getCancelBid = (req, res) => {
   let success = search(req.session.flash, "success"),
@@ -592,13 +528,15 @@ exports.getCancelBid = (req, res) => {
   });
 };
 
+
 exports.postCancelBid = (req, res) => {
   try {
     MongoClient.connect(URL, { useUnifiedTopology: true }, async function(
       err,
       db
     ) {
-      if (treatError(req, res, err, "back")) return false;
+      if (treatError(req, res, err, "back")) 
+        return false;
       let dbo = db.db(BASE);
 
       try {
@@ -612,11 +550,13 @@ exports.postCancelBid = (req, res) => {
             createdAt: Date.now()
           },
           function(err, obj) {
-            if (treatError(req, res, err, "back")) return false;
+            if (treatError(req, res, err, "back")) 
+              return false;
           }
         );
       } catch (e) {
-        if (treatError(req, res, e, "back")) return false;
+        if (treatError(req, res, e, "back")) 
+          return false;
       } //Cancelled bids do not have an expiry date any longer:
 
       await dbo
@@ -632,7 +572,8 @@ exports.postCancelBid = (req, res) => {
             }
           },
           async function(err, resp) {
-            if (treatError(req, res, err, "back")) return false;
+            if (treatError(req, res, err, "back")) 
+              return false;
             await sendCancelBidEmail(
               req,
               req.body.suppliersName,
@@ -653,6 +594,7 @@ exports.postCancelBid = (req, res) => {
   }
 };
 
+
 exports.getConfirmation = (req, res) => {
   if (!req.session || !req.session.buyerId) {
     req.session = req.session ? req.session : {};
@@ -671,6 +613,7 @@ exports.getConfirmation = (req, res) => {
   });
 };
 
+
 exports.getDelete = (req, res) => {
   let success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
@@ -684,6 +627,7 @@ exports.getDelete = (req, res) => {
   });
 };
 
+
 exports.getDeactivate = (req, res) => {
   let success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
@@ -696,6 +640,7 @@ exports.getDeactivate = (req, res) => {
   });
 };
 
+
 exports.getResendToken = (req, res) => {
   let success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
@@ -707,10 +652,12 @@ exports.getResendToken = (req, res) => {
   });
 };
 
+
 exports.postDelete = async function(req, res, next) {
   let id = req.body.id;
   buyerDelete(req, res, id);
 };
+
 
 exports.postDeactivate = async function(req, res, next) {
   let id = req.body.id;
@@ -751,118 +698,108 @@ exports.postDeactivate = async function(req, res, next) {
   } catch {}
 };
 
+
 exports.postConfirmation = async function(req, res, next) {
   try {
-    await Token.findOne({ token: req.params.token, userType: TYPE }, async function(
-      err,
-      token
-    ) {
-      if (!token) {
-        req.flash(
-          "We were unable to find a valid token. It may have expired. Please request a new token."
-        );
-        return res.redirect("/buyer/resend");
-        if (1 == 2)
-          return res.status(400).send({
-            type: "not-verified",
-            msg:
-              "We were unable to find a valid token. Your token may have expired."
-          });
-      }
+    let token = await getObjectMongoose('UserToken', { token: req.params.token, userType: TYPE });
+  
+    if (!token) {
+      req.flash("We were unable to find a valid token. It may have expired. Please request a new token.");
+      return res.redirect("/buyer/resend");       
+    }
+    
+    let user = await getObjectMongoose('Buyer', { _id: token._userId, emailAddress: req.body.emailAddress });
+    
+    if(!user)
+      return res.status(400).send({
+        msg: "We were unable to find a user for this token."
+      });
 
-      await Buyer.findOne(
-        { _id: token._userId, emailAddress: req.body.emailAddress },
-        async function(err, user) {
-          if (!user)
-            return res.status(400).send({
-              msg: "We were unable to find a user for this token."
-            });
+    if(user.isVerified)
+      return res.status(400).send({
+        type: "already-verified",
+        msg: "This user has already been verified."
+      });
 
-          if (user.isVerified)
-            return res.status(400).send({
-              type: "already-verified",
-              msg: "This user has already been verified."
-            });
+    await MongoClient.connect(
+      URL,
+      { useUnifiedTopology: true },
+      async function(err, db) {
+        if (treatError(req, res, err, "back")) 
+          return false;
 
-          await MongoClient.connect(
-            URL,
-            { useUnifiedTopology: true },
-            async function(err, db) {
-              if (treatError(req, res, err, "back")) return false;
-
-              let dbo = db.db(BASE);
-              await dbo
-                .collection("buyers")
-                .updateOne(
-                  { _id: user._id },
-                  { $set: { isVerified: true, isActive: true } },
-                  function(err, resp) {
-                    if (err) {
-                      console.error(err.message);
-                      return res.status(500).send({
-                        msg: err.message
-                      });
-                    }
-                  }
-                );
-
-              db.close();
-              console.log("The account has been verified. Please log in.");
-              req.flash(
-                "success",
-                "The account has been verified. Please log in."
-              );
-              return res.redirect("/buyer/sign-in/");
-              //res.status(200).send("The account has been verified. Please log in.");
+        let dbo = db.db(BASE);
+        await dbo
+          .collection("buyers")
+          .updateOne(
+            { _id: user._id },
+            { $set: { isVerified: true, isActive: true } },
+            function(err, resp) {
+              if (err) {
+                console.error(err.message);
+                return res.status(500).send({
+                  msg: err.message
+                });
+              }
             }
           );
+
+        db.close();
+        console.log("The account has been verified. Please log in.");
+        req.flash(
+          "success",
+          "The account has been verified. Please log in."
+        );
+        return res.redirect("/buyer/sign-in/");
+        //res.status(200).send("The account has been verified. Please log in.");           
         }
-      );
-    });
+      );    
   } catch {}
 };
 
-exports.postResendToken = function(req, res, next) {
+
+exports.postResendToken = async function(req, res, next) {
   /*
     req.assert('emailAddress', 'Email is not valid').isEmail();
     req.assert('emailAddress', 'Email cannot be blank').notEmpty();
     req.sanitize('emailAddress').normalizeEmail({ remove_dots: false });   
     let errors = req.validationErrors();
     if (errors) return res.status(400).send(errors);*/
+  
+  let user = await getObjectMongoose('Buyer', { emailAddress: req.body.emailAddress });  
 
-  Buyer.findOne({ emailAddress: req.body.emailAddress }, function(err, user) {
-    if (!user)
-      return res
-        .status(400)
-        .send({ msg: "We were unable to find a user with that email." });
-    if (user.isVerified)
-      return res
-        .status(400)
-        .send({
-          msg: "This account has already been verified. Please log in."
-        });
+  if (!user)
+    return res
+      .status(400)
+      .send({ msg: "We were unable to find a user with that email." });
 
-    let token = new Token({
-      _userId: user._id,
-      userType: TYPE,
-      token: crypto.randomBytes(16).toString("hex")
-    });
+  if (user.isVerified)
+    return res
+      .status(400)
+      .send({
+        msg: "This account has already been verified. Please log in."
+      });
 
-    token.save(async function(err) {
-      if (err) {
-        req.flash("error", err.message);
-        return res.status(500).send({
-          msg: err.message
-        });
-      }
+  let token = new UserToken({
+    _userId: user._id,
+    userType: TYPE,
+    token: crypto.randomBytes(16).toString("hex")
+  });
 
-      await resendTokenEmail(user, token.token, "/buyer/confirmation/", req);
-      return res
-        .status(200)
-        .send(
-          "A verification email has been sent to " + user.emailAddress + "."
-        );
-    });
+  token.save(async function(err) {
+    if (err) {
+      req.flash("error", err.message);
+      return res.status(500).send({
+        msg: err.message
+      });
+    }
+
+    await resendTokenEmail(user, token.token, "/buyer/confirmation/", req);
+    return res
+      .status(200)
+      .send(
+        "A verification email has been sent to " + user.emailAddress + "."
+      );   
   });
 };
 
@@ -885,49 +822,39 @@ exports.getSignIn = (req, res) => {
 };
 
 
-exports.getSignUp = (req, res) => {
-  let success = search(req.session.flash, "success"),
-    error = search(req.session.flash, "error");
-  req.session.flash = [];
-  
-  if (!req.session.buyerId) {
-    Country.find({}).then((countries) => {
-        let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
-        req.session.flash = [];
+exports.getSignUp = async (req, res) => {
+  if(!req.session.buyerId) {
+    let countries = await getDataMongoose('Country');
+    let ids = await getDataMongoose('Supervisor');
+    let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+    req.session.flash = [];
 
-        let country = [];
-        for(let i in countries) {
-          country.push({id: i, name: countries[i].name});
-        }
-      
-      Supervisor.find({}, { organizationUniteID: 1 }).then((ids) => {
-        let uniteIds = [];
-        for(let i in ids) {
-          uniteIds.push({
-            id: i,
-            name: ids[i].organizationUniteID
-          });
-        }
-        
-        uniteIds.sort(function (a, b) {
-          return a.name.localeCompare(b.name);
-        });
-
-        return res.render("buyer/sign-up", {
-          DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
-          captchaSiteKey: captchaSiteKey,
-          FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
-          uniteIds: uniteIds,
-          encryptionNotice: (encryptionNotice),
-          countries: country,
-          successMessage: success,
-          errorMessage: error
-        });
+    let uniteIds = [];
+    for(let i in ids) {
+      uniteIds.push({
+        id: i,
+        name: ids[i].organizationUniteID
       });
+    }
+
+    uniteIds.sort(function (a, b) {
+      return a.name.localeCompare(b.name);
+    });
+
+    return res.render("buyer/sign-up", {
+      DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+      captchaSiteKey: captchaSiteKey,
+      FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
+      uniteIds: uniteIds,
+      encryptionNotice: (encryptionNotice),
+      countries: countries,
+      successMessage: success,
+      errorMessage: error
     });
   }
   else return res.redirect("/buyer");
 };
+
 
 exports.getBalance = (req, res) => {
   res.render("buyer/balance", {
@@ -936,6 +863,7 @@ exports.getBalance = (req, res) => {
     currency: req.session.buyer.currency
   });
 };
+
 
 exports.getForgotPassword = (req, res) => {
   let success = search(req.session.flash, "success"),
@@ -949,6 +877,7 @@ exports.getForgotPassword = (req, res) => {
   });
 };
 
+
 exports.postForgotPassword = (req, res, next) => {
   async.waterfall(
     [
@@ -958,48 +887,42 @@ exports.postForgotPassword = (req, res, next) => {
           done(err, token);
         });
       },
-      function(token, done) {
-        Buyer.findOne({ emailAddress: req.body.emailAddress }, function(
-          err,
-          user
-        ) {
-          if (!user) {
-            req.flash(
-              "error",
-              "Sorry. We were unable to find a user with this e-mail address."
-            );
-            return res.redirect("buyer/forgotPassword");
-          }
+      async function(token, done) {
+        let user = await getObjectMongoose('Buyer', { emailAddress: req.body.emailAddress });
+        
+        if (!user) {
+          req.flash(
+            "error",
+            "Sorry. We were unable to find a user with this e-mail address."
+          );
+          return res.redirect("buyer/forgotPassword");
+        }
 
-          MongoClient.connect(URL, { useUnifiedTopology: true }, function(
-            err,
-            db
-          ) {
-            if (treatError(req, res, err, "back")) return false;
+        MongoClient.connect(URL, { useUnifiedTopology: true }, function(err, db) {
+          if (treatError(req, res, err, "back")) 
+            return false;
 
-            let dbo = db.db(BASE);
-            dbo
-              .collection("buyers")
-              .updateOne(
-                { _id: user._id },
-                {
-                  $set: {
-                    resetPasswordToken: token,
-                    resetPasswordExpires: Date.now() + 86400000
-                  }
-                },
-                function(err, resp) {
-                  if (err) {
-                    console.error(err.message);
-                    req.flash("error", err.message);
-                    return false;
-                  }
-
-                  db.close();
+          let dbo = db.db(BASE);
+          dbo
+            .collection("buyers")
+            .updateOne(
+              { _id: user._id },
+              {
+                $set: {
+                  resetPasswordToken: token,
+                  resetPasswordExpires: Date.now() + 86400000
                 }
-              );
-          });
-        });
+              },
+              function(err, resp) {
+                if (err) {
+                  console.error(err.message);
+                  req.flash("error", err.message);
+                  return false;
+                }
+
+                db.close();
+              });
+          });        
       },
       function(token, user, done) {
         sendForgotPasswordEmail(user, "Buyer", "/buyer/reset/", token, req);
@@ -1009,90 +932,81 @@ exports.postForgotPassword = (req, res, next) => {
       if (treatError(req, res, err, "back")) 
         return false;
       return res.redirect("/buyer/forgotPassword");
-    }
-  );
+    });
 };
 
-exports.getResetPasswordToken = (req, res) => {
-  Buyer.findOne(
-    {
-      resetPasswordToken: req.params.token,
-      resetPasswordExpires: { $gt: Date.now() }
-    },
-    function(err, user) {
-      if (!user) {
-        req.flash(
-          "error",
-          "Password reset token is either invalid or expired."
-        );
-        return res.redirect("/forgotPassword");
-      }
 
-      let success = search(req.session.flash, "success"),
-        error = search(req.session.flash, "error");
-      req.session.flash = [];
+exports.getResetPasswordToken = async (req, res) => {
+  let user = await getObjectMongoose('Buyer', {
+    resetPasswordToken: req.params.token,
+    resetPasswordExpires: { $gt: Date.now() }});
 
-      res.render("buyer/resetPassword", {
-        token: req.params.token,
-        successMessage: success,
-        errorMessage: error
-      });
+    if (!user) {
+      req.flash(
+        "error",
+        "Password reset token is either invalid or expired."
+      );
+      return res.redirect("/forgotPassword");
     }
-  );
+
+    let success = search(req.session.flash, "success"),
+      error = search(req.session.flash, "error");
+    req.session.flash = [];
+
+    res.render("buyer/resetPassword", {
+      token: req.params.token,
+      successMessage: success,
+      errorMessage: error
+    });   
 };
+
 
 exports.postResetPasswordToken = (req, res) => {
   async.waterfall(
     [
-      function(done) {
-        Buyer.findOne(
-          {
+      async function(done) {
+        let user = await getObjectMongoose('Buyer', {
             resetPasswordToken: req.params.token,
             resetPasswordExpires: { $gt: Date.now() }
-          },
-          function(err, user) {
-            if (!user) {
-              req.flash(
-                "error",
-                "Password reset token is either invalid or expired."
-              );
-              return res.redirect("back");
-            }
-
-            if (req.body.password === req.body.passwordRepeat) {
-              MongoClient.connect(URL, { useUnifiedTopology: true }, function(
-                err,
-                db
-              ) {
-                if (treatError(req, res, err, "back")) 
-                  return false;
-                
-                let dbo = db.db(BASE);
-                let hash = bcrypt.hashSync(req.body.password, 10);
-                
-                dbo
-                  .collection("buyers")
-                  .updateOne(
-                    { _id: user._id },
-                    {
-                      $set: {
-                        password: hash,
-                        resetPasswordToken: undefined,
-                        resetPasswordExpires: undefined
-                      }
-                    },
-                    function(err, resp) {
-                      if (treatError(req, res, err, "back")) return false;
-                      db.close();
-                    }
-                  );
-              });
-            } else {
-              req.flash("error", "Passwords do not match.");
-              return res.redirect("back");
-            }
+          });
+        
+          if (!user) {
+            req.flash(
+              "error",
+              "Password reset token is either invalid or expired."
+            );
+            return res.redirect("back");
           }
-        );
+
+          if (req.body.password === req.body.passwordRepeat) {
+            MongoClient.connect(URL, { useUnifiedTopology: true }, function(err, db) {
+              if(treatError(req, res, err, "back")) 
+                return false;
+
+              let dbo = db.db(BASE);
+              let hash = bcrypt.hashSync(req.body.password, 10);
+
+              dbo
+                .collection("buyers")
+                .updateOne(
+                  { _id: user._id },
+                  {
+                    $set: {
+                      password: hash,
+                      resetPasswordToken: undefined,
+                      resetPasswordExpires: undefined
+                    }
+                  },
+                  function(err, resp) {
+                    if (treatError(req, res, err, "back")) return false;
+                    db.close();
+                  }
+                );
+            });
+          } else {
+            req.flash("error", "Passwords do not match.");
+            return res.redirect("back");
+          }       
       },
       function(user, done) {
         sendResetPasswordEmail(user, "Buyer", req);
@@ -1105,15 +1019,18 @@ exports.postResetPasswordToken = (req, res) => {
   );
 };
 
+
 exports.postSignIn = (req, res) => {
   postSignInBody("buyer", req, res);
 };
+
 
 let global = 0;
 function getSupers(id) {
   let promise = Supervisor.find({ organizationUniteID: id }).exec();
   return promise;
 }
+
 
 exports.postSignUp = async (req, res) => {
   const captchaVerified = await fetch(
@@ -1156,11 +1073,9 @@ exports.postSignUp = async (req, res) => {
             req.flash("error", "Password must have between 6 and 16 characters.");
             return res.redirect("/buyer/sign-up");
           } else {
-            let promise = getSupers(req.body.organizationUniteID);
-            promise.then(async function(supers) {
-              console.log(supers);
-              if (supers && supers.length && !(supers[0].isActive)) {
-                
+            let supers = await getDataMongoose('Supervisor', { organizationUniteID: req.body.organizationUniteID });
+          
+              if (supers && supers.length && !(supers[0].isActive)) {                
                 req.flash(
                   "error",
                   "Your Supervisor is currently not active. Please contact them."
@@ -1177,110 +1092,101 @@ exports.postSignUp = async (req, res) => {
                 return res.redirect("/buyer/sign-up");
               } else if (global++ < 1) {
                 const ipv4 = await internalIp.v4();
-                
-                await Buyer.findOne(
-                  { emailAddress: req.body.emailAddress },
-                  async function(err, user) {
-                    if(treatError(req, res, err, '/supplier/sign-up'))
-                      return false;
-                    
-                    if(verifyBanNewUser(req, res, req.body.emailAddress, ipv4)) {
-                      return res.status(400).send({
-                        msg: 'You are trying to join UNITE from the part of an already banned user. Please refrain from doing so.'
-                      });
-                    }
-                    
-                    if(user) {
-                      return res
-                        .status(400)
-                        .send({
-                          msg:
-                            "The e-mail address you have entered is already associated with another account."
-                        });
-                    }
-                    
-                    let buyer;
-                    console.log(4);
-                    try {
-                      let hash = bcrypt.hashSync(req.body.password, 10);
-                      console.log(6);
-                      /*
-                      bcrypt.hash(req.body.password, 16, async function(
-                        err,
-                        hash
-                      ) {*/
-                        buyer = new Buyer({
-                          role: process.env.USER_REGULAR,
-                          avatar: req.body.avatar,
-                          organizationName: req.body.organizationName,
-                          organizationUniteID: req.body.organizationUniteID,
-                          contactName: req.body.contactName,
-                          emailAddress: req.body.emailAddress,
-                          password: hash,
-                          ipv4: ipv4,
-                          isVerified: false,
-                          isActive: false,
-                          contactMobileNumber: req.body.contactMobileNumber,
-                          address: req.body.address,
-                          balance: req.body.balance,
-                          currency: req.body.currency,
-                          deptAgencyGroup: req.body.deptAgencyGroup,
-                          qualification: req.body.qualification,
-                          country: req.body.country,
-                          createdAt: Date.now(),
-                          updatedAt: Date.now(),
-                          createdAtFormatted: normalFormat(Date.now()),
-                          updatedAtFormatted: normalFormat(Date.now())
-                        });
+                const user = getObjectMongoose('Buyer', { emailAddress: req.body.emailAddress });
+              
+                if(verifyBanNewUser(req, res, req.body.emailAddress, ipv4)) {
+                  return res.status(400).send({
+                    msg: 'You are trying to join UNITE from the part of an already banned user. Please refrain from doing so.'
+                  });
+                }
 
-                        await buyer.save(async (err) => {
-                          if(treatError(req, res, err, "/buyer/sign-up"))
-                            return false;
+                if(user) {
+                  return res
+                    .status(400)
+                    .send({
+                      msg:
+                        "The e-mail address you have entered is already associated with another account."
+                    });
+                }
 
-                        req.session.buyer = buyer;
-                        req.session.buyerId = buyer._id;
-                        await req.session.save((err) => {
-                          if (treatError(req, res, err, "/buyer/sign-up"))
-                            return false;
+                let buyer;
+
+                try {
+                  let hash = bcrypt.hashSync(req.body.password, 10);
+
+                  /*
+                  bcrypt.hash(req.body.password, 16, async function(
+                    err,
+                    hash
+                  ) {*/
+                    buyer = new Buyer({
+                      role: process.env.USER_REGULAR,
+                      avatar: req.body.avatar,
+                      organizationName: req.body.organizationName,
+                      organizationUniteID: req.body.organizationUniteID,
+                      contactName: req.body.contactName,
+                      emailAddress: req.body.emailAddress,
+                      password: hash,
+                      ipv4: ipv4,
+                      isVerified: false,
+                      isActive: false,
+                      contactMobileNumber: req.body.contactMobileNumber,
+                      address: req.body.address,
+                      balance: req.body.balance,
+                      currency: req.body.currency,
+                      deptAgencyGroup: req.body.deptAgencyGroup,
+                      qualification: req.body.qualification,
+                      country: req.body.country,
+                      createdAt: Date.now(),
+                      updatedAt: Date.now(),
+                      createdAtFormatted: normalFormat(Date.now()),
+                      updatedAtFormatted: normalFormat(Date.now())
+                    });
+
+                    await buyer.save(async (err) => {
+                      if(treatError(req, res, err, "/buyer/sign-up"))
+                        return false;
+
+                    req.session.buyer = buyer;
+                    req.session.buyerId = buyer._id;
+                    await req.session.save((err) => {
+                      if (treatError(req, res, err, "/buyer/sign-up"))
+                        return false;
+                    });
+
+                    let token = new UserToken({
+                      _userId: buyer._id,
+                      userType: TYPE,
+                      token: crypto.randomBytes(16).toString("hex")
+                    });
+
+                    await token.save(async function(err) {
+                      if (err) {
+                        req.flash("error", err.message);
+                        console.error(err.message);
+                        return res.status(500).send({
+                          msg: err.message
                         });
+                      }
+                    });
 
-                        let token = new Token({
-                          _userId: buyer._id,
-                          userType: TYPE,
-                          token: crypto.randomBytes(16).toString("hex")
-                        });
-
-                        await token.save(async function(err) {
-                          if (err) {
-                            req.flash("error", err.message);
-                            console.error(err.message);
-                            return res.status(500).send({
-                              msg: err.message
-                            });
-                          }
-                        });
-
-                        await sendConfirmationEmail(
-                          req.body.organizationName,
-                          "/buyer/confirmation/",
-                          token.token,
-                          req
-                        );
-                        req.flash(
-                          "success",
-                          "Buyer signed up successfully! Please confirm your account by checking your e-mail address: " +
-                            req.body.emailAddress + " ."
-                        );
-                        setTimeout(function() {
-                          return res.redirect("/buyer/sign-in");
-                        }, 250);
-                      });
-                    //});
-                    } catch {}
-                  }
-                );
+                    await sendConfirmationEmail(
+                      req.body.organizationName,
+                      "/buyer/confirmation/",
+                      token.token,
+                      req
+                    );
+                    req.flash(
+                      "success",
+                      "Buyer signed up successfully! Please confirm your account by checking your e-mail address: " +
+                        req.body.emailAddress + " ."
+                    );
+                    setTimeout(function() {
+                      return res.redirect("/buyer/sign-in");
+                    }, 250);
+                  });                   
+                } catch {}
               }
-            }); //.catch(console.error);
           }
         }
     }
@@ -1290,92 +1196,81 @@ exports.postSignUp = async (req, res) => {
   }
 };
 
-exports.getProfile = (req, res) => {
-  if (!req || !req.session) return false;
 
-  let success = search(req.session.flash, "success"),
-    error = search(req.session.flash, "error");
-  req.session.flash = [];
-  
-  Country.find({}).then((countries) => {
-      let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
-      req.session.flash = [];
+exports.getProfile = async (req, res) => {
+  if (!req || !req.session) 
+    return false;
 
-      let country = [];
-      for(let i in countries) {
-        country.push({id: i, name: countries[i].name});
-      }
-        
-    res.render("buyer/profile", {
-      DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
-      FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
-      successMessage: success,
-      countries: country,
-      errorMessage: error,
-      profile: req.session.buyer
-    });
+  let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
+  req.session.flash = [];  
+  const countries = await getDataMongoose('Country'); 
+
+  res.render("buyer/profile", {
+    DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+    FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
+    successMessage: success,
+    countries: countries,
+    errorMessage: error,
+    profile: req.session.buyer
   });
 };
 
-exports.postProfile = (req, res) => {
+
+exports.postProfile = async (req, res) => {
   try {
-    Buyer.findOne({ _id: req.body._id }, async (err, doc) => {
+    let doc = await getObjectMongoose('Buyer', { _id: req.body._id });
+    const ipv4 = await internalIp.v4();
+
+    doc._id = req.body._id;
+    doc.avatar = req.body.avatar;
+    doc.role = req.body.role;
+    doc.organizationName = req.body.organizationName;
+    doc.organizationUniteID = req.body.organizationUniteID;
+    doc.contactName = req.body.contactName;
+    doc.emailAddress = req.body.emailAddress;
+    doc.password = req.body.password;
+    doc.ipvs = ipv4;
+    doc.isVerified = true;
+    doc.isActive = true;
+    doc.contactMobileNumber = req.body.contactMobileNumber;
+    doc.address = req.body.address;
+    doc.balance = req.body.balance;
+    doc.currency = req.body.currency;
+    doc.deptAgencyGroup = req.body.deptAgencyGroup;
+    doc.qualification = req.body.qualification;
+    doc.country = req.body.country;
+    doc.createdAt = req.body.createdAt;
+    doc.updatedAt = Date.now();
+    doc.createdAtFormatted = normalFormat(req.body.createdAt);
+    doc.updatedAtFormatted = normalFormat(Date.now());
+
+    MongoClient.connect(URL, { useUnifiedTopology: true }, async function(err, db) {
       if (treatError(req, res, err, "/buyer/profile")) 
         return false;
       
-      const ipv4 = await internalIp.v4();
+      let dbo = db.db(BASE);
 
-      doc._id = req.body._id;
-      doc.avatar = req.body.avatar;
-      doc.role = req.body.role;
-      doc.organizationName = req.body.organizationName;
-      doc.organizationUniteID = req.body.organizationUniteID;
-      doc.contactName = req.body.contactName;
-      doc.emailAddress = req.body.emailAddress;
-      doc.password = req.body.password;
-      doc.ipvs = ipv4;
-      doc.isVerified = true;
-      doc.isActive = true;
-      doc.contactMobileNumber = req.body.contactMobileNumber;
-      doc.address = req.body.address;
-      doc.balance = req.body.balance;
-      doc.currency = req.body.currency;
-      doc.deptAgencyGroup = req.body.deptAgencyGroup;
-      doc.qualification = req.body.qualification;
-      doc.country = req.body.country;
-      doc.createdAt = req.body.createdAt;
-      doc.updatedAt = Date.now();
-      doc.createdAtFormatted = normalFormat(req.body.createdAt);
-      doc.updatedAtFormatted = normalFormat(Date.now());
+      await dbo
+        .collection("buyers")
+        .updateOne({ _id: doc._id }, { $set: doc }, async function(
+          err,
+          resp
+        ) {
+          if (treatError(req, res, err, "/buyer/profile")) 
+            return false;
 
-      MongoClient.connect(URL, { useUnifiedTopology: true }, async function(
-        err,
-        db
-      ) {
-        if (treatError(req, res, err, "/buyer/profile")) return false;
-        let dbo = db.db(BASE);
+          req.session.buyer = doc;
+          req.session.buyerId = doc._id;
+          await req.session.save();
+          db.close();
 
-        await dbo
-          .collection("buyers")
-          .updateOne({ _id: doc._id }, { $set: doc }, async function(
-            err,
-            resp
-          ) {
-            if (treatError(req, res, err, "/buyer/profile")) return false;
-
-            req.session.buyer = doc;
-            req.session.buyerId = doc._id;
-            await req.session.save();
-            db.close();
-
-            console.log("Buyer details updated successfully!");
-            req.flash("success", "Buyer details updated successfully!");
-            setTimeout(function() {
-              return res.redirect("/buyer/profile");
-            }, 400);
-          });
-      });
-    });
+          console.log("Buyer details updated successfully!");
+          req.flash("success", "Buyer details updated successfully!");
+          setTimeout(function() {
+            return res.redirect("/buyer/profile");
+          }, 400);
+        });
+      });    
     //.catch(console.error);
   } catch {
     //return res.redirect('/buyer/profile');

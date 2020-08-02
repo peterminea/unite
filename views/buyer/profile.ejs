@@ -25,7 +25,7 @@
   <script type="text/javascript">
     $(document).ready(function() {
       let token = $("input[name='_csrf']").val();
-      getAutocomplete('#country', '/countryAutocomplete', token);
+      getAutocomplete('#country', '/countryAutocomplete', token, '<%= profile._id %>');
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       let defaultCurr = "<%= profile.currency %>";
       initBaseRates(fx, 'select.currency', '/currencyAutocomplete', token, defaultCurr);
@@ -115,7 +115,7 @@
         <div class="form-group mr-2">
           <label>Organization UNITE ID*</label>
           <input type="text" readonly class="form-control" id="organizationUniteID" name="organizationUniteID" value="<%= profile.organizationUniteID %>">
-        </div>        
+        </div>
         <div class="form-group mr-2">
           <label>Contact name*</label>
           <input type="text" class="form-control" id="contactName" name="contactName" value="<%= profile.contactName %>" required>

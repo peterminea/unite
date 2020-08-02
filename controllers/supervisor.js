@@ -4,7 +4,7 @@ const ObjectId = require("mongodb").ObjectId;
 const Supervisor = require("../models/supervisor");
 const Buyer = require("../models/buyer");
 const BidRequest = require("../models/bidRequest");
-const Token = require("../models/userToken");
+const UserToken = require("../models/userToken");
 const assert = require('assert');
 const process = require('process');
 const { basicFormat, customFormat, normalFormat } = require("../middleware/dateConversions");
@@ -13,8 +13,32 @@ const MongoClient = require('mongodb').MongoClient;
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const search = require('../middleware/searchFlash');
-let Recaptcha = require('express-recaptcha').RecaptchaV3;
-const { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendCancelBidEmail, prel, sortLists, getUsers, getBidStatusesJson, getCancelTypesJson, postSignInBody, updateBidBody, encryptionNotice } = require('../middleware/templates');
+let Recaptcha = require('express-recaptcha').RecaptchaV2;
+
+const {
+  fileExists,
+  sendConfirmationEmail,
+  sendCancellationEmail,
+  sendExpiredBidEmails,
+  sendInactivationEmail,
+  resendTokenEmail,
+  sendForgotPasswordEmail,
+  sendResetPasswordEmail,
+  sendCancelBidEmail,
+  prel,
+  sortLists,
+  getObjectMongo,
+  getObjectMongoose,
+  getDataMongo,
+  getDataMongoose,
+  getBidStatusesJson,
+  getCancelTypesJson,
+  postSignInBody,
+  saveBidBody,
+  updateBidBody,
+  encryptionNotice
+} = require("../middleware/templates");
+
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
@@ -22,7 +46,6 @@ const fetch = require('node-fetch');
 const Country = require('../models/country');
 const internalIp = require('internal-ip');
 const { verifyBanNewUser, verifyBanExistingUser } = require('../middleware/verifyBanned');
-
 const TYPE = process.env.USER_SPV;
 
 function getBidsData(bids) {
@@ -66,70 +89,48 @@ function getBidsData(bids) {
 }
 
 
-function getBuyerBidsData(req, res, buyers) {
+async function getBuyerBidsData(req, res, buyers) {
   let bidData = [];
   
   if(buyers && buyers.length) {
-    MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
-      if(treatError(req, res, err, 'back'))
-        return false;
-      
-      let dbo = db.db(BASE);
-      
-      for(let i in buyers) {
-        await dbo.collection('bidRequests').find({ buyer: new ObjectId(buyers[i]._id) }).toArray(function(err, bids) {
-          if(treatError(err, req, res, 'back')) {
-            return false;
-          }
-          
-          let obj = getBidsData(bids);
-          bidData.push(obj);
-          
-        if(i == buyers.length - 1) {
-          db.close();
-          return bidData;
-          }
-        });
-      }
-    });
+    for(let i in buyers) {
+      let bids = await getDataMongoose('BidRequest', { buyer: new ObjectId(buyers[i]._id) });
+      let obj = getBidsData(bids);
+      bidData.push(obj);      
+    }
   }
   
   return bidData;
 }
 
-exports.getIndex = (req, res) => {
+
+exports.getIndex = async (req, res) => {
   if(!req || !req.session) 
     return false;
+  
   const supervisor = req.session.supervisor;
+  let results = await getDataMongoose('Buyer', { organizationUniteID: supervisor.organizationUniteID });
+  let bidData = await getBuyerBidsData(req, res, results);
+  console.log(bidData? bidData.length : 'Null');
+  
+  if(bidData.length)
+  for(let i in results) {
+    results[i].bidData = bidData[i];
+  }
 
-  Buyer.find(
-    { organizationUniteID: supervisor.organizationUniteID },
-    async (err, results) => {
-      if(treatError(req, res, err, 'back'))
-        return false;
-      
-      let bidData = await getBuyerBidsData(req, res, results);
-      console.log(bidData? bidData.length : 'Null');
-      if(bidData.length)
-      for(let i in results) {
-        results[i].bidData = bidData[i];
-      }
-      
-      let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
-      req.session.flash = [];
-                  
-      if(supervisor.avatar && supervisor.avatar.length && !fileExists('public/' + supervisor.avatar.substring(3))) {
-        supervisor.avatar = '';
-      }
+  let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
 
-      res.render("supervisor/index", {
-        supervisor: supervisor,
-        successMessage: success,
-        errorMessage: error,
-        buyers: results
-      });
-    }
-  );
+  if(supervisor.avatar && supervisor.avatar.length && !fileExists('public/' + supervisor.avatar.substring(3))) {
+    supervisor.avatar = '';
+  }
+
+  res.render("supervisor/index", {
+    supervisor: supervisor,
+    successMessage: success,
+    errorMessage: error,
+    buyers: results
+  });
 }
 
 
@@ -224,33 +225,30 @@ exports.getChat = (req, res) => {//Coming from the getLogin above.
 }
 
 
-exports.postDeactivate = (req, res) => {
+exports.postDeactivate = async (req, res) => {
   let id = req.body.id, uniteId = req.body.uniteID;
+  const buyers = await getDataMongoose('Buyer', {organizationUniteID: uniteId, isActive: true});
   
-  let prom = Buyer.find({organizationUniteID: uniteId, isActive: true}).exec();
-  prom.then((buyers) => {
-    if(buyers && buyers.length) {
-      req.flash('error', 'You have at least one active Buyer associated to your Supervisor account. It is not advisable to deactivate your account at this time.');
-      return res.redirect('/supervisor/profile');
-    }
-    
-    try {
-      MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
+  if(buyers && buyers.length) {
+    req.flash('error', 'You have at least one active Buyer associated to your Supervisor account. It is not advisable to deactivate your account at this time.');
+    return res.redirect('/supervisor/profile');
+  }
+
+  try {
+    MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
+      if(treatError(req, res, err, 'back'))
+        return false;
+      let dbo = db.db(BASE);
+      //And now, deactivate the Supplier themselves:
+      await dbo.collection('supervisors').updateOne( { _id: id }, { $set: { isActive: false } }, function(err, resp) {
         if(treatError(req, res, err, 'back'))
           return false;
-        let dbo = db.db(BASE);
-        //And now, deactivate the Supplier themselves:
-        await dbo.collection('supervisors').updateOne( { _id: id }, { $set: { isActive: false } }, function(err, resp) {
-          if(treatError(req, res, err, 'back'))
-            return false;
-          req.flash('success', 'Supervisor successfully deactivated. You will re-become active at your next login.');
-          return res.redirect('/supervisor/sign-in');
-        });        
-      });
-    }
-    catch {
-    }
-  });
+        req.flash('success', 'Supervisor successfully deactivated. You will re-become active at your next login.');
+        return res.redirect('/supervisor/sign-in');
+      });        
+    });
+  } catch {
+    }  
 };
 
 
@@ -263,45 +261,45 @@ exports.postDelete = function (req, res, next) {
 
 exports.postConfirmation = async function (req, res, next) {
   try {
-  await Token.findOne({ token: req.params.token, userType: TYPE }, async function (err, token) {
+    
+    let token = await getObjectMongoose('UserToken', { token: req.params.token, userType: TYPE });
+    let user = await getObjectMongoose('Supervisor', { _id: token._userId, emailAddress: req.body.emailAddress });
+
     if (!token) {
       req.flash('error', 'We were unable to find a valid token. It may have expired. Please request a new token.');
       return res.redirect('/supervisor/resend');
     }
 
-    await Supervisor.findOne({ _id: token._userId, emailAddress: req.body.emailAddress }, async function (err, user) {
-        if (!user)
-          return res.status(400).send({
-          msg: 'We were unable to find a user for this token.' 
-        });
+    if (!user)
+      return res.status(400).send({
+      msg: 'We were unable to find a user for this token.' 
+    });
 
-        if (user.isVerified) 
-          return res.status(400).send({ 
-            type: 'already-verified', 
-            msg: 'This user has already been verified.' });
+    if (user.isVerified) 
+      return res.status(400).send({ 
+        type: 'already-verified', 
+        msg: 'This user has already been verified.' });
 
-          await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
-            if(treatError(req, res, err, 'back'))
-              return false;
-            let dbo = db.db(BASE);
-                
-            await dbo.collection("supervisors").updateOne({ _id: user._id }, { $set: {isVerified: true} }, function(err, resp) {
-                  if(err) {
-                    req.flash('error', err.message);
-                    console.error(err.message);
-                    return res.status(500).send({ 
-                      msg: err.message 
-                    });
-                    
-                  }
-                
-                db.close();
-                console.log("The account has been verified. Please log in.");
-                req.flash('success', "The account has been verified. Please log in.");
-                return res.redirect('/supervisor/sign-in');
-                });
-            });        
-        });
+      await MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {//db or client.
+        if(treatError(req, res, err, 'back'))
+          return false;
+        let dbo = db.db(BASE);
+
+        await dbo.collection("supervisors").updateOne({ _id: user._id }, { $set: {isVerified: true} }, function(err, resp) {
+          if(err) {
+            req.flash('error', err.message);
+            console.error(err.message);
+            return res.status(500).send({ 
+              msg: err.message 
+            });
+
+          }
+
+        db.close();
+        console.log("The account has been verified. Please log in.");
+        req.flash('success', "The account has been verified. Please log in.");
+        return res.redirect('/supervisor/sign-in');
+            });       
     });
   } catch {
     //req.flash('error', 'Error on Verification!');
@@ -310,29 +308,29 @@ exports.postConfirmation = async function (req, res, next) {
 }
 
 
-exports.postResendToken = function (req, res, next) {
-    Supervisor.findOne({ emailAddress: req.body.emailAddress }, async function (err, user) {
-        if (!user) 
-          return res.status(400).send({ msg: 'We were unable to find a user with that email.' });
-        if (user.isVerified) 
-          return res.status(400).send({ msg: 'This account has already been verified. Please log in.' });
+exports.postResendToken = async function (req, res, next) {
+  const user = await getObjectMongoose('Supervisor', { emailAddress: req.body.emailAddress });
+  
+  if (!user) 
+    return res.status(400).send({ msg: 'We were unable to find a user with that email.' });
+  if (user.isVerified) 
+    return res.status(400).send({ msg: 'This account has already been verified. Please log in.' });
 
-        let token = new Token({ 
-          _userId: user._id, 
-          userType: TYPE,
-          token: crypto.randomBytes(16).toString('hex') });
+  let token = new UserToken({ 
+    _userId: user._id, 
+    userType: TYPE,
+    token: crypto.randomBytes(16).toString('hex') });
 
-        await token.save((err) => {
-            if (err) {
-              return res.status(500).send({
-                msg: err.message 
-              }); 
-            } 
+  await token.save((err) => {
+      if (err) {
+        return res.status(500).send({
+          msg: err.message 
         });
-      
-        await resendTokenEmail(user, token.token, '/supervisor/confirmation/', req);
-        return res.status(200).send('A verification email has been sent to ' + user.emailAddress + '.');
-        });    
+      } 
+  });
+
+  await resendTokenEmail(user, token.token, '/supervisor/confirmation/', req);
+  return res.status(200).send('A verification email has been sent to ' + user.emailAddress + '.');
 }
 
 
@@ -356,23 +354,23 @@ exports.postForgotPassword = (req, res, next) => {
         done(err, token);
       });
     },
-    function(token, done) {
-      Supervisor.findOne({ emailAddress: req.body.emailAddress }, function (err, user) {
-        if (!user) {
-          req.flash('error', 'Sorry. We were unable to find a user with this e-mail address.');
-          return res.redirect('supervisor/forgotPassword');
-        }
-        
-        MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
+    async function(token, done) {
+      const user = await getObjectMongoose('Supervisor', { emailAddress: req.body.emailAddress });
+     
+      if (!user) {
+        req.flash('error', 'Sorry. We were unable to find a user with this e-mail address.');
+        return res.redirect('supervisor/forgotPassword');
+      }
+
+      MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
+        if(treatError(req, res, err, 'back'))
+          return false;
+
+        let dbo = db.db(BASE);
+        dbo.collection("supervisors").updateOne({ _id: user._id }, { $set: {resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000} }, function(err, res) {        
           if(treatError(req, res, err, 'back'))
             return false;
-          
-          let dbo = db.db(BASE);
-          dbo.collection("supervisors").updateOne({ _id: user._id }, { $set: {resetPasswordToken: token, resetPasswordExpires: Date.now() + 86400000} }, function(err, res) {        
-            if(treatError(req, res, err, 'back'))
-              return false;
-            db.close();
-          });
+          db.close();
         });
       });
     },
@@ -387,61 +385,58 @@ exports.postForgotPassword = (req, res, next) => {
 }
 
 
-exports.getResetPasswordToken = (req, res) => {
+exports.getResetPasswordToken = async (req, res) => {
   let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
+  const user = await getObjectMongoose('Supervisor', {resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() }});
   
-  Supervisor.findOne({resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() }}, function(err, user) {
-    if(!user) {
-      req.flash('error', 'Password reset token is either invalid or expired.');
-      return res.redirect('/supervisor/forgotPassword');
-    }
-    res.render('supervisor/resetPassword', {
-      token: req.params.token,
-      successMessage: success,
-      errorMessage: error
-    });
-  });
+  if(!user) {
+    req.flash('error', 'Password reset token is either invalid or expired.');
+    return res.redirect('/supervisor/forgotPassword');
+  }
+  
+  res.render('supervisor/resetPassword', {
+    token: req.params.token,
+    successMessage: success,
+    errorMessage: error
+  });  
 }
 
 
 exports.postResetPasswordToken = (req, res) => {
   async.waterfall([
-    function(done) {
-      Supervisor.findOne(
-        {resetPasswordToken: req.params.token, 
-         resetPasswordExpires: { $gt: Date.now() }
-        }, function(err, user) {
+    async function(done) {
+      const user = await getObjectMongoose('Supervisor', {resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() }});
+
       if(!user) {
         req.flash('error', 'Password reset token is either invalid or expired.');
         return res.redirect('back');
       }
-        
-    if (req.body.password === req.body.passwordRepeat) {
+
+      if(req.body.password === req.body.passwordRepeat) {
         MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
           if(treatError(req, res, err, 'back'))
             return false;
-          
-            let dbo = db.db(BASE);
-            let hash = bcrypt.hashSync(req.body.password, 10);
-            dbo.collection("supervisors").updateOne({ _id: user._id }, 
-              { $set: {
-                password: hash, 
-                resetPasswordToken: undefined, 
-                resetPasswordExpires: undefined } }, 
-                                                    
-                function(err, resp) {
-                  if(treatError(req, res, err, 'back'))
-                    return false;
 
-                    db.close();
+          let dbo = db.db(BASE);
+          let hash = bcrypt.hashSync(req.body.password, 10);
+          dbo.collection("supervisors").updateOne({ _id: user._id }, 
+            { $set: {
+              password: hash, 
+              resetPasswordToken: undefined, 
+              resetPasswordExpires: undefined } },
+              function(err, resp) {
+                if(treatError(req, res, err, 'back'))
+                  return false;
+
+                db.close();
             });
-          });
-        } else {
-          req.flash('error', 'Passwords do not match.');
-          return res.redirect('back');
-        }
-      });
+        });
+      } else {
+        req.flash('error', 'Passwords do not match.');
+        return res.redirect('back');
+      }
+      
     },
     function(user, done) {
       sendResetPasswordEmail(user, 'Supervisor', req);
@@ -469,31 +464,22 @@ exports.getSignIn = (req, res) => {
 }
 
 
-exports.getSignUp = (req, res) => {
-  let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
-  req.session.flash = [];
-  
-  if(!req.session.supervisorId) {
-    Country.find({}).then((countries) => {
-        let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
-        req.session.flash = [];
+exports.getSignUp = async (req, res) => {
+  if(!req.session.supervisorId) {    
+    const countries = await getDataMongoose('Country');
+    let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+    req.session.flash = [];
 
-        let country = [];
-        for(let i in countries) {
-          country.push({id: i, name: countries[i].name});
-        }
-
-      res.render("supervisor/sign-up", {
-        captchaSiteKey: captchaSiteKey,
-        countries: country,
-        FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
-        encryptionNotice: encryptionNotice,
-        successMessage: success,
-        errorMessage: error
+    res.render("supervisor/sign-up", {
+      captchaSiteKey: captchaSiteKey,
+      countries: countries,
+      FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
+      encryptionNotice: encryptionNotice,
+      successMessage: success,
+      errorMessage: error
       });
-    });
-  } else 
-    return res.redirect("/supervisor");
+    } else 
+      return res.redirect("/supervisor");
 }
 
 
@@ -527,91 +513,90 @@ exports.postSignUp = async (req, res) => {
           return res.redirect("/supervisor/sign-up");
           
           } else if(global++ < 1) {
-            Supervisor.findOne({ emailAddress: req.body.emailAddress }, async function (err, user) {
-              if(treatError(req, res, err, '/supplier/sign-up'))
-                return false;
-              
-              const ipv4 = await internalIp.v4();
-              
-              if(verifyBanNewUser(req, res, req.body.emailAddress, ipv4)) {
-                return res.status(400).send({
-                  msg: 'You are trying to join UNITE from the part of an already banned user. Please refrain from doing so.'
-                });
-              }
-              
-              if (user) 
-                return res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
-                let supervisor;
-                let hash = bcrypt.hashSync(req.body.password, 10);
-              
-                try {
-                  //user = new Promise((resolve, reject) => {
-                    supervisor = new Supervisor({
-                      role: process.env.USER_REGULAR,
-                      avatar: req.body.avatar,
-                      organizationName: req.body.organizationName,
-                      organizationUniteID: req.body.organizationUniteID,
-                      contactName: req.body.contactName,
-                      emailAddress: req.body.emailAddress,
-                      password: hash,
-                      ipv4: ipv4,
-                      isVerified: false,
-                      isActive: false,
-                      contactMobileNumber: req.body.contactMobileNumber,
-                      address: req.body.address,
-                      country: req.body.country,
-                      certificates: req.body.certificatesIds,
-                      antibriberyPolicy: req.body.antibriberyPolicyId,
-                      environmentPolicy: req.body.environmentPolicyId,
-                      qualityManagementPolicy: req.body.qualityManagementPolicyId,
-                      occupationalSafetyAndHealthPolicy: req.body.occupationalSafetyAndHealthPolicyId,
-                      otherRelevantFiles: req.body.otherRelevantFilesIds,
-                      certificatesIds: req.body.certificatesIds,
-                      antibriberyPolicyId: req.body.antibriberyPolicyId,
-                      environmentPolicyId: req.body.environmentPolicyId,
-                      qualityManagementPolicyId: req.body.qualityManagementPolicyId,
-                      occupationalSafetyAndHealthPolicyId: req.body.occupationalSafetyAndHealthPolicyId,
-                      otherRelevantFilesIds: req.body.otherRelevantFilesIds,
-                      UNITETermsAndConditions: true,
-                      antibriberyAgreement: true,
-                      createdAt: Date.now(),
-                      updatedAt: Date.now(),
-                      createdAtFormatted: normalFormat(Date.now()),
-                      updatedAtFormatted: normalFormat(Date.now())
-                    });
+            const user = await getObjectMongoose('Supervisor', { emailAddress: req.body.emailAddress });            
+            if(treatError(req, res, err, '/supplier/sign-up'))
+              return false;
 
-                    await supervisor.save((err) => {
-                      if(treatError(req, res, err, '/supervisor/sign-up'))
-                        return false;
-                      
-                      req.session.supervisor = supervisor;
-                      req.session.supervisorId = supervisor._id;
-                      req.session.save();
+            const ipv4 = await internalIp.v4();
 
-                      let token = new Token({ 
-                        _userId: supervisor._id,
-                        userType: TYPE, 
-                        token: crypto.randomBytes(16).toString('hex') });
-
-                      token.save(async function (err) {
-                        if (err) {
-                          req.flash('error', err.message);
-                          console.error(err.message);
-                          return res.status(500).send({
-                            msg: err.message 
-                          });
-                        }
-
-                        await sendConfirmationEmail(supervisor.organizationName, "/supervisor/confirmation/", token.token, req);
-                        req.flash("success", "Supervisor signed up successfully! Please confirm your account by visiting " + req.body.emailAddress + '');
-                        setTimeout(function() {
-                          return res.redirect("/supervisor/sign-in");
-                  }, 250);
-                  });
+            if(verifyBanNewUser(req, res, req.body.emailAddress, ipv4)) {
+              return res.status(400).send({
+                msg: 'You are trying to join UNITE from the part of an already banned user. Please refrain from doing so.'
               });
-            } catch {
             }
-          });
+
+            if (user) 
+              return res.status(400).send({ msg: 'The e-mail address you have entered is already associated with another account.'});
+              let supervisor;
+              let hash = bcrypt.hashSync(req.body.password, 10);
+
+              try {
+                //user = new Promise((resolve, reject) => {
+                  supervisor = new Supervisor({
+                    role: process.env.USER_REGULAR,
+                    avatar: req.body.avatar,
+                    organizationName: req.body.organizationName,
+                    organizationUniteID: req.body.organizationUniteID,
+                    contactName: req.body.contactName,
+                    emailAddress: req.body.emailAddress,
+                    password: hash,
+                    ipv4: ipv4,
+                    isVerified: false,
+                    isActive: false,
+                    contactMobileNumber: req.body.contactMobileNumber,
+                    address: req.body.address,
+                    country: req.body.country,
+                    certificates: req.body.certificatesIds,
+                    antibriberyPolicy: req.body.antibriberyPolicyId,
+                    environmentPolicy: req.body.environmentPolicyId,
+                    qualityManagementPolicy: req.body.qualityManagementPolicyId,
+                    occupationalSafetyAndHealthPolicy: req.body.occupationalSafetyAndHealthPolicyId,
+                    otherRelevantFiles: req.body.otherRelevantFilesIds,
+                    certificatesIds: req.body.certificatesIds,
+                    antibriberyPolicyId: req.body.antibriberyPolicyId,
+                    environmentPolicyId: req.body.environmentPolicyId,
+                    qualityManagementPolicyId: req.body.qualityManagementPolicyId,
+                    occupationalSafetyAndHealthPolicyId: req.body.occupationalSafetyAndHealthPolicyId,
+                    otherRelevantFilesIds: req.body.otherRelevantFilesIds,
+                    UNITETermsAndConditions: true,
+                    antibriberyAgreement: true,
+                    createdAt: Date.now(),
+                    updatedAt: Date.now(),
+                    createdAtFormatted: normalFormat(Date.now()),
+                    updatedAtFormatted: normalFormat(Date.now())
+                  });
+
+                  await supervisor.save((err) => {
+                    if(treatError(req, res, err, '/supervisor/sign-up'))
+                      return false;
+
+                    req.session.supervisor = supervisor;
+                    req.session.supervisorId = supervisor._id;
+                    req.session.save();
+
+                    let token = new UserToken({ 
+                      _userId: supervisor._id,
+                      userType: TYPE, 
+                      token: crypto.randomBytes(16).toString('hex') });
+
+                    token.save(async function (err) {
+                      if (err) {
+                        req.flash('error', err.message);
+                        console.error(err.message);
+                        return res.status(500).send({
+                          msg: err.message 
+                        });
+                      }
+
+                      await sendConfirmationEmail(supervisor.organizationName, "/supervisor/confirmation/", token.token, req);
+                      req.flash("success", "Supervisor signed up successfully! Please confirm your account by visiting " + req.body.emailAddress + '');
+                      setTimeout(function() {
+                        return res.redirect("/supervisor/sign-in");
+                }, 250);
+                });
+            });
+          } catch {
+          }          
         }
       }
     }
@@ -622,38 +607,27 @@ exports.postSignUp = async (req, res) => {
 }
 
 
-exports.getProfile = (req, res) => {
+exports.getProfile = async (req, res) => {
   if (!req || !req.session) 
     return false;
-  
+ 
+  const countries = await getDataMongoose('Country');
   let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
-  Country.find({}).then((countries) => {
-    let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
-    req.session.flash = [];
 
-    let country = [];
-    for(let i in countries) {
-      country.push({id: i, name: countries[i].name});
-    }
-    
-    res.render("supervisor/profile", {
-      successMessage: success,
-      errorMessage: error,
-      FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
-      countries: country,
-      profile: req.session.supervisor
-    });
+  res.render("supervisor/profile", {
+    successMessage: success,
+    errorMessage: error,
+    FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
+    countries: countries,
+    profile: req.session.supervisor
   });
 }
 
 
-exports.postProfile = (req, res) => {
+exports.postProfile = async (req, res) => {
   try {
-  Supervisor.findOne({ _id: req.body._id }, async (err, doc) => {
-    if(treatError(req, res, err, '/supervisor/profile'))
-      return false;
-    
+    let doc = await getObjectMongoose('Supervisor', { _id: req.body._id });
     const ipv4 = await internalIp.v4();
     
     doc._id = req.body._id;
@@ -712,8 +686,7 @@ exports.postProfile = (req, res) => {
         setTimeout(function() {
           return res.redirect("/supervisor/profile");
         }, 400);
-      });
-    });
+      });   
   })
     .catch(console.error);
   } catch {

@@ -225,7 +225,7 @@
                     <% if(supplier.productsServicesOffered != null && supplier.productsServicesOffered.length > 0) { %>
                       <br>
                       <% let g = 0, h = supplier.productsServicesOffered.length; for(g in supplier.productsServicesOffered) { %>
-                      <span style='color: navy'><%= supplier.productsServicesOffered[g] %><% if(g < h-1) { %>, <% } %></span>
+                      <span style='color: navy; font-weight: bold'><%= supplier.productsServicesOffered[g] %><% if(g < h-1) { %>, <% } %></span>
                       <% } %>
                     <% } else { %>
                     <br>
@@ -377,12 +377,26 @@
                       </div>
                       <input type="text" class="form-control" name="complianceRequirementsUrl" aria-describedby="basic-addon3">
                     </div>
-                  </div>                 
+                  </div>
                    <div class="form-group">
                     <label class="col-form-label">Other Requirements</label>
                     <textarea class="form-control" name="otherRequirements"></textarea>
-                  </div>
+                  </div>                 
                   <div class='upload-section'>
+                    <div class='catalog' id='catalog_<%= i %>' style='visibility: hidden'>
+                      <% for(let p of products) { %>
+                      <span id='<%= p._id %>'><%= p.productName %></span>
+                      <% } %>
+                    </div>
+                     <p class='excel'>
+                      You can also select multiple suppliers for your bid.
+                    </p>
+                    <div class="form-group">
+                      <label class="col-form-label">Other Suppliers</label>
+                      <select id="otherSuppliers_<%= i %>" class="form-control otherSuppliers" name="otherSuppliers">
+                        <option></option>
+                      </select>
+                    </div>
                     <div class="form-group">
                       <label class="col-form-label">Preferred Delivery Date</label>
                       <input type="text" class="form-control prefDate" id="prefDate_<%= i %>" name="preferredDeliveryDate">
@@ -420,7 +434,7 @@
                       <input type="hidden" class="fileId" name="productImage" value="">
                       <input class="form-control upload productimageupload multiparam" type="file" id="productImage" name="products" single>
                       <input class="form-control single btn upload-button btn-success mt-2" type="button" disabled value="Upload Product Image" />                    
-                    </div>                  
+                    </div>
                     <div class="form-group">
                       <label class="col-form-label">Products / Services Requested*</label>
                         <p class='littleNote form-control' style='height: 120px'>
@@ -429,7 +443,7 @@
                         <input type="text" class="form-control prodInput" defaultMaxAmount="<%= MAX_AMOUNT %>" placeholder="Add Product/Service*" id="prodServiceInput_<%= i %>">
                         <br>
                         <button class="btn btn-outline-secondary prodButton" type="button" disabled MAX="<%= MAX_PROD %>" id="addProdService_<%= i %>">Add</button>
-                      </div>                    
+                      </div>
                       <div class="form-group">
                         <label class="col-form-label">Amount*</label>
                         <input type="number" min="1" step="1" class="form-control amountInput" id="amount_<%= i %>" name="theAmount" value="0" required>
@@ -516,8 +530,13 @@
                     }
                     
                     const ind = '_' + "<%= i %>";
-                    let data = []; 
+                    let data = [];
                     initGrid(productColModel, data, "#grid"+ind, '#prodPager'+ind, "name", 'Products List', 1080);
+                    let otherSel = $('#otherSuppliers'+ind);
+                    
+                    <% for(let x of allSuppliers) { if(x._id != supplier._id) { %>
+                    otherSel.append(`<option id='${<%= x._id %>}' value='${<%= x.companyName %>}'><%= x.companyName %></option>`);
+                    <% } } %>
                     
                     setTimeout(function() {
                       let table = $("#grid"+ind);

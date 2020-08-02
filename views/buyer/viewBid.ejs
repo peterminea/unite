@@ -310,14 +310,14 @@
                      <div class="form-group">
                       <label class="col-form-label">Status*</label>
                       <input type="hidden" id="status_<%= i %>" class="form-control" name="status" value="<%= bid.status %>">
-                    </div>                  
+                    </div>
                     <div class="form-group selectstatus">
                       <select style="width: 100%" id="statuses_<%= i %>">
                       </select>
                     </div>
                       <% if (statusesJson != null) {  %>
                         <input type="hidden" id="statusJsonValues_<%= i %>" value="<%= statusesJson %>">
-                      <% }  %>                  
+                      <% }  %>
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <input type="hidden" name="buyer" value="<%= bid.buyer %>">
                     <input type="hidden" name="supplier" value="<%= bid.supplier %>">                  
