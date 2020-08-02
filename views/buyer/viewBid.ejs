@@ -219,16 +219,9 @@
                   <div class="form-group">
                     <label class="col-form-label">Item Description (Short*)</label>
                     <input readonly type="text" class="form-control" name="itemDescription" value="<%= bid.itemDescription %>">
-                    <input type="hidden" id="products_<%= i %>" value="<%= bid.productList %>">
-                    <input type="hidden" id="prices_<%= i %>" value="<%= bid.priceList %>">
-                    <input type="hidden" id="quantities_<%= i %>" value="<%= bid.amountList %>">
                   </div>
                   <div class="form-group">
                     <% const re = /:\s|,\s/;
-                    const products = bid.productList;
-                    const prices = bid.priceOriginalList;
-                    const amounts = bid.amountList;
-                    const images = bid.productImagesList;
                       %>
                     <Code>The product prices are expressed in your currency.<br></Code>
                     <label>Products / Services Ordered:</label>                    
@@ -242,7 +235,7 @@
                   <div class="form-group">
                     <label class="col-form-label">Amount*</label>
                     <input type="hidden" class="form-control" id="amount_<%= i %>" name="theAmount" value="0">
-                    <% j = 0; for(let k of bid.amountList) {j += k;} %>
+                    <% j = 0; for(let k of bid.productDetailsList) {j += k.amount;} %>
                     <input type="text" class='form-control' title="Total number of items" readonly id="totalAmount_<%= i %>" name="amount" value="<%= j %>">
                   </div>
                   <div class="form-group">
@@ -302,7 +295,7 @@
                     </div>
                     <div class="form-group">
                       <label class="col-form-label">Price (Supplier's currency):</label>
-                       <% l = 0; for(m in bid.priceList) {l += bid.priceList[m];} %> <!-- Same as bid.supplierPrice .-->
+                       <% l = 0; for(m of bid.productDetailsList) {l += m.supplierPrice;} %> <!-- Same as bid.supplierPrice .-->
                       <input type="text" title="Order price as seen by Supplier" value="<%= l %> <%= bid.supplierCurrency %>" class="form-control" id="supplierPrice_<%= i %>" name="supplierPrice" readonly>
                     </div>
                 <% if(bid.isExtended == false) { %>
@@ -349,26 +342,26 @@
                       let index = "<%= i %>";                 
                       let data = [];
                           
-                      <% let h = 0; if (products != null) { for(h in products) { %>                       
+                      <% let h = 0; if (productDetailsList != null) { for(h of productDetailsList) { %>                       
                         data.push({
-                          name: '<%= products[h] %>',
-                          supplierName: "<%= bid.supplierName %>",                          
-                          hiddenPrice: '<%= parseFloat(prices[h]).toFixed(2) %>',
-                          hiddenTotalPrice: '<%= parseFloat(parseInt(amounts[h])*parseFloat(prices[h])).toFixed(2) %>',
+                          name: '<%= h.productName %>',
+                          supplierName: "<%= bid.supplierName %>",
+                          hiddenPrice: '<%= parseFloat(h.buyerPrice).toFixed(2) %>',
+                          hiddenTotalPrice: '<%= parseFloat(parseInt(h.amount)*parseFloat(h.buyerPrice)).toFixed(2) %>',
                           hiddenCurrency: '<%= bid.buyerCurrency %>',
-                          productImageSource: <% if(images[h].length > 0) { %>
-                            "<img src='<%= path + '../' + images[h].substring(7) %>' style='height: 25px; width: 30px' onclick='window.open(this.src)'>"
+                          productImageSource: <% if(h.productImage != null && h.productImage.length > 0) { %>
+                            "<img src='<%= path + '../' + h.productImage.substring(7) %>' style='height: 25px; width: 30px' onclick='window.open(this.src)'>"
                           <% } else { %>
                             ''
                           <% } %>,
                           supplierId: "<%= bid.supplier %>",
-                          productId: '<%= products[h]._id %>',
+                          productId: '<%= h.id %>',
                           supplierCurrency: "<%= bid.supplierCurrency %>",
-                          hiddenAmount: '<%= parseInt(amounts[h]) %>'
+                          hiddenAmount: '<%= parseInt(h.amount) %>'
                         });
                       <% } } %>
                      
-                      initGrid(productColModel, data, "#grid_"+index, '#prodPager_'+index, "name", 'Products List', 1000);
+                      initGrid(productColModel, data, "#grid_"+index, '#prodPager_'+index, "name", 'Products List', 1024);
                       $('#mainForm_'+index).submit(function(e) {
                         if(!($(this).find('textarea[name="specialMentions"]').text()) 
                            && !confirm('Are you sure you want to update Bid Status without any mentions for the Supplier ' + $(this).find('input[name="supplierName"]').val() + '?')) {
@@ -405,8 +398,7 @@
                         to = "<%= bid.buyerName %>",
                         desc = "<%= bid.requestName %>",
                         emailAddress = "<%= bid.buyerEmail %>";
-                        let that = index;
-                        alert(that + ' ' + that);
+                        let that = index;                       
                         
                         $('#message_'+index)
                           .parent('div')

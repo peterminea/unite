@@ -48,6 +48,7 @@ dependencies:
   stripe: 8.81.0
   sweetalert: 2.1.2
   token: 0.1.0
+  underscore: 1.10.2
   utf-8-validate: 5.0.2
   validator: 13.1.1
 packages:
@@ -3332,6 +3333,10 @@ packages:
       node: '>= 0.8'
     resolution:
       integrity: sha512-KPHm4VL5dDXKz01UuEd88Df+KzynaohSL9fBh096KWAxSKZQDI2uBrVqtvRM4rwrIrRRKsdLNML/lnaaVSRioA==
+  /underscore/1.10.2:
+    dev: false
+    resolution:
+      integrity: sha512-N4P+Q/BuyuEKFJ43B9gYuOj4TQUHXX+j2FqguVOpjkssLUUrnJofCcBccJSCoeturDoZU6GorDTHSvUDlSQbTg==
   /universalify/1.0.0:
     dev: false
     engines:
@@ -3602,5 +3607,6 @@ specifiers:
   stripe: ^8.81.0
   sweetalert: ^2.1.2
   token: ^0.1.0
+  underscore: ^1.10.2
   utf-8-validate: ^5.0.2
   validator: ^13.1.1

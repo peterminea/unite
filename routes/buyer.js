@@ -24,6 +24,7 @@ router.get("/chat/:from/:to/:username/:room/:reqId/:reqName/:toName/:fromName", 
 router.get("/cancelBid/:bidId/:bidName/:userType/:buyerName/:supplierName/:buyerEmail/:supplierEmail", isAuth, sessionExit, buyerController.getCancelBid);
 router.get("/bidsCatalog/:buyerId/:buyerName", isAuth, sessionExit, buyerController.getBidsCatalog);
 router.get("/placeBid/:buyerId/:productId/:supplierId", isAuth, sessionExit, buyerController.getPlaceBid);
+router.get("/productsCatalog", isAuth, sessionExit, buyerController.getProductsCatalog);
 
 router.post("/", isAuth, sessionExit, buyerController.postIndex);
 router.post("/sign-in", buyerController.postSignIn);
@@ -38,5 +39,6 @@ router.post("/resetPassword/:token", isAuth, sessionExit, buyerController.postRe
 router.post("/viewBid", isAuth, sessionExit, buyerController.postViewBids);
 router.post("/cancelBid/:bidId/:bidName/:userType/:buyerName/:supplierName/:buyerEmail/:supplierEmail", isAuth, sessionExit, buyerController.postCancelBid);
 router.post("/placeBid/:buyerId/:productId/:supplierId", isAuth, sessionExit, buyerController.postPlaceBid);
+router.post("/productsCatalog", isAuth, sessionExit, buyerController.getPlaceBid);
 
 module.exports = router;

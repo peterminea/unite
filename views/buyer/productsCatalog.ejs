@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Catalog of Products - UNITE</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A cool thing made with Glitch">
+  <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/messages.css">
+  <link rel="stylesheet" href="/jquery-ui.css">
+  <link rel="stylesheet" href="/bootstrap.min.css">
+  <link rel="stylesheet" href="/ui.jqgrid.min.css">
+  <link rel="stylesheet" href="/ui.multiselect.min.css">
+   <script  src="https://code.jquery.com/jquery-3.5.1.js"  integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" 
+  crossorigin="anonymous"></script>
+  <script src="/jquery-ui.min.js"></script>
+  <script src="/popper.min.js"></script>
+  <script src="/bootstrap.min.js"></script>
+  <script src="/sweetalert2@9.min.js"></script>
+  <script src="/index.min.js"></script> 
+  <script src="/money.js"></script>
+  <script src="/jquery.simulate.js"></script>
+  <script src="/jquery.jqgrid.min.js"></script>
+  <script src="/grid.locale-en.js"></script>
+  <script src="/https.js"></script>  
+  <script src="/functions.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      let token = $("input[name='_csrf']").val();
+      errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
+                   
+      let data = JSON.parse('<%= data %>');';
+      let MAX = parseInt('<%= MAX %>'),
+        buyerId = '<%= buyerId %>';
+      let data2 = [];
+      
+      let colModel = productColModel;
+      const length = colModel.length;
+      colModel.splice(length-2, 2);
+      colModel.splice(9, 2);
+      colModel.push({ name: 'image', label: 'Product Image', align: 'center', formatter: productImageFormatter, search: false, sortable: false, width: 90});
+      colModel.push({ name: 'newBid', label: 'Place Bid', align: 'center', search: false, sortable: false, formatter: linkFormatter, width: 140});          
+
+      for(let i in data) {
+       data2.push({
+          productId: data[i].productId,
+          buyerId: buyerId,
+          supplierId: data[i].supplierId, 
+          name: data[i].productName,
+          supplierName: data[i].supplierName,
+          hiddenPrice: data[i].price,
+          hiddenCurrency: data[i].buyerCurrency,
+          hiddenAmount: data[i].amount,
+          hiddenTotalPrice: data[i].totalPrice,
+          supplierCurrency: data[i].supplierCurrency,
+         // maxAmount, bigPrice are as true as hiddenPrice and hiddenAmount of Product here.
+          productImageSource: data[i].productImage.length? '../' + data[i].productImage.substring(7) : ''
+        });
+      }
+
+      initGrid(colModel, data2, "#gridProds", '#prodPager', "productName", 'Products List', 1100);
+
+      $('#bidOnProds').on('click', function(e) {
+        e.preventDefault();
+
+        let selIds = $('#gridProds').jqGrid("getGridParam", "selarrrow");
+        if(!selIds || !selIds.length) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'warning',
+            text: 'You have not selected any product rows!'
+          });
+
+          return false;
+        }
+
+        if(selIds.length > MAX) {
+           Swal.fire({
+            icon: 'warning',
+            title: 'warning',
+            text: 'You can select at most '+  + ' products.'
+          });
+          
+          return false;
+        }
+
+        let prodIds = [], buyerId, suppIds = [];
+        
+        for(let i in selIds) {
+          let data = $('#gridProds').jqGrid('getRowData', selIds[i]);
+          if(prodIds.length == 0) {
+            buyerId = data.buyerId;
+          }
+          
+          prodIds.push(data.productId);
+          suppIds.push(data.supplierId);
+        }
+
+        $('#bidProductList').val(prodIds);
+        $('#bidSupplierList').val(suppIds);
+        $('#buyerId').val(buyerId);
+        $('#bidProdsForm').submit();
+      });
+    }
+  </script>
+</head>
+
+<body>
+  <nav pos="" user="buyer" class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="/buyer">Catalog of Products - UNITE</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </nav>
+
+  <div class="container mt-4" style='margin-top: 50px'>
+   <div id="jqDiv1" class="jqGridProd form-group">
+      <table id="gridProds"></table>
+      <div id="prodPager"></div>
+    </div>;
+    <br>
+    <div class="profile-form"> 
+      <form id="bidProdsForm" method="POST"> 
+        <input type='hidden' id='bidProductList' name='bidProductList'>
+        <input type='hidden' id='bidSupplierList' name='bidSupplierList'>
+        <input type='hidden' id='buyerId' name='buyerId'>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>"> 
+        <button type="submit" id="bidOnProds" disabled value="Bid on selected products" class="btn btn-success btn-block btn-lg">Bid on Selected Products</button>
+      </form>
+    </div>
+  </div>  
+</body>
+</html>

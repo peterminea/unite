@@ -370,51 +370,8 @@ socket.on("connection", sock => {
   });
 });
 
+
 const { fileExists } = require('./middleware/templates');
-
-//Buyers should load a Catalog of Products by clicking on a button in their Index page:
-app.get("/loadProductsCatalog", (req, res) => {
-  ProductService.find({}, async (err, products) => {
-    if (!products || !products.length) {
-      return false;
-    }
-
-    let catalogItems = [];
-
-    for (let i in products) {
-      let supId = products[i].supplier;
-
-      await Supplier.findOne({ _id: supId }, function(err, obj) {
-        if (err) {
-          console.log(err.message);
-          throw err;
-        }
-
-        if (obj)
-          catalogItems.push({
-            productId: products[i]._id,
-            supplierId: obj._id,
-            productName: products[i].productName,
-            price: products[i].price,
-            amount: products[i].amount,
-            totalPrice: products[i].totalPrice,
-            productImage: fileExists(products[i].productImage)? products[i].productImage : '',
-            buyerCurrency: products[i].currency,
-            supplierCurrency: obj.currency,
-            supplierName: obj.companyName
-          });
-      });
-    }
-
-    catalogItems.sort(function(a, b) {
-      return a.productName.localeCompare(b.productName);
-    });
-
-    console.log((catalogItems[0].productImage));
-    res.json(catalogItems);
-  });
-});
-
 //Upload files to DB & to Glitch:
 const ObjectId = require("mongodb").ObjectId;
 const uploadController = require("./controllers/upload");
@@ -956,7 +913,6 @@ app.post("/currencyAutocomplete", function(req, res, next) {
 app.post("/prodServiceAutocomplete", function(req, res, next) {
   let regex = new RegExp(req.query["term"], "i");
   let id = req.body["supplierId"];
-  console.log(id);
   let values = regex && id? { productName: regex, supplier: new ObjectId(id) } : { supplier: (id) };
 
   let prodServiceFilter = ProductService.find(
@@ -971,9 +927,10 @@ app.post("/prodServiceAutocomplete", function(req, res, next) {
     console.log(data.length);
     if (!err) {
       if (data && data.length && data.length > 0) {
-        data.forEach(item => {
+        data.forEach((item) => {
           let obj = {
             id: item._id,
+            supplierId: item.supplier,
             name: item.productName,
             price: item.price,
             amount: item.amount,
@@ -1089,6 +1046,7 @@ for (let inet in networkInterfaces) {
 
 async function getUsers(db, table, obj) {
     let newObj = obj && obj instanceof Object? obj : {};
+    //console.log(newObj);
   
     let myPromise = () => {
        return new Promise((resolve, reject) => {
@@ -1125,9 +1083,42 @@ if (1 == 2)
     }
 
     db = client.db(BASE); //Right connection!
-    let sup = await getUsers(db, 'suppliers');    
+    let sup = await getUsers(db, 'bidrequests');    
     
     for(let i of sup) {
+      
+      let productDetailsList = [];
+      let buyerPrice = 0, supplierPrice = 0;      
+      
+      for(let j of i.productDetailsList) {
+        
+        buyerPrice += parseFloat(j.buyerPrice) * j.amount;
+        supplierPrice += parseFloat(j.supplierPrice) * j.amount;
+        j.totalPrice = parseFloat(j.totalPrice);
+        productDetailsList.push(j);
+        
+        /*
+        let prod = await getUsers(db, 'productservices', { productName: (i.productList[j]) });
+        //console.log(prod);
+        productDetailsList.push({
+          id: prod && prod.length && prod[0]._id? prod[0]._id : null,
+          productName: i.productList[j],
+          productImage: (i.productImagesList[j] != null && i.productImagesList[j].length > 0)? i.productImagesList[j] : '',
+          buyerPrice: i.priceOriginalList[j]? parseFloat(i.priceOriginalList[j]) : 0,
+          supplierPrice: i.priceList[j]? parseFloat(i.priceList[j]) : 0,
+          buyerCurrency: i.buyerCurrency? i.buyerCurrency : 'EUR',
+          supplierCurrency: i.supplierCurrency? i.supplierCurrency : 'EUR',
+          amount: i.amountList[j]? i.amountList[j] : 0,
+          totalPrice: i.priceList[j] && i.amountList[j]? parseFloat(parseFloat(i.priceList[j]) * i.amountList[j]).toFixed(2) : 0,
+          supplier: i.supplier
+        });*/
+      }
+      
+      //console.log(productDetailsList);
+      
+      db.collection('bidrequests').updateOne( { _id: i._id }, { $set : { productDetailsList: productDetailsList, buyerPrice: buyerPrice, supplierPrice: supplierPrice },/* $unset: { amountList: '', productList: '', productImagesList: '', priceOriginalList: '', priceList: '' } */}, /*{ multi: true },*/ function(err, obj) {});
+      
+      /*
       let bids = await getUsers(db, 'bidrequests', { supplier: i._id });
       let balance2 = i.balance != null? parseFloat(i.balance) : 0;
       for(let j of bids) {
@@ -1135,7 +1126,7 @@ if (1 == 2)
       }
     
       balance2 = parseFloat(balance2).toFixed(2);
-      console.log(i.balance);
+      console.log(i.balance);*/
       //console.log(parseFloat(balance2).toFixed(2));      
       //db.collection('suppliers').updateOne({ _id: i._id }, { $set: { balance: balance2 } }, function(err, obj) {});
       //db.collection('suppliers').updateMany({}, { $set: { balance: balance2 } }, function(err, obj) {});      
