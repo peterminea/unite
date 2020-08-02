@@ -55,29 +55,9 @@ const bidRequestSchema = new Schema({
     type: String,
     required: true,
   },
-  productList: [{
-    type: String,//Schema.Types.Mixed,
-    required: true
-  }],
   productDetailsList: [{
-    type: String,
+    type: Object,
     required: true
-  }],
-  amountList: [{
-    type: Number,
-    required: true
-  }],
-  priceList: [{//Converted to Supplier's currency.
-    type: Number,
-    required: true
-  }],
-  priceOriginalList: [{//Keeps Buyer's currency.
-    type: Number,
-    required: true
-  }],
-  productImagesList: [{
-    type: String,
-    required: false
   }],
   deliveryLocation: {
     type: String,
@@ -104,6 +84,7 @@ const bidRequestSchema = new Schema({
     default: Date.now() + 3 * process.env.DAY_DURATION,
     required: false
   },
+  
   specialMentions: {
     type: String,
     required: false
@@ -182,11 +163,11 @@ const bidRequestSchema = new Schema({
   },
   buyer: {
     type: Schema.Types.ObjectId,
-    ref: 'buyer',// Buyer's object id -> It will be generated from current session
+    ref: 'buyer',// Buyer's object id
     required: true
   },
   supplier: {
-    type: Schema.Types.ObjectId, // Supplier's object id -> It will be generated from current session
+    type: Schema.Types.ObjectId, // Supplier's object id
     ref: 'supplier',
     required: true
   }

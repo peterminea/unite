@@ -214,11 +214,12 @@
                 <input type="hidden" required id="priceList" name="priceList" value="">
                 <input type="hidden" required id="priceOriginalList" name="priceOriginalList" value="">
                 <input type="hidden" required id="productImagesList" name="productImagesList" value="">
+                <input type="hidden" required id="productIdsList" name="productIdsList" value="">
                 <% if(isMultiBid == true) { %>
                 <!-- <input type="hidden" id="productIdsList" name="productIdsList"> -->
                 <input type="hidden" id="supplierIdsList" name="supplierIdsList">
                 <input type="hidden" id="supplierTotalPricesList" name="supplierTotalPricesList">
-                <% } %>              
+                <% } %>
             </div>            
             <div id="jqDiv" class="form-group">
               <table id="grid" MAX="<%= MAX_PROD %>" buyerCurrency="<%= buyer.currency %>" <% if(isSingleBid == true) { %> supplierId="<%= supplier._id %>" supplierCurrency="<%= supplier.currency %>" <% } else { %> <% } %>>

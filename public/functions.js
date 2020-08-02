@@ -91,7 +91,7 @@ function downloadFormatter(cellvalue, options, rowObject) {
 
 function linkFormatter(cellvalue, options, rowObject) {
   return (
-    '<span class="newBid" style="font-weight: bold"><a href="../buyer/placeBid/' +
+    '<span class="newBid" style="font-weight: bold"><a href="../placeBid/' +
     rowObject.buyerId +
     "/" +
     rowObject.productId +
@@ -753,13 +753,12 @@ function getIdClear(obj) {
 function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
   obj.on('click', function() {
     let id = getIdClear($(this));
-    let elem = $("#prodServices"+id);
     let grid = $('#grid'+id);
     let amount = $('#amount'+id);
     let input = $("#prodServiceInput"+id);
     let MAX = parseInt($(this).attr('MAX'));
     
-    if(grid.find('tr').length >= MAX) {
+    if(grid.find('tr').length > MAX) {//One row is extra. The header row.
         Swal.fire({
           icon: 'error',
           title: 'Error!',
@@ -784,29 +783,50 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
     if(!input.attr('price'))
       input.attr('price', 1);
     //let req = input.val().length;// && $('#price').val().length && $('#currency').val().length;
+    
+    let option = $(`#productsList${id} option:selected`);
+    let suppId = option && option.attr('supplierId')?
+      option.attr('supplierId') : null;
+    
+    const supplierNameInput = (id.length? $('#supplierName'+id) 
+      : !($('#span.multisupp').length)? $('#supplierName') : $(`span.multisupp[suppId=${suppId}]`).parent('div').find('span.supplierNameListed'));
+    
+    let val = supplierNameInput.is('input')? supplierNameInput.val() : supplierNameInput.text();
+    
+    if(!val || !val.length) {
+      val = 'No supplier';
+    }
 
     if(input.val() && input.val().length) {
       input.removeClass('errorField');
       let prodVal = input.val();
       let isPresent = false;
-      if(grid.find('tr').length)
-      grid.find('tr span.product').each(function() {
-        if(prodVal == $(this).text()) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error!',
-            text: 'You have already added ' + prodVal + ' to the list. Please refine your selection.'
-          });
+      
+      if(grid.find('tr').length > 1) {
+        grid.find('tr span.product').each(function() {
+          let rowId = $(this).closest('tr').attr('id');
+          let row = grid.jqGrid("getRowData", rowId);
+          
+          if((prodVal == $(this).text()) && (row.supplierId? row.supplierId == suppId : 1==1)) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error!',
+              text: `You have already added ${prodVal} to the list` + (row.supplierId? `for the same supplier (${val})` : '') + '. Please refine your selection.'
+            });
 
-          isPresent = true;
+            isPresent = true;
+            return false;
+          }
+        });
+
+        if(isPresent) {
           return false;
         }
-      });
-
-      if(isPresent) {
-        return false;
       }
-
+      
+      let productId = option && option.attr('productId')?
+        option.attr('productId') : null;
+      
       let amountVal = parseInt(amount.val());
       let currencyVal = $('select.buyerCurrency'+id).find('option:selected').text();
       let priceVal = input.attr('price');
@@ -816,7 +836,7 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
       let buyerCurrSpan = $('span.bidCurrency[index="'+ (id.length? id.substring(1) : '-1') +'"]').first();
       buyerPriceUnit.text(parseFloat(addedPrice).toFixed(2));
       buyerPriceCurr.text(buyerCurrSpan.text());
-      let option = $(`#productsList${id} option:selected`);
+      
       let suppCurr = option && option.attr('currency')? option.attr('currency') : $('#supplierCurrency'+id).text();
       let price = parseFloat($('#price'+id).val()? $('#price'+id).val() : 0) + parseFloat(addedPrice);
       let bigPrice = parseFloat(price).toFixed(2);
@@ -827,26 +847,12 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
       let imagePath = input.attr('productImage')?
         '../' + input.attr('productImage').substring(7) 
         : imageInput.attr('filePath');
-      
-      let suppId = option && option.attr('supplierId')?
-        option.attr('supplierId') : null;
-      
-      let productId = option && option.attr('productId')?
-        option.attr('productId') : null;
 
       imageInput
         .attr('filePath', null)
         .attr('value', '');
 
-      let src = imagePath && imagePath.length? imagePath : null;        
-      const supplierNameInput = (id.length? $('#supplierName'+id) 
-                               : !($('#span.multisupp').length)? $('#supplierName') : $(`span.multisupp[suppId=${suppId}]`).parent('div').find('span.supplierNameListed'));
-      
-      let val = supplierNameInput.is('input')? supplierNameInput.val() : supplierNameInput.text();
-      if(!val || !val.length) {
-        val = 'No supplier';
-      }
-      
+      let src = imagePath && imagePath.length? imagePath : null;
       let lis = 1 + grid.find('tr').length;
 
       let data = {
@@ -868,7 +874,7 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
       };
 
       grid.jqGrid('addRowData', lis, data, 'last');
-      let counter = elem.parent('div').find('span.productsCount');
+      let counter = grid.parent('div').next('div').find('span.productsCount');
       let newValue = 1 + parseInt(counter.text()? counter.text() : 0);
       let totalAmount = $('#totalAmount'+id).val()? parseInt($('#totalAmount'+id).val()) : 0;
       counter.text(newValue);
@@ -1169,6 +1175,7 @@ function removeAllItems(index) {
     $("#amountList" + index).val("");
     $("#priceList" + index).val("");
     $("#productImagesList" + index).val("");
+    $("#productIdsList" + index).val("");
     $("#totalAmount" + index).val("0");
     $('span.productsCount').text(0);
 
@@ -2458,7 +2465,9 @@ $(document).ready(function() {
         let amountInput = $("#amountList"+id);
         let priceInput = $("#priceList"+id), priceOrigInput = $("#priceOriginalList"+id);
         let prodImageInput = $("#productImagesList"+id);
-        let arr = [], arr1 = [], arr2 = [], arr3 = [], arr4 = [], arr5 = [], arr6 = [], arr7 = [];
+        let prodIdInput = $("#productIdsList"+id);
+        
+        let arr = [], arr1 = [], arr2 = [], arr3 = [], arr4 = [], arr5 = [], arr6 = [], arr7 = [], arr8 = [];;
         let totalPriceOriginal = 0, totalPriceConverted = 0;
         let origCurrency = $(elem).attr('buyerCurrency');  
         $('#currency'+id).val(origCurrency);
@@ -2481,11 +2490,11 @@ $(document).ready(function() {
           let img = $(element).find('span.productImage img');
           let src = img && img.length? 'public/' + img.attr('src').substring(3) : '';
           arr3.push(src);
+          arr8.push(row.productId? row.productId : '');
           
           if($('#supplierIdsList').length) {//PlaceBid Multi Supplier.
             arr5.push(row.supplierId);
-            arr7.push(suppCurrency);
-            //arr8.push($(this).attr('productId'));
+            arr7.push(suppCurrency);            
           }
         });
         
@@ -2494,6 +2503,7 @@ $(document).ready(function() {
         priceInput.val(arr2);
         prodImageInput.val(arr3);
         priceOrigInput.val(arr4);
+        prodIdInput.val(arr8);//To replace all the arrays with an object similar to the Product model, saved within the Bid Request model. These objects can later be used for future user suggestions in Bid Requests.
         
         if(arr5.length) {
           $('#supplierIdsList').val(arr5);
@@ -2651,8 +2661,7 @@ $(document).ready(function() {
         if(id.charAt(1) == '-')
             id = '';
 
-        let elem = $("#prodServices"+id), grid = $("#grid"+id);
-        elem.attr('buyerCurrency', curr);
+        let grid = $("#grid"+id);
         grid.attr('buyerCurrency', curr);
         $('#currency'+id).val(curr);
         $('#scurrency'+id).text(curr);
@@ -2662,7 +2671,7 @@ $(document).ready(function() {
           $('#updateProfile').prop('disabled', true);
         };
         
-        let suppCurrency = elem.attr('supplierCurrency')? elem.attr('supplierCurrency') : null; 
+        let suppCurrency = grid.attr('supplierCurrency')? grid.attr('supplierCurrency') : null; 
         if(!($(this).hasClass('multiplex')) && suppCurrency && curr && curr != suppCurrency) {
           Swal.fire({
             icon: 'warning',
@@ -2722,8 +2731,8 @@ $(document).ready(function() {
   }
     
       $('input[readonly].textarea[readonly]').css('background-color', 'lightgray');//No names on spans. Also, disabled inputs means no readability for back-end.
-    
-      $('input.prodInput').not(':disabled').autocomplete({
+    /*
+      $('input.prodInput').not(':readonly').autocomplete({
         source: function(req, res) {
           let obj = $(this.element);
           $('.prov').remove();
@@ -2747,7 +2756,7 @@ $(document).ready(function() {
               //autocomp(obj, data);
               let $obj = '<div class="prov"><ul class="autocomp">';
               for(const i in data) {
-                $obj += '<li id="' + data[i].price + '" amount="' + data[i].amount + '" totalPrice="' + data[i].totalPrice + '" productImage="' + data[i].productImage + '" currency="' + data[i].currency + '">' + data[i].name + '</li>';
+                $obj += '<li id="' + data[i].price + '" productId="' + data[i].id + '" supplierId="' + data[i].supplierId + '" amount="' + data[i].amount + '" totalPrice="' + data[i].totalPrice + '" productImage="' + data[i].productImage + '" currency="' + data[i].currency + '">' + data[i].name + '</li>';
               }
 
               $obj += '</ul><div>';
@@ -2772,7 +2781,7 @@ $(document).ready(function() {
           });
         },
         minLength: 3
-      });
+      });*/
   
   
   $('input.cb').on('change', function() {

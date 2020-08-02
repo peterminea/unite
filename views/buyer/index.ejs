@@ -47,108 +47,12 @@
           icon: 'info',
           title: 'Information',
           timer: 2000,
-          text: 'Please wait a while until the Catalog of Products is loaded...'
+          text: 'The Catalog of Products is going to be prepared for you...'
         });
-       
-        let that = $(this);
         
-        $.ajax({
-          url: '/loadProductsCatalog',
-          headers: { "X-CSRF-Token": token },
-          datatype: 'application/json',
-          type: "GET",
-          scroll: true,
-          success: function(data) {
-            if(!data || !data.length) {
-              //obj.val('');
-              //obj.next('.prodButton').prop('disabled', true);
-             return false;
-            }
-           
-            let str = '';
-            str += '<div id="jqDiv1" class="jqGridProd form-group"><table id="gridProds"></table><div id="prodPager"></div></div>';
-            $('div.bodyBuilder').append(str);
-            let data2 = [];
-            let colModel = productColModel;
-            const length = colModel.length;
-            colModel.splice(length-2, 2);
-            colModel.splice(9, 2);
-            colModel.push({ name: 'image', label: 'Product Image', align: 'center', formatter: productImageFormatter, search: false, sortable: false, width: 90});
-            colModel.push({ name: 'newBid', label: 'Place Bid', align: 'center', search: false, sortable: false, formatter: linkFormatter, width: 140});
-            console.log(colModel);
-            
-            for(let i in data) {
-             data2.push({
-                productId: data[i].productId,
-                buyerId: $('#loadCatalog').attr('buyer'),
-                supplierId: data[i].supplierId, 
-                name: data[i].productName,
-                supplierName: data[i].supplierName,
-                hiddenPrice: data[i].price,
-                hiddenCurrency: data[i].buyerCurrency,
-                hiddenAmount: data[i].amount,
-                hiddenTotalPrice: data[i].totalPrice,
-                supplierCurrency: data[i].supplierCurrency,
-               // maxAmount, bigPrice are as true as hiddenPrice and hiddenAmount of Product here.
-                productImageSource: data[i].productImage.length? '../' + data[i].productImage.substring(7) : ''
-              });
-            }
-
-            initGrid(colModel, data2, "#gridProds", '#prodPager', "productName", 'Products List', 1100);
-            $('#loadCatalog').prop('disabled', true);
-
-            str = '';
-            str += '<br><div class=" profile-form"> <form id="bidProdsForm" method="POST">' 
-              + "<input type='hidden' id='bidProductList' name='bidProductList'>"
-              + "<input type='hidden' id='bidSupplierList' name='bidSupplierList'>"
-              + "<input type='hidden' id='buyerId' name='buyerId'>"
-              + '<input type="hidden" name="_csrf" value="'
-              + "<%= csrfToken %>" 
-              + '">' 
-              + '<button type="submit" id="bidOnProds" disabled value="Bid on selected products" class="btn btn-success btn-block btn-lg">Bid on Selected Products</button>'
-              + '</form></div>';
-            $('div.bodyBuilder').append(str);
-            
-            $('#bidOnProds').click(function(e) {
-              e.preventDefault();
-              
-              let selIds = $('#gridProds').jqGrid("getGridParam", "selarrrow");
-              if(!selIds || !selIds.length) {
-                Swal.fire({
-                  icon: 'warning',
-                  title: 'warning',
-                  text: 'You have not selected any product rows!'
-                });
-                
-                return false;
-              }
-              
-              let MAX = parseInt($('#loadCatalog').attr('MAX'));
-              
-              if(selIds.length > MAX) {
-                 Swal.fire({
-                  icon: 'warning',
-                  title: 'warning',
-                  text: 'You can select at most '+  + ' products.'
-                });
-              }
-              
-              let prodIds = [], buyerId, suppIds = [];
-              for(let i in selIds) {
-                let data = $('#gridProds').jqGrid('getRowData', selIds[i]);
-                if(prodIds.length == 0) 
-                  buyerId = data.buyerId;
-                prodIds.push(data.productId);
-                suppIds.push(data.supplierId);
-              }
-              
-              $('#bidProductList').val(prodIds);
-              $('#bidSupplierList').val(suppIds);
-              $('#buyerId').val(buyerId);
-              $('#bidProdsForm').submit();
-            });
-          }
-        });
+        setTimeout(function() {
+          $(this).parent('div').find('a').trigger('click');
+        }, 2000);
       });
   });
   </script>
@@ -210,6 +114,7 @@
       <button class="form-control btn btn-warning" style="margin-bottom: 20px" MAX="<%= MAX_PROD %>" id="loadCatalog" buyer="<%= buyer._id %>" avatar="<%= buyer.avatar %>">
         Load Catalog of Products
       </button>
+      <a href="../buyer/productsCatalog" style="visibility: hidden"></a>
     </div>
     <% } %>
 
@@ -369,7 +274,7 @@
                   <div class="form-group">
                     <label>Other relevant files</label>
                     <input readonly class="form-control" type="text" id="otherRelevantFiles" name="otherRelevantFiles" value="<%= supplier.otherRelevantFiles %>">
-                  </div>                  
+                  </div>
                   <!--Mandatory check of agreements -->
                   <div class="form-group">
                     <div class="form-check">
@@ -519,9 +424,9 @@
                     <div class="form-group">
                       <label class="col-form-label">Products / Services Requested*</label>
                         <p class='littleNote form-control' style='height: 120px'>
-                          You can also request products not being on the list of the supplier.
+                          You can request products out of the supplier stock.
                         </p>
-                        <input type="text" required class="form-control prodInput" defaultMaxAmount="<%= MAX_AMOUNT %>" placeholder="Add Product/Service*" id="prodServiceInput_<%= i %>">
+                        <input type="text" class="form-control prodInput" defaultMaxAmount="<%= MAX_AMOUNT %>" placeholder="Add Product/Service*" id="prodServiceInput_<%= i %>">
                         <br>
                         <button class="btn btn-outline-secondary prodButton" type="button" disabled MAX="<%= MAX_PROD %>" id="addProdService_<%= i %>">Add</button>
                       </div>                    

@@ -15,6 +15,8 @@ const BidRequest = require("../models/bidRequest");
 const ProductService = require("../models/productService");
 const Country = require('../models/country');
 const BidStatus = require("../models/bidStatus");
+const _ = require("underscore");
+
 const {
   basicFormat,
   customFormat,
@@ -45,6 +47,7 @@ const {
   getBidStatusesJson,
   getCancelTypesJson,
   postSignInBody,
+  saveBidBody,
   updateBidBody,
   encryptionNotice
 } = require("../middleware/templates");
@@ -139,107 +142,88 @@ exports.getIndex = async (req, res) => {
 };
 
 
-function prepareBidData(req) {
-  let productList = prel(req.body.productList);
-  let amountList = prel(req.body.amountList, false, true);
-  let priceList = prel(req.body.priceList, true, false);
-  let priceOriginalList = prel(req.body.priceOriginalList, true, false);
-  let imagesList = req.body.productImagesList? prel(req.body.productImagesList) : [];
-  let suppCurrListProd = (req.body.supplierCurrenciesListProd)?
-                          prel(req.body.supplierCurrenciesListProd) : [];
+//Buyers should load a Catalog of Products by clicking on a button in their Index page:
+exports.getProductsCatalog = (req, res) => {
   
-  sortLists(productList, amountList, priceList, imagesList, suppCurrListProd);
-  if(!(suppCurrListProd.length) && req.body.supplierCurrency) {
-    suppCurrListProd.push(req.body.supplierCurrency);
-  }
+  ProductService.find({}, async (err, products) => {
+    if (!products || !products.length) {
+      return false;
+    }
 
-  let products = [];
+    let catalogItems = [];
 
-  for (let i in productList) {
-    products.push(
-      "Product name: '" +
-        productList[i] +
-        "', amount: " +
-        (amountList[i]) +
-        ", price: " +
-        (priceList[i]) +
-        " " +
-        (req.body.supplierCurrency? req.body.supplierCurrency : suppCurrListProd[i]) +
-        (imagesList[i] != null && imagesList[i].length > 0? `, image path: ${imagesList[i]}.` : '.')
-    );
-  }
-  
-  return {
-    productList: productList, 
-    amountList: amountList, 
-    priceList: priceList, 
-    priceOriginalList: priceOriginalList, 
-    imagesList: imagesList, 
-    supplierCurrenciesListProd: suppCurrListProd,
-    products: products
-  };
-}
+    for (let i in products) {
+      let supId = products[i].supplier;
 
+      await Supplier.findOne({ _id: supId }, function(err, obj) {
+        if(treatError(req, res, err, 'back'))
+          return false;
 
-function isPresent(elem, array) {
-  if(array.length)
-  for(let i in array) {
-    if(elem == array[i])
-      return true;
-  }
-  
-  return false;
-}
+        if (obj) {
+          catalogItems.push({
+            productId: products[i]._id,
+            supplierId: obj._id,
+            productName: products[i].productName,
+            price: products[i].price,
+            amount: products[i].amount,
+            totalPrice: products[i].totalPrice,
+            productImage: fileExists(products[i].productImage)? products[i].productImage : '',
+            buyerCurrency: products[i].currency,
+            supplierCurrency: obj.currency,
+            supplierName: obj.companyName
+          });
+        }
+      });
+    }
 
-
-function arrangeMultiData(t, suppIds) {
-  let productLists = [], amountLists = [], productImagesLists = [], priceLists = [], priceOriginalLists = [], productDetailsLists = [];
-  let uniqueSuppIds = [];
-  let app = [];
-  
-  for(let i in suppIds) {//0, 1, 2, 3, 4 - 0=2=4, 1=3.
-    //i=0, app=[]
-    //i=1, app=024
-    //i=2, app=02413
-    //i=3, app=02413
-    //i=4, app=02413
-    let productList = [], amountList = [], productImagesList = [], priceList = [], priceOriginalList = [], productDetailsList = [];
+    catalogItems.sort(function(a, b) {
+      return a.productName.localeCompare(b.productName);
+    });
     
-    if(!isPresent(suppIds[i], app)) {
-      for(let j in suppIds) {//0: 0, 2, 4.
-        if(suppIds[i] == suppIds[j]) {
-          app.push(suppIds[j]);
-          productList.push(t.productList[j]);
-          amountList.push(t.amountList[j]);
-          productImagesList.push(t.imagesList[j]);
-          priceList.push(t.priceList[j]);
-          priceOriginalList.push(t.priceOriginalList[j]);
-          productDetailsList.push(t.products[j]);
+    let success = search(req.session.flash, "success"),
+      error = search(req.session.flash, "error");
+    req.session.flash = [];
+    
+    res.render("buyer/productsCatalog", {
+      data: catalogItems,
+      MAX: process.env.BID_MAX_PROD,
+      buyerId: req.session.buyer._id,
+      successMessage: success,
+      errorMessage: error
+    });
+  });
+}
+
+
+async function suggest(prod, buyerId) {
+  let promise = await BidRequest.find({
+    $and: [
+      { buyer: { $ne: buyerId } },
+      {
+        $or: [
+      {"productDetailsList.productName": prod.productName},
+      {"productDetailsList.id": prod._id}
+      ]
+      }]
+  }).exec();
+  
+  return promise.then((bids) => {
+    let products = [], i = 0;
+    
+    //loop1:    
+    for(let bid of bids) {
+      for(let product of bid.productDetailsList) {
+        if(product.productName != prod.productName || product.id != prod._id) {          
+          products.push(product);
+          //if(++i == process.env.MAX_PROD_SUGGESTED) {
+           // break loop1;
+          //}
         }
       }
-      
-      productLists.push(productList);
-      amountLists.push(amountList);
-      productImagesLists.push(productImagesList);
-      priceLists.push(priceList);
-      priceOriginalLists.push(priceOriginalList);
-      productDetailsLists.push(productDetailsList);
-      uniqueSuppIds.push(suppIds[i]);
     }
-    
-    if(app.length == suppIds.length)
-      break;
-  }
-  
-  return {
-    productList: productLists, 
-    amountList: amountLists, 
-    priceList: priceLists, 
-    priceOriginalList: priceOriginalLists, 
-    imagesList: productImagesLists, 
-    products: productDetailsLists,
-    uniqueSuppIds: uniqueSuppIds
-  };
+   
+    return products;
+  });
 }
 
 
@@ -251,7 +235,8 @@ exports.postIndex = (req, res) => {
     const key = req.body.capabilityInput;
 
     Supplier.find({}, (err, suppliers) => {
-      if (treatError(req, res, err, "buyer")) return false;
+      if (treatError(req, res, err, "/buyer")) 
+        return false;
 
       const suppliers2 = [];
       for (const supplier of suppliers) {
@@ -300,117 +285,39 @@ exports.postIndex = (req, res) => {
         });
       });
     });
-  } else if (req.body.itemDescription) {    
-    //New Bid Request placed.    
-    let suppIds = req.body.supplierIdsList? prel(req.body.supplierIdsList) : [];//Multi or not.
-    let t = prepareBidData(req), names, emails, suppCurrencies, suppCurrenciesByProd, totalPricesList;
-    
-    if(req.body.supplierId) {//Not Multi.
-      suppIds.push(req.body.supplierId)
-    } else {
-      names = req.body.supplierNamesList? prel(req.body.supplierNamesList) : [];
-      emails = req.body.supplierEmailsList? prel(req.body.supplierEmailsList) : [];
-      suppCurrencies = req.body.supplierCurrenciesList? prel(req.body.supplierCurrenciesList) : [];//currencies
-      totalPricesList = req.body.supplierTotalPricesList? prel(req.body.supplierTotalPricesList, true) : [];
-      t = arrangeMultiData(t, suppIds);
-      suppIds = suppIds.filter((v, i, a) => a.indexOf(v) === i);
-      //suppIds = t.uniqueSuppIds;
-    };   
-   
-    //Supplier's name, e-mail, currency, total price to be saved as lists in PlaceBid in case of Multi.
-    let backPath = '../../../../../../../';
-    let asyncCounter = 0;
-    
-     for(let i = 0; i < suppIds.length; i++) {
-       let buyerPrice = !(t.uniqueSuppIds)? req.body.buyerPrice :fx(parseFloat(totalPricesList[i]).toFixed(2))
-                .from(suppCurrencies[i])
-                .to(req.body.buyerCurrency);       
-      
-      const bidRequest = new BidRequest({
-        requestName: req.body.requestName,
-        supplierName: req.body.supplierName? req.body.supplierName : names[i],
-        buyerName: req.body.buyerName,
-        buyerEmail: req.body.buyerEmail,
-        supplierEmail: req.body.supplierEmail? req.body.supplierEmail : emails[i],
-        itemDescription: req.body.itemDescription,
-        productList: !(t.uniqueSuppIds)? t.productList : t.productList[i],
-        amountList: !(t.uniqueSuppIds)? t.amountList : t.amountList[i],
-        productImagesList: !(t.uniqueSuppIds)? t.imagesList : t.imagesList[i],
-        priceList: !(t.uniqueSuppIds)? t.priceList : t.priceList[i],//Supplier's currency.
-        priceOriginalList: !(t.uniqueSuppIds)? t.priceOriginalList : t.priceOriginalList[i],
-        productDetailsList: !(t.uniqueSuppIds)? t.products : t.products[i],
-        itemDescriptionLong: req.body.itemDescriptionLong,
-        itemDescriptionUrl: req.itemDescriptionUrl,
-        amount: req.body.amount,
-        deliveryLocation: req.body.deliveryLocation,
-        deliveryRequirements: req.body.deliveryRequirements,
-        complianceRequirements: req.body.complianceRequirements,
-        complianceRequirementsUrl: req.body.complianceRequirementsUrl,
-        preferredDeliveryDate: req.body.preferredDeliveryDate,
-        otherRequirements: req.body.otherRequirements,
-        status: req.body.status,
-        buyerPrice: buyerPrice,
-        supplierPrice: req.body.supplierPrice? req.body.supplierPrice : totalPricesList[i],
-        isCancelled: false,
-        isExpired: false,
-        isExtended: req.body.validityExtensionId? true : false,
-        buyerCurrency: req.body.buyerCurrency,
-        supplierCurrency: req.body.supplierCurrency? req.body.supplierCurrency : suppCurrencies[i],
-        validityExtensionId: req.body.validityExtensionId,
-        validityExtension: req.body.validityExtensionId,
-        specialMentions: req.body.specialMentions
-          ? req.body.specialMentions
-          : req.body.buyerName +
-            " has sent a new Order to " +
-            (req.body.supplierName? req.body.supplierName : names[i]) +
-            ", and the Bid price is " +
-            (req.body.supplierPrice? req.body.supplierPrice : totalPricesList[i]) +
-            " " +
-            (req.body.supplierCurrency? req.body.supplierCurrency : suppCurrencies[i]) +
-            ".",
-        createdAt: req.body.createdAt ? req.body.createdAt : Date.now(),
-        updatedAt: Date.now(),
-        expiryDate:
-          Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION + (req.body.validityExtensionId? process.env.DAYS_BID_EXTENDED * process.env.DAY_DURATION : 0),
-        createdAtFormatted: req.body.createdAt
-          ? normalFormat(req.body.createdAt)
-          : normalFormat(Date.now()),
-        updatedAtFormatted: normalFormat(Date.now()),
-        expiryDateFormatted: customFormat(
-          Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION + (req.body.validityExtensionId? process.env.DAYS_BID_EXTENDED * process.env.DAY_DURATION : 0)
-        ),
-        buyer: req.body.buyer,
-        supplier: suppIds[i]
-      });
-       
-      bidRequest
-        .save()
-        .then((err, result) => {
-          if(++asyncCounter == suppIds.length) {
-            if(treatError(req, res, err, "../../buyer")) 
-              return false;
-            
-             req.flash("success", "Bid requested successfully!");
-             return res.redirect("../../buyer"); 
-          }
-      })
-      .catch(console.error);
-    }
-  } else if(req.body.bidProductList) {//Place bid on one or more products (+ 1 or more suppliers) from the Product Catalog grid.
-      let buyerId = req.body.buyerId, productIds = req.body.bidProductList, supplierIds = req.body.bidSupplierList;
-      let productList = prel(productIds);
-      let supplierList = prel(supplierIds);
-      let prodIDs = [], suppIDs = [];
+  } else if (req.body.itemDescription) {
+    saveBidBody(req, res, '/');
+  } else {
+    res.redirect("/buyer");
+  }
+};
 
-      for(let i in productList) {
-        prodIDs.push(new ObjectId(productList[i]));
-      }
 
-      for(let i in supplierList) {
-        suppIDs.push(new ObjectId(supplierList[i]));
-      }
-    
-    let uniqueSupplierIds = suppIDs.filter((v, i, a) => a.indexOf(v) === i);
+exports.getPlaceBid = (req, res) => {
+  let buyerId = (req.params.buyerId? req.params.buyerId : req.body.buyerId), productId = (req.params.productId), supplierId = (req.params.supplierId);
+  let productIds = req.body.bidProductList? req.body.bidProductList : [], supplierIds = req.body.bidSupplierList? req.body.bidSupplierList : [];
+  
+  if(!productIds.length && productId) {
+    productIds.push(productId);
+  }
+  
+  if(!supplierIds.length && supplierId) {
+    supplierIds.push(supplierId);
+  }
+  
+  let productList = prel(productIds);
+  let supplierList = prel(supplierIds);
+  let prodIDs = [], suppIDs = [];
+
+  for(let i in productList) {
+    prodIDs.push(new ObjectId(productList[i]));
+  }
+
+  for(let i in supplierList) {
+    suppIDs.push(new ObjectId(supplierList[i]));
+  }
+
+  let uniqueSupplierIds = suppIDs.filter((v, i, a) => a.indexOf(v) === i);
     
   // { $in : [1,2,3,4] }
   //Or array
@@ -426,184 +333,75 @@ exports.postIndex = (req, res) => {
         return res.redirect('back');
       }
 
-      Supplier.find({ _id: { $in: uniqueSupplierIds } }).then((sups) => {
+      Supplier.find({ _id: { $in: uniqueSupplierIds } }).then(async (sups) => {
         if(!sups) {
-          req.flash('error', 'Suppliers for the products not found!');
-          return res.redirect('back');
-        }
-        
-        let promise = BidStatus.find({}).exec();
-        promise.then((statuses) => {
-          let products = [], supps = [];
-          
-          for(let i in prods) {
-            products.push(prods[i]);
-          }
-          
-          for(let i in sups) {
-            supps.push(sups[i]);  
-          }
-          
-          let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
-          req.session.flash = [];
-          let isMultiProd = prodIDs.length > 1;
-          let isMultiSupp = uniqueSupplierIds.length > 1;
+        req.flash('error', 'Suppliers for the products not found!');
+        return res.redirect('back');
+      }
 
-          res.render("buyer/placeBid", {
-            successMessage: success,
-            errorMessage: error,
-            isMultiProd: isMultiProd,
-            isMultiSupp: isMultiSupp,
-            isMultiBid: isMultiSupp,
-            isSingleBid: !isMultiSupp, 
-            isSingleProd: !isMultiProd,
-            MAX_PROD: process.env.BID_MAX_PROD,
-            MAX_AMOUNT: process.env.MAX_PROD_PIECES,
-            BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
-            FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
-            statuses: statuses,
-            statusesJson: JSON.stringify(getBidStatusesJson()),
-            buyer: buyer[0],
-            product: products[0],
-            supplier: supps[0],
-            products: products,
-            suppliers: supps
-            });
+      let promise = await BidStatus.find({}).exec();
+      promise.then(async (statuses) => {
+        let products = [], supps = [];
+        let suggestionsList = [];
+
+        for(let i in prods) {
+          products.push(prods[i]);
+          //Find a suggestion for this product:
+          let suggestions = await suggest(prods[i], buyer[0]._id);
+
+          for(let i of suggestions) {
+            suggestionsList.push(i);
+          }
+        }
+        /*
+        suggestionsList.sort(function(a, b) {
+          return a.id.localeCompare(b.id);
+        });*/
+
+        suggestionsList = _.uniq(suggestionsList, false, function(item) { return item.id; });
+
+        //Keep the first [const] sugestions:
+        suggestionsList.length = process.env.MAX_PROD_SUGGESTED;
+
+        for(let i in sups) {
+          supps.push(sups[i]);  
+        }
+
+        let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
+        req.session.flash = [];
+        let isMultiProd = prodIDs.length > 1;
+        let isMultiSupp = uniqueSupplierIds.length > 1;
+
+        res.render("buyer/placeBid", {
+          successMessage: success,
+          errorMessage: error,
+          isMultiProd: isMultiProd,
+          isMultiSupp: isMultiSupp,
+          isMultiBid: isMultiSupp,
+          isSingleBid: !isMultiSupp, 
+          isSingleProd: !isMultiProd,
+          MAX_PROD: process.env.BID_MAX_PROD,
+          MAX_AMOUNT: process.env.MAX_PROD_PIECES,
+          BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+          FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
+          statuses: statuses,
+          statusesJson: JSON.stringify(getBidStatusesJson()),
+          suggestions: suggestionsList,
+          buyer: buyer[0],
+          product: products[0],
+          supplier: supps[0],
+          products: products,
+          suppliers: supps
           });
         });
       });
     });
-  } else {
-    res.redirect("/buyer");
-  }
-};
-
-
-exports.getPlaceBid = (req, res) => {  
-  let buyerId = (req.params.buyerId), productId = (req.params.productId), supplierId = (req.params.supplierId);
-  // { $in : [1,2,3,4] }
-  //Or array
-  Buyer.find({ _id: new ObjectId(buyerId) }).then((buyer) => {
-    if(!buyer) {
-        req.flash('error', 'Buyer not found in the database!');
-        return res.redirect('back');
-      }
-  
-    ProductService.find({ _id: productId }).then((prod) => {
-      if(!prod) {
-        req.flash('error', 'Product not found!');
-        return res.redirect('back');
-      }
-
-      Supplier.find({ _id: supplierId }).then((sup) => {
-        if(!sup) {
-          req.flash('error', 'Supplier for the product not found!');
-          return res.redirect('back');
-        }
-        
-        let promise = BidStatus.find({}).exec();
-        promise.then((statuses) => {          
-          let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
-          req.session.flash = [];          
-
-          res.render("buyer/placeBid", {
-            successMessage: success,
-            errorMessage: error,
-            MAX_PROD: process.env.BID_MAX_PROD,
-            MAX_AMOUNT: process.env.MAX_PROD_PIECES,
-            BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
-            FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
-            statuses: statuses,
-            statusesJson: JSON.stringify(getBidStatusesJson()),
-            isMultiProd: false,
-            isMultiSupp: false,
-            isMultiBid: false,
-            isSingleBid: true, 
-            isSingleProd: true,
-            buyer: buyer[0],
-            product: prod[0],
-            supplier: sup[0]
-            });
-          });
-        });
-      });
-    });
+  });
 }
 
 
-exports.postPlaceBid = async (req, res) => {
-  console.log(req.body.supplierCurrency);
-  let t = prepareBidData(req);
-  
-  //Supplier's name, e-mail, currency, total price to be saved as lists in PlaceBid in case of Multi.
-  const bidRequest = new BidRequest({
-    requestName: req.body.requestName,
-    supplierName: req.body.supplierName,
-    buyerName: req.body.buyerName,
-    buyerEmail: req.body.buyerEmail,
-    supplierEmail: req.body.supplierEmail,
-    itemDescription: req.body.itemDescription,
-    productList: t.productList,
-    amountList: t.amountList,
-    productImagesList: t.imagesList,
-    priceList: t.priceList, //Supplier's currency.
-    priceOriginalList: t.priceOriginalList,
-    productDetailsList: t.products,
-    itemDescriptionLong: req.body.itemDescriptionLong,
-    itemDescriptionUrl: req.itemDescriptionUrl,
-    amount: req.body.amount,
-    deliveryLocation: req.body.deliveryLocation,
-    deliveryRequirements: req.body.deliveryRequirements,
-    complianceRequirements: req.body.complianceRequirements,
-    complianceRequirementsUrl: req.body.complianceRequirementsUrl,
-    preferredDeliveryDate: req.body.preferredDeliveryDate,
-    otherRequirements: req.body.otherRequirements,
-    status: req.body.status,
-    buyerPrice: req.body.buyerPrice,
-    supplierPrice: req.body.supplierPrice,
-    isCancelled: false,
-    isExpired: false,
-    isExtended: req.body.validityExtensionId? true : false,
-    buyerCurrency: req.body.buyerCurrency,
-    supplierCurrency: req.body.supplierCurrency,
-    validityExtensionId: req.body.validityExtensionId,
-    validityExtension: req.body.validityExtensionId,
-    specialMentions: req.body.specialMentions
-      ? req.body.specialMentions
-      : req.body.buyerName +
-        " has sent a new Order to " +
-        req.body.supplierName +
-        ", and the price is " +
-        req.body.price +
-        " " +
-        req.body.supplierCurrency +
-        ".",
-    createdAt: req.body.createdAt ? req.body.createdAt : Date.now(),
-    updatedAt: Date.now(),
-    expiryDate:
-      Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION + (req.body.validityExtensionId? process.env.DAYS_BID_EXTENDED * process.env.DAY_DURATION : 0),
-    createdAtFormatted: req.body.createdAt
-      ? normalFormat(req.body.createdAt)
-      : normalFormat(Date.now()),
-    updatedAtFormatted: normalFormat(Date.now()),
-    expiryDateFormatted: customFormat(
-      Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION + (req.body.validityExtensionId? process.env.DAYS_BID_EXTENDED * process.env.DAY_DURATION : 0)
-    ),
-    buyer: req.body.buyer,
-    supplier: req.body.supplier
-  });
-
-  return bidRequest
-    .save()
-    .then((err, result) => {
-    let path = '../../../../../';
-      if(treatError(req, res, err, path+"buyer")) 
-        return false;    
-    
-      req.flash("success", "Bid requested successfully!");
-      return res.redirect(path+"/buyer");
-    })
-    .catch(console.error);
+exports.postPlaceBid = async (req, res) => {  
+  saveBidBody(req, res, '/');
 }
 
 
@@ -642,6 +440,7 @@ exports.getBidsCatalog = (req, res) => {
       });
   });
 };
+
 
 exports.getChatLogin = (req, res) => {
   //We need a username, a room name, and a socket-based ID.
@@ -722,7 +521,6 @@ exports.getViewBids = (req, res) => {
       validPrice += parseFloat(validBids[i].buyerPrice);
       for(let j in validBids[i].productImagesList) {
         if(!fileExists(validBids[i].productImagesList[j])) {
-          console.log('MALFUNCTION');
           validBids[i].productImagesList[j] = '';
         }
       }

@@ -122,14 +122,6 @@
 					<label>Item Description</label>
 					<input type="text" class="form-control" value="<%= request.itemDescription %>" readonly>
 				</div>
-				<div class="form-group">
-					<% const re = /:\s|,\s/;
-            const products = request.productList;
-            const prices = request.priceList;
-            const amounts = request.amountList;
-            const images = request.productImagesList;
-            %>					
-        </div>
         <div class="form-group">
           <label class="col-form-label">Request Name*</label>
           <input readonly type="text" class="form-control" name="requestName" value="<%= request.requestName %>">
@@ -185,7 +177,7 @@
         <div class='totals'>
           <div class="form-group">
             <label>Amount</label>
-            <% j = 0; for(let h of request.amountList) {j += h;} %>
+            <% j = 0; for(let h of request.productDetailsList) {j += h.amount;} %>
             <input class='form-control' title="Total number of items" type="text" readonly id="totalAmount" name="amount" value="<%= j %>">					
           </div>
           <div class="form-group">
@@ -202,7 +194,7 @@
           </div>
           <div class="form-group">
             <label>Price (Your Currency):</label>
-            <% l = 0; for(let m of request.priceList) {l += m;} %> <!-- Also request.supplierPrice .-->
+            <% l = 0; for(let m of request.productDetailsList) {l += m.supplierPrice;} %> <!-- Also request.supplierPrice .-->
             <input type="text" title="Total order price" value="<%= l %> <%= request.supplierCurrency %>" class="form-control" id="price" name="supplierPrice" readonly>
           </div>
           <div class="form-group">
@@ -251,20 +243,22 @@
         <input type="hidden" name="requestId" value="<%= request._id %>">
         <script type="text/javascript">
           let data = [];
-            <% let h = 0; if (products != null) { for(h in products) { %>              
+            <% let h = 0; if (productDetailsList != null) { for(h in productDetailsList) { %>              
             data.push({
-              name: '<%= products[h] %>',
-              supplierName: '<%= request.supplierName %>',
-              hiddenPrice: '<%= parseFloat(prices[h]).toFixed(2) %>',
-              hiddenTotalPrice: '<%= parseFloat(parseInt(amounts[h])*parseFloat(prices[h])).toFixed(2) %>',
+              name: '<%= h.productName %>',
+              supplierName: "<%= request.supplierName %>",
+              hiddenPrice: '<%= parseFloat(h.supplierPrice).toFixed(2) %>',
+              hiddenTotalPrice: '<%= parseFloat(parseInt(h.amount)*parseFloat(h.supplierPrice)).toFixed(2) %>',
               hiddenCurrency: '<%= request.supplierCurrency %>',
-              productImageSource: <% if(images[h].length > 0) { %>
-                '<img src="<%= path + '../' + images[h].substring(7) %>" style="height: 25px; width: 30px" onclick="window.open(this.src)">'
-                <% } else { %>''<% } %>,
+              productImageSource: <% if(h.productImage != null && h.productImage.length > 0) { %>
+                "<img src='<%= path + '../' + h.productImage.substring(7) %>' style='height: 25px; width: 30px' onclick='window.open(this.src)'>"
+              <% } else { %>
+                ''
+              <% } %>,
               supplierId: "<%= request.supplier %>",
-              productId: null,
+              productId: '<%= h.id %>',
               supplierCurrency: "<%= request.supplierCurrency %>",
-              hiddenAmount: '<%= amounts[h] %>'
+              hiddenAmount: '<%= parseInt(h.amount) %>'
             });
             <% } }%>
 

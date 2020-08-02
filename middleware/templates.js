@@ -2,6 +2,7 @@ const sgMail = require('@sendgrid/mail');
 const MongoClient = require('mongodb').MongoClient;
 const bcrypt = require("bcryptjs");
 const fs = require('fs');
+const BidRequest = require("../models/bidRequest");
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
@@ -29,7 +30,7 @@ const sendConfirmationEmail = (name, link, token, req) => {
 };
 
 
-const  fileExists = (path) => {
+const fileExists = (path) => {
   return fs.existsSync(path);
 }
 
@@ -471,7 +472,230 @@ const getCancelTypesJson = function() {
 };
 
 
+const uniqueJSONArray = (elem, array) => {
+  for(let i of array) {
+    if(i.id === elem.id) {
+      return false;
+    }
+  }
+  
+  array.push(elem);
+}
+
+
+function prepareBidData(req) {
+  let productList = prel(req.body.productList);
+  let amountList = prel(req.body.amountList, false, true);
+  let priceList = prel(req.body.priceList, true, false);
+  let priceOriginalList = prel(req.body.priceOriginalList, true, false);
+  let imagesList = req.body.productImagesList? prel(req.body.productImagesList) : [];
+  let idsList = req.body.productIdsList? prel(req.body.productIdsList) : [];
+  
+  let suppCurrListProd = (req.body.supplierCurrenciesListProd)?
+                          prel(req.body.supplierCurrenciesListProd) : [];
+  
+  sortLists(productList, amountList, priceList, imagesList, suppCurrListProd);
+  if(!(suppCurrListProd.length) && req.body.supplierCurrency) {
+    suppCurrListProd.push(req.body.supplierCurrency);
+  }
+
+  let products = [];
+
+  for (let i in productList) {//JSON, not string.
+    products.push({
+      id: (idsList[i] && idsList[i].length)? idsList[i] : null,
+      productName: productList[i],
+      productImage: (imagesList[i] != null && imagesList[i].length > 0)? imagesList[i] : null,
+      buyerPrice: priceOriginalList[i],
+      supplierPrice: priceList[i],      
+      buyerCurrency: req.body.buyerCurrency,
+      supplierCurrency: req.body.supplierCurrency,
+      amount: amountList[i],
+      totalPrice: parseFloat(priceList[i] * amountList[i]).toFixed(2),
+      supplier: req.body.supplierId?
+        req.body.supplierId : (req.body.supplierIdsList && req.body.supplierIdsList[i])? req.body.supplierIdsList[i] : null
+    });
+  }
+  
+  return {
+    productList: productList, 
+    amountList: amountList, 
+    priceList: priceList, 
+    priceOriginalList: priceOriginalList, 
+    imagesList: imagesList, 
+    productIdsList: idsList,
+    supplierCurrenciesListProd: suppCurrListProd,
+    products: products
+  };
+}
+
+
+function isPresent(elem, array) {
+  if(array.length)
+  for(let i in array) {
+    if(elem == array[i])
+      return true;
+  }
+  
+  return false;
+}
+
+
+function arrangeMultiData(t, suppIds) {
+  let productLists = [], amountLists = [], productImagesLists = [], priceLists = [], priceOriginalLists = [], productDetailsLists = [];
+  let uniqueSuppIds = [];
+  let app = [];
+  
+  for(let i in suppIds) {//0, 1, 2, 3, 4 - 0=2=4, 1=3.
+    //i=0, app=[]
+    //i=1, app=024
+    //i=2, app=02413
+    //i=3, app=02413
+    //i=4, app=02413
+    let productList = [], amountList = [], productImagesList = [], priceList = [], priceOriginalList = [], productDetailsList = [];
+    
+    if(!isPresent(suppIds[i], app)) {
+      for(let j in suppIds) {//0: 0, 2, 4.
+        if(suppIds[i] == suppIds[j]) {
+          app.push(suppIds[j]);
+          productList.push(t.productList[j]);
+          amountList.push(t.amountList[j]);
+          productImagesList.push(t.imagesList[j]);
+          priceList.push(t.priceList[j]);
+          priceOriginalList.push(t.priceOriginalList[j]);
+          productDetailsList.push(t.products[j]);
+        }
+      }
+      
+      productLists.push(productList);
+      amountLists.push(amountList);
+      productImagesLists.push(productImagesList);
+      priceLists.push(priceList);
+      priceOriginalLists.push(priceOriginalList);
+      productDetailsLists.push(productDetailsList);
+      uniqueSuppIds.push(suppIds[i]);
+    }
+    
+    if(app.length == suppIds.length)
+      break;
+  }
+  
+  return {
+    productList: productLists, 
+    amountList: amountLists, 
+    priceList: priceLists, 
+    priceOriginalList: priceOriginalLists, 
+    imagesList: productImagesLists, 
+    products: productDetailsLists,
+    uniqueSuppIds: uniqueSuppIds
+  };
+}
+
+
+const saveBidBody = async (req, res, path) => {
+    //New Bid Request placed.
+    let fix;
+  
+    if(typeof fx == 'undefined') {
+      fix = require("money");
+      let initConversions = require("../middleware/exchangeRates");
+      await initConversions(fix);
+    } else {
+      eval('fix = fx;');
+    }
+  
+    let suppIds = req.body.supplierIdsList? prel(req.body.supplierIdsList) : [];//Multi or not.
+    let t = prepareBidData(req), names, emails, suppCurrencies, suppCurrenciesByProd, totalPricesList;
+    
+    if(req.body.supplierId) {//Not Multi.
+      suppIds.push(req.body.supplierId)
+    } else {//Multi Supplier!
+      names = req.body.supplierNamesList? prel(req.body.supplierNamesList) : [];
+      emails = req.body.supplierEmailsList? prel(req.body.supplierEmailsList) : [];
+      suppCurrencies = req.body.supplierCurrenciesList? prel(req.body.supplierCurrenciesList) : [];//currencies
+      totalPricesList = req.body.supplierTotalPricesList? prel(req.body.supplierTotalPricesList, true) : [];
+      t = arrangeMultiData(t, suppIds);
+      suppIds = suppIds.filter((v, i, a) => a.indexOf(v) === i);
+      //suppIds = t.uniqueSuppIds;
+    };
+   
+    //Supplier's name, e-mail, currency, total price to be saved as lists in PlaceBid in case of Multi.
+    let asyncCounter = 0;
+    
+     for(let i = 0; i < suppIds.length; i++) {
+       let buyerPrice = !(t.uniqueSuppIds)? req.body.buyerPrice :fix(parseFloat(totalPricesList[i]).toFixed(2))
+                .from(suppCurrencies[i])
+                .to(req.body.buyerCurrency);       
+      
+      const bidRequest = new BidRequest({
+        requestName: req.body.requestName,
+        supplierName: req.body.supplierName? req.body.supplierName : names[i],
+        buyerName: req.body.buyerName,
+        buyerEmail: req.body.buyerEmail,
+        supplierEmail: req.body.supplierEmail? req.body.supplierEmail : emails[i],
+        itemDescription: req.body.itemDescription,
+        productDetailsList: !(t.uniqueSuppIds)? t.products : t.products[i],
+        itemDescriptionLong: req.body.itemDescriptionLong,
+        itemDescriptionUrl: req.itemDescriptionUrl,
+        amount: req.body.amount,
+        deliveryLocation: req.body.deliveryLocation,
+        deliveryRequirements: req.body.deliveryRequirements,
+        complianceRequirements: req.body.complianceRequirements,
+        complianceRequirementsUrl: req.body.complianceRequirementsUrl,
+        preferredDeliveryDate: req.body.preferredDeliveryDate,
+        otherRequirements: req.body.otherRequirements,
+        status: req.body.status,
+        buyerPrice: buyerPrice,
+        supplierPrice: req.body.supplierPrice? req.body.supplierPrice : totalPricesList[i],
+        isCancelled: false,
+        isExpired: false,
+        isExtended: req.body.validityExtensionId? true : false,
+        buyerCurrency: req.body.buyerCurrency,
+        supplierCurrency: req.body.supplierCurrency? req.body.supplierCurrency : suppCurrencies[i],
+        validityExtensionId: req.body.validityExtensionId,
+        validityExtension: req.body.validityExtensionId,
+        specialMentions: req.body.specialMentions
+          ? req.body.specialMentions
+          : req.body.buyerName +
+            " has sent a new Order to " +
+            (req.body.supplierName? req.body.supplierName : names[i]) +
+            ", and the Bid price is " +
+            (req.body.supplierPrice? req.body.supplierPrice : totalPricesList[i]) +
+            " " +
+            (req.body.supplierCurrency? req.body.supplierCurrency : suppCurrencies[i]) +
+            ".",
+        createdAt: req.body.createdAt ? req.body.createdAt : Date.now(),
+        updatedAt: Date.now(),
+        expiryDate:
+          Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION + (req.body.validityExtensionId? process.env.DAYS_BID_EXTENDED * process.env.DAY_DURATION : 0),
+        createdAtFormatted: req.body.createdAt
+          ? normalFormat(req.body.createdAt)
+          : normalFormat(Date.now()),
+        updatedAtFormatted: normalFormat(Date.now()),
+        expiryDateFormatted: customFormat(
+          Date.now() + process.env.BID_EXPIRY_DAYS * process.env.DAY_DURATION + (req.body.validityExtensionId? process.env.DAYS_BID_EXTENDED * process.env.DAY_DURATION : 0)
+        ),
+        buyer: req.body.buyer,
+        supplier: suppIds[i]
+      });
+       
+      bidRequest
+        .save()
+        .then((err, result) => {
+          if(++asyncCounter == suppIds.length) {
+            if(treatError(req, res, err, path+"buyer"))
+              return false;
+            
+             req.flash("success", "Bid requested successfully!");
+             return res.redirect(path+"buyer"); 
+          }
+      })
+      .catch(console.error);
+    }
+}
+
+
 const encryptionNotice = 'For your protection, UNITE uses encryption for your stored passwords.\nThus, it may take a certain amount of time for your encrypted password to be saved, after you press Sign Up or when you reset the password.\nThank you for your understanding, and remember that UNITE strives for ensuring a safe climate to its Users!';
 
 
-module.exports = { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendBanEmail, sendCancelBidEmail, prel, sortLists, getUsers, getBidStatusesJson, getCancelTypesJson, postSignInBody, updateBidBody, encryptionNotice };
+module.exports = { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendBanEmail, sendCancelBidEmail, prel, sortLists, getUsers, uniqueJSONArray, getBidStatusesJson, getCancelTypesJson, postSignInBody, saveBidBody, updateBidBody, encryptionNotice };
