@@ -405,7 +405,7 @@ const updateBidBody = (req, res, reqId, returnLink) => {
       }
       
       if(req.body.status == process.env.PAYMENT_DELIVERY_DONE) {//Update the balance of the Supplier.
-        let supplier = getUsers(dbo, 'suppliers', { _id: bid.supplier });
+        let supplier = getDataMongo(dbo, 'suppliers', { _id: bid.supplier });
         let newBalance = parseFloat(bid.supplierPrice) + (supplier && supplier.balance? parseFloat(supplier.balance) : 0);
         dbo.collection('suppliers').updateOne({ _id: supplier._id }, { $set: { balance: parseFloat(newBalance).toFixed(2) } }, function(err, obj) {});
       }
@@ -428,25 +428,70 @@ const updateBidBody = (req, res, reqId, returnLink) => {
 }
 
 
-const getUsers = async(db, table, obj) => {
-    let newObj = obj && obj instanceof Object? obj : {};
-  
-    let myPromise = () => {
-       return new Promise((resolve, reject) => {
-          db
-          .collection(table)
-          .find(newObj)
-          //.limit(1)
-          .toArray(function(err, data) {
-             err 
-                ? reject(err) 
-                : resolve(data);
-           });
+const getObjectMongo = async (db, table, obj) => {
+  let myPromise = () => {
+    return new Promise((resolve, reject) => {
+      db
+      .collection(table)
+      .findOne((typeof obj !== 'undefined' && obj instanceof Object)? obj : {}, function(err, data) {
+         err 
+            ? reject(err) 
+            : resolve(data);
        });
-    };
-   
-    let result = await myPromise();
-    return result;
+     });
+  };
+
+  let result = await myPromise();
+  return result;
+};
+
+
+const getObjectMongoose = async (model, obj) => {
+  let myPromise = () => {
+    return new Promise((resolve, reject) => {
+      eval(`let ${model} = require('../models/${lowerCase(model)}'); ${model}.findOne((typeof obj !== 'undefined' && obj instanceof Object)? obj : {}, (err, data) => { err || !data? reject(err) : resolve(data); });`);
+    });
+  };
+
+  let result = await myPromise();
+  return result;
+};
+
+
+const getDataMongo = async(db, table, obj) => {//DB connection active.
+  let myPromise = () => {
+    return new Promise((resolve, reject) => {
+      db
+      .collection(table)
+      .find(typeof obj !== 'undefined' && obj instanceof Object? obj : {})
+      .toArray(function(err, data) {
+         err 
+            ? reject(err) 
+            : resolve(data);
+       });
+     });
+  };
+
+  let result = await myPromise();
+  return result;
+}
+
+
+//function lowerCase
+function lowerCase(s) {
+  return s.replace(/^.{1}/g, s[0].toLowerCase());
+}
+
+
+const getDataMongoose = async (model, obj) => {//A Mongoose model name.
+  let myPromise = () => {
+    return new Promise((resolve, reject) => {
+      eval(`let ${model} = require('../models/${lowerCase(model)}'); ${model}.find(typeof obj !== 'undefined' && obj instanceof Object? obj : {}).then((data, err) => { err || !data? reject(err) : resolve(data); });`);      
+    });
+  };
+
+  let result = await myPromise();
+  return result;
 }
 
 
@@ -698,4 +743,4 @@ const saveBidBody = async (req, res, path) => {
 const encryptionNotice = 'For your protection, UNITE uses encryption for your stored passwords.\nThus, it may take a certain amount of time for your encrypted password to be saved, after you press Sign Up or when you reset the password.\nThank you for your understanding, and remember that UNITE strives for ensuring a safe climate to its Users!';
 
 
-module.exports = { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendBanEmail, sendCancelBidEmail, prel, sortLists, getUsers, uniqueJSONArray, getBidStatusesJson, getCancelTypesJson, postSignInBody, saveBidBody, updateBidBody, encryptionNotice };
+module.exports = { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendBanEmail, sendCancelBidEmail, prel, sortLists, getObjectMongo, getObjectMongoose, getDataMongo, getDataMongoose, uniqueJSONArray, getBidStatusesJson, getCancelTypesJson, postSignInBody, saveBidBody, updateBidBody, encryptionNotice };

@@ -24,7 +24,7 @@
   <script type="text/javascript">
       $(document).ready(function() {        
         let token = $("input[name='_csrf']").val();
-        getAutocomplete('#country', '/countryAutocomplete', token);
+        getAutocomplete('#country', '/countryAutocomplete', token, '<%= profile._id %>');
         errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
 
         $("input").on('change', function() {        

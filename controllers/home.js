@@ -17,7 +17,7 @@ const BadWords = require('bad-words');
 const search = require('../middleware/searchFlash');
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const fs = require("fs");
-const { fileExists, getCancelTypesJson } = require('../middleware/templates');
+const { fileExists, getObjectMongoose, getDataMongoose, getCancelTypesJson } = require('../middleware/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
@@ -229,91 +229,58 @@ exports.getTermsConditions = (req, res) => {
   });
 }
 
-exports.getBidsList = (req, res) => {
-  MongoClient.connect(URL, {useUnifiedTopology: true}, function(err, db) {
-    if(treatError(req, res, err, 'back'))
-      return false;
 
-    let dbo = db.db(BASE);
-    dbo.collection("bidrequests").find({}).toArray(function(err, bids) {
-      if(err) {
-        console.error(err.message);
-        return res.status(500).send({ 
-          msg: err.message 
-        });
-      }
+exports.getBidsList = async (req, res) => {  
+  let bids = await getDataMongoose('BidRequest');
 
-      db.close();
-      bids.sort(function(a, b) {
-        return a.requestName.localeCompare(b.requestName);
-      });
-      
-      let obj = userData(req);
-
-      res.render('bidsCatalog', {
-        role: obj.role,
-        isAdmin: obj.role == process.env.USER_ADMIN,
-        userId: obj.userId,
-        avatar: checkFile(obj.avatar),
-        userName: obj.userName,
-        userType: obj.userType,
-        bids: bids
-        });
-      });
+  bids.sort(function(a, b) {
+    return a.requestName.localeCompare(b.requestName);
   });
+
+  let obj = userData(req);
+
+  res.render('bidsCatalog', {
+    role: obj.role,
+    isAdmin: obj.role == process.env.USER_ADMIN,
+    userId: obj.userId,
+    avatar: checkFile(obj.avatar),
+    userName: obj.userName,
+    userType: obj.userType,
+    bids: bids
+    });
 };
+
 
 exports.getMemberList = async (req, res) => {
   //Get all buyers, suppliers, supervisors.
-  let buys = [], supers = [], supps = [];
   
-  let promise = Buyer.find({}).exec();
-  await promise.then((buyers) => {
-    buyers.sort(function (a, b) {
-      return a.organizationName.localeCompare(b.organizationName);
-    });
-   // buys = buyers;
-   // if(1==2)
-    for(let i in buyers) {
-      buys.push(buyers[i]);
-    }
-  });
-  
-  let promise1 = Supervisor.find({}).exec();
-  await promise1.then((sups) => {
-    sups.sort(function (a, b) {
-      return a.organizationName.localeCompare(b.organizationName);
-    });
-   // supers = sup;
-   // if(1==2)
-    for(let i in sups) {      
-      supers.push(sups[i]);
-    }
+  let buyers = await getDataMongoose('Buyer');
+  let supervisors = await getDataMongoose('Supervisor');
+  let suppliers = await getDataMongoose('Supplier');  
+ 
+  buyers.sort(function (a, b) {
+    return a.organizationName.localeCompare(b.organizationName);
   });
 
-  let promise2 = Supplier.find({}).exec();
-  await promise2.then((suppliers) => {
-    suppliers.sort(function (a, b) {
-      return a.companyName.localeCompare(b.companyName);
-    });
-    //supps = suppliers;
-   // if(1==2)
-    for(let i in suppliers) {
-      supps.push(suppliers[i]);
-    }
+  supervisors.sort(function (a, b) {
+    return a.organizationName.localeCompare(b.organizationName);
+  });
+
+  suppliers.sort(function (a, b) {
+    return a.companyName.localeCompare(b.companyName);
   });
   
   let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   let obj = userData(req);
   
-  res.render("memberList", {
-    buyers: buys,
+  res.render("memberList", {    
     role: obj.role,
     isAdmin: obj.role == process.env.USER_ADMIN,
     avatar: checkFile(obj.avatar),
-    suppliers: supps,
-    supervisors: supers,
+    buyers: buyers,
+    supervisors: supervisors,
+    suppliers: suppliers,
     userId: obj.userId,
     successMessage: success,
     errorMessage: error,

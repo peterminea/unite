@@ -296,6 +296,22 @@
                 <input type="number" id="status" class="form-control" name="status" min="0" max="4" step="1" value="<%= statuses[0].value %>" readonly>
               </div>
             </div>
+            
+            <% if(suggestions != null && suggestions.length > 0) { %>
+            <div class='suggestions form-group'>
+              <label class='suggestions-label'>People who bought this product also liked...</label>
+              <% for(let sugg of suggestions) { %>
+              <div class='suggestion'>
+                <span class='suggestion-name'><%= sugg.productName %> - </span>
+                <span><%= sugg.buyerPrice %> <%= sugg.buyerCurrency %></span>
+                <% if(sugg.productImage != null && sugg.productImage.length) { %>
+                <span>&nbsp;<img src="<%= path + '../' + sugg.productImage.substring(7) %>" style='height: 25px; width: 30px' onclick='window.open(this.src)'></span>
+                <% } %>
+              </div>
+              <% } %>
+            </div>
+            <% } %>
+            
             <div class="form-group">
               <select class='statuses' style="width: 100%" id="statuses">
                 <% if (statuses != null) { for (status of statuses) { %>

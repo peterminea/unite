@@ -31,9 +31,9 @@
   <script type="text/javascript">
     $(document).ready(function () {
       let token = $("input[name='_csrf']").val();
-      getAutocomplete('.country', '/countryAutocomplete', token);      
-      getAutocomplete('#industry', '/industryGetAutocomplete', token);      
-      getAutocomplete('#capabilityDescription', '/capabilityInputAutocomplete', token);
+      getAutocomplete('.country', '/countryAutocomplete', token);
+      getAutocomplete('#industry', '/industryGetAutocomplete', token);
+      getAutocomplete('#capabilityDescription', '/capabilityInputAutocomplete', token, '<%= profile._id %>');
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       let defaultCurr = "<%= profile.currency %>";
       initBaseRates(fx, 'select.currency', '/currencyAutocomplete', token, defaultCurr);  

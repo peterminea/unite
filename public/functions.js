@@ -1201,25 +1201,34 @@ function addition(
   fromBuyer,
   supplierId
 ) {
-  let isPresent = false;
+  let isPresent = false, isInCatalog = false;
+    
   elem.find("span.product").each(function() {
     if ($(this).text() == prodVal) {
       isPresent = true;
       return false;
     }
   });
+    
+  const id = fromBuyer ? '_' + getId(elem.attr("id")) : '';
+    
+  if(id.length && $('#catalog'+id).length) {
+    $('#catalog'+id).find('span').each(function(ind, elem) {
+      if($(elem).text() == prodVal) {
+        isInCatalog = true;
+        return !isInCatalog;
+      }
+    });
+  }
 
-  if (isPresent) {
+  if(isPresent || isInCatalog) {
     Swal.fire({
       icon: "error",
       title: "Error!",
       text:
-        "You have already added " +
-        prodVal +
-        " to the list. Please refine your selection."
+        isPresent? "You have already added " + prodVal + " to the list. Please refine your selection." : `${prodVal} is present in the UNITE Catalog of Products. You can only add new Products to the list.`
     });
   } else {
-    const id = fromBuyer ? '_' + getId(elem.attr("id")) : '';
     let fromBid = fromBuyer || !($("#hiddenTotalPrice").length);
     let addedPrice = parseFloat(priceVal * amountVal).toFixed(2);
     let priceInput = fromBid ? $("#price" + id) : $("#totalSupplyPrice");
