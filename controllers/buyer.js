@@ -170,7 +170,7 @@ exports.getProductsCatalog = async (req, res) => {
 
 
 async function suggest(prod, buyerId) {
-  let promise = await BidRequest.find({
+  let products = [], i = 0, bids = await getDataMongoose('BidRequest', {
     $and: [
       { buyer: { $ne: buyerId } },
       {
@@ -179,11 +179,8 @@ async function suggest(prod, buyerId) {
       {"productDetailsList.id": prod._id}
       ]
       }]
-  }).exec();
-  
-  return promise.then((bids) => {
-    let products = [], i = 0;
-    
+  });
+ 
     //loop1:    
     for(let bid of bids) {
       for(let product of bid.productDetailsList) {
@@ -197,7 +194,6 @@ async function suggest(prod, buyerId) {
     }
    
     return products;
-  });
 }
 
 
@@ -295,28 +291,33 @@ exports.getPlaceBid = async (req, res) => {
     req.flash('error', 'Data not found in the database!');
     res.redirect('back');
   }
-    
-  // { $in : [1,2,3,4] }
-  //Or array
-  let suggestionsList = [];
 
-  for(let i in products) {
+  let suggestions = [], suggestionsList = [];
 
-    //Find a suggestion for this product:
-    let suggestions = await suggest(products[i], buyer[0]._id);
-
-    for(let i of suggestions) {
-      suggestionsList.push(i);
+  for(let i in products) {//Find a suggestion for this product:
+    suggestionsList = await suggest(products[i], buyer[0]._id);
+    for(let i of suggestionsList) {
+      suggestions.push(i);      
     }
   }
-  /*
-  suggestionsList.sort(function(a, b) {
-    return a.id.localeCompare(b.id);
-  });*/
 
-  suggestionsList = _.uniq(suggestionsList, false, function(item) { return item.id; });
-  //Keep the first [const] sugestions:
-  suggestionsList.length = process.env.MAX_PROD_SUGGESTED;
+  suggestionsList = _.uniq(suggestions, false, function(item) { return item.id; });  
+  let len = suggestionsList.length;
+  suggestions = [];
+  
+  while(1) {
+    let num = parseInt(Math.random() * len);
+    suggestions.push(suggestionsList[num]);
+    if(suggestions.length > 1) 
+      suggestions = _.uniq(suggestions, false, function(item) { return item.id; });
+      //Keep the first [const] suggestions:
+      if(suggestions.length == process.env.MAX_PROD_SUGGESTED)
+        break;
+  }
+  
+  suggestions.sort(function(a, b) {
+    return a.productName.localeCompare(b.productName);
+  });
 
   let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
   req.session.flash = [];
@@ -337,8 +338,9 @@ exports.getPlaceBid = async (req, res) => {
     FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
     statuses: statuses,
     statusesJson: JSON.stringify(getBidStatusesJson()),
-    suggestions: suggestionsList,
+    suggestions: suggestions,
     buyer: buyer,
+    path: req.params.productId? '../../../' : '../',
     product: products[0],
     supplier: suppliers[0],
     products: products,

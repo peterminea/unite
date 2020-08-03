@@ -1003,6 +1003,25 @@ for (let inet in networkInterfaces) {
   }
 }*/
 
+const _ = require('underscore');
+
+let products = [
+  {
+    id: 1,
+    price: 42,
+    productName: 'Gloves'
+  },
+  {
+    id: 2,
+    price: 43,
+    productName: 'Hats'
+  },
+  {
+    id: 2,
+    price: 44, 
+    productName: 'Snickers'
+  }
+];
 
 let db;
 if (1 == 2)
@@ -1013,9 +1032,16 @@ if (1 == 2)
     }
 
     db = client.db(BASE); //Right connection!
-    let sup = await getDataMongo(db, 'suppliers');
-    let sup2 = await getDataMongoose('Supplier');
-    console.log(sup.length);
+    let sup;// = await getDataMongo(db, 'suppliers');
+    //let sup2 = await getDataMongoose('Supplier');
+    //console.log(sup.length);
+    
+    //let prod = await getObjectMongo(db, 'productservices', { productName: 'Gloves' });
+    //console.log(prod);
+    
+    products = _.uniq(products, false, function(item) { return item.id; });
+    
+    console.log(products);
     
     if(1==2)
     for(let i of sup) {
@@ -1028,41 +1054,12 @@ if (1 == 2)
         buyerPrice += parseFloat(j.buyerPrice) * j.amount;
         supplierPrice += parseFloat(j.supplierPrice) * j.amount;
         j.totalPrice = parseFloat(j.totalPrice);
-        productDetailsList.push(j);
-        
-        /*
-        let prod = await getUsers(db, 'productservices', { productName: (i.productList[j]) });
-        //console.log(prod);
-        productDetailsList.push({
-          id: prod && prod.length && prod[0]._id? prod[0]._id : null,
-          productName: i.productList[j],
-          productImage: (i.productImagesList[j] != null && i.productImagesList[j].length > 0)? i.productImagesList[j] : '',
-          buyerPrice: i.priceOriginalList[j]? parseFloat(i.priceOriginalList[j]) : 0,
-          supplierPrice: i.priceList[j]? parseFloat(i.priceList[j]) : 0,
-          buyerCurrency: i.buyerCurrency? i.buyerCurrency : 'EUR',
-          supplierCurrency: i.supplierCurrency? i.supplierCurrency : 'EUR',
-          amount: i.amountList[j]? i.amountList[j] : 0,
-          totalPrice: i.priceList[j] && i.amountList[j]? parseFloat(parseFloat(i.priceList[j]) * i.amountList[j]).toFixed(2) : 0,
-          supplier: i.supplier
-        });*/
+        productDetailsList.push(j);        
       }
       
       //console.log(productDetailsList);
       
-      db.collection('bidrequests').updateOne( { _id: i._id }, { $set : { productDetailsList: productDetailsList, buyerPrice: buyerPrice, supplierPrice: supplierPrice },/* $unset: { amountList: '', productList: '', productImagesList: '', priceOriginalList: '', priceList: '' } */}, /*{ multi: true },*/ function(err, obj) {});
-      
-      /*
-      let bids = await getUsers(db, 'bidrequests', { supplier: i._id });
-      let balance2 = i.balance != null? parseFloat(i.balance) : 0;
-      for(let j of bids) {
-        balance2 += (j.supplierPrice != null? parseFloat(j.supplierPrice) : 0);
-      }
-    
-      balance2 = parseFloat(balance2).toFixed(2);
-      console.log(i.balance);*/
-      //console.log(parseFloat(balance2).toFixed(2));      
-      //db.collection('suppliers').updateOne({ _id: i._id }, { $set: { balance: balance2 } }, function(err, obj) {});
-      //db.collection('suppliers').updateMany({}, { $set: { balance: balance2 } }, function(err, obj) {});      
+      db.collection('bidrequests').updateOne( { _id: i._id }, { $set : { productDetailsList: productDetailsList, buyerPrice: buyerPrice, supplierPrice: supplierPrice },/* $unset: { amountList: '', productList: '', productImagesList: '', priceOriginalList: '', priceList: '' } */}, /*{ multi: true },*/ function(err, obj) {});    
     }
     
     process.on("uncaughtException", function(err) {
