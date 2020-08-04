@@ -815,15 +815,14 @@ function generateData(countries, industries) {
 
 exports.getProfile = async (req, res) => {
   if (!req || !req.session) 
-    return false;  
-  console.log(req.connection.remoteAddress);  
+    return false;
   
+  console.log(req.connection.remoteAddress);    
+  const supplier = req.session.supplier;
   let products = await getDataMongoose('ProductService', { supplier: supplier._id });
   let countries = await getDataMongoose('Country');
   let industries = await getDataMongoose('Industry');
   let capabilities = await getDataMongoose('Capability', { supplier: supplier._id });
-  
-  const supplier = req.session.supplier;
  
   products.sort(function(a, b) {
     return a.productName.localeCompare(b.productName);
@@ -833,6 +832,8 @@ exports.getProfile = async (req, res) => {
 
   for(let i in products) {
     req.session.supplier.productsServicesOffered.push(products[i].productName);
+    if(!fileExists(products[i].productImage))
+        products[i].productImage = '';
   }
 
   let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
@@ -861,8 +862,7 @@ exports.getProfile = async (req, res) => {
     successMessage: success,
     errorMessage: error,
     profile: req.session.supplier         
-})
-.catch(console.error);
+  });
 }
 
 
@@ -943,10 +943,10 @@ exports.getBidRequest = async (req, res) => {
   req.session.flash = [];  
   let request = await getObjectMongoose('BidRequest', { _id: id });
   let buyer = await getObjectMongoose('Buyer', { _id: request.buyer });
-
-  for(let j in request.productImagesList) {
-    if(!fileExists(request.productImagesList[j])) {
-      request.productImagesList[j] = '';
+  
+  for(let j in request.productDetailsList) {
+    if(!fileExists(request.productDetailsList[j].productImage)) {      
+      request.productDetailsList[j].productImage = '';
     }
   }
 

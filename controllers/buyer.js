@@ -304,10 +304,12 @@ exports.getViewBids = async (req, res) => {
         validBids[i].cannotExtendMore = true;
       }
     }
+    
     validPrice += parseFloat(validBids[i].buyerPrice);
-    for(let j in validBids[i].productImagesList) {
-      if(!fileExists(validBids[i].productImagesList[j])) {
-        validBids[i].productImagesList[j] = '';
+    
+    for(let j in validBids[i].productDetailsList) {
+      if(!fileExists(validBids[i].productDetailsList[j].productImage)) {      
+        validBids[i].productDetailsList[j].productImage = '';
       }
     }
   }
