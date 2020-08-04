@@ -33,7 +33,7 @@
   <script type="text/javascript">
     $(document).ready(function() {
       let token = $("input[name='_csrf']").val();
-      getProductsList('.productsList', '/prodServiceAutocomplete', token);
+      //getProductsList('.productsList', '/prodServiceAutocomplete', token);
       getAutocomplete('#search', '/capabilityInputAutocomplete', token, true);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>'); 
       let defaultBidCurrency = '<%= BID_DEFAULT_CURR %>';      
@@ -122,15 +122,40 @@
       <% let i = 0; if (suppliers != null) { for (supplier of suppliers) { i++; %>
       <div class="card mt-4 suppliersLive">
         <h5 class="card-header bg-dark text-white"><%= supplier.companyName %></h5>
-        <div class="card-body">
-          <h5 class="card-title">Contact Name: <%= supplier.contactName %></h5>
-          <p class="card-text">Capability Description: <%= supplier.capabilityDescription %></p>
-          <button class="btn btn-primary ml-2" style="float: right" data-target="#request_<%= i %>"
-            data-toggle="modal">Request a Bid</button>
-          <button class="btn btn-dark" style="float: right" data-target="#comp_<%= i %>"
-            data-toggle="modal">Supplier Details</button>
-          <a href="../buyer/viewBid/<%= supplier._id %>/<%= buyer._id %>/<%= buyer.currency %>/<%= buyer.balance %>"><button class="btn btn-dark" style="margin-right: 10px; float: right">View Bid(s)</button></a>
-        </div>
+        <form method='POST'>
+          <div class="card-body">
+            <h5 class="card-title">Contact Name: <%= supplier.contactName %></h5>
+            <p class="card-text">Capability Description: <%= supplier.capabilityDescription %></p>
+            <input type="hidden" name="buyerId" value="<%= buyer._id %>" />
+            <input type="hidden" name="supplierId" value="<%= supplier._id %>" />
+            <input type='hidden' id='bidSupplierList_<%= i %>' name='bidSupplierList' value="<%= supplier._id %>">
+            <input type="hidden" name="outsideCatalog" value="0" />
+            <input type="hidden" name="allowMultiple" value="false" />
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <button class="btn btn-primary ml-2 openBid" initialId="<%= supplier._id %>" id="openBid_<%= i %>" style="float: right">Request a Bid (Page)</button>
+            <button class="btn btn-dark" style="float: right" data-target="#comp_<%= i %>" data-toggle="modal">Supplier Details</button>
+            <a href="../buyer/viewBid/<%= supplier._id %>/<%= buyer._id %>/<%= buyer.currency %>/<%= buyer.balance %>">
+              <button class="btn btn-dark" style="margin-right: 10px; float: right">View Bid(s)</button>
+            </a>
+          </div>
+          <div class="modal-body" totals>
+             <p class='excel'>
+              You can select multiple suppliers for your bid. Please refer to the drop-down below.
+            </p>
+            <div class="form-group">
+              <label class="col-form-label">Other Suppliers</label>
+              <select id="otherSuppliers_<%= i %>" class="form-control otherSuppliers" toExclude="<%= supplier._id %>" name="otherSuppliers">
+                <option></option>
+              </select>
+              <script type="text/javascript">              
+                let otherSel = $('#otherSuppliers_<%= i %>);
+                <% for(let x of allSuppliers) { if(x._id != supplier._id) { %>
+                otherSel.append(`<option id='${<%= x._id %>}' value='${<%= x.companyName %>}'><%= x.companyName %></option>`);
+                <% } } %>
+              </script>
+            </div>
+          </div>          
+          </form>
 
         <!-- Modal view of Supplier Details (read-only mode) -->
         <div class="modal fade" id="comp_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
@@ -299,309 +324,6 @@
               <div class="modal-footer">
                 <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Modal window for the new Bid Request -->
-        <div class="modal fade" style="width: 100%; max-width: 96%; overflow: auto" id="request_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
-          <div class="modal-dialog" style="max-width: 1024px; overflow: auto" role="document">
-            <div class="modal-content" style="width: 100%; overflow: hidden">
-              <div class="modal-header">
-                <h5 class="modal-title">New Bid Request</h5>
-                <button type="button" id='close_<%= i %>' class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <form method="POST">
-                <div class="modal-body">
-                  <div class="form-group">
-                    <label class="text-muted form-text">
-                      Please fill in all the required (*) fields.
-                    </label>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Request Name*</label>
-                    <input type="text" class="form-control" id="requestName_<%= i %>" name="requestName" required>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Supplier Company</label>
-                    <input type="text" class="form-control" id="supplierName_<%= i %>" name="supplierName" value="<%= supplier.companyName %>" readonly>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Buyer Organization</label>
-                    <input type="text" class="form-control" name="buyerName" value="<%= buyer.organizationName %>" readonly>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Buyer's E-mail Address*</label>
-                    <input type="email" class="form-control" name="buyerEmail" value="<%= buyer.emailAddress %>" readonly>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Supplier's E-mail Address*</label>
-                    <input type="email" class="form-control" name="supplierEmail" value="<%= supplier.emailAddress %>" readonly>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Item Description <b>(Short)</b>*</label>
-                    <input type="text" class="form-control" name="itemDescription" required>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Item Description (Long)*</label>
-                    <textarea class="form-control" name="itemDescriptionLong" required></textarea>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Item Description URL (Long)</label>
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon3">http(s)://</span>
-                      </div>
-                      <input type="text" class="form-control" aria-describedby="basic-addon3" name="itemDescriptionUrl">
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Delivery Location*</label>
-                    <textarea class="form-control" name="deliveryLocation" required></textarea>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Delivery Requirements*</label>
-                    <textarea class="form-control" name="deliveryRequirements" required></textarea>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Compliance Requirements*</label>
-                    <textarea class="form-control" name="complianceRequirements" required></textarea>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Compliance Requirements URL</label>
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon3">http(s)://</span>
-                      </div>
-                      <input type="text" class="form-control" name="complianceRequirementsUrl" aria-describedby="basic-addon3">
-                    </div>
-                  </div>
-                   <div class="form-group">
-                    <label class="col-form-label">Other Requirements</label>
-                    <textarea class="form-control" name="otherRequirements"></textarea>
-                  </div>                 
-                  <div class='upload-section'>
-                    <div class='catalog' id='catalog_<%= i %>' style='visibility: hidden'>
-                      <% for(let p of products) { %>
-                      <span id='<%= p._id %>'><%= p.productName %></span>
-                      <% } %>
-                    </div>
-                     <p class='excel'>
-                      You can also select multiple suppliers for your bid.
-                    </p>
-                    <div class="form-group">
-                      <label class="col-form-label">Other Suppliers</label>
-                      <select id="otherSuppliers_<%= i %>" class="form-control otherSuppliers" name="otherSuppliers">
-                        <option></option>
-                      </select>
-                    </div>
-                    <div class="form-group">
-                      <label class="col-form-label">Preferred Delivery Date</label>
-                      <input type="text" class="form-control prefDate" id="prefDate_<%= i %>" name="preferredDeliveryDate">
-                    </div>
-                    <div class="form-group">
-                      <label class="col-form-label">Your currency*:</label>
-                      <select class="form-control buyerCurrency" id="selectCurrencies_<%= i %>" supplierCurrency="<%= supplier.currency %>" index="<%= i %>" ></select>
-                    </div>
-                    <p class='excel'>
-                      You can select products from drop-down:
-                    </p>
-                    <div class="form-group">
-                      <label class="col-form-label">Supplier's products:</label>
-                      <select index="<%= i %>" supplierId="<%= supplier._id %>" class="form-control productsList" name="productsList" id="productsList_<%= i %>"></select>
-                    </div>
-                    <div class="form-group">
-                      <label>Bid extension letter:</label>
-                      <input type="hidden" class="fileId" name="validityExtensionId" value="">
-                      <input class="form-control upload" type="file" id="validityExtension" name="validityExtension"/>
-                      <input class="form-control single btn upload-button btn-success mt-2" type="button" disabled value="Upload File" />
-                    </div>
-                    <div>
-                      <p class='excel'>
-                        You can use an Excel file with the products list, with each row as product name + product price + product currency + product amount + optionally Supplier name (4 or 5 cells/row, the first row must contain column names). When clicking Process, your items are instantly added to the Page.
-                      </p>
-                    </div>
-                    <div class="form-group">
-                      <label>Please upload your Excel product list:</label>
-                      <input type="hidden" class="fileId" name="excel" value="">
-                      <input class="form-control upload fileexcelupload fromBuyer multiparam" type="file" id="products" name="excel" single>
-                      <input class="form-control single btn upload-button btn-success mt-2" type="button" disabled value="Process Excel File" />
-                    </div>
-                    <div class="form-group">
-                      <label>Upload a product image:</label>
-                      <input type="hidden" class="fileId" name="productImage" value="">
-                      <input class="form-control upload productimageupload multiparam" type="file" id="productImage" name="products" single>
-                      <input class="form-control single btn upload-button btn-success mt-2" type="button" disabled value="Upload Product Image" />                    
-                    </div>
-                    <div class="form-group">
-                      <label class="col-form-label">Products / Services Requested*</label>
-                        <p class='littleNote form-control' style='height: 120px'>
-                          You can request products out of the supplier stock.
-                        </p>
-                        <input type="text" class="form-control prodInput" defaultMaxAmount="<%= MAX_AMOUNT %>" placeholder="Add Product/Service*" id="prodServiceInput_<%= i %>">
-                        <br>
-                        <button class="btn btn-outline-secondary prodButton" type="button" disabled MAX="<%= MAX_PROD %>" id="addProdService_<%= i %>">Add</button>
-                      </div>
-                      <div class="form-group">
-                        <label class="col-form-label">Amount*</label>
-                        <input type="number" min="1" step="1" class="form-control amountInput" id="amount_<%= i %>" name="theAmount" value="0" required>
-                      </div>
-                    </div>
-                    <ul class="list-group" MAX="<%= MAX_PROD %>" buyerCurrency="<%= buyer.currency %>" supplierCurrency="<%= supplier.currency %>" id="prodServices_<%= i %>">
-                      </ul>
-                      <p class='term'>
-                        You have a number of <span class='productsCount'>0</span> products.
-                      </p>
-                      <input type="hidden" required id="hiddenProdServicesList_<%= i %>" name="productList" value="">
-                      <input type="hidden" required id="amountList_<%= i %>" name="amountList" value="">
-                      <input type="hidden" required id="priceList_<%= i %>" name="priceList" value="">
-                      <input type="hidden" required id="priceOriginalList_<%= i %>" name="priceOriginalList" value="">
-                      <input type="hidden" required id="productImagesList_<%= i %>" name="productImagesList" value="">
-                    
-                    <div id="jqDiv_<%= i %>" class="form-group">
-                      <table id="grid_<%= i %>" MAX="<%= MAX_PROD %>" supplierId="<%= supplier._id %>" buyerCurrency="<%= buyer.currency %>" supplierCurrency="<%= supplier.currency %>">
-                      </table>
-                      <div id='prodPager_<%= i %>'>
-                      </div>
-                    </div>
-                  <div class='totals'>
-                      <div class="form-group">
-                        <label>Total number of items (Overall Amount):</label>
-                        <input class="form-control" type="number" readonly id="totalAmount_<%= i %>" name="amount" value="0">
-                      </div>
-                       <div class="form-group">
-                        <label class="col-form-label">Your price for selected product:</label>
-                        <span class="form-control hid">
-                          <span id="buyerPriceUnit_<%= i %>">0</span>
-                          <span index="<%= i %>" class="bidCurrency" id="buyerCurrencyUnit_<%= i %>"></span>
-                        </span>
-                      </div>
-                      <div class="form-group">
-                        <label class=" col-form-label">Your total price:</label>
-                        <span class="form-control hid">
-                          <span index="<%= i %>" class="bidPrice" id="sprice_<%= i %>">0</span>
-                          <span index="<%= i %>" class="bidCurrency" id="scurrency_<%= i %>"></span>
-                          <input type="hidden" index="<%= i %>" class="bidPrice" id="price_<%= i %>" name="buyerPrice" value="0">
-                          <input type="hidden" index="<%= i %>" class="bidCurrency" id="currency_<%= i %>" name="buyerCurrency">
-                        </span>
-                      </div>
-                      <div class="form-group">
-                        <label class="col-form-label">Supplier's price for selected product:</label>
-                        <span class="form-control hid">
-                          <span id="supplierPriceUnit_<%= i %>">0</span>
-                          <span index="<%= i %>" class="suppCurrency" id="supplierCurrencyUnit_<%= i %>"><%= supplier.currency %></span>
-                        </span>
-                      </div>
-                      <div class="form-group">
-                        <label class="col-form-label">Supplier's equivalent total price:</label>
-                        <span class="form-control hid">
-                          <span id="supplierPrice_<%= i %>" name="supplierPrice">0</span>
-                          <span index="<%= i %>" class="suppCurrency" id="supplierCurrency_<%= i %>" name="supplierCurrency"><%= supplier.currency %></span>
-                        </span>
-                      </div>
-                      <div class="form-group">
-                        <label class="col-form-label">Status*</label>
-                        <input type="number" id="status_<%= i %>" class="form-control" name="status" min="0" max="4" step="1" value="<%= statuses[0].value %>" readonly>
-                      </div>
-                    </div>
-                    <div class="form-group">
-                      <select class='statuses' style="width: 100%" id="statuses_<%= i %>">
-                        <% if (statuses != null) { for (status of statuses) { %>
-                        <option disabled title="<%= status.name %>" value="<%= status.value %>"><%= status.name %></option>
-                        <% } } %>
-                      </select>
-                      <% if (statusesJson != null) { %>
-                        <div style="visibility: hidden" id="statusJsonValues_<%= i %>">
-                          <span class='statuses'><%= statusesJson %></span>                
-                        </div>
-                      <% } %>
-                    </div>                    
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    <input type="hidden" name="buyer" value="<%= buyer._id %>">
-                    <input type="hidden" name="supplier" value="<%= supplier._id %>">
-                  <script type="text/javascript">
-                    function limitStatus(e) {
-                        let ASCIICode = (e.which) ? e.which : e.keyCode;
-                        if (ASCIICode > 31 && (ASCIICode < 48 || ASCIICode > 54)) 
-                            return false;
-                        return true; 
-                    }
-                    
-                    const ind = '_' + "<%= i %>";
-                    let data = [];
-                    initGrid(productColModel, data, "#grid"+ind, '#prodPager'+ind, "name", 'Products List', 1080);
-                    let otherSel = $('#otherSuppliers'+ind);
-                    
-                    <% for(let x of allSuppliers) { if(x._id != supplier._id) { %>
-                    otherSel.append(`<option id='${<%= x._id %>}' value='${<%= x.companyName %>}'><%= x.companyName %></option>`);
-                    <% } } %>
-                    
-                    setTimeout(function() {
-                      let table = $("#grid"+ind);
-                      table.attr('supplierCurrency', "<%= supplier.currency %>");
-                    }, 1024);
-
-                    $('#status'+ind).on('keypress keyon keyup', function(e) {
-                        return limitStatus(e);
-                    });
-                    
-                    let sel = $('#statuses'+ind);
-                    let statusVector = [];
-                    sel.find('option').each(function(index, element) {
-                      statusVector.push($(element).text());
-                    });
-                    
-                    sel
-                      .find('option[value="' + $('#status'+ind).val() + '"]')
-                      .prop('selected', true);
-                    
-                    sel.attr('title', sel.find('option:selected').text());
-                    let x = JSON.parse($('#statusJsonValues'+ind).find('span.statuses').text());
-                    
-                    $('#status'+ind).change(function(e) {//Read-only select, though.
-                      if($(this).val() < x.BUYER_REQUESTED_BID
-                         || $(this).val() > x.PAYMENT_DELIVERY_DONE) {//The last two options can be triggered by the corresponding Cancel Bid button. 5 for Supplier cancellation, 6 for Buyer cancellation.
-                        return false;
-                      }
-                    
-                      let id = '_' + getId($(this).attr('id'));
-                      if(id.length == 1)
-                        id = '';
-                      
-                      let statusText = statusVector[parseInt($(this).val())];
-                      if($("#statusText"+id).length)
-                        $("#statusText"+id).remove();
-                      
-                      $('<div style="color: blue" id="statusText' + id + '"><p>' + statusText + '</p></div>')
-                        .insertAfter($('#status'+id).parent('div'));
-                    });
-                    
-                    let elem0 = $("#prodServices"+ind);
-                    $('<a><span style="color: green; cursor: pointer" id="massRemove'+ind+'">Remove All Products</span></a><br>').insertBefore(elem0);
-                    
-                    $('#massRemove'+ind).on('click', function() {
-                      let id = getId($(this).attr('id'));
-                      
-                      if(id.length)
-                        id = '_' + id;
-                      removeAllItems(id);
-                    });
-                    
-                    let suppCurr = '<%= supplier.currency %>';
-                    bindAddBid($('button[id="addProdService'+ind+'"]'), suppCurr);
-                  </script>
-                </div>
-                <div class='totals'>
-                  <div class='form-group'>
-                    <a href="/buyer"><button index="<%= i %>" class="btn bid-button btn-warning cancel">Cancel</button></a>
-                  </div>
-                  <div class='form-group'>
-                    <button index="<%= i %>" type="submit" class="placeBid bid-button btn btn-primary">Send request</button>
-                  </div>
-                </div>
-              </form>
             </div>
           </div>
         </div>
