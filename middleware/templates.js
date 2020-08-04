@@ -451,7 +451,7 @@ const getObjectMongo = async (db, table, obj) => {
 const getObjectMongoose = async (model, obj) => {
   let myPromise = () => {
     return new Promise((resolve, reject) => {
-      eval(`let ${model} = require('../models/${lowerCase(model)}'); ${model}.findOne((typeof obj !== 'undefined' && obj instanceof Object)? obj : {}, (err, data) => { err || !data? reject(err) : resolve(data); });`);
+      eval(`let ${model} = require('../models/${lowerCase(model)}'); ${model}.findOne((typeof obj !== 'undefined' && obj instanceof Object)? obj : {}, (err, data) => { err? reject(err) : resolve(data); });`);
     });
   };
 
@@ -768,6 +768,12 @@ const getPlaceBidBody = async (req, res) => {
   req.session.flash = [];
   let isMultiProd = prodIds.length > 1;
   let isMultiSupp = uniqueSupplierIds.length > 1;
+  /*
+  console.log(buyerId + ' ' + productId + ' ' + supplierId);
+  console.log(isMultiProd + ' ' + !isMultiProd + ' ' + !products.length);
+  console.log(suppliers.length + ' ' + req.body.bidSupplierList + ' ' + isMultiSupp);
+  
+  throw new Error();*/
 
   res.render("buyer/placeBid", {
     successMessage: success,
@@ -778,10 +784,9 @@ const getPlaceBidBody = async (req, res) => {
     isSingleBid: !isMultiSupp,
     isSingleProd: !isMultiProd,
     isNoProd: !products.length,//Outside Catalog.
-    //otherSuppliers: otherSuppliers,
-    //isMultiSuppNoCatalog: otherSuppliers != null,
     MAX_PROD: process.env.BID_MAX_PROD,
     MAX_AMOUNT: process.env.MAX_PROD_PIECES,
+    BID_DEFAULT_PRICE: process.env.BID_DEFAULT_PRICE,
     BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
     FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
     statuses: statuses,

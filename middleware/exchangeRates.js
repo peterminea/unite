@@ -2,9 +2,9 @@ module.exports = async (fx) => {
   const fetch = require('node-fetch');
   let url = "https://www.floatrates.com/daily/eur.json";
   let settings = { method: "Get" };
-  let res = await fetch(url, settings);
-  let json = res.json();
-
+  let res = await fetch(url, settings)
+  .then((res) => res.json())
+  .then((json) => {
   let currency = JSON.stringify(json);
   currency = '[' + (currency).split('},').join('}},{') + ']';
   currency = JSON.parse(currency);
@@ -14,8 +14,7 @@ module.exports = async (fx) => {
     let obj = JSON.parse(t.substring(7, t.length-1));
   }
 
-  fx.base = process.env.APP_DEFAULT_CURR;//EUR    
-
+  fx.base = process.env.APP_DEFAULT_CURR;//EUR
   let t, obj = [], str = 'fx.rates = {\n';
 
   for(let i in currency) {
@@ -32,7 +31,7 @@ module.exports = async (fx) => {
   } 
 
   str += '\n}';
-  eval(str);    
-  //console.log(fx);
+  eval(str);
   return fx;    
+  });
 }

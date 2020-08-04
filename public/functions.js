@@ -748,16 +748,21 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
     if(!amount.val() || amount.val() < 1 || !(Number.isInteger(parseFloat(amount.val())))) {
       Swal.fire({
         icon: 'warning',
-        title: 'Attention',                          
+        title: 'Attention',
         text: 'Please select a valid amount of products first.'
       });
 
       return false;
     }
     
+    let isProposedPriceHandled = !($('#proposedPrice').length) || $('proposedPrice').val();
+    
     if(!input.attr('price'))
-      input.attr('price', 1);
+      input.attr('price', input.attr('defaultPrice'));//Default price when there is no product and the buyer must invent products not being on the UNITE Catalog.
     //let req = input.val().length;// && $('#price').val().length && $('#currency').val().length;
+    if($('#proposedPrice').length && $('proposedPrice').val()) {
+      input.attr('price', $('proposedPrice').val());
+    }
     
     let option = $(`#productsList option:selected`);
     let suppId = option && option.attr('supplierId')?
@@ -770,7 +775,7 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
       val = 'No supplier';
     }
 
-    if(input.val() && input.val().length) {
+    if(input.val() && input.val().length && isProposedPriceHandled) {
       input.removeClass('errorField');
       let prodVal = input.val();
       let isPresent = false;
@@ -881,7 +886,7 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
         Swal.fire({
           icon: 'warning',
           title: 'Attention!',
-          text: 'Please enter valid product data (name, amount).'
+          text: 'Please enter valid product data (name, price (if required), amount).'
         });
 
         input.addClass('errorField');
@@ -945,7 +950,7 @@ function bindHandleProduct(obj, prodServiceInput, isRow, isAdd) {
     let divId = $("#jqDiv");
     let gridId = $("#grid");
     let fromBid = !($("#hiddenTotalPrice").length);
-    let rowId;    
+    let rowId;
     let bidSuppCurr, bidBigPrice, bidAmount, bidUnitPrice, prodSuppId, bidMaxAmount;
     let index = gridId.find("tr").index(tr);
     let rowid = tr.attr('id');
@@ -1028,7 +1033,7 @@ function bindHandleProduct(obj, prodServiceInput, isRow, isAdd) {
       totalAmountInput.val(parseInt(newAmount));
       tr.find("span.amount").text(parseInt(localAmount));
       tr.find("span.totalPrice").text(parseFloat(localPrice).toFixed(2));
-      
+
       if (!isRow && (entireAmount > 1 || isAdd)) {//No row deletion.
         gridId.jqGrid("setRowData", rowid, {
           hiddenAmount: parseInt(localAmount),
@@ -2334,9 +2339,15 @@ $(document).ready(function() {
   
   
   $('.otherSuppliers').on('change', function() {    
-    let id = getIdClear($(this).attr('id'));
+    let id = getIdClear($(this));
     let idsList = $('#bidSupplierList'+id);    
     let opt = $(this).find('option:selected');
+    let div = $(this).parent('div').next('div');
+    if(!(div.find('span').length)) {
+      div.append('<p class="additional-suppliers">Additional suppliers chosen for bid:</p>');
+    }
+    
+    div.append(`<span>${opt.text()}</span><br>`);
     
     if(opt.text().length) {
       idsList.val(idsList.val() + `,${opt.attr('id')}`);
@@ -2347,7 +2358,7 @@ $(document).ready(function() {
   $('.openBid').on('click', function(e) {
     e.preventDefault();
     
-    let id = getIdClear($(this).attr('id'));
+    let id = getIdClear($(this));
     let idsList = $('#bidSupplierList'+id);    
     let values = idsList.val().split(',');
     idsList.val(values);
@@ -2540,7 +2551,14 @@ if(1==2)
       });   
     
     
-      $('input[id^="prodServiceInput"]').on('change', function() {
+      $('#proposedPrice').on('change', function() {
+        $('#prodServiceInput')
+          .attr('price', $(this).val())
+          .trigger('change');
+      });
+    
+    
+      $('input[id="prodServiceInput"]').on('change', function() {
         if($(this).val()) {
           let amount = $('#amount').val();
           
