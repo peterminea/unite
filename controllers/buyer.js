@@ -15,7 +15,6 @@ const BidRequest = require("../models/bidRequest");
 const ProductService = require("../models/productService");
 const Country = require('../models/country');
 const BidStatus = require("../models/bidStatus");
-const _ = require("underscore");
 
 const {
   basicFormat,
@@ -51,6 +50,8 @@ const {
   getCancelTypesJson,
   postSignInBody,
   saveBidBody,
+  getCatalogItems,
+  getPlaceBidBody,
   updateBidBody,
   encryptionNotice
 } = require("../middleware/templates");
@@ -121,38 +122,6 @@ exports.getIndex = async (req, res) => {
 };
 
 
-async function getCatalogItems() {
-  let products = await getDataMongoose('ProductService');
-  let catalogItems = [];
-
-  for (let i in products) {
-    let supId = products[i].supplier;
-    let obj = await getObjectMongoose('Supplier', { _id: products[i].supplier });
-
-    if(obj) {
-      catalogItems.push({
-        productId: products[i]._id,
-        supplierId: obj._id,
-        productName: products[i].productName,
-        price: products[i].price,
-        amount: products[i].amount,
-        totalPrice: products[i].totalPrice,
-        productImage: fileExists(products[i].productImage)? products[i].productImage : '',
-        buyerCurrency: products[i].currency,
-        supplierCurrency: obj.currency,
-        supplierName: obj.companyName
-      });
-    }
-  }
-
-  catalogItems.sort(function(a, b) {
-    return a.productName.localeCompare(b.productName);
-  });
-  
-  return catalogItems;
-}
-
-
 //Buyers should load a Catalog of Products by clicking on a button in their Index page:
 exports.getProductsCatalog = async (req, res) => {
   let catalogItems = await getCatalogItems();
@@ -169,38 +138,10 @@ exports.getProductsCatalog = async (req, res) => {
 }
 
 
-async function suggest(prod, buyerId) {
-  let products = [], i = 0, bids = await getDataMongoose('BidRequest', {
-    $and: [
-      { buyer: { $ne: buyerId } },
-      {
-        $or: [
-      {"productDetailsList.productName": prod.productName},
-      {"productDetailsList.id": prod._id}
-      ]
-      }]
-  });
- 
-    //loop1:    
-    for(let bid of bids) {
-      for(let product of bid.productDetailsList) {
-        if(product.productName != prod.productName || product.id != prod._id) {          
-          products.push(product);
-          //if(++i == process.env.MAX_PROD_SUGGESTED) {
-           // break loop1;
-          //}
-        }
-      }
-    }
-   
-    return products;
-}
-
-
 exports.postIndex = async (req, res) => {
    initConversions(fx);
 
-  if (req.body.capabilityInput) {
+  if (req.body.capabilityInput) {//Initial search.
     //req.term for Autocomplete - We started the search and become able to place a Bid Request.
     const key = req.body.capabilityInput;
     let suppliers = await getDataMongoose('Supplier');
@@ -228,29 +169,26 @@ exports.postIndex = async (req, res) => {
           .to(process.env.BID_DEFAULT_CURR);
       }              
 
-      let success = search(req.session.flash, "success"),
-        error = search(req.session.flash, "error");
-      req.session.flash = [];
-      let catalogItems = await getCatalogItems();
-    
-      res.render("buyer/index", {
-        buyer: req.session.buyer,
-        suppliers: suppliers2,
-        allSuppliers: suppliers,
-        MAX_PROD: process.env.BID_MAX_PROD,
-        MAX_AMOUNT: process.env.MAX_PROD_PIECES,
-        BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
-        FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
-        bidsLength: bids && bids.length ? bids.length : null,
-        totalBidsPrice: totalBidsPrice,
-        statuses: statuses,
-        products: catalogItems,
-        successMessage: success,
-        errorMessage: error,
-        statusesJson: JSON.stringify(getBidStatusesJson())
+    let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
+    req.session.flash = [];    
+
+    res.render("buyer/index", {
+      buyer: req.session.buyer,
+      suppliers: suppliers2,
+      allSuppliers: suppliers,
+      MAX_PROD: process.env.BID_MAX_PROD,
+      MAX_AMOUNT: process.env.MAX_PROD_PIECES,
+      BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+      FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
+      bidsLength: bids && bids.length ? bids.length : null,
+      totalBidsPrice: totalBidsPrice,
+      statuses: statuses,
+      successMessage: success,
+      errorMessage: error,
+      statusesJson: JSON.stringify(getBidStatusesJson())
     });
-  } else if (req.body.itemDescription) {
-    saveBidBody(req, res, '/');
+  } else if(req.body.outsideCatalog) {//Open Bid - no products from the Cata-Log.    
+    getPlaceBidBody(req, res);
   } else {
     res.redirect("/buyer");
   }
@@ -258,94 +196,7 @@ exports.postIndex = async (req, res) => {
 
 
 exports.getPlaceBid = async (req, res) => {
-  let buyerId = (req.params.buyerId? req.params.buyerId : req.body.buyerId), productId = (req.params.productId), supplierId = (req.params.supplierId);
-  let productIds = req.body.bidProductList? req.body.bidProductList : [], supplierIds = req.body.bidSupplierList? req.body.bidSupplierList : [];
-  
-  if(!productIds.length && productId) {
-    productIds.push(productId);
-  }
-  
-  if(!supplierIds.length && supplierId) {
-    supplierIds.push(supplierId);
-  }
-  
-  let productList = prel(productIds);
-  let supplierList = prel(supplierIds);
-  let prodIds = [], suppIds = [];
-
-  for(let i in productList) {
-    prodIds.push(new ObjectId(productList[i]));
-  }
-
-  for(let i in supplierList) {
-    suppIds.push(new ObjectId(supplierList[i]));
-  }
-
-  let uniqueSupplierIds = suppIds.filter((v, i, a) => a.indexOf(v) === i);
-  let buyer = await getObjectMongoose('Buyer', { _id: buyerId });
-  let products = await getDataMongoose('ProductService', { _id: { $in: prodIds } });
-  let suppliers = await getDataMongoose('Supplier', { _id: { $in: uniqueSupplierIds } });
-  let statuses = await getDataMongoose('BidStatus');
-  
-  if(!buyer || !products.length || !suppliers.length || !statuses.length) {
-    req.flash('error', 'Data not found in the database!');
-    res.redirect('back');
-  }
-
-  let suggestions = [], suggestionsList = [];
-
-  for(let i in products) {//Find a suggestion for this product:
-    suggestionsList = await suggest(products[i], buyer[0]._id);
-    for(let i of suggestionsList) {
-      suggestions.push(i);      
-    }
-  }
-
-  suggestionsList = _.uniq(suggestions, false, function(item) { return item.id; });  
-  let len = suggestionsList.length;
-  suggestions = [];
-  
-  while(1) {
-    let num = parseInt(Math.random() * len);
-    suggestions.push(suggestionsList[num]);
-    if(suggestions.length > 1) 
-      suggestions = _.uniq(suggestions, false, function(item) { return item.id; });
-      //Keep the first [const] suggestions:
-      if(suggestions.length == process.env.MAX_PROD_SUGGESTED)
-        break;
-  }
-  
-  suggestions.sort(function(a, b) {
-    return a.productName.localeCompare(b.productName);
-  });
-
-  let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
-  req.session.flash = [];
-  let isMultiProd = prodIds.length > 1;
-  let isMultiSupp = uniqueSupplierIds.length > 1;
-
-  res.render("buyer/placeBid", {
-    successMessage: success,
-    errorMessage: error,
-    isMultiProd: isMultiProd,
-    isMultiSupp: isMultiSupp,
-    isMultiBid: isMultiSupp,
-    isSingleBid: !isMultiSupp, 
-    isSingleProd: !isMultiProd,
-    MAX_PROD: process.env.BID_MAX_PROD,
-    MAX_AMOUNT: process.env.MAX_PROD_PIECES,
-    BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
-    FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
-    statuses: statuses,
-    statusesJson: JSON.stringify(getBidStatusesJson()),
-    suggestions: suggestions,
-    buyer: buyer,
-    path: req.params.productId? '../../../' : '../',
-    product: products[0],
-    supplier: suppliers[0],
-    products: products,
-    suppliers: suppliers
-  });
+  getPlaceBidBody(req, res);
 }
 
 

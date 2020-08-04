@@ -3,7 +3,7 @@ const MongoClient = require('mongodb').MongoClient;
 const bcrypt = require("bcryptjs");
 const fs = require('fs');
 const BidRequest = require("../models/bidRequest");
-
+const ObjectId = require("mongodb").ObjectId;
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
@@ -11,6 +11,8 @@ const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
 const fetch = require('node-fetch');
 const internalIp = require('internal-ip');
 const { verifyBanNewUser, verifyBanExistingUser } = require('../middleware/verifyBanned');
+const search = require('../middleware/searchFlash');
+const _ = require("underscore");
 
 const sendConfirmationEmail = (name, link, token, req) => {
     sgMail.send({
@@ -637,6 +639,165 @@ function arrangeMultiData(t, suppIds) {
 }
 
 
+async function suggest(prod, buyerId) {
+  let products = [], i = 0, bids = await getDataMongoose('BidRequest', {
+    $and: [
+      { buyer: { $ne: buyerId } },
+      {
+        $or: [
+      {"productDetailsList.productName": prod.productName},
+      {"productDetailsList.id": prod._id}
+      ]
+      }]
+  });
+ 
+    //loop1:    
+    for(let bid of bids) {
+      for(let product of bid.productDetailsList) {
+        if(product.productName != prod.productName || product.id != prod._id) {          
+          products.push(product);
+          //if(++i == process.env.MAX_PROD_SUGGESTED) {
+           // break loop1;
+          //}
+        }
+      }
+    }
+   
+    return products;
+}
+
+
+const getCatalogItems = async () => {
+  let products = await getDataMongoose('ProductService');
+  let catalogItems = [];
+
+  for (let i in products) {
+    let supId = products[i].supplier;
+    let obj = await getObjectMongoose('Supplier', { _id: products[i].supplier });
+
+    if(obj) {
+      catalogItems.push({
+        productId: products[i]._id,
+        supplierId: obj._id,
+        productName: products[i].productName,
+        price: products[i].price,
+        amount: products[i].amount,
+        totalPrice: products[i].totalPrice,
+        productImage: fileExists(products[i].productImage)? products[i].productImage : '',
+        buyerCurrency: products[i].currency,
+        supplierCurrency: obj.currency,
+        supplierName: obj.companyName
+      });
+    }
+  }
+
+  catalogItems.sort(function(a, b) {
+    return a.productName.localeCompare(b.productName);
+  });
+  
+  return catalogItems;
+}
+
+
+const getPlaceBidBody = async (req, res) => {
+  let buyerId = (req.params.buyerId? req.params.buyerId : req.body.buyerId), productId = (req.params.productId), supplierId = (req.params.supplierId);
+  let productIds = req.body.bidProductList? req.body.bidProductList : [], supplierIds = req.body.bidSupplierList? req.body.bidSupplierList : [];
+  //let otherSuppliers = req.body.allowMultiple? await getDataMongoose('Supplier') : null;
+  
+  if(!productIds.length && productId) {
+    productIds.push(productId);
+  }
+  
+  if(!supplierIds.length && supplierId) {
+    supplierIds.push(supplierId);
+  }
+  
+  let productList = productIds.length? prel(productIds) : [];
+  let supplierList = prel(supplierIds);
+  let prodIds = [], suppIds = [];
+
+  for(let i in productList) {
+    prodIds.push(new ObjectId(productList[i]));
+  }
+
+  for(let i in supplierList) {
+    suppIds.push(new ObjectId(supplierList[i]));
+  }
+
+  let uniqueSupplierIds = suppIds.filter((v, i, a) => a.indexOf(v) === i);
+  let buyer = await getObjectMongoose('Buyer', { _id: buyerId });
+  let products = prodIds.length? await getDataMongoose('ProductService', { _id: { $in: prodIds } }) : [];//Empty if bidding outside the Catalog.
+  let suppliers = await getDataMongoose('Supplier', { _id: { $in: uniqueSupplierIds } });
+  let statuses = await getDataMongoose('BidStatus');
+  let catalogItems = prodIds.length? null : await getCatalogItems();
+  
+  if(!buyer || !products.length || !suppliers.length || !statuses.length) {
+    req.flash('error', 'Data not found in the database!');
+    res.redirect('back');
+  }
+
+  let suggestions = [], suggestionsList = [];
+  if(products.length) {
+    for(let i in products) {//Find a suggestion for this product:
+      suggestionsList = await suggest(products[i], buyer[0]._id);
+      for(let i of suggestionsList) {
+        suggestions.push(i);      
+      }
+    }
+
+    suggestionsList = _.uniq(suggestions, false, function(item) { return item.id; });  
+    let len = suggestionsList.length;
+    suggestions = [];
+
+    while(1) {
+      let num = parseInt(Math.random() * len);
+      suggestions.push(suggestionsList[num]);
+      if(suggestions.length > 1) 
+        suggestions = _.uniq(suggestions, false, function(item) { return item.id; });
+        //Keep the first [const] suggestions:
+        if(suggestions.length == process.env.MAX_PROD_SUGGESTED)
+          break;
+    }
+
+    suggestions.sort(function(a, b) {
+      return a.productName.localeCompare(b.productName);
+    });
+  }
+
+  let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
+  req.session.flash = [];
+  let isMultiProd = prodIds.length > 1;
+  let isMultiSupp = uniqueSupplierIds.length > 1;
+
+  res.render("buyer/placeBid", {
+    successMessage: success,
+    errorMessage: error,
+    isMultiProd: isMultiProd,
+    isMultiSupp: isMultiSupp,
+    isMultiBid: isMultiSupp,
+    isSingleBid: !isMultiSupp,
+    isSingleProd: !isMultiProd,
+    isNoProd: !products.length,//Outside Catalog.
+    //otherSuppliers: otherSuppliers,
+    //isMultiSuppNoCatalog: otherSuppliers != null,
+    MAX_PROD: process.env.BID_MAX_PROD,
+    MAX_AMOUNT: process.env.MAX_PROD_PIECES,
+    BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+    FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
+    statuses: statuses,
+    statusesJson: JSON.stringify(getBidStatusesJson()),
+    suggestions: suggestions,
+    buyer: buyer,
+    path: req.params.productId? '../../../' : '../',
+    product: products.length? products[0] : null,
+    supplier: suppliers[0],
+    catalogItems: catalogItems,
+    products: products,
+    suppliers: suppliers
+  });
+}
+
+
 const saveBidBody = async (req, res, path) => {
     //New Bid Request placed.
     let fix;
@@ -743,4 +904,4 @@ const saveBidBody = async (req, res, path) => {
 const encryptionNotice = 'For your protection, UNITE uses encryption for your stored passwords.\nThus, it may take a certain amount of time for your encrypted password to be saved, after you press Sign Up or when you reset the password.\nThank you for your understanding, and remember that UNITE strives for ensuring a safe climate to its Users!';
 
 
-module.exports = { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendBanEmail, sendCancelBidEmail, prel, sortLists, getObjectMongo, getObjectMongoose, getDataMongo, getDataMongoose, uniqueJSONArray, getBidStatusesJson, getCancelTypesJson, postSignInBody, saveBidBody, updateBidBody, encryptionNotice };
+module.exports = { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendBanEmail, sendCancelBidEmail, prel, sortLists, getObjectMongo, getObjectMongoose, getDataMongo, getDataMongoose, uniqueJSONArray, getBidStatusesJson, getCancelTypesJson, postSignInBody, getCatalogItems, getPlaceBidBody, saveBidBody, updateBidBody, encryptionNotice };

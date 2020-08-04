@@ -158,7 +158,7 @@ server2.on("stream", (stream, headers) => {
 });
 
 server2.listen(8443);*/
-//Lambda letiant: messages.sort((a,b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0));
+//Lambda variant: messages.sort((a,b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0));
 app.get("/messages", (req, res) => {
   Message.find(
     {
@@ -179,9 +179,11 @@ app.get("/messages", (req, res) => {
   );
 });
 
+
 server.listen(port, () => {
   console.log("Connected to port: " + port + ".");
 });
+
 
 app.post("/messages", (req, res) => {
   let message = new Message(req.body);
@@ -192,6 +194,7 @@ app.post("/messages", (req, res) => {
     res.sendStatus(200);
   });
 });
+
 
 let count = 0;
 const {
@@ -281,7 +284,6 @@ socket.on("connection", sock => {
   });
 
   sock.on("sendMessage", function(msgData, callback) {
-    //console.log(sock);
     let user = getUser(sock.id);
 
     if (!user) {
@@ -312,7 +314,6 @@ socket.on("connection", sock => {
     mesg.save(err => {
       if (err) {
         console.error(err.message);
-        //flash('error', err.message);
         throw err;
       }
     });
@@ -451,7 +452,6 @@ let prodImageStorage = multer.diskStorage({
     callback(null, path.join("${__dirname}/../public/productImages"));    
   },
   filename: function(req, file, callback) {
-    // + path.extname(file.originalname)
     let date = dateformat(new Date(), "dddd_mmmm_dS_yyyy_h.MM.ss_TT"); //Date.now()
     let date2 = moment(new Date().getTime()).format("HH.mm.ss.a");
     callback(null, file.originalname.substring(file.originalname.lastIndexOf('.')+1) + "_" + date + "_" + file.originalname); //The name itself.
@@ -484,7 +484,7 @@ let uploadProdImage = multer({
 
 app.post("/uploadfile", upload.single("single"), (req, res, next) => {
   const file = req.file;
-  console.log(file); //Can we parse its content here or not?
+  
   if (!file) {
     const error = new Error("Please upload a file");
     error.httpStatusCode = 400;
@@ -535,7 +535,7 @@ app.post("/uploadExcel", uploadExcel.single("single"), (req, res, next) => {
 
   if(obj && obj.length) {
     console.log(obj[0].data);
-    //Treat the obj letiable as an array of rows
+    //Treat the obj variable as an array of rows:
     res.send(obj[0].data);
   } else {
     res.send("Error!");
@@ -625,7 +625,7 @@ app.post("/purchase", (req, res, next) => {
         (err, client) => {
           if (err) {
             console.error(err.message);
-            //flash('error', err.message);
+            //req.flash('error', err.message);
             return res.status(500).send({ msg: err.message });
           }
 
@@ -886,143 +886,6 @@ app.post("/currencyAutocomplete", async function(req, res, next) {
 });
 
 
-/*
-app.post("/prodServiceAutocomplete", function(req, res, next) {
-  let regex = new RegExp(req.query["term"], "i");
-  let id = req.body["supplierId"];
-  let values = regex && id? { productName: regex, supplier: new ObjectId(id) } : { supplier: new ObjectId(id) };
-
-  let prodServiceFilter = ProductService.find(
-    values,
-    { productName: 1, price: 1, currency: 1 }
-  )
-    .sort({ productName: 1 })
-    .limit(regex && id? parseInt(MAX_PROD) : 100); //Negative sort means descending.
-
-  prodServiceFilter.exec(function(err, data) {
-    let result = [];
-    console.log(data.length);
-    if (!err) {
-      if (data && data.length && data.length > 0) {
-        data.forEach((item) => {
-          let obj = {
-            id: item._id,
-            supplierId: item.supplier,
-            name: item.productName,
-            price: item.price,
-            amount: item.amount,
-            totalPrice: item.totalPrice,
-            productImage: item.productImage,
-            currency: item.currency
-          };
-
-          result.push(obj);
-        });
-      }
-
-      res.jsonp(result);
-    } else {
-      req.flash("error", err.message);
-      throw err;
-    }
-  });
-});
-
-
-app.post("/capabilityInputAutocomplete", async function(req, res, next) {  
-  let regex = new RegExp(req.query["term"], "i");
-  let val = regex? { supplier: new ObjectId(req.body["supplierId"]), capabilityDescription: regex } : { supplier: new ObjectId(req.body["supplierId"]) };
-  let data = await getDataMongoose('Capability', val);
-
-  if (data && data.length && data.length > 0) {
-    let result = [];
-
-    data.forEach(item => {
-      let obj = {
-        id: item._id,
-        name: item.capabilityDescription
-      };
-
-      result.push(obj);
-    });
-
-    res.jsonp(result);
-    } else {
-    req.flash("error", 'Capabilities not found!');
-    res.json('Error!');
-  }
-});*/
-
-
-const fetch = require('node-fetch');
-let url = "https://www.floatrates.com/daily/eur.json";/*
-let settings = { method: "Get" };
-
-fetch(url, settings)
-    .then((res) => res.json())
-    .then((json) => {
-      //console.log(JSON.stringify(json));
-  let currency = JSON.stringify(json);
-  currency = '[' + (currency).split('},').join('}},{') + ']';
-  currency = JSON.parse(currency); 
-
-  let fx = {
-    base: process.env.APP_DEFAULT_CURR,
-  }, t, obj = [], str = 'fx.rates = {\n';
-  
-  for(let i in currency) {
-    t = JSON.stringify(currency[i]);
-    obj.push(JSON.parse(t.substring(7, t.length-1)));
-  }
-  
-  obj.sort(function(a, b) {
-      return a.code.localeCompare(b.code);
-    });
-  
-  for(let i in obj) {
-    str += obj[i].code + ': ' + obj[i].rate + (i == obj.length-1? '' : ',\n');
-  } 
-
-  str += '\n}';
-  eval(str);
-  });
-
-let networkInterfaces = os.networkInterfaces();
-
-let nonLocalInterfaces = {};
-for (let inet in networkInterfaces) {
-  let addresses = networkInterfaces[inet];
-  for (let i=0; i<addresses.length; i++) {
-    let address = addresses[i];
-    if (!address.internal) {
-      if (!nonLocalInterfaces[inet]) {
-        nonLocalInterfaces[inet] = [];
-      }
-      nonLocalInterfaces[inet].push(address);
-    }
-  }
-}*/
-
-const _ = require('underscore');
-
-let products = [
-  {
-    id: 1,
-    price: 42,
-    productName: 'Gloves'
-  },
-  {
-    id: 2,
-    price: 43,
-    productName: 'Hats'
-  },
-  {
-    id: 2,
-    price: 44, 
-    productName: 'Snickers'
-  }
-];
-
 let db;
 if (1 == 2)
   MongoClient.connect(URI, { useUnifiedTopology: true }, async (err, client) => {
@@ -1031,36 +894,7 @@ if (1 == 2)
       throw err;
     }
 
-    db = client.db(BASE); //Right connection!
-    let sup;// = await getDataMongo(db, 'suppliers');
-    //let sup2 = await getDataMongoose('Supplier');
-    //console.log(sup.length);
-    
-    //let prod = await getObjectMongo(db, 'productservices', { productName: 'Gloves' });
-    //console.log(prod);
-    
-    products = _.uniq(products, false, function(item) { return item.id; });
-    
-    console.log(products);
-    
-    if(1==2)
-    for(let i of sup) {
-      
-      let productDetailsList = [];
-      let buyerPrice = 0, supplierPrice = 0;
-      
-      for(let j of i.productDetailsList) {
-        
-        buyerPrice += parseFloat(j.buyerPrice) * j.amount;
-        supplierPrice += parseFloat(j.supplierPrice) * j.amount;
-        j.totalPrice = parseFloat(j.totalPrice);
-        productDetailsList.push(j);        
-      }
-      
-      //console.log(productDetailsList);
-      
-      db.collection('bidrequests').updateOne( { _id: i._id }, { $set : { productDetailsList: productDetailsList, buyerPrice: buyerPrice, supplierPrice: supplierPrice },/* $unset: { amountList: '', productList: '', productImagesList: '', priceOriginalList: '', priceList: '' } */}, /*{ multi: true },*/ function(err, obj) {});    
-    }
+    db = client.db(BASE); //Right connection! 
     
     process.on("uncaughtException", function(err) {
       console.error(err.message);
