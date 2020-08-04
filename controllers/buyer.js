@@ -86,13 +86,13 @@ exports.getIndex = async (req, res) => {
   let bids = await getDataMongoose('BidRequest', {buyer: req.session.buyer._id});
   let caps = await getDataMongoose('Capability');  
   let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
-  req.session.flash = [];  
+  req.session.flash = [];
   let buyer = req.session.buyer, cap = [], totalBidsPrice = 0;
 
   caps.sort(function (a, b) {
-    return a.name.localeCompare(b.name);
+    return a.capabilityDescription.localeCompare(b.capabilityDescription);
   });
-
+  
   if (bids && bids.length && fx) {
     for (let i in bids) {
       totalBidsPrice += fx(parseFloat(bids[i].buyerPrice).toFixed(2))
@@ -117,7 +117,6 @@ exports.getIndex = async (req, res) => {
     successMessage: success,
     errorMessage: error,
     suppliers: null
-    //catalogItems: catalogItems
   });
 };
 
@@ -129,7 +128,7 @@ exports.getProductsCatalog = async (req, res) => {
   req.session.flash = [];
 
   res.render("buyer/productsCatalog", {
-    data: catalogItems,
+    data: (catalogItems),
     MAX: process.env.BID_MAX_PROD,
     buyerId: req.session.buyer._id,
     successMessage: success,
@@ -272,7 +271,7 @@ exports.getViewBids = async (req, res) => {
   let bids = await getDataMongoose('BidRequest', {
     supplier: req.params.supplierId,
     buyer: req.params.buyerId
-  });  
+  });
 
   //Verify bids:
   let validBids = [],

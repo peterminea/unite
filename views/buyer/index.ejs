@@ -33,26 +33,30 @@
   <script type="text/javascript">
     $(document).ready(function() {
       let token = $("input[name='_csrf']").val();
-      //getProductsList('.productsList', '/prodServiceAutocomplete', token);
       getAutocomplete('#search', '/capabilityInputAutocomplete', token, true);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>'); 
       let defaultBidCurrency = '<%= BID_DEFAULT_CURR %>';      
       initBaseRates(fx, 'select.buyerCurrency', '/currencyAutocomplete', token, defaultBidCurrency);//Preferred currency for Buyer.
+      
+      $('.viewBid').on('click', function(e) {
+        e.preventDefault();
+        window.location = `../buyer/viewBid/${$(this).attr('supplierId')}/${$(this).attr('buyerId')}/${$(this).attr('buyerCurrency')}/${$(this).attr('buyerBalance')}`;
+      });
 
       $('#loadCatalog').on('click', function() {
         if($('div.suppliersLive').length)
-          return false;
+          return false;        
         
         Swal.fire({
           icon: 'info',
           title: 'Information',
-          timer: 2000,
+          timer: 1000,
           text: 'The Catalog of Products is going to be prepared for you...'
         });
         
-        setTimeout(function() {
-          $(this).parent('div').find('a').trigger('click');
-        }, 2000);
+        setTimeout(function() {          
+          window.location.href = $('#loadCatalog').parent('div').find('.a').attr('href');
+        }, 1200);
       });
   });
   </script>
@@ -104,7 +108,7 @@
         <select class='autocomp'>
           <option id="" value=""></option>
           <% for(capability of capabilities) { %>
-          <option id="<%= capability.id %>" value="<%= capability.name %>"><%= capability.name %></option>
+          <option id="<%= capability.id %>" value="<%= capability.capabilityDescription %>"><%= capability.capabilityDescription %></option>
           <% } %>
         </select>
       </div>
@@ -112,9 +116,9 @@
     
     <div class="mt-4">
       <button class="form-control btn btn-warning" style="margin-bottom: 20px" MAX="<%= MAX_PROD %>" id="loadCatalog" buyer="<%= buyer._id %>" avatar="<%= buyer.avatar %>">
-        Load Catalog of Products
+        Load Products Catalog
       </button>
-      <a href="../buyer/productsCatalog" style="visibility: hidden"></a>
+      <a class='a' href="../buyer/productsCatalog"></a>      
     </div>
     <% } %>
 
@@ -134,11 +138,9 @@
             <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
             <button class="btn btn-primary ml-2 openBid" initialId="<%= supplier._id %>" id="openBid_<%= i %>" style="float: right">Request a Bid (Page)</button>
             <button class="btn btn-dark" style="float: right" data-target="#comp_<%= i %>" data-toggle="modal">Supplier Details</button>
-            <a href="../buyer/viewBid/<%= supplier._id %>/<%= buyer._id %>/<%= buyer.currency %>/<%= buyer.balance %>">
-              <button class="btn btn-dark" style="margin-right: 10px; float: right">View Bid(s)</button>
-            </a>
+            <button class="btn btn-dark viewBid" supplierId="<%= supplier._id %>" buyerId="<%= buyer._id %>" buyerCurrency="<%= buyer.currency %>" buyerBalance="<%= buyer.balance %>" style="margin-right: 10px; float: right">View Bid(s)</button>
           </div>
-          <div class="modal-body" totals>
+          <div class="modal-body totals">
              <p class='excel'>
               You can select multiple suppliers for your bid. Please refer to the drop-down below.
             </p>
@@ -147,16 +149,17 @@
               <select id="otherSuppliers_<%= i %>" class="form-control otherSuppliers" toExclude="<%= supplier._id %>" name="otherSuppliers">
                 <option></option>
               </select>
-              <script type="text/javascript">              
-                let otherSel = $('#otherSuppliers_<%= i %>);
+              <script type="text/javascript">
                 <% for(let x of allSuppliers) { if(x._id != supplier._id) { %>
-                otherSel.append(`<option id='${<%= x._id %>}' value='${<%= x.companyName %>}'><%= x.companyName %></option>`);
+                $('#otherSuppliers_<%= i %>').append(`<option id='<%= x._id %>' value='<%= x.companyName %>'><%= x.companyName %></option>`);
                 <% } } %>
               </script>
             </div>
+            <div class='additionalSuppliers'>
+            </div>
           </div>          
           </form>
-
+      
         <!-- Modal view of Supplier Details (read-only mode) -->
         <div class="modal fade" id="comp_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
           <div class="modal-dialog" role="document">

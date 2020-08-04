@@ -744,7 +744,7 @@ app.get("/bidStatuses", async function(req, res, next) {
   let data = await getDataMongoose('BidStatus');
  
   if(data && data.length && data.length > 0) {
-    let result;
+    let result = [];
 
     data.forEach((item) => {
       let obj = {

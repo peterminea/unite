@@ -243,7 +243,7 @@
         <input type="hidden" name="requestId" value="<%= request._id %>">
         <script type="text/javascript">
           let data = [];
-            <% let h = 0; if (productDetailsList != null) { for(h in productDetailsList) { %>              
+            <% let h = 0; if (request.productDetailsList != null) { for(h in request.productDetailsList) { %>              
             data.push({
               name: '<%= h.productName %>',
               supplierName: "<%= request.supplierName %>",

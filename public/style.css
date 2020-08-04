@@ -20,6 +20,20 @@ body {
   width: 180px
 }
 
+div.additionalSuppliers {
+  color: red;
+  text-decoration: italic;
+  font-size: 11px;
+}
+
+p.additional-suppliers {
+  font-size: 13px;
+  font-weight: bold;
+  color: green;
+  text-decoration: underline;
+  margin-bottom: 5px
+}
+
 .signup-notice {  
   margin-top: 40px;  
 }

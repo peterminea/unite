@@ -31,8 +31,7 @@
     $(document).ready(function() {
       let token = $("input[name='_csrf']").val();
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
-                   
-      let data = JSON.parse('<%= data %>');';
+
       let MAX = parseInt('<%= MAX %>'),
         buyerId = '<%= buyerId %>';
       let data2 = [];
@@ -44,21 +43,21 @@
       colModel.push({ name: 'image', label: 'Product Image', align: 'center', formatter: productImageFormatter, search: false, sortable: false, width: 90});
       colModel.push({ name: 'newBid', label: 'Place Bid', align: 'center', search: false, sortable: false, formatter: linkFormatter, width: 140});          
 
-      for(let i in data) {
+      <% for(let i in data) { %>
        data2.push({
-          productId: data[i].productId,
-          buyerId: buyerId,
-          supplierId: data[i].supplierId, 
-          name: data[i].productName,
-          supplierName: data[i].supplierName,
-          hiddenPrice: data[i].price,
-          hiddenCurrency: data[i].buyerCurrency,
-          hiddenAmount: data[i].amount,
-          hiddenTotalPrice: data[i].totalPrice,
-          supplierCurrency: data[i].supplierCurrency,
-          productImageSource: data[i].productImage.length? '../' + data[i].productImage.substring(7) : ''
+          productId: '<%= data[i].productId %>',
+          buyerId: '<%= buyerId %>',
+          supplierId: '<%= data[i].supplierId %>',
+          name: '<%= data[i].productName %>',
+          supplierName: '<%= data[i].supplierName %>',
+          hiddenPrice: '<%= data[i].price %>',
+          hiddenCurrency: '<%= data[i].buyerCurrency %>',
+          hiddenAmount: '<%= data[i].amount %>',
+          hiddenTotalPrice: '<%= data[i].totalPrice %>',
+          supplierCurrency: '<%= data[i].supplierCurrency %>',
+          productImageSource: '<%= data[i].productImage.length? '../' + data[i].productImage.substring(7) : '' %>'
         });
-      }
+      <% } %>
 
       initGrid(colModel, data2, "#gridProds", '#prodPager', "productName", 'Products List', 1100);
 
@@ -103,7 +102,7 @@
         $('#buyerId').val(buyerId);
         $('#bidProdsForm').submit();
       });
-    }
+    });
   </script>
 </head>
 
