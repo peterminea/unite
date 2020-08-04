@@ -33,7 +33,7 @@ const sendConfirmationEmail = (name, link, token, req) => {
 
 
 const fileExists = (path) => {
-  return fs.existsSync(path);
+  return path? fs.existsSync(path) : false;
 }
 
 
@@ -739,6 +739,9 @@ const getPlaceBidBody = async (req, res) => {
   let suggestions = [], suggestionsList = [];
   if(products.length) {
     for(let i in products) {//Find a suggestion for this product:
+      if(!fileExists(products[i].productImage))
+        products[i].productImage = '';
+      
       suggestionsList = await suggest(products[i], buyer[0]._id);
       for(let i of suggestionsList) {
         suggestions.push(i);      
@@ -771,8 +774,7 @@ const getPlaceBidBody = async (req, res) => {
   /*
   console.log(buyerId + ' ' + productId + ' ' + supplierId);
   console.log(isMultiProd + ' ' + !isMultiProd + ' ' + !products.length);
-  console.log(suppliers.length + ' ' + req.body.bidSupplierList + ' ' + isMultiSupp);
-  
+  console.log(suppliers.length + ' ' + req.body.bidSupplierList + ' ' + isMultiSupp);  
   throw new Error();*/
 
   res.render("buyer/placeBid", {

@@ -732,11 +732,8 @@ app.post("/deleteFile", function(req, res, next) {
 
 
 app.post("/exists", function(req, res) {
-  const path = req.body.path;
-  
-  if (fs2.existsSync(path)) {
-    return res.json({ exists: fs2.existsSync(path)? true : false });
-  }
+  let exists = fs2.existsSync(req.body.path);
+  return res.json({ exists: (exists? true: false )});
 });
 
 

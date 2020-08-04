@@ -170,9 +170,9 @@ function expiredBidsPriceFormatter(cellvalue, options, rowObject) {
     { name: 'bigPrice', hidden: true },
     { name: 'name', label: 'Product name', formatter: productFormatter, search: true, width: 140},
     { name: 'supplierName', label: 'Supplier name', formatter: supplierFormatter, search: true, width: 140},
-    { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, unformat: priceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(rowObject.hiddenPrice).toFixed(2);}, search: true, width: 140},
+    { name: 'price', label: 'Product price', align: 'center', formatter: priceFormatter, unformat: priceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(parseFloat(rowObject.hiddenPrice).toFixed(2));}, search: true, width: 140},
     { name: 'amount', label: 'Amount', formatter: amountFormatter, unformat: amountUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseInt(rowObject.hiddenAmount);}, align: 'center', search: true, width: 70},
-    { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, unformat: totalPriceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(rowObject.hiddenTotalPrice).toFixed(2);}, search: true, width: 90}, 
+    { name: 'totalPrice', label: 'Total price', align: 'center', formatter: totalPriceFormatter, unformat: totalPriceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(parseFloat(rowObject.hiddenTotalPrice).toFixed(2));}, search: true, width: 90}, 
     { name: 'imageWrapper', label: 'Image Zone', align: 'center', width: 170, search: false, sortable: false, formatter: imageWrapperFormatter},
     { name: 'buttonsWrapper', label: 'Buttons Zone', align: 'center', width: 110, search: false, sortable: false, formatter: buttonsWrapperFormatter}
   ];
@@ -180,8 +180,8 @@ function expiredBidsPriceFormatter(cellvalue, options, rowObject) {
   const colModelGridBids = [
       { name: 'bidName', label: 'Bid Request Name', search: true, width: 210},
       { name: 'supplierName', label: 'Bid Supplier Name', align: 'center', sorttype: 'text', search: true, width: 220},      
-      { name: 'buyerPrice', label: 'Buyer\'s Price', align: 'center', formatter: buyerPriceFormatter, sorttype: function(cellValue, rowObject) { return parseFloat(rowObject.buyerPriceHref).toFixed(2);}, search: true, width: 100},
-      { name: 'supplierPrice', label: 'Supplier\'s Price', align: 'center', formatter: supplierPriceFormatter, sorttype: function(cellValue, rowObject) { return parseFloat(rowObject.supplierPriceHref).toFixed(2);}, search: true, width: 100 }, 
+      { name: 'buyerPrice', label: 'Buyer\'s Price', align: 'center', formatter: buyerPriceFormatter, sorttype: function(cellValue, rowObject) { return parseFloat(parseFloat(rowObject.buyerPriceHref).toFixed(2));}, search: true, width: 100},
+      { name: 'supplierPrice', label: 'Supplier\'s Price', align: 'center', formatter: supplierPriceFormatter, sorttype: function(cellValue, rowObject) { return parseFloat(parseFloat(rowObject.supplierPriceHref).toFixed(2));}, search: true, width: 100 }, 
       { name: 'preferredDeliveryDate', label: 'Preferred Delivery Date', align: 'center', search: true, width: 100},
       { name: 'dateCreated', label: 'Creation Date', align: 'center', search: true, width: 200},
       { name: 'expiryDate', label: 'Expiry Date', align: 'center', search: true, width: 100},
@@ -821,7 +821,7 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
       $('#price').val(bigPrice);
       $('#sprice').text(bigPrice);
 
-      let imageInput = $('input.productimageupload[id="productImage'+'"]');
+      let imageInput = $('#productImage');
       let imagePath = input.attr('productImage')?
         '../' + input.attr('productImage').substring(7) 
         : imageInput.attr('filePath');
@@ -1756,7 +1756,7 @@ function delegateUpload(obj) {
     let table = $("#grid"); //parent('tbody').parent('table');
     let div = divId.prev("div");
     index = table.find("tr").index(tr);
-    uploadInput = div.find('input.productimageupload[id^="productImage"]');
+    uploadInput = $('#productImage');
     uploadInput.attr("fromOutside", index).trigger("click");
   });
 }
@@ -1803,10 +1803,10 @@ function initGrid(
   $(`${gridId}`).jqGrid({
     colModel: colModel,
     data: data,
-    guiStyle: "bootstrap",
-    iconSet: "fontAwesome",
+    guiStyle: "bootstrap4",
+    iconSet: "jqueryUI",
     idPrefix: "gb1_",
-    datatype: "clientSide",
+    datatype: "local",
     viewrecords: true,
     gridview: true,
     altRows: true,
@@ -1846,9 +1846,6 @@ function initGrid(
         bindHandleProduct(table.find(".inc"), prod, false, true);
         bindHandleProduct(table.find(".dec"), prod, false, false);
         delegateUpload(table.find(".uploadImage"));
-      } else if($('span.newBid').length) {
-        //$('span.newBid').off('click').on('click', function() {          
-        //});
       }
     },
     gridComplete: function() {
@@ -2010,8 +2007,6 @@ function checkPresence(obj) {
 }
 
 
-
-
 function hasExtension(file, vec) {
   let ext = file.name.substring(file.name.lastIndexOf('.'));
   
@@ -2093,7 +2088,6 @@ $(document).ready(function() {
       "</div>";
 
     nav.append($str);
-
     let ul = $("#navbarSupportedContent").find("ul");
 
     $(
@@ -2176,8 +2170,6 @@ $(document).ready(function() {
     let li = ul.find("li").eq(ind);
     li.addClass("active");
     let text = li.find("a").text();
-    //li.find('a').text(text + ' (current)');// Askin said that this is not necessary. So REMOVE it!
-    //}
   } else {
     if (nav.length && !nav.hasClass("noMenu")) {
       let user = nav.attr("user");
@@ -2252,7 +2244,6 @@ $(document).ready(function() {
         let li = ul.find("li").eq(ind);
         li.addClass("active");
         let text = li.find("a").text();
-        //li.find('a').text(text + ' (current)');
       }
     }
   }
@@ -2363,7 +2354,7 @@ $(document).ready(function() {
     let values = idsList.val().split(',');
     idsList.val(values);
     $(this).parent('div').parent('form').submit();
-    
+    /*
     const swalWithBootstrapButtons = Swal.mixin({
       customClass: {
         confirmButton: 'btn btn-success',
@@ -2371,7 +2362,7 @@ $(document).ready(function() {
       },
       buttonsStyling: false
     })
-if(1==2)
+//if(1==2)
     swalWithBootstrapButtons.fire({
       title: 'Allow Multiple Suppliers',
       text: "Do you want your new Bid Request to be deliverable to multiple Suppliers?",
@@ -2382,9 +2373,7 @@ if(1==2)
       reverseButtons: false
     }).then((result) => {
       let multiple = $(this).parent('div').find('input[name="allowMultiple"]');
-      //let outsideCatalog = $(this).parent('div').find('input[name="outsideCatalog"]');
-      //outsideCatalog.val(1);
-      
+     
       if (result.value) {        
         multiple.val(true);
       } else if (result.dismiss === Swal.DismissReason.cancel) {
@@ -2392,7 +2381,7 @@ if(1==2)
       }
       
       $(this).parent('div').parent('form').submit();
-    });
+    });*/
   });
 
   $("select.autocomp").on("change", function() {
@@ -2468,11 +2457,7 @@ if(1==2)
   
   
   if($('button.placeBid').length) {//Placing a bid from Buyer Index or PlaceBid.    
-      $('button.placeBid').on('click', function() {
-        let id = '_' + $(this).attr('index');
-        if(id.charAt(1) == '-')
-            id = '';
-        
+      $('button.placeBid').on('click', function() {        
         let elem = $('#grid');
         
         if(!(elem) || !(elem.find('tr:not(:first)').length)) {
@@ -2533,7 +2518,6 @@ if(1==2)
         if(arr5.length) {
           $('#supplierIdsList').val(arr5);
           $('#supplierCurrenciesListProd').val(arr7);
-          //$('#productIdsList').val(arr8;
           
           elem.find('span.totalPrice').each(function(index, element) {
             arr6.push(parseFloat($(element).text()).toFixed(2));
@@ -2558,22 +2542,17 @@ if(1==2)
       });
     
     
-      $('input[id="prodServiceInput"]').on('change', function() {
+      $('#prodServiceInput').on('change', function() {
         if($(this).val()) {
           let amount = $('#amount').val();
           
           if(amount && amount > 0) {
             $("#addProdService").prop('disabled', false);
-          
             let price = $(this).attr('price')? parseFloat($(this).attr('price')) : 1;
             price *= parseInt($('#amount').val());
             $('#buyerPriceUnit').text(parseFloat(price).toFixed(2));
-
             let supplierCurrency = $('#supplierCurrency').text();
-            let suppPrice = fx.convert(price, 
-                                       {from: $('span.bidCurrency').first().text(), to: supplierCurrency
-             });
-            
+            let suppPrice = fx.convert(price, { from: $('span.bidCurrency').first().text(), to: supplierCurrency });
             $('#supplierPriceUnit').text(parseFloat(suppPrice).toFixed(2));
           }
         }
@@ -2610,11 +2589,6 @@ if(1==2)
           $('#supplierPriceUnit').text(parseFloat(suppPrice).toFixed(2));
         }
       });
-    
-   // $('#password,#confirmPassword').on('change paste', function() {
-      
-    //});
-    
     
       $('select.productsList').on('change', function() {
         let opt = $(this).find('option:selected');
@@ -2686,11 +2660,7 @@ if(1==2)
         if(!curr || !curr.length || (curr.toLowerCase().includes('no results found'))) {
           return false;  
         }
-        
-        let id = '_' + $(this).attr('index');
-        if(id.charAt(1) == '-')
-            id = '';
-
+    
         let grid = $("#grid");
         grid.attr('buyerCurrency', curr);
         $('#currency').val(curr);
@@ -2725,7 +2695,6 @@ if(1==2)
         });
         
         let buyerPriceUnit = $('#buyerPriceUnit'), buyerPriceCurr = $('#buyerCurrencyUnit');
-        //alert(id.substring(1) + ' S ' + oldBidCurrencySpan.length + ' T ' + buyerPriceCurr.length);
         
         if(buyerPriceUnit.text() != null && buyerPriceUnit.text().length && buyerPriceUnit.text() != '0') {
           let newPriceUnit = fx.convert(parseFloat(buyerPriceUnit.text()), {from: buyerPriceCurr.text(), to: curr});
@@ -2760,8 +2729,7 @@ if(1==2)
       });
   }
     
-  $('input[readonly].textarea[readonly]').css('background-color', 'lightgray');//No names on spans. Also, disabled inputs means no readability for back-end.
-  
+  $('input[readonly].textarea[readonly]').css('background-color', 'lightgray');//No names on spans. Also, disabled inputs means no readability for back-end.  
   
   $('input.cb').on('change', function() {
         let len = $('.cb:checked').length;
@@ -2807,16 +2775,17 @@ if(1==2)
       if (isMulti) {
         let ob = '<div class="fileWrapper">';
         for (let i in val) {
-          fileExists(
-            "public/" + fileId[i].substring(3),
-            isMulti,
-            ob,
-            theDiv,
-            fileId[i],
-            i,
-            val,
-            token
-          );
+          if(fileId[i] && fileId[i].length)
+            fileExists(
+              "public/" + fileId[i].substring(3),
+              isMulti,
+              ob,
+              theDiv,
+              fileId[i],
+              i,
+              val,
+              token
+            );
         }
       } else {
         let ob = "";
@@ -2922,10 +2891,7 @@ if(1==2)
           if (input.attr("fromOutside") != null) {
             let index = input.attr("fromOutside");
             let div = input.parent("div");           
-            let table = div
-              .parent("div")
-              .next("div")
-              .find("table[id^='grid']");
+            let table = $('#grid');
             
             let tr = table.find("tbody tr").eq(index);
             let span = tr.find("span.productImage");
@@ -2958,7 +2924,7 @@ if(1==2)
           }
         } else if(isExcel) {
           let div = input.parent('div').parent('div');
-          let el = div.find('table[id^="grid"]');          
+          let el = $('#grid');
           let productInput = $("#prodServiceInput");
           let MAX = el.attr("MAX");
 
@@ -3029,9 +2995,7 @@ if(1==2)
               token +
               '" file="' +
               file +
-              '" class="remFile" onclick="removeFile(this,Swal)" title="Delete the ' +
-              absolutePath +
-              ' file">Remove</span></div>';
+              '" class="remFile" onclick="removeFile(this,Swal)" title="Delete the ' + absolutePath + ' file">Remove</span></div>';
           }
 
           if (hasDiv) {

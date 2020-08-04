@@ -195,11 +195,11 @@
           <div class="form-group">
             <label>Price (Your Currency):</label>
             <% l = 0; for(let m of request.productDetailsList) {l += m.supplierPrice;} %> <!-- Also request.supplierPrice .-->
-            <input type="text" title="Total order price" value="<%= l %> <%= request.supplierCurrency %>" class="form-control" id="price" name="supplierPrice" readonly>
+            <input type="text" title="Total order price" value="<%= l %> <%= request.supplierCurrency %>" class="form-control" id="supplierPrice" name="supplierPrice" readonly>
           </div>
           <div class="form-group">
             <label>Price (Buyer's Currency):</label>
-            <input type="text" title="Total original order price" value="<%= request.buyerPrice %> <%= request.buyerCurrency %>" class="form-control" id="price" name="buyerPrice" readonly>
+            <input type="text" title="Total original order price" value="<%= request.buyerPrice %> <%= request.buyerCurrency %>" class="form-control" id="buyerPrice" name="buyerPrice" readonly>
           </div>
           <div class="form-group">
             <label>Currency (yours):</label>
@@ -243,7 +243,7 @@
         <input type="hidden" name="requestId" value="<%= request._id %>">
         <script type="text/javascript">
           let data = [];
-            <% let h = 0; if (request.productDetailsList != null) { for(h in request.productDetailsList) { %>              
+            <% let h = 0; if (request.productDetailsList != null) { for(h of request.productDetailsList) { %>              
             data.push({
               name: '<%= h.productName %>',
               supplierName: "<%= request.supplierName %>",
