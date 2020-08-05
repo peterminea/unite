@@ -1,0 +1,19 @@
+{
+  home: {
+    title: 'UNITE Public Procurement Platform',
+    meaning: '<b>U</b>nderserved <b>N</b>eeds <b>I</b>n <b>T</b>imes of <b>E</b>mergency',
+    description: 'Public Procurement Platform',
+    whatItDoes: 'Creating a world where governments and companies innovate together to overcome crisis',
+    mottoOne: 'SAVING JOBS, SAVING LIVES!',
+    mottoTwo: 'We are driving the new normal!',
+    signUp: 'Sign Up',
+    signInBuyer: 'Sign up as Buyer',
+    signInSupervisor: 'Sign in as Supervisor',
+    signInSupplier: 'Sign in as Supplier',
+    signUpBuyer: 'Sign up as Buyer',
+    signUpSupervisor: 'Sign up as Supervisor',
+    signUpSupplier: 'Sign up as Supplier',
+    captchaProtection: 'This website is protected by Google reCaptcha V2.',
+    close: 'Close'    
+  }
+}

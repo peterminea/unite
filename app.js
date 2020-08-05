@@ -17,6 +17,10 @@ const Capability = require("./models/capability");
 const ProductService = require("./models/productService");
 const BannedUser = require('./models/bannedUser');
 
+const i18next = require('i18next');
+const i18nextMiddleware = require('i18next-express-middleware');
+const Backend = require('i18next-node-fs-backend');
+
 //Basic declarations:
 const os = require('os');
 const path = require("path");
@@ -47,7 +51,6 @@ const stripePublicKey = process.env.STRIPE_KEY_PUBLIC;
 const stripe = require("stripe")(stripeSecretKey);
 const cookieParser = require("cookie-parser");
 //require('dotenv').config();
-
 //const MONGODB_URI = "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";//The DB url is actually saved as an Environment letiable, it will be easier to use anywhere in the application that way.
 //Syntax: process.env.MONGODB_URI
 
@@ -99,6 +102,28 @@ app.use(
     store: store
   })
 );
+
+ i18next
+    .use(i18nextMiddleware.LanguageDetector)
+    .use(Backend)
+    .init({
+      backend: {
+        loadPath: __dirname + '/locales/{{lng}}/{{ns}}.json'
+      },
+      debug: true,
+      detection: {
+        order: ['querystring', 'cookie'],
+        caches: ['cookie']
+      },
+      preload: ['en', 'ro'],
+      saveMissing: true,
+      fallBackLng: ['en']
+
+    });
+
+  app.use(i18nextMiddleware.handle(i18next));
+
+
 //app.use(csrf({ cookie: true }));
 // Password Checking & Protecting
 const csrfProtection = csrf();
@@ -124,6 +149,21 @@ app.use("/", homeRoutes);
 app.use("/supplier", supplierRoutes);
 app.use("/buyer", buyerRoutes);
 app.use("/supervisor", supervisorRoutes);
+
+const LanguageController = require('./controllers/languageController');
+
+//   router.get('/', LanguageController.list);
+
+//Locals error handler:
+  app.use(function(err, req, res, next) {
+    // set locals, only providing error in development
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+    // render the error page
+    res.status(err.status || 500);
+    res.render('error');
+  });
 
 
 app.get('/loadBannedUsers', (req, res) => {//Banned user table.  
