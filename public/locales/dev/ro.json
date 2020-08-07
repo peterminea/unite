@@ -19,5 +19,71 @@
     "about": {
         "first_paragraph": "UNITE este o platformă de achiziții publice exclusiv pentru achizițiile publice de comenzi speciale de produse și servicii pentru răspunsul la crize. <br> Noi o numim \"Alibaba de cereri urgente de achiziții publice.\" <br><br>UNITE este o platformă cu două fețe, care conectează cumpărătorii publici cu companiile care au capacitatea și capacitatea de a-și reorienta activitățile către furnizarea de bunuri și servicii ca răspuns la criza COVID-19.<br> <br>Companiile sunt invitate să se înregistreze pe platformă, descriind capacitatea și capacitatea lor de a fabrica produse de care au nevoie urgent sau de a furniza servicii la cerere. <br>Companiile pot, de asemenea, să răsfoiască și să răspundă cererilor de licitație deschise depuse de cumpărătorii publici. <br><br> Cumpărătorii publică pot accesa platforma și pot crea o solicitare de achiziție. Software-ul nostru se potrivește cu cererea de achiziție cu potențialii furnizori și facilitează tranzacția completă - inclusiv contactul inițial, negocierea. plasarea comenzii, acceptarea livrării și plata.",
         "second_paragraph": "UNITE se diferențiază de alte soluții prin faptul că oferă o bază de date a companiilor cu capacitatea de a reorienta operațiunile și în care automatizează procesul. Alte soluții includ utilizarea furnizorilor existenți și a sistemului ERP\/de achiziție (care nu este adaptat cerințelor anormale); implicarea cu piața prin contactarea companiilor individuale prin e-mail, telefon sau personal (ceea ce este lent); utilizarea altor platforme de vânzări online (nicio vizibilitate a capacității companiilor de a reorienta operațiunile); cunoștințele proprii ale cumpărătorilor publici și legăturile acestora cu industria (care nu sunt distribuite pe scară largă - limitate la persoane fizice sau echipe locale)."
+    },
+    "feedback": {
+        "provideFeedbackShort": "Oferiți un feedback!",
+        "provideFeedbackLong": "Oferiți feedback, sugestii sau solicitări utilizatorilor - <i>Vă rugăm să completați câmpurile necesare (*) .<\/i>",
+        "feedbackName": "Numele dumneavoastră",
+        "feedbackEmail": "Adresa de e-mail",
+        "feedbackDetails": "Detalii despre feedback"
+    },
+    "commonFields": {
+        "dateCreated": "Data creării",
+        "emailAddress": "Adresa de e-mail",
+        "password": "Parola",
+        "confirmPassword": "Confirmați parola",
+        "rememberUser": "Ține-mă minte (?)",
+        "submit": "Trimite",
+        "telephone": "Număr mobil de contact",
+        "organizationName": "Numele Organizatiei",
+        "organizationUniteID": "ID-ul UNITE al Organizației",
+        "contactName": "Nume persoană de contact",
+        "deptAgencyGroup": "Departamentul \/ Agenția \/ Grupul",
+        "address": "Adresă",
+        "country": "Țară",
+        "preferredCurrency": "Moneda preferată (Implicit: Euro)",
+        "mandatoryFill": "Vă rugăm să completați toate câmpurile necesare (*).",
+        "website": "Site web",
+        "facebookURL": "Profilul Facebook",
+        "instagramURL": "Profilul Instagram",
+        "twitterURL": "Profilul Twitter",
+        "linkedinURL": "Profilul LinkedIn",
+        "otherSMEUrl": "Alt profil social media",
+        "uploadProductList": "Vă rugăm să încărcați lista de produse:",
+        "uploadProductImage": "Vă rugăm să încărcați o imagine a produsului:",
+        "uploadExcelNotice": "Puteți utiliza un fișier Excel cu lista de produse, cu fiecare rând ca nume de produs + prețul produsului + moneda produsului + suma produsului + opțional Numele furnizorului (4 sau 5 celule \/ rând, primul rând trebuie să conțină nume de coloană). Când faceți clic pe Procesare, elementele dvs. sunt adăugate instantaneu la Pagina.",
+        "uploadExcelList": "Vă rugăm să încărcați lista de produse Excel",
+        "productsOffered": "Produse \/ Servicii oferite:",
+        "userAvatar": "Avatarul de utilizator",
+        "certificates": "Certificate",
+        "antibriberyPolicy": "Politica anti-mită",
+        "environmentPolicy": "Politica de mediu",
+        "qualityMgmtPolicy": "Politica de management al calității",
+        "occupationalSafetyHealth": "Securitatea și sănătatea în muncă",
+        "otherRelevantFiles": "Alte fișiere relevante",
+        "checkTerms": "Sunt de acord cu Termenii și Condițiile UNITE",
+        "checkAntibribery": "Recunosc Acordul anti-mită UNITE"
+    },
+    "buyerSpecific": {
+        "qualification": "Calificare \/ Experiență",
+        "balanceToInvest": "Sold de investit"
+    },
+    "supervisorSignUp": {
+        "title": "Înscrieți-vă ca Supraveghetor"
+    },
+    "supplierSpecific": {
+        "balance": "Sold",
+        "totalSupplyPrice": "Prețul total al ofertei",
+        "totalSupplyAmount": "Cantitatea totală a ofertei",
+        "employeeNumber": "Numărul de angajați",
+        "turnover": "Rata de Turn-over a anului trecut",
+        "directorsName": "Numele directorului",
+        "title": "Titlu",
+        "registrationNumber": "Numărul de înregistrare al companiei",
+        "companyName": "Numele companiei",
+        "areaCovered": "Zona de acoperire",
+        "companyAddress": "Adresa companiei",
+        "industry": "Industrie",
+        "registeredCountry": "Țară înregistrată"
     }
 }

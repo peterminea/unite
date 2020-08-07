@@ -510,6 +510,25 @@ const getBidStatusesJson = function() {
 };
 
 
+const renderBidStatuses = async () => {
+  let result = [], data = await getDataMongoose('BidStatus');
+ 
+  if(data && data.length && data.length > 0) {
+    data.forEach((item) => {
+      let obj = {
+        id: item._id,
+        value: item.value,
+        name: item.value + " - " + item.name
+      };
+
+      result.push(obj);
+    });
+  }
+  
+  return result;
+}
+
+
 const getCancelTypesJson = function() { 
   return {
     USER_CANCEL: process.env.USER_CANCEL_TYPE,
@@ -911,4 +930,4 @@ const saveBidBody = async (req, res, path) => {
 const encryptionNotice = 'For your protection, UNITE uses encryption for your stored passwords.\nThus, it may take a certain amount of time for your encrypted password to be saved, after you press Sign Up or when you reset the password.\nThank you for your understanding, and remember that UNITE strives for ensuring a safe climate to its Users!';
 
 
-module.exports = { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendBanEmail, sendCancelBidEmail, prel, sortLists, getObjectMongo, getObjectMongoose, getDataMongo, getDataMongoose, uniqueJSONArray, getBidStatusesJson, getCancelTypesJson, postSignInBody, getCatalogItems, getPlaceBidBody, saveBidBody, updateBidBody, encryptionNotice };
+module.exports = { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendBanEmail, sendCancelBidEmail, prel, sortLists, getObjectMongo, getObjectMongoose, getDataMongo, getDataMongoose, uniqueJSONArray, getBidStatusesJson, renderBidStatuses, getCancelTypesJson, postSignInBody, getCatalogItems, getPlaceBidBody, saveBidBody, updateBidBody, encryptionNotice };

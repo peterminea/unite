@@ -739,31 +739,8 @@ app.post("/purchase", (req, res, next) => {
     });
 });
 
+
 const jsonp = require("jsonp");
-
-app.post("/deleteBid", function(req, res, next) {
-  MongoClient.connect(URI, { useUnifiedTopology: true }, function(err, db) {
-    if (err) {
-      console.error(err.message);
-      res.json(err);
-    }
-
-    let dbo = db.db(BASE), myquery = { _id: req.body.bidId };
-
-    dbo.collection("bidrequests").deleteOne(myquery, function(err, resp) {
-      if (err) {
-        console.error(err.message);
-        db.close();
-        res.json(err);
-        //res.redirect('back');
-      }
-
-      db.close();
-    });
-  });
-});
-
-
 app.post("/deleteFile", function(req, res, next) {
   //fs2.unlinkSync(req.body.file);
   console.log(req.body.file);
@@ -787,30 +764,6 @@ app.post("/exists", function(req, res) {
 });
 
 
-app.get("/bidStatuses", async function(req, res, next) {
-  let data = await getDataMongoose('BidStatus');
- 
-  if(data && data.length && data.length > 0) {
-    let result = [];
-
-    data.forEach((item) => {
-      let obj = {
-        id: item._id,
-        value: item.value,
-        name: item.value + " - " + item.name
-      };
-
-      result.push(obj);
-    });
-
-    res.jsonp(result);
-  } else {
-    req.flash('error', 'Bids not found!');
-    res.jsonp('Error!');
-  }
-});
-
-
 app.post("/cancelReasonTitles", async function(req, res, next) {
   let objectType = req.body.objectType;
   const isAdmin = req.body.isAdmin;
@@ -831,7 +784,7 @@ app.post("/cancelReasonTitles", async function(req, res, next) {
       "Content-Type": "application/json"
     },
     200
-  );   
+  );
 });
 
 
@@ -842,36 +795,6 @@ app.post('/getFiles', function(req, res) {
     });
     res.json(files);
   });
-});
-
-
-app.get("/feedbackSubjects", async function(req, res, next) {
-  let subjects = await getDataMongoose('FeedbackSubject');
-  
-  subjects.sort(function(a, b) {
-    return a.name.localeCompare(b.name);
-  });
-
-  res.send(subjects,
-    {
-      "Content-Type": "application/json"
-    },
-    200);
-});
-
-
-app.get("/feedbacks", async function(req, res, next) {
-  let feedbacks = await getDataMongoose('Feedback');
- 
-  feedbacks.sort((a, b) =>
-    a.createdAt > b.createdAt ? 1 : b.createdAt > a.createdAt ? -1 : 0
-  );
-
-  res.send(feedbacks,
-    {
-      "Content-Type": "application/json"
-    },
-    200);
 });
 
 

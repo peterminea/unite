@@ -162,15 +162,21 @@ exports.getFilesList = async (req, res) => {
     //return res.json(files);
 };
 
-exports.getFeedback = (req, res) => {
+exports.getFeedback = async (req, res) => {
   let obj = userData(req);
   let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
+  let subjects = await getDataMongoose('FeedbackSubject');
+  
+  subjects.sort(function(a, b) {
+    return a.name.localeCompare(b.name);
+  });
   
   res.render("feedback", {
     role: obj.role,
     captchaSiteKey: captchaSiteKey,
     isAdmin: obj.role == process.env.USER_ADMIN,
+    subjects: subjects,
     successMessage: success,
     errorMessage: error,
     userId: obj.userId,
@@ -180,12 +186,18 @@ exports.getFeedback = (req, res) => {
   });
 };
 
-exports.getViewFeedbacks = (req, res) => {
+exports.getViewFeedbacks = async (req, res) => {
   let obj = userData(req);  
-  res.render("viewFeedbacks", {
-    
+  let feedbacks = await getDataMongoose('Feedback');
+ 
+  feedbacks.sort((a, b) =>
+    a.createdAt > b.createdAt ? 1 : b.createdAt > a.createdAt ? -1 : 0
+  );
+  
+  res.render("viewFeedbacks", {    
     role: obj.role,
     isAdmin: obj.role == process.env.USER_ADMIN,
+    feedbacks: feedbacks,
     userId: obj.userId,
     avatar: checkFile(obj.avatar),
     userName: obj.userName,

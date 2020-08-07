@@ -72,7 +72,7 @@
       $('#mainForm').submit(function(e) {
         let radio = $(this).find('input[type="radio"]:checked');
         radio.attr('name', 'reasonTitle');
-        if(!confirm('You are about to ban this User from using UNITE. This can be time-limited.\Banning a UNITE User is a serious event, it should be motivated and the User notified about the reason. Please provide accurate information about it.')) {
+        if(!confirm('You are about to ban this User from using UNITE. This can be time-limited.\nBanning a UNITE User is a serious event, it should be motivated and the User notified about the reason. Please provide accurate information about it.')) {
           return false;
         }
       });

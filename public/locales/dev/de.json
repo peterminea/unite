@@ -1,0 +1,89 @@
+{
+    "home": {
+        "title": "UNITE-Plattform für öffentliche Beschaffungswesen",
+        "meaning": "Unterversorgte Bedürfnisse in Notzeiten",
+        "description": "Plattform für öffentliches Auftragswesen",
+        "whatItDoes": "Schaffung einer Welt, in der Regierungen und Unternehmen gemeinsam Innovationen entwickeln, um die Krise zu überwinden",
+        "mottoOne": "ARBEITSPLÄTZE RETTEN, LEBEN RETTEN!",
+        "mottoTwo": "Wir fahren das neue Normal!",
+        "signUp": "Registrieren Sie sich",
+        "signInBuyer": "Melden Sie sich als Käufer an",
+        "signInSupervisor": "Melden Sie sich als Supervisor an",
+        "signInSupplier": "Melden Sie sich als Lieferant an",
+        "signUpBuyer": "Registrieren Sie sich als Käufer",
+        "signUpSupervisor": "Registrieren Sie sich als Supervisor",
+        "signUpSupplier": "Registrieren Sie sich als Lieferant",
+        "captchaProtection": "Diese Website ist durch Google reCaptcha V2 geschützt.",
+        "close": "Schließen"
+    },
+    "about": {
+        "first_paragraph": "UNITE ist eine Plattform für das öffentliche Beschaffungswesen, die ausschließlich für die staatliche Beschaffung von Sonderbestellungen von Produkten und Dienstleistungen für die Krisenreaktion bestimmt ist. <br>Wir nennen sie \"Die Alibaba dringender<\/br> öffentlicher Beschaffungsaufträge\".<br> UNITE ist eine zweiseitige Plattform, die öffentliche Beschaffer mit Unternehmen verbindet, die die Fähigkeit und Kapazität haben, ihre Aktivitäten als Reaktion<\/br> auf die COVID-19-Krise auf die<br> Lieferung von Waren und Dienstleistungen neu auszurichten<\/br>. Die<br> Unternehmen werden aufgefordert, sich auf der Plattform zu registrieren und dabei ihre Fähigkeit und Kapazität zur Herstellung dringend benötigter Produkte oder zur Bereitstellung nachgefragter<\/br> Dienstleistungen<br> zu beschreiben<\/br>.<br><br> Unternehmen können auch offene Ausschreibungen öffentlicher Auftraggeber einsehen und darauf reagieren<\/br><\/br>.<br>   Öffentliche Einkäufer können auf die Plattform zugreifen und eine Beschaffungsanfrage erstellen. Unsere Software gleicht die Beschaffungsanfrage mit potenziellen Lieferanten ab und erleichtert die gesamte Transaktion - einschließlich Erstkontakt, Verhandlung, Auftragserteilung, Lieferannahme und Bezahlung.<\/br>",
+        "second_paragraph": "UNITE unterscheidet sich von anderen Lösungen dadurch, dass es eine Datenbank von Unternehmen bereitstellt, die in der Lage sind, den Betrieb neu auszurichten, und dass es den Prozess automatisiert. Zu den anderen Lösungen gehören die Nutzung bestehender Lieferanten und des ERP-\/Einkaufssystems (nicht geeignet für ungewöhnliche Anforderungen); Engagement mit dem Markt durch die Kontaktaufnahme mit einzelnen Unternehmen per E-Mail, Telefon oder persönlich (was langsam ist); Nutzung anderer Online-Verkaufsplattformen (keine Sichtbarkeit der Fähigkeit von Unternehmen, den Betrieb neu auszurichten); eigenes Wissen über öffentliche Käufer und ihre Verbindungen zur Industrie (nicht weit verbreitet - beschränkt auf Einzelpersonen oder lokale Teams)."
+    },
+    "feedback": {
+        "provideFeedbackShort": "Geben Sie Feedback!",
+        "provideFeedbackLong": "Geben Sie Benutzer-Feedback, Vorschläge oder Anfragen ein - <i>Bitte füllen Sie die erforderlichen (*) Felder aus.<\/i>",
+        "feedbackName": "Ihr Name",
+        "feedbackEmail": "Ihre E-Mail-Adresse",
+        "feedbackDetails": "Details zur Rückmeldung"
+    },
+    "commonFields": {
+        "dateCreated": "Erstellungsdatum",
+        "emailAddress": "E-Mail-Addresse",
+        "password": "Kennwort",
+        "confirmPassword": "Kennwort bestätigen",
+        "rememberUser": "Erinnern Sie sich an mich (?)",
+        "submit": "Senden",
+        "telephone": "Kontakt Mobilnummer",
+        "organizationName": "Organisationsname",
+        "organizationUniteID": "Organisations UNITE ID",
+        "contactName": "Name der Kontaktperson",
+        "deptAgencyGroup": "Abteilung \/ Agentur \/ Gruppe",
+        "address": "Adresse",
+        "country": "Land",
+        "preferredCurrency": "Bevorzugte Währung (Standard: Euro)",
+        "mandatoryFill": "Bitte füllen Sie alle erforderlichen (*) Felder aus.",
+        "website": "Webseite",
+        "facebookURL": "Facebook-Profil",
+        "instagramURL": "Instagram-Profil",
+        "twitterURL": "Twitter-Profil",
+        "linkedinURL": "LinkedIn-Profil",
+        "otherSMEUrl": "Anderes Social Media-Profil",
+        "uploadProductList": "Bitte laden Sie Ihre Produktliste hoch:",
+        "uploadProductImage": "Bitte laden Sie ein Bild des Produkts hoch:",
+        "uploadExcelNotice": "Sie können eine Excel-Datei mit der Produktliste verwenden, mit jeder Zeile als Produktname + Produktpreis + Produktwährung + Produktbetrag + optional Lieferantenname (4 oder 5 Zellen\/Zeile, die erste Zeile muss Spaltennamen enthalten). Wenn Sie auf Verarbeiten klicken, werden Ihre Artikel sofort zur Seite hinzugefügt.",
+        "uploadExcelList": "Bitte laden Sie Ihre Excel-Produktliste hoch",
+        "productsOffered": "Angebotene Produkte \/ Dienstleistungen:",
+        "userAvatar": "Benutzer-Avatar",
+        "certificates": "Bescheinigungen",
+        "antibriberyPolicy": "Anti-Bestechungspolitik",
+        "environmentPolicy": "Umweltpolitik",
+        "qualityMgmtPolicy": "Qualitätsmanagement-Richtlinie",
+        "occupationalSafetyHealth": "Sicherheit und Gesundheit bei der Arbeit",
+        "otherRelevantFiles": "Andere relevante Dateien",
+        "checkTerms": "Ich bin mit den UNITE-Bedingungen einverstanden",
+        "checkAntibribery": "Ich erkenne das Anti-Korruptionsabkommen der UNITE an"
+    },
+    "buyerSpecific": {
+        "qualification": "Qualifikation / Erfahrung",
+        "balanceToInvest": "Bilanz zu investieren"
+    },
+    "supervisorSignUp": {
+        "title": "Registrieren Sie sich als Supervisor"
+    },
+    "supplierSpecific": {
+        "balance": "Bilanz",
+        "totalSupplyPrice": "Gesamtpreis der Lieferung",
+        "totalSupplyAmount": "Gesamtmenge des Angebots",
+        "employeeNumber": "Zahl der Mitarbeiter",
+        "turnover": "Umsatz im letzten Jahr",
+        "directorsName": "Direktorsname",
+        "title": "Titel",
+        "registrationNumber": "Registrierungsnummer des Unternehmens",
+        "companyName": "Unternehmensname",
+        "areaCovered": "Abgedeckte Fläche",
+        "companyAddress": "Unternehmensadresse",
+        "industry": "Industrie",
+        "registeredCountry": "Registriertes Land"
+    }
+}

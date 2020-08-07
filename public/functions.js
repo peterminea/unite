@@ -1483,112 +1483,95 @@ function getCancelReasonTitles(obj, token, url, objectType, isAdmin, isSuperviso
   });
 }
 
-function getFeedbackSubjects(obj, token, url) {
-  $.ajax({
-    url: url,
-    type: "GET",
-    headers: { "X-CSRF-Token": token },
-    datatype: "application/json",
-    error: function() {},
-    success: function(data) {
-      //data = subjects.
-      if (
-        !data ||
-        !data.length ||
-        treatError(data, "getting Feedback Subjects")
-      ) {
-        return false;
-      }
+function getFeedbackSubjects(data, obj, token) {
+  //data = subjects.
+  if (
+    !data ||
+    !data.length ||
+    treatError(data, "getting Feedback Subjects")
+  ) {
+    return false;
+  }
 
-      let str = '<div class="form-group">';
-      str +=
-        "<label>Please select an option below and explain it*.</label><br>";
-      str += '<select id="subjects"><option></option>';
-      for (let i in data) {
-        str +=
-          '<option id="' +
-          i +
-          '" value="' +
-          data[i].name +
-          '">' +
-          data[i].name +
-          "</option>";
-      }
+  let str = '<div class="form-group">';
+  str +=
+    "<label>Please select an option below and explain it*.</label><br>";
+  str += '<select id="subjects"><option></option>';
+  for (let i in data) {
+    str +=
+      '<option id="' +
+      i +
+      '" value="' +
+      data[i].name +
+      '">' +
+      data[i].name +
+      "</option>";
+  }
 
-      str += "</select></div>";
-      obj.prepend(str);
+  str += "</select></div>";
+  obj.prepend(str);
 
-      $("#subjects").on("change", function() {
-        $(this).attr(
-          "title",
-          $(this)
-            .find("option:selected")
-            .text()
-        );
-      });
-    }
+  $("#subjects").on("change", function() {
+    $(this).attr(
+      "title",
+      $(this)
+        .find("option:selected")
+        .text()
+    );
   });
 }
 
-function getFeedbacks(obj, token, url) {
-  $.ajax({
-    url: url,
-    type: "GET",
-    headers: { "X-CSRF-Token": token },
-    datatype: "application/json",
-    error: function() {},
-    success: function(data) {
-      //data = feedbacks.
-      if (!data || !data.length || treatError(data, "getting Feedbacks")) {
-        obj.prepend(
-          '<p class="term">There are currently no Feedbacks available. Please engage with your users first.</p>'
-        );
-        return false;
-      }
+function getFeedbacks(data, obj, token) {
+  //data = feedbacks.
+  if (!data || !data.length || treatError(data, "getting Feedbacks")) {
+    obj.prepend(
+      '<p class="term">There are currently no Feedbacks available. Please engage with your users first.</p>'
+    );
+    return false;
+  }
 
-      let str = "";
-      for (let i in data) {
-        str +=
-          "<h5>#" +
-          parseInt(1 + parseInt(i)) +
-          '</h5><div class="form-group" style="border-style: dotted; border-color: green; text-align: center; color: brown; word-wrap: break-word; margin-bottom: 8px">';
-        str += "<label>From:</label><br>";
-        str +=
-          '<span id="name_' +
-          i +
-          '"><b>' +
-          data[i].userName +
-          "</b></span><br><br>";
-        str += "<label>E-mail:</label><br>";
-        str +=
-          '<span id="email_' +
-          i +
-          '"><b>' +
-          data[i].userEmail +
-          "</b></span><br><br>";
-        str += "<label>Subject:</label><br>";
-        str +=
-          '<span id="subject_' +
-          i +
-          '"><b>' +
-          data[i].subject +
-          "</b></span><br><br>";
-        str += "<label>Message: </label><br>";
-        str +=
-          '<span style="white-space: pre-line" id="text_' +
-          i +
-          '">' +
-          data[i].message +
-          "</span><br><br>";
-        str += "<label>Date: </label><br>";
-        str += '<span id="date_' + i + '">' + data[i].createdAt + "</span>";
-        str += "</div>";
-      }
+  let str = "";
+  for (let i in data) {
+    str +=
+      "<h5>#" +
+      parseInt(1 + parseInt(i)) +
+      '</h5><div class="form-group" style="border-style: dotted; border-color: green; text-align: center; color: brown; word-wrap: break-word; margin-bottom: 8px">';
+    str += "<label>From:</label><br>";
+    str +=
+      '<span id="name_' +
+      i +
+      '"><b>' +
+      data[i].userName +
+      "</b></span><br><br>";
+    str += "<label>E-mail:</label><br>";
+    str +=
+      '<span id="email_' +
+      i +
+      '"><b>' +
+      data[i].userEmail +
+      "</b></span><br><br>";
+    str += "<label>Subject:</label><br>";
+    str +=
+      '<span id="subject_' +
+      i +
+      '"><b>' +
+      data[i].subject +
+      "</b></span><br><br>";
+    str += "<label>Message: </label><br>";
+    str +=
+      '<span style="white-space: pre-line" id="text_' +
+      i +
+      '">' +
+      data[i].message +
+      "</span><br><br>";
+    str += "<label>Date: </label><br>";
+    str += '<span id="date_' + i + '">' + data[i].createdAt + "</span>";
+    str += "</div>";
+  }
 
-      obj.prepend(str);
-    }
-  });
+  obj.prepend(str);
 }
+
 
 function imageExists(image_url) {
   let http = new XMLHttpRequest();
@@ -1596,6 +1579,7 @@ function imageExists(image_url) {
   http.send();
   return http.status != 404;
 }
+
 
 function validCountry(obj) {
   let inputs = [];
@@ -1619,12 +1603,14 @@ function validCountry(obj) {
   return true;
 }
 
+
 function treatLastLi() {
   let nextLi = $("li.last").next("li");
   $("li.last").removeClass("last");
   nextLi.addClass("last");
   return 30;
 }
+
 
 function supplierValidateFields(fx) {
   if ($("#grid tr").length == 1) {
@@ -1708,6 +1694,7 @@ function supplierValidateFields(fx) {
   return true;
 }
 
+
 function registrationDialog(accountType) {
   $("#dialog").dialog({
     modal: true,
@@ -1747,6 +1734,7 @@ function registrationDialog(accountType) {
     }
   });
 }
+
 
 function delegateUpload(obj) {
   obj.off("click").on("click", function() {  
@@ -1789,6 +1777,7 @@ function errorSuccess(Swal, errorMessage, successMessage) {
     });
   }
 }
+
 
 function initGrid(
   colModel,
@@ -1884,6 +1873,7 @@ function initGrid(
     }
   );
 }
+
 
 function fileExists(absolutePath, isMulti, ob, theDiv, fileId, i, val, token) {
   $.ajax({
@@ -2345,6 +2335,14 @@ $(document).ready(function() {
       opt.prop('disabled', true);
     }
   });
+  
+  
+  $('.viewBid').on('click', function(e) {
+    e.preventDefault();
+    //$(this).parent('div').find('form').submit();
+    //window.location.href = `../../../../../buyer/viewBid/${$(this).attr('bidId')}`;
+  });
+  
   
   $('.openBid').on('click', function(e) {
     e.preventDefault();

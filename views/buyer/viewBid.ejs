@@ -32,145 +32,74 @@
     $(document).ready(function() {
       let token = $("input[name='_csrf']").first().val();
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
-      $('.rem,.inc,.dec,.uploadImage').off('click');//Off in View Mode.
+      $('.rem,.inc,.dec,.uploadImage').off('click');//Off in View Mode.                
+      let x = JSON.parse($('[id^="statusJsonValues"]').first().val());      
+      
+      setTimeout(function() {
+        $('select[id^="statuses"]')
+          .each(function(index, el) {
 
-      $.ajax({
-              url: "/bidStatuses",
-              headers: { "X-CSRF-Token": token },
-              datatype: 'jsonp',
-              type: "GET",
-              scroll: true,
-              error: function() {},
-              success: function(data) {                
-                if(!data || !data.length)
-                  return false;
-                
-                let x = JSON.parse($('[id^="statusJsonValues_"]').first().val());
-                //alert(x.PAYMENT_DELIVERY_DONE + ' ' + $('select[id^="statuses_"]').length);
-                if($('.delete').length) {
-                  $('.delete').bind('click', function() {          
-                    let bidId = $(this).attr('id');
-                    let div1 = $(this).parent('div'), div2 = div1.prev('div');
+          $(el).find('option').each(function(ind, elem) {
+            $(elem).prop('disabled', ind > x.PAYMENT_DELIVERY_DONE? true : false);
+          });
 
-                    if(confirm('Are you sure you want to remove this bid from your Buyer Dashboard forever?')) {
-                      $.ajax({
-                        url: '/deleteBid',
-                        type: 'POST',
-                        headers: { "X-CSRF-Token": token },
-                        data: {bidId: bidId},
-                        datatype: 'application/json',
-                        error: function() {
-                        Swal.fire({
-                          icon: 'error',
-                          title: 'Error!',
-                          text: 'Error on AJAX Request!'
-                        });
-                        },
-                        success: function(data) {
-                          if(treatError(data, 'deleting the Bid Request')) {
-                            return false;
-                          }
-                          
-                          div2.remove();
-                          div1.remove();
-                          Swal.fire({
-                            icon: 'success',
-                            title: 'Done!',
-                            text: 'You cancelled this order.'
-                          });
-                        }
-                      });
-                    }
-                  });
-                }
-                
-                setTimeout(function() {
-                  $('select[id^="statuses_"]')
-                    .each(function(index, el) {
-                    for(let i in data) {
-                      let opt = '<option ' + (i > x.PAYMENT_DELIVERY_DONE? 'disabled ' : '') + 'style="word-wrap: break-word; width: 100px" title="' + data[i].name +'" value="' + data[i].value + '">' + data[i].name + '</option>';
-                      $(el).append(opt);
-                      }
+          let statusInput = $(el)
+            .parent('div')
+            .prev('div')
+            .find('input[id^="status"]');
 
-                    //setTimeout(function() {                    
-                      let statusInput = $(el)
-                        .parent('div')
-                        .prev('div')
-                        .find('input[id^="status_"]');                   
-                      $(el)
-                          .find('option[value="' + statusInput.val() + '"]')
-                          .prop({'selected': true});
+          $(el)
+              .find('option[value="' + statusInput.val() + '"]')
+              .prop({'selected': true});
 
-                      $(el).attr('title', $(this).find('option:selected').text());                  
+          $(el).attr('title', $(this).find('option:selected').text());
+        });
+    }, 250);
 
-                  });
-              }, 250);
-                
-                $('select[id^="statuses_"]')
-                  .on('change', function() {//Difficult DOM jQuery navigation in modals.                  
-                  let theVal = $(this).find('option:selected').attr('value');
-                  let index = getId($(this).attr('id'));
-                  
-                  let statusDiv = $(this).parent('div').parent('div').next('div');
+      $('select[id^="statuses"]')
+        .on('change', function() {//Difficult DOM jQuery navigation in modals.                  
+        let theVal = $(this).find('option:selected').attr('value');
+        let index = getId($(this).attr('id'));
 
-                  ($(this)
-                    .parent('div')
-                    .prev('div')
-                    .find('input[id^="status"]'))
-                    .val(theVal);
-                  
-                  if(theVal == x.SUPP_START_DELIVERY) {
-                    let amount = $('#price_'+index).val();
-                    statusDiv.append('<button type="button" style="float: left; position: center" title="Pay ' + amount + '" class="btn btn-primary" id="purchase_'+index+'">Go to Purchase</button>');
-                  } else {
-                    statusDiv.find('button[id^="purchase"]').remove();
-                    $('#grid_'+index).find('tr:not(:first)').css({"title": "Already ordered!", "border": "2px solid gray", 'background-color': 'teal'});
-                  }
-                  
-                  statusDiv
-                      .find('button[id^="updateBidStatus_"]')
-                      .prop('disabled', false);
-                });
-              }
+        let statusDiv = $(this).parent('div').parent('div').next('div');
+
+        ($(this)
+          .parent('div')
+          .prev('div')
+          .find('input[id^="status"]'))
+          .val(theVal);
+
+        if(theVal == x.SUPP_START_DELIVERY) {
+          let amount = $('#price').val();
+          statusDiv.append('<button type="button" style="float: left; position: center" title="Pay ' + amount + '" class="btn btn-primary" id="purchase'+'">Go to Purchase</button>');
+        } else {
+          statusDiv.find('button[id^="purchase"]').remove();
+          $('#grid').find('tr:not(:first)').css({"title": "Already ordered!", "border": "2px solid gray", 'background-color': 'teal'});
+        }
+
+        statusDiv
+            .find('button[id^="updateBidStatus"]')
+            .prop('disabled', false);
       });
     });
   </script>
 </head>
-
-<body id="<%= supplierId %>" id2="<%= buyerId %>">
+  
+<body>
   <nav user="buyer" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
     <a class="navbar-brand" href="/">Buyer - UNITE</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-  </nav>
-    <input type="hidden" id="balance" value="<%= balance %>">
+  </nav>    
     <div class="container">
       <br><br>
-      <div class="col-md-12">
-        <% let i = 0; if (bids != null && bids.length > 0) { %>
-        <div>
-          <p>
-            You currently have placed a number of <span class='bidLength'><%= bids.length %></span> valid bids. Their total price is <span class='totalPrice'><%= validPrice %></span> <span class='currency'><%= currency %>.</span>
-          </p>
-        </div>
-        <% for (bid of bids) { i++; %>        
-        <div>      
-          <div class="card mt-4">
-            <h5 class="card-header bg-dark text-white">From: <%= bid.buyerName %></h5>
-            <div class="card-body">
-              <h5 class="card-title">To: <%= bid.supplierName %></h5>
-              <div>
-                <span>Request: <%= bid.requestName %></span>
-              </div>             
-              <button class="btn btn-primary ml-2" style="float: right" data-target="#request_<%= i %>" data-toggle="modal">View Bid Details</button>
-            </div>
-          </div>
-        </div>
-   
-        <!-- Modal window for the new, valid Bid Request -->
-        <div class="modal fade" style="width: 100%; max-width: 96%; overflow: scroll" id="request_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
+  
+
+
+<!-- Modal window for the new, valid Bid Request -->
+        <div class="modal fade" style="width: 100%; max-width: 96%; overflow: scroll" id="request" tabindex="-1" role="dialog" aria-hidden="true">
           <div class="modal-dialog" style="max-width: 1080px; overflow: scroll" role="document">
             <div class="modal-content" style="width: 100%; overflow: hidden">
               <div class="modal-header">
@@ -179,7 +108,7 @@
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
-              <form method="POST" id="mainForm_<%= i %>">
+              <form method="POST" id="mainForm">
                 <input type="hidden" name="id" value="<%= bid._id %>">
                 <div class="modal-body">
                   <div class="form-group">
@@ -226,17 +155,17 @@
                     <Code>The product prices are expressed in your currency.<br></Code>
                     <label>Products / Services Ordered:</label>                    
                   </div>
-                   <div id="jqDiv_<%= i %>" class="form-group">
-                    <table id="grid_<%= i %>">
+                   <div id="jqDiv" class="form-group">
+                    <table id="grid">
                     </table>
-                     <div id='prodPager_<%= i %>'>
+                     <div id='prodPager'>
                      </div>
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Amount*</label>
-                    <input type="hidden" class="form-control" id="amount_<%= i %>" name="theAmount" value="0">
+                    <input type="hidden" class="form-control" id="amount" name="theAmount" value="0">
                     <% j = 0; for(let k of bid.productDetailsList) {j += k.amount;} %>
-                    <input type="text" class='form-control' title="Total number of items" readonly id="totalAmount_<%= i %>" name="amount" value="<%= j %>">
+                    <input type="text" class='form-control' title="Total number of items" readonly id="totalAmount" name="amount" value="<%= j %>">
                   </div>
                   <div class="form-group">
                     <label class="col-form-label">Item Description (Long)*</label>
@@ -291,12 +220,12 @@
                     </div>
                      <div class="form-group">
                       <label class="col-form-label">Price (Your currency):</label>
-                      <input type="text" title="Original order price" value="<%= bid.buyerPrice %> <%= bid.buyerCurrency %>" class="form-control" id="buyerPrice_<%= i %>" name="buyerPrice" readonly>
+                      <input type="text" title="Original order price" value="<%= bid.buyerPrice %> <%= bid.buyerCurrency %>" class="form-control" id="buyerPrice" name="buyerPrice" readonly>
                     </div>
                     <div class="form-group">
                       <label class="col-form-label">Price (Supplier's currency):</label>
                        <% l = 0; for(m of bid.productDetailsList) {l += m.supplierPrice;} %> <!-- Same as bid.supplierPrice .-->
-                      <input type="text" title="Order price as seen by Supplier" value="<%= l %> <%= bid.supplierCurrency %>" class="form-control" id="supplierPrice_<%= i %>" name="supplierPrice" readonly>
+                      <input type="text" title="Order price as seen by Supplier" value="<%= l %> <%= bid.supplierCurrency %>" class="form-control" id="supplierPrice" name="supplierPrice" readonly>
                     </div>
                 <% if(bid.isExtended == false) { %>
                     <div class="form-group">
@@ -309,14 +238,17 @@
                   </div>
                      <div class="form-group">
                       <label class="col-form-label">Status*</label>
-                      <input type="hidden" id="status_<%= i %>" class="form-control" name="status" value="<%= bid.status %>">
+                      <input type="hidden" id="status" class="form-control" name="status" value="<%= bid.status %>">
                     </div>
                     <div class="form-group selectstatus">
-                      <select style="width: 100%" id="statuses_<%= i %>">
+                       <select style="width: 100%" id="statuses">
+                        <% if (statuses != null) { for (status of statuses) { %>
+                        <option style="word-wrap: break-word; width: 100px" title="<%= status.name %>" value="<%= status.value %>"><%= status.name %></option>
+                        <% } }%>
                       </select>
-                    </div>
+                    </div>                  
                       <% if (statusesJson != null) {  %>
-                        <input type="hidden" id="statusJsonValues_<%= i %>" value="<%= statusesJson %>">
+                        <input type="hidden" id="statusJsonValues" value="<%= statusesJson %>">
                       <% }  %>
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <input type="hidden" name="buyer" value="<%= bid.buyer %>">
@@ -327,7 +259,7 @@
                     <h3>Mentions for Supplier</h3>
                     <br>
                     <label>Type your mentions below:</label>
-                    <textarea name="specialMentions" id="message_<%= i %>" class="form-control"><%= bid.specialMentions %></textarea>
+                    <textarea name="specialMentions" id="message" class="form-control"><%= bid.specialMentions %></textarea>
                     <br>
                     <input type="hidden" name="from" value="<%= bid.buyer %>">
                     <input type="hidden" name="to" value="<%= bid.supplier %>">
@@ -335,11 +267,10 @@
                     <input type="hidden" name="reqName" value="<%= bid.requestName %>">
                     <input type="hidden" name="sender" value="<%= bid.buyerName %>">
                     <input type="hidden" name="receiver" value="<%= bid.supplierName %>">
-                    <input type="hidden" name="_csrf" id="csrf_<%= i %>" value="<%= csrfToken %>">
-                    <button class="btn btn-warning bid-button-wide" title="Update status/Send message" disabled type="submit" id="updateBidStatus_<%= i %>">Update Status & Send Message
+                    <input type="hidden" name="_csrf" id="csrf" value="<%= csrfToken %>">
+                    <button class="btn btn-warning bid-button-wide" title="Update status/Send message" disabled type="submit" id="updateBidStatus">Update Status & Send Message
                     </button>
-                    <script type="text/javascript">
-                      let index = "<%= i %>";                 
+                    <script type="text/javascript">                      
                       let data = [];
                           
                       <% let h = 0; if (bid.productDetailsList != null) { for(h of bid.productDetailsList) { %>                       
@@ -361,8 +292,8 @@
                         });
                       <% } } %>
                      
-                      initGrid(productColModel, data, "#grid_"+index, '#prodPager_'+index, "name", 'Products List', 1024);
-                      $('#mainForm_'+index).submit(function(e) {
+                      initGrid(productColModel, data, "#grid", '#prodPager', "name", 'Products List', 1024);
+                      $('#mainForm').submit(function(e) {
                         if(!($(this).find('textarea[name="specialMentions"]').text()) 
                            && !confirm('Are you sure you want to update Bid Status without any mentions for the Supplier ' + $(this).find('input[name="supplierName"]').val() + '?')) {
                           return false;
@@ -370,17 +301,17 @@
                         //return true;
                       });                      
                       
-                      $("#message_"+index).bind('change', function() {
-                        $('#updateBidStatus_'+getId($(this).attr('id'))).prop('disabled', false);
+                      $("#message").bind('change', function() {
+                        $('#updateBidStatus').prop('disabled', false);
                       });
                       
-                      let x = JSON.parse($('[id^="statusJsonValues_"]').first().val());
+                      let x = JSON.parse($('[id^="statusJsonValues"]').first().val());
                       const stripePublicKey = "<%= stripePublicKey %>";
-                      let status = $('#status_'+index).val();
+                      let status = $('#status').val();
                       
-                      if($('#status_'+index).val() == x.SUPP_STARTED_DELIVERY) {//Ready to pay -> STRIPE in action!
-                        let amount = $('#price_'+index).val();//Not to be confused with the number of items!
-                        let currency = $('#currency_'+index).val();
+                      if($('#status').val() == x.SUPP_STARTED_DELIVERY) {//Ready to pay -> STRIPE in action!
+                        let amount = $('#price').val();//Not to be confused with the number of items!
+                        let currency = $('#currency').val();
                         let balance = $('#balance').val();
                         
                         if(amount > balance) {                         
@@ -398,11 +329,10 @@
                         to = "<%= bid.buyerName %>",
                         desc = "<%= bid.requestName %>",
                         emailAddress = "<%= bid.buyerEmail %>";
-                        let that = index;                       
                         
-                        $('#message_'+index)
+                        $('#message')
                           .parent('div')
-                          .append('<button type="button" style="float: left" title="Pay ' + amount + '" class="btn btn-primary" id="purchase_'+index+'">Purchase</button>');
+                          .append('<button type="button" style="float: left" title="Pay ' + amount + '" class="btn btn-primary" id="purchase'+'">Purchase</button>');
 						  
 						              let stripeHandler = StripeCheckout.configure({
                             key: stripePublicKey,
@@ -411,14 +341,14 @@
                               fetch('/purchase', {
                                 method: 'POST',
                                 headers: {
-                                  "X-CSRF-Token": $("#csrf_"+index).val(),
+                                  "X-CSRF-Token": $("#csrf").val(),
                                   'Content-Type': 'application/json',
                                   'Accept': 'application/json'
                                 },
                                 body: JSON.stringify({
                                   stripeTokenId: token.id,
                                   token: token,
-                                  buyerId: "<%= buyerId %>",
+                                  buyerId: "<%= bid.buyer %>",
                                   newBalance: newBalance,
                                   emailAddress: emailAddress,//Buyer's e-mail.
                                   description: "Order - " + desc,
@@ -430,15 +360,15 @@
                                 return res.json();
                               })
                                 .then((data) => {
-                                  $('#purchase_'+that).remove();
-                                  $('#status_'+that).val(x.PAYMENT_DELIVERY_DONE);
-                                  $('#statuses_'+that).find('option:eq('+x.PAYMENT_DELIVERY_DONE+')').prop('selected', true);
-                                  $('#grid_'+that).find('tr:not(:first)').css({"title": "Already ordered!", "border": "2px solid gray", 'background-color': 'teal'});
+                                  $('#purchase').remove();
+                                  $('#status').val(x.PAYMENT_DELIVERY_DONE);
+                                  $('#statuses').find('option:eq('+x.PAYMENT_DELIVERY_DONE+')').prop('selected', true);
+                                  $('#grid').find('tr:not(:first)').css({"title": "Already ordered!", "border": "2px solid gray", 'background-color': 'teal'});
                                 });
                               }
                             });
                         
-                        $('#purchase_'+index).on('click', function() {
+                        $('#purchase').on('click', function() {
                           Swal.fire({
                             title: '<strong>Go to Payment</strong>',
                             icon: 'warning',
@@ -468,9 +398,9 @@
                           });
                         });
                       } else {
-                        $('#purchase_'+index).remove();
+                        $('#purchase').remove();
                         if(status >= x.PAYMENT_DELIVERY_DONE) {//Beyond the purchase phase.
-                          $('#grid_'+index).find('tr:not(:first)').css({"title": "Already ordered!", "border": "2px solid gray", 'background-color': 'teal'});//Mark them!
+                          $('#grid').find('tr:not(:first)').css({"title": "Already ordered!", "border": "2px solid gray", 'background-color': 'teal'});//Mark them!
                         }
                       }
                     </script>
@@ -481,56 +411,25 @@
      <!-- Buyer=sender, supplier=receiver. -->          
           <div class='totals'>
             <div class='form-group'>
-              <span><a href="../../../../../buyer/chatLogin/<%= bid.buyer %>/<%= bid.supplier %>/<%= bid._id %>/<%= bid.requestName %>/<%= bid.supplierName %>/<%= bid.buyerName %>">
+              <span><a href="../buyer/chatLogin/<%= bid.buyer %>/<%= bid.supplier %>/<%= bid._id %>/<%= bid.requestName %>/<%= bid.supplierName %>/<%= bid.buyerName %>">
                 <button title="Chat" id="chat" class="btn-success bid-button btn">Chat with your supplier</button>
                 </a>
               </span>
             </div>
             <div class='form-group'>
-              <span><a href="../../../../../buyer/cancelBid/<%= bid._id %>/<%= bid.requestName %>/Buyer/<%= bid.buyerName %>/<%= bid.supplierName %>/<%= bid.buyerEmail %>/<%= bid.supplierEmail %>">
+              <span><a href="../buyer/cancelBid/<%= bid._id %>/<%= bid.requestName %>/Buyer/<%= bid.buyerName %>/<%= bid.supplierName %>/<%= bid.buyerEmail %>/<%= bid.supplierEmail %>">
                 <button title="Cancel Bid" id="cancelBid" class="btn-danger bid-button btn">Cancel your Order</button>
               </a>
               </span>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn bid-button btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn bid-button btn-secondary" onclick='history.back()'>Close</button>
         </div>
       </div>
     </div>
   </div>
-  <% } } i = 0; if(cancelledBids.length > 0) { %> 
-    <br>
-      <h3 style="color: green">
-        The following <%= cancelledBids.length %> bids are Bid Requests that were cancelled. We advise you to delete them. Their total price is <span class='cancelledPrice'><%= cancelledPrice %></span> <span class='currency'><%= currency %>.</span>
-      </h3>
-    <hr>
-  <% for(bid of cancelledBids) { i++; %>
-    <div class="card mt-4">
-      <p>
-        The <%= bid.requestName %> bid was cancelled upon <% if(bid.status == buyerCancelBidStatus) { %> your <% } else { %> Supplier's <% } %> decision. You can remove the bid completely.
-      </p>
-      <button class="btn btn-primary ml-2 delete" style="float: right" id="<%= bid._id %>">Delete Bid</button>
-    </div>
-  <% } } i = 0; if(expiredBids != null && expiredBids.length > 0) { %> 
-    <br>
-      <h3 style="color: green">
-        The following <%= expiredBids.length %> bids are Bid Requests that have expired. We advise you to delete them. Their total price is <span class='expiredPrice'><%= expiredPrice %></span> <span class='currency'><%= currency %>.</span>
-      </h3>
-    <hr>
-  <% for (bid of expiredBids) { i++;  %>  
-    <div class="card mt-4">
-      <p>
-        The <%= bid.requestName %> request expired, its limit date was <%= bid.expiryDateFormatted %>. You can remove the bid request completely.
-      </p>
-      <button class="btn btn-primary ml-2 delete" style="float: right" id="<%= bid._id %>">Delete Bid</button>
-    </div>
-  <% } } if(totalBidLength == 0)  { %>
-      <p style="font-size: 12pt; font-weight: bold; color: purple">You have not placed any bids to this supplier. If you prefer, you may do so at any time.</p>
-    <% } else { %>
-      <p style="font-size: 12pt; font-weight: bold; color: navy">You placed a total of <%= totalBidLength %> bid requests to this supplier. Their total price is <%= totalPrice %> <%= currency %>.</p>
-    <% } %>
-  </div>
+      
   </div>
   </body>
 </html>
