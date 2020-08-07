@@ -1,0 +1,89 @@
+{
+    "home": {
+        "title": "UNITE - Piattaforma per appalti pubblici",
+        "meaning": "Esigenze speciali durante i tempi di emergenza",
+        "description": "Piattaforma per appalti pubblici",
+        "whatItDoes": "Creiamo insieme un mondo dove governi e aziende innovano insieme per superare la crisi",
+        "mottoOne": "SALVANDO POSTI DI LAVORO, SALVIAMO VITE UMANE!",
+        "mottoTwo": "Noi stiamo guidando il nuovo normale!",
+        "signUp": "Registrati",
+        "signInBuyer": "Accedi come Acquirente",
+        "signInSupervisor": "Accedi come supervisore",
+        "signInSupplier": "Accedi come Fornitore",
+        "signUpBuyer": "Registrati come Acquirente",
+        "signUpSupervisor": "Iscriviti come Supervisore",
+        "signUpSupplier": "Registrati come Fornitore",
+        "captchaProtection": "Questo sito web è protetto da Google reCaptcha V2.",
+        "close": "Chiudi"
+    },
+    "about": {
+        "first_paragraph": "UNITE è una piattaforma per gli appalti pubblici esclusivamente per l'approvvigionamento governativo di ordini speciali di prodotti e servizi per la risposta alle crisi. La <br>chiamiamo \"L'Alibaba delle<\/br> richieste <br>urgenti<\/br> di appalti pubblici\". UNITE<br> è una piattaforma a due lati, che mette in contatto gli acquirenti pubblici con le aziende che hanno la capacità e la capacità di riorientare le loro attività per la fornitura di beni e servizi in risposta alla<\/br> crisi COVID-19.<br> Le aziende sono invitate a registrarsi sulla piattaforma, descrivendo la loro capacità e capacità di produrre prodotti di cui c'è urgente bisogno o di fornire<\/br> servizi su<br> richiesta<\/br>.<br><br> Le aziende possono anche navigare e rispondere alle richieste di offerte aperte da parte<\/br><\/br> di acquirenti<br><br> pubblici<\/br><\/br>.<br>   Gli acquirenti pubblici possono accedere alla piattaforma e creare una richiesta di appalto. Il nostro software abbina la richiesta di appalto con i potenziali fornitori e facilita l'intera transazione - incluso il contatto iniziale, la negoziazione, l'inserimento dell'ordine, l'accettazione della consegna e il pagamento.<\/br>",
+        "second_paragraph": "UNITE si differenzia dalle altre soluzioni in quanto fornisce un database di aziende con la capacità di rifocalizzare le operazioni e in quanto automatizza il processo. Altre soluzioni includono l'utilizzo dei fornitori esistenti e del sistema ERP\/acquisto (non adatto a requisiti anomali); l'impegno con il mercato attraverso il contatto con le singole aziende via e-mail, telefono o di persona (che è lento); l'utilizzo di altre piattaforme di vendita online (nessuna visibilità della capacità delle aziende di rifocalizzare le operazioni); la propria conoscenza degli acquirenti pubblici e delle loro connessioni con l'industria (non ampiamente condivisa - limitata a singoli individui o a squadre locali)."
+    },
+    "feedback": {
+        "provideFeedbackShort": "Fornisci un feedback!",
+        "provideFeedbackLong": "Fornire feedback, suggerimenti o richieste di informazioni da parte degli utenti - <i>Si prega di compilare i campi obbligatori (*)<\/i>.",
+        "feedbackName": "Il tuo nome",
+        "feedbackEmail": "Il tuo indirizzo e-mail",
+        "feedbackDetails": "Dettagli del feedback"
+    },
+    "commonFields": {
+        "dateCreated": "Data di creazione",
+        "emailAddress": "Indirizzo e-mail",
+        "password": "Password",
+        "confirmPassword": "Confermare la password",
+        "rememberUser": "Ricordami (?)",
+        "submit": "Invia",
+        "telephone": "Numero cellulare di contatto",
+        "organizationName": "Nome dell'organizzazione",
+        "organizationUniteID": "L'UNITE ID dell'Organizzazione",
+        "contactName": "Nome persona di contatto",
+        "deptAgencyGroup": "Dipartimento \/ Agenzia \/ Gruppo",
+        "address": "Indirizzo",
+        "country": "Paese",
+        "preferredCurrency": "Valuta preferita (Predefinito: Euro)",
+        "mandatoryFill": "Si prega di compilare tutti i campi obbligatori (*).",
+        "website": "Sito web",
+        "facebookURL": "Profilo Facebook",
+        "instagramURL": "Profilo Instagram",
+        "twitterURL": "Profilo Twitter",
+        "linkedinURL": "Profilo LinkedIn",
+        "otherSMEUrl": "Altro profilo di social media",
+        "uploadProductList": "Si prega di caricare l'elenco dei prodotti:",
+        "uploadProductImage": "Si prega di caricare un'immagine del Prodotto:",
+        "uploadExcelNotice": "È possibile utilizzare un file Excel con l'elenco dei prodotti, con ogni riga come nome del prodotto + prezzo del prodotto + valuta del prodotto + importo del prodotto + opzionalmente nome del fornitore (4 o 5 celle/riga, la prima riga deve contenere i nomi delle colonne). Cliccando su Processo, i vostri articoli vengono aggiunti istantaneamente alla pagina.",
+        "uploadExcelList": "Si prega di caricare la vostra lista di prodotti Excel",
+        "productsOffered": "Prodotti / Servizi offerti:",
+        "userAvatar": "Avatar dell'utente",
+        "certificates": "Certificati",
+        "antibriberyPolicy": "Politica anti-corruzione",
+        "environmentPolicy": "Politica ambientale",
+        "qualityMgmtPolicy": "Politica di gestione della qualità",
+        "occupationalSafetyHealth": "Sicurezza e salute sul lavoro",
+        "otherRelevantFiles": "Altri file rilevanti",
+        "checkTerms": "Sono d'accordo con i Termini e condizioni di UNITE",
+        "checkAntibribery": "Riconosco l'Accordo anti-corruzione UNITE"
+    },
+    "buyerSpecific": {
+        "qualification": "Qualificazione \/ Esperienza",
+        "balanceToInvest": "Saldo da investire"
+    },
+    "supervisorSignUp": {
+        "title": "Registrati come Supervisore"
+    },
+    "supplierSpecific": {
+        "balance": "Saldo",
+        "totalSupplyPrice": "Prezzo totale della fornitura",
+        "totalSupplyAmount": "Quantità totale della fornitura",
+        "employeeNumber": "Numero di dipendenti",
+        "turnover": "Il turn-over dell'anno scorso",
+        "directorsName": "Nome del direttore",
+        "title": "Titolo",
+        "registrationNumber": "Numero di registrazione dell'azienda",
+        "companyName": "Nome dell'azienda",
+        "areaCovered": "Area coperta",
+        "companyAddress": "Indirizzo dell'azienda",
+        "industry": "Industria",
+        "registeredCountry": "Paese registrato"
+    }
+}

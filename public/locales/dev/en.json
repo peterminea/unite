@@ -1,90 +1,166 @@
 {
-  "home": {
-    "title": "UNITE Public Procurement Platform",
-    "meaning": "<b>U</b>nderserved <b>N</b>eeds <b>I</b>n <b>T</b>imes of <b>E</b>mergency",
-    "description": "Public Procurement Platform",
-    "whatItDoes": "Creating a world where governments and companies innovate together to overcome crisis",
-    "mottoOne": "SAVING JOBS, SAVING LIVES!",
-    "mottoTwo": "We are driving the new normal!",
-    "signUp": "Sign Up",
-    "signInBuyer": "Sign up as Buyer",
-    "signInSupervisor": "Sign in as Supervisor",
-    "signInSupplier": "Sign in as Supplier",
-    "signUpBuyer": "Sign up as Buyer",
-    "signUpSupervisor": "Sign up as Supervisor",
-    "signUpSupplier": "Sign up as Supplier",
-    "captchaProtection": "This website is protected by Google reCaptcha V2.",
-    "close": "Close"    
-  },
-  "about": {
-  "first_paragraph": "UNITE is a Public Procurement Platform exclusively for governmental procurement of special orders of products and services for crisis response. <br>We call it \"The Alibaba of urgent public procurement requests.\"<br><br> UNITE is a two-sided platform, connecting public buyers with companies that have the capability and capacity to refocus their activities to supplying goods and services in response to the COVID-19 crisis.<br><br> Companies are invited to register on the platform, describing their capability and capacity to manufacture urgently needed products or to supply in-demand services. <br>Companies can also browse and respond to open tender requests placed by public buyers. <br><br>  Public buyers can access the platform and create a procurement request. Our software matches the procurement request with potential suppliers and facilitates the complete transaction - including initial contact, negotiation. order placement, delivery acceptance, and payment.",
-    "second_paragraph": "UNITE differentiates itself from other solutions in that it provides a database of companies with capability to refocus operations and in that it automates the process. Other solutions include using existing suppliers and ERP/purchasing system (not suited to abnormal requirements); engagement with the market through contacting individual companies by email, telephone or in person (which is slow); use of other online sales platforms (no visibility of the ability of companies to refocus operations); own knowledge of public buyers and their connections to industry (not widely shared - limited to individuals or local teams)."
-  },  
-  "feedback": {
-    "provideFeedbackShort": "Provide Feedback!",
-    "provideFeedbackLong": "Provide user feedback, suggestions or inquiries - <i>Please fill in the required (*) fields.</i>",
-    "feedbackName": "Your name",
-    "feedbackEmail": "Your e-mail address",
-    "feedbackDetails": "Feedback Details"
-  },
-  "commonFields": {
-    "dateCreated": "Date of creation",
-    "emailAddress": "E-mail address",
-    "password": "Password",
-    "confirmPassword": "Confirm password",
-    "rememberUser": "Remember me (?)",
-    "submit": "Submit",
-    "telephone": "Contact Mobile Number",
-    "organizationName": "Organization Name",
-    "organizationUniteID": "Organization UNITE ID",
-    "contactName": "Contact Name",
-    "deptAgencyGroup": "Department / Agency / Group",
-    "address": "Address",
-    "country": "Country",
-    "preferredCurrency": "Preferred currency (Default: Euro)",
-    "mandatoryFill": "Please fill in all the required (*) fields.",
-    "website": "Website",
-    "facebookURL": "Facebook profile",
-    "instagramURL": "Instagram profile",
-    "twitterURL": "Twitter profile",
-    "linkedinURL": "LinkedIn profile",
-    "otherSMEUrl": "Other Social Media profile",
-    "uploadProductList": "Please upload your product list:",
-    "uploadProductImage": "Please upload an image of the Product:",
-    "uploadExcelNotice": "You can use an Excel file with the products list, with each row as product name + product price + product currency + product amount + optionally Supplier name (4 or 5 cells/row, the first row must contain column names). When clicking Process, your items are instantly added to the Page.",
-    "uploadExcelList": "Please upload your Excel product list",
-    "productsOffered": "Products / Services offered:",
-    "userAvatar": "User Avatar",
-    "certificates": "User Avatar",
-    "antibriberyPolicy": "User Avatar",
-    "environmentPolicy": "Environment Policy",
-    "qualityMgmtPolicy": "Quality Management Policy",
-    "occupationalSafetyHealth": "Occupational Safety and Health",
-    "otherRelevantFiles": "Other relevant files",
-    "checkTerms": "I agree with the UNITE Terms and Conditions",
-    "checkAntibribery": "I acknowledge the UNITE Anti-Bribery Agreement"
-  },
-  "buyerSpecific": {
-    "qualification": "Qualification / Experience",
-    "balanceToInvest": "Balance to invest"
-  },
-  "supervisorSignUp": {
-    "title": "Sign up as Supervisor"
-  },
-  "supplierSpecific": {
-    "balance": "Balance",
-    "totalSupplyPrice": "Total price of the supply",
-    "totalSupplyAmount": "Total amount of the supply",
-    "employeeNumber": "Number of employees",
-    "turnover": "Last year turn-over",
-    "directorsName": "Director's name",
-    "title": "Title",
-    "registrationNumber": "Company's Registration Number",
-    "employeeNumber": "Number of employees",
-    "companyName": "Name of the company",
-    "areaCovered": "Area covered",
-    "companyAddress": "Company Address",
-    "industry": "Industry",
-    "registeredCountry": "Registered country"
-  }  
+    "home": {
+        "title": "UNITE Public Procurement Platform",
+        "meaning": "<b>U</b>nderserved <b>N</b>eeds <b>I</b>n <b>T</b>imes of <b>E</b>mergency",
+        "description": "Public Procurement Platform",
+        "whatItDoes": "Creating a world where governments and companies innovate together to overcome crisis",
+        "mottoOne": "SAVING JOBS, SAVING LIVES!",
+        "mottoTwo": "We are driving the new normal!",
+        "signUp": "Sign Up",
+        "signInBuyer": "Sign in as Buyer",
+        "signInSupervisor": "Sign in as Supervisor",
+        "signInSupplier": "Sign in as Supplier",
+        "signUpBuyer": "Sign up as Buyer",
+        "signUpSupervisor": "Sign up as Supervisor",
+        "signUpSupplier": "Sign up as Supplier",
+        "captchaProtection": "This website is protected by Google reCaptcha V2.",
+        "close": "Close"
+    },
+    "about": {
+        "first_paragraph": "UNITE is a Public Procurement Platform exclusively for governmental procurement of special orders of products and services for crisis response. <br>We call it \"The Alibaba of urgent public procurement requests.\"<br><br> UNITE is a two-sided platform, connecting public buyers with companies that have the capability and capacity to refocus their activities to supplying goods and services in response to the COVID-19 crisis.<br><br> Companies are invited to register on the platform, describing their capability and capacity to manufacture urgently needed products or to supply in-demand services. <br>Companies can also browse and respond to open tender requests placed by public buyers. <br><br>  Public buyers can access the platform and create a procurement request. Our software matches the procurement request with potential suppliers and facilitates the complete transaction - including initial contact, negotiation. order placement, delivery acceptance, and payment.",
+        "second_paragraph": "UNITE differentiates itself from other solutions in that it provides a database of companies with capability to refocus operations and in that it automates the process. Other solutions include using existing suppliers and ERP/purchasing system (not suited to abnormal requirements); engagement with the market through contacting individual companies by email, telephone or in person (which is slow); use of other online sales platforms (no visibility of the ability of companies to refocus operations); own knowledge of public buyers and their connections to industry (not widely shared - limited to individuals or local teams)."
+    },
+    "feedback": {
+        "provideFeedbackShort": "Provide Feedback!",
+        "provideFeedbackLong": "Provide user feedback, suggestions or inquiries - <i>Please fill in the required (*) fields.</i>",
+        "feedbackName": "Your name",
+        "feedbackEmail": "Your e-mail address",
+        "feedbackDetails": "Feedback Details"
+    },
+    "commonFields": {
+        "dateCreated": "Date of creation",
+        "emailAddress": "E-mail address",
+        "password": "Password",
+        "confirmPassword": "Confirm password",
+        "rememberUser": "Remember me (?)",
+        "submit": "Submit",
+        "telephone": "Contact Mobile Number",
+        "organizationName": "Organization Name",
+        "organizationUniteID": "Organization UNITE ID",
+        "contactName": "Contact Name",
+        "deptAgencyGroup": "Department / Agency / Group",
+        "address": "Address",
+        "country": "Country",
+        "preferredCurrency": "Preferred currency (Default: Euro)",
+        "mandatoryFill": "Please fill in all the required (*) fields.",
+        "website": "Website",
+        "facebookURL": "Facebook profile",
+        "instagramURL": "Instagram profile",
+        "twitterURL": "Twitter profile",
+        "linkedinURL": "LinkedIn profile",
+        "otherSMEUrl": "Other Social Media profile",
+        "uploadProductList": "Please upload your product list:",
+        "uploadProductImage": "Please upload an image of the Product:",
+        "uploadExcelNotice": "You can use an Excel file with the products list, with each row as product name + product price + product currency + product amount + optionally Supplier name (4 or 5 cells/row, the first row must contain column names). When clicking Process, your items are instantly added to the Page.",
+        "uploadExcelList": "Please upload your Excel product list",
+        "productsOffered": "Products / Services offered:",
+        "userAvatar": "User Avatar",
+        "certificates": "Certificates",
+        "antibriberyPolicy": "Anti-bribery Policy",
+        "environmentPolicy": "Environment Policy",
+        "qualityMgmtPolicy": "Quality Management Policy",
+        "occupationalSafetyHealth": "Occupational Safety and Health",
+        "otherRelevantFiles": "Other relevant files",
+        "checkTerms": "I agree with the UNITE Terms and Conditions",
+        "checkAntibribery": "I acknowledge the UNITE Anti-Bribery Agreement"
+    },
+    "buyerSpecific": {
+        "qualification": "Qualification / Experience",
+        "balanceToInvest": "Balance to invest"
+    },
+    "supervisorSignUp": {
+        "title": "Sign up as Supervisor"
+    },
+    "supplierSpecific": {
+        "balance": "Balance",
+        "totalSupplyPrice": "Total price of the supply",
+        "totalSupplyAmount": "Total amount of the supply",
+        "employeeNumber": "Number of employees",
+        "turnover": "Last year turn-over",
+        "directorsName": "Director's name",
+        "title": "Title",
+        "registrationNumber": "Company's Registration Number",
+        "companyName": "Name of the company",
+        "areaCovered": "Area covered",
+        "companyAddress": "Company Address",
+        "industry": "Industry",
+        "registeredCountry": "Registered country"
+    },
+	"bannedUsers": {
+	 "banTitle": "Ban UNITE User Account - Admin Reserved - Please fill in the required (*) fields:",
+	  "banConfirmation":"You are about to ban this User from using UNITE. This can be time-limited.\nBanning a UNITE User is a serious event, it should be motivated and the User notified about the reason. Please provide accurate information about it.",
+	  "banReason": "Reason for banning account",
+	  "userName": "Name of the user",
+	  "prefEndingBanDate": "Preferred Date for ban ending:",
+	  "bannedList": "Load list of Banned Users"
+	},
+	"bidsCatalog": {
+		"title": "FULL LIST OF BUYER BIDS - UNITE",
+		"listDescription": "This is the whole list of bid requests (Tender Requests) that have been placed by all our UNITE Buyers by now. It includes bids of any status (valid, expired, cancelled), and also their prices, given in supplier's agreed currency.",
+		"conversionNotice": "We may also convert each bid's price to the default currency of the Bid Request. We assume that suppliers may use different national currencies from those of the buyers, so then we apply conversion rates.",
+		"noElements": "Sorry, no buyers here."
+	},
+	"deleteUser": {
+	"title": "UNITE - Delete User Account - Admin",
+	"confirmation": "You are about to remove all this User data from UNITE. This cannot be undone.\nDeleting a UNITE User is a serious issue and it needs a well-elaborated reason. Please proceed only if you are really sure about it.",
+	"secondTitle": "Delete User Account - Please fill in the required (*) fields",
+	"reason": "Reason for deleting account",
+	"userName": "Name of the User:",
+	"deletion": "Delete User"
+	},
+ "fileList": {
+ "title": "UNITE FULL LIST OF UPLOADED FILES",
+ "disclaimer": "Disclaimer: This is a Demo list of files that are uploaded to our App folders.",
+ "description": "We include Avatars and user-specific files that are uploaded. For practical reasons, we prefer uploading files to dedicated folders of the application hosting space, and not to the DB itself - currently the database only contains a few uploaded files.<br>Note: Only Site Administrators can access these lists. So, guys, what we get to see here - it is only for us!",
+ "productImages": "List of UNITE Product Image Files",
+ "noProductImages": "Sorry, no Product Image files here.",
+ "uploadedDocuments": "List of UNITE Upload Files",
+ "noUploadedDocuments": "Sorry, no Uploaded files here.",
+ "avatarFiles": "List of UNITE Avatar Files",
+ "noAvatarFiles": "Sorry, no Avatar files here."
+ }, 
+ "memberList": {
+ "title": "UNITE FULL LIST OF MEMBERS - Buyers, Supervisors, Suppliers",
+ "description_partOne": "Disclaimer: This is a Demo list of members. At this moment they do not represent real economic entities from the world. Any resemblance to any real-life company is unintentional. This list is shown only for Development purposes, and it is only accessible to Administrators.",
+ "description_partTwo": "However, in the coming future UNITE will have real members that will be listed. We will limit the amount of specific data to be made publicly available on our platform, according to the GDPR laws and rules. We may also restrict the access of external visitors to data about our members, meaning that you have to join UNITE (remember: business-to-business) to see the said information.",
+ "buyersList": "List of UNITE Buyers",
+ "noBuyers": "Sorry, no Buyers here.",
+ "supervisorsList": "List of UNITE Supervisors",
+ "noSupervisors": "Sorry, no Supervisors here.",
+ "suppliersList": "List of UNITE Suppliers",
+ "noSuppliers": "Sorry, no Suppliers here."
+ },
+ "viewFeedbacks": {
+ "title": "UNITE - View Platform Feedbacks",
+ "description": "Below we have our Feedbacks, Suggestions, and other Inquiries from our Users."
+ },
+ "buyerView": {
+ "balance": {
+	"title": "Buyer's Balance",
+	"description": "You can make currency conversions here, in order to see what the equivalent of your current balance would be, if translated into other national currencies.",
+	"label": "Current Buyer Balance",
+	"selectConvert": "Select other currency and convert your balance:"	
+	},
+	"bidsCatalog": {
+		"title": "Buyer's Bid Catalog",
+		"secondTitle": "FULL LIST OF BUYER BIDS",
+		"description_partOne": "This is the whole list of bid requests (Tender Requests) that have been placed by the {buyerName} UNITE Buyer by now. It includes bids of any status (valid, expired, cancelled), and also their prices, given in supplier's agreed currency.",
+		"description_partTwo": "We may also convert each bid's price to the default currency of the Bid Request. We assume that suppliers may use different national currencies from those of the buyers, so then we apply conversion rates.",
+		"contentTitle": "Full table of your Buyer Bids",
+		"noElements": "Sorry, no Bids are here."
+	},
+	"bidCancel" : {
+		"title": "UNITE - Buyer - Cancel Order",
+		"nextTitle": "UNITE - Cancel your Order",
+		"requiredField": "Cancel your Order - Please fill in the required (*) field",
+		"details": "Details",
+		"detailsPlaceholder": "Details about why you cancel"
+	}
+ },
+ "supervisorView": {
+ 
+ },
+ "supplierView": {
+ 
+ }
 }

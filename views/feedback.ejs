@@ -28,14 +28,22 @@
       name = "<%= userName %>", 
       type = "<%= userType %>";
       userInputs(id, role, avatar, name, type, $('ul.mr-auto'));
-      getFeedbackSubjects($('#feedbackForm'), $('input[name="_csrf"]').val(), '/feedbackSubjects');
+      
+      let data = [];
+      <% if(subjects != null) { for(let s of subjects) { %>
+      data.push({
+        id: '<%= s._id %>',
+        name: '<%= s.name %>'
+      });
+      <% } } %>
+      
+      getFeedbackSubjects(data, $('#feedbackForm'), $('input[name="_csrf"]').val());
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
 
       $('#feedbackForm').submit(function(e) {
         let formData = new FormData(document.getElementById('feedbackForm'));
         let captchaResponse = formData.get('g-recaptcha-response');
         $('input[name="captchaResponse"]').val(captchaResponse);
-        
         let option = $(this).find('select option:not(:eq(0)):selected');
         
         if(!option.length) {

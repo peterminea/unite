@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>UNITE - Buyer - View Bid(s)</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A cool thing made with Glitch">
+  <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/messages.css">
+  <link rel="stylesheet" href="/jquery-ui.css">
+  <link rel="stylesheet" href="/bootstrap.min.css">
+  <link rel="stylesheet" href="/ui.jqgrid.min.css">
+  <link rel="stylesheet" href="/ui.multiselect.min.css">
+ <!--  <script src="/jquery.min.js"></script> -->
+  <script  src="https://code.jquery.com/jquery-3.5.1.js"  integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" 
+  crossorigin="anonymous"></script>
+  <script src="/jquery-ui.min.js"></script>
+  <script src="/popper.min.js"></script>
+  <script src="/bootstrap.min.js"></script>
+  <script src="/sweetalert2@9.min.js"></script>
+  <script src="/index.min.js"></script>
+  <script src="/money.min.js"></script>
+  <script src="/jquery.simulate.js"></script>
+  <script src="/jquery.jqgrid.min.js"></script>
+  <script src="/grid.locale-en.js"></script>
+  <script src="/https.js"></script>  
+  <script src="/functions.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {      
+      if($('.delete').length) {
+        $('.delete').bind('click', function() {
+          let bidId = $(this).attr('id');
+          let div1 = $(this).parent('div'), div2 = div1.prev('div');
+
+          if(confirm('Are you sure you want to remove this bid from your Buyer Dashboard forever?')) {            
+            let form = $(this).parent('div').find('form');
+            form.append(`<input type="hidden" name="bidIdToDelete" value="${bidId}">Deletion</span>`);
+            form.submit();
+          }
+        });
+      }
+    });
+  </script>
+</head>
+
+<body id="<%= supplierId %>" id2="<%= buyerId %>">
+  <nav user="buyer" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
+    <a class="navbar-brand" href="/">Buyer - UNITE</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </nav>
+    <input type="hidden" id="balance" value="<%= balance %>">
+    <div class="container">
+      <br><br>
+      <div class="col-md-12">
+        <% let i = 0; if (bids != null && bids.length > 0) { %>
+        <div>
+          <p>
+            You currently have placed a number of <span class='bidLength'><%= bids.length %></span> valid bids. Their total price is <span class='totalPrice'><%= validPrice %></span> <span class='currency'><%= currency %>.</span>
+          </p>
+        </div>
+        <% for (bid of bids) { i++; %>        
+        <div>      
+          <div class="card mt-4">
+            <h5 class="card-header bg-dark text-white">From: <%= bid.buyerName %></h5>
+            <div class="card-body">
+              <h5 class="card-title">To: <%= bid.supplierName %></h5>
+              <div>
+                <span>Request: <%= bid.requestName %></span>
+              </div>
+              <a href="../../../../../buyer/viewBid/<%= bid._id %>" class="btn btn-primary" style="float: right;">
+                <button class="btn btn-warning ml-2 viewBid" bidId="<%= bid._id %>" id="viewBid_<%= i %>" style="float: right">View Bid Details</button>
+              </a>
+              <!-- <button class="btn btn-primary ml-2" style="float: right" data-target="#request_< %= i %>" data-toggle="modal">View Bid Details</button> -->
+            </div>
+          </div>
+        </div>
+  <% } } i = 0; if(cancelledBids.length > 0) { %> 
+    <br>
+      <h3 style="color: green">
+        The following <%= cancelledBids.length %> bids are Bid Requests that were cancelled. We advise you to delete them. Their total price is <span class='cancelledPrice'><%= cancelledPrice %></span> <span class='currency'><%= currency %>.</span>
+      </h3>
+    <hr>
+  <% for(bid of cancelledBids) { i++; %>
+    <div class="card mt-4">
+      <p>
+        The <%= bid.requestName %> bid was cancelled upon <% if(bid.status == buyerCancelBidStatus) { %> your <% } else { %> Supplier's <% } %> decision. You can remove the bid completely.
+      </p>
+      <button class="btn btn-primary ml-2 delete" style="float: right" id="<%= bid._id %>">Delete Bid</button>
+      <form method="POST">
+      </form>
+    </div>
+  <% } } i = 0; if(expiredBids != null && expiredBids.length > 0) { %> 
+    <br>
+      <h3 style="color: green">
+        The following <%= expiredBids.length %> bids are Bid Requests that have expired. We advise you to delete them. Their total price is <span class='expiredPrice'><%= expiredPrice %></span> <span class='currency'><%= currency %>.</span>
+      </h3>
+    <hr>
+  <% for (bid of expiredBids) { i++;  %>  
+    <div class="card mt-4">
+      <p>
+        The <%= bid.requestName %> request expired, its limit date was <%= bid.expiryDateFormatted %>. You can remove the bid request completely.
+      </p>
+      <button class="btn btn-primary ml-2 delete" style="float: right" id="<%= bid._id %>">Delete Bid</button>
+    </div>
+  <% } } if(totalBidLength == 0)  { %>
+      <p style="font-size: 12pt; font-weight: bold; color: purple">You have not placed any bids to this supplier. If you prefer, you may do so at any time.</p>
+    <% } else { %>
+      <p style="font-size: 12pt; font-weight: bold; color: navy">You placed a total of <%= totalBidLength %> bid requests to this supplier. Their total price is <%= totalPrice %> <%= currency %>.</p>
+    <% } %>
+  </div>
+  </div>
+  </body>
+</html>

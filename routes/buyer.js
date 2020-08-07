@@ -18,7 +18,8 @@ router.get("/confirmation/:token", sessionExit, buyerController.getConfirmation)
 router.get('/resend', /*isAuth,*/ sessionExit, buyerController.getResendToken);
 router.get("/forgotPassword", isAuth, sessionExit, buyerController.getForgotPassword);
 router.get("/resetPassword/:token", isAuth, sessionExit, buyerController.getResetPasswordToken);
-router.get("/viewBid/:supplierId/:buyerId/:currency/:balance", isAuth, sessionExit, buyerController.getViewBids);
+router.get("/viewBids/:supplierId/:buyerId/:currency/:balance", isAuth, sessionExit, buyerController.getViewBids);
+router.get("/viewBid/:bidId", isAuth, sessionExit, buyerController.getViewBid);
 router.get("/chatLogin/:supplierId/:buyerId/:requestId/:requestName/:buyerName/:supplierName", isAuth, sessionExit, buyerController.getChatLogin);
 router.get("/chat/:from/:to/:username/:room/:reqId/:reqName/:toName/:fromName", isAuth, sessionExit, buyerController.getChat);
 router.get("/cancelBid/:bidId/:bidName/:userType/:buyerName/:supplierName/:buyerEmail/:supplierEmail", isAuth, sessionExit, buyerController.getCancelBid);
@@ -36,7 +37,8 @@ router.post('/confirmation/:token', sessionExit, buyerController.postConfirmatio
 router.post('/resend', /*isAuth,*/ sessionExit, buyerController.postResendToken);
 router.post("/forgotPassword", isAuth, sessionExit, buyerController.postForgotPassword);
 router.post("/resetPassword/:token", isAuth, sessionExit, buyerController.postResetPasswordToken);
-router.post("/viewBid", isAuth, sessionExit, buyerController.postViewBids);
+router.post("/viewBids", isAuth, sessionExit, buyerController.postViewBids);
+router.post("/viewBid/:bidId", isAuth, sessionExit, buyerController.postViewBid);
 router.post("/cancelBid/:bidId/:bidName/:userType/:buyerName/:supplierName/:buyerEmail/:supplierEmail", isAuth, sessionExit, buyerController.postCancelBid);
 router.post("/placeBid/:buyerId/:supplierId/:productId", isAuth, sessionExit, buyerController.postPlaceBid);
 router.post("/productsCatalog", isAuth, sessionExit, buyerController.getPlaceBid);

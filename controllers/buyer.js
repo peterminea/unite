@@ -47,6 +47,7 @@ const {
   getDataMongo,
   getDataMongoose,
   getBidStatusesJson,
+  renderBidStatuses,
   getCancelTypesJson,
   postSignInBody,
   saveBidBody,
@@ -267,7 +268,21 @@ exports.getChat = (req, res) => {
 };
 
 
-exports.getViewBids = async (req, res) => {
+exports.getViewBids = async (req, res) => {  
+  let result = [], data = await getDataMongoose('BidStatus');
+ 
+  if(data && data.length && data.length > 0) {
+    data.forEach((item) => {
+      let obj = {
+        id: item._id,
+        value: item.value,
+        name: item.value + " - " + item.name
+      };
+
+      result.push(obj);
+    });
+  }
+  
   let bids = await getDataMongoose('BidRequest', {
     supplier: req.params.supplierId,
     buyer: req.params.buyerId
@@ -332,15 +347,12 @@ exports.getViewBids = async (req, res) => {
     error = search(req.session.flash, "error");
   req.session.flash = [];
 
-
-  res.render("buyer/viewBid", {
+  res.render("buyer/viewBids", {
     bids: validBids,
     cancelledBids: cancelledBids,
     expiredBids: expiredBids,
     totalBidLength: bids && bids.length ? bids.length : 0,
     buyerCancelBidStatus: process.env.BUYER_CANCEL_BID,
-    stripePublicKey: process.env.STRIPE_KEY_PUBLIC,
-    stripeSecretKey: process.env.STRIPE_KEY_SECRET,
     successMessage: success,
     errorMessage: error,
     totalPrice: totalPrice,
@@ -349,19 +361,61 @@ exports.getViewBids = async (req, res) => {
     cancelledPrice: cancelledPrice,
     currency: req.params.currency,
     path: '../../../../',
-    bidExtensionDays: process.env.DAYS_BID_EXTENDED,
-    statusesJson: JSON.stringify(getBidStatusesJson()),
     supplierId: req.params.supplierId,
     buyerId: req.params.buyerId,
     balance: req.params.balance
   });
-
 };
 
 
 exports.postViewBids = (req, res) => {
-  updateBidBody(req, res, req.body.id, 'back');
+  if(!(req.body.bidIdToDelete)) {    
+  } else {//Delete
+    MongoClient.connect(URL, { useUnifiedTopology: true }, function(err, db) {
+      if(treatError(err, req, res, 'back'))
+        return false;
+
+      let dbo = db.db(BASE), myquery = { _id: req.body.bidIdToDelete };
+
+      dbo.collection("bidrequests").deleteOne({ _id: req.body.bidIdToDelete }, function(err, resp) {
+        if(treatError(err, req, resp, 'back')) {          
+          db.close();
+          return false;
+        }
+        
+        req.flash('success', 'You cancelled this order.');
+        db.close();
+        res.redirect('back');
+      });
+    });
+  }
 };
+
+
+exports.getViewBid = async (req, res) => {
+  let success = search(req.session.flash, "success"),
+    error = search(req.session.flash, "error");
+  
+  let bid = await getObjectMongoose('BidRequest', { _id: req.body.bidId });
+  let statuses = await renderBidStatuses();
+    
+    res.render("buyer/viewBid", {
+      bid: bid,
+      path: '../',
+      bidExtensionDays: process.env.DAYS_BID_EXTENDED,
+      stripePublicKey: process.env.STRIPE_KEY_PUBLIC,
+      stripeSecretKey: process.env.STRIPE_KEY_SECRET,
+      successMessage: success,
+      errorMessage: error,
+      statuses: statuses,
+      statusesJson: JSON.stringify(getBidStatusesJson())
+    });
+}
+
+
+exports.postViewBid = (req, res) => {
+  updateBidBody(req, res, req.body.id, 'back');
+}
 
 
 exports.getCancelBid = (req, res) => {

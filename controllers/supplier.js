@@ -39,6 +39,7 @@ const {
   getDataMongo,
   getDataMongoose,
   getBidStatusesJson,
+  renderBidStatuses,
   getCancelTypesJson,
   postSignInBody,
   saveBidBody,
@@ -936,8 +937,8 @@ exports.getBalance = (req, res) => {
 }
 
 
-exports.getBidRequest = async (req, res) => {
-  const supplier = req.session.supplier;  
+exports.getBidRequest = async (req, res) => {  
+  //const supplier = req.session.supplier;  
   const id = req.params.id;
   let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];  
@@ -956,20 +957,18 @@ exports.getBidRequest = async (req, res) => {
       request.cannotExtendMore = true;
     }
   }
+  
+  let statuses = await renderBidStatuses();
 
-  let promise = BidStatus.find({}).exec();
-  promise.then((statuses) => {
-    res.render("supplier/bid-request", {
-      supplier: supplier,
-      request: request,
-      buyer: buyer,
-      path: '../',
-      bidExtensionDays: process.env.DAYS_BID_EXTENDED,
-      successMessage: success,
-      errorMessage: error,
-      statuses: statuses,
-      statusesJson: JSON.stringify(getBidStatusesJson())
-      });
+  res.render("supplier/bid-request", {    
+    bid: request,
+    buyer: buyer,
+    path: '../',
+    bidExtensionDays: process.env.DAYS_BID_EXTENDED,
+    successMessage: success,
+    errorMessage: error,
+    statuses: statuses,
+    statusesJson: JSON.stringify(getBidStatusesJson())
     });
 }
 

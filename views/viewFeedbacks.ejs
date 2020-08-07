@@ -27,7 +27,20 @@
       avatar = "<%= avatar %>", 
       type = "<%= userType %>";
       userInputs(id, role, avatar, name, type, $('ul.mr-auto'));
-      getFeedbacks($('#main'), $('input[name="_csrf"]').val(), '/feedbacks');
+      
+      let data = [];
+      <% if(feedbacks != null) { for(let f of feedbacks) { %>
+      data.push({
+        id: '<%= f._id %>',
+        userName: '<%= f.userName %>',
+        userEmail: '<%= f.userEmail %>',
+        subject: '<%= f.subject %>',
+        message: '<%= f.message %>',
+        createdAt: '<%= f.createdAt %>'
+      });
+      <% } } %>
+      
+      getFeedbacks(data, $('#main'), $('input[name="_csrf"]').val());
     });
   </script>
   </head>
