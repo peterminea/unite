@@ -1,0 +1,90 @@
+{
+  "home": {
+    "title": "UNITE Public Procurement Platform",
+    "meaning": "<b>U</b>nderserved <b>N</b>eeds <b>I</b>n <b>T</b>imes of <b>E</b>mergency",
+    "description": "Public Procurement Platform",
+    "whatItDoes": "Creating a world where governments and companies innovate together to overcome crisis",
+    "mottoOne": "SAVING JOBS, SAVING LIVES!",
+    "mottoTwo": "We are driving the new normal!",
+    "signUp": "Sign Up",
+    "signInBuyer": "Sign up as Buyer",
+    "signInSupervisor": "Sign in as Supervisor",
+    "signInSupplier": "Sign in as Supplier",
+    "signUpBuyer": "Sign up as Buyer",
+    "signUpSupervisor": "Sign up as Supervisor",
+    "signUpSupplier": "Sign up as Supplier",
+    "captchaProtection": "This website is protected by Google reCaptcha V2.",
+    "close": "Close"    
+  },
+  "about": {
+  "first_paragraph": "UNITE is a Public Procurement Platform exclusively for governmental procurement of special orders of products and services for crisis response. <br>We call it \"The Alibaba of urgent public procurement requests.\"<br><br> UNITE is a two-sided platform, connecting public buyers with companies that have the capability and capacity to refocus their activities to supplying goods and services in response to the COVID-19 crisis.<br><br> Companies are invited to register on the platform, describing their capability and capacity to manufacture urgently needed products or to supply in-demand services. <br>Companies can also browse and respond to open tender requests placed by public buyers. <br><br>  Public buyers can access the platform and create a procurement request. Our software matches the procurement request with potential suppliers and facilitates the complete transaction - including initial contact, negotiation. order placement, delivery acceptance, and payment.",
+    "second_paragraph": "UNITE differentiates itself from other solutions in that it provides a database of companies with capability to refocus operations and in that it automates the process. Other solutions include using existing suppliers and ERP/purchasing system (not suited to abnormal requirements); engagement with the market through contacting individual companies by email, telephone or in person (which is slow); use of other online sales platforms (no visibility of the ability of companies to refocus operations); own knowledge of public buyers and their connections to industry (not widely shared - limited to individuals or local teams)."
+  },  
+  "feedback": {
+    "provideFeedbackShort": "Provide Feedback!",
+    "provideFeedbackLong": "Provide user feedback, suggestions or inquiries - <i>Please fill in the required (*) fields.</i>",
+    "feedbackName": "Your name",
+    "feedbackEmail": "Your e-mail address",
+    "feedbackDetails": "Feedback Details"
+  },
+  "commonFields": {
+    "dateCreated": "Date of creation",
+    "emailAddress": "E-mail address",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "rememberUser": "Remember me (?)",
+    "submit": "Submit",
+    "telephone": "Contact Mobile Number",
+    "organizationName": "Organization Name",
+    "organizationUniteID": "Organization UNITE ID",
+    "contactName": "Contact Name",
+    "deptAgencyGroup": "Department / Agency / Group",
+    "address": "Address",
+    "country": "Country",
+    "preferredCurrency": "Preferred currency (Default: Euro)",
+    "mandatoryFill": "Please fill in all the required (*) fields.",
+    "website": "Website",
+    "facebookURL": "Facebook profile",
+    "instagramURL": "Instagram profile",
+    "twitterURL": "Twitter profile",
+    "linkedinURL": "LinkedIn profile",
+    "otherSMEUrl": "Other Social Media profile",
+    "uploadProductList": "Please upload your product list:",
+    "uploadProductImage": "Please upload an image of the Product:",
+    "uploadExcelNotice": "You can use an Excel file with the products list, with each row as product name + product price + product currency + product amount + optionally Supplier name (4 or 5 cells/row, the first row must contain column names). When clicking Process, your items are instantly added to the Page.",
+    "uploadExcelList": "Please upload your Excel product list",
+    "productsOffered": "Products / Services offered:",
+    "userAvatar": "User Avatar",
+    "certificates": "User Avatar",
+    "antibriberyPolicy": "User Avatar",
+    "environmentPolicy": "Environment Policy",
+    "qualityMgmtPolicy": "Quality Management Policy",
+    "occupationalSafetyHealth": "Occupational Safety and Health",
+    "otherRelevantFiles": "Other relevant files",
+    "checkTerms": "I agree with the UNITE Terms and Conditions",
+    "checkAntibribery": "I acknowledge the UNITE Anti-Bribery Agreement"
+  },
+  "buyerSpecific": {
+    "qualification": "Qualification / Experience",
+    "balanceToInvest": "Balance to invest"
+  },
+  "supervisorSignUp": {
+    "title": "Sign up as Supervisor"
+  },
+  "supplierSpecific": {
+    "balance": "Balance",
+    "totalSupplyPrice": "Total price of the supply",
+    "totalSupplyAmount": "Total amount of the supply",
+    "employeeNumber": "Number of employees",
+    "turnover": "Last year turn-over",
+    "directorsName": "Director's name",
+    "title": "Title",
+    "registrationNumber": "Company's Registration Number",
+    "employeeNumber": "Number of employees",
+    "companyName": "Name of the company",
+    "areaCovered": "Area covered",
+    "companyAddress": "Company Address",
+    "industry": "Industry",
+    "registeredCountry": "Registered country"
+  }  
+}

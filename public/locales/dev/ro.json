@@ -1,0 +1,23 @@
+{
+    "home": {
+        "title": "Platforma UNITE pentru achiziții publice",
+        "meaning": "Nevoi speciale în timpuri de urgență",
+        "description": "Platformă de achiziții publice",
+        "whatItDoes": "Crearea unei lumi în care guvernele și întreprinderile inovează împreună pentru a depăși criza",
+        "mottoOne": "SALVÂND LOCURI DE MUNCĂ, SALVĂM VIEȚI!",
+        "mottoTwo": "Conducem noua normalitate!",
+        "signUp": "Înscrie-te",
+        "signInBuyer": "Înscrieți-vă ca cumpărător",
+        "signInSupervisor": "Conectați-vă ca supraveghetor",
+        "signInSupplier": "Conectați-vă ca furnizor",
+        "signUpBuyer": "Înscrieți-vă ca cumpărător",
+        "signUpSupervisor": "Înscrieți-vă ca supraveghetor",
+        "signUpSupplier": "Înscrieți-vă ca furnizor",
+        "captchaProtection": "Acest site este protejat de Google reCaptcha V2.",
+        "close": "Închide"
+    },
+    "about": {
+        "first_paragraph": "UNITE este o platformă de achiziții publice exclusiv pentru achizițiile publice de comenzi speciale de produse și servicii pentru răspunsul la crize. <br> Noi o numim \"Alibaba de cereri urgente de achiziții publice.\" <br><br>UNITE este o platformă cu două fețe, care conectează cumpărătorii publici cu companiile care au capacitatea și capacitatea de a-și reorienta activitățile către furnizarea de bunuri și servicii ca răspuns la criza COVID-19.<br> <br>Companiile sunt invitate să se înregistreze pe platformă, descriind capacitatea și capacitatea lor de a fabrica produse de care au nevoie urgent sau de a furniza servicii la cerere. <br>Companiile pot, de asemenea, să răsfoiască și să răspundă cererilor de licitație deschise depuse de cumpărătorii publici. <br><br> Cumpărătorii publică pot accesa platforma și pot crea o solicitare de achiziție. Software-ul nostru se potrivește cu cererea de achiziție cu potențialii furnizori și facilitează tranzacția completă - inclusiv contactul inițial, negocierea. plasarea comenzii, acceptarea livrării și plata.",
+        "second_paragraph": "UNITE se diferențiază de alte soluții prin faptul că oferă o bază de date a companiilor cu capacitatea de a reorienta operațiunile și în care automatizează procesul. Alte soluții includ utilizarea furnizorilor existenți și a sistemului ERP\/de achiziție (care nu este adaptat cerințelor anormale); implicarea cu piața prin contactarea companiilor individuale prin e-mail, telefon sau personal (ceea ce este lent); utilizarea altor platforme de vânzări online (nicio vizibilitate a capacității companiilor de a reorienta operațiunile); cunoștințele proprii ale cumpărătorilor publici și legăturile acestora cu industria (care nu sunt distribuite pe scară largă - limitate la persoane fizice sau echipe locale)."
+    }
+}

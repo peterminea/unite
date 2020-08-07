@@ -59,6 +59,26 @@ const server = http.createServer(app);
 const socket = socketio(server);
 const bcrypt = require('bcryptjs');
 const { getObjectMongo, getObjectMongoose, getDataMongo, getDataMongoose } = require('./middleware/templates');
+const lingua = require('lingua');
+
+ i18next
+    .use(i18nextMiddleware.LanguageDetector)
+    .use(Backend)
+    .init({
+      backend: {
+        loadPath: /*__dirname*/ 'public' + '/locales/{{lng}}/{{ns}}.json'
+      },
+      debug: true,
+      detection: {
+        order: ['querystring', 'cookie'],
+        caches: ['cookie']
+      },
+      preload: ['en', 'ro'],
+      saveMissing: true,
+      fallBackLng: ['en']
+    });
+
+app.use(i18nextMiddleware.handle(i18next));
 mongoose.Promise = global.Promise;
 mongoose.set("useCreateIndex", true);
 
@@ -76,8 +96,34 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //app.use(express.static(path.join(__dirname, '..', "public")));
 //app.use([/(.*)\.js$/, '/public'], express.static(__dirname + '/public'));
 
+const LanguageController = require('./controllers/languageController');
+app.use(lingua(app, {
+        defaultLocale: 'en',
+        path: path.join(__dirname, 'public/locales/dev'),
+        storageKey: 'lang', // http://domain.tld/?lang=de
+        cookieOptions: {
+            domain: '.domain.tld',    // to allow subdomains access to the same cookie, for instance
+            path: '/blog',            // to restrict the language cookie to a path
+            httpOnly: false,          // if you need access to this cookie from javascript on the client
+            expires: new Date(Date.now() + 24 * 60 * 60 * 1000),  // expire in 1 day instead of 1 year
+            secure: true              // for serving over https
+        }
+    }));
+
+//router.get('/', LanguageController.list);
+//Locals error handler:
+  app.use(function(err, req, res, next) {
+    // set locals, only providing error in development
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+    // render the error page
+    res.status(err.status || 500);
+    res.render('error');
+  });
+
+
 app.use('/public', (req, res, next) => {
-  console.log(req);
   if (!req.session || process.env.ENV != 'dev') {
     let result = req.url.match(/(.*)\.js$/)
     if(result) {
@@ -103,29 +149,9 @@ app.use(
   })
 );
 
- i18next
-    .use(i18nextMiddleware.LanguageDetector)
-    .use(Backend)
-    .init({
-      backend: {
-        loadPath: __dirname + '/locales/{{lng}}/{{ns}}.json'
-      },
-      debug: true,
-      detection: {
-        order: ['querystring', 'cookie'],
-        caches: ['cookie']
-      },
-      preload: ['en', 'ro'],
-      saveMissing: true,
-      fallBackLng: ['en']
-
-    });
-
-  app.use(i18nextMiddleware.handle(i18next));
-
 
 //app.use(csrf({ cookie: true }));
-// Password Checking & Protecting
+//Password Checking & Protecting
 const csrfProtection = csrf();
 app.use(csrfProtection);
 app.use(require("flash")());
@@ -149,22 +175,6 @@ app.use("/", homeRoutes);
 app.use("/supplier", supplierRoutes);
 app.use("/buyer", buyerRoutes);
 app.use("/supervisor", supervisorRoutes);
-
-const LanguageController = require('./controllers/languageController');
-
-//   router.get('/', LanguageController.list);
-
-//Locals error handler:
-  app.use(function(err, req, res, next) {
-    // set locals, only providing error in development
-    res.locals.message = err.message;
-    res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-    // render the error page
-    res.status(err.status || 500);
-    res.render('error');
-  });
-
 
 app.get('/loadBannedUsers', (req, res) => {//Banned user table.  
   BannedUser.find({}, (err, users) => {
@@ -932,6 +942,8 @@ if (1 == 2)
     }
 
     db = client.db(BASE); //Right connection! 
+    
+    db.collection('buyers').updateMany({}, { $set: { website: 'https://www.governor.gov', facebookURL: 'https://www.facebook.com/governor', instagramURL: 'https://www.instagram.com/governor', twitterURL: 'https://www/twitter.com/governor', linkedinURL: 'https://www.linkedin.com/profile/governor', otherSocialMediaURL: 'https://www.governor.net' } }, function(err, obj) {});
     
     process.on("uncaughtException", function(err) {
       console.error(err.message);
