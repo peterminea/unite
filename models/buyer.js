@@ -104,6 +104,30 @@ const buyerSchema = new Schema({
     type: String,
     required: true
   },
+  website: {
+    type: String,
+    required: false
+  },
+  facebookURL: {
+    type: String,
+    required: false
+  },
+  instagramURL: {
+    type: String,
+    required: false
+  },
+  twitterURL: {
+    type: String,
+    required: false
+  },
+  linkedinURL: {
+    type: String,
+    required: false
+  },
+  otherSocialMediaURL: {
+    type: String,
+    required: false
+  },
   createdAt: {
     type: Date,
     default: Date.now()

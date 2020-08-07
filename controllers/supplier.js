@@ -514,6 +514,11 @@ exports.postSignUp = async (req, res) => {
                 employeeNumbers: req.body.employeeNumbers,
                 lastYearTurnover: req.body.lastYearTurnover,
                 website: req.body.website,
+                facebookURL: req.body.facebookURL,
+                instagramURL: req.body.instagramURL,
+                twitterURL: req.body.twitterURL,
+                linkedinURL: req.body.linkedinURL,
+                otherSocialMediaURL: req.body.otherSocialMediaURL,
                 productsServicesOffered: productList,
                 pricesList: pricesList,
                 currenciesList: currenciesList,
@@ -538,11 +543,6 @@ exports.postSignUp = async (req, res) => {
                 otherRelevantFilesIds: req.body.otherRelevantFilesIds,
                 balance: req.body.balance,
                 currency: req.body.currency,
-                facebookURL: req.body.facebookURL,
-                instagramURL: req.body.instagramURL,
-                twitterURL: req.body.twitterURL,
-                linkedinURL: req.body.linkedinURL,
-                otherSocialMediaURL: req.body.otherSocialMediaURL,
                 UNITETermsAndConditions: true,//We assume that user was constrainted to check them.
                 antibriberyAgreement: true,
                 createdAt: Date.now(),
@@ -1016,6 +1016,11 @@ exports.postProfile = async (req, res) => {
     doc.employeeNumbers = req.body.employeeNumbers;
     doc.lastYearTurnover = req.body.lastYearTurnover;
     doc.website = req.body.website;
+    doc.facebookURL = req.body.facebookURL;
+    doc.instagramURL = req.body.instagramURL;
+    doc.twitterURL = req.body.twitterURL;
+    doc.linkedinURL = req.body.linkedinURL;
+    doc.otherSocialMediaURL = req.body.otherSocialMediaURL;
     doc.productsServicesOffered = productList;
     doc.pricesList = pricesList;
     doc.currenciesList = currenciesList;
@@ -1038,11 +1043,6 @@ exports.postProfile = async (req, res) => {
     doc.qualityManagementPolicyId = req.body.qualityManagementPolicyId;
     doc.occupationalSafetyAndHealthPolicyId = req.body.occupationalSafetyAndHealthPolicyId;
     doc.otherRelevantFilesIds = req.body.otherRelevantFilesIds;
-    doc.facebookURL = req.body.facebookURL;
-    doc.instagramURL = req.body.instagramURL;
-    doc.twitterURL = req.body.twitterURL;
-    doc.linkedinURL = req.body.linkedinURL;
-    doc.otherSocialMediaURL = req.body.otherSocialMediaURL;
     doc.UNITETermsAndConditions = true;
     doc.antibriberyAgreement = true;
     doc.createdAt = req.body.createdAt;

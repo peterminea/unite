@@ -991,6 +991,12 @@ exports.postSignUp = async (req, res) => {
                       deptAgencyGroup: req.body.deptAgencyGroup,
                       qualification: req.body.qualification,
                       country: req.body.country,
+                      website: req.body.website,
+                      facebookURL: req.body.facebookURL,
+                      instagramURL: req.body.instagramURL,
+                      twitterURL: req.body.twitterURL,
+                      linkedinURL: req.body.linkedinURL,
+                      otherSocialMediaURL: req.body.otherSocialMediaURL,
                       createdAt: Date.now(),
                       updatedAt: Date.now(),
                       createdAtFormatted: normalFormat(Date.now()),
@@ -1093,6 +1099,12 @@ exports.postProfile = async (req, res) => {
     doc.deptAgencyGroup = req.body.deptAgencyGroup;
     doc.qualification = req.body.qualification;
     doc.country = req.body.country;
+    doc.website = req.body.website;
+    doc.facebookURL = req.body.facebookURL;
+    doc.instagramURL = req.body.instagramURL;
+    doc.twitterURL = req.body.twitterURL;
+    doc.linkedinURL = req.body.linkedinURL;
+    doc.otherSocialMediaURL = req.body.otherSocialMediaURL;
     doc.createdAt = req.body.createdAt;
     doc.updatedAt = Date.now();
     doc.createdAtFormatted = normalFormat(req.body.createdAt);
