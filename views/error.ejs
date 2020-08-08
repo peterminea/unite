@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>UNITE - Buyer - User Confirmation</title>
+  <title>UNITE - Error Page</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="A cool thing made with Glitch">
@@ -17,41 +17,27 @@
   <script src="/popper.min.js"></script>
   <script src="/bootstrap.min.js"></script>
   <script src="/sweetalert2@9.min.js"></script>
-  <script src="/index.min.js"></script>
   <script src="/https.js"></script>
-  <script src="/chatUsers.js"></script>
   <script src="/functions.js"></script>
   <script type="text/javascript">
-  $(document).ready(function() {
-    errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
-  });
-  </script>
-</head>
-
-<body>
-  <nav user="buyer" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
-    <a class="navbar-brand" href="/">UNITE - Buyer - User Confirmation</a>
+    $(document).ready(function() {
+      
+    });
+  </script>  
+  </head>
+  
+  <body>
+  <nav user="supplier" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
+    <a class="navbar-brand" href="/">UNITE - Error Page</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
   </nav>
     <div class="container">
-       <div class="col-md-12">
-        <form id="mainForm" action="/buyer/confirmation/<%= token %>" method="POST">
-          <legend>
-            Confirm Buyer E-mail
-          </legend>
-          <div class="form-group">
-            <label for="email">E-mail*:</label>
-            <input required class="form-control" type="email" name="emailAddress" autofocus="autofocus"></input>
-          </div>
-          <div class="form-group">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button type="submit" id="confirm" value="Confirm E-mail" class="btn btn-primary btn-block btn-lg">Confirm e-mail and account</button>
-          </div>
-        </form>
-      </div>
-    </div>
+      <p>
+        404 - ERROR
+      </p>
+    </div>    
   </body>
 </html>

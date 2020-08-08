@@ -110,7 +110,7 @@ function imageFormatter(cellvalue, options, rowObject) {
 
 
 function buyerRemovalFormatter(cellvalue, options, rowObject) {  
-  return `<a href="delete/${rowObject.buyerId}"><button title="Remove selected Buyer from UNITE" id="process_${rowObject.index}" class="btn btn-danger">Process</button></a>`;
+  return `<a href="../../../supervisor/deleteBuyer/${rowObject.buyerId}"><button title="Remove selected Buyer from UNITE" id="process_${rowObject.index}" class="btn btn-danger">Process</button></a>`;
 }
 
 
@@ -1434,9 +1434,9 @@ function userInputs(id, role, avatar, name, type, ul) {
   }
 }
 
-function getCancelReasonTitles(obj, token, url, objectType, isAdmin, isSupervisor) {
+function getCancelReasonTitles(obj, data) {
   //For deleting user accounts and cancelling bids. Types (titles) of reasons, expressed as radio buttons, should be chosen.
-  $.ajax({
+  /*$.ajax({
     url: url,
     type: "POST",
     headers: { "X-CSRF-Token": token },
@@ -1447,7 +1447,7 @@ function getCancelReasonTitles(obj, token, url, objectType, isAdmin, isSuperviso
       isSupervisor: isSupervisor
     },
     error: function() {},
-    success: function(data) {
+    success: function(data) {*/
       //data = titles.
       if (
         !data ||
@@ -1479,8 +1479,8 @@ function getCancelReasonTitles(obj, token, url, objectType, isAdmin, isSuperviso
           .not(this)
           .prop("checked", false);
       });
-    }
-  });
+    //}
+  //});
 }
 
 function getFeedbackSubjects(data, obj, token) {
@@ -2054,12 +2054,18 @@ $(document).ready(function() {
       }
     );
   }
-
+/*
+  <a href="?language=en">English</a>&nbsp;
+    <a href="?language=de">Deutsch</a>&nbsp;
+    <a href="?language=it">Italiano</a>&nbsp;
+    <a href="?language=ro">Română</a>*/
+  
   let nav = $("body").find("nav");
   if (nav.length && nav.next("div").hasClass("home")) {
     let $str =
       ' <div class="collapse navbar-collapse" id="navbarSupportedContent">' +
-      '<ul class="navbar-nav mr-auto">' +
+      '<ul class="navbar-nav mr-auto">' +        
+        '<li class="nav-item language" style="cursor: pointer"><a class="nav-link" title="Languages">Languages</a></li>' +
       '<li class="nav-item">' +
       '<a class="nav-link" title="Home" href="/">Home</a>' +
       "</li>" +
@@ -2079,6 +2085,16 @@ $(document).ready(function() {
 
     nav.append($str);
     let ul = $("#navbarSupportedContent").find("ul");
+    
+    $('li.language').click(function(e) {
+      if($(this).hasClass('showLanguages')) {
+        $(this).removeClass('showLanguages').text('Languages');
+      } else {
+        $(this)
+          .append(`<br><ul class='languages-bar'><li><a href="?language=en">English</a></li><li><a href="?language=de">Deutsch</a></li><li><a href="?language=it">Italiano</a></li><li><a href="?language=ro">Română</a></li></ul>`)
+        .addClass('showLanguages');
+      }
+    });
 
     $(
       '<li class="nav-item"><a class="nav-link" href="/feedback" title="Feedback/Suggestions">User Feedback</a></li>'

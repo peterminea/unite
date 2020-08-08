@@ -11,47 +11,28 @@ const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require("../middleware/treatError");
 const search = require("../middleware/searchFlash");
 const internalIp = require('internal-ip');
+const { getObjectMongoose } = require('../middleware/templates');
+const BannedUser = require('../models/bannedUser');
 
 
-const verifyBanNewUser = (req, res, email, ip) => {
-  MongoClient.connect(URL, { useUnifiedTopology: true }, async function(err, db) {
-    if(treatError(req, res, err, "back")) 
-      return false;    
-
-    let dbo = db.db(BASE);
-    
-    let filter = { $or: [ { email: email }, { ip: ip } ] };
-    
-    dbo.collection('bannedusers').findOne(filter, (err, obj) => {
-      if(treatError(req, res, err, "back")) 
-        return false; 
-      
-      if(obj && obj.banExpiryDate > Date.now()) {
-        db.close();
-        res.status(400).send({
-          msg: 'Banned user!'
-        });
-      }
-    });    
-    
-    db.close;
-  });
+const verifyBanNewUser = async (req, res, email, ip) => {  
+  let obj = await getObjectMongoose('BannedUser', { $or: [ { email: email }, { ip: ip } ] });
+  
+  if(obj && obj.banExpiryDate > Date.now()) {
+    res.status(400).send({
+      msg: 'Banned user!'
+    });
+  }
 };
 
-const verifyBanExistingUser = (dbo, req, res, doc, ip) => {
-  let filter = { $or: [ { email: doc.emailAddress }, { ip: ip }, { userId: doc._id } ] };
+const verifyBanExistingUser = async (dbo, req, res, doc, ip) => {
+  let obj = await getObjectMongoose('BannedUser', { $or: [ { email: doc.emailAddress }, { ip: ip }, { userId: doc._id } ] });
   
-  dbo.collection('bannedusers').findOne(filter, (err, obj) => {
-    if(treatError(req, res, err, "back")) 
-      return false; 
-
-    if(obj && obj.banExpiryDate > Date.now()) {
-      dbo.close();
-      res.status(400).send({
-        msg: 'Banned user!'
-      });
-    }
-  });  
+  if(obj && obj.banExpiryDate > Date.now()) {
+    res.status(400).send({
+      msg: 'Banned user!'
+    });
+  }
 };
 
 

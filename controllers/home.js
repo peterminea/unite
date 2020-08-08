@@ -17,7 +17,7 @@ const BadWords = require('bad-words');
 const search = require('../middleware/searchFlash');
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const fs = require("fs");
-const { fileExists, getObjectMongoose, getDataMongoose, getCancelTypesJson } = require('../middleware/templates');
+const { fileExists, getObjectMongoose, getDataMongoose, getCancelReasonTitles } = require('../middleware/templates');
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
@@ -63,13 +63,15 @@ exports.getIndex = (req, res) => {
 };
 
 
-exports.getDeleteUser = (req, res) => {
+exports.getDeleteUser = async (req, res) => {
   let obj = userData(req);
   let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
+  let titles = await getCancelReasonTitles(process.env.USER_CANCEL_TYPE, true, false);
   
   res.render("deleteUser", {
     role: obj.role,
+    titles: titles,
     //isAdmin: obj.role == process.env.USER_ADMIN,
     //userId: obj.userId,
     //avatar: obj.avatar,
@@ -78,7 +80,6 @@ exports.getDeleteUser = (req, res) => {
     name: req.params.name,
     uniteID: req.params.uniteID,
     emailAddress: req.params.email,
-    cancelReasonTypesJson: JSON.stringify(getCancelTypesJson()),
     successMessage: success,
     errorMessage: error
     //userName: obj.userName,
@@ -87,20 +88,26 @@ exports.getDeleteUser = (req, res) => {
 };
 
 
-exports.getBanUser = (req, res) => {
+exports.getBanUser = async (req, res) => {
   let obj = userData(req);
   let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  let titles = await getCancelReasonTitles(process.env.USER_BAN_TYPE, true, false);
+  let users = await getDataMongoose('BannedUser');  
+  if(users) 
+    users.sort((a, b) => (a.name > b.name ? 1 : b.name > a.name ? -1 : 0));
+  
   req.session.flash = [];
   
-  res.render("deleteUser", {
+  res.render("banUser", {
     role: obj.role,
+    titles: titles,
+    bannedUsers: users,
     deleteId: req.params.id,
     deleteType: req.params.type,
     name: req.params.name,
     uniteID: req.params.uniteID,
     emailAddress: req.params.email,
     ipv4Address: req.params.ipv4Address,
-    cancelReasonTypesJson: JSON.stringify(getCancelTypesJson()),
     successMessage: success,
     errorMessage: error
   });

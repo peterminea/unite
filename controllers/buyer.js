@@ -48,13 +48,13 @@ const {
   getDataMongoose,
   getBidStatusesJson,
   renderBidStatuses,
-  getCancelTypesJson,
   postSignInBody,
   saveBidBody,
   getCatalogItems,
   getPlaceBidBody,
   updateBidBody,
-  encryptionNotice
+  encryptionNotice,
+  getCancelReasonTitles
 } = require("../middleware/templates");
 
 const {
@@ -170,7 +170,7 @@ exports.postIndex = async (req, res) => {
       }              
 
     let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
-    req.session.flash = [];    
+    req.session.flash = [];
 
     res.render("buyer/index", {
       buyer: req.session.buyer,
@@ -418,14 +418,16 @@ exports.postViewBid = (req, res) => {
 }
 
 
-exports.getCancelBid = (req, res) => {
+exports.getCancelBid = async (req, res) => {
   let success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
   req.session.flash = [];
+  let titles = await getCancelReasonTitles(process.env.BID_CANCEL_TYPE, false, false);
 
   res.render("buyer/cancelBid", {
     successMessage: success,
     errorMessage: error,
+    titles: titles,
     bidId: req.params.bidId,
     bidName: req.params.bidName,
     userType: req.params.userType,
@@ -522,14 +524,15 @@ exports.getConfirmation = (req, res) => {
 };
 
 
-exports.getDelete = (req, res) => {
+exports.getDelete = async (req, res) => {
   let success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
   req.session.flash = [];
+  let titles = await getCancelReasonTitles(process.env.USER_CANCEL_TYPE, false, false);
 
   res.render("buyer/delete", {
     id: req.params.id,
-    cancelReasonTypesJson: JSON.stringify(getCancelTypesJson()),
+    titles: titles,
     successMessage: success,
     errorMessage: error
   });
@@ -561,9 +564,8 @@ exports.getResendToken = (req, res) => {
 };
 
 
-exports.postDelete = async function(req, res, next) {
-  let id = req.body.id;
-  buyerDelete(req, res, id);
+exports.postDelete = async function(req, res, next) {  
+  buyerDelete(req, res, req.body.id, false, false);
 };
 
 

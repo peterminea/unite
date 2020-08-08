@@ -31,7 +31,7 @@
 
 <body>
   <nav pos="1" user="supervisor" class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="/supervisor">Supervisor - UNITE</a>
+    <a class="navbar-brand" href="/supervisor">Government Supervisor Dashboard - UNITE</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -58,71 +58,6 @@
       </div>
     </div>
   </div>
-<% if(buyers != null && buyers.length > 0) { %>
-  <div class="container mt-4">
-    <table class="table table-striped table-hover">
-      <thead>
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">Dept Agency Group</th>
-          <th scope="col">Contact Name</th>
-          <th scope="col">Balance</th>
-          <th scope="col">isActive</th>
-          <th scope="col">Total Bid Count</th>
-          <th scope="col">Total Bid Price</th>
-          <th scope="col">Valid Bids</th>
-          <th scope="col">Valid Bids Price</th>
-          <th scope="col">Cancelled Bids</th>
-          <th scope="col">Cancelled Bids Price</th>
-          <th scope="col">Expired Bids</th>
-          <th scope="col">Expired Bids Price</th>
-          <th scope="col">Process</th>
-          <th scope="col">Talk</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% let i = 0; for (buyer of buyers) { %>
-        <tr id="<%= buyer._id %>">
-          <td scope="col"><%= i+1 %></td>
-          <td scope="col"><%= buyer.deptAgencyGroup %></td>
-          <td scope="col"><%= buyer.contactName %></td>
-          <td scope="col">€ <%= buyer.balance %></td>
-          <td scope="col"><%= buyer.isActive %></td>
-          <% if(buyer.bidData != null) { %>
-          <td scope="col"><%= buyer.bidData.totalBids %></td>
-          <td scope="col"><%= buyer.bidData.totalPrice %> <%= buyer.currency %></td>
-          <td scope="col"><%= buyer.bidData.validBids %></td>
-          <td scope="col"><%= buyer.bidData.validBidsPrice %> <%= buyer.currency %></td>
-          <td scope="col"><%= buyer.bidData.cancelledBids %></td>
-          <td scope="col"><%= buyer.bidData.cancelledBidsPrice %> <%= buyer.currency %></td>
-          <td scope="col"><%= buyer.bidData.expiredBids %></td>
-          <td scope="col"><%= buyer.bidData.expiredBidsPrice %> <%= buyer.currency %></td>
-          <% } else { %>
-          <td scope="col"></td>
-          <td scope="col"></td>
-          <td scope="col"></td>
-          <td scope="col"></td>
-          <td scope="col"></td>
-          <td scope="col"></td>
-          <td scope="col"></td>
-          <td scope="col"></td>
-          <% } %>
-          <td scope="col">
-            <a href="delete/<%= buyer._id %>">
-              <button title="Remove selected Buyer from UNITE" id="process_<%= i %>" class="btn btn-primary">Process
-              </button>
-            </a>
-          </td>
-          <td scope="col">
-            <a href="../../../supervisor/chatLogin/<%= supervisor._id %>/<%= buyer._id %>/0/None/<%= buyer.organizationName %>/(Supervisor)-<%= supervisor.organizationName %>">
-              <button title="Chat with your buyer in UNITE" id="chat_<%= i %>" class="btn btn-primary">Chat</button>
-            </a>
-          </td>
-          <input type="hidden" name="_csrf" value="<%= csrfToken %>" >
-        </tr>
-        <% i++; } %>
-        </tbody>
-      </table>    
     </div>
     <div id="jqDiv" class="form-group">
       <table id="supervBuyers">
@@ -142,11 +77,11 @@
       { name: 'validBids', label: 'Valid Bids Count', align: 'center', template: 'number', sorttype: 'number', search: true, width: 100},
       { name: 'validBidsPrice', label: 'Valid Bids Price', align: 'center', formatter: validBidsPriceFormatter, unformat: priceUnformatter, sorttype: 'number', template: 'number', search: true, width: 100 },
       { name: 'cancelledBids', label: 'Cancelled Bids Count', align: 'center', search: true, width: 210},
-      { name: 'cancelledBidsPrice', label: 'Cancelled Bids Price', align: 'center', formatter: cancelledBidsPriceFormatter, unformat: priceUnformatter, sorttype: 'number', template: 'number', search: true, width: 220},      
+      { name: 'cancelledBidsPrice', label: 'Cancelled Bids Price', align: 'center', formatter: cancelledBidsPriceFormatter, unformat: priceUnformatter, sorttype: 'number', template: 'number', search: true, width: 220},
       { name: 'expiredBids', label: 'Expired Bids Count', align: 'center', template: 'number', sorttype: 'number', search: true, width: 100},
       { name: 'expiredBidsPrice', label: 'Expired Bids Price', align: 'center', formatter: expiredBidsPriceFormatter, unformat: priceUnformatter, sorttype: 'number', template: 'number', search: true, width: 100 },
       { name: 'removeBuyer', label: 'Process Removal', align: 'center', formatter: buyerRemovalFormatter, sortable: false, search: false, width: 100 },
-      { name: 'chat', label: 'Chat with Buyer', align: 'center', formatter: chatFormatter, unformat: priceUnformatter, sortable: false, search: false, width: 100 },
+      { name: 'chat', label: 'Chat with Buyer', align: 'center', formatter: chatFormatter, /*unformat: chatUnformatter,*/ sortable: false, search: false, width: 100 },
       { name: "hiddenCurrency", hidden: true },
       { name: "hiddenTotalBids", hidden: true },
       { name: "hiddenTotalBidPrice", hidden: true },
@@ -163,7 +98,7 @@
       { name: 'index', hidden: true }
     ];
       
-  <% i = 0; for (buyer of buyers) { %>
+  <% i = 0; if(buyers != null) { for (buyer of buyers) { %>
   data.push({
     index: "<%= i %> ",
     supervisorId: "<%= supervisor._id %> ",
@@ -195,10 +130,9 @@
     hiddenExpiredBidsPrice: 0
     <% } %>
   }); 
-  <% } %>
+  <% } } %>
 
-  initGrid(colModelGridBids, data, "#supervBuyers", '#sbPager', "bidName", 'Supervisor\'s Buyers List', 1900);
-  
+  initGrid(colModelGridBids, data, "#supervBuyers", '#sbPager', "bidName", 'Supervisor\'s Buyers List', 1900);  
     </script>
         <% } else {%>
         <div>

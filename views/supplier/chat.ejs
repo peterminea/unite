@@ -115,30 +115,30 @@
            $('#messages1').append('<h4>' + message.sender + '</h4><p>' + message.message + '</p>');
         }
                                   
-        function getMessages() {
-          $.ajax({
-            url: "/messages",//Two-sided: we have to check if sender is from and receiver to, but also inversely.
-            data: {
-              from: sender.value,
-              to: receiver.value
-            },
-            headers: { "X-CSRF-Token": token },
-            datatype: 'application/json',
-            type: "GET",
-            error: function() {
-              console.log('error');
-            },
-            success: function(data) {
-              for(let item of data) {
-                putMessages(messages, item);
-              }
-              $(messages).append('<br>');
-              autoscroll(messages);
-            }
-          });
+        function getMessages(data) {
+          for(let item of data) {
+            putMessages(messages, item);
+          }
         }
       
-        getMessages();
+        let data = [];
+
+        <% if(messages != null) { for(let m of messages) { %>
+        data.push({
+          id: '<%= m._id %>',
+          to: '<%= m.to %>',
+          from: '<%= m.from %>',
+          sender: '<%= m.sender %>',
+          receiver: '<%= m.receiver %>',
+          bidRequestId: '<%= m.bidRequestId %>',
+          message: '<%= m.message %>',
+          time: '<%= m.time %>',
+          createdAt: '<%= m.createdAt %>',
+          updatedAt: '<%= m.updatedAt %>'
+        });
+        % } } %>
+                      
+        getMessages(data);      
       
         sock.on('countUpdated', (count) => {
           $('#messages1 p').text('The connections count has been updated! It is ' + count + '.');

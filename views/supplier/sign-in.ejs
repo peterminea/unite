@@ -37,7 +37,7 @@
 
 <body>
   <nav user="supplier" class="navbar navbar-expand-lg navbar-dark bg-dark noMenu" style="width: 100% !important;">
-    <a class="navbar-brand" href="/">UNITE</a>
+    <a class="navbar-brand" href="/">Sign in as Supplier - UNITE</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -50,24 +50,12 @@
       <img src="https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2Funite.png?v=1587840844949" height="150">
       </a>
     </div>
-
-    <% if (1 == 2 && errorMessage.length > 0) { %>
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-      <strong>Error!</strong> Something has gone wrong. Check the fields below.
-      <p style="color: red">
-        <%= errorMessage %>
-      </p>
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-    <% } %>
     
     <div class="sign-in-form smooth-shadow">
       <form id="login" method="POST">
         <h2 class="text-center">Sign in as Supplier</h2>
         <div class="form-group">
-          <label for="emailAddress">Email address</label>
+          <label for="emailAddress">E-mail address</label>
           <input type="email" class="form-control" id="emailAddress" placeholder="demo@email.com" name="emailAddress" required>
         </div>
         <div class="form-group">

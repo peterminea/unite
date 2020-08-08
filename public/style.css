@@ -42,6 +42,10 @@ p.additional-suppliers {
     color: teal;  
 }
 
+input:required {
+  border: 1px solid red
+}
+
 .update-profile {
   text-align: center;
   font-weight: bold;

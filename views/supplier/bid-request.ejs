@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Supplier's selected order - UNITE</title>
+  <title>Selected Bid Request Details - UNITE</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="A cool thing made with Glitch">
@@ -39,7 +39,7 @@
 
 <body>
 	<nav user="supplier" class="navbar navbar-expand-lg navbar-dark bg-dark">
-		<a class="navbar-brand" href="/supplier">Bid request details - UNITE</a>
+		<a class="navbar-brand" href="/supplier">Selected Bid Request Details - UNITE</a>
 		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
 			aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 			<span class="navbar-toggler-icon"></span>
@@ -119,9 +119,22 @@
         </div>
         <% } %>
 				<div class="form-group">
-					<label>Item Description</label>
+					<label>Item Description (Short)</label>
 					<input type="text" class="form-control" value="<%= bid.itemDescription %>" readonly>
 				</div>
+        <div class="form-group">
+					<label>Item Description (Long)</label>
+          <textarea readonly class="form-control"><%= bid.itemDescriptionLong %></textarea>
+				</div>
+        <div class="form-group">
+          <label class="col-form-label">Item Description URL</label>
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="basic-addon3">http(s)://</span>
+            </div>
+            <input readonly type="text" class="form-control" aria-describedby="basic-addon3" value="<%= bid.itemDescriptionUrl %>" name="itemDescriptionUrl">
+          </div>
+        </div>
         <div class="form-group">
           <label class="col-form-label">Request Name*</label>
           <input readonly type="text" class="form-control" name="requestName" value="<%= bid.requestName %>">
@@ -131,7 +144,7 @@
           <input readonly type="text" class="form-control" name="supplierName" value="<%= bid.supplierName %>">
         </div>
         <div class="form-group">
-          <label class="col-form-label">Buyer Organization*</label>
+          <label class="col-form-label">Buyer's Organization Name*</label>
           <input readonly type="text" class="form-control" name="buyerName" value="<%= bid.buyerName %>">
         </div>
         <div class="form-group">
@@ -142,14 +155,6 @@
           <label class="col-form-label">Supplier's E-mail Address*</label>
           <input readonly type="text" class="form-control" name="supplierEmail" value="<%= bid.supplierEmail %>">
         </div>
-				<div class="form-group">
-					<label>Item Description (Long)</label>
-          <textarea readonly class="form-control"><%= bid.itemDescriptionLong %></textarea>
-				</div>
-        <div class="form-group">
-					<label>Item Description (URL)</label>
-					<input type="url" readonly class="form-control" value=<%= bid.itemDescriptionUrl %>>
-				</div>				
 				<div class="form-group">
 					<label>Delivery Location</label>
 					<textarea class="form-control" readonly><%= bid.deliveryLocation %></textarea>
@@ -363,7 +368,7 @@
         <div class="totals">
           <div class="form-group">
             <span><a href="../../../supplier/chatLogin/<%= supplier._id %>/<%= buyer._id %>/<%= bid._id %>/<%= bid.requestName %>/<%= bid.buyerName %>/<%= bid.supplierName %>">
-              <button title="Chat" id="chat" class="btn-success bid-button btn">Chat with your buyer</button>
+              <button title="Chat" id="chat" class="btn-success bid-button btn">Chat with your Buyer</button>
             </a>
             </span>
           </div>

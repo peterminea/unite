@@ -32,7 +32,7 @@
           let bidId = $(this).attr('id');
           let div1 = $(this).parent('div'), div2 = div1.prev('div');
           
-          if(confirm('Are you sure you want to remove this bid from your Supplier Dashboard forever?')) {
+          if(confirm('Are you sure you want to remove this Bid from your Supplier Dashboard forever?')) {
             $.ajax({
               url: '/deleteBid',
               type: 'POST',
@@ -65,7 +65,7 @@
 
 <body>
 	<nav pos="3" user="supplier" class="navbar navbar-expand-lg navbar-dark bg-dark">
-		<a class="navbar-brand" href="/supplier">Supplier - UNITE</a>
+		<a class="navbar-brand" href="/supplier">Bid Requests List - Supplier - UNITE</a>
 		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
 			aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 			<span class="navbar-toggler-icon"></span>

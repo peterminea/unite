@@ -21,7 +21,15 @@
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-      getCancelReasonTitles($('#mainForm'), $('input[name="_csrf"]').val(), '/cancelReasonTitles', 'User', false, true);
+      let data = [];
+      <% if(titles != null) { for(let s of titles) { %>
+      data.push({
+        id: '<%= s._id %>',
+        name: '<%= s.name %>'
+      });
+      <% } } %>
+      
+      getCancelReasonTitles($('#mainForm'), data);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       
       $('#mainForm').submit(function(e) {
@@ -66,7 +74,7 @@
           <input type="hidden" name="userType" value="Buyer">
           <div class="form-group">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button type="submit" id="delete" title="Delete Account" class="btn btn-primary btn-block btn-lg">Delete Account</button>
+            <button type="submit" id="delete" title="Delete Buyer's Account" class="btn btn-primary btn-block btn-lg">Delete Buyer's Account</button>
           </div>
         </form>
       </div>

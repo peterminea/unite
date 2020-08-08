@@ -40,12 +40,13 @@ const {
   getDataMongoose,
   getBidStatusesJson,
   renderBidStatuses,
-  getCancelTypesJson,
   postSignInBody,
   saveBidBody,
   updateBidBody,
-  encryptionNotice
+  encryptionNotice,
+  getCancelReasonTitles
 } = require("../middleware/templates");
+
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
@@ -125,9 +126,10 @@ exports.postAddProduct = (req, res) => {
 }
 
 
-exports.getCancelBid = (req, res) => {
+exports.getCancelBid = async (req, res) => {
   let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
+  let titles = await getCancelReasonTitles(process.env.BID_CANCEL_TYPE, false, false);
   
   res.render('supplier/cancelBid', {
     bidId: req.params.bidId,
@@ -137,6 +139,7 @@ exports.getCancelBid = (req, res) => {
     supplierName: req.params.supplierName,
     buyerEmail: req.params.buyerEmail,
     supplierEmail: req.params.supplierEmail,
+    titles: titles,
     successMessage: success,
     errorMessage: error
   });  
@@ -206,13 +209,14 @@ exports.getConfirmation = (req, res) => {
 }
 
 
-exports.getDelete = (req, res) => {
+exports.getDelete = async (req, res) => {
   let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
+  let titles = await getCancelReasonTitles(process.env.USER_CANCEL_TYPE, false, false);
   
   res.render('supplier/delete', {
     id: req.params.id,
-    cancelReasonTypesJson: JSON.stringify(getCancelTypesJson()),
+    titles: titles,
     successMessage: success,
     errorMessage: error
   });
@@ -679,13 +683,23 @@ exports.getChatLogin = (req, res) => {//We need a username, a room name, and a s
 }
 
 
-exports.getChat = (req, res) => {//Coming from the getLogin above.
+exports.getChat = async (req, res) => {//Coming from the getLogin above.
   let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
+  let messages = await getDataMongoose('Message', {
+      $or: [
+        { from: req.params.from, to: req.params.to },
+        { from: req.params.to, to: req.params.from }
+      ]
+    });
+
+  //messages.sort(compareTimes);
+  messages.sort((a, b) => (a.time > b.time ? 1 : b.time > a.time ? -1 : 0));
   
   res.render("supplier/chat", {
     successMessage: success,
     errorMessage: error,
+    messages: messages,
     from: req.params.from,
     to: req.params.to,
     username: req.params.username,
