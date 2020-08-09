@@ -14,6 +14,8 @@ const { verifyBanNewUser, verifyBanExistingUser } = require('../middleware/verif
 const search = require('../middleware/searchFlash');
 const jsonp = require("jsonp");
 const _ = require("underscore");
+const { getObjectMongo, getDataMongo, getObjectMongoose, getDataMongoose } = require("../middleware/getData");
+
 
 const sendConfirmationEmail = (name, link, token, req) => {
     sgMail.send({
@@ -288,7 +290,7 @@ const postSignInBody = async (link, req, res) => {
           }
            
             const ipv4 = await internalIp.v4();
-            verifyBanExistingUser(dbo, req, res, doc, ipv4);
+            verifyBanExistingUser(req, res, doc, ipv4);
            
             switch(link) {
               case 'buyer':
@@ -431,74 +433,6 @@ const updateBidBody = (req, res, reqId, returnLink) => {
         });
     });
   });
-}
-
-
-const getObjectMongo = async (db, table, obj, field) => {
-  let myPromise = () => {
-    return new Promise((resolve, reject) => {
-      db
-      .collection(table)
-      .findOne((typeof obj !== 'undefined' && obj instanceof Object)? obj : {}, typeof field !== 'undefined' && field instanceof Object? field : {}, function(err, data) {
-         err 
-            ? reject(err) 
-            : resolve(data);
-       });
-     });
-  };
-
-  let result = await myPromise();
-  return result;
-};
-
-
-const getObjectMongoose = async (model, obj, field) => {
-  let myPromise = () => {
-    return new Promise((resolve, reject) => {
-      eval(`let ${model} = require('../models/${lowerCase(model)}'); ${model}.findOne((typeof obj !== 'undefined' && obj instanceof Object)? obj : {}, typeof field !== 'undefined' && field instanceof Object? field : {}, (err, data) => { err? reject(err) : resolve(data); });`);
-    });
-  };
-
-  let result = await myPromise();
-  return result;
-};
-
-
-const getDataMongo = async(db, table, obj, field) => {//DB connection active.
-  let myPromise = () => {
-    return new Promise((resolve, reject) => {
-      db
-      .collection(table)
-      .find(typeof obj !== 'undefined' && obj instanceof Object? obj : {},
-           typeof field !== 'undefined' && field instanceof Object? field : {})
-      .toArray(function(err, data) {
-         err 
-            ? reject(err) 
-            : resolve(data);
-       });
-     });
-  };
-
-  let result = await myPromise();
-  return result;
-}
-
-
-//function lowerCase
-function lowerCase(s) {
-  return s.replace(/^.{1}/g, s[0].toLowerCase());
-}
-
-
-const getDataMongoose = async (model, obj, field) => {//A Mongoose model name.
-  let myPromise = () => {
-    return new Promise((resolve, reject) => {
-      eval(`let ${model} = require('../models/${lowerCase(model)}'); ${model}.find(typeof obj !== 'undefined' && obj instanceof Object? obj : {}, typeof field !== 'undefined' && field instanceof Object? field : {}).then((data, err) => { err || !data? reject(err) : resolve(data); });`);      
-    });
-  };
-
-  let result = await myPromise();
-  return result;
 }
 
 
@@ -718,6 +652,7 @@ const getPlaceBidBody = async (req, res) => {
   let buyerId = (req.params.buyerId? req.params.buyerId : req.body.buyerId), productId = (req.params.productId), supplierId = (req.params.supplierId);
   let productIds = req.body.bidProductList? req.body.bidProductList : [], supplierIds = req.body.bidSupplierList? req.body.bidSupplierList : [];
   //let otherSuppliers = req.body.allowMultiple? await getDataMongoose('Supplier') : null;  
+  let statuses = await getDataMongoose('BidStatus');
   
   if(!productIds.length && productId) {
     productIds.push(productId);
@@ -741,12 +676,12 @@ const getPlaceBidBody = async (req, res) => {
 
   let uniqueSupplierIds = suppIds.filter((v, i, a) => a.indexOf(v) === i);
   let buyer = await getObjectMongoose('Buyer', { _id: buyerId });
-  let products = prodIds.length? await getDataMongoose('ProductService', { _id: { $in: prodIds } }) : [];//Empty if bidding outside the Catalog.
+  let products = (prodIds.length)? await getDataMongoose('ProductService', { _id: { $in: prodIds } }) : [];//Empty if bidding outside the Catalog.
   let suppliers = await getDataMongoose('Supplier', { _id: { $in: uniqueSupplierIds } });  
   
-  if(!buyer || !products.length || !suppliers.length || !statuses.length) {
+  if(!buyer || (!products.length && productIds.length) || !suppliers.length || !statuses.length) {
     req.flash('error', 'Data not found in the database!');
-    res.redirect('back');
+    return res.redirect('back');
   }
 
   let suggestions = [], suggestionsList = [];
@@ -785,7 +720,7 @@ const getPlaceBidBody = async (req, res) => {
     }
   }
 
-  let statuses = await getDataMongoose('BidStatus');
+  
   let catalogItems = (prodIds.length)? [] : await getCatalogItems();
   let currencies = await getCurrenciesList();
   let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
@@ -798,6 +733,7 @@ const getPlaceBidBody = async (req, res) => {
   console.log(isMultiProd + ' ' + !isMultiProd + ' ' + !products.length);
   console.log(suppliers.length + ' ' + req.body.bidSupplierList + ' ' + isMultiSupp);  
   //throw new Error();
+  
   setTimeout(function() {
     res.render("buyer/placeBid", {
         successMessage: success,
@@ -816,7 +752,7 @@ const getPlaceBidBody = async (req, res) => {
         FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
         statuses: statuses,
         statusesJson: statusesJson,
-        suggestions: suggestions,
+        //suggestions: suggestions,
         buyer: buyer,
         path: req.params.productId? '../../../' : '../',
         product: products.length? products[0] : null,
@@ -825,7 +761,7 @@ const getPlaceBidBody = async (req, res) => {
         products: products,
         suppliers: suppliers
       });
-    }, 3000);
+    }, 100);
 }
 
 

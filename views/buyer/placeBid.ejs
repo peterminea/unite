@@ -337,7 +337,7 @@
               </div>
             </div>
             
-            <% if(suggestions != null && suggestions.length > 0) { %>
+            <% if(typeof suggestions !== 'undefined' && suggestions != null && suggestions.length > 0) { %>
             <div class='suggestions form-group'>
               <label class='suggestions-label'>People who bought this product also liked...</label>
               <% for(let sugg of suggestions) { %>
@@ -354,11 +354,11 @@
             
             <div class="form-group">
               <select class='statuses' style="width: 100%" id="statuses">
-                <% if (statuses != null) { for (status of statuses) { %>
+                <% if (typeof statuses !== 'undefined' && statuses != null) { for (status of statuses) { %>
                 <option disabled title="<%= status.name %>" value="<%= status.value %>"><%= status.name %></option>
                 <% } } %>
               </select>
-              <% if (statusesJson != null) { %>
+              <% if (typeof statusesJson !== 'undefined' && statusesJson != null) { %>
               <div style="visibility: hidden" id="statusJsonValues">                
                 <span class='statuses'><%= statusesJson %></span>                
               </div>

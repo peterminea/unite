@@ -129,7 +129,7 @@
       <h5 class="card-header">Welcome!</h5>
       <div class="card-body">
         <h5 class="card-title">Hello, <%= profile.companyName %>!</h5>
-        <p class="card-text">This is your profile page. In order to ensure that you continue to appear in the search results of buyers, please keep your capabilities and productsup-to-date.</p>
+        <p class="card-text">This is your profile page. In order to ensure that you continue to appear in the search results of buyers, please keep your capabilities and products up-to-date.</p>
       </div>
     </div>
     
@@ -258,7 +258,7 @@
           <input type="hidden" name="saveCapability">
           <select class='autocomp'>
             <% for(cap of capabilities) { %>
-            <option id="<%= cap.id %>" value="<%= cap.name %>"><%= cap.name %></option>
+            <option id="<%= cap.id %>" value="<%= cap.capabilityDescription %>"><%= cap.capabilityDescription %></option>
             <% } %>
           </select>
         </div>

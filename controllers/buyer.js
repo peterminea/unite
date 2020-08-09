@@ -41,11 +41,7 @@ const {
   sendResetPasswordEmail,
   sendCancelBidEmail,
   prel,
-  sortLists,
-  getObjectMongo,
-  getObjectMongoose,
-  getDataMongo,
-  getDataMongoose,
+  sortLists,  
   getBidStatusesJson,
   renderBidStatuses,
   postSignInBody,
@@ -57,6 +53,8 @@ const {
   encryptionNotice,
   getCancelReasonTitles
 } = require("../middleware/templates");
+
+const { getObjectMongo, getDataMongo, getObjectMongoose, getDataMongoose } = require("../middleware/getData");
 
 const {
   removeAssociatedBuyerBids,
@@ -188,7 +186,7 @@ exports.postIndex = async (req, res) => {
       errorMessage: error,
       statusesJson: JSON.stringify(getBidStatusesJson())
     });
-  } else if(req.body.outsideCatalog) {//Open Bid - no products from the Catalog.    
+  } else if(req.body.outsideCatalog) {//Open Bid - no products from the Catalog.  
     getPlaceBidBody(req, res);
   } else {
     res.redirect("/buyer");
