@@ -424,8 +424,10 @@ exports.getSignUp = async (req, res) => {
     });
 
     capabilities.sort(function (a, b) {
-      return a.name.localeCompare(b.name);
+      return a.capabilityDescription.localeCompare(b.capabilityDescription);
     });
+    
+    console.log(capabilities);
 
     return res.render("supplier/sign-up", {
       MAX_PROD: process.env.SUPP_MAX_PROD,
@@ -872,8 +874,10 @@ exports.getProfile = async (req, res) => {
   });
 
   capabilities.sort(function (a, b) {
-    return a.name.localeCompare(b.name);
+    return a.capabilityDescription.localeCompare(b.capabilityDescription);
   });
+  
+  console.log(capabilities.length);
 
   res.render("supplier/profile", {
     products: products,

@@ -718,6 +718,7 @@ const getPlaceBidBody = async (req, res) => {
   let buyerId = (req.params.buyerId? req.params.buyerId : req.body.buyerId), productId = (req.params.productId), supplierId = (req.params.supplierId);
   let productIds = req.body.bidProductList? req.body.bidProductList : [], supplierIds = req.body.bidSupplierList? req.body.bidSupplierList : [];
   //let otherSuppliers = req.body.allowMultiple? await getDataMongoose('Supplier') : null;  
+  let statuses = await getDataMongoose('BidStatus');
   
   if(!productIds.length && productId) {
     productIds.push(productId);
@@ -741,12 +742,12 @@ const getPlaceBidBody = async (req, res) => {
 
   let uniqueSupplierIds = suppIds.filter((v, i, a) => a.indexOf(v) === i);
   let buyer = await getObjectMongoose('Buyer', { _id: buyerId });
-  let products = prodIds.length? await getDataMongoose('ProductService', { _id: { $in: prodIds } }) : [];//Empty if bidding outside the Catalog.
+  let products = (prodIds.length)? await getDataMongoose('ProductService', { _id: { $in: prodIds } }) : [];//Empty if bidding outside the Catalog.
   let suppliers = await getDataMongoose('Supplier', { _id: { $in: uniqueSupplierIds } });  
   
-  if(!buyer || !products.length || !suppliers.length || !statuses.length) {
+  if(!buyer || (!products.length && productIds.length) || !suppliers.length || !statuses.length) {
     req.flash('error', 'Data not found in the database!');
-    res.redirect('back');
+    return res.redirect('back');
   }
 
   let suggestions = [], suggestionsList = [];
@@ -785,7 +786,7 @@ const getPlaceBidBody = async (req, res) => {
     }
   }
 
-  let statuses = await getDataMongoose('BidStatus');
+  
   let catalogItems = (prodIds.length)? [] : await getCatalogItems();
   let currencies = await getCurrenciesList();
   let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
@@ -798,6 +799,7 @@ const getPlaceBidBody = async (req, res) => {
   console.log(isMultiProd + ' ' + !isMultiProd + ' ' + !products.length);
   console.log(suppliers.length + ' ' + req.body.bidSupplierList + ' ' + isMultiSupp);  
   //throw new Error();
+  
   setTimeout(function() {
     res.render("buyer/placeBid", {
         successMessage: success,
@@ -816,7 +818,7 @@ const getPlaceBidBody = async (req, res) => {
         FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
         statuses: statuses,
         statusesJson: statusesJson,
-        suggestions: suggestions,
+        //suggestions: suggestions,
         buyer: buyer,
         path: req.params.productId? '../../../' : '../',
         product: products.length? products[0] : null,
@@ -825,7 +827,7 @@ const getPlaceBidBody = async (req, res) => {
         products: products,
         suppliers: suppliers
       });
-    }, 3000);
+    }, 100);
 }
 
 

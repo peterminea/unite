@@ -205,7 +205,7 @@
           <input type="hidden" name="saveCapability">
           <select class='autocomp'>
             <% for(cap of capabilities) { %>
-            <option id="<%= cap.id %>" value="<%= cap.name %>"><%= cap.name %></option>
+            <option id="<%= cap.id %>" value="<%= cap.capabilityDescription %>"><%= cap.capabilityDescription %></option>
             <% } %>
           </select>
         </div>

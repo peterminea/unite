@@ -188,7 +188,7 @@ exports.postIndex = async (req, res) => {
       errorMessage: error,
       statusesJson: JSON.stringify(getBidStatusesJson())
     });
-  } else if(req.body.outsideCatalog) {//Open Bid - no products from the Catalog.    
+  } else if(req.body.outsideCatalog) {//Open Bid - no products from the Catalog.  
     getPlaceBidBody(req, res);
   } else {
     res.redirect("/buyer");
