@@ -21,8 +21,15 @@
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-      const x = JSON.parse($('#cancelReasonTypesValues span:first').text());
-      getCancelReasonTitles($('#cancelForm'), $('input[name="_csrf"]').val(), '/CancelReasonTitles', x.BID_CANCEL, false);
+      let data = [];
+      <% if(titles != null) { for(let s of titles) { %>
+      data.push({
+        id: '<%= s._id %>',
+        name: '<%= s.name %>'
+      });
+      <% } } %>
+      
+      getCancelReasonTitles($('#cancelForm'), data);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
     
     $('#cancelForm').submit(function(e) {
@@ -35,7 +42,7 @@
 
 <body>
   <nav user="supplier" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
-    <a class="navbar-brand" href="/">UNITE - Cancel Buyer's Order</a>
+    <a class="navbar-brand" href="/">UNITE - Supplier - Cancel Buyer's Order</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -52,17 +59,12 @@
             <input type="hidden" name="userType" value="<%= userType %>">
             <div class="form-group">
               <label>Details*</label>
-              <textarea required class="form-control" name="reason" rows="10" placeholder="Details on why cancelling..." cols="50"></textarea>
+              <textarea required class="form-control" name="reason" rows="10" placeholder="Details about why you cancel" cols="50"></textarea>
             </div>
             <input type="hidden" name="buyersName" value="<%= buyerName %>">
             <input type="hidden" name="suppliersName" value="<%= supplierName %>">
             <input type="hidden" name="buyersEmail" value="<%= buyerEmail %>">
-            <input type="hidden" name="suppliersEmail" value="<%= supplierEmail %>">            
-          <% if (cancelReasonTypesJson != null) { %>
-            <div style="visibility: hidden" id="cancelReasonTypesValues">            
-                <span class='statuses'><%= cancelReasonTypesJson %></span>          
-            </div>
-          <% } %>
+            <input type="hidden" name="suppliersEmail" value="<%= supplierEmail %>">         
             <div class="form-group">
               <input type="hidden" name="_csrf" value="<%= csrfToken %>">
               <button style="float: right" type="submit" id="submitCancel" title="Cancel Order" class="btn-primary btn">Cancel Buyer's Order</button><br>

@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>UNITE - Buyer - View Bid(s)</title>
+  <title>UNITE - Buyer - View Bid Request Details</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="A cool thing made with Glitch">
@@ -95,8 +95,6 @@
   </nav>    
     <div class="container">
       <br><br>
-  
-
 
 <!-- Modal window for the new, valid Bid Request -->
         <div class="modal fade" style="width: 100%; max-width: 96%; overflow: scroll" id="request" tabindex="-1" role="dialog" aria-hidden="true">
@@ -133,8 +131,12 @@
                       <input readonly type="text" class="form-control" name="supplierName" value="<%= bid.supplierName %>">
                     </div>
                     <div class="form-group">
-                      <label class="col-form-label">Buyer Organization*</label>
+                      <label class="col-form-label">Buyer's Organization Name*</label>
                       <input readonly type="text" class="form-control" name="buyerName" value="<%= bid.buyerName %>">
+                    </div>
+                    <div class="form-group">
+                      <label>Buyer's Organization UNITE ID</label>
+                      <input type="text" class="form-control" value="<%= buyer.organizationUniteID %>" readonly>
                     </div>
                     <div class="form-group">
                       <label class="col-form-label">Buyer's E-mail Address*</label>
@@ -146,8 +148,21 @@
                     </div>
                   </div>
                   <div class="form-group">
-                    <label class="col-form-label">Item Description (Short*)</label>
+                    <label class="col-form-label">Item Description</label>
                     <input readonly type="text" class="form-control" name="itemDescription" value="<%= bid.itemDescription %>">
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Item Description (Long)</label>
+                    <textarea readonly class="form-control" name="itemDescriptionLong"><%= bid.itemDescriptionLong %></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label">Item Description URL</label>
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon3">http(s)://</span>
+                      </div>
+                      <input readonly type="text" class="form-control" aria-describedby="basic-addon3" value="<%= bid.itemDescriptionUrl %>" name="itemDescriptionUrl">
+                    </div>
                   </div>
                   <div class="form-group">
                     <% const re = /:\s|,\s/;
@@ -167,19 +182,6 @@
                     <% j = 0; for(let k of bid.productDetailsList) {j += k.amount;} %>
                     <input type="text" class='form-control' title="Total number of items" readonly id="totalAmount" name="amount" value="<%= j %>">
                   </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Item Description (Long)*</label>
-                    <textarea readonly class="form-control" name="itemDescriptionLong"><%= bid.itemDescriptionLong %></textarea>
-                  </div>
-                  <div class="form-group">
-                    <label class="col-form-label">Item Description URL (Long)</label>
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon3">http(s)://</span>
-                      </div>
-                      <input readonly type="text" class="form-control" aria-describedby="basic-addon3" value="<%= bid.itemDescriptionUrl %>" name="itemDescriptionUrl">
-                    </div>
-                  </div>                  
                   <div class="form-group">
                     <label class="col-form-label">Delivery Location*</label>
                     <textarea readonly class="form-control" name="deliveryLocation"><%= bid.deliveryLocation %></textarea>
@@ -226,6 +228,14 @@
                       <label class="col-form-label">Price (Supplier's currency):</label>
                        <% l = 0; for(m of bid.productDetailsList) {l += m.supplierPrice;} %> <!-- Same as bid.supplierPrice .-->
                       <input type="text" title="Order price as seen by Supplier" value="<%= l %> <%= bid.supplierCurrency %>" class="form-control" id="supplierPrice" name="supplierPrice" readonly>
+                    </div>
+                    <div class="form-group">
+                      <label>Currency (yours):</label>
+                      <input type="text" readonly class="form-control" readonly name="supplierCurrency" value="<%= bid.buyerCurrency %>">
+                    </div>
+                    <div class="form-group">
+                      <label>Currency (Supplier's):</label>
+                      <input type="text" readonly class="form-control" readonly name="buyerCurrency" value="<%= bid.supplierCurrency %>">
                     </div>
                 <% if(bid.isExtended == false) { %>
                     <div class="form-group">

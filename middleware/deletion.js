@@ -6,7 +6,7 @@ const BidRequest = require("../models/bidRequest");
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
-const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendBanEmail, sendCancelBidEmail, postSignInBody } = require('../middleware/templates');
+const { sendConfirmationEmail, sendCancellationEmail, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendBanEmail, sendCancelBidEmail, getCancelReasonTitles, getDataMongoose, postSignInBody } = require('../middleware/templates');
 
 
 async function removeSupervisor(id, req, res, db, isBan) {
@@ -51,106 +51,101 @@ async function removeSupervisor(id, req, res, db, isBan) {
 }
 
 
-const removeAssociatedBuyerBids = async (req, res, dbo, id) => {
-  let promise = BidRequest.find( { buyer: id } ).exec();
-  await promise.then(async (bids) => {
-    let complexReason = 'The Buyer deleted their account. More details:\n' + req.body.reason;
+const removeAssociatedBuyerBids = async (req, res, dbo, id) => {  
+  let bids = await getDataMongoose('BidRequest', { buyer: id });
+  let complexReason = 'The Buyer deleted their account. More details:\n' + req.body.reason;
 
-    for(let bid of bids) {//One by one.
-      try {
-        await dbo.collection('cancelreasons').insertOne( {
-          title: 'Bid Cancellation',
-          cancelType: process.env.BID_CANCEL,
-          userType: req.body.userType,
-          reason: complexReason,
-          userName: req.body.organizationName,
-          createdAt: Date.now()
-        }, function(err, obj) {
-          treatError(req, res, err, 'back');
-        });
-      }  
-      catch(e) {
-        treatError(req, res, e, 'back');
-      }
-
-      await dbo.collection('bidrequests').deleteOne( { _id: bid._id }, function(err, obj) {
+  for(let bid of bids) {//One by one.
+    try {
+      await dbo.collection('cancelreasons').insertOne( {
+        title: 'Bid Cancellation',
+        cancelType: process.env.BID_CANCEL,
+        userType: req.body.userType,
+        reason: complexReason,
+        userName: req.body.organizationName,
+        createdAt: Date.now()
+      }, function(err, obj) {
         treatError(req, res, err, 'back');
       });
-
-      req.body.requestsName = bid.requestName;
-      await sendCancelBidEmail(req, bid.suppliersName, bid.buyersName, bid.suppliersEmail, bid.buyersEmail, 'Supplier ', 'Buyer ', complexReason);
+    }  
+    catch(e) {
+      treatError(req, res, e, 'back');
     }
-  });
+
+    await dbo.collection('bidrequests').deleteOne( { _id: bid._id }, function(err, obj) {
+      treatError(req, res, err, 'back');
+    });
+
+    req.body.requestsName = bid.requestName;
+    await sendCancelBidEmail(req, bid.suppliersName, bid.buyersName, bid.suppliersEmail, bid.buyersEmail, 'Supplier ', 'Buyer ', complexReason);
+  }
 }
 
 
 const removeAssociatedSuppBids = async (req, res, dbo, id) => {
-  let promise = BidRequest.find( { supplier: id } ).exec();
-  await promise.then(async (bids) => {
-    let complexReason = 'The Supplier deleted their account. More details:\n' + req.body.reason;
+  let bids = await getDataMongoose('BidRequest', { supplier: id });
+  let complexReason = 'The Supplier deleted their account. More details:\n' + req.body.reason;
 
-    for(let bid of bids) {//One by one.          
-      try {
-        await dbo.collection('cancelreasons').insertOne( {
-          title: 'Account Deletion',//req.body.reasonTitle,
-          cancelType: process.env.USER_CANCEL,
-          userType: req.body.userType,
-          reason: complexReason,
-          userName: req.body.companyName,
-          createdAt: Date.now()
-        }, function(err, obj) {
-            treatError(req, res, err, 'back');
-        });
-      }  
-      catch(e) {
-        console.error(e);
-        req.flash('error', e.message);
-        throw e;
-      }
-
-      await dbo.collection('bidrequests').deleteOne( { _id: bid._id }, function(err, obj) {
-        treatError(req, res, err, 'back');
+  for(let bid of bids) {//One by one.          
+    try {
+      await dbo.collection('cancelreasons').insertOne( {
+        title: 'Account Deletion',//req.body.reasonTitle,
+        cancelType: process.env.USER_CANCEL,
+        userType: req.body.userType,
+        reason: complexReason,
+        userName: req.body.companyName,
+        createdAt: Date.now()
+      }, function(err, obj) {
+          treatError(req, res, err, 'back');
       });
-
-      req.body.requestsName = bid.requestName;
-      await sendCancelBidEmail(req, bid.buyersName, bid.suppliersName, bid.buyersEmail, bid.suppliersEmail, 'Buyer ', 'Supplier ', complexReason);
     }
-  });
+    catch(e) {
+      console.error(e);
+      req.flash('error', e.message);
+      throw e;
+    }
+
+    await dbo.collection('bidrequests').deleteOne( { _id: bid._id }, function(err, obj) {
+      treatError(req, res, err, 'back');
+    });
+
+    req.body.requestsName = bid.requestName;
+    await sendCancelBidEmail(req, bid.buyersName, bid.suppliersName, bid.buyersEmail, bid.suppliersEmail, 'Buyer ', 'Supplier ', complexReason);
+  }
 }
 
 
 async function removeAssociatedBuyerBidsSuperDel(req, res, req2, dbo, id) {
-  let promise = BidRequest.find( { buyer: id } ).exec();
-  await promise.then(async (bids) => {   
-    for(let bid of bids) {//One by one.
-      try {
-        await dbo.collection('cancelreasons').insertOne( {
-          title: 'User Cancellation',
-          cancelType: process.env.USER_CANCEL,
-          userType: 'Buyer',
-          reason: req2.body.reason,
-          userName: req2.body.organizationName,
-          createdAt: Date.now()
-        }, function(err, obj) {
-          treatError(req, res, err, 'back');
-        });
-      }  
-      catch(e) {
-        treatError(req, res, e, 'back');
-      }
-
-      await dbo.collection('bidrequests').deleteOne( { _id: bid._id }, function(err, obj) {
+  let bids = await getDataMongoose('BidRequest', { buyer: id });
+ 
+  for(let bid of bids) {//One by one.
+    try {
+      await dbo.collection('cancelreasons').insertOne( {
+        title: 'User Cancellation',
+        cancelType: process.env.USER_CANCEL,
+        userType: 'Buyer',
+        reason: req2.body.reason,
+        userName: req2.body.organizationName,
+        createdAt: Date.now()
+      }, function(err, obj) {
         treatError(req, res, err, 'back');
       });
-
-      req.body.requestsName = bid.requestName;
-      await sendCancelBidEmail(req, bid.suppliersName, bid.buyersName, bid.suppliersEmail, bid.buyersEmail, 'Supplier ', 'Buyer ', req.body.reason);
     }
-  });
+    catch(e) {
+      treatError(req, res, e, 'back');
+    }
+
+    await dbo.collection('bidrequests').deleteOne( { _id: bid._id }, function(err, obj) {
+      treatError(req, res, err, 'back');
+    });
+
+    req.body.requestsName = bid.requestName;
+    await sendCancelBidEmail(req, bid.suppliersName, bid.buyersName, bid.suppliersEmail, bid.buyersEmail, 'Supplier ', 'Buyer ', req.body.reason);
+  } 
 }
 
 
-const buyerDelete = (req, res, id, isBan) => {  
+const buyerDelete = async (req, res, id, isBan, isSupervisor) => {  
   try {    
     MongoClient.connect(URL, {useUnifiedTopology: true}, async function(err, db) {
       let dbo = db.db(BASE);
@@ -210,7 +205,8 @@ const buyerDelete = (req, res, id, isBan) => {
         req.flash('success', 'You have banned this User account successfully.');
         res.redirect("back");
       } else {
-        req.flash('success', 'You have deleted your Buyer account. We hope that you will be back with us!');
+        isSupervisor? req.flash('success', 'You have deleted the account of your Buyer.\nWe regret that you experienced inconveniences, and wish you best collaborations!') 
+          : req.flash('success', 'You have deleted your Buyer account.\nWe hope that you will be back with us!');
         res.redirect("/buyer/sign-in");
       }
     });

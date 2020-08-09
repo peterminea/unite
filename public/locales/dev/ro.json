@@ -7,7 +7,7 @@
         "mottoOne": "SALVÂND LOCURI DE MUNCĂ, SALVĂM VIEȚI!",
         "mottoTwo": "Conducem noua normalitate!",
         "signUp": "Înscrie-te",
-        "signInBuyer": "Înscrieți-vă ca cumpărător",
+        "signInBuyer": "Conectați-vă ca Cumpărător",
         "signInSupervisor": "Conectați-vă ca supraveghetor",
         "signInSupplier": "Conectați-vă ca furnizor",
         "signUpBuyer": "Înscrieți-vă ca cumpărător",
@@ -18,7 +18,7 @@
     },
     "about": {
         "first_paragraph": "UNITE este o platformă de achiziții publice exclusiv pentru achizițiile publice de comenzi speciale de produse și servicii pentru răspunsul la crize. <br> Noi o numim \"Alibaba de cereri urgente de achiziții publice.\" <br><br>UNITE este o platformă cu două fețe, care conectează cumpărătorii publici cu companiile care au capacitatea și capacitatea de a-și reorienta activitățile către furnizarea de bunuri și servicii ca răspuns la criza COVID-19.<br> <br>Companiile sunt invitate să se înregistreze pe platformă, descriind capacitatea și capacitatea lor de a fabrica produse de care au nevoie urgent sau de a furniza servicii la cerere. <br>Companiile pot, de asemenea, să răsfoiască și să răspundă cererilor de licitație deschise depuse de cumpărătorii publici. <br><br> Cumpărătorii publică pot accesa platforma și pot crea o solicitare de achiziție. Software-ul nostru se potrivește cu cererea de achiziție cu potențialii furnizori și facilitează tranzacția completă - inclusiv contactul inițial, negocierea. plasarea comenzii, acceptarea livrării și plata.",
-        "second_paragraph": "UNITE se diferențiază de alte soluții prin faptul că oferă o bază de date a companiilor cu capacitatea de a reorienta operațiunile și în care automatizează procesul. Alte soluții includ utilizarea furnizorilor existenți și a sistemului ERP\/de achiziție (care nu este adaptat cerințelor anormale); implicarea cu piața prin contactarea companiilor individuale prin e-mail, telefon sau personal (ceea ce este lent); utilizarea altor platforme de vânzări online (nicio vizibilitate a capacității companiilor de a reorienta operațiunile); cunoștințele proprii ale cumpărătorilor publici și legăturile acestora cu industria (care nu sunt distribuite pe scară largă - limitate la persoane fizice sau echipe locale)."
+        "second_paragraph": "UNITE se diferențiază de alte soluții prin faptul că oferă o bază de date a companiilor cu capacitatea de a reorienta operațiunile și în care automatizează procesul. Alte soluții includ utilizarea furnizorilor existenți și a sistemului ERP\/de achiziție (care nu este adaptat cerințelor anormale); implicarea cu piața prin contactarea companiilor individuale prin e-mail, telefon sau personal (ceea ce este lent); utilizarea altor platforme de vânzări online (nicio vizibilitate a capacității companiilor de a reorienta operațiunile); cunoștințele proprii ale cumpărătorilor publici și legăturile acestora cu industria (care nu sunt împărtășite pe scară largă - limitate la persoane fizice sau echipe locale)."
     },
     "feedback": {
         "provideFeedbackShort": "Oferiți un feedback!",
@@ -62,7 +62,15 @@
         "occupationalSafetyHealth": "Securitatea și sănătatea în muncă",
         "otherRelevantFiles": "Alte fișiere relevante",
         "checkTerms": "Sunt de acord cu Termenii și Condițiile UNITE",
-        "checkAntibribery": "Recunosc Acordul anti-mită UNITE"
+        "checkAntibribery": "Recunosc Acordul anti-mită UNITE",
+        "userRole": "Rol de utilizator UNITE",
+        "cardGreeting": "Bună ziua!",
+        "defaultGreeting": "Bună ziua, {organizationName} !",
+        "defaultGreetingTwo": "Bună ziua, {companyName} !",
+        "updateDetails": "Actualizați-vă detaliile",
+        "updateProfile": "Actualizare profil",
+        "deactivateAccount": "Dezactivare cont",
+        "deleteAccount": "Ștergere cont"
     },
     "buyerSpecific": {
         "qualification": "Calificare \/ Experiență",
@@ -85,5 +93,446 @@
         "companyAddress": "Adresa companiei",
         "industry": "Industrie",
         "registeredCountry": "Țară înregistrată"
+    },
+    "antibriberyAgreement": {
+        "title": "UNITE - Necesități subrezervate în timpuri de urgență - Acord anti-mită"
+    },
+    "termsConditions": {
+        "title": "UNITE - Nevoi subrezervate în momente de urgență - Termeni și condiții"
+    },
+    "error": {
+        "title": "UNITE - Pagina de eroare",
+        "errorText": "404 - EROARE"
+    },
+    "bannedUsers": {
+        "banTitle": "Banare Cont UNITE - Rezervat Administratorului - Completați câmpurile (*) solicitate:",
+        "banConfirmation": "Ești pe cale să interzici acestui utilizator să utilizeze UNITE. Acest lucru poate fi limitat la un anumit timp. \n Interzicerea unui utilizator UNITE este un eveniment grav, ar trebui să fie motivat și Utilizatorul să fie notificat cu privire la motiv. Vă rugăm să furnizați informații exacte despre aceasta.",
+        "banReason": "Motivul interzicerii contului",
+        "userName": "Numele utilizatorului",
+        "prefEndingBanDate": "Data preferată pentru încheierea interdicției (banării):",
+        "bannedList": "Lista de încărcare a utilizatorilor interziși"
+    },
+    "bidsCatalog": {
+        "title": "LISTA COMPLETĂ A OFERTELOR CUMPĂRĂTORULUI - UNITE",
+        "listDescription": "Aceasta este întreaga listă de cereri de ofertă (cereri de ofertă) care au fost plasate de către toți cumpărătorii noștri UNITE până acum. Acesta include ofertele de orice statut (valabile, expirate, anulate), precum și prețurile acestora, date în moneda convenită de furnizor.",
+        "conversionNotice": "De asemenea, putem converti prețul fiecărei oferte în moneda implicită a Cererii de ofertă. Presupunem că furnizorii pot utiliza monede naționale diferite de cele ale cumpărătorilor, așa că atunci aplicăm rate de conversie.",
+        "noElements": "Ne pare rău, nu există cumpărători aici."
+    },
+    "deleteUser": {
+        "title": "UNITE - Ștergere cont utilizator - Admin",
+        "confirmation": "Ești pe cale să elimini toate aceste date ale utilizatorului din UNITE. Acest lucru nu poate fi anulat. \n Ștergerea unui utilizator UNITE este o problemă serioasă și are nevoie de un motiv bine elaborat. Vă rugăm să continuați doar dacă sunteți cu adevărat sigur.",
+        "secondTitle": "Ștergere cont utilizator - Completați câmpurile necesare (*)",
+        "reason": "Motivul ștergerii contului",
+        "userName": "Numele Utilizatorului:",
+        "deletion": "Ștergere utilizator"
+    },
+    "fileList": {
+        "title": "UNITE - LISTA COMPLETĂ A FIȘIERELOR ÎNCĂRCATE",
+        "disclaimer": "Disclaimer: Aceasta este o listă demo de fișiere care sunt încărcate în folderele noastre App.",
+        "description": "Includem avataruri și fișiere specifice utilizatorului care sunt încărcate. Din motive practice, preferăm încărcarea fișierelor în folderele dedicate ale spațiului de găzduire a aplicației, și nu în DB în sine - în prezent baza de date conține doar câteva fișiere încărcate. <br> Notă: Doar administratorii site-ului pot accesa aceste liste. Astfel, dragi utilizatori, ceea ce vedem aici - este doar pentru noi!",
+        "productImages": "Lista fișierelor de imagini ale produselor UNITE",
+        "noProductImages": "Ne pare rău, nu există fișiere cu imagini de produse aici.",
+        "uploadedDocuments": "Lista fișierelor încărcate pe UNITE",
+        "noUploadedDocuments": "Ne pare rău, nu există fișiere încărcate aici.",
+        "avatarFiles": "Lista fișierelor de tip Avatar de pe UNITE",
+        "noAvatarFiles": "Ne pare rău, nu există fișiere de Avatar aici."
+    },
+    "memberList": {
+        "title": "UNITE - LISTA COMPLETA A MEMBRILOR - Cumparatori, Supraveghetori, Furnizori",
+        "description_partOne": "Disclaimer: Aceasta este o listă demo de membri. În acest moment, ele nu reprezintă entități economice reale din lume. Orice asemănare cu orice companie din viața reală este neintenționată. Această listă este afișată numai în scopuri de dezvoltare și este accesibilă numai administratorilor.",
+        "description_partTwo": "Cu toate acestea, în viitorul apropiat, UNITE va avea membri reali, care vor fi enumerate. Vom limita cantitatea de date specifice care vor fi puse la dispoziția publicului pe platforma noastră, în conformitate cu legile și normele GDPR. De asemenea, putem restricționa accesul vizitatorilor externi la date despre membrii noștri, ceea ce înseamnă că trebuie să vă alăturați UNITE (amintiți-vă: business-to-business) pentru a vedea informațiile menționate.",
+        "buyersList": "Lista cumpărătorilor UNITE",
+        "noBuyers": "Ne pare rău, nu există cumpărători aici.",
+        "supervisorsList": "Lista supraveghetorilor pe UNITE",
+        "noSupervisors": "Ne pare rău, nu există supraveghetori aici.",
+        "suppliersList": "Lista furnizorilor UNITE",
+        "noSuppliers": "Ne pare rău, nu există furnizori aici."
+    },
+    "viewFeedbacks": {
+        "title": "UNITE - Vizualizați feedback-urile platformei",
+        "description": "Mai jos avem feedback-urile, sugestiile și alte întrebări ale utilizatorilor noștri."
+    },
+    "buyerView": {
+        "joinChatTitle": "Cumpărător - Conectare chat pentru UNITE",
+        "balance": {
+            "title": "Soldul cumpărătorului",
+            "description": "Puteți efectua conversii în monedă aici, pentru a vedea care ar fi echivalentul soldului dvs. curent, dacă este convertit în alte monede naționale.",
+            "label": "Soldul curent al cumpărătorului",
+            "selectConvert": "Selectați altă monedă și convertiți soldul:"
+        },
+        "bidsCatalog": {
+            "title": "Catalogul ofertelor cumpărătorului",
+            "secondTitle": "LISTA COMPLETĂ A OFERTELOR CUMPĂRĂTORULUI",
+            "description_partOne": "Aceasta este lista completă a cererilor de ofertă (Cereri de licitație) care au fost plasate de către {buyerName} Cumpărătorul UNITE până acum. Include oferte de orice stare (valabile, expirate, anulate), precum și prețurile acestora, date în moneda convenită a furnizorului.",
+            "description_partTwo": "De asemenea, este posibil să convertim prețul fiecărei sume licitate în moneda implicită a solicitării de ofertă. Presupunem că furnizorii pot utiliza monede naționale diferite de cele ale cumpărătorilor, astfel încât apoi aplicăm ratele de conversie.",
+            "contentTitle": "Tabelul complet al ofertelor cumpărătorului",
+            "noElements": "Ne pare rău, nu există oferte aici."
+        },
+        "cancelBid": {
+            "title": "UNITE - Cumpărător - Anulați comanda",
+            "nextTitle": "UNITE - Anulați comanda",
+            "requiredField": "Anulare comandă - Completați câmpul obligatoriu (*)",
+            "details": "Detalii",
+            "detailsPlaceholder": "Detalii despre motivul pentru care anulați"
+        },
+        "confirmation": {
+            "title": "UNITE - Cumpărător - Confirmare utilizator",
+            "legend": "Confirmați e-mailul de cumpărător",
+            "email": "E-mail",
+            "confirm": "Confirmați e-mailul și contul"
+        },
+        "deactivate": {
+            "title": "UNITE - Dezactivați contul de cumpărător",
+            "legend": "Dezactivare cont cumpărător - Vă rugăm să completați câmpurile necesare (*)",
+            "email": "E-mail",
+            "name": "Numele Organizației",
+            "reason": "Motivul pentru dezactivarea contului",
+            "deactivate": "Dezactivați contul",
+            "confirm": "Sigur doriți să vă dezactivați contul de Cumpărător? \n Acest lucru va elimina solicitările dvs. de ofertă plasate în UNITE. Veți fi reactivat automat la următoarea autentificare. \n Sperăm să ne vedem în curând!",
+            "notice": "Dacă vă dezactivați temporar contul de cumpărător, sumele licitate (comenzi) trebuie anulate. Furnizorii corespondenți vor fi anunțați la anularea ofertei. Când vă activați din nou contul la conectare, va trebui să plasați din nou comenzile dacă doriți să faceți acest lucru."
+        },
+        "delete": {
+            "title": "UNITE - Cumpărător - Ștergere Utilizator",
+            "confirm": "Sunteți pe cale să eliminați toate datele din UNITE. Acest lucru nu poate fi anulat. Vă rugăm să continuați numai dacă sunteți cu adevărat sigur.",
+            "legend": "Ștergere cont cumpărător - Vă rugăm să completați câmpurile necesare (*)",
+            "email": "E-mail",
+            "name": "Numele Organizatiei",
+            "reason": "Motivul ștergerii contului",
+            "delete": "Ștergere cont"
+        },
+        "forgotPassword": {
+            "title": "UNITE - Cumpărător - Am uitat parola",
+            "confirmEmail": "Confirmați adresa de e-mail",
+            "email": "E-mail",
+            "reset": "Salt la Resetare"
+        },
+        "index": {
+            "title": "Panoul de bord al cumpărătorului - UNITE",
+            "greetingOne": "Bine ați venit!",
+            "greetingTwo": "Bună ziua, {name} !",
+            "ability": "Puteți deschide și trimite Cereri de ofertă către furnizorii dvs. preferați.",
+            "bidsCount": "Ați făcut un total de { bidsLength } cereri de ofertă , prețul lor total (exprimat în moneda Dvs.) este {price} {currency} .",
+            "loadBidTable": "Încărcați tabelul complet de oferte",
+            "noBids": "Până în prezent, nu ați depus nicio ofertă pentru acest Furnizor.",
+            "searchSuppliers": "Se vor căuta Furnizorii cu capacitățile solicitate.",
+            "loadCatalog": "Încărcare catalog de produse",
+            "requestBid": "Solicitați o ofertă",
+            "supplierDetails": "Detalii furnizor",
+            "viewBids": "Vizualizați ofertele",
+            "multiSupplier": "Puteți selecta mai mulți furnizori pentru oferta dvs. Vă rugăm să consultați meniul derulant de mai jos.",
+            "otherSuppliers": "Alți furnizori"
+        },
+        "placeBid": {
+            "title": "Cumpărător - Plasați o Cerere de Ofertă - UNITE",
+            "greeting": "Bine ați venit!",
+            "invite": "Vă rugăm să efectuați solicitarea de ofertă",
+            "info": "Puteți plasa o cerere de ofertă pe unul sau mai multe produse, aparținând unuia sau mai multor furnizori. <br> Dacă alegeți mai mulți furnizori, se vor crea obiecte separate de Cerere de ofertă la trimitere, fiecare dintre ei fiind trimis furnizorului corespunzător. <br> Dacă alegeți același nume de produs de la mai mulți furnizori, iar ofertele sunt acceptate, va trebui să plătiți fiecare furnizor. Vă rugăm să gestionați cu atenție aceste alegeri.",
+            "requirement": "Vă rugăm să completați toate câmpurile necesare (*).",
+            "requestName": "Numele solicitării de ofertă",
+            "bidSupplierCompany": "Compania furnizorului",
+            "multiSupplierInfo": "Această solicitare de ofertă se adresează mai multor furnizori. <br> Pentru aceasta, la depunerea ofertei, se vor crea oferte separate pentru fiecare Furnizor și produsele corespunzătoare, prețurile fiind astfel convertite în monedele corespunzătoare.",
+            "suppliersList": "Furnizorii sunt",
+            "supplierData": "Date despre furnizor",
+            "bidBuyerName": "Numele organizației cumpărătorului",
+            "bidBuyerUniteID": "ID-ul UNITE al Organizației Cumpărătorului",
+            "buyerEmail": "Adresa de e-mail a cumpărătorului",
+            "bidBuyerContactName": "Numele persoanei de contact a cumpărătorului",
+            "bidBuyerCurrency": "Monedă (originalul cumpărătorului)",
+            "bidBuyerDeptAgencyGroup": "Departamentul \/ Agenția \/ Grupul cumpărătorului",
+            "bidBuyerQualification": "Calificarea \/ experiența cumpărătorului",
+            "bidBuyerAddress": "Adresa cumpărătorului",
+            "bidBuyerCountry": "Țara cumpărătorului",
+            "bidProductPricesCurrency": "Prețurile produselor sunt exprimate în moneda Dvs.",
+            "bidProductsServicesOrdered": "Produse \/ Servicii comandate",
+            "bidSupplierEmail": "Adresa de e-mail a furnizorului",
+            "bidSelfPrice": "Preț (Moneda Dvs.)",
+            "bidBuyerPrice": "Preț (moneda cumpărătorului)",
+            "bidSupplierPrice": "Preț (moneda furnizorului)",
+            "bidSelfCurrency": "Moneda (a Dvs.)",
+            "bidSupplierCurrency": "Moneda (furnizorului)",
+            "bidMentionsBuyer": "Mențiuni pentru Cumpărător",
+            "bidMentionsSupplier": "Mentiuni pentru Furnizor",
+            "bidTypeMentions": "Scrieți mențiunile mai jos",
+            "bidPaymentNotice": "ANUNȚ IMPORTANT: UNITE utilizează în prezent Gateway-ul de plată Stripe în MODUL DE TESTARE. <br>Nu se efectuează plăți reale din contul Dvs. Trebuie să utilizați un număr de card fictiv, precum 4242 4242 4242, și, de asemenea, inventați un CCV și data expirării. <br> Doriți să continuați?",
+            "bidFundsError": "Soldul curent nu este suficient pentru finalizarea acestei achiziții. Vă rugăm să adăugați mai multe fonduri în contul Dvs.",
+            "bidUpdateNoBuyerMentions": "Sunteți sigur că doriți să actualizați Starea ofertei fără mențiuni pentru Cumpărătorul",
+            "bidUpdateNoSupplierMentions": "Sigur doriți să actualizați Starea ofertei fără mențiuni pentru Furnizorul",
+            "bidAcceptConfirm": "Sigur doriți să acceptați această ofertă din partea",
+            "bidUpdateStatusMentions": "Actualizați starea și trimiteți mențiunile",
+            "bidStatusRequested": "Cumpărătorul a solicitat o ofertă de la Furnizor. Vă rugăm să trimiteți informații suplimentare cumpărătorului.",
+            "bidStatusWaiting": "Se așteaptă ca Cumpărătorul să proceseze informațiile comenzii.",
+            "bidStatusWanted": "Cumpărătorul dorește să cumpere produsul pentru prețul total de {$1} {$2} . Vă rugăm să anulați sau să acceptați.",
+            "bidStatusStarted": "Furnizorul a început livrarea. Vă rugăm să așteptați confirmarea cumpărătorului.",
+            "bidStatusPaidDone": "Plata și livrarea au fost efectuate cu succes.",
+            "bidStatusCancelledSupplier": "Furnizorul a anulat cererea.",
+            "bidStatusCancelledBuyer": "Cumpărătorul a anulat cererea.",
+            "bidChatBuyer": "Discutați cu Cumpărătorul Dvs.",
+            "bidChatSupplier": "Discutați cu furnizorul Dvs.",
+            "bidCancelBidBuyer": "Anulați comanda Dvs.",
+            "bidCancelBidSupplier": "Anulați comanda cumpărătorului",
+            "bidItemDescriptionShort": "Descrierea produsului <b> (pe scurt) <\/b>",
+            "bidItemDescriptionLong": "Descrierea produsului <b> (pe larg) <\/b>",
+            "bidItemDescriptionURL": "URL descriere produs",
+            "bidDeliveryLocation": "Locul livrării",
+            "bidDeliveryRequirements": "Cerințe de livrare",
+            "bidComplianceRequirements": "Cerințe de conformitate",
+            "bidComplianceRequirementsURL": "Adresa URL a cerințelor de conformitate",
+            "bidOtherRequirements": "Alte cerinte",
+            "bidPreferredDeliveryDate": "Data de livrare preferată",
+            "currency": "Moneda Dvs.",
+            "close": "Închideți",
+            "selectProducts": "Puteți selecta produse din meniul drop-down",
+            "availableProducts": "Produse disponibile",
+            "noProducts": "Nu există produse disponibile",
+            "bidExtensionLetter": "Scrisoare de prelungire a ofertei",
+            "proposedPrice": "Prețul propus (se poate modifica la decizia furnizorului)",
+            "requestedList": "Produse \/ Servicii solicitate",
+            "requestNewProducts": "Puteți solicita produse care nu sunt în prezent în stocul furnizorului.",
+            "amount": "Cantitate",
+            "productsCount": "Aveți un număr de {} produse.",
+            "totalItems": "Numărul total de elemente (Cantitatea totală)",
+            "buyersPriceProduct": "Prețul Dvs.. pentru produsul selectat",
+            "buyersOverallPrice": "Prețul Dvs. total",
+            "suppliersPriceProduct": "Prețul furnizorului pentru produsul selectat",
+            "multiSupplierPriceNotice": "Această ofertă este destinată să fie trimisă mai multor furnizori. Prețurile echivalente ale furnizorilor vor fi stabilite separat pentru fiecare dintre ele.",
+            "suppliersOverallPrice": "Prețul total echivalent al furnizorului",
+            "multiSupplierPriceAdapted": "Deoarece oferta dumneavoastră este destinată să se adreseze mai multor furnizori, fiecare dintre aceștia va avea prețurile produselor corespunzătoare\/propuse convertite din moneda dumneavoastră în cea corespunzătoare. <br>Ca adăugați sume pentru produse, fiecare dintre Furnizori va avea aici prețul actualizat, corespunzător în moneda lor.",
+            "suppliersPriceRendered": "preț total pentru produsul selectat",
+            "bidStatus": "Stare",
+            "productSuggestionTitle": "Celor care au cumpărat acest produs le-a plăcut și ...",
+            "cancel": "Anulați",
+            "sendBid": "Trimite cererea de ofertă"
+        },
+        "productsCatalog": {
+            "title": "Catalog de produse - UNITE",
+            "bidTableProducts": "Cerere de ofertă pentru produsele selectate"
+        },
+        "profile": {
+            "title": "Profilul cumpărătorului - UNITE",
+            "terminationText": "Sigur ștergeți contul de cumpărător? <br>Acest lucru va elimina, de asemenea, cererile de licitare și mesajele pe care le-ați trimis în UNITE. <br>Dacă doriți doar să luați o pauză, vă puteți dezactiva contul în schimb.",
+            "cardGreeting": "Bună ziua!",
+            "defaultGreeting": "Bună ziua, {organizationName} !",
+            "description": "Aceasta este pagina Dumneavoastră de profil. Vă rugăm să păstrați datele corecte și veți avea șansa de a găsi furnizorii Dvs. necesari!"
+        },
+        "resend": {
+            "title": "UNITE - Cumpărător - Retrimitere token de confirmare",
+            "legend": "Retrimitere token de confirmare e-mail",
+            "email": "E-mail",
+            "resend": "Retrimitere token de confirmare"
+        },
+        "resetPassword": {
+            "title": "UNITE - Cumpărător - Resetați parola",
+            "legend": "Resetați parola",
+            "newPassword": "Parolă nouă",
+            "confirmPassword": "Confirmați parola",
+            "resetPassword": "Actualizați parola"
+        },
+        "signIn": {
+            "title": "Conectați-vă ca Cumpărător - UNITE"
+        },
+        "signUp": {
+            "title": "Înscrieți-vă ca Cumpărător - UNITE"
+        },
+        "viewBid": {
+            "title": "UNITE - Cumpărător - Vizualizați detaliile cererii de ofertă",
+            "bidExpirationNoticeNotExtended": "Această solicitare de licitare este pe cale să expire. Data limită este de {0} dolari. <br>Vă rugăm să încărcați o scrisoare de prelungire a sumei licitate pentru a obține {1} zile de valabilitate în plus.",
+            "bidExpirationNoticeExtended": "Această solicitare de ofertă este pe cale să expire. Data sa limită este $ {0} . <br> Ați extins deja valabilitatea inițială a ofertei, deci data de mai sus este definitivă.",
+            "pay": "Plătiți",
+            "goToPayment": "Salt la plată",
+            "paymentCancelled": "Plată anulată!",
+            "alreadyOrdered": "Deja comandat!"
+        },
+        "viewBids": {
+            "title": "Lista cererilor de ofertă - Cumpărător - UNITE",
+            "confirmRemoval": "Sunteți sigur că doriți să eliminați definitiv această ofertă din Panoul de bord al cumpărătorului?",
+            "totalValidBids": "În prezent, ați plasat un număr de {$0} cereri de ofertă valide. Prețul lor total este de {$1} {$2} .",
+            "validFrom": "De la",
+            "bidDetails": "Vizualizați detaliile ofertei",
+            "cancelledBids": "Următoarele $ {0} oferte sunt Cereri de ofertă care au fost anulate. Vă recomandăm să le ștergeți. Prețul lor total este de {$ 1} {$ 2}.",
+            "cancellationNoticeBuyer": "Oferta {$0} a fost anulată la decizia Cumpărătorului. Puteți elimina definitiv oferta.",
+            "deleteBid": "Ștergeți oferta",
+            "expiredBids": "Următoarele $ {0} cereri de ofertă sunt expirate. Vă recomandăm să le ștergeți. Prețul lor total este de {$ 1} {$ 2}.",
+            "expiredBidsNotice": "Cererea $ {0} expirat, data limită a acesteia a fost $ {1} . Puteți elimina complet cererea de ofertă.",
+            "noBids": "Nu ați depus nicio ofertă pentru acest furnizor. Dacă preferați, puteți face acest lucru în orice moment.",
+            "totalBids": "Ați plasat un total de $ {0} cereri de ofertă la acest furnizor. Prețul lor total este de {$ 1} {$ 2}."
+        }
+    },
+    "chatRoom": {
+        "displayName": "Numele afișat",
+        "joinMessage": "Alăturați-vă camerei de chat",
+        "chooseName": "Alegeți un nume de utilizator",
+        "roomName": "Cameră de chat",
+        "join": "Alăturați-vă chatului!"
+    },
+    "supervisorView": {
+        "joinChatTitle": "Supervizor - Conectare chat pentru UNITE",
+        "confirmation": {
+            "title": "UNITE - Supervizor - Confirmare utilizator",
+            "legend": "Confirmați e-mailul autorității de supraveghere",
+            "email": "E-mail",
+            "confirm": "Confirmați e-mailul și contul"
+        },
+        "deactivate": {
+            "title": "UNITE - Dezactivați Contul de Supervizor",
+            "legend": "Dezactivare cont supervizor - Completați câmpurile necesare (*)",
+            "email": "E-mail",
+            "name": "Numele Organizației",
+            "reason": "Motivul pentru dezactivarea contului",
+            "deactivate": "Dezactivare cont",
+            "confirm": "Sigur doriți să vă dezactivați contul de Supervizor? \n Trebuie să vă asigurați că nu aveți cumpărători activi asociați la UNITE. \n Veți fi reactivat automat la următoarea autentificare. \n Sperăm să vă revedem în curând!",
+            "notice": "Dacă alegeți să dezactivați temporar Contul supervizorului, asigurați-vă că nu aveți cumpărători activi pe UNITE. Nu este recomandat să lăsați cumpărătorii corespunzători fără nici o supraveghere \/ supraveghere asupra lor. Acest lucru îi poate încuraja să se angajeze în activități ilegale, așa că vă rugăm să luați în considerare luarea acestei decizii cu mare atenție."
+        },
+        "delete": {
+            "title": "UNITE - Supervizor - Ștergerea utilizatorului",
+            "confirm": "Sunteți pe cale să eliminați toate datele din UNITE. Acest lucru nu poate fi anulat. Vă rugăm să continuați numai dacă sunteți cu adevărat sigur.",
+            "legend": "Ștergere cont supraveghetor - Vă rugăm să completați câmpurile necesare (*)",
+            "email": "E-mail",
+            "name": "Numele Organizatiei",
+            "reason": "Motivul ștergerii contului",
+            "delete": "Ștergere cont"
+        },
+        "forgotPassword": {
+            "title": "UNITE - Cumpărător - Am uitat parola",
+            "confirmEmail": "Confirmați adresa de e-mail",
+            "email": "E-mail",
+            "reset": "Salt la Resetare"
+        },
+        "index": {
+            "title": "Tabloul de bord al supraveghetorului guvernamental - UNITE",
+            "description": "Cu ID-ul UNITE, noii cumpărători se pot înregistra pe site-ul web și pot începe căutarea furnizorilor. Dacă schimbați ID-ul UNITE, anunțați-vă membrii.",
+            "cardGreeting": "Bună ziua!",
+            "defaultGreeting": "Bună ziua, {organizationName} !",
+            "uniteIDDescription": "Cu ID-ul Dvs. UNITE, noii cumpărători se pot înregistra pe site-ul web și pot începe căutarea furnizorilor. Dacă schimbați ID-ul UNITE, anunțați-vă membrii.",
+            "uniteID": "ID-ul unic UNITE",
+            "noBuyers": "Ne pare rău, în prezent nu există cumpărători cu ID-ul UNITE al organizației dvs. Vă rugăm să așteptați înregistrarea lor."
+        },
+        "profile": {
+            "title": "Supervizor guvernamental - Profil - UNITE",
+            "profileDescription": "Aceasta este pagina dvs. de profil de Supervizor. Vă rugăm să vă păstrați datele corecte și să aveți grijă de activitatea cinstită a prietenilor dvs. pe UNITE!",
+            "terminationText": "Sigur doriți să ștergeți contul dvs. de Supervizor? <br> Acest lucru va elimina și: <br> <br> Cumpărătorii asociați; <br> Toate datele lor specifice, cum ar fi comenzi, mesaje, token-uri; <br> propriile Dvs. token-uri de utilizator (dacă există); <br> Istoricul mesajelor dvs. de la UNITE. <br> <br> Vă rugăm să fiți foarte atenți cu această opțiune!",
+            "editableUniteID": "ID-ul UNITE al Organizației (modificabil numai de către dvs.)"
+        },
+        "resend": {
+            "title": "UNITE - Cumpărător - Retrimitere token de confirmare",
+            "legend": "Retrimitere token de confirmare e-mail",
+            "email": "E-mail",
+            "resend": "Retrimitere token de confirmare"
+        },
+        "resetPassword": {
+            "title": "UNITE - Cumpărător - Resetați parola",
+            "legend": "Resetați parola",
+            "newPassword": "Parolă nouă",
+            "confirmPassword": "Confirmați parola",
+            "resetPassword": "Actualizați parola"
+        },
+        "signIn": {
+            "title": "Conectați-vă ca supraveghetor - UNITE"
+        },
+        "signUp": {
+            "title": "Înscrieți-vă ca supraveghetor - UNITE"
+        }
+    },
+    "supplierView": {
+        "joinChatTitle": "Furnizor - Conectare chat pentru UNITE",
+        "addProduct": {
+            "title": "Furnizor - Adăugați un produs \/ serviciu - UNITE",
+            "legend": "Adăugați un nou produs \/ serviciu",
+            "productServiceName": "Denumirea produsului \/ serviciului",
+            "price": "Preț",
+            "preferredCurrency": "Moneda preferată (implicit: Euro)",
+            "productImage": "Încărcarea unei imagini a produsului",
+            "amount": "Cantitate",
+            "totalPrice": "Prețul total",
+            "addButton": "Adăugare produs"
+        },
+        "balance": {
+            "title": "Soldul furnizorului - UNITE",
+            "notice": "Puteți efectua conversii de monedă aici, pentru a vedea care ar fi echivalentul soldului dvs. curent, dacă este convertit în alte monede naționale.",
+            "currentBalance": "Soldul curent al furnizorului",
+            "selectConvert": "Selectați altă monedă și convertiți soldul"
+        },
+        "bid-request": {
+            "title": "Detalii despre cererea de ofertă selectată - UNITE"
+        },
+        "bid-requests": {
+            "title": "Lista cererilor de ofertă - Furnizor - UNITE",
+            "removalConfirm": "Sigur eliminați definitiv această cerere de ofertă din Tabloul Dvs. de bord de Furnizor?",
+            "removalDone": "Ai anulat această comandă de la Cumpărător.",
+            "validBidsPlaced": "Aveți în prezent un număr de $ (0) oferte valide primite. Prețul lor total este: $ {0} $ {1} .",
+            "bidFromBuyer": "Cerere de ofertă de la cumpărător",
+            "noBids": "Nu ați primit nicio cerere de ofertă ca furnizor. Dacă doriți, puteți actualiza oferta dvs. de produse din pagina dvs. de profil.",
+            "totalBids": "Ați primit un total de $ {0} cereri de ofertă. Prețul lor total este: $ {1} $ {2} ."
+        },
+        "cancelBid": {
+            "title": "UNITE - Furnizor - Anulați comanda cumpărătorului",
+            "legend": "Anulare comandă cumpărător - Vă rugăm să completați câmpul necesar (*)",
+            "cancelOrder": "Anulați comanda cumpărătorului"
+        },
+        "confirmation": {
+            "title": "UNITE - Furnizor - Confirmare utilizator",
+            "legend": "Confirmați e-mailul furnizorului",
+            "email": "E-mail",
+            "confirm": "Confirmați e-mailul și contul"
+        },
+        "deactivate": {
+            "title": "UNITE - Dezactivați contul furnizorului",
+            "legend": "Dezactivați contul furnizorului - completați câmpurile (*) solicitate",
+            "email": "E-mail",
+            "name": "Numele companiei",
+            "reason": "Motivul pentru dezactivarea contului",
+            "deactivate": "Dezactivare cont",
+            "confirm": "Sigur dezactivați contul furnizorului?\nAceasta va elimina următoarele date:\n\nProdusele\/serviciile dvs.;\nCapacitățile tale;\nComenzile primite de la UNITE.\nNu veți fi vizibil pentru cumpărătorii care caută capacități ale Furnizorilor pe Site.",
+            "notice": "Dacă dezactivați temporar contul dvs. de furnizori, capacitatea, produsele și serviciile dvs. nu vor mai fi vizibile pentru Cumpărători. Când vă activați din nou contul la conectare, va trebui să vă editați \/ să vă salvați profilul, astfel încât să vă poată găsi din nou ofertele."
+        },
+        "delete": {
+            "title": "UNITE - Furnizor - Ștergere utilizator",
+            "confirm": "Sunteți pe cale să eliminați toate datele din UNITE. Acest lucru nu poate fi anulat. Vă rugăm să continuați numai dacă sunteți cu adevărat sigur.",
+            "legend": "Ștergere cont furnizor - Vă rugăm să completați câmpurile necesare (*)",
+            "email": "E-mail",
+            "name": "Numele Companiei",
+            "reason": "Motivul ștergerii contului",
+            "delete": "Ștergere cont"
+        },
+        "forgotPassword": {
+            "title": "UNITE - Cumpărător - Am uitat parola",
+            "confirmEmail": "Confirmați adresa de e-mail",
+            "email": "E-mail",
+            "reset": "Salt la Resetare"
+        },
+        "index": {
+            "title": "Tablou de bord pentru furnizori - UNITE",
+            "description": "Aceasta este pagina Tabloul de bord. Pentru a vă asigura că veți continua să apară în rezultatele căutării cumpărătorilor, vă rugăm să vă mențineți capacitățile și produsele actualizate.",
+            "balance": "Sold",
+            "balanceDescription": "Soldul dvs. este suma prețurilor din <i> Cererile dvs. de oferte acceptate <\/i> ale căror plăți au fost efectuate de către Cumpărători. <br> Vă puteți gestiona soldul accesând pagina dvs. de sold.",
+            "goToBalance": "Mergeți la sold",
+            "supplyDescription": "În prezent , aveți un număr de {productsLength} tipuri de produse, într-un număr total de {amount} elemente, iar prețul total al stocului Dvs. de aprovizionare este de {totalPrice} {currency} .",
+            "acceptedBids": "Cereri de ofertă acceptate",
+            "bidDirection": "Dacă doriți să măriți numărul solicitărilor de sume licitate acceptate, vă puteți edita capacitățile în profilul dvs.",
+            "goToProfile": "Mergi la profil"
+        },
+        "profile": {
+            "title": "Profilul furnizorului - UNITE",
+            "terminationText": "Sigur doriți să ștergeți contul dvs. de furnizor? <br> Acest lucru va elimina și: <br> Produsele \/ serviciile dvs.; <br> Capabilitățile tale; <br> Comenzile dvs. primite; <br> Token-urile dvs. de utilizator (dacă există); <br> Istoricul mesajelor dvs. de la UNITE. <br> <br> Dacă doriți doar să faceți o pauză, puteți dezactiva contul în schimb.",
+            "description": "Aceasta este pagina Tabloul de bord. Pentru a vă asigura că veți continua să apară în rezultatele căutării cumpărătorilor, vă rugăm să vă mențineți capacitățile și produsele actualizate."
+        },
+        "resend": {
+            "title": "UNITE - Cumpărător - Retrimitere token de confirmare",
+            "legend": "Retrimitere token de confirmare e-mail",
+            "email": "E-mail",
+            "resend": "Retrimitere token de confirmare"
+        },
+        "resetPassword": {
+            "title": "UNITE - Cumpărător - Resetați parola",
+            "legend": "Resetați parola",
+            "newPassword": "Parolă nouă",
+            "confirmPassword": "Confirmați parola",
+            "resetPassword": "Actualizați parola"
+        },
+        "signIn": {
+            "title": "Conectați-vă ca Furnizor - UNITE"
+        },
+        "signUp": {
+            "title": "Înscrieți-vă ca Furnizor - UNITE"
+        }
     }
 }

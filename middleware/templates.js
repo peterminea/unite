@@ -1,10 +1,10 @@
 const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const MongoClient = require('mongodb').MongoClient;
 const bcrypt = require("bcryptjs");
-const fs = require('fs');
+const fs = require('fs-extra');
 const BidRequest = require("../models/bidRequest");
 const ObjectId = require("mongodb").ObjectId;
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
@@ -12,6 +12,7 @@ const fetch = require('node-fetch');
 const internalIp = require('internal-ip');
 const { verifyBanNewUser, verifyBanExistingUser } = require('../middleware/verifyBanned');
 const search = require('../middleware/searchFlash');
+const jsonp = require("jsonp");
 const _ = require("underscore");
 
 const sendConfirmationEmail = (name, link, token, req) => {
@@ -529,15 +530,6 @@ const renderBidStatuses = async () => {
 }
 
 
-const getCancelTypesJson = function() { 
-  return {
-    USER_CANCEL: process.env.USER_CANCEL_TYPE,
-    BID_CANCEL: process.env.BID_CANCEL_TYPE,
-    USER_BAN: process.env.USER_BAN_TYPE
-  }
-};
-
-
 const uniqueJSONArray = (elem, array) => {
   for(let i of array) {
     if(i.id === elem.id) {
@@ -927,7 +919,201 @@ const saveBidBody = async (req, res, path) => {
 }
 
 
+const getCancelReasonTitles = async (objectType, isAdmin, isSupervisor) => {  
+  let val = objectType && isAdmin? { type: objectType , isAdmin: true } 
+    : objectType && isSupervisor? { type: objectType, isSupervisor: isSupervisor } 
+    : objectType? { type: objectType } : {};
+  
+  let titles = await getDataMongoose('CancelReasonTitle', val);
+
+  titles.sort(function(a, b) {
+    return a.name.localeCompare(b.name);
+  });
+  
+  return titles;
+}
+
+
+const stripeSecretKey = process.env.STRIPE_KEY_SECRET;
+const stripePublicKey = process.env.STRIPE_KEY_PUBLIC;
+const stripe = require("stripe")(stripeSecretKey);
+
+const completePurchase = (req, res, next) => {
+  const headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type"
+  };
+
+  stripe.customers
+    .create({
+      email: req.body.emailAddress,
+      //card: '4242424242424242'//
+      source: req.body.stripeTokenId
+    })
+    .then((customer) =>
+      stripe.charges.create({
+        amount: req.body.amount,
+        receipt_email: req.body.emailAddress,
+        description: req.body.description,
+        customer: customer.id,
+        //source: req.body.stripeTokenId,
+        currency: req.body.currency.toLowerCase()
+      })
+    )
+    .then(async (charge) => {
+      console.log("Payment successful!\n" + charge);
+      const response = {
+        headers,
+        statusCode: 200,
+        body: JSON.stringify({
+          message: "You have successfully paid for your items!",
+          charge: charge
+        })
+      };
+
+      //Update the Balance:
+      await MongoClient.connect(
+        URL,
+        { useUnifiedTopology: true },
+        (err, client) => {
+          if (err) {
+            console.error(err.message);
+            //req.flash('error', err.message);
+            return res.status(500).send({ msg: err.message });
+          }
+
+         let  db = client.db(BASE); //Right connection!
+          db.collection("buyers").updateOne(
+            { _id: req.body.buyerId },
+            { $set: { balance: req.body.newBalance } },
+            function(err, obj) {
+              if (err) {
+                console.error(err.message);
+                return res.status(500).send({ msg: err.message });
+              }
+            }
+          );
+        }
+      );
+
+      //Send an e-mail to user:
+      let mailOptions = {
+        from: "peter@uniteprocurement.com",
+        to: req.body.emailAddress,
+        subject: "Order Paid Successfully!",
+        text:
+          "Hello,\n\n" +
+          "We inform you that your purchase in value of" +
+          req.body.amount +
+          " " +
+          req.body.currency +
+          " has been successfully completed. Please wait for your delivery to finish.\nCurrently it was just a test, nothing for real yet though :)." +
+          "\n\nWith kind regards,\nThe UNITE Public procurement Platform Team"
+      };
+
+      sgMail.send(mailOptions, function(err, resp) {
+        if (err) {
+          console.error(err.message);
+          return res.status(500).send({ msg: err.message });
+        }
+        console.log(
+          "Message sent: " + resp ? resp.response : req.body.emailAddress
+        );
+        req.flash(
+          "success",
+          "A verification email has been sent to " + req.body.emailAddress,
+          +"."
+        );
+        res.json(response);
+      });
+    })
+    .catch((err) => {
+      console.log("Payment failed! Please repeat the operation.\n" + err);
+      /*const response = {
+        headers,
+        statusCode: 500,
+        body: JSON.stringify({
+          error: err.message
+        })
+      };*/
+
+      //res.json(response);
+      res.status(500).end();
+    });
+}
+
+
+const uniteIDAutocompleteBody = async (req, res) => {
+  let regex = new RegExp(req.query["term"], "i");
+  let val = regex? { organizationUniteID: regex } : {};  
+  let data = await getDataMongoose('Supervisor', val);
+
+  if (data && data.length && data.length > 0) {
+    let result = [];
+    
+    data.sort(function(a, b) {
+      return a.organizationUniteID.localeCompare(b.organizationUniteID);
+    });
+    
+    data.forEach(item => {
+      let obj = {
+        id: item._id,
+        name: item.organizationUniteID
+      };
+
+      result.push(obj);
+    }); 
+
+    res.jsonp(result);
+    } else {
+    req.flash("error", 'UNITE IDs not found!');
+  }  
+}
+
+const currencyAutocompleteBody = async (req, res) => {
+  let regex = new RegExp(req.query["term"], "i");
+  let val = regex? { value: regex } : {};
+  let data = await getDataMongoose('Currency', val);
+  
+  if (data && data.length && data.length > 0) {
+    let result = [];
+    data.sort((a, b) => {
+      return a.value.localeCompare(b.value);
+    });
+
+    data.forEach((item) => {     
+      result.push({
+        id: item._id,
+        name: item.value,
+        value: item.name
+      });
+    });
+
+    res.jsonp(result);
+    } else {
+    res.jsonp('Currencies not found!');
+  }
+}
+
+
+const deleteFileBody = (req, res) => {
+   //fs2.unlinkSync(req.body.file);
+  console.log(req.body.file);
+
+  fs.unlink(req.body.file, function(err) {
+    if (err) {
+      req.flash("error", err.message);
+      res.json(err);
+    }
+    //if no error, file has been deleted successfully
+    console.log("File deleted!");
+    req.flash("success", "File deleted!");
+    res.status(200).end();
+  });
+}
+
+
 const encryptionNotice = 'For your protection, UNITE uses encryption for your stored passwords.\nThus, it may take a certain amount of time for your encrypted password to be saved, after you press Sign Up or when you reset the password.\nThank you for your understanding, and remember that UNITE strives for ensuring a safe climate to its Users!';
 
 
-module.exports = { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendBanEmail, sendCancelBidEmail, prel, sortLists, getObjectMongo, getObjectMongoose, getDataMongo, getDataMongoose, uniqueJSONArray, getBidStatusesJson, renderBidStatuses, getCancelTypesJson, postSignInBody, getCatalogItems, getPlaceBidBody, saveBidBody, updateBidBody, encryptionNotice };
+module.exports = { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendBanEmail, sendCancelBidEmail, prel, sortLists, getObjectMongo, getObjectMongoose, getDataMongo, getDataMongoose, uniqueJSONArray, getBidStatusesJson, renderBidStatuses, postSignInBody, getCatalogItems, getPlaceBidBody, saveBidBody, updateBidBody, encryptionNotice, getCancelReasonTitles, uniteIDAutocompleteBody, currencyAutocompleteBody, deleteFileBody, completePurchase };

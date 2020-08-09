@@ -20,6 +20,10 @@ body {
   width: 180px
 }
 
+ol.languages-bar {
+  background-color: lightgray;
+}
+
 div.additionalSuppliers {
   color: red;
   text-decoration: italic;
@@ -40,6 +44,10 @@ p.additional-suppliers {
 
 .signup-notice p {  
     color: teal;  
+}
+
+input:required {
+  border: 1px solid red
 }
 
 .update-profile {

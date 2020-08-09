@@ -32,11 +32,11 @@ const {
   getDataMongo,
   getDataMongoose,
   getBidStatusesJson,
-  getCancelTypesJson,
   postSignInBody,
   saveBidBody,
   updateBidBody,
-  encryptionNotice
+  encryptionNotice,
+  getCancelReasonTitles
 } = require("../middleware/templates");
 
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
@@ -164,18 +164,39 @@ exports.getDeactivate = (req, res) => {
 }
 
 
-exports.getDelete = (req, res) => {
+exports.getDelete = async (req, res) => {
   let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
+  let titles = await getCancelReasonTitles(process.env.USER_CANCEL_TYPE, false, false);
   
   res.render('supervisor/delete', {
     id: req.params.id, 
+    titles: titles,
     organizationUniteID: req.params.organizationUniteID,
-    cancelReasonTypesJson: JSON.stringify(getCancelTypesJson()),
     successMessage: success,
     errorMessage: error
   });
 }
+
+
+exports.getDeleteBuyer = async (req, res) => {
+  let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  req.session.flash = [];
+  let titles = await getCancelReasonTitles(process.env.USER_CANCEL_TYPE, false, true);
+  
+  res.render('supervisor/deleteBuyer', {
+    id: req.params.id, 
+    titles: titles,
+    organizationUniteID: req.params.organizationUniteID,
+    successMessage: success,
+    errorMessage: error
+  });
+}
+
+
+exports.postDeleteBuyer = async function(req, res, next) {  
+  buyerDelete(req, res, req.body.id, false, true);
+};
 
 
 exports.getResendToken = (req, res) => {
@@ -206,15 +227,25 @@ exports.getChatLogin = (req, res) => {//We need a username, a room name, and a s
 }
 
 
-exports.getChat = (req, res) => {//Coming from the getLogin above.
+exports.getChat = async (req, res) => {//Coming from the getLogin above.
   let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   
-  res.render("supplier/chat", {
+  let messages = await getDataMongoose('Message', {
+      $or: [
+        { from: req.params.from, to: req.params.to },
+        { from: req.params.to, to: req.params.from }
+      ]
+    });
+ 
+  messages.sort((a, b) => (a.time > b.time ? 1 : b.time > a.time ? -1 : 0));
+  
+  res.render("chat", {
     successMessage: success,
     errorMessage: error,
     from: req.params.from,
     to: req.params.to,
+    messages: messages,
     username: req.params.username,
     room: req.params.room,
     fromName: req.params.fromName,
@@ -252,16 +283,13 @@ exports.postDeactivate = async (req, res) => {
 };
 
 
-exports.postDelete = function (req, res, next) {  
-  let id = req.body.id;
-  let uniteID = req.body.organizationUniteID;
-  supervisorDelete(req, res, id, uniteID);
+exports.postDelete = function (req, res, next) {
+  supervisorDelete(req, res, req.body.id, req.body.organizationUniteID);
 }
 
 
 exports.postConfirmation = async function (req, res, next) {
-  try {
-    
+  try {    
     let token = await getObjectMongoose('UserToken', { token: req.params.token, userType: TYPE });
     let user = await getObjectMongoose('Supervisor', { _id: token._userId, emailAddress: req.body.emailAddress });
 

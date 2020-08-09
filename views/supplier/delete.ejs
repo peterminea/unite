@@ -21,7 +21,14 @@
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
-      const x = JSON.parse($('#cancelReasonTypesValues span:first').text());
+      let data = [];
+      <% if(titles != null) { for(let s of titles) { %>
+      data.push({
+        id: '<%= s._id %>',
+        name: '<%= s.name %>'
+      });
+      <% } } %>
+      
       getCancelReasonTitles($('#mainForm'), $('input[name="_csrf"]').val(), '/cancelReasonTitles', x.USER_CANCEL, false, false);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       

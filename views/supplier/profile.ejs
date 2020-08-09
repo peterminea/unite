@@ -106,7 +106,7 @@
 
 <body>
   <nav pos="4" user="supplier" class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="/supplier">Supplier - UNITE</a>
+    <a class="navbar-brand" href="/supplier">Supplier Profile - UNITE</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -119,7 +119,7 @@
       <h5 class="card-header">Welcome!</h5>
       <div class="card-body">
         <h5 class="card-title">Hello, <%= profile.companyName %>!</h5>
-        <p class="card-text">This is your profile page. In order to ensure that you continue to appear in the search results of buyers, please keep your capabilities up-to-date.</p>
+        <p class="card-text">This is your profile page. In order to ensure that you continue to appear in the search results of buyers, please keep your capabilities and productsup-to-date.</p>
       </div>
     </div>
     
@@ -142,7 +142,7 @@
           <input required type="text" id="supplierName" name="companyName" class="form-control" value="<%= profile.companyName %>">
         </div>
         <div class="form-group">
-          <label>Email address*</label>
+          <label>E-mail address*</label>
           <input required type="email" id="emailAddress" name="emailAddress" class="form-control" value="<%= profile.emailAddress %>">
           <small class="text-muted form-text">Only company domains are allowed.</small>
         </div>
@@ -165,7 +165,7 @@
           <input required type="text" class="form-control" id="title" name="title" value="<%= profile.title %>">
         </div>
         <div class="form-group">
-          <label>Company Registration No</label>
+          <label>Companys Registration Number</label>
           <input type="text" class="form-control" id="companyRegistrationNo" name="companyRegistrationNo" value="<%= profile.companyRegistrationNo %>" required>
         </div>
         <div class="form-group">

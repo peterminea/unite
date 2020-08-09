@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Buyer - Bid on selected Product - UNITE</title>
+  <title>Buyer - Place Bid Request - UNITE</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="A cool thing made with Glitch">
@@ -40,7 +40,7 @@
   
   <body>
     <nav pos="" user="buyer" class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <a class="navbar-brand" href="/buyer">Buyer - Bid on Product - UNITE</a>
+      <a class="navbar-brand" href="/buyer">Buyer - Place Bid Request - UNITE</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -73,11 +73,11 @@
             <!-- To replace the first section below with the second section below, in case we choose multiple suppliers when Outside Catalog. Also, this will come against isSingleBid.-->
             <%  if(isSingleBid == true) { %>
             <div class="form-group">
-              <label class="col-form-label">Supplier Company</label>
+              <label class="col-form-label">Supplier's Company</label>
               <input type="text" class="form-control" id="supplierName" name="supplierName" value="<%= supplier.companyName %>" readonly>
             </div>
             <div class="form-group">
-              <label class="col-form-label">Supplier's E-mail Address*</label>
+              <label class="col-form-label">Supplier's E-mail Address</label>
               <input type="email" class="form-control" name="supplierEmail" value="<%= supplier.emailAddress %>" readonly>
             </div>
             <input type="hidden" name="supplierId" value="<%= supplier._id %>">
@@ -97,11 +97,11 @@
             <% } } %>
             
             <div class="form-group">
-              <label class="col-form-label">Buyer Organization</label>
+              <label class="col-form-label">Buyer's Organization Name</label>
               <input type="text" class="form-control" name="buyerName" value="<%= buyer.organizationName %>" readonly>
             </div>
             <div class="form-group">
-              <label class="col-form-label">Buyer's E-mail Address*</label>
+              <label class="col-form-label">Buyer's E-mail Address</label>
               <input type="email" class="form-control" name="buyerEmail" value="<%= buyer.emailAddress %>" readonly>
             </div>
             <div class="form-group">
@@ -109,11 +109,11 @@
               <input type="text" class="form-control" name="itemDescription" required>
             </div>
             <div class="form-group">
-              <label class="col-form-label">Item Description (Long)*</label>
+              <label class="col-form-label">Item Description <b>(Long)</b>*</label>
               <textarea class="form-control" name="itemDescriptionLong" required></textarea>
             </div>
             <div class="form-group">
-              <label class="col-form-label">Item Description URL (Long)</label>
+              <label class="col-form-label">Item Description URL</label>
               <div class="input-group">
                 <div class="input-group-prepend">
                   <span class="input-group-text" id="basic-addon3">http(s)://</span>
@@ -270,7 +270,7 @@
                 </span>
               </div>            
               <div class="form-group">
-                <label class=" col-form-label">Your Overall price:</label>
+                <label class=" col-form-label">Your Overall Price:</label>
                 <span class="form-control hid">
                   <span  class="bidPrice" id="sprice">0</span>
                   <span  class="bidCurrency" id="scurrency"></span>
