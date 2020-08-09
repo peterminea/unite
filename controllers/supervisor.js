@@ -35,6 +35,7 @@ const {
   postSignInBody,
   saveBidBody,
   updateBidBody,
+  getCurrenciesList,
   encryptionNotice,
   getCancelReasonTitles
 } = require("../middleware/templates");
@@ -246,6 +247,7 @@ exports.getChat = async (req, res) => {//Coming from the getLogin above.
     from: req.params.from,
     to: req.params.to,
     messages: messages,
+    user: process.env.USER_SPV,
     username: req.params.username,
     room: req.params.room,
     fromName: req.params.fromName,

@@ -40,7 +40,10 @@ const fileExists = (path) => {
 
 const prel = (req, isFloat, isInt) => {
   let arr = (req);
-  arr = arr.split(',');
+  console.log(req);
+  if(!(Array.isArray(arr)))
+    arr = arr.split(',');
+  
   let newProd = [];
   for (let i in arr) {
     newProd.push(isFloat? parseFloat(arr[i]).toFixed(2) : isInt? parseInt(arr[i]) : String(arr[i]));
@@ -431,12 +434,12 @@ const updateBidBody = (req, res, reqId, returnLink) => {
 }
 
 
-const getObjectMongo = async (db, table, obj) => {
+const getObjectMongo = async (db, table, obj, field) => {
   let myPromise = () => {
     return new Promise((resolve, reject) => {
       db
       .collection(table)
-      .findOne((typeof obj !== 'undefined' && obj instanceof Object)? obj : {}, function(err, data) {
+      .findOne((typeof obj !== 'undefined' && obj instanceof Object)? obj : {}, typeof field !== 'undefined' && field instanceof Object? field : {}, function(err, data) {
          err 
             ? reject(err) 
             : resolve(data);
@@ -449,10 +452,10 @@ const getObjectMongo = async (db, table, obj) => {
 };
 
 
-const getObjectMongoose = async (model, obj) => {
+const getObjectMongoose = async (model, obj, field) => {
   let myPromise = () => {
     return new Promise((resolve, reject) => {
-      eval(`let ${model} = require('../models/${lowerCase(model)}'); ${model}.findOne((typeof obj !== 'undefined' && obj instanceof Object)? obj : {}, (err, data) => { err? reject(err) : resolve(data); });`);
+      eval(`let ${model} = require('../models/${lowerCase(model)}'); ${model}.findOne((typeof obj !== 'undefined' && obj instanceof Object)? obj : {}, typeof field !== 'undefined' && field instanceof Object? field : {}, (err, data) => { err? reject(err) : resolve(data); });`);
     });
   };
 
@@ -461,12 +464,13 @@ const getObjectMongoose = async (model, obj) => {
 };
 
 
-const getDataMongo = async(db, table, obj) => {//DB connection active.
+const getDataMongo = async(db, table, obj, field) => {//DB connection active.
   let myPromise = () => {
     return new Promise((resolve, reject) => {
       db
       .collection(table)
-      .find(typeof obj !== 'undefined' && obj instanceof Object? obj : {})
+      .find(typeof obj !== 'undefined' && obj instanceof Object? obj : {},
+           typeof field !== 'undefined' && field instanceof Object? field : {})
       .toArray(function(err, data) {
          err 
             ? reject(err) 
@@ -486,10 +490,10 @@ function lowerCase(s) {
 }
 
 
-const getDataMongoose = async (model, obj) => {//A Mongoose model name.
+const getDataMongoose = async (model, obj, field) => {//A Mongoose model name.
   let myPromise = () => {
     return new Promise((resolve, reject) => {
-      eval(`let ${model} = require('../models/${lowerCase(model)}'); ${model}.find(typeof obj !== 'undefined' && obj instanceof Object? obj : {}).then((data, err) => { err || !data? reject(err) : resolve(data); });`);      
+      eval(`let ${model} = require('../models/${lowerCase(model)}'); ${model}.find(typeof obj !== 'undefined' && obj instanceof Object? obj : {}, typeof field !== 'undefined' && field instanceof Object? field : {}).then((data, err) => { err || !data? reject(err) : resolve(data); });`);      
     });
   };
 
@@ -713,7 +717,7 @@ const getCatalogItems = async () => {
 const getPlaceBidBody = async (req, res) => {
   let buyerId = (req.params.buyerId? req.params.buyerId : req.body.buyerId), productId = (req.params.productId), supplierId = (req.params.supplierId);
   let productIds = req.body.bidProductList? req.body.bidProductList : [], supplierIds = req.body.bidSupplierList? req.body.bidSupplierList : [];
-  //let otherSuppliers = req.body.allowMultiple? await getDataMongoose('Supplier') : null;
+  //let otherSuppliers = req.body.allowMultiple? await getDataMongoose('Supplier') : null;  
   
   if(!productIds.length && productId) {
     productIds.push(productId);
@@ -738,9 +742,7 @@ const getPlaceBidBody = async (req, res) => {
   let uniqueSupplierIds = suppIds.filter((v, i, a) => a.indexOf(v) === i);
   let buyer = await getObjectMongoose('Buyer', { _id: buyerId });
   let products = prodIds.length? await getDataMongoose('ProductService', { _id: { $in: prodIds } }) : [];//Empty if bidding outside the Catalog.
-  let suppliers = await getDataMongoose('Supplier', { _id: { $in: uniqueSupplierIds } });
-  let statuses = await getDataMongoose('BidStatus');
-  let catalogItems = prodIds.length? null : await getCatalogItems();
+  let suppliers = await getDataMongoose('Supplier', { _id: { $in: uniqueSupplierIds } });  
   
   if(!buyer || !products.length || !suppliers.length || !statuses.length) {
     req.flash('error', 'Data not found in the database!');
@@ -753,66 +755,77 @@ const getPlaceBidBody = async (req, res) => {
       if(!fileExists(products[i].productImage))
         products[i].productImage = '';
       
-      suggestionsList = await suggest(products[i], buyer[0]._id);
+      suggestionsList = await suggest(products[i], buyer._id);     
+      
       for(let i of suggestionsList) {
-        suggestions.push(i);      
+        suggestions.push(i);
+      }    
+    }
+
+    if(suggestionsList.length) {
+      suggestionsList = _.uniq(suggestions, false, function(item) { return item.id; });  
+      let len = suggestionsList.length;
+      suggestions = [];
+
+      while(1) {
+        let num = parseInt(Math.random() * len);
+        suggestions.push(suggestionsList[num]);
+        console.log(suggestions);
+
+        if(suggestions.length > 1) 
+          suggestions = _.uniq(suggestions, false, function(item) { return item.id; });
+          //Keep the first [const] suggestions:
+          if(suggestions.length == process.env.MAX_PROD_SUGGESTED)
+            break;
       }
+
+      suggestions.sort(function(a, b) {
+        return a.productName.localeCompare(b.productName);
+      });
     }
-
-    suggestionsList = _.uniq(suggestions, false, function(item) { return item.id; });  
-    let len = suggestionsList.length;
-    suggestions = [];
-
-    while(1) {
-      let num = parseInt(Math.random() * len);
-      suggestions.push(suggestionsList[num]);
-      if(suggestions.length > 1) 
-        suggestions = _.uniq(suggestions, false, function(item) { return item.id; });
-        //Keep the first [const] suggestions:
-        if(suggestions.length == process.env.MAX_PROD_SUGGESTED)
-          break;
-    }
-
-    suggestions.sort(function(a, b) {
-      return a.productName.localeCompare(b.productName);
-    });
   }
 
+  let statuses = await getDataMongoose('BidStatus');
+  let catalogItems = (prodIds.length)? [] : await getCatalogItems();
+  let currencies = await getCurrenciesList();
   let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
   req.session.flash = [];
   let isMultiProd = prodIds.length > 1;
   let isMultiSupp = uniqueSupplierIds.length > 1;
-  /*
+  let statusesJson = JSON.stringify(getBidStatusesJson());  
+  
   console.log(buyerId + ' ' + productId + ' ' + supplierId);
   console.log(isMultiProd + ' ' + !isMultiProd + ' ' + !products.length);
   console.log(suppliers.length + ' ' + req.body.bidSupplierList + ' ' + isMultiSupp);  
-  throw new Error();*/
-
-  res.render("buyer/placeBid", {
-    successMessage: success,
-    errorMessage: error,
-    isMultiProd: isMultiProd,
-    isMultiSupp: isMultiSupp,
-    isMultiBid: isMultiSupp,
-    isSingleBid: !isMultiSupp,
-    isSingleProd: !isMultiProd,
-    isNoProd: !products.length,//Outside Catalog.
-    MAX_PROD: process.env.BID_MAX_PROD,
-    MAX_AMOUNT: process.env.MAX_PROD_PIECES,
-    BID_DEFAULT_PRICE: process.env.BID_DEFAULT_PRICE,
-    BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
-    FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
-    statuses: statuses,
-    statusesJson: JSON.stringify(getBidStatusesJson()),
-    suggestions: suggestions,
-    buyer: buyer,
-    path: req.params.productId? '../../../' : '../',
-    product: products.length? products[0] : null,
-    supplier: suppliers[0],
-    catalogItems: catalogItems,
-    products: products,
-    suppliers: suppliers
-  });
+  //throw new Error();
+  setTimeout(function() {
+    res.render("buyer/placeBid", {
+        successMessage: success,
+        errorMessage: error,
+        currencies: currencies,
+        isMultiProd: isMultiProd,
+        isMultiSupp: isMultiSupp,
+        isMultiBid: isMultiSupp,
+        isSingleBid: !isMultiSupp,
+        isSingleProd: !isMultiProd,
+        isNoProd: !products.length,//Outside Catalog.
+        MAX_PROD: process.env.BID_MAX_PROD,
+        MAX_AMOUNT: process.env.MAX_PROD_PIECES,
+        BID_DEFAULT_PRICE: process.env.BID_DEFAULT_PRICE,
+        BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
+        FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
+        statuses: statuses,
+        statusesJson: statusesJson,
+        suggestions: suggestions,
+        buyer: buyer,
+        path: req.params.productId? '../../../' : '../',
+        product: products.length? products[0] : null,
+        supplier: suppliers[0],
+        catalogItems: catalogItems,
+        products: products,
+        suppliers: suppliers
+      });
+    }, 3000);
 }
 
 
@@ -1042,7 +1055,7 @@ const completePurchase = (req, res, next) => {
     });
 }
 
-
+/*
 const uniteIDAutocompleteBody = async (req, res) => {
   let regex = new RegExp(req.query["term"], "i");
   let val = regex? { organizationUniteID: regex } : {};  
@@ -1055,7 +1068,7 @@ const uniteIDAutocompleteBody = async (req, res) => {
       return a.organizationUniteID.localeCompare(b.organizationUniteID);
     });
     
-    data.forEach(item => {
+    data.forEach((item) => {
       let obj = {
         id: item._id,
         name: item.organizationUniteID
@@ -1067,33 +1080,8 @@ const uniteIDAutocompleteBody = async (req, res) => {
     res.jsonp(result);
     } else {
     req.flash("error", 'UNITE IDs not found!');
-  }  
-}
-
-const currencyAutocompleteBody = async (req, res) => {
-  let regex = new RegExp(req.query["term"], "i");
-  let val = regex? { value: regex } : {};
-  let data = await getDataMongoose('Currency', val);
-  
-  if (data && data.length && data.length > 0) {
-    let result = [];
-    data.sort((a, b) => {
-      return a.value.localeCompare(b.value);
-    });
-
-    data.forEach((item) => {     
-      result.push({
-        id: item._id,
-        name: item.value,
-        value: item.name
-      });
-    });
-
-    res.jsonp(result);
-    } else {
-    res.jsonp('Currencies not found!');
   }
-}
+}*/
 
 
 const deleteFileBody = (req, res) => {
@@ -1113,7 +1101,27 @@ const deleteFileBody = (req, res) => {
 }
 
 
+const getCurrenciesList = async () => {  
+  let result = [], data = await getDataMongoose('Currency');
+  
+  if (data && data.length && data.length > 0) {  
+    data.sort((a, b) => {
+      return a.value.localeCompare(b.value);
+    });
+
+    data.forEach((item) => {     
+      result.push({
+        id: item._id,
+        name: item.value,
+        value: item.name
+      });
+    });
+  }
+  
+  return result;
+}
+
 const encryptionNotice = 'For your protection, UNITE uses encryption for your stored passwords.\nThus, it may take a certain amount of time for your encrypted password to be saved, after you press Sign Up or when you reset the password.\nThank you for your understanding, and remember that UNITE strives for ensuring a safe climate to its Users!';
 
 
-module.exports = { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendBanEmail, sendCancelBidEmail, prel, sortLists, getObjectMongo, getObjectMongoose, getDataMongo, getDataMongoose, uniqueJSONArray, getBidStatusesJson, renderBidStatuses, postSignInBody, getCatalogItems, getPlaceBidBody, saveBidBody, updateBidBody, encryptionNotice, getCancelReasonTitles, uniteIDAutocompleteBody, currencyAutocompleteBody, deleteFileBody, completePurchase };
+module.exports = { fileExists, sendConfirmationEmail, sendCancellationEmail, sendExpiredBidEmails, sendInactivationEmail, resendTokenEmail, sendForgotPasswordEmail, sendResetPasswordEmail, sendBanEmail, sendCancelBidEmail, prel, sortLists, getObjectMongo, getObjectMongoose, getDataMongo, getDataMongoose, uniqueJSONArray, getBidStatusesJson, renderBidStatuses, postSignInBody, getCatalogItems, getPlaceBidBody, saveBidBody, updateBidBody, encryptionNotice, getCancelReasonTitles, getCurrenciesList, deleteFileBody, completePurchase };

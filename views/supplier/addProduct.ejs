@@ -27,7 +27,17 @@
         errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
         let token = $("input[name='_csrf']").val();
         let defaultCurr = "<%= DEFAULT_CURR %>";
-        initBaseRates(fx, 'select.currency', '/currencyAutocomplete', token, defaultCurr, true);
+        let data = [];
+
+        <% if(currencies != null) { for(let c of currencies) { %>
+        data.push({
+          id:    '<%= c.id %>',
+          name:  '<%= c.name %>',
+          value: '<%= c.value %>'
+        })
+        <% } } %>
+        
+        initBaseRates(fx, 'select.currency', data, token, defaultCurr, true);
         
         $('#price,#amount').on('change paste', function() {
           let price = $('#price').val(), amount = $('#amount').val();

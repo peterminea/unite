@@ -53,6 +53,7 @@ const {
   getCatalogItems,
   getPlaceBidBody,
   updateBidBody,
+  getCurrenciesList,
   encryptionNotice,
   getCancelReasonTitles
 } = require("../middleware/templates");
@@ -161,13 +162,13 @@ exports.postIndex = async (req, res) => {
       }
     }
 
-      let totalBidsPrice = 0;
+    let totalBidsPrice = 0;
 
-      for (let i in bids) {
-        totalBidsPrice += fx(parseFloat(bids[i].buyerPrice).toFixed(2))
-          .from(bids[i].supplierCurrency)
-          .to(process.env.BID_DEFAULT_CURR);
-      }              
+    for (let i in bids) {
+      totalBidsPrice += fx(parseFloat(bids[i].buyerPrice).toFixed(2))
+        .from(bids[i].supplierCurrency)
+        .to(process.env.BID_DEFAULT_CURR);
+    }              
 
     let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
     req.session.flash = [];
@@ -187,7 +188,7 @@ exports.postIndex = async (req, res) => {
       errorMessage: error,
       statusesJson: JSON.stringify(getBidStatusesJson())
     });
-  } else if(req.body.outsideCatalog) {//Open Bid - no products from the Cata-Log.    
+  } else if(req.body.outsideCatalog) {//Open Bid - no products from the Catalog.    
     getPlaceBidBody(req, res);
   } else {
     res.redirect("/buyer");
@@ -266,6 +267,7 @@ exports.getChat = async (req, res) => {
     successMessage: success,
     errorMessage: error,
     messages: messages,
+    user: process.env.USER_BUYER,
     from: req.params.from,
     to: req.params.to,
     username: req.params.username,
@@ -745,7 +747,8 @@ exports.getSignIn = (req, res) => {
 exports.getSignUp = async (req, res) => {
   if(!req.session.buyerId) {
     let countries = await getDataMongoose('Country');
-    let ids = await getDataMongoose('Supervisor');
+    let ids = await getDataMongoose('Supervisor', {}, {organizationUniteID: 1});
+    let currencies = await getCurrenciesList();
     let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
     req.session.flash = [];
 
@@ -765,6 +768,7 @@ exports.getSignUp = async (req, res) => {
       DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
       captchaSiteKey: captchaSiteKey,
       FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
+      currencies: currencies,
       uniteIds: uniteIds,
       encryptionNotice: (encryptionNotice),
       countries: countries,
@@ -776,9 +780,12 @@ exports.getSignUp = async (req, res) => {
 };
 
 
-exports.getBalance = (req, res) => {
+exports.getBalance = async (req, res) => {
+  let currencies = await getCurrenciesList();
+  
   res.render("buyer/balance", {
     balance: req.session.buyer.balance,
+    currencies: currencies,
     appId: process.env.EXCH_RATES_APP_ID,
     currency: req.session.buyer.currency
   });
@@ -1130,10 +1137,12 @@ exports.getProfile = async (req, res) => {
   let success = search(req.session.flash, "success"), error = search(req.session.flash, "error");
   req.session.flash = [];  
   const countries = await getDataMongoose('Country'); 
+  let currencies = await getCurrenciesList();
 
   res.render("buyer/profile", {
     DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
     FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
+    currencies: currencies,
     successMessage: success,
     countries: countries,
     errorMessage: error,

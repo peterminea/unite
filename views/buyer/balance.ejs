@@ -27,12 +27,22 @@
       let defaultBalance = $('#defaultBalance').val();
       //errorSuccess(Swal, '< %= errorMessage %>', '< %= successMessage %>');      
       $('#balance').val(parseFloat(defaultBalance).toFixed(2) + ' ' + defaultCurr);
+      let data = [];
       
-      initBaseRates(fx, '#currency', '/currencyAutocomplete', $('#token').val())
+      <% if(typeof currencies !== 'undefined' && currencies != null) { for(let c of currencies) { %>
+      data.push({
+        id:    '<%= c.id %>',
+        name:  '<%= c.name %>',
+        value: '<%= c.value %>'
+      })
+      <% } } %>
+      
+     // alert(JSON.stringify(data));
+      initBaseRates(fx, '#currency', data, $('#token').val())
         .then((fx) => {
-        setTimeout(function() {
+        //setTimeout(function() {
           $('#currency').find(`option[value='EUR']`).prop('selected', true);  
-        }, 1000);
+       // }, 10);
         
         $('#currency').off('change').on('change', function() {
           if(!($(this).val()))

@@ -1,5 +1,4 @@
-const autocomp = function(obj, data, enter) {
-  //Not suitable for modals.
+const autocomp = function(obj, data, enter) {  
   let sel = obj.parent("div").find("select");
   for (const i in data) {
     const opt =
@@ -194,69 +193,59 @@ function expiredBidsPriceFormatter(cellvalue, options, rowObject) {
     ];
 
 
-function getCurrenciesList(elem, url, token, defaultBidCurrency, cancelChange) {
+function getCurrenciesList(elem, data, token, defaultBidCurrency, cancelChange) {
   let obj = $("" + elem + "");
-  
-  $.ajax({
-    url: url,
-    headers: { "X-CSRF-Token": token },
-    datatype: "jsonp",
-    type: "POST",
-    success: function(data) {
-       obj.each(function(ind, elem) {
-         let obj2 = $(elem);
-         
-        if (!data || !data.length || treatError(data, "loading currencies")) {
-          //obj2.val('');
-          obj2.append("<option>No results found.</option>");
-          return false;
-        }
 
-        obj2.append("<option></option>");
-        for (let i in data) {
-          let opt =
-            "<option " +
-            'style="word-wrap: break-word; width: 50px" title="' +
-            data[i].value +
-            '" value="' +
-            data[i].name +
-            '">' +
-            data[i].name +
-            "</option>";
-          obj2.append(opt);
-        }
+   obj.each(function(ind, elem) {
+     let obj2 = $(elem);
 
-        obj2
-          .find('option[value="' + defaultBidCurrency + '"]')
-          .prop('selected', true);
-
-        if($('span.bidCurrency').length) {
-          $('span.bidCurrency').each(function() {
-            $(this).text(defaultBidCurrency);
-            });
-
-          if($('select.productsList').length) {
-            $('select.productsList').each(function(ind, elem) {
-              let opt = $(elem).find('option:selected');
-
-              if(opt && opt.length && opt.text() && !(opt.text().toLowerCase().includes('no results found'))) {
-                $(elem)
-                  .addClass('init')
-                  .trigger('change');
-              }
-            });
-          }
-        }
-
-        if(!cancelChange)
-          obj2.addClass('init').trigger('change');
-      });
-    },
-    error: function(err) {
-      alert(err);
+    if (!data || !data.length || treatError(data, "loading currencies")) {
+      //obj2.val('');
+      obj2.append("<option>No results found.</option>");
+      return false;
     }
-  }); 
+
+    obj2.append("<option></option>");
+    for (let i in data) {
+      let opt =
+        "<option " +
+        'style="word-wrap: break-word; width: 50px" title="' +
+        data[i].value +
+        '" value="' +
+        data[i].name +
+        '">' +
+        data[i].name +
+        "</option>";
+      obj2.append(opt);
+    }
+
+    obj2
+      .find('option[value="' + defaultBidCurrency + '"]')
+      .prop('selected', true);
+
+    if($('span.bidCurrency').length) {
+      $('span.bidCurrency').each(function() {
+        $(this).text(defaultBidCurrency);
+        });
+
+      if($('select.productsList').length) {
+        $('select.productsList').each(function(ind, elem) {
+          let opt = $(elem).find('option:selected');
+
+          if(opt && opt.length && opt.text() && !(opt.text().toLowerCase().includes('no results found'))) {
+            $(elem)
+              .addClass('init')
+              .trigger('change');
+          }
+        });
+      }
+    }
+
+    if(!cancelChange)
+      obj2.addClass('init').trigger('change');
+  });    
 }
+
 
 function getProductsList(elem, url, token) {
   //For <select> drop-down currencies.
@@ -2361,14 +2350,13 @@ $(document).ready(function() {
   });
   
   
-  $('.openBid').on('click', function(e) {
-    e.preventDefault();
-    
+  $('.openBid').click(function() {
+    //e.preventDefault();
     let id = getIdClear($(this));
     let idsList = $('#bidSupplierList'+id);    
     let values = idsList.val().split(',');
     idsList.val(values);
-    $(this).parent('div').parent('form').submit();
+    
     /*
     const swalWithBootstrapButtons = Swal.mixin({
       customClass: {
