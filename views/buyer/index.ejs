@@ -36,7 +36,6 @@
       getAutocomplete('#search', '/capabilityInputAutocomplete', token, true);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>'); 
       let defaultBidCurrency = '<%= BID_DEFAULT_CURR %>';      
-      initBaseRates(fx, 'select.buyerCurrency', '/currencyAutocomplete', token, defaultBidCurrency);//Preferred currency for Buyer.
       
       $('.viewBids').on('click', function(e) {
         e.preventDefault();
@@ -125,18 +124,19 @@
     <div class="bodyBuilder">
       <% let i = 0; if (suppliers != null) { for (supplier of suppliers) { i++; %>
       <div class="card mt-4 suppliersLive">
-        <h5 class="card-header bg-dark text-white"><%= supplier.companyName %></h5>
-        <form method='POST'>
+        <h5 class="card-header bg-dark text-white"><%= supplier.companyName %></h5>        
           <div class="card-body">
             <h5 class="card-title">Contact Name: <%= supplier.contactName %></h5>
             <p class="card-text">Capability Description: <%= supplier.capabilityDescription %></p>
-            <input type="hidden" name="buyerId" value="<%= buyer._id %>" />
-            <input type="hidden" name="supplierId" value="<%= supplier._id %>" />
-            <input type='hidden' id='bidSupplierList_<%= i %>' name='bidSupplierList' value="<%= supplier._id %>">
-            <input type="hidden" name="outsideCatalog" value="0" />
-            <input type="hidden" name="allowMultiple" value="false" />
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-            <button class="btn btn-primary ml-2 openBid" initialId="<%= supplier._id %>" id="openBid_<%= i %>" style="float: right">Request a Bid</button>
+            <form class="my-2 my-lg-2" method="POST">
+              <input type="hidden" name="buyerId" value="<%= buyer._id %>" />
+              <input type="hidden" name="supplierId" value="<%= supplier._id %>" />
+              <input type='hidden' id='bidSupplierList_<%= i %>' name='bidSupplierList' value="<%= supplier._id %>">
+              <input type="hidden" name="outsideCatalog" value="0" />
+              <input type="hidden" name="allowMultiple" value="false" />
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <button type='submit' class="btn btn-primary ml-2 openBid" initialId="<%= supplier._id %>" id="openBid_<%= i %>" style="float: right">Request a Bid</button>
+            </form>
             <button class="btn btn-dark" style="float: right" data-target="#comp_<%= i %>" data-toggle="modal">Supplier Details</button>
             <button class="btn btn-dark viewBids" supplierId="<%= supplier._id %>" buyerId="<%= buyer._id %>" buyerCurrency="<%= buyer.currency %>" buyerBalance="<%= buyer.balance %>" style="margin-right: 10px; float: right">View Bids</button>
           </div>
@@ -157,8 +157,7 @@
             </div>
             <div class='additionalSuppliers'>
             </div>
-          </div>          
-          </form>
+          </div>
       
         <!-- Modal view of Supplier Details (read-only mode) -->
         <div class="modal fade" id="comp_<%= i %>" tabindex="-1" role="dialog" aria-hidden="true">
@@ -171,7 +170,6 @@
                 </button>
               </div>
               <div class="modal-body">
-                <form>                  
                   <div class="form-group">
                     <label>E-mail address</label>
                     <input type="email" class="form-control" readonly value="<%= supplier.emailAddress %>"> </div>
@@ -321,8 +319,7 @@
                       </label>
                     </div>
                   </div>
-                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                </form>
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />                
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>

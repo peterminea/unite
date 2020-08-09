@@ -33,7 +33,17 @@
       getAutocomplete('#capabilityDescription', '/capabilityInputAutocomplete', token);
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');      
       let defaultCurr = "<%= DEFAULT_CURR %>";
-      initBaseRates(fx, 'select.currency', '/currencyAutocomplete', token, defaultCurr);
+      let data = [];
+      
+      <% if(typeof currencies !== 'undefined' && currencies != null) { for(let c of currencies) { %>
+      data.push({
+        id:    '<%= c.id %>',
+        name:  '<%= c.name %>',
+        value: '<%= c.value %>'
+      })
+      <% } } %>
+                   
+      initBaseRates(fx, 'select.currency', data, token, defaultCurr);
       
       $("input.number").inputFilter(function(value) {
         return /^\d*$/.test(value);

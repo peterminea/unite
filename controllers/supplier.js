@@ -43,6 +43,7 @@ const {
   postSignInBody,
   saveBidBody,
   updateBidBody,
+  getCurrenciesList,
   encryptionNotice,
   getCancelReasonTitles
 } = require("../middleware/templates");
@@ -83,12 +84,14 @@ exports.getIndex = async (req, res) => {
 }
 
 
-exports.getAddProduct = (req, res) => {
+exports.getAddProduct = async (req, res) => {
   let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
+  let currencies = await getCurrenciesList();
   req.session.flash = [];
   
   res.render("supplier/addProduct", {
     supplierId: req.session.supplier._id,
+    currencies: currencies,
     DEFAULT_CURR: process.env.SUPP_DEFAULT_CURR,
     FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
     successMessage: success,
@@ -407,6 +410,7 @@ exports.getSignUp = async (req, res) => {
     let countries = await getDataMongoose('Country');
     let industries = await getDataMongoose('Industry');
     let capabilities = await getDataMongoose('Capability');
+    let currencies = await getCurrenciesList();
    
     let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
     req.session.flash = [];
@@ -427,6 +431,7 @@ exports.getSignUp = async (req, res) => {
       MAX_PROD: process.env.SUPP_MAX_PROD,
       DEFAULT_CURR: process.env.SUPP_DEFAULT_CURR,
       FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
+      currencies: currencies,
       encryptionNotice: encryptionNotice,
       countries: countries,
       industries: industries,
@@ -702,6 +707,7 @@ exports.getChat = async (req, res) => {//Coming from the getLogin above.
     successMessage: success,
     errorMessage: error,
     messages: messages,
+    user: process.env.USER_SUPPLIER,
     from: req.params.from,
     to: req.params.to,
     username: req.params.username,
@@ -834,7 +840,8 @@ exports.getProfile = async (req, res) => {
   if (!req || !req.session) 
     return false;
   
-  console.log(req.connection.remoteAddress);    
+  console.log(req.connection.remoteAddress);
+  let currencies = await getCurrenciesList();
   const supplier = req.session.supplier;
   let products = await getDataMongoose('ProductService', { supplier: supplier._id });
   let countries = await getDataMongoose('Country');
@@ -873,6 +880,7 @@ exports.getProfile = async (req, res) => {
     countries: countries,
     industries: industries,
     capabilities: capabilities,
+    currencies: currencies,
     MAX_PROD: process.env.SUPP_MAX_PROD,
     DEFAULT_CURR: process.env.SUPP_DEFAULT_CURR,
     FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
@@ -944,9 +952,12 @@ exports.getBidRequests = async (req, res) => {
 };
 
 
-exports.getBalance = (req, res) => {
+exports.getBalance = async (req, res) => {
+  let currencies = await getCurrenciesList();
+  
   res.render("supplier/balance", { 
     balance: req.session.supplier.balance,
+    currencies: currencies,
     appId: process.env.EXCH_RATES_APP_ID,
     currency: req.session.supplier.currency
   });

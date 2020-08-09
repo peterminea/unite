@@ -63,10 +63,10 @@
     "pug": "^3.0.0",
     "lingua": "^0.4.0",
     "@lokalise/node-api": "^5.0.0",
-    "canvas": "^2.6.1",
     "fs-extra": "^9.0.1",
     "cookies": "^0.7.3",
-    "traverse": "^0.6.6"
+    "traverse": "^0.6.6",
+    "canvas-prebuilt": "^1.6.11"
   },
   "engines": {
     "node": "12.x"

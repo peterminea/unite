@@ -57,13 +57,13 @@ const socket = socketio(server);
 const bcrypt = require('bcryptjs');
 const { deleteFileBody, getObjectMongo, getObjectMongoose, getDataMongo, getDataMongoose, uniteIDAutocompleteBody, currencyAutocompleteBody, completePurchase } = require('./middleware/templates');
 const lingua = require('lingua');
-
+/*
  i18next
     .use(i18nextMiddleware.LanguageDetector)
     .use(Backend)
     .init({
       backend: {
-        loadPath: /*__dirname*/ 'public' + '/locales/{{lng}}/{{ns}}.json'
+        loadPath:  'public' + '/locales/{{lng}}/{{ns}}.json' //__dirname
       },
       debug: true,
       detection: {
@@ -75,7 +75,7 @@ const lingua = require('lingua');
       fallBackLng: ['en']
     });
 
-app.use(i18nextMiddleware.handle(i18next));
+app.use(i18nextMiddleware.handle(i18next));*/
 mongoose.Promise = global.Promise;
 mongoose.set("useCreateIndex", true);
 
@@ -283,17 +283,6 @@ app.post("/exists", function(req, res) {
 });
 
 
-//Autocomplete fields:
-app.post("/uniteIDAutocomplete", async function(req, res, next) {
- uniteIDAutocompleteBody(req, res);
-});
-
-
-app.post("/currencyAutocomplete", async function(req, res, next) {
- currencyAutocompleteBody(req, res);
-});
-
-
 let db;
 if (1 == 2)
   MongoClient.connect(URI, { useUnifiedTopology: true }, async (err, client) => {
@@ -302,10 +291,7 @@ if (1 == 2)
       throw err;
     }
 
-    db = client.db(BASE); //Right connection! 
-    
-    db.collection('buyers').updateMany({}, { $set: { website: 'https://www.governor.gov', facebookURL: 'https://www.facebook.com/governor', instagramURL: 'https://www.instagram.com/governor', twitterURL: 'https://www/twitter.com/governor', linkedinURL: 'https://www.linkedin.com/profile/governor', otherSocialMediaURL: 'https://www.governor.net' } }, function(err, obj) {});
-    
+    db = client.db(BASE); //Right connection!
     process.on("uncaughtException", function(err) {
       console.error(err.message);
     });    

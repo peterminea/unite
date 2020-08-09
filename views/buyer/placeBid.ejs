@@ -33,7 +33,17 @@
         let token = $("input[name='_csrf']").val();
         errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
         let defaultBidCurrency = '<%= BID_DEFAULT_CURR %>';
-        initBaseRates(fx, 'select.buyerCurrency', '/currencyAutocomplete', token, defaultBidCurrency);
+        let data = [];
+      
+        <% if(typeof currencies !== 'undefined' && currencies != null) { for(let c of currencies) { %>
+        data.push({
+          id:    '<%= c.id %>',
+          name:  '<%= c.name %>',
+          value: '<%= c.value %>'
+        })
+        <% } } %>
+      
+        initBaseRates(fx, 'select.buyerCurrency', data, token, defaultBidCurrency);
     });
   </script>
   </head>

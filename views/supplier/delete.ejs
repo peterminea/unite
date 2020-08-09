@@ -71,12 +71,7 @@
             <textarea required rows="10" cols="50" class="form-control" id="reason" name="reason"></textarea>
           </div>
           <input type="hidden" name="type" value="User Cancellation">          
-          <input type="hidden" name="userType" value="Supplier">
-          <% if (cancelReasonTypesJson != null) { %>
-            <div style="visibility: hidden" id="cancelReasonTypesValues">            
-                <span class='statuses'><%= cancelReasonTypesJson %></span>          
-            </div>
-          <% } %>
+          <input type="hidden" name="userType" value="Supplier">         
           <div class="form-group">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <button type="submit" id="delete" title="Delete Account" class="btn btn-primary btn-block btn-lg">Delete Account</button>

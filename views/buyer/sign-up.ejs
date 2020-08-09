@@ -31,7 +31,17 @@
         getAutocomplete('#country', '/countryAutocomplete', token);
         errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
         let defaultCurr = "<%= DEFAULT_CURR %>";
-        initBaseRates(fx, 'select.currency', '/currencyAutocomplete', token, defaultCurr);        
+        let data = [];
+      
+        <% if(typeof currencies !== 'undefined' && currencies != null) { for(let c of currencies) { %>
+        data.push({
+          id:    '<%= c.id %>',
+          name:  '<%= c.name %>',
+          value: '<%= c.value %>'
+        })
+        <% } } %>
+                     
+        initBaseRates(fx, 'select.currency', data, token, defaultCurr);        
        
         $('select.currency')
           .find('option[value="'+defaultCurr+'"]')
