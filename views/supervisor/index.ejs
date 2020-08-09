@@ -11,20 +11,30 @@
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/messages.css">
   <link rel="stylesheet" href="/jquery-ui.css">
-  <link rel="stylesheet" href="/bootstrap.min.css">  
-  <script src="/jquery.min.js"></script>
+  <link rel="stylesheet" href="/bootstrap.min.css">
+  <link rel="stylesheet" href="/ui.jqgrid.min.css">
+  <link rel="stylesheet" href="/ui.multiselect.min.css">
+ <!--  <script src="/jquery.min.js"></script> -->
+  <script  src="https://code.jquery.com/jquery-3.5.1.js"  integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" 
+  crossorigin="anonymous"></script>
   <script src="/jquery-ui.min.js"></script>
   <script src="/popper.min.js"></script>
   <script src="/bootstrap.min.js"></script>
-  <script src="/index.min.js"></script>
   <script src="/sweetalert2@9.min.js"></script>
+  <script src="/index.min.js"></script>
+  <!-- <script src="/money.min.js"></script> -->
+  <script src="/money.js"></script>
+  <script src="/jquery.simulate.js"></script>
+  <script src="/jquery.jqgrid.min.js"></script>
+  <script src="/grid.locale-en.js"></script>
   <script src="/https.js"></script>
+  <script src="/chatUsers.js"></script>
   <script src="/functions.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
       let token = $("input[name^='_csrf']").first().val();
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
-      prepareSortTable();
+      //prepareSortTable();
     });
   </script>
 </head>
@@ -52,7 +62,7 @@
         </h5>        
         <p style="font-family: verdana; font-size: 11pt; color: green">With your UNITE ID, new buyers can register on the website and start searching for suppliers. If you change the UNITE ID, please announce your members.</p>
         <div class="form-group">
-          <label>Your Unique Unite ID</label>
+          <label>Your Unique UNITE ID</label>
           <input type="text" class="form-control" readonly value="<%= supervisor.organizationUniteID %>">
         </div>
       </div>
@@ -67,29 +77,26 @@
     </div>
     <script type="text/javascript">
     var data = [];
+      
     var colModelSupervBuyers = [
-      { name: 'deptAgencyGroup', label: 'Department/Agency Group', align: 'center', search: true, width: 210},
-      { name: 'contactName', label: 'Contact Name', align: 'center', sorttype: 'text', search: true, width: 220},      
+      { name: 'deptAgencyGroup', label: 'Department/Agency Group', align: 'center', search: true, width: 150},
+      { name: 'contactName', label: 'Contact Name', align: 'center', sorttype: 'text', search: true, width: 140},      
       { name: 'balance', label: 'Buyer\'s Balance', align: 'center', template: 'number', sorttype: 'number', search: true, width: 100},
       { name: 'isActive', label: 'Is Active?', align: 'center', search: true, width: 100 },
-      { name: 'totalBids', label: 'Total Bids Count', align: 'center', search: true, width: 210},
-      { name: 'totalBidsPrice', label: 'Total Bids Price', align: 'center', formatter: totalBidsPriceFormatter, unformat: priceUnformatter, sorttype: 'number', template: 'number', search: true, width: 220},      
-      { name: 'validBids', label: 'Valid Bids Count', align: 'center', template: 'number', sorttype: 'number', search: true, width: 100},
-      { name: 'validBidsPrice', label: 'Valid Bids Price', align: 'center', formatter: validBidsPriceFormatter, unformat: priceUnformatter, sorttype: 'number', template: 'number', search: true, width: 100 },
-      { name: 'cancelledBids', label: 'Cancelled Bids Count', align: 'center', search: true, width: 210},
-      { name: 'cancelledBidsPrice', label: 'Cancelled Bids Price', align: 'center', formatter: cancelledBidsPriceFormatter, unformat: priceUnformatter, sorttype: 'number', template: 'number', search: true, width: 220},
-      { name: 'expiredBids', label: 'Expired Bids Count', align: 'center', template: 'number', sorttype: 'number', search: true, width: 100},
-      { name: 'expiredBidsPrice', label: 'Expired Bids Price', align: 'center', formatter: expiredBidsPriceFormatter, unformat: priceUnformatter, sorttype: 'number', template: 'number', search: true, width: 100 },
+      { name: 'totalBids', label: 'Total Bids Count', align: 'center', template: 'number', sorttype: function(cellValue, rowObject) { return parseInt(rowObject.totalBids);}, search: true, width: 50},
+      { name: 'totalBidsPrice', label: 'Total Bids Price', align: 'center', formatter: totalBidsPriceFormatter, unformat: priceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(parseFloat(rowObject.hiddenTotalBidsPrice).toFixed(2));}, search: true, width: 120},      
+      { name: 'validBids', label: 'Valid Bids Count', align: 'center', template: 'number', sorttype: function(cellValue, rowObject) { return parseInt(rowObject.validBids);}, search: true, width: 50},
+      { name: 'validBidsPrice', label: 'Valid Bids Price', align: 'center', formatter: validBidsPriceFormatter, unformat: priceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(parseFloat(rowObject.hiddenValidBidsPrice).toFixed(2));}, search: true, width: 100 },
+      { name: 'cancelledBids', label: 'Cancelled Bids Count', align: 'center', template: 'number', sorttype: function(cellValue, rowObject) { return parseInt(rowObject.cancelledBids);}, search: true, width: 50},
+      { name: 'cancelledBidsPrice', label: 'Cancelled Bids Price', align: 'center', formatter: cancelledBidsPriceFormatter, unformat: priceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(parseFloat(rowObject.hiddenCancelledBidsPrice).toFixed(2));}, search: true, width: 120},
+      { name: 'expiredBids', label: 'Expired Bids Count', align: 'center', template: 'number', sorttype: function(cellValue, rowObject) { return parseInt(rowObject.expiredBids);}, search: true, width: 50},
+      { name: 'expiredBidsPrice', label: 'Expired Bids Price', align: 'center', formatter: expiredBidsPriceFormatter, unformat: priceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(parseFloat(rowObject.hiddenExpiredBidsPrice).toFixed(2));}, search: true, width: 100 },
       { name: 'removeBuyer', label: 'Process Removal', align: 'center', formatter: buyerRemovalFormatter, sortable: false, search: false, width: 100 },
-      { name: 'chat', label: 'Chat with Buyer', align: 'center', formatter: chatFormatter, /*unformat: chatUnformatter,*/ sortable: false, search: false, width: 100 },
-      { name: "hiddenCurrency", hidden: true },
-      { name: "hiddenTotalBids", hidden: true },
-      { name: "hiddenTotalBidPrice", hidden: true },
-      { name: "hiddenValidBids", hidden: true },
-      { name: "hiddenValidBidsPrice", hidden: true },
-      { name: "hiddenCancelledBids", hidden: true },
-      { name: "hiddenCancelledBidsPrice", hidden: true },
-      { name: "hiddenExpiredBids", hidden: true },
+      { name: 'chat', label: 'Chat with Buyer', align: 'center', formatter: chatFormatter, sortable: false, search: false, width: 100 },
+      { name: "hiddenCurrency", hidden: true },      
+      { name: "hiddenTotalBidsPrice", hidden: true },      
+      { name: "hiddenValidBidsPrice", hidden: true },      
+      { name: "hiddenCancelledBidsPrice", hidden: true },      
       { name: "hiddenExpiredBidsPrice", hidden: true },
       { name: 'supervisorId', hidden: true },
       { name: 'buyerId', hidden: true },
@@ -98,47 +105,47 @@
       { name: 'index', hidden: true }
     ];
       
-  <% i = 0; if(buyers != null) { for (buyer of buyers) { %>
+  <% let i = -1; if(buyers != null) { for (buyer of buyers) {i++; %>
   data.push({
-    index: "<%= i %> ",
-    supervisorId: "<%= supervisor._id %> ",
-    buyerId: "<%= buyer._id %> ",
-    buyerOrganizationName: "<%= buyer.organizationName %> ",
-    supervisorOrganizationName: "<%= supervisor.organizationName %> ",
-    deptAgencyGroup: "<%= buyer.deptAgencyGroup %> ",
-    contactName: "<%= buyer.contactName %> ",
-    balance: "<%= buyer.balance %> ",
-    isActive: "<%= buyer.isActive %> ",
-    hiddenCurrency: "<%= buyer.currency %> ",
+    index: "<%= i %>",
+    supervisorId: "<%= supervisor._id %>",
+    buyerId: "<%= buyer._id %>",
+    buyerOrganizationName: "<%= buyer.organizationName %>",
+    supervisorOrganizationName: "<%= supervisor.organizationName %>",
+    deptAgencyGroup: "<%= buyer.deptAgencyGroup %>",
+    contactName: "<%= buyer.contactName %>",
+    balance: "<%= buyer.balance %>",
+    isActive: "<%= buyer.isActive %>",
+    hiddenCurrency: "<%= buyer.currency %>",
     <% if (buyer.bidData != null) { %>
-    hiddenTotalBids: "<%= buyer.bidData.totalBids %> ",
-    hiddenTotalBidsPrice: "<%= buyer.bidData.totalPrice %> ",
-    hiddenValidBids: "<%= buyer.bidData.validBids %> ",
-    hiddenValidBidsPrice: "<%= buyer.bidData.validBidsPrice %> ",
-    hiddenCancelledBids: "<%= buyer.bidData.cancelledBids %> ",
-    hiddenCancelledBidsPrice: "<%= buyer.bidData.cancelledBidsPrice %> ",
-    hiddenExpiredBids: "<%= buyer.bidData.expiredBids %>",
-    hiddenExpiredBidsPrice: "<%= buyer.bidData.expiredBidsPrice %> "
+    totalBids: "<%= buyer.bidData.totalBids %>",
+    hiddenTotalBidsPrice: "<%= buyer.bidData.totalPrice %>",
+    validBids: "<%= buyer.bidData.validBids %>",
+    hiddenValidBidsPrice: "<%= buyer.bidData.validBidsPrice %>",
+    cancelledBids: "<%= buyer.bidData.cancelledBids %>",
+    hiddenCancelledBidsPrice: "<%= buyer.bidData.cancelledBidsPrice %>",
+    expiredBids: "<%= buyer.bidData.expiredBids %>",
+    hiddenExpiredBidsPrice: "<%= buyer.bidData.expiredBidsPrice %>"
     <% } else { %>
-    hiddenTotalBids: 0,
+    totalBids: 0,
     hiddenTotalBidsPrice: 0,
-    hiddenValidBids: 0,
+    validBids: 0,
     hiddenValidBidsPrice: 0,
-    hiddenCancelledBids: 0,
+    cancelledBids: 0,
     hiddenCancelledBidsPrice: 0,
-    hiddenExpiredBids: 0,
+    expiredBids: 0,
     hiddenExpiredBidsPrice: 0
     <% } %>
   }); 
-  <% } } %>
-
-  initGrid(colModelGridBids, data, "#supervBuyers", '#sbPager', "bidName", 'Supervisor\'s Buyers List', 1900);  
+  <% } %>
+  
+  initGrid(colModelSupervBuyers, data, "#supervBuyers", '#sbPager', "contactName", 'Supervisor\'s Buyers List', 1900);
     </script>
         <% } else {%>
         <div>
           <p style="color: green; font-family: arial">
-            Sorry, no buyers with your Organization UNITE ID are currently available. Please wait for their registration.
-          </p>          
+            Sorry, no Buyers with your Organization UNITE ID are currently available. Please wait for their registration.
+          </p>
         </div>
         <% }%>
 </body>

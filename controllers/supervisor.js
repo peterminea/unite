@@ -227,15 +227,25 @@ exports.getChatLogin = (req, res) => {//We need a username, a room name, and a s
 }
 
 
-exports.getChat = (req, res) => {//Coming from the getLogin above.
+exports.getChat = async (req, res) => {//Coming from the getLogin above.
   let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
   req.session.flash = [];
   
-  res.render("supplier/chat", {
+  let messages = await getDataMongoose('Message', {
+      $or: [
+        { from: req.params.from, to: req.params.to },
+        { from: req.params.to, to: req.params.from }
+      ]
+    });
+ 
+  messages.sort((a, b) => (a.time > b.time ? 1 : b.time > a.time ? -1 : 0));
+  
+  res.render("chat", {
     successMessage: success,
     errorMessage: error,
     from: req.params.from,
     to: req.params.to,
+    messages: messages,
     username: req.params.username,
     room: req.params.room,
     fromName: req.params.fromName,
@@ -279,8 +289,7 @@ exports.postDelete = function (req, res, next) {
 
 
 exports.postConfirmation = async function (req, res, next) {
-  try {
-    
+  try {    
     let token = await getObjectMongoose('UserToken', { token: req.params.token, userType: TYPE });
     let user = await getObjectMongoose('Supervisor', { _id: token._userId, emailAddress: req.body.emailAddress });
 

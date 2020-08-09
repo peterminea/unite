@@ -1078,23 +1078,20 @@ const currencyAutocompleteBody = async (req, res) => {
   if (data && data.length && data.length > 0) {
     let result = [];
     data.sort((a, b) => {
-      return a.name.localeCompare(b.name);
+      return a.value.localeCompare(b.value);
     });
 
-    data.forEach(item => {
-      let obj = {
+    data.forEach((item) => {     
+      result.push({
         id: item._id,
         name: item.value,
         value: item.name
-      };
-
-      result.push(obj);
+      });
     });
 
     res.jsonp(result);
     } else {
-    req.flash("error", 'Currencies not found!');
-    res.jsonp('Error!');
+    res.jsonp('Currencies not found!');
   }
 }
 

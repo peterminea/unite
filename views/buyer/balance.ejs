@@ -30,7 +30,13 @@
       
       initBaseRates(fx, '#currency', '/currencyAutocomplete', $('#token').val())
         .then((fx) => {
+        setTimeout(function() {
+          $('#currency').find(`option[value='EUR']`).prop('selected', true);  
+        }, 1000);
+        
         $('#currency').off('change').on('change', function() {
+          if(!($(this).val()))
+            return false;
           let val = fx.convert(defaultBalance, {from: defaultCurr, to: $(this).val()});
           $('#balance').val(val.toFixed(2) + ' ' + $(this).val());
         });

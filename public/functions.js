@@ -114,8 +114,8 @@ function buyerRemovalFormatter(cellvalue, options, rowObject) {
 }
 
 
-function chatFormatter(cellvalue, options, rowObject) {
-  return `<a href="../../../supervisor/chatLogin/${rowObject.supervisorId}/${rowObject.buyerId}/0/None/${rowObject. buyerOrganizationName}/(Supervisor)-${rowObject.supervisorOrganizationName}>`;
+function chatFormatter(cellvalue, options, rowObject) {  
+  return `<a href="../../../supervisor/chatLogin/${rowObject.supervisorId}/${rowObject.buyerId}/0/None/${rowObject.buyerOrganizationName}/(Supervisor)-${rowObject.supervisorOrganizationName}"><button title="Chat with your Buyer" class="btn btn-warning">Chat with your Buyer</button></a>`;
 }
 
 
@@ -1789,7 +1789,7 @@ function initGrid(
   width,
   token
 ) {
-  $(`${gridId}`).jqGrid({
+  $(gridId).jqGrid({
     colModel: colModel,
     data: data,
     guiStyle: "bootstrap4",
@@ -2088,10 +2088,11 @@ $(document).ready(function() {
     
     $('li.language').click(function(e) {
       if($(this).hasClass('showLanguages')) {
-        $(this).removeClass('showLanguages').text('Languages');
+        $(this).find('ol').remove();
+        $(this).removeClass('showLanguages');
       } else {
         $(this)
-          .append(`<br><ul class='languages-bar'><li><a href="?language=en">English</a></li><li><a href="?language=de">Deutsch</a></li><li><a href="?language=it">Italiano</a></li><li><a href="?language=ro">Română</a></li></ul>`)
+          .append(`<ol style="position: fixed" class='languages-bar'><li><a href="?language=en">English</a></li><li><a href="?language=de">Deutsch</a></li><li><a href="?language=it">Italiano</a></li><li><a href="?language=ro">Română</a></li></ol>`)
         .addClass('showLanguages');
       }
     });

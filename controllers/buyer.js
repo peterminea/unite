@@ -247,15 +247,25 @@ exports.getChatLogin = (req, res) => {
 };
 
 
-exports.getChat = (req, res) => {
+exports.getChat = async (req, res) => {
   //Coming from the getLogin above.
   let success = search(req.session.flash, "success"),
     error = search(req.session.flash, "error");
   req.session.flash = [];
+  
+  let messages = await getDataMongoose('Message', {
+      $or: [
+        { from: req.params.from, to: req.params.to },
+        { from: req.params.to, to: req.params.from }
+      ]
+    });
+  
+  messages.sort((a, b) => (a.time > b.time ? 1 : b.time > a.time ? -1 : 0));
 
   res.render("supplier/chat", {
     successMessage: success,
     errorMessage: error,
+    messages: messages,
     from: req.params.from,
     to: req.params.to,
     username: req.params.username,

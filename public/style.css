@@ -20,6 +20,10 @@ body {
   width: 180px
 }
 
+ol.languages-bar {
+  background-color: lightgray;
+}
+
 div.additionalSuppliers {
   color: red;
   text-decoration: italic;

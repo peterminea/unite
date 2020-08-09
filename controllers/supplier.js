@@ -692,6 +692,8 @@ exports.getChat = async (req, res) => {//Coming from the getLogin above.
         { from: req.params.to, to: req.params.from }
       ]
     });
+  
+  console.log(messages.length);
 
   //messages.sort(compareTimes);
   messages.sort((a, b) => (a.time > b.time ? 1 : b.time > a.time ? -1 : 0));
