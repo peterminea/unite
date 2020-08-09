@@ -34,10 +34,6 @@ const {
   sendCancelBidEmail,
   prel,
   sortLists,
-  getObjectMongo,
-  getObjectMongoose,
-  getDataMongo,
-  getDataMongoose,
   getBidStatusesJson,
   renderBidStatuses,
   postSignInBody,
@@ -48,6 +44,7 @@ const {
   getCancelReasonTitles
 } = require("../middleware/templates");
 
+const { getObjectMongo, getDataMongo, getObjectMongoose, getDataMongoose } = require("../middleware/getData");
 const { removeAssociatedBuyerBids, removeAssociatedSuppBids, buyerDelete, supervisorDelete, supplierDelete } = require('../middleware/deletion');
 const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;

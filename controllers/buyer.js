@@ -41,11 +41,7 @@ const {
   sendResetPasswordEmail,
   sendCancelBidEmail,
   prel,
-  sortLists,
-  getObjectMongo,
-  getObjectMongoose,
-  getDataMongo,
-  getDataMongoose,
+  sortLists,  
   getBidStatusesJson,
   renderBidStatuses,
   postSignInBody,
@@ -57,6 +53,8 @@ const {
   encryptionNotice,
   getCancelReasonTitles
 } = require("../middleware/templates");
+
+const { getObjectMongo, getDataMongo, getObjectMongoose, getDataMongoose } = require("../middleware/getData");
 
 const {
   removeAssociatedBuyerBids,
