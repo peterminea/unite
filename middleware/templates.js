@@ -12,7 +12,7 @@ const fetch = require('node-fetch');
 const internalIp = require('internal-ip');
 const { verifyBanNewUser, verifyBanExistingUser } = require('../middleware/verifyBanned');
 const search = require('../middleware/searchFlash');
-const jsonp = require("jsonp");
+//const jsonp = require("jsonp");
 const _ = require("underscore");
 const { getObjectMongo, getDataMongo, getObjectMongoose, getDataMongoose } = require("../middleware/getData");
 
@@ -729,9 +729,9 @@ const getPlaceBidBody = async (req, res) => {
   let isMultiSupp = uniqueSupplierIds.length > 1;
   let statusesJson = JSON.stringify(getBidStatusesJson());  
   
-  console.log(buyerId + ' ' + productId + ' ' + supplierId);
-  console.log(isMultiProd + ' ' + !isMultiProd + ' ' + !products.length);
-  console.log(suppliers.length + ' ' + req.body.bidSupplierList + ' ' + isMultiSupp);  
+  //console.log(buyerId + ' ' + productId + ' ' + supplierId);
+  //console.log(isMultiProd + ' ' + !isMultiProd + ' ' + !products.length);
+  //console.log(suppliers.length + ' ' + req.body.bidSupplierList + ' ' + isMultiSupp);
   //throw new Error();
   
   setTimeout(function() {
