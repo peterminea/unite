@@ -1,8 +1,7 @@
-'use strict';
+"use strict";
 
 //Basic declarations:
 const path = require("path");
-const Message = require("./models/message");
 const http = require("http");
 const express = require("express");
 const socketio = require("socket.io");
@@ -17,11 +16,10 @@ const MongoClient = require("mongodb").MongoClient;
 const BASE = process.env.BASE;
 const URI = process.env.MONGODB_URI;
 const MAX_PROD = process.env.SUP_MAX_PROD;
-
 const cookieParser = require("cookie-parser");
 const Message = require('./models/message');
 //require('dotenv').config();
-//const MONGODB_URI = "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";//The DB url is actually saved as an Environment letiable, it will be easier to use anywhere in the application that way.
+//const MONGODB_URI = "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";//The DB url is actually saved as an Environment variable, it will be easier to use anywhere in the application that way.
 //Syntax: process.env.MONGODB_URI
 const app = express();
 const server = http.createServer(app);
@@ -36,7 +34,6 @@ const {
   deleteFileBody,
   completePurchase
 } = require("./middleware/templates");
-
 /*
 const lingua = require('lingua');
 
