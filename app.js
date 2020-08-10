@@ -1,50 +1,21 @@
 'use strict';
 
-//Classes:
-const BidRequest = require("./models/bidRequest");
-const BidStatus = require("./models/bidStatus");
-const CancelReasonTitle = require("./models/cancelReasonTitle");
-const Feedback = require("./models/feedback");
-const FeedbackSubject = require("./models/feedbackSubject");
-const Buyer = require("./models/buyer");
-const Supplier = require("./models/supplier");
-const Supervisor = require("./models/supervisor");
-const Currency = require("./models/currency");
 const Message = require("./models/message");
-const Country = require("./models/country");
-const Industry = require("./models/industry");
-const Capability = require("./models/capability");
-const ProductService = require("./models/productService");
-const BannedUser = require('./models/bannedUser');
-
-const i18next = require('i18next');
-const i18nextMiddleware = require('i18next-express-middleware');
-const Backend = require('i18next-node-fs-backend');
 
 //Basic declarations:
-const os = require('os');
-const path = require("path");
 const http = require("http");
 const express = require("express");
 const socketio = require("socket.io");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const csrf = require("csurf");
-const multer = require("multer");
 const fs = require("fs-extra");
-const dateformat = require("dateformat");
-const { basicFormat, customFormat, normalFormat } = require('./middleware/dateConversions');
 const process = require("process");
-const BadWords = require("bad-words");
-const crypto = require("crypto");
-const moment = require("moment");
-const http2 = require("http2");
 const mongoose = require("mongoose");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const MongoClient = require("mongodb").MongoClient;
 const BASE = process.env.BASE;
 const URI = process.env.MONGODB_URI;
-const MAX_PROD = process.env.SUP_MAX_PROD;
 
 const cookieParser = require("cookie-parser");
 //require('dotenv').config();
@@ -54,9 +25,7 @@ const cookieParser = require("cookie-parser");
 const app = express();
 const server = http.createServer(app);
 const socket = socketio(server);
-const bcrypt = require('bcryptjs');
-const { deleteFileBody, getObjectMongo, getObjectMongoose, getDataMongo, getDataMongoose, uniteIDAutocompleteBody, currencyAutocompleteBody, completePurchase } = require('./middleware/templates');
-const lingua = require('lingua');
+const { deleteFileBody, } = require('./middleware/templates');
 /*
  i18next
     .use(i18nextMiddleware.LanguageDetector)
