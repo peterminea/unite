@@ -284,6 +284,24 @@
       $($messages).append(html);
       autoscroll();
     });
+      
+    setTimeout(function() {    
+      <% if(keys != null) { %>
+      let i = 0, indexes = [];
+     
+      $('a.nav-link').each(function(ind, elem) {      
+        indexes.push($(elem).attr('index'));
+      });
+
+      <% for(let k in keys) { %>   
+      if(isInArray(i, indexes)) {
+        $('a.nav-link span').eq(i).text('<%= eval(keys[k]) %>');
+      }
+      i++;
+      <% } } %>
+
+      if(1==2) $('span.big-title')[0].innerHTML = ('<%= translation.home.meaning %>');
+    }, 500);
   });
   </script>
 </head>
@@ -304,7 +322,7 @@
       <div class="button close" title="Close"></div>
     </div>          
   </div>
-<div class="container">
+<div class="container home">
     <br>
     <div class="chat_window">
       <div class="title text-center">

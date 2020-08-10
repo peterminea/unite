@@ -3,7 +3,6 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const mongoose = require("mongoose");
 const UserToken = require("../models/userToken");
-const assert = require("assert");
 const process = require("process");
 const Schema = mongoose.Schema;
 const Message = require("../models/message");
@@ -72,6 +71,15 @@ const { verifyBanNewUser, verifyBanExistingUser } = require('../middleware/verif
 let fx = require("money"), initConversions = require("../middleware/exchangeRates");
 const TYPE = process.env.USER_BUYER;
 
+const buyerMenuTranslationKeys = [
+  "translation.menu.languages",
+  "translation.menu.home",
+  "translation.menu.userDashboard",
+  "translation.menu.userBalance",
+  "translation.menu.userProfile",
+  "translation.menu.logout"
+];
+
 exports.getIndex = async (req, res) => {
   if(!req.session || !req.session.buyer) {
     return;
@@ -107,6 +115,7 @@ exports.getIndex = async (req, res) => {
 
   res.render("buyer/index", {
     buyer: buyer,
+    keys: buyerMenuTranslationKeys,
     MAX_PROD: process.env.BID_MAX_PROD,
     BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
     bidsLength: bids && bids.length ? bids.length : null,
@@ -130,6 +139,7 @@ exports.getProductsCatalog = async (req, res) => {
   res.render("buyer/productsCatalog", {
     data: (catalogItems),
     MAX: process.env.BID_MAX_PROD,
+    keys: buyerMenuTranslationKeys,
     buyerId: req.session.buyer._id,
     successMessage: success,
     errorMessage: error
@@ -175,6 +185,7 @@ exports.postIndex = async (req, res) => {
       buyer: req.session.buyer,
       suppliers: suppliers2,
       allSuppliers: suppliers,
+      keys: buyerMenuTranslationKeys,
       MAX_PROD: process.env.BID_MAX_PROD,
       MAX_AMOUNT: process.env.MAX_PROD_PIECES,
       BID_DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
@@ -220,6 +231,7 @@ exports.getBidsCatalog = async (req, res) => {
 
   res.render("buyer/bidsCatalog", {
     buyerName: req.params.buyerName,
+    keys: buyerMenuTranslationKeys,
     successMessage: success,
     errorMessage: error,
     bids: bids
@@ -236,6 +248,7 @@ exports.getChatLogin = (req, res) => {
   res.render("buyer/chatLogin", {
     successMessage: success,
     errorMessage: error,
+    keys: buyerMenuTranslationKeys,
     from: req.params.supplierId,
     to: req.params.buyerId,
     fromName: req.params.supplierName,
@@ -264,6 +277,7 @@ exports.getChat = async (req, res) => {
   res.render("supplier/chat", {
     successMessage: success,
     errorMessage: error,
+    keys: buyerMenuTranslationKeys,
     messages: messages,
     user: process.env.USER_BUYER,
     from: req.params.from,
@@ -363,6 +377,7 @@ exports.getViewBids = async (req, res) => {
     expiredBids: expiredBids,
     totalBidLength: bids && bids.length ? bids.length : 0,
     buyerCancelBidStatus: process.env.BUYER_CANCEL_BID,
+    keys: buyerMenuTranslationKeys,
     successMessage: success,
     errorMessage: error,
     totalPrice: totalPrice,
@@ -412,6 +427,7 @@ exports.getViewBid = async (req, res) => {
     res.render("buyer/viewBid", {
       bid: bid,
       path: '../',
+      keys: buyerMenuTranslationKeys,
       bidExtensionDays: process.env.DAYS_BID_EXTENDED,
       stripePublicKey: process.env.STRIPE_KEY_PUBLIC,
       stripeSecretKey: process.env.STRIPE_KEY_SECRET,
@@ -438,6 +454,7 @@ exports.getCancelBid = async (req, res) => {
     successMessage: success,
     errorMessage: error,
     titles: titles,
+    keys: buyerMenuTranslationKeys,
     bidId: req.params.bidId,
     bidName: req.params.bidName,
     userType: req.params.userType,
@@ -528,6 +545,7 @@ exports.getConfirmation = (req, res) => {
 
   res.render("buyer/confirmation", {
     token: req.params ? req.params.token : null,
+    keys: buyerMenuTranslationKeys,
     successMessage: success,
     errorMessage: error
   });
@@ -543,6 +561,7 @@ exports.getDelete = async (req, res) => {
   res.render("buyer/delete", {
     id: req.params.id,
     titles: titles,
+    keys: buyerMenuTranslationKeys,
     successMessage: success,
     errorMessage: error
   });
@@ -556,6 +575,7 @@ exports.getDeactivate = (req, res) => {
 
   res.render("buyer/deactivate", {
     id: req.params.id,
+    keys: buyerMenuTranslationKeys,
     successMessage: success,
     errorMessage: error
   });
@@ -568,6 +588,7 @@ exports.getResendToken = (req, res) => {
   req.session.flash = [];
 
   res.render("buyer/resend", {
+    keys: buyerMenuTranslationKeys,
     successMessage: success,
     errorMessage: error
   });
@@ -784,6 +805,7 @@ exports.getBalance = async (req, res) => {
   res.render("buyer/balance", {
     balance: req.session.buyer.balance,
     currencies: currencies,
+    keys: buyerMenuTranslationKeys,
     appId: process.env.EXCH_RATES_APP_ID,
     currency: req.session.buyer.currency
   });
@@ -797,6 +819,7 @@ exports.getForgotPassword = (req, res) => {
 
   res.render("buyer/forgotPassword", {
     email: req.session.buyer.emailAddress,
+    keys: buyerMenuTranslationKeys,
     successMessage: success,
     errorMessage: error
   });
@@ -880,6 +903,7 @@ exports.getResetPasswordToken = async (req, res) => {
 
     res.render("buyer/resetPassword", {
       token: req.params.token,
+      keys: buyerMenuTranslationKeys,
       successMessage: success,
       errorMessage: error
     });   
@@ -1140,6 +1164,7 @@ exports.getProfile = async (req, res) => {
   res.render("buyer/profile", {
     DEFAULT_CURR: process.env.BID_DEFAULT_CURR,
     FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
+    keys: buyerMenuTranslationKeys,
     currencies: currencies,
     successMessage: success,
     countries: countries,

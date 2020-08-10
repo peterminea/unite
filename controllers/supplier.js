@@ -8,7 +8,6 @@ const Capability = require("../models/capability");
 const Industry = require("../models/industry");
 const Message = require("../models/message");
 const UserToken = require("../models/userToken");
-const assert = require("assert");
 const process = require("process");
 const { basicFormat, customFormat, normalFormat } = require("../middleware/dateConversions");
 const async = require("async");
@@ -21,6 +20,16 @@ const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const search = require('../middleware/searchFlash');
 let Recaptcha = require('express-recaptcha').RecaptchaV2;
+
+const supplierMenuTranslationKeys = [
+  "translation.menu.languages",
+  "translation.menu.home",
+  "translation.menu.userDashboard",
+  "translation.menu.userBalance",
+  "translation.menu.supplierBidsList",
+  "translation.menu.userProfile",   
+  "translation.menu.logout"
+];
 
 const {
   fileExists,
@@ -74,6 +83,7 @@ exports.getIndex = async (req, res) => {
 
   res.render("supplier/index", {
     supplier: supplier,
+    keys: supplierMenuTranslationKeys,
     requestsCount: requestsCount,
     successMessage: success,
     errorMessage: error
@@ -89,6 +99,7 @@ exports.getAddProduct = async (req, res) => {
   res.render("supplier/addProduct", {
     supplierId: req.session.supplier._id,
     currencies: currencies,
+    keys: supplierMenuTranslationKeys,
     DEFAULT_CURR: process.env.SUPP_DEFAULT_CURR,
     FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
     successMessage: success,
@@ -140,6 +151,7 @@ exports.getCancelBid = async (req, res) => {
     buyerEmail: req.params.buyerEmail,
     supplierEmail: req.params.supplierEmail,
     titles: titles,
+    keys: supplierMenuTranslationKeys,
     successMessage: success,
     errorMessage: error
   });  
@@ -203,6 +215,7 @@ exports.getConfirmation = (req, res) => {
   
   res.render("supplier/confirmation", { 
     token: req.params? req.params.token : null,
+    keys: supplierMenuTranslationKeys,
     successMessage: success,
     errorMessage: error
   });
@@ -217,6 +230,7 @@ exports.getDelete = async (req, res) => {
   res.render('supplier/delete', {
     id: req.params.id,
     titles: titles,
+    keys: supplierMenuTranslationKeys,
     successMessage: success,
     errorMessage: error
   });
@@ -229,6 +243,7 @@ exports.getDeactivate = (req, res) => {
   
   res.render('supplier/deactivate', {
     id: req.params.id,
+    keys: supplierMenuTranslationKeys,
     successMessage: success,
     errorMessage: error
   });
@@ -239,6 +254,7 @@ exports.getResendToken = (req, res) => {
   req.session.flash = [];
   
   res.render("supplier/resend", {
+    keys: supplierMenuTranslationKeys,
     successMessage: success,
     errorMessage: error
   });
@@ -664,6 +680,7 @@ exports.getForgotPassword = (req, res) => {
   
   res.render("supplier/forgotPassword", {
     email: req.session.supplier.emailAddress,
+    keys: supplierMenuTranslationKeys,
     successMessage: success,
     errorMessage: error
   });
@@ -677,6 +694,7 @@ exports.getChatLogin = (req, res) => {//We need a username, a room name, and a s
   res.render("supplier/chatLogin", {
     successMessage: success,
     errorMessage: error,
+    keys: supplierMenuTranslationKeys,
     from: req.params.supplierId,
     to: req.params.buyerId,
     fromName: req.params.supplierName,
@@ -702,10 +720,11 @@ exports.getChat = async (req, res) => {//Coming from the getLogin above.
   //messages.sort(compareTimes);
   messages.sort((a, b) => (a.time > b.time ? 1 : b.time > a.time ? -1 : 0));
   
-  res.render("supplier/chat", {
+  res.render("chat", {
     successMessage: success,
     errorMessage: error,
     messages: messages,
+    keys: supplierMenuTranslationKeys,
     user: process.env.USER_SUPPLIER,
     from: req.params.from,
     to: req.params.to,
@@ -774,6 +793,7 @@ exports.getResetPasswordToken = async (req, res) => {
     }
     res.render("supplier/resetPassword", { 
       token: req.params.token,
+      keys: supplierMenuTranslationKeys,
       successMessage: success,
       errorMessage: error
     });
@@ -882,6 +902,7 @@ exports.getProfile = async (req, res) => {
     industries: industries,
     capabilities: capabilities,
     currencies: currencies,
+    keys: supplierMenuTranslationKeys,
     MAX_PROD: process.env.SUPP_MAX_PROD,
     DEFAULT_CURR: process.env.SUPP_DEFAULT_CURR,
     FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
@@ -939,6 +960,7 @@ exports.getBidRequests = async (req, res) => {
     res.render("supplier/bid-requests", {
       successMessage: success,
       errorMessage: error,
+      keys: supplierMenuTranslationKeys,
       supplier: supplier,
       totalPrice: totalPrice,
       validPrice: validPrice,
@@ -958,6 +980,7 @@ exports.getBalance = async (req, res) => {
   
   res.render("supplier/balance", { 
     balance: req.session.supplier.balance,
+    keys: supplierMenuTranslationKeys,
     currencies: currencies,
     appId: process.env.EXCH_RATES_APP_ID,
     currency: req.session.supplier.currency
@@ -991,6 +1014,7 @@ exports.getBidRequest = async (req, res) => {
   res.render("supplier/bid-request", {    
     bid: request,
     buyer: buyer,
+    keys: supplierMenuTranslationKeys,
     path: '../',
     bidExtensionDays: process.env.DAYS_BID_EXTENDED,
     successMessage: success,

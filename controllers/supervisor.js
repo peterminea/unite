@@ -5,7 +5,6 @@ const Supervisor = require("../models/supervisor");
 const Buyer = require("../models/buyer");
 const BidRequest = require("../models/bidRequest");
 const UserToken = require("../models/userToken");
-const assert = require('assert');
 const process = require('process');
 const { basicFormat, customFormat, normalFormat } = require("../middleware/dateConversions");
 const async = require('async');
@@ -14,6 +13,14 @@ const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const search = require('../middleware/searchFlash');
 let Recaptcha = require('express-recaptcha').RecaptchaV2;
+
+const supervisorMenuTranslationKeys = [
+  "translation.menu.languages",
+  "translation.menu.home",
+  "translation.menu.userDashboard",
+  "translation.menu.userProfile",
+  "translation.menu.logout"
+];
 
 const {
   fileExists,
@@ -125,6 +132,7 @@ exports.getIndex = async (req, res) => {
 
   res.render("supervisor/index", {
     supervisor: supervisor,
+    keys: supervisorMenuTranslationKeys,
     successMessage: success,
     errorMessage: error,
     buyers: results
@@ -154,7 +162,8 @@ exports.getDeactivate = (req, res) => {
   req.session.flash = [];
   
   res.render('supervisor/deactivate', {
-    id: req.params.id, 
+    id: req.params.id,
+    keys: supervisorMenuTranslationKeys,
     uniteId: req.params.organizationUniteID,
     successMessage: success,
     errorMessage: error
@@ -168,7 +177,8 @@ exports.getDelete = async (req, res) => {
   let titles = await getCancelReasonTitles(process.env.USER_CANCEL_TYPE, false, false);
   
   res.render('supervisor/delete', {
-    id: req.params.id, 
+    id: req.params.id,
+    keys: supervisorMenuTranslationKeys,
     titles: titles,
     organizationUniteID: req.params.organizationUniteID,
     successMessage: success,
@@ -185,6 +195,7 @@ exports.getDeleteBuyer = async (req, res) => {
   res.render('supervisor/deleteBuyer', {
     id: req.params.id, 
     titles: titles,
+    keys: supervisorMenuTranslationKeys,
     organizationUniteID: req.params.organizationUniteID,
     successMessage: success,
     errorMessage: error
@@ -215,6 +226,7 @@ exports.getChatLogin = (req, res) => {//We need a username, a room name, and a s
   res.render("supervisor/chatLogin", {
     successMessage: success,
     errorMessage: error,
+    keys: supervisorMenuTranslationKeys,
     from: req.params.supplierId,
     to: req.params.buyerId,
     fromName: req.params.supplierName,
@@ -241,6 +253,7 @@ exports.getChat = async (req, res) => {//Coming from the getLogin above.
   res.render("chat", {
     successMessage: success,
     errorMessage: error,
+    keys: supervisorMenuTranslationKeys,
     from: req.params.from,
     to: req.params.to,
     messages: messages,
@@ -368,6 +381,7 @@ exports.getForgotPassword = (req, res) => {
   res.render("supervisor/forgotPassword", {
     successMessage: success,
     errorMessage: error,
+    keys: supervisorMenuTranslationKeys,
     email: req.session.supervisor.emailAddress//We pre-fill the e-mail field with the address.
   });
 }
@@ -424,6 +438,7 @@ exports.getResetPasswordToken = async (req, res) => {
   
   res.render('supervisor/resetPassword', {
     token: req.params.token,
+    keys: supervisorMenuTranslationKeys,
     successMessage: success,
     errorMessage: error
   });  
@@ -541,8 +556,10 @@ exports.postSignUp = async (req, res) => {
           
           } else if(global++ < 1) {
             const user = await getObjectMongoose('Supervisor', { emailAddress: req.body.emailAddress });            
-            if(treatError(req, res, err, '/supplier/sign-up'))
+            if(!user) {
+              req.flash('error', 'Invalid user!');
               return false;
+            }
 
             const ipv4 = await internalIp.v4();
 
@@ -645,6 +662,7 @@ exports.getProfile = async (req, res) => {
   res.render("supervisor/profile", {
     successMessage: success,
     errorMessage: error,
+    keys: supervisorMenuTranslationKeys,
     FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
     countries: countries,
     profile: req.session.supervisor

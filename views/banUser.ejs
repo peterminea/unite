@@ -69,19 +69,35 @@
           return false;
         }
       });
+      
+      setTimeout(function() {    
+        <% if(keys != null) { %>
+        let i = 0, indexes = [];
+        
+        $('a.nav-link').each(function(ind, elem) {      
+          indexes.push($(elem).attr('index'));
+        });
+
+        <% for(let k in keys) { %>   
+        if(isInArray(i, indexes)) {
+          $('a.nav-link span').eq(i).text('<%= eval(keys[k]) %>');
+        }
+        i++;
+        <% } } %>
+      }, 500);
   });
   </script>
 </head>
 
 <body>
-  <nav user="supplier" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
     <a class="navbar-brand" href="/">UNITE - Delete User Account - Admin</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
   </nav>
-    <div class="container">
+    <div class="container home">
        <div class="col-md-12">
         <legend>
           Ban UNITE User Account - Admin Reserved - Please fill in the required (*) fields:

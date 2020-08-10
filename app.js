@@ -1,8 +1,8 @@
 'use strict';
 
-const Message = require("./models/message");
-
 //Basic declarations:
+const path = require("path");
+const Message = require("./models/message");
 const http = require("http");
 const express = require("express");
 const socketio = require("socket.io");
@@ -16,25 +16,39 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 const MongoClient = require("mongodb").MongoClient;
 const BASE = process.env.BASE;
 const URI = process.env.MONGODB_URI;
+const MAX_PROD = process.env.SUP_MAX_PROD;
 
 const cookieParser = require("cookie-parser");
+const Message = require('./models/message');
 //require('dotenv').config();
 //const MONGODB_URI = "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";//The DB url is actually saved as an Environment letiable, it will be easier to use anywhere in the application that way.
 //Syntax: process.env.MONGODB_URI
-
 const app = express();
 const server = http.createServer(app);
 const socket = socketio(server);
-const { deleteFileBody, } = require('./middleware/templates');
+
+const { getObjectMongo,
+  getObjectMongoose,
+  getDataMongo,
+  getDataMongoose } = require('./middleware/getData');
+
+const {
+  deleteFileBody,
+  completePurchase
+} = require("./middleware/templates");
+
 /*
+const lingua = require('lingua');
+
  i18next
     .use(i18nextMiddleware.LanguageDetector)
     .use(Backend)
     .init({
       backend: {
-        loadPath:  'public' + '/locales/{{lng}}/{{ns}}.json' //__dirname
+        loadPath:  'public' + '/locales/{{lng}}/{{ns}}.json', //__dirname,
+        jsonIndent: 4
       },
-      debug: true,
+      debug: false,
       detection: {
         order: ['querystring', 'cookie'],
         caches: ['cookie']
@@ -44,7 +58,9 @@ const { deleteFileBody, } = require('./middleware/templates');
       fallBackLng: ['en']
     });
 
-app.use(i18nextMiddleware.handle(i18next));*/
+app.use(i18nextMiddleware.handle(i18next));
+*/
+
 mongoose.Promise = global.Promise;
 mongoose.set("useCreateIndex", true);
 
@@ -61,6 +77,19 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 //app.use(express.static(path.join(__dirname, '..', "public")));
 //app.use([/(.*)\.js$/, '/public'], express.static(__dirname + '/public'));
+//const i18n = require('./middleware/i18n.js');
+//app.use(i18n.init);
+
+const i18n = require("i18n-express");
+
+app.use(
+  i18n({
+    translationsPath: path.join(__dirname, "public/locales/dev"), // <--- use here. Specify translations files path.
+    siteLangs: ["en", "it", "de", "ro"],
+    textsVarName: "translation"
+  })
+);
+
 /*
 const LanguageController = require('./controllers/languageController');
 app.use(lingua(app, {
@@ -82,22 +111,21 @@ app.use(lingua(app, {
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.locals.error = req.app.get("env") === "development" ? err : {};
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.render("error");
 });
 
-
-app.use('/public', (req, res, next) => {
-  if (!req.session || process.env.ENV != 'dev') {
-    let result = req.url.match(/(.*)\.js$/)
-    if(result) {
-      return res.status(403).end('403 Forbidden')
+app.use("/public", (req, res, next) => {
+  if (!req.session || process.env.ENV != "dev") {
+    let result = req.url.match(/(.*)\.js$/);
+    if (result) {
+      return res.status(403).end("403 Forbidden");
     }
   }
-  
+
   next();
 });
 
@@ -116,7 +144,6 @@ app.use(
   })
 );
 
-
 //app.use(csrf({ cookie: true }));
 //Password Checking & Protecting
 const csrfProtection = csrf();
@@ -125,9 +152,9 @@ app.use(require("flash")());
 //app.use(require('connect-flash')());
 //app.use(require('express-flash')());
 
-app.use(function (req, res, next) {
+app.use(function(req, res, next) {
   let token = req.csrfToken();
-  res.cookie('XSRF-TOKEN', token);
+  res.cookie("XSRF-TOKEN", token);
   res.locals.csrfToken = token;
   next();
 });
@@ -178,55 +205,55 @@ app.post("/messages", (req, res) => {
   });
 });
 
-
 const { socketMethods } = require("./middleware/socketMethods");
 
 socket.on("connection", (sock) => {
   socketMethods(socket, sock);
 });
 
-
 //Upload files to DB & to Glitch:
 const ObjectId = require("mongodb").ObjectId;
 const uploadController = require("./controllers/upload");
 const uploadAvatarController = require("./controllers/uploadAvatar");
 const methodOverride = require("method-override");
-const { upload, uploadExcel, uploadProdImage, uploadSingleFile, uploadMultipleFiles, uploadProductImage, uploadExcelFile } = require('./middleware/uploads')
+const {
+  upload,
+  uploadExcel,
+  uploadProdImage,
+  uploadSingleFile,
+  uploadMultipleFiles,
+  uploadProductImage,
+  uploadExcelFile
+} = require("./middleware/uploads");
+
 app.use(methodOverride("_method"));
 
 app.post("/uploadfile", upload.single("single"), (req, res, next) => {
- uploadSingleFile(req, res, next);
+  uploadSingleFile(req, res, next);
 });
 
-
-app.post("/uploadProductImage", uploadProdImage.single("single"), (req, res, next) => {
-  uploadProductImage(req, res, next);
-});
-
+app.post(
+  "/uploadProductImage",
+  uploadProdImage.single("single"),
+  (req, res, next) => {
+    uploadProductImage(req, res, next);
+  }
+);
 
 app.post("/uploadExcel", uploadExcel.single("single"), (req, res, next) => {
   uploadExcelFile(req, res, next);
 });
-
 
 //Uploading multiple files
 app.post("/uploadmultiple", upload.array("multiple", 10), (req, res, next) => {
   uploadMultipleFiles(req, res, next);
 });
 
-
 //Alternate multiupload:
-app.post("/multipleupload", uploadController.multipleUpload, (req, res, next) => {
-  console.log(req.files);
-  res.send();
-  },
-  (error, req, res, next) => {
-    res.status(400).send({ error: error.message });
-  }
-);
-
-
-app.post("/avatarUpload", uploadAvatarController.avatarUpload, (req, res, next) => {
+app.post(
+  "/multipleupload",
+  uploadController.multipleUpload,
+  (req, res, next) => {
     console.log(req.files);
     res.send();
   },
@@ -235,38 +262,50 @@ app.post("/avatarUpload", uploadAvatarController.avatarUpload, (req, res, next) 
   }
 );
 
+app.post(
+  "/avatarUpload",
+  uploadAvatarController.avatarUpload,
+  (req, res, next) => {
+    console.log(req.files);
+    res.send();
+  },
+  (error, req, res, next) => {
+    res.status(400).send({ error: error.message });
+  }
+);
 
 app.post("/purchase", (req, res, next) => {
   completePurchase(req, res, next);
 });
 
-
 app.post("/deleteFile", function(req, res, next) {
   deleteFileBody(req, res);
 });
 
-
 app.post("/exists", function(req, res) {
   let exists = fs.existsSync(req.body.path);
-  return res.json({ exists: (exists? true: false )});
+  return res.json({ exists: exists ? true : false });
 });
-
 
 let db;
 if (1 == 2)
-  MongoClient.connect(URI, { useUnifiedTopology: true }, async (err, client) => {
-    if (err) {
-      console.error(err.message);
-      throw err;
-    }
+  MongoClient.connect(
+    URI,
+    { useUnifiedTopology: true },
+    async (err, client) => {
+      if (err) {
+        console.error(err.message);
+        throw err;
+      }
 
-    db = client.db(BASE); //Right connection!
-    process.on("uncaughtException", function(err) {
-      console.error(err.message);
-    });    
-        
- //db.close();
-  });
+      db = client.db(BASE); //Right connection!
+      process.on("uncaughtException", function(err) {
+        console.error(err.message);
+      });
+
+      //db.close();
+    }
+  );
 
 mongoose
   .connect(URI, {
