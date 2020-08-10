@@ -1,9 +1,6 @@
 "use strict";
 
-//Classes:
-const Message = require("./models/message");
-
-//Basic declarations:7
+//Basic declarations:
 const path = require("path");
 const http = require("http");
 const express = require("express");
@@ -20,6 +17,7 @@ const BASE = process.env.BASE;
 const URI = process.env.MONGODB_URI;
 const MAX_PROD = process.env.SUP_MAX_PROD;
 const cookieParser = require("cookie-parser");
+const Message = require('./models/message');
 //require('dotenv').config();
 //const MONGODB_URI = "mongodb+srv://root:UNITEROOT@unite-cluster-afbup.mongodb.net/UNITEDB";//The DB url is actually saved as an Environment letiable, it will be easier to use anywhere in the application that way.
 //Syntax: process.env.MONGODB_URI
@@ -27,14 +25,13 @@ const app = express();
 const server = http.createServer(app);
 const socket = socketio(server);
 
-const {
-  deleteFileBody,
-  getObjectMongo,
+const { getObjectMongo,
   getObjectMongoose,
   getDataMongo,
-  getDataMongoose,
-  uniteIDAutocompleteBody,
-  currencyAutocompleteBody,
+  getDataMongoose } = require('./middleware/getData');
+
+const {
+  deleteFileBody,
   completePurchase
 } = require("./middleware/templates");
 /*
@@ -198,7 +195,7 @@ server.listen(port, () => {
 app.post("/messages", (req, res) => {
   let message = new Message(req.body);
 
-  message.save(err => {
+  message.save((err) => {
     if (err) return res.sendStatus(500);
     socket.emit("message", req.body);
     res.sendStatus(200);
@@ -207,7 +204,7 @@ app.post("/messages", (req, res) => {
 
 const { socketMethods } = require("./middleware/socketMethods");
 
-socket.on("connection", sock => {
+socket.on("connection", (sock) => {
   socketMethods(socket, sock);
 });
 
@@ -313,7 +310,7 @@ mongoose
     useCreateIndex: true,
     useUnifiedTopology: true
   })
-  .then(result => {
+  .then((result) => {
     return null;
   })
   .then(() => {
