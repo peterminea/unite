@@ -24,6 +24,11 @@ ol.languages-bar {
   background-color: lightgray;
 }
 
+img.country-flag {
+  width: 30px;
+  height: 30px;
+}
+
 div.additionalSuppliers {
   color: red;
   text-decoration: italic;
@@ -120,6 +125,10 @@ p.excel {
 
 span.hid,span.supply {
   background-color: lightgray
+}
+
+a.userRight span {
+  color: white;
 }
 
 @media only screen and (max-width: 900px) {
@@ -366,8 +375,8 @@ span.adminDelete {
 }
 
 .custom-button {
-  height: 50px;
-  width: 240px;
+  height: 64px;
+  width: 250px;
   background-color: #aaddee;
   color: #4400aa;
   border-radius: 5px;

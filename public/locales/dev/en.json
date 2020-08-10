@@ -1,9 +1,10 @@
 {
     "home": {
+        "bigTitle": "UNITE - Underserved Needs in Times of Emergency - Home Page",
         "title": "UNITE Public Procurement Platform",
         "meaning": "<b>U<\/b>nderserved <b>N<\/b>eeds <b>I<\/b>n <b>T<\/b>imes of <b>E<\/b>mergency",
         "description": "Public Procurement Platform",
-        "whatItDoes": "Creating a world where governments and companies innovate together to overcome crisis",
+        "whatWeDo": "Creating a world where governments and companies innovate together to overcome crisis",
         "mottoOne": "SAVING JOBS, SAVING LIVES!",
         "mottoTwo": "We are driving the new normal!",
         "signUp": "Sign Up",
@@ -17,7 +18,8 @@
         "close": "Close"
     },
     "about": {
-        "first_paragraph": "UNITE is a Public Procurement Platform exclusively for governmental procurement of special orders of products and services for crisis response. <br>We call it \"The Alibaba of urgent public procurement requests.\"<br><br> UNITE is a two-sided platform, connecting public buyers with companies that have the capability and capacity to refocus their activities to supplying goods and services in response to the COVID-19 crisis.<br><br> Companies are invited to register on the platform, describing their capability and capacity to manufacture urgently needed products or to supply in-demand services. <br>Companies can also browse and respond to open tender requests placed by public buyers. <br><br>  Public buyers can access the platform and create a procurement request. Our software matches the procurement request with potential suppliers and facilitates the complete transaction - including initial contact, negotiation. order placement, delivery acceptance, and payment.",
+        "title": "About us",
+        "first_paragraph": "UNITE is a Public Procurement Platform exclusively for governmental procurement of special orders of products and services for crisis response. <br>We call it \"The Alibaba of urgent public procurement requests.\" <br><br> UNITE is a two-sided platform, connecting public buyers with companies that have the capability and capacity to refocus their activities to supplying goods and services in response to the COVID-19 crisis.<br><br> Companies are invited to register on the platform, describing their capability and capacity to manufacture urgently needed products or to supply in-demand services.<br>Companies can also browse and respond to open tender requests placed by public buyers. <br><br>  Public buyers can access the platform and create a procurement request. Our software matches the procurement request with potential suppliers and facilitates the complete transaction - including initial contact, negotiation. order placement, delivery acceptance, and payment.",
         "second_paragraph": "UNITE differentiates itself from other solutions in that it provides a database of companies with capability to refocus operations and in that it automates the process. Other solutions include using existing suppliers and ERP\/purchasing system (not suited to abnormal requirements); engagement with the market through contacting individual companies by email, telephone or in person (which is slow); use of other online sales platforms (no visibility of the ability of companies to refocus operations); own knowledge of public buyers and their connections to industry (not widely shared - limited to individuals or local teams)."
     },
     "feedback": {
@@ -536,5 +538,24 @@
         "signUp": {
             "title": "Sign up as Supplier - UNITE"
         }
+    },
+    "menu": {
+        "greeting": "Hello",
+        "languages": "Languages",
+        "home": "Home",
+        "about": "About us",
+        "terms": "Terms",
+        "antibribery": "Anti-Bribery",
+        "userFeedback": "User Feedback",
+        "adminSection": "Admin Section",
+        "viewFeedback": "View Feedbacks",
+        "memberList": "List of our Members",
+        "uploadedFiles": "View Uploaded Files",
+        "allBids": "All Bid Requests",
+        "userDashboard": "Dashboard",
+        "userBalance": "Balance",
+        "supplierBidsList": "Bid Requests",
+        "userProfile": "Profile",
+        "logout": "Logout"
     }
 }

@@ -1,6 +1,5 @@
 const multer = require("multer");
 const fs = require("fs-extra");
-const fs2 = require("fs");
 const moment = require("moment");
 const dateformat = require("dateformat");
 const path = require("path");
@@ -168,7 +167,7 @@ const uploadExcelFile = (req, res, next) => {
   }
 
   let obj = xlsx.parse(fs.readFileSync(file.path));
-  fs2.unlinkSync(file);
+  fs.unlinkSync(file);
 
   if(obj && obj.length) {
     console.log(obj[0].data);

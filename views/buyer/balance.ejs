@@ -37,20 +37,33 @@
       })
       <% } } %>
       
-     // alert(JSON.stringify(data));
       initBaseRates(fx, '#currency', data, $('#token').val())
         .then((fx) => {
-        //setTimeout(function() {
-          $('#currency').find(`option[value='EUR']`).prop('selected', true);  
-       // }, 10);
+          $('#currency').find(`option[value='${defaultCurr}']`).prop('selected', true);         
         
-        $('#currency').off('change').on('change', function() {
-          if(!($(this).val()))
-            return false;
-          let val = fx.convert(defaultBalance, {from: defaultCurr, to: $(this).val()});
-          $('#balance').val(val.toFixed(2) + ' ' + $(this).val());
+          $('#currency').off('change').on('change', function() {
+            if(!($(this).val()))
+              return false;
+            let val = fx.convert(defaultBalance, {from: defaultCurr, to: $(this).val()});
+            $('#balance').val(val.toFixed(2) + ' ' + $(this).val());
+          });
         });
-      });
+      
+      setTimeout(function() {    
+        <% if(keys != null) { %>
+        let i = 0, indexes = [];
+
+        $('a.nav-link').each(function(ind, elem) {      
+          indexes.push($(elem).attr('index'));
+        });
+
+        <% for(let k in keys) { %>   
+        if(isInArray(i, indexes)) {
+          $('a.nav-link span').eq(i).text('<%= eval(keys[k]) %>');
+        }
+        i++;
+        <% } } %>
+      }, 500);
     });
   </script>
 </head>

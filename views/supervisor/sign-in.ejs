@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Sign in as Government Supervisor - UNITE</title>
+  <title><%= translation.home.signInSupervisor %> - UNITE</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="A cool thing made with Glitch">
@@ -36,7 +36,7 @@
 
 <body>
   <nav user="supervisor" class="navbar navbar-expand-lg navbar-dark bg-dark noMenu" style="width: 100% !important;">
-    <a class="navbar-brand" href="/">Sign in as Government Supervisor - UNITE</a>
+    <a class="navbar-brand" href="/"><%= translation.home.signInSupervisor %> - UNITE</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -65,23 +65,24 @@
 
     <div class="sign-in-form smooth-shadow">
       <form id="login" method="POST">
-        <h2 class="text-center">Sign in as Supervisor</h2>
+        <h2 class="text-center"><%= translation.home.signInSupervisor %></h2>
         <div class="form-group">
-          <label for="emailAddress">Email address</label>
+          <label for="emailAddress"><%= translation.commonFields.emailAddress %></label>
           <input type="email" class="form-control" id="emailAddress" placeholder="demo@email.com" name="emailAddress" required>
         </div>
         <div class="form-group">
-          <label for="password">Password</label>
+          <label for="password"><%= translation.commonFields.password %></label>
           <input type="password" class="form-control" id="password" placeholder="Demo1pass" name="password" required>
         </div>
         <div class="form-check">
           <input type="checkbox" class="form-check-input" name="remember" id="remember">          
-            <label style="color: green" class="form-check-label" for="remember">Remember me (?)</label>          
+            <label style="color: green" class="form-check-label" for="remember"><%= translation.commonFields.rememberUser %></label>
         </div>
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+        <br>        
         <div class="g-recaptcha" data-sitekey="<%= captchaSiteKey %>"></div>
         <input type="hidden" name="captchaResponse">
-        <button type="submit" class="btn btn-primary btn-block btn-lg">Submit</button>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+        <button type="submit" class="btn btn-primary btn-block btn-lg"><%= translation.commonFields.submit %></button>
       </form>
     </div>
   </div>

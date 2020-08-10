@@ -24,6 +24,22 @@ const captchaSiteKey = process.env.RECAPTCHA_V2_SITE_KEY;
 const captchaSecretKey = process.env.RECAPTCHA_V2_SECRET_KEY;
 const fetch = require('node-fetch');
 
+ const homeMenuTranslationKeys = [
+        "translation.menu.greeting",
+        "translation.menu.languages",
+        "translation.menu.home",
+        "translation.menu.about",
+        "translation.menu.terms",
+        "translation.menu.antibribery",
+        "translation.menu.userFeedback",
+        "translation.menu.adminSection",
+        "translation.menu.viewFeedback",
+        "translation.menu.memberList",
+        "translation.menu.uploadedFiles",
+        "translation.menu.allBids",
+        "translation.menu.logout"
+  ];
+
 let userData = require('../middleware/userHome');
 
 function checkFile(file) {
@@ -51,10 +67,11 @@ exports.getIndex = (req, res) => {
       console.log(ip);
   }).catch((error) => {
       console.error(error);
-  });  
-
+  });
+  
   res.render("index", {
     role: obj.role,
+    keys: homeMenuTranslationKeys,
     isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
     avatar: checkFile(obj.avatar),
@@ -76,6 +93,7 @@ exports.getDeleteUser = async (req, res) => {
     //isAdmin: obj.role == process.env.USER_ADMIN,
     //userId: obj.userId,
     //avatar: obj.avatar,
+    keys: homeMenuTranslationKeys,
     banId: req.params.id,
     banType: req.params.type,
     name: req.params.name,
@@ -102,6 +120,7 @@ exports.getBanUser = async (req, res) => {
   res.render("banUser", {
     role: obj.role,
     titles: titles,
+    keys: homeMenuTranslationKeys,
     bannedUsers: users,
     deleteId: req.params.id,
     deleteType: req.params.type,
@@ -158,6 +177,7 @@ exports.getFilesList = async (req, res) => {
     role: obj.role,
     successMessage: success,
     errorMessage: error,
+    keys: homeMenuTranslationKeys,
     isAdmin: obj.role == process.env.USER_ADMIN,
     files: files,
     uploads: uploads,
@@ -183,6 +203,7 @@ exports.getFeedback = async (req, res) => {
   res.render("feedback", {
     role: obj.role,
     captchaSiteKey: captchaSiteKey,
+    keys: homeMenuTranslationKeys,
     isAdmin: obj.role == process.env.USER_ADMIN,
     subjects: subjects,
     successMessage: success,
@@ -205,6 +226,7 @@ exports.getViewFeedbacks = async (req, res) => {
   res.render("viewFeedbacks", {    
     role: obj.role,
     isAdmin: obj.role == process.env.USER_ADMIN,
+    keys: homeMenuTranslationKeys,
     feedbacks: feedbacks,
     userId: obj.userId,
     avatar: checkFile(obj.avatar),
@@ -217,6 +239,7 @@ exports.getAbout = (req, res) => {
   let obj = userData(req);
   res.render("about", {
     role: obj.role,
+    keys: homeMenuTranslationKeys,
     isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
     avatar: checkFile(obj.avatar),
@@ -229,6 +252,7 @@ exports.getAntibriberyAgreement = (req, res) => {
   let obj = userData(req);
   res.render("antibriberyAgreement", {
     role: obj.role,
+    keys: homeMenuTranslationKeys,
     isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
     avatar: checkFile(obj.avatar),
@@ -241,6 +265,7 @@ exports.getTermsConditions = (req, res) => {
   let obj = userData(req);
   res.render("termsConditions", {
     role: obj.role,
+    keys: homeMenuTranslationKeys,
     isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
     avatar: checkFile(obj.avatar),
@@ -261,6 +286,7 @@ exports.getBidsList = async (req, res) => {
 
   res.render('bidsCatalog', {
     role: obj.role,
+    keys: homeMenuTranslationKeys,
     isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
     avatar: checkFile(obj.avatar),
@@ -296,6 +322,7 @@ exports.getMemberList = async (req, res) => {
   
   res.render("memberList", {    
     role: obj.role,
+    keys: homeMenuTranslationKeys,
     isAdmin: obj.role == process.env.USER_ADMIN,
     avatar: checkFile(obj.avatar),
     buyers: buyers,

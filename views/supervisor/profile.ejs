@@ -20,7 +20,6 @@
   <script src="/sweetalert2@9.min.js"></script>
   <script src="/https.js"></script>
   <script src="/functions.js"></script>
-  
   <script type="text/javascript">
       $(document).ready(function() {        
         let token = $("input[name='_csrf']").val();
@@ -62,6 +61,22 @@
             }
           });
       });
+        
+      setTimeout(function() {    
+        <% if(keys != null) { %>
+        let i = 0, indexes = [];
+
+        $('a.nav-link').each(function(ind, elem) {      
+          indexes.push($(elem).attr('index'));
+        });
+
+        <% for(let k in keys) { %>   
+        if(isInArray(i, indexes)) {
+          $('a.nav-link span').eq(i).text('<%= eval(keys[k]) %>');
+        }
+        i++;
+        <% } } %>
+      }, 500);
   });
   </script>
 </head>

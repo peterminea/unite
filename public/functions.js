@@ -675,7 +675,8 @@ function removeFile(obj) {
 
 
 function isJson(obj) {
-  if (!obj || !obj.length || !Array.isArray(obj)) return false;
+  if (!obj || !obj.length || !Array.isArray(obj)) 
+    return false;
   if (obj.toString().charAt(0) == "[")
     //To be or not to be a JSON array.
     return false;
@@ -692,11 +693,38 @@ function isUnique(value, index, self) {
 //let unique = myArray.filter(isUnique);
 //let unique = myArray.filter((v, i, a) => a.indexOf(v) === i);
 function checkName(arr, name) {
-  for (let i in arr) {
-    if (arr[i].toLowerCase() == name.toLowerCase()) return true;
+  for (let i of arr) {
+    if (i.toLowerCase() == name.toLowerCase()) 
+      return true;
   }
 
   return false;
+}
+
+
+function isInArray(elem, array) {
+  for(let i of array) {
+    if(elem == i) {
+      return true;
+    }
+  }
+  
+return false;
+}
+
+
+function isInArraySorted(elem, array) {
+  for(let i of array) {
+    if(elem == i) {
+      return true;
+    }
+    
+    if(elem < i) {
+      return false;
+    }
+  }
+  
+return false;
 }
 
 
@@ -1396,9 +1424,9 @@ function userInputs(id, role, avatar, name, type, ul) {
     //We are logged in!
     ul.prepend(
       '<li class="nav-item user">' +
-        '<a class="nav-link" title="Hello" href="' +
+        '<a class="nav-link" index="0" title="Hello" href="' +
         link +
-        '">Hello, ' +
+        '"><span>Hello</span>, ' +
         name +
         " (" +
         role +
@@ -1415,7 +1443,7 @@ function userInputs(id, role, avatar, name, type, ul) {
     let str = "";
     str +=
       '<li class="nav-item logout">' +
-      '<a class="btn btn-danger admin" marg="240" style="margin-top: -240px;" href="?exit=true&home=true" title="Clear user session/Logout">Logout</a>' +
+      '<a class="btn btn-danger admin" marg="240" index="12" style="margin-top: -240px;" href="?exit=true&home=true" title="Clear user session/Logout"><span>Logout</span></a>' +
       "</li>";
 
     ul.append(str);
@@ -2037,7 +2065,7 @@ $(document).ready(function() {
     $("input,textarea,span,label,li,button,a,b,p,h1,h2,h3,h4,h5,option").each(
       function(index, el) {
         //Tooltips in the App.
-        if (!$(el).attr("title")) {
+        if(!$(el).attr("title")) {
           $(el).attr("title", $(el).val() ? $(el).val() : $(el).text());
         }
       }
@@ -2050,44 +2078,41 @@ $(document).ready(function() {
     <a href="?language=ro">Română</a>*/
   
   let nav = $("body").find("nav");
+  let lang, loc = window.location.href;
+    
+  let str = loc.indexOf('?');
+  if(str != -1) {
+    lang = loc.substring(str);
+    loc = loc.substring(0, str);
+  }
+  
   if (nav.length && nav.next("div").hasClass("home")) {
     let $str =
       ' <div class="collapse navbar-collapse" id="navbarSupportedContent">' +
       '<ul class="navbar-nav mr-auto">' +        
-        '<li class="nav-item language" style="cursor: pointer"><a class="nav-link" title="Languages">Languages</a></li>' +
+      `<li class="nav-item language" style="cursor: pointer"><a class="nav-link" index="1"><span>Languages</span></a></li>` +
       '<li class="nav-item">' +
-      '<a class="nav-link" title="Home" href="/">Home</a>' +
+      `<a class="nav-link" index="2" href="/${lang}"><span>Home</span></a>` +
       "</li>" +
       '<li class="nav-item">' +
-      '<a class="nav-link" title="About" href="/about">About</a>' +
+      `<a class="nav-link" index="3" href="/about${lang}"><span>About</span></a>` +
       "</li>" +
       '<li class="nav-item">' +
-      '<a class="nav-link" href="/termsConditions" title="Terms and Conditions">Terms</a>' +
+      `<a class="nav-link" href="/termsConditions${lang}" index="4" title="Terms and Conditions"><span>Terms</span></a>` +
       "</li>" +
       '<li class="nav-item last">' +
-      '<a class="nav-link" href="/antibriberyAgreement" title="Anti-Bribery Agreement">Anti-Bribery</a>' +
+      `<a class="nav-link" href="/antibriberyAgreement${lang}" index="5" title="Anti-Bribery Agreement"><span>Anti-Bribery</span></a>` +
       "</li>" +
       "</ul>" +
       "<br>" +
-      '<button class="signup btn btn-primary" data-toggle="modal" data-target="#signUpModal">Sign up</button>' +
+      '<button class="signup btn btn-primary" data-toggle="modal" data-target="#signUpModal"><span>Sign up</span></button>' +
       "</div>";
 
     nav.append($str);
     let ul = $("#navbarSupportedContent").find("ul");
-    
-    $('li.language').click(function(e) {
-      if($(this).hasClass('showLanguages')) {
-        $(this).find('ol').remove();
-        $(this).removeClass('showLanguages');
-      } else {
-        $(this)
-          .append(`<ol style="position: fixed" class='languages-bar'><li><a href="?language=en">English</a></li><li><a href="?language=de">Deutsch</a></li><li><a href="?language=it">Italiano</a></li><li><a href="?language=ro">Română</a></li></ol>`)
-        .addClass('showLanguages');
-      }
-    });
-
+ 
     $(
-      '<li class="nav-item"><a class="nav-link" href="/feedback" title="Feedback/Suggestions">User Feedback</a></li>'
+      `<li class="nav-item"><a class="nav-link" href="/feedback${lang}" index="6" title="Feedback/Suggestions"><span>User Feedback</span></a></li>`
     ).insertAfter("li.last");
 
     let isAdmin = nav.find('input[id="userData"]').attr("isAdmin");
@@ -2112,43 +2137,43 @@ $(document).ready(function() {
     if (isAdmin == "true") {
       treatLastLi();
       $(
-        '<li class="nav-item"><a class="nav-link admin" marg="' +
+        '<li class="nav-item"><a class="nav-link admin" index="7" marg="' +
           marg +
           '" style="margin-top: -' +
           marg +
-          'px" title="Admin specific fields"><b>Admin Section<b></a></li>'
+          'px" title="Admin specific fields"><b><span>Admin Section</span><b></a></li>'
       ).insertAfter("li.last");
       marg -= treatLastLi();
       $(
-        '<li class="nav-item"><a class="nav-link admin" marg="' +
+        '<li class="nav-item"><a class="nav-link admin" index="8" marg="' +
           marg +
           '" style="margin-top: -' +
           marg +
-          'px" href="/viewFeedbacks" title="Check Feedbacks">View Feedbacks</a></li>'
+          `px" href="/viewFeedbacks${lang}"><span>View Feedbacks</span></a></li>`
       ).insertAfter("li.last");
       marg -= treatLastLi();
       $(
-        '<li class="nav-item"><a class="nav-link admin" marg="' +
+        '<li class="nav-item"><a class="nav-link admin" index="9" marg="' +
           marg +
           '" style="margin-top: -' +
           marg +
-          'px" href="/memberList" title="List of UNITE Members">List of our members</a></li>'
+          `px" href="/memberList${lang}" title="List of UNITE Members"><span>List of our members</span></a></li>`
       ).insertAfter("li.last");
       marg -= treatLastLi();
       $(
-        '<li class="nav-item"><a class="nav-link admin" marg="' +
+        '<li class="nav-item"><a class="nav-link admin" index="10" marg="' +
           marg +
           '" style="margin-top: -' +
           marg +
-          'px" href="/filesList" title="View Uploaded Files List">View Uploaded Files</a></li>'
+          `px" href="/filesList${lang}" title="View Uploaded Files List"><span>View Uploaded Files</span></a></li>`
       ).insertAfter("li.last");
       marg -= treatLastLi();
       $(
-        '<li class="nav-item"><a class="nav-link admin" marg="' +
+        '<li class="nav-item"><a class="nav-link admin" index="11" marg="' +
           marg +
           '" style="margin-top: -' +
           marg +
-          'px" href="/bidsList" title="View UNITE Bids List">View All Bids</a></li>'
+          `px" href="/bidsList${lang}" title="View UNITE Bids List"><span>View All Bids</span></a></li>`
       ).insertAfter("li.last");
     }
 
@@ -2166,8 +2191,8 @@ $(document).ready(function() {
     let li = ul.find("li").eq(ind);
     li.addClass("active");
     let text = li.find("a").text();
-  } else {
-    if (nav.length && !nav.hasClass("noMenu")) {
+  } else {//No Home zone.
+    if (nav.length && !nav.hasClass("noMenu")) {      
       let user = nav.attr("user");
       let bigScreen = window.matchMedia("(min-width: 900px)");
       let offset = user == "supplier" ? 112 : user == "buyer" ? 80 : 40;
@@ -2201,32 +2226,33 @@ $(document).ready(function() {
       let str =
         '<div class="collapse navbar-collapse" id="navbarSupportedContent">' +
         '<ul class="navbar-nav mr-auto">' +
-        '<li class="nav-item"><a class="nav-link" href="/">Home<span class="sr-only"></span></a> </li>' +
-        '<li class="nav-item"><a class="nav-link" href="/' +
+        `<li class="nav-item language" style="cursor: pointer"><a class="nav-link" index="0"><span>Languages</span></a></li>` +
+        '<li class="nav-item"><a class="nav-link" index="1" href="/"><span>Home</span></a> </li>' +
+        '<li class="nav-item"><a class="nav-link" index="2" href="/' +
         user +
-        '">Dashboard <span class="sr-only"></span></a></li>' +
+        '"><span>Dashboard</span></a></li>' +
         (user == "supervisor"
           ? ""
-          : '<li class="nav-item"><a class="nav-link" href="/' +
+          : '<li class="nav-item"><a class="nav-link" index="3" href="/' +
             user +
-            '/balance">Balance <span class="sr-only"></span></a></li>') +
+            '/balance"><span>Balance</span></a></li>') +
         (user == "supplier"
-          ? '<li class="nav-item"><a class="nav-link" href="/' +
+          ? '<li class="nav-item"><a class="nav-link" index="4" href="/' +
             user +
-            '/bid-requests">Bid Requests</a></li>'
+            '/bid-requests"><span>Bid Requests</span></a></li>'
           : "") +
-        '<li class="nav-item"><a class="btn btn-primary userRight" marg="' +
+        '<li class="nav-item"><a class="nav-link btn btn-primary userRight" index="' + (user == 'buyer'? 4 : user == 'supervisor'? 5 : 3) + '" marg="' +
         profilePx +
         '" style="margin-top: -' +
         profilePx +
         'px" href="/' +
         user +
-        '/profile">Profile</a></li><br>' +
-        '<li class="nav-item"><a class="btn btn-danger userRight" marg="' +
+        '/profile"><span>Profile</span></a></li><br>' +
+        '<li class="nav-item"><a class="nav-link btn btn-danger userRight" index="' + (user == 'buyer'? 5 : user == 'supervisor'? 6 : 4) + '" marg="' +
         logoutPx +
         '" style="margin-top: -' +
         logoutPx +
-        'px" title="Logout" href="?exit=true">Logout</a></li></ul></div>';
+        'px" title="Logout" href="?exit=true"><span>Logout</span></a></li></ul></div>';
 
       nav.append(str);
 
@@ -2243,6 +2269,24 @@ $(document).ready(function() {
       }
     }
   }
+  
+   $('li.language').click(function(e) {
+    if($(this).hasClass('showLanguages')) {
+      $(this).find('ol').remove();
+      $(this).removeClass('showLanguages');
+    } else {        
+      $(this)
+        .append(`<ol style="position: fixed" title='Choose Platform Language' class='languages-bar'><li><a href="${loc}?clang=en"><img class='country-flag' src="https://www.countryflags.io/us/flat/64.png">English</a></li><li><a href="${loc}?clang=de"><img class='country-flag' src="https://www.countryflags.io/de/flat/64.png">Deutsch</a></li><li><a href="${loc}?clang=it"><img class='country-flag' src="https://www.countryflags.io/it/flat/64.png">Italiano</a></li><li><a href="${loc}?clang=ro"><img class='country-flag' src="https://www.countryflags.io/ro/flat/64.png">Română</a></li></ol>`)
+      .addClass('showLanguages');       
+
+      $('ol.languages-bar li').off('click').on('click', function() {
+        let ref = $(this).find('a').attr('href');
+        let langStr = ref.substring(ref.indexOf('?'));
+        nav.attr('language', langStr);
+        $('li.language').hide();
+      });
+    }
+  });
 
   $("body").css({
     "background-image":

@@ -1,9 +1,10 @@
 {
     "home": {
+        "bigTitle": "UNITE - Underserved Needs in Times of Emergency - Startseite",
         "title": "UNITE-Plattform für öffentliche Beschaffungswesen",
         "meaning": "Unterversorgte Bedürfnisse in Notzeiten",
         "description": "Plattform für öffentliches Auftragswesen",
-        "whatItDoes": "Schaffung einer Welt, in der Regierungen und Unternehmen gemeinsam Innovationen entwickeln, um die Krise zu überwinden",
+        "whatWeDo": "Schaffung einer Welt, in der Regierungen und Unternehmen gemeinsam Innovationen entwickeln, um die Krise zu überwinden",
         "mottoOne": "ARBEITSPLÄTZE RETTEN, LEBEN RETTEN!",
         "mottoTwo": "Wir fahren das neue Normal!",
         "signUp": "Registrieren Sie sich",
@@ -14,10 +15,11 @@
         "signUpSupervisor": "Registrieren Sie sich als Supervisor",
         "signUpSupplier": "Registrieren Sie sich als Lieferant",
         "captchaProtection": "Diese Website ist durch Google reCaptcha V2 geschützt.",
-        "close": "Schließen"
+        "close": "Schließen"        
     },
     "about": {
-        "first_paragraph": "UNITE ist eine Plattform für das öffentliche Beschaffungswesen, die ausschließlich für die staatliche Beschaffung von Sonderbestellungen von Produkten und Dienstleistungen für die Krisenreaktion bestimmt ist. <br>Wir nennen sie \"Die Alibaba dringender<\/br> öffentlicher Beschaffungsaufträge\".<br> UNITE ist eine zweiseitige Plattform, die öffentliche Beschaffer mit Unternehmen verbindet, die die Fähigkeit und Kapazität haben, ihre Aktivitäten als Reaktion<\/br> auf die COVID-19-Krise auf die<br> Lieferung von Waren und Dienstleistungen neu auszurichten<\/br>. Die<br> Unternehmen werden aufgefordert, sich auf der Plattform zu registrieren und dabei ihre Fähigkeit und Kapazität zur Herstellung dringend benötigter Produkte oder zur Bereitstellung nachgefragter<\/br> Dienstleistungen<br> zu beschreiben<\/br>.<br><br> Unternehmen können auch offene Ausschreibungen öffentlicher Auftraggeber einsehen und darauf reagieren<\/br><\/br>.<br>   Öffentliche Einkäufer können auf die Plattform zugreifen und eine Beschaffungsanfrage erstellen. Unsere Software gleicht die Beschaffungsanfrage mit potenziellen Lieferanten ab und erleichtert die gesamte Transaktion - einschließlich Erstkontakt, Verhandlung, Auftragserteilung, Lieferannahme und Bezahlung.<\/br>",
+      "title": "Über uns",
+        "first_paragraph": "UNITE ist eine Plattform für das öffentliche Beschaffungswesen, die ausschließlich für die staatliche Beschaffung von Sonderbestellungen von Produkten und Dienstleistungen für die Krisenreaktion bestimmt ist. <br>Wir nennen sie \"Die Alibaba dringender öffentlicher Beschaffungsaufträge\".<br> UNITE ist eine zweiseitige Plattform, die öffentliche Beschaffer mit Unternehmen verbindet, die die Fähigkeit und Kapazität haben, ihre Aktivitäten als Reaktion auf die COVID-19-Krise auf die<br> Lieferung von Waren und Dienstleistungen neu auszurichten<br>. Die Unternehmen werden aufgefordert, sich auf der Plattform zu registrieren und dabei ihre Fähigkeit und Kapazität zur Herstellung dringend benötigter Produkte oder zur Bereitstellung nachgefragter<\/br> Dienstleistungen<br> zu beschreiben.<br><br> Unternehmen können auch offene Ausschreibungen öffentlicher Auftraggeber einsehen und darauf reagieren.<br>Öffentliche Einkäufer können auf die Plattform zugreifen und eine Beschaffungsanfrage erstellen. Unsere Software gleicht die Beschaffungsanfrage mit potenziellen Lieferanten ab und erleichtert die gesamte Transaktion - einschließlich Erstkontakt, Verhandlung, Auftragserteilung, Lieferannahme und Bezahlung.</br>",
         "second_paragraph": "UNITE unterscheidet sich von anderen Lösungen dadurch, dass es eine Datenbank von Unternehmen bereitstellt, die in der Lage sind, den Betrieb neu auszurichten, und dass es den Prozess automatisiert. Zu den anderen Lösungen gehören die Nutzung bestehender Lieferanten und des ERP-\/Einkaufssystems (nicht geeignet für ungewöhnliche Anforderungen); Engagement mit dem Markt durch die Kontaktaufnahme mit einzelnen Unternehmen per E-Mail, Telefon oder persönlich (was langsam ist); Nutzung anderer Online-Verkaufsplattformen (keine Sichtbarkeit der Fähigkeit von Unternehmen, den Betrieb neu auszurichten); eigenes Wissen über öffentliche Käufer und ihre Verbindungen zur Industrie (nicht weit verbreitet - beschränkt auf Einzelpersonen oder lokale Teams)."
     },
     "feedback": {
@@ -535,5 +537,24 @@
         "signUp": {
             "title": "Registrieren Sie sich als Lieferant - UNITE"
         }
+    },
+    "menu": {
+        "greeting": "Hallo",
+        "languages": "Sprachen",
+        "home": "Startseite",
+        "about": "Über uns",
+        "terms": "Bedingungen",
+        "antibribery": "Anti-Bestechung",
+        "userFeedback": "Benutzer-Feedback",
+        "adminSection": "Admin-Bereich",
+        "viewFeedback": "Rückmeldungen anzeigen",
+        "memberList": "Liste unserer Mitglieder",
+        "uploadedFiles": "Hochgeladene Dateien anzeigen",
+        "allBids": "Alle Gebotsanfragen",
+        "userDashboard": "Benutzer-Dashboard",
+        "userBalance": "Bilanz",
+        "supplierBidsList": "Gebotsanfragen",
+        "userProfile": "Profil",
+        "logout": "Ausloggen"
     }
 }
