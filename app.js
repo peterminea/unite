@@ -1,7 +1,8 @@
-"use strict";
+'use strict';
 
 //Basic declarations:
 const path = require("path");
+const Message = require("./models/message");
 const http = require("http");
 const express = require("express");
 const socketio = require("socket.io");
@@ -16,6 +17,7 @@ const MongoClient = require("mongodb").MongoClient;
 const BASE = process.env.BASE;
 const URI = process.env.MONGODB_URI;
 const MAX_PROD = process.env.SUP_MAX_PROD;
+
 const cookieParser = require("cookie-parser");
 const Message = require('./models/message');
 //require('dotenv').config();
@@ -34,6 +36,7 @@ const {
   deleteFileBody,
   completePurchase
 } = require("./middleware/templates");
+
 /*
 const lingua = require('lingua');
 
