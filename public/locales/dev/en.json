@@ -603,7 +603,8 @@
         "isActive": "Is Active?",
         "ipv4": "IPv4 Address",
         "deletion": "Delete User",
-        "ban": "Ban User"
+        "ban": "Ban User",
+        "title": "Buyers"
     },
     "gridSupervisorHome": {
         "organizationName": "Organization Name",
@@ -616,7 +617,8 @@
         "isActive": "Is Active?",
         "ipv4": "IPv4 Address",
         "deletion": "Delete User",
-        "ban": "Ban User"
+        "ban": "Ban User",
+        "title": "Supervisors"
     },
     "gridSupplierHome": {
         "companyName": "Company Name",
@@ -635,7 +637,8 @@
         "isActive": "Is Active?",
         "ipv4": "IPv4 Address",
         "deletion": "Delete User",
-        "ban": "Ban User"
+        "ban": "Ban User",
+        "title": "Suppliers"
     },
     "gridProducts": {
         "name": "Product name",
@@ -646,7 +649,8 @@
         "productImage": "Product Image",
         "placeBid": "New Bid Request",
         "imageWrapper": "Product images",
-        "buttonsWrapper": "Handle the line"
+        "buttonsWrapper": "Handle the line",
+        "title": "Products List"
     },
     "gridBids": {
         "bidName": "Bid Request Name",
@@ -658,7 +662,8 @@
         "dateCreated": "Creation Date",
         "expiryDate": "Expiry Date",
         "isCancelled": "Is Cancelled?",
-        "isExpired": "Is Expired?"
+        "isExpired": "Is Expired?",
+        "title": "UNITE Bid Requests List"
     },
     "gridUploadedFiles": {
         "filename": "File Name",
@@ -667,7 +672,10 @@
         "image": "Image",
         "uploadDate": "Date of the upload",
         "download": "Download File",
-        "deletion": "Delete File"
+        "deletion": "Delete File",
+        "avatarTitle": "Avatar Files",
+        "productImagesTitle": "Product Image Files",
+        "uploadedDocsTitle": "Uploaded Documents"
     },
     "gridSupervisorsBuyers": {
         "deptAgencyGroup": "Department \/ Agency \/ Group",
@@ -683,6 +691,16 @@
         "expiredBids": "Expired Bids Count",
         "expiredBidsPrice": "Expired Bids Price",
         "removeBuyer": "Remove from UNITE",
-        "chat": "Talk to the Buyer"
+        "chat": "Talk to the Buyer",
+        "title": "Supervisor's Buyers List"
+    },
+    "gridBannedUsers": {
+        "title": "Banned Users List",
+        "name": "User Name",
+        "type": "User Type",
+        "email": "E-mail Address",
+        "ip": "IP Address (IPv4)",
+        "banDate": "Ban Date",
+        "banExpiryDate": "Ban Expiry Date"
     }
 }

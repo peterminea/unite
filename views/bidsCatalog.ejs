@@ -92,8 +92,13 @@
     </div>
   <script type="text/javascript">
     let data = [];
-    let colModel = colModelGridBids;
-    colModelGridBids.splice(1, 0, { name: 'buyerName', label: 'Bid Buyer Name', align: 'center', search: true, width: 220});
+    colModelGridBids.splice(1, 0, { name: 'buyerName', label: '<%= translation.gridBids.buyerName %>', align: 'center', search: true, width: 220});
+    <% if(gridKeys != null) { %>
+    let i = 0;
+    <% for(let k in gridKeys) { %>
+    colModelGridBids[i].label = '<%= eval(gridKeys[k]) %>';
+    i++;
+    <% } } %>
   
   <% i = 0; for (let bid of bids) { %>    
     data.push({
@@ -110,7 +115,7 @@
     });
      <% i++; } %>
     
-    initGrid(colModel, data, "#gridBids", '#bidsPager', "bidName", 'Bids List', 1200);
+    initGrid(colModelGridBids, data, "#gridBids", '#bidsPager', "bidName", '<%= translation.gridBids.title %>', 1200);
     </script>
         <% } else {%>
         <div>

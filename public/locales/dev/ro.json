@@ -4,8 +4,8 @@
         "meaning": "Nevoi speciale în timpuri de urgență",
         "description": "Platformă de achiziții publice",
         "whatItDoes": "Crearea unei lumi în care guvernele și întreprinderile inovează împreună pentru a depăși criza",
-        "mottoOne": "SALVĂM LOCURI DE MUNCĂ, SALVĂM VIEȚI!",
-        "mottoTwo": "Noi conducem noul normal!",
+        "mottoOne": "SALVÂND LOCURI DE MUNCĂ, SALVĂM VIEȚI!",
+        "mottoTwo": "Conducem noua normalitate!",
         "signUp": "Înscrie-te",
         "signInBuyer": "Conectați-vă ca Cumpărător",
         "signInSupervisor": "Conectați-vă ca supraveghetor",
@@ -19,7 +19,7 @@
         "bigTitle": "UNITE - Nevoi rezervate pe timp de urgență - Pagina de pornire"
     },
     "about": {
-      "first_paragraph": "UNITE este o platformă de achiziții publice exclusiv pentru achizițiile publice de comenzi speciale de produse și servicii pentru răspunsul la criză. \n Noi o numim \"Alibaba al cererilor urgente de achiziții publice.\" \n\nUNITE este o platformă cu două fețe, care conectează cumpărătorii publici cu companiile care au capacitatea și capacitatea de a-și reorienta activitățile către furnizarea de bunuri și servicii ca răspuns la criza COVID-19.\n \nCompaniile sunt invitate să se înregistreze pe platformă, descriind capacitatea și capacitatea lor de a fabrica produse de care au nevoie urgent sau de a furniza servicii la cerere. \nCompaniile pot, de asemenea, să răsfoiască și să răspundă cererilor de licitație deschise depuse de cumpărătorii publici. \n\n Cumpărătorii publică pot accesa platforma și pot crea o solicitare de achiziție. Software-ul nostru se potrivește cu cererea de achiziție cu potențialii furnizori și facilitează tranzacția completă - inclusiv contactul inițial, negocierea. plasarea comenzii, acceptarea livrării și plata.",
+        "first_paragraph": "UNITE este o platformă de achiziții publice exclusiv pentru achizițiile publice de comenzi speciale de produse și servicii pentru răspunsul la crize. \n Noi o numim \"Alibaba de cereri urgente de achiziții publice.\" \n\nUNITE este o platformă cu două fețe, care conectează cumpărătorii publici cu companiile care au capacitatea și capacitatea de a-și reorienta activitățile către furnizarea de bunuri și servicii ca răspuns la criza COVID-19.\n \nCompaniile sunt invitate să se înregistreze pe platformă, descriind capacitatea și capacitatea lor de a fabrica produse de care au nevoie urgent sau de a furniza servicii la cerere. \nCompaniile pot, de asemenea, să răsfoiască și să răspundă cererilor de licitație deschise depuse de cumpărătorii publici. \n\n Cumpărătorii publică pot accesa platforma și pot crea o solicitare de achiziție. Software-ul nostru se potrivește cu cererea de achiziție cu potențialii furnizori și facilitează tranzacția completă - inclusiv contactul inițial, negocierea. plasarea comenzii, acceptarea livrării și plata.",
         "second_paragraph": "UNITE se diferențiază de alte soluții prin faptul că oferă o bază de date a companiilor cu capacitatea de a reorienta operațiunile și în care automatizează procesul. Alte soluții includ utilizarea furnizorilor existenți și a sistemului ERP\/de achiziție (care nu este adaptat cerințelor anormale); implicarea cu piața prin contactarea companiilor individuale prin e-mail, telefon sau personal (ceea ce este lent); utilizarea altor platforme de vânzări online (nicio vizibilitate a capacității companiilor de a reorienta operațiunile); cunoștințele proprii ale cumpărătorilor publici și legăturile acestora cu industria (care nu sunt împărtășite pe scară largă - limitate la persoane fizice sau echipe locale).",
         "title": "Despre noi",
         "more": "Mai multe despre noi",
@@ -603,7 +603,8 @@
         "isActive": "Este activ?",
         "ipv4": "Adresă IP (IPv4)",
         "deletion": "Ștergere utilizator",
-        "ban": "Banare utilizator"
+        "ban": "Banare utilizator",
+        "title": "Cumpărători"
     },
     "gridSupervisorHome": {
         "organizationName": "Numele Organizației",
@@ -616,7 +617,8 @@
         "isActive": "Este activ?",
         "ipv4": "Adresă IP (IPv4)",
         "deletion": "Ștergere utilizator",
-        "ban": "Banare utilizator"
+        "ban": "Banare utilizator",
+        "title": "Supraveghetori"
     },
     "gridSupplierHome": {
         "companyName": "Numele Companiei",
@@ -635,7 +637,8 @@
         "isActive": "Este activ?",
         "ipv4": "Adresă IP (IPv4)",
         "deletion": "Ștergere utilizator",
-        "ban": "Banare utilizator"
+        "ban": "Banare utilizator",
+        "title": "Furnizori"
     },
     "gridProducts": {
         "name": "Numele produsului",
@@ -646,7 +649,8 @@
         "productImage": "Imaginea produsului",
         "placeBid": "Solicitare nouă de ofertă",
         "imageWrapper": "Imagini de produse",
-        "buttonsWrapper": "Gestionați rândul"
+        "buttonsWrapper": "Gestionați rândul",
+        "title": "Listă produse"
     },
     "gridBids": {
         "bidName": "Numele cererii de ofertă",
@@ -658,7 +662,8 @@
         "dateCreated": "Data creării",
         "expiryDate": "Data expirării",
         "isCancelled": "Este anulat?",
-        "isExpired": "A expirat?"
+        "isExpired": "A expirat?",
+        "title": "Lista solicitărilor de oferte pe UNITE"
     },
     "gridUploadedFiles": {
         "filename": "Nume fișier",
@@ -667,7 +672,10 @@
         "image": "Imagine",
         "uploadDate": "Data încărcării",
         "download": "Descărcați fișierul",
-        "deletion": "Ștergeți fișierul"
+        "deletion": "Ștergeți fișierul",
+        "avatarTitle": "Fișiere de tip Avatar",
+        "productImagesTitle": "Fișiere de tip imagine produs",
+        "uploadedDocsTitle": "Documente încărcate"
     },
     "gridSupervisorsBuyers": {
         "deptAgencyGroup": "Departamentul \/ Agenția \/ Grupul",
@@ -683,6 +691,16 @@
         "expiredBids": "Numărul ofertelor expirate",
         "expiredBidsPrice": "Prețul ofertelor expirate",
         "removeBuyer": "Eliminați din UNITE",
-        "chat": "Vorbiți cu Cumpărătorul"
+        "chat": "Vorbiți cu Cumpărătorul",
+        "title": "Lista cumpărătorilor din subordinea supraveghetorului"
+    },
+    "gridBannedUsers": {
+        "title": "Lista utilizatorilor interziși",
+        "name": "User Name",
+        "type": "Tip de utilizator",
+        "email": "Adresa de email",
+        "ip": "Adresă IP (IPv4)",
+        "banDate": "Data banării",
+        "banExpiryDate": "Data de expirare a  banării"
     }
 }

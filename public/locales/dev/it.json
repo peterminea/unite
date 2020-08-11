@@ -29,7 +29,7 @@
     },
     "feedback": {
         "provideFeedbackShort": "Fornisci un feedback!",
-        "provideFeedbackLong": "Fornire feedback, suggerimenti o richieste di informazioni da parte degli utenti - <i>Si prega di compilare i campi obbligatori (*)<\/i>.",
+        "provideFeedbackLong": "Fornire feedback, suggerimenti o richieste di informazioni da parte degli utenti - <i>Si prega di compilare i campi obbligatori (*)</i>.",
         "feedbackName": "Il tuo nome",
         "feedbackEmail": "Il tuo indirizzo e-mail",
         "feedbackDetails": "Dettagli del feedback",
@@ -603,7 +603,8 @@
         "isActive": "È attivo?",
         "ipv4": "Indirizzo IPv4",
         "deletion": "Cancella utente",
-        "ban": "Escludi utente"
+        "ban": "Escludi utente",
+        "title": "Acquirenti"
     },
     "gridSupervisorHome": {
         "organizationName": "Nome dell'organizzazione",
@@ -616,7 +617,8 @@
         "isActive": "È attivo?",
         "ipv4": "Indirizzo IPv4",
         "deletion": "Cancella utente",
-        "ban": "Escludi utente"
+        "ban": "Escludi utente",
+        "title": "Supervisori"
     },
     "gridSupplierHome": {
         "companyName": "Nome dell'azienda",
@@ -635,7 +637,8 @@
         "isActive": "È attivo?",
         "ipv4": "Indirizzo IPv4",
         "deletion": "Cancella utente",
-        "ban": "Escludi utente"
+        "ban": "Escludi utente",
+        "title": "Fornitori"
     },
     "gridProducts": {
         "name": "Nome del prodotto",
@@ -646,7 +649,8 @@
         "productImage": "Immagine del prodotto",
         "placeBid": "Nuova richiesta di offerta",
         "imageWrapper": "Immagini dei prodotti",
-        "buttonsWrapper": "Gestisci la linea"
+        "buttonsWrapper": "Gestisci la linea",
+        "title": "Elenco prodotti"
     },
     "gridBids": {
         "bidName": "Nome della richiesta di offerta",
@@ -658,7 +662,8 @@
         "dateCreated": "Data di creazione",
         "expiryDate": "Data di scadenza",
         "isCancelled": "È annullato?",
-        "isExpired": "È scaduto?"
+        "isExpired": "È scaduto?",
+        "title": "Elenco delle richieste di offerta UNITE"
     },
     "gridUploadedFiles": {
         "filename": "Nome del file",
@@ -667,7 +672,10 @@
         "image": "Immagine",
         "uploadDate": "Data di caricamento",
         "download": "Scarica il file",
-        "deletion": "Elimina file"
+        "deletion": "Elimina file",
+        "avatarTitle": "File tipo Avatar",
+        "productImagesTitle": "File di immagini per i prodotti",
+        "uploadedDocsTitle": "Documenti caricati"
     },
     "gridSupervisorsBuyers": {
         "deptAgencyGroup": "Dipartimento \/ Agenzia \/ Gruppo",
@@ -683,6 +691,16 @@
         "expiredBids": "Conteggio delle offerte scadute",
         "expiredBidsPrice": "Prezzo delle offerte scadute",
         "removeBuyer": "Rimuovere da UNITE",
-        "chat": "Parlate con l'Acquirente"
+        "chat": "Parlate con l'Acquirente",
+        "title": "Elenco degli acquirenti corrispondenti al supervisore"
+    },
+    "gridBannedUsers": {
+        "title": "Elenco degli utenti vietati",
+        "name": "User Name",
+        "type": "Tipo di utente",
+        "email": "Indirizzo e-mail",
+        "ip": "Indirizzo IP (IPv4)",
+        "banDate": "Data del divieto",
+        "banExpiryDate": "Data di scadenza del ban"
     }
 }
