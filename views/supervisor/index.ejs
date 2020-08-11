@@ -97,7 +97,7 @@
     var colModelSupervBuyers = [
       { name: 'deptAgencyGroup', label: 'Department/Agency Group', align: 'center', search: true, width: 150},
       { name: 'contactName', label: 'Contact Name', align: 'center', sorttype: 'text', search: true, width: 140},      
-      { name: 'balance', label: 'Buyer\'s Balance', align: 'center', template: 'number', sorttype: 'number', search: true, width: 100},
+      { name: 'balance', label: 'Buyer\'s Balance', align: 'center', template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(rowObject.balance).toFixed(2);}, search: true, width: 100},
       { name: 'isActive', label: 'Is Active?', align: 'center', search: true, width: 100 },
       { name: 'totalBids', label: 'Total Bids Count', align: 'center', template: 'number', sorttype: function(cellValue, rowObject) { return parseInt(rowObject.totalBids);}, search: true, width: 50},
       { name: 'totalBidsPrice', label: 'Total Bids Price', align: 'center', formatter: totalBidsPriceFormatter, unformat: priceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(parseFloat(rowObject.hiddenTotalBidsPrice).toFixed(2));}, search: true, width: 120},      

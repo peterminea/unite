@@ -64,20 +64,20 @@
     
 <div class="container home">
   <h1>
-    UNITE FULL LIST OF MEMBERS - Buyers, Supervisors, Suppliers
+    <%= translation.memberList.title %>
   </h1>
   <br>
   <div>
     <p class='term'>
-      Disclaimer: This is a Demo list of members. At this moment they do not represent real economic entities from the world. Any resemblance to any real-life company is unintentional. This list is shown only for Development purposes, and it is only accessible to Administrators.
+      <%= translation.memberList.description_partOne %>
     </p>
     <p class='term'>
-      However, in the coming future UNITE will have real members that will be listed. We will limit the amount of specific data to be made publicly available on our platform, according to the GDPR laws and rules. We may also restrict the access of external visitors to data about our members, meaning that you have to join UNITE (remember: business-to-business) to see the said information.
+      <%= translation.memberList.description_partTwo %>
     </p>
   </div>
   <br><br>
   <h3 style="color: green">
-    List of UNITE Buyers
+    <%= translation.memberList.buyersList %>
   </h3>
   <br>
 <% if(buyers != null && buyers.length > 0) { %>
@@ -94,6 +94,7 @@
     let data = [];
     let colModelBuyer = [
       { name: 'organizationName', label: 'Organization name', search: true, width: 210},
+      { name: 'organizationUniteID', label: 'Organization UNITE ID', align: 'center', search: true, width: 140},
       { name: 'deptAgencyGroup', label: 'Dept. Agency Group', align: 'center', search: true, width: 220},
       { name: 'contactName', label: 'Contact Name', align: 'center', search: true, width: 200},
       { name: 'emailAddress', label: 'E-mail Address', align: 'center', search: true, width: 160},
@@ -113,6 +114,7 @@
       data.push({
             id: "<%= i %>",
             organizationName: "<%= buyer.organizationName %>",
+            organizationUniteID: "<%= buyer.organizationUniteID %>",
             deptAgencyGroup: "<%= buyer.deptAgencyGroup %>",
             contactName: "<%= buyer.contactName %>",
             emailAddress: "<%= buyer.emailAddress %>",
@@ -123,16 +125,16 @@
             isActive: "<%= buyer.isActive %>",
             ipv4: "<%= buyer.ipv4 %>",
             hiddenDeleteHref: <% if(buyer.role != 'Admin') { %> "deleteUser/<%= buyer._id %>/Buyer/<%= buyer.organizationName %>/None/<%= buyer.emailAddress %>" <% } else { %> '' <% } %>,
-        hiddenBanHref: <% if(buyer.role != 'Admin') { %> "banUser/<%= buyer._id %>/Buyer/<%= buyer.organizationName %>/None/<%= buyer.emailAddress %>/<%= buyer.ipv4 %>" <% } else { %> '' <% } %>
+            hiddenBanHref: <% if(buyer.role != 'Admin') { %> "banUser/<%= buyer._id %>/Buyer/<%= buyer.organizationName %>/None/<%= buyer.emailAddress %>/<%= buyer.ipv4 %>" <% } else { %> '' <% } %>
       });
      <% i++; } %>
     
-    initGrid(colModelBuyer, data, "#gridBuyer", '#buyerPager', "organizationName", 'Buyers', 1600);
+    initGrid(colModelBuyer, data, "#gridBuyer", '#buyerPager', "organizationName", 'Buyers', 1680);
     </script>
         <% } else { %>
         <div>
           <p style="color: green; font-family: arial">
-            Sorry, no buyers here.
+            <%= translation.memberList.buyersList %>
           </p>
         </div>
         <% }%>
@@ -141,7 +143,7 @@
   <br>
   
   <h3 style="color: green">
-    List of UNITE Supervisors
+    <%= translation.memberList.supervisorsList %>
   </h3>
   <br>
 <% if(supervisors != null && supervisors.length > 0) {%>
@@ -194,7 +196,7 @@
         <% } else { %>
         <div>
           <p style="color: green; font-family: arial">
-            Sorry, no supervisors here.
+            <%= translation.memberList.noSupervisors %>
           </p>          
         </div>
         <% }%>
@@ -204,7 +206,7 @@
   <br>  
   
   <h3 style="color: green">
-    List of UNITE Suppliers
+    <%= translation.memberList.suppliersList %>
   </h3>
   <br>
 <% if(suppliers != null && suppliers.length > 0) {%>
@@ -234,8 +236,8 @@
       { name: 'capabilityDescription', label: 'Capability Description', align: 'center', search: true, width: 210},
       { name: 'role', label: 'Role', align: 'center', search: true, width: 75},
       { name: 'isActive', label: 'Is Active?', align: 'center', search: true, width: 60},
-      { name: 'deletion', label: 'Removal', align: 'center', formatter: removalFormatter, search: false, width: 100},
       { name: 'ipv4', label: 'IP Address (v4)', align: 'center', sorttype: "text", search: true, width: 180},
+      { name: 'deletion', label: 'Removal', align: 'center', formatter: removalFormatter, search: false, width: 100},      
       { name: 'ban', label: 'Ban User', align: 'center', formatter: banFormatter, search: false, width: 100},
       { name: 'hiddenDeleteHref', hidden: true },
       { name: 'hiddenBanHref', hidden: true }
@@ -269,7 +271,7 @@
         <% } else { %>
         <div>
           <p style="color: green; font-family: arial">
-            Sorry, no suppliers here.
+            <%= translation.memberList.noSuppliers %>
           </p>          
         </div>
         <% }%>

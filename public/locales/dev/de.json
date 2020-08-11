@@ -1,10 +1,9 @@
 {
     "home": {
-        "bigTitle": "UNITE - Underserved Needs in Times of Emergency - Startseite",
         "title": "UNITE-Plattform für öffentliche Beschaffungswesen",
         "meaning": "Unterversorgte Bedürfnisse in Notzeiten",
         "description": "Plattform für öffentliches Auftragswesen",
-        "whatWeDo": "Schaffung einer Welt, in der Regierungen und Unternehmen gemeinsam Innovationen entwickeln, um die Krise zu überwinden",
+        "whatItDoes": "Schaffung einer Welt, in der Regierungen und Unternehmen gemeinsam Innovationen entwickeln, um die Krise zu überwinden",
         "mottoOne": "ARBEITSPLÄTZE RETTEN, LEBEN RETTEN!",
         "mottoTwo": "Wir fahren das neue Normal!",
         "signUp": "Registrieren Sie sich",
@@ -15,19 +14,29 @@
         "signUpSupervisor": "Registrieren Sie sich als Supervisor",
         "signUpSupplier": "Registrieren Sie sich als Lieferant",
         "captchaProtection": "Diese Website ist durch Google reCaptcha V2 geschützt.",
-        "close": "Schließen"        
+        "close": "Schließen",
+        "whatWeDo": "Schaffung einer Welt, in der Regierungen und Unternehmen gemeinsam Innovationen entwickeln, um die Krise zu überwinden",
+        "bigTitle": "UNITE - Unterversorgte Bedürfnisse in Notzeiten - Home Page"
     },
     "about": {
-      "title": "Über uns",
-        "first_paragraph": "UNITE ist eine Plattform für das öffentliche Beschaffungswesen, die ausschließlich für die staatliche Beschaffung von Sonderbestellungen von Produkten und Dienstleistungen für die Krisenreaktion bestimmt ist. <br>Wir nennen sie \"Die Alibaba dringender öffentlicher Beschaffungsaufträge\".<br> UNITE ist eine zweiseitige Plattform, die öffentliche Beschaffer mit Unternehmen verbindet, die die Fähigkeit und Kapazität haben, ihre Aktivitäten als Reaktion auf die COVID-19-Krise auf die<br> Lieferung von Waren und Dienstleistungen neu auszurichten<br>. Die Unternehmen werden aufgefordert, sich auf der Plattform zu registrieren und dabei ihre Fähigkeit und Kapazität zur Herstellung dringend benötigter Produkte oder zur Bereitstellung nachgefragter<\/br> Dienstleistungen<br> zu beschreiben.<br><br> Unternehmen können auch offene Ausschreibungen öffentlicher Auftraggeber einsehen und darauf reagieren.<br>Öffentliche Einkäufer können auf die Plattform zugreifen und eine Beschaffungsanfrage erstellen. Unsere Software gleicht die Beschaffungsanfrage mit potenziellen Lieferanten ab und erleichtert die gesamte Transaktion - einschließlich Erstkontakt, Verhandlung, Auftragserteilung, Lieferannahme und Bezahlung.</br>",
-        "second_paragraph": "UNITE unterscheidet sich von anderen Lösungen dadurch, dass es eine Datenbank von Unternehmen bereitstellt, die in der Lage sind, den Betrieb neu auszurichten, und dass es den Prozess automatisiert. Zu den anderen Lösungen gehören die Nutzung bestehender Lieferanten und des ERP-\/Einkaufssystems (nicht geeignet für ungewöhnliche Anforderungen); Engagement mit dem Markt durch die Kontaktaufnahme mit einzelnen Unternehmen per E-Mail, Telefon oder persönlich (was langsam ist); Nutzung anderer Online-Verkaufsplattformen (keine Sichtbarkeit der Fähigkeit von Unternehmen, den Betrieb neu auszurichten); eigenes Wissen über öffentliche Käufer und ihre Verbindungen zur Industrie (nicht weit verbreitet - beschränkt auf Einzelpersonen oder lokale Teams)."
+        "first_paragraph": "UNITE ist eine Plattform für das öffentliche Beschaffungswesen, die ausschließlich für die staatliche Beschaffung von Sonderbestellungen von Produkten und Dienstleistungen für die Krisenreaktion bestimmt ist. \nWir nennen sie \"Die Alibaba dringender öffentlicher Beschaffungsaufträge\".\n UNITE ist eine zweiseitige Plattform, die öffentliche Beschaffer mit Unternehmen verbindet, die die Fähigkeit und Kapazität haben, ihre Aktivitäten als Reaktion auf die COVID-19-Krise auf die\n Lieferung von Waren und Dienstleistungen neu auszurichten. Die\n Unternehmen werden aufgefordert, sich auf der Plattform zu registrieren und dabei ihre Fähigkeit und Kapazität zur Herstellung dringend benötigter Produkte oder zur Bereitstellung nachgefragter Dienstleistungen\n zu beschreiben.\n\n Unternehmen können auch offene Ausschreibungen öffentlicher Auftraggeber einsehen und darauf reagieren.\n   Öffentliche Einkäufer können auf die Plattform zugreifen und eine Beschaffungsanfrage erstellen. Unsere Software gleicht die Beschaffungsanfrage mit potenziellen Lieferanten ab und erleichtert die gesamte Transaktion - einschließlich Erstkontakt, Verhandlung, Auftragserteilung, Lieferannahme und Bezahlung.",
+        "second_paragraph": "UNITE unterscheidet sich von anderen Lösungen dadurch, dass es eine Datenbank von Unternehmen bereitstellt, die in der Lage sind, den Betrieb neu auszurichten, und dass es den Prozess automatisiert. Zu den anderen Lösungen gehören die Nutzung bestehender Lieferanten und des ERP-\/Einkaufssystems (nicht geeignet für ungewöhnliche Anforderungen); Engagement mit dem Markt durch die Kontaktaufnahme mit einzelnen Unternehmen per E-Mail, Telefon oder persönlich (was langsam ist); Nutzung anderer Online-Verkaufsplattformen (keine Sichtbarkeit der Fähigkeit von Unternehmen, den Betrieb neu auszurichten); eigenes Wissen über öffentliche Käufer und ihre Verbindungen zur Industrie (nicht weit verbreitet - beschränkt auf Einzelpersonen oder lokale Teams).",
+        "title": "Über uns",
+        "more": "Mehr über uns",
+        "europeanCouncilInnovation": "Präsenz bei EIC COVID-Plattform",
+        "devPost": "DevPost Einzelheiten",
+        "socialMedia": "Links zu sozialen Medien:"
     },
     "feedback": {
         "provideFeedbackShort": "Geben Sie Feedback!",
         "provideFeedbackLong": "Geben Sie Benutzer-Feedback, Vorschläge oder Anfragen ein - <i>Bitte füllen Sie die erforderlichen (*) Felder aus.<\/i>",
         "feedbackName": "Ihr Name",
         "feedbackEmail": "Ihre E-Mail-Adresse",
-        "feedbackDetails": "Details zur Rückmeldung"
+        "feedbackDetails": "Details zur Rückmeldung",
+        "title": "UNITE - Rückmeldungen zur Plattform",
+        "sendFeedback": "Senden Sie Ihr Feedback",
+        "required": "Bitte wählen Sie eine Feedback-Art aus der Liste aus.",
+        "details": "Einzelheiten"
     },
     "commonFields": {
         "dateCreated": "Erstellungsdatum",
@@ -65,7 +74,7 @@
         "otherRelevantFiles": "Andere relevante Dateien",
         "checkTerms": "Ich bin mit den UNITE-Bedingungen einverstanden",
         "checkAntibribery": "Ich erkenne das Anti-Korruptionsabkommen der UNITE an",
-        "userRole": "UNITE Rolle",
+        "userRole": "UNITE Benutzer-Rolle",
         "cardGreeting": "Hallo!",
         "defaultGreeting": "Hallo, {organizationName} !",
         "defaultGreetingTwo": "Hallo, {companyName} !",
@@ -112,13 +121,18 @@
         "banReason": "Grund für die Sperrung des Kontos",
         "userName": "Benutzersname",
         "prefEndingBanDate": "Bevorzugtes Datum für das Ende des Verbots:",
-        "bannedList": "Liste der gesperrten Benutzer laden"
+        "bannedList": "Liste der gesperrten Benutzer laden",
+        "title": "UNITE - Benutzerkonto löschen - Admin",
+        "banUser": "Benutzer verbieten",
+        "loadBannedList": "Liste der gesperrten Mitglieder laden",
+        "loadButton": "Fortfahren"
     },
     "bidsCatalog": {
-        "title": "VOLLE LISTE VON BUYER BIDS - UNITE",
+        "title": "VOLLSTÄNDIGE LISTE DER ANGEBOTSANFRAGEN VON KÄUFERN - UNITE",
         "listDescription": "Dies ist die gesamte Liste der Gebotsanfragen (Tender Requests), die inzwischen von allen UNITE-Käufern gestellt wurden. Es enthält Gebote jeglichen Status (gültig, abgelaufen, storniert) sowie deren Preise in der vom Lieferanten vereinbarten Währung.",
         "conversionNotice": "Wir können auch den Preis jedes Gebots in die Standardwährung der Gebotsanfrage umrechnen. Wir gehen davon aus, dass Lieferanten möglicherweise andere Landeswährungen als die Käufer verwenden. Daher wenden wir Umrechnungskurse an.",
-        "noElements": "Entschuldigung, es gibt keine Käufer hier."
+        "noElements": "Entschuldigung, es gibt keine Käufer hier.",
+        "bidsTable": "Vollständige Tabelle unserer UNITE-Gebotsanfragen von Käufern"
     },
     "deleteUser": {
         "title": "UNITE - Benutzerkonto löschen - Admin",
@@ -131,11 +145,11 @@
     "fileList": {
         "title": "UNITE - VOLLSTÄNDIGE LISTE DER HOCHGELADENEN DATEIEN",
         "disclaimer": "Haftungsausschluss: Dies ist eine Demoliste von Dateien, die in unsere App-Ordner hochgeladen werden.",
-        "description": "Wir enthalten Avatare und benutzerspezifische Dateien, die hochgeladen werden. Aus praktischen Gründen ziehen wir es vor, Dateien in dedizierte Ordner des Anwendungshosting-Bereichs und nicht in die Datenbank selbst hochzuladen. Derzeit enthält die Datenbank nur wenige hochgeladene Dateien. <br> Hinweis: Nur Site-Administratoren können auf diese Listen zugreifen. Also, Leute, was wir hier zu sehen bekommen - es ist nur für uns!",
+        "description": "Wir enthalten Avatare und benutzerspezifische Dateien, die hochgeladen werden. Aus praktischen Gründen ziehen wir es vor, Dateien in dedizierte Ordner des Anwendungshosting-Bereichs und nicht in die Datenbank selbst hochzuladen. Derzeit enthält die Datenbank nur wenige hochgeladene Dateien. \n Hinweis: Nur Site-Administratoren können auf diese Listen zugreifen. Also, Leute, was wir hier zu sehen bekommen - es ist nur für uns!",
         "productImages": "Liste der UNITE-Produktbilddateien",
         "noProductImages": "Leider keine Product Image-Dateien hier.",
         "uploadedDocuments": "Liste der UNITE-Upload-Dateien",
-        "noUploadedDocuments": "Leider keine hochgeladenen Dateien hier.",
+        "noUploadedDocuments": "Sorry, no uploaded Documents are here.",
         "avatarFiles": "Liste der UNITE-Avatar-Dateien",
         "noAvatarFiles": "Tut mir leid, keine Avatar-Dateien hier."
     },
@@ -155,7 +169,7 @@
         "description": "Nachstehend finden Sie unsere Rückmeldungen, Vorschläge und andere Anfragen von unseren Benutzern."
     },
     "buyerView": {
-        "joinChatTitle": "Käufer - Chat-Anmeldung für UNITE",
+        "joinChatTitle": "Buyer - Chat Login in UNITE",
         "balance": {
             "title": "Saldo des Käufers",
             "description": "Sie können hier Währungsumrechnungen vornehmen, um zu sehen, wie hoch der Gegenwert Ihres aktuellen Saldos wäre, wenn er in andere Landeswährungen umgerechnet würde.",
@@ -164,11 +178,11 @@
         },
         "bidsCatalog": {
             "title": "Gebotskatalog des Käufers",
-            "secondTitle": "VOLLSTÄNDIGE LISTE DER KÄUFERGEBOTE",
+            "secondTitle": "FULL LIST OF BID REQUESTS FROM BUYER",
             "description_partOne": "Dies ist die gesamte Liste der Gebotsanfragen (Tender Requests), die vom {KäuferName} UNITE-Käufer bisher gestellt wurden. Sie enthält Gebote mit beliebigem Status (gültig, abgelaufen, annulliert) und auch deren Preise, angegeben in der vereinbarten Währung des Lieferanten.",
             "description_partTwo": "Wir können auch den Preis jedes Gebots in die Standardwährung der Gebotsanfrage umrechnen. Wir gehen davon aus, dass Lieferanten möglicherweise andere Landeswährungen als die Käufer verwenden, daher wenden wir Umrechnungskurse an.",
             "contentTitle": "Vollständige Tabelle Ihrer Käufergebote",
-            "noElements": "Entschuldigung, hier sind keine Gebote."
+            "noElements": "Leider sind hier keine Gebotsanfragen."
         },
         "cancelBid": {
             "title": "UNITE - Käufer - Bestellung stornieren",
@@ -221,18 +235,18 @@
             "requestBid": "Gebot anfordern",
             "supplierDetails": "Lieferantendetails",
             "viewBids": "Gebote anzeigen",
-            "multiSupplier": "Sie können mehrere Lieferanten für Ihr Angebot auswählen. Bitte beachten Sie die nachstehende Dropdown-Liste.",
+            "multiSupplier": "Sie können mehrere Lieferanten für Ihre Gebotsanfrage auswählen. Bitte beachten Sie die Dropdown-Liste unten.",
             "otherSuppliers": "Andere Lieferanten"
         },
         "placeBid": {
             "title": "Käufer - Gebotsanfrage stellen - UNITE",
             "greeting": "Herzlich willkommen!",
             "invite": "Bitte stellen Sie Ihre Gebotsanfrage",
-            "info": "Sie können eine Angebotsanfrage für ein oder mehrere Produkte stellen, die zu einem oder mehreren Lieferanten gehören.<br> Wenn Sie mehrere Lieferanten auswählen, werden bei der Angebotsabgabe separate Objekte für die Angebotsanfrage erstellt, von denen jedes einzelne an den entsprechenden<\/br> Lieferanten<br> gesendet<\/br> wird.<br><br> Wenn Sie denselben Produktnamen aus mehreren Lieferanten wählen und Angebote angenommen werden, müssen Sie jeden Lieferanten bezahlen. Bitte behandeln Sie diese Auswahl sorgfältig.<\/br><\/br>",
+            "info": "Sie können eine Angebotsanfrage für ein oder mehrere Produkte stellen, die zu einem oder mehreren Lieferanten gehören.\n Wenn Sie mehrere Lieferanten auswählen, werden bei der Angebotsabgabe separate Objekte für die Angebotsanfrage erstellt, von denen jedes einzelne an den entsprechenden Lieferanten\n gesendet wird.\n\n Wenn Sie denselben Produktnamen aus mehreren Lieferanten wählen und Angebote angenommen werden, müssen Sie jeden Lieferanten bezahlen. Bitte behandeln Sie diese Auswahl sorgfältig.",
             "requirement": "Bitte füllen Sie alle Pflichtfelder (*) aus.",
             "requestName": "Name der Anfrage",
             "bidSupplierCompany": "Unternehmen des Lieferanten",
-            "multiSupplierInfo": "Diese Angebotsanfrage ist an mehrere Lieferanten gerichtet.<br> Zu diesem Zweck werden bei der Angebotsabgabe für jeden Lieferanten und die entsprechenden Produkte separate Angebote erstellt, wobei die Preise entsprechend in die entsprechenden Währungen umgerechnet werden.<\/br>",
+            "multiSupplierInfo": "Diese Angebotsanfrage ist an mehrere Lieferanten gerichtet.\n Zu diesem Zweck werden bei der Angebotsabgabe für jeden Lieferanten und die entsprechenden Produkte separate Angebote erstellt, wobei die Preise entsprechend in die entsprechenden Währungen umgerechnet werden.",
             "suppliersList": "Die Lieferanten sind",
             "supplierData": "Lieferantendaten",
             "bidBuyerName": "Organisationsname des Käufers",
@@ -255,7 +269,7 @@
             "bidMentionsBuyer": "Erwähnungen für Käufer",
             "bidMentionsSupplier": "Erwähnungen für Lieferanten",
             "bidTypeMentions": "Geben Sie Ihre Erwähnungen unten ein",
-            "bidPaymentNotice": "WICHTIGER HINWEIS: UNITE verwendet derzeit den Streifenzahlungs-Gateway im TEST-MODUS.<br> Es werden Ihnen keine echten Gebühren berechnet. Sie müssen eine fiktive Kartennummer wie 4242 4242 4242 4242 4242 4242 verwenden und auch das CCV und das Ablaufdatum erfinden<\/br>.<br><br> Wollen Sie fortfahren?<\/br><\/br>",
+            "bidPaymentNotice": "WICHTIGER HINWEIS: UNITE verwendet derzeit den Streifenzahlungs-Gateway im TEST-MODUS.\n Es werden Ihnen keine echten Gebühren berechnet. Sie müssen eine fiktive Kartennummer wie 4242 4242 4242 4242 4242 4242 verwenden und auch das CCV und das Ablaufdatum erfinden.\n\n Wollen Sie fortfahren?",
             "bidFundsError": "Ihr aktuelles Guthaben reicht nicht aus, um diesen Kauf abzuschließen. Bitte fügen Sie Ihrem Konto etwas mehr Geld hinzu.",
             "bidUpdateNoBuyerMentions": "Sind Sie sicher, dass Sie den Angebotsstatus ohne Erwähnungen für den Käufer aktualisieren möchten?",
             "bidUpdateNoSupplierMentions": "Möchten Sie den Gebotsstatus wirklich ohne Nennungen für den Lieferanten aktualisieren?",
@@ -295,10 +309,10 @@
             "totalItems": "Gesamtzahl der Artikel (Gesamtbetrag)",
             "buyersPriceProduct": "Ihr Preis für das ausgewählte Produkt",
             "buyersOverallPrice": "Ihr Gesamtpreis",
-            "suppliersPriceProduct": "Lieferantenpreis für ausgewähltes Produkt",
+            "suppliersPriceProduct": "Supplier's price for the selected product",
             "multiSupplierPriceNotice": "Dieses Angebot soll an mehrere Lieferanten gesendet werden. Die äquivalenten Lieferantenpreise werden für jeden von ihnen separat festgelegt.",
             "suppliersOverallPrice": "Äquivalenter Gesamtpreis des Lieferanten",
-            "multiSupplierPriceAdapted": "Da sich Ihr Angebot an mehrere Lieferanten richten soll, werden für jeden von ihnen die Preise der entsprechenden\/vorgeschlagenen Produkte aus Ihrer Währung in ihre entsprechende Währung umgerechnet.<br> Wenn Sie Beträge für Produkte hinzufügen, wird jeder der Lieferanten hier seinen aktualisierten, entsprechenden Preis in seiner Währung haben.<\/br>",
+            "multiSupplierPriceAdapted": "Da sich Ihr Angebot an mehrere Lieferanten richten soll, werden für jeden von ihnen die Preise der entsprechenden\/vorgeschlagenen Produkte aus Ihrer Währung in ihre entsprechende Währung umgerechnet.\n Wenn Sie Beträge für Produkte hinzufügen, wird jeder der Lieferanten hier seinen aktualisierten, entsprechenden Preis in seiner Währung haben.",
             "suppliersPriceRendered": "Gesamtpreis für das ausgewählte Produkt",
             "bidStatus": "Status",
             "productSuggestionTitle": "Leute, die dieses Produkt gekauft haben, mochten auch...",
@@ -311,7 +325,7 @@
         },
         "profile": {
             "title": "Käuferprofil - UNITE",
-            "terminationText": "Sind Sie sicher, dass Sie Ihr Käuferkonto löschen möchten?<br> Dadurch werden auch Ihre Gebotsanfragen und die Nachrichten, die Sie in UNITE gesendet haben, entfernt<\/br>.<br><br> Wenn Sie nur eine Pause machen möchten, können Sie stattdessen Ihr Konto deaktivieren.<\/br><\/br>",
+            "terminationText": "Sind Sie sicher, dass Sie Ihr Käuferkonto löschen möchten?\n Dadurch werden auch Ihre Gebotsanfragen und die Nachrichten, die Sie in UNITE gesendet haben, entfernt.\n\n Wenn Sie nur eine Pause machen möchten, können Sie stattdessen Ihr Konto deaktivieren.",
             "cardGreeting": "Hallo!",
             "defaultGreeting": "Hallo, {organizationName} !",
             "description": "Dies ist Ihre Profilseite. Bitte halten Sie Ihre Daten korrekt, und Sie werden viel Glück bei der Suche nach Ihren benötigten Lieferanten haben!"
@@ -337,8 +351,8 @@
         },
         "viewBid": {
             "title": "UNITE - Käufer - Details zur Gebotsanfrage anzeigen",
-            "bidExpirationNoticeNotExtended": "Diese Gebotsanfrage läuft bald ab. Das Limitdatum ist $ {0} . <br> Bitte laden Sie einen Bid Extension Letter hoch, um $ {1} mehr Gültigkeitstage zu erhalten.",
-            "bidExpirationNoticeExtended": "Diese Gebotsanfrage läuft demnächst aus. Sein Limitdatum ist ${0}.<br> Sie haben die Gültigkeit des ursprünglichen Angebots bereits verlängert, so dass das obige Datum endgültig ist.<\/br>",
+            "bidExpirationNoticeNotExtended": "Diese Gebotsanfrage läuft bald ab. Das Limitdatum ist $ {0} . \n Bitte laden Sie einen Bid Extension Letter hoch, um $ {1} mehr Gültigkeitstage zu erhalten.",
+            "bidExpirationNoticeExtended": "Diese Gebotsanfrage läuft demnächst aus. Sein Limitdatum ist ${0}.\n Sie haben die Gültigkeit des ursprünglichen Angebots bereits verlängert, so dass das obige Datum endgültig ist.",
             "pay": "Bezahlen Sie",
             "goToPayment": "Gehen Sie zur Zahlung",
             "paymentCancelled": "Zahlung storniert!",
@@ -412,7 +426,7 @@
         "profile": {
             "title": "Regierungsaufseher - Profil - UNITE",
             "profileDescription": "Dies ist Ihre Supervisor-Profilseite. Bitte halten Sie Ihre Daten korrekt und kümmern Sie sich um die ehrlichen Aktivitäten Ihrer Freunde auf UNITE!",
-            "terminationText": "Sind Sie sicher, dass Sie Ihr Supervisor-Konto löschen möchten? Dies wird auch<br> Folgendes<\/br> entfernen<br>: Ihre<\/br> assoziierten Käufer;<br><br> alle ihre spezifischen Daten, wie Bestellungen,<\/br><\/br> Nachrichten, Tokens;<br><br> Ihre eigenen Benutzer-Token<\/br><\/br> (falls vorhanden);<br><br> Ihre Nachrichtenhistorie von<\/br><\/br> UNITE.<br> Bitte gehen Sie mit dieser Option sehr vorsichtig um!<\/br>",
+            "terminationText": "Sind Sie sicher, dass Sie Ihr Supervisor-Konto löschen möchten? Dies wird auch\n Folgendes entfernen\n: Ihre assoziierten Käufer;\n\n alle ihre spezifischen Daten, wie Bestellungen, Nachrichten, Tokens;\n\n Ihre eigenen Benutzer-Token (falls vorhanden);\n\n Ihre Nachrichtenhistorie von UNITE.\n Bitte gehen Sie mit dieser Option sehr vorsichtig um!",
             "editableUniteID": "Organisation UNITE ID (nur von Ihnen bearbeitbar)"
         },
         "resend": {
@@ -463,6 +477,7 @@
             "removalDone": "Sie haben diese Bestellung vom Einkäufer storniert.",
             "validBidsPlaced": "Sie haben derzeit eine Anzahl von $ (0) gültigen Geboten erhalten. Ihr Gesamtpreis beträgt: $ {0} $ {1} .",
             "bidFromBuyer": "Angebotsanfrage vom Käufer",
+            "cancelledBids": "Die folgenden $ {0} Gebote sind abgelaufene Gebotsanforderungen. Wir empfehlen Ihnen, diese zu löschen. Ihr Gesamtpreis beträgt {$ 1} {$ 2}.",
             "noBids": "Sie haben als Lieferant keine Angebotsanfragen erhalten. Wenn Sie es vorziehen, können Sie Ihr Produktangebot von Ihrer Profilseite aus aktualisieren.",
             "totalBids": "Sie haben insgesamt ${0} Gebotsanfragen erhalten. Ihr Gesamtpreis beträgt: ${1} ${2}."
         },
@@ -506,7 +521,7 @@
             "title": "Lieferanten-Dashboard - UNITE",
             "description": "Dies ist Ihre Dashboard-Seite. Um sicherzustellen, dass Sie weiterhin in den Suchergebnissen von Käufern erscheinen, halten Sie bitte Ihre Fähigkeiten und Produkte auf dem neuesten Stand.",
             "balance": "Bilanz",
-            "balanceDescription": "Ihr Guthaben ist die Summe der Preise aus Ihren <i> akzeptierten Gebotsanfragen <\/i> deren Zahlungen von Käufern geleistet wurden. <br> Sie können Ihr Guthaben verwalten, indem Sie auf die Seite Guthaben gehen.",
+            "balanceDescription": "Ihr Guthaben ist die Summe der Preise aus Ihren <i> akzeptierten Gebotsanfragen <\/i> deren Zahlungen von Käufern geleistet wurden. \n Sie können Ihr Guthaben verwalten, indem Sie auf die Seite Guthaben gehen.",
             "goToBalance": "Zum Bilanz gehen",
             "supplyDescription": "Sie haben derzeit eine Reihe von {productsLength} -Produkttypen, die eine Gesamtliefermenge von {amount} Artikeln ergeben, und der Gesamtpreis Ihrer angebotenen Lieferung beträgt {totalPrice} {currency} .",
             "acceptedBids": "Akzeptierte Gebotsanfragen",
@@ -515,7 +530,7 @@
         },
         "profile": {
             "title": "Lieferantenprofil - UNITE",
-            "terminationText": "Sind Sie sicher, dass Sie Ihr Lieferantenkonto löschen möchten? Dadurch werden auch entfernt<br>: Ihre<\/br> Produkte\/Dienstleistungen; Ihre Fähigkeiten;<br> Ihre<\/br> erhaltenen Bestellungen;<br><br> Ihre Benutzer-Token<\/br><\/br> (falls vorhanden);<br><br> Ihre Nachrichtenhistorie von<\/br><\/br> UNITE.<br> Wenn Sie nur eine Pause machen möchten, können Sie stattdessen Ihr Konto deaktivieren.<\/br>",
+            "terminationText": "Sind Sie sicher, dass Sie Ihr Lieferantenkonto löschen möchten? Dadurch werden auch entfernt\n: Ihre Produkte\/Dienstleistungen; Ihre Fähigkeiten;\n Ihre erhaltenen Bestellungen;\n\n Ihre Benutzer-Token (falls vorhanden);\n\n Ihre Nachrichtenhistorie von UNITE.\n Wenn Sie nur eine Pause machen möchten, können Sie stattdessen Ihr Konto deaktivieren.",
             "description": "Dies ist Ihre Dashboard-Seite. Um sicherzustellen, dass Sie weiterhin in den Suchergebnissen von Käufern erscheinen, halten Sie bitte Ihre Fähigkeiten und Produkte auf dem neuesten Stand."
         },
         "resend": {
@@ -551,10 +566,123 @@
         "memberList": "Liste unserer Mitglieder",
         "uploadedFiles": "Hochgeladene Dateien anzeigen",
         "allBids": "Alle Gebotsanfragen",
-        "userDashboard": "Benutzer-Dashboard",
+        "userDashboard": "Instrumententafel",
         "userBalance": "Bilanz",
         "supplierBidsList": "Gebotsanfragen",
         "userProfile": "Profil",
         "logout": "Ausloggen"
+    },
+    "chat": {
+        "title": "Messaging-System",
+        "geolocationError": "Geolokalisierung an Ihrem Endpunkt nicht unterstützt. Wir entschuldigen uns für die Unannehmlichkeiten.",
+        "chatTitle": "UNITE Chat - Sprechen Sie sofort mit Ihrem Partner!",
+        "pressKeytoSend": "Drücken Sie Senden oder Eingabe, um zu senden",
+        "typeMessage": "Geben Sie Ihre Nachricht hier ein",
+        "sendLocation": "Standort senden",
+        "sendLocationTitle": "Senden Sie Ihren geographischen Standort",
+        "increment": "Inkrementieren",
+        "talkingNow": "chattet mit",
+        "incrementTitle": "Anzahl der Verbindungen inkrementieren",
+        "currentLocation": "Aktueller Standort",
+        "name": "Name",
+        "userName": "Benutzername",
+        "countUpdated": "Die Anzahl der Verbindungen wurde aktualisiert! Es ist",
+        "instantTime": "Gerade jetzt.",
+        "typingNotice": "tippt"
+    },
+    "gridBuyerHome": {
+        "organizationName": "Organisationsname",
+        "organizationUniteID": "Organisations UNITE ID",
+        "deptAgencyGroup": "Abteilung \/ Agentur \/ Gruppe",
+        "contactName": " Name der Kontaktperson",
+        "emailAddress": " E-Mail-Adresse",
+        "contactMobileNumber": "Kontakt-Mobilnummer",
+        "country": "Land",
+        "qualification": "Qualifikation \/ Erfahrung",
+        "role": "Benutzer-Rolle",
+        "isActive": "Ist aktiv?",
+        "ipv4": "IPv4-Adresse",
+        "deletion": "Benutzer löschen",
+        "ban": "Benutzer verbieten"
+    },
+    "gridSupervisorHome": {
+        "organizationName": "Organisationsname",
+        "organizationUniteID": "Organisations UNITE ID",
+        "contactName": " Name der Kontaktperson",
+        "emailAddress": " E-Mail-Adresse",
+        "contactMobileNumber": "Kontakt-Mobilnummer",
+        "country": "Land",
+        "role": "Benutzer-Rolle",
+        "isActive": "Ist aktiv?",
+        "ipv4": "IPv4-Adresse",
+        "deletion": "Benutzer löschen",
+        "ban": "Benutzer verbieten"
+    },
+    "gridSupplierHome": {
+        "companyName": "Unternehmensname",
+        "directorsName": "Direktorsname",
+        "contactName": " Name der Kontaktperson",
+        "emailAddress": " E-Mail-Adresse",
+        "registeredCountry": "Registriertes Land",
+        "contactMobileNumber": "Kontakt Mobilnummer",
+        "country": "Land",
+        "areaCovered": "Abgedeckter Bereich",
+        "companyAddress": "Unternehmensadresse",
+        "employeesNumber": "Zahl der Mitarbeiter",
+        "industry": "Industrie",
+        "capabilityDescription": "Beschreibung der Fähigkeiten",
+        "role": "Benutzer-Rolle",
+        "isActive": "Ist aktiv?",
+        "ipv4": "IPv4-Adresse",
+        "deletion": "Benutzer löschen",
+        "ban": "Benutzer verbieten"
+    },
+    "gridProducts": {
+        "name": "Produktname",
+        "supplierName": "Lieferantenname",
+        "price": "Produktpreis",
+        "amount": "Menge",
+        "totalPrice": "Gesamtpreis",
+        "productImage": "Produktbild",
+        "placeBid": "Neue Gebotsanfrage",
+        "imageWrapper": "Produktbilder",
+        "buttonsWrapper": "Die Linie handhaben"
+    },
+    "gridBids": {
+        "bidName": "Name der Gebotsanfrage",
+        "buyerName": "Name des Käufers der Angebotsanfrage",
+        "supplierName": "Name des Gebotslieferanten",
+        "buyerPrice": "Käuferpreis",
+        "supplierPrice": "Lieferantenpreis",
+        "preferredDeliveryDate": "Bevorzugtes Lieferdatum",
+        "dateCreated": "Erstellungsdatum",
+        "expiryDate": "Verfallsdatum",
+        "isCancelled": "Ist storniert?",
+        "isExpired": "Ist abgelaufen?"
+    },
+    "gridUploadedFiles": {
+        "filename": "Dateiname",
+        "folder": "Datei-Ordner",
+        "length": "Länge (Bytes)",
+        "image": "Bild",
+        "uploadDate": "Datum des Uploads",
+        "download": "Datei herunterladen",
+        "deletion": "Datei löschen"
+    },
+    "gridSupervisorsBuyers": {
+        "deptAgencyGroup": "Abteilung \/ Agentur \/ Gruppe",
+        "contactName": "Kontaktpersonenname",
+        "balance": "Saldo des Käufers",
+        "isActive": "Ist aktiv?",
+        "totalBids": "Gesamtzahl der Gebote",
+        "totalBidsPrice": "Gesamtpreis der Gebote",
+        "validBids": "Gültige Gebotsanzahl",
+        "validBidsPrice": "Preis für gültige Gebote",
+        "cancelledBids": "Anzahl stornierter Gebote",
+        "cancelledBidsPrice": "Preis für stornierte Gebote",
+        "expiredBids": "Anzahl abgelaufener Gebote",
+        "expiredBidsPrice": "Preis für abgelaufene Gebote",
+        "removeBuyer": "Aus UNITE entfernen",
+        "chat": "Sprechen Sie mit dem Käufer"
     }
 }

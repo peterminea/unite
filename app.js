@@ -82,7 +82,7 @@ const i18n = require("i18n-express");
 app.use(
   i18n({
     translationsPath: path.join(__dirname, "public/locales/dev"), // <--- use here. Specify translations files path.
-    siteLangs: ["en", "it", "de", "ro"],
+    siteLangs: ["en", "it", "fr", "de", "ro"],
     textsVarName: "translation"
   })
 );

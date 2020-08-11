@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>UNITE - Remove User as Admin</title>
+  <title><%= translation.bannedUsers.title %></title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="A cool thing made with Glitch">
@@ -65,7 +65,7 @@
       $('#mainForm').submit(function(e) {
         let radio = $(this).find('input[type="radio"]:checked');
         radio.attr('name', 'reasonTitle');
-        if(!confirm('You are about to ban this User from using UNITE. This can be time-limited.\nBanning a UNITE User is a serious event, it should be motivated and the User notified about the reason. Please provide accurate information about it.')) {
+        if(!confirm('<%= translation.bannedUsers.banConfirmation %>')) {
           return false;
         }
       });
@@ -91,7 +91,7 @@
 
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
-    <a class="navbar-brand" href="/">UNITE - Delete User Account - Admin</a>
+    <a class="navbar-brand" href="/"><%= translation.bannedUsers.title %></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -100,11 +100,11 @@
     <div class="container home">
        <div class="col-md-12">
         <legend>
-          Ban UNITE User Account - Admin Reserved - Please fill in the required (*) fields:
+          <%= translation.bannedUsers.banTitle %>
         </legend>
         <form id="mainForm" method="POST">
           <div class="form-group">
-            <label for="reason">Reason for banning account*:</label>
+            <label for="reason"><%= translation.bannedUsers.banReason %>*:</label>
             <textarea required rows="10" cols="50" class="form-control" id="reason" name="reason"></textarea>
           </div>
           <input type="hidden" name="type" value="User Ban by Admin">
@@ -113,25 +113,25 @@
           <input type="hidden" name="emailAddress" value="<%= emailAddress %>">
           <input type="hidden" name="ipv4Address" value="<%= ipv4Address %>">          
           <div class="form-group">
-            <label for="name">Name of the User:</label>
+            <label for="name"><%= translation.bannedUsers.userName %>:</label>
             <input readonly type="text" name="name" value="<%= name %>">  
           </div>
           <div class="form-group">
-            <label for="endDate">Preferred Date for ban ending:</label>
+            <label for="endDate"><%= translation.bannedUsers.banPrefEndingDate %>:</label>
             <input type="text" class="form-control" required id="endDate" name="endDate">
           </div>
           <input type="hidden" name="uniteID" value="<%= uniteID %>">
           <div class="form-group">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button type="submit" id="delete" title="Delete User" class="btn btn-primary btn-block btn-lg">Delete User</button>
+            <button type="submit" id="delete" title="Ban User" class="btn btn-primary btn-block btn-lg"><%= translation.bannedUsers.banUser %></button>
           </div>
         </form>
       </div>
       <div class="col-md-12">
         <div class="form-group">
-          <label>Load list of Banned Users</label>
+          <label><%= translation.bannedUsers.loadBannedList %></label>
           <button class="form-control btn btn-outline-warning" id="loadBannedUsers">
-            Load
+            <%= translation.bannedUsers.loadButton %>
           </button>
         </div>
         <div class="bodyBuilder">

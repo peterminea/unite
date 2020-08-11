@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>UNITE - Underserved Needs in Times of Emergency - Uploaded Files List</title>
+  <title><%= translation.fileList.title %></title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="A cool thing made with Glitch">
@@ -80,20 +80,20 @@
     
 <div class="container home">
   <h1>
-    UNITE FULL LIST OF UPLOADED FILES
+    <%= translation.fileList.title %>
   </h1>
   <br>
   <div>
-    <p class='term'>
-      Disclaimer: This is a Demo list of files that are uploaded to our App folders.
+    <p class='term'>      
+      <%= translation.fileList.disclaimer %>
     </p>
     <p class='term'>
-      We include Avatars and user-specific files that are uploaded. For practical reasons, we prefer uploading files to dedicated folders of the application hosting space, and not to the DB itself - currently the database only contains a few uploaded files.<br>Note: Only Site Administrators can access these lists. So, guys, what we get to see here - it is only for us!
+      <%= translation.fileList.description %>      
     </p>
   </div>
   <br><br>
   <h3 style="color: green">
-    List of UNITE Product Image Files
+    <%= translation.fileList.productImages %>      
   </h3>
   <br>
 <% if(files != null && files.length > 0) {%>
@@ -107,19 +107,7 @@
   </div>
   
   <script type="text/javascript">
-    let data = [];
-    const colModelProdImages = [
-      { name: 'filename', label: 'File Name', align: 'center', search: true, width: 160},
-      { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 160},
-      { name: 'length', label: 'File Length', align: 'center', sorttype: 'number', search: true, width: 160},
-      { name: 'image', label: 'Image', align: 'center', formatter: imageFormatter, sortable: false, search: false, width: 100 },
-      { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 250},
-      { name: 'download', label: 'Download it', align: 'center', formatter: downloadFormatter, search: false, width: 100},
-      { name: 'deletion', label: 'Remove', align: 'center', formatter: fileRemovalFormatter, search: false, width: 100},
-      { name: 'downloadHref', hidden: true },
-      { name: 'downloadName', hidden: true },
-      { name: 'deletionHref', hidden: true }
-    ];
+    let data = [];  
  
     <% i = 0; for (file of files) { %>
     data.push({
@@ -134,18 +122,18 @@
     }); 
      <% i++; } %>    
    
-    initGrid(colModelProdImages, data, "#gridProdImages", '#prodImagePager', "filename", 'Product Image Files', 1280, "<%= csrfToken %>");
+    initGrid(colModelUploadedFiles, data, "#gridProdImages", '#prodImagePager', "filename", 'Product Image Files', 1280, "<%= csrfToken %>");
     </script>
         <% } else {%>
         <div>
           <p style="color: green; font-family: arial">
-            Sorry, no Product Image files here.
+            <%= translation.fileList.noProductImages %>      
           </p>
         </div>
         <% }%>  
   <br><br>
   <h3 style="color: green">
-    List of UNITE Upload Files
+    <%= translation.fileList.uploadedDocuments %>
   </h3>
   <br>
 <% if(uploads != null && uploads.length > 0) {%>
@@ -159,19 +147,7 @@
     </div>  
  
   <script type="text/javascript">
-    let data0 = [];
-    let colModelUploadFiles = [
-      { name: 'filename', label: 'File Name', align: 'center', search: true, width: 160},
-      { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 160},
-      { name: 'length', label: 'File Length', align: 'center', search: true, sorttype: 'number', width: 160},
-      { name: 'image', label: 'Image', align: 'center', formatter: imageFormatter, sortable: false, search: false, width: 100 },
-      { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 250},
-      { name: 'download', label: 'Download it', align: 'center', formatter: downloadFormatter, search: false, width: 100},
-      { name: 'deletion', label: 'Remove', align: 'center', formatter: fileRemovalFormatter, search: false, width: 100},
-      { name: 'downloadHref', hidden: true },
-      { name: 'downloadName', hidden: true },
-      { name: 'deletionHref', hidden: true }
-    ];
+    let data0 = []; 
  
     <% i = 0; for (file of uploads) { %>
      data0.push({
@@ -186,18 +162,18 @@
     });
      <% i++; } %>
     
-    initGrid(colModelUploadFiles, data0, "#gridUploads", '#uploadPager', "filename", 'Uploaded Files', 1280, "<%= csrfToken %>");
+    initGrid(colModelUploadedFiles, data0, "#gridUploads", '#uploadPager', "filename", 'Uploaded Files', 1280, "<%= csrfToken %>");
     </script>
         <% } else {%>
         <div>
           <p style="color: green; font-family: arial">
-            Sorry, no Uploaded files here.
+            <%= translation.fileList.noUploadedDocuments %>
           </p>
         </div>
         <% }%>
   <br><br>
   <h3 style="color: green">
-    List of UNITE Avatar Files
+    <%= translation.fileList.avatarFiles %>
   </h3>
   <br>
 <% if(avatars != null && avatars.length > 0) {%>
@@ -211,19 +187,7 @@
     </div>
  
   <script type="text/javascript">
-    let data1 = [];
-    let colModelAvatarImages = [
-      { name: 'filename', label: 'File Name', align: 'center', search: true, width: 160},
-      { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 160},
-      { name: 'length', label: 'File Length', align: 'center', sorttype: 'number', search: true, width: 160},
-      { name: 'image', label: 'Image', align: 'center', formatter: imageFormatter, sortable: false, search: false, width: 100 },
-      { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 250},
-      { name: 'download', label: 'Download it', align: 'center', formatter: downloadFormatter, search: false, width: 100},
-      { name: 'deletion', label: 'Remove', align: 'center', formatter: fileRemovalFormatter, search: false, width: 100},
-      { name: 'downloadHref', hidden: true },
-      { name: 'downloadName', hidden: true },
-      { name: 'deletionHref', hidden: true }
-    ];
+    let data1 = [];  
   
     <% i = 0; for (file of avatars) { %>  
      data1.push({
@@ -238,12 +202,12 @@
     });
      <% i++; } %>
     
-    initGrid(colModelAvatarImages, data1, "#gridAvatars", '#avatarPager', "filename", 'Avatar Files', 1280, "<%= csrfToken %>");
+    initGrid(colModelUploadedFiles, data1, "#gridAvatars", '#avatarPager', "filename", 'Avatar Files', 1280, "<%= csrfToken %>");
     </script>
         <% } else {%>
         <div>
           <p style="color: green; font-family: arial">
-            Sorry, no Avatar files here.
+            <%= translation.fileList.noAvatarFiles %>
           </p>          
         </div>
         <% }%> 

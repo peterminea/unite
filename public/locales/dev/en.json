@@ -1,10 +1,9 @@
 {
     "home": {
-        "bigTitle": "UNITE - Underserved Needs in Times of Emergency - Home Page",
         "title": "UNITE Public Procurement Platform",
         "meaning": "<b>U<\/b>nderserved <b>N<\/b>eeds <b>I<\/b>n <b>T<\/b>imes of <b>E<\/b>mergency",
         "description": "Public Procurement Platform",
-        "whatWeDo": "Creating a world where governments and companies innovate together to overcome crisis",
+        "whatItDoes": "Creating a world where governments and companies innovate together to overcome crisis",
         "mottoOne": "SAVING JOBS, SAVING LIVES!",
         "mottoTwo": "We are driving the new normal!",
         "signUp": "Sign Up",
@@ -15,19 +14,29 @@
         "signUpSupervisor": "Sign up as Supervisor",
         "signUpSupplier": "Sign up as Supplier",
         "captchaProtection": "This website is protected by Google reCaptcha V2.",
-        "close": "Close"
+        "close": "Close",
+        "whatWeDo": "Creating a world where governments and companies innovate together to overcome crisis",
+        "bigTitle": "UNITE - Underserved Needs in Times of Emergency - Home Page"
     },
     "about": {
+        "first_paragraph": "UNITE is a Public Procurement Platform exclusively for governmental procurement of special orders of products and services for crisis response. \nWe call it \"The Alibaba of urgent public procurement requests.\"\n\n UNITE is a two-sided platform, connecting public buyers with companies that have the capability and capacity to refocus their activities to supplying goods and services in response to the COVID-19 crisis.\n\n Companies are invited to register on the platform, describing their capability and capacity to manufacture urgently needed products or to supply in-demand services. \nCompanies can also browse and respond to open tender requests placed by public buyers. \n\n  Public buyers can access the platform and create a procurement request. Our software matches the procurement request with potential suppliers and facilitates the complete transaction - including initial contact, negotiation. order placement, delivery acceptance, and payment.",
+        "second_paragraph": "UNITE differentiates itself from other solutions in that it provides a database of companies with capability to refocus operations and in that it automates the process. Other solutions include using existing suppliers and ERP\/purchasing system (not suited to abnormal requirements); engagement with the market through contacting individual companies by email, telephone or in person (which is slow); use of other online sales platforms (no visibility of the ability of companies to refocus operations); own knowledge of public buyers and their connections to industry (not widely shared - limited to individuals or local teams).",
         "title": "About us",
-        "first_paragraph": "UNITE is a Public Procurement Platform exclusively for governmental procurement of special orders of products and services for crisis response. <br>We call it \"The Alibaba of urgent public procurement requests.\" <br><br> UNITE is a two-sided platform, connecting public buyers with companies that have the capability and capacity to refocus their activities to supplying goods and services in response to the COVID-19 crisis.<br><br> Companies are invited to register on the platform, describing their capability and capacity to manufacture urgently needed products or to supply in-demand services.<br>Companies can also browse and respond to open tender requests placed by public buyers. <br><br>  Public buyers can access the platform and create a procurement request. Our software matches the procurement request with potential suppliers and facilitates the complete transaction - including initial contact, negotiation. order placement, delivery acceptance, and payment.",
-        "second_paragraph": "UNITE differentiates itself from other solutions in that it provides a database of companies with capability to refocus operations and in that it automates the process. Other solutions include using existing suppliers and ERP\/purchasing system (not suited to abnormal requirements); engagement with the market through contacting individual companies by email, telephone or in person (which is slow); use of other online sales platforms (no visibility of the ability of companies to refocus operations); own knowledge of public buyers and their connections to industry (not widely shared - limited to individuals or local teams)."
+        "more": "More About Us",
+        "europeanCouncilInnovation": "EIC COVID Platform presence",
+        "devPost": "DevPost Details",
+        "socialMedia": "Social Media Links:"
     },
     "feedback": {
         "provideFeedbackShort": "Provide Feedback!",
         "provideFeedbackLong": "Provide user feedback, suggestions or inquiries - <i>Please fill in the required (*) fields.<\/i>",
         "feedbackName": "Your name",
         "feedbackEmail": "Your e-mail address",
-        "feedbackDetails": "Feedback Details"
+        "feedbackDetails": "Feedback Details",
+        "title": "UNITE - Feedbacks on the Platform",
+        "sendFeedback": "Send your Feedback",
+        "required": "Please choose a feedback type from the list.",
+        "details": "Details"
     },
     "commonFields": {
         "dateCreated": "Date of creation",
@@ -65,7 +74,7 @@
         "otherRelevantFiles": "Other relevant files",
         "checkTerms": "I agree with the UNITE Terms and Conditions",
         "checkAntibribery": "I acknowledge the UNITE Anti-Bribery Agreement",
-        "userRole": "UNITE Role",
+        "userRole": "UNITE User Role",
         "cardGreeting": "Hello!",
         "defaultGreeting": "Hello, {organizationName}!",
         "defaultGreetingTwo": "Hello, {companyName}!",
@@ -112,13 +121,18 @@
         "banReason": "Reason for banning account",
         "userName": "Name of the user",
         "prefEndingBanDate": "Preferred Date for ban ending:",
-        "bannedList": "Load list of Banned Users"
+        "bannedList": "Load list of Banned Users",
+        "title": "UNITE - Delete User Account - Admin",
+        "banUser": "Ban User",
+        "loadBannedList": "Load list of banned members",
+        "loadButton": "Proceed"
     },
     "bidsCatalog": {
-        "title": "FULL LIST OF BUYER BIDS - UNITE",
+        "title": "FULL LIST OF BUYER BID REQUESTS - UNITE",
         "listDescription": "This is the whole list of bid requests (Tender Requests) that have been placed by all our UNITE Buyers by now. It includes bids of any status (valid, expired, cancelled), and also their prices, given in supplier's agreed currency.",
         "conversionNotice": "We may also convert each bid's price to the default currency of the Bid Request. We assume that suppliers may use different national currencies from those of the buyers, so then we apply conversion rates.",
-        "noElements": "Sorry, no buyers here."
+        "noElements": "Sorry, no buyers here.",
+        "bidsTable": "Full table of our UNITE Bid Requests from Buyers"
     },
     "deleteUser": {
         "title": "UNITE - Delete User Account - Admin",
@@ -131,11 +145,11 @@
     "fileList": {
         "title": "UNITE - FULL LIST OF UPLOADED FILES",
         "disclaimer": "Disclaimer: This is a Demo list of files that are uploaded to our App folders.",
-        "description": "We include Avatars and user-specific files that are uploaded. For practical reasons, we prefer uploading files to dedicated folders of the application hosting space, and not to the DB itself - currently the database only contains a few uploaded files.<br>Note: Only Site Administrators can access these lists. So, guys, what we get to see here - it is only for us!",
+        "description": "We include Avatars and user-specific files that are uploaded. For practical reasons, we prefer uploading files to dedicated folders of the application hosting space, and not to the DB itself - currently the database only contains a few uploaded files.\nNote: Only Site Administrators can access these lists. So, guys, what we get to see here - it is only for us!",
         "productImages": "List of UNITE Product Image Files",
         "noProductImages": "Sorry, no Product Image files here.",
         "uploadedDocuments": "List of UNITE Upload Files",
-        "noUploadedDocuments": "Sorry, no Uploaded files here.",
+        "noUploadedDocuments": "Sorry, no uploaded Documents are here.",
         "avatarFiles": "List of UNITE Avatar Files",
         "noAvatarFiles": "Sorry, no Avatar files here."
     },
@@ -155,7 +169,7 @@
         "description": "Below we have our Feedbacks, Suggestions, and other Inquiries from our Users."
     },
     "buyerView": {
-        "joinChatTitle": "Buyer - Chat Login for UNITE",
+        "joinChatTitle": "Buyer - Chat Login in UNITE",
         "balance": {
             "title": "Buyer's Balance",
             "description": "You can make currency conversions here, in order to see what the equivalent of your current balance would be, if translated into other national currencies.",
@@ -164,11 +178,11 @@
         },
         "bidsCatalog": {
             "title": "Buyer's Bid Catalog",
-            "secondTitle": "FULL LIST OF BUYER BIDS",
+            "secondTitle": "FULL LIST OF BID REQUESTS FROM BUYER",
             "description_partOne": "This is the whole list of bid requests (Tender Requests) that have been placed by the {buyerName} UNITE Buyer by now. It includes bids of any status (valid, expired, cancelled), and also their prices, given in supplier's agreed currency.",
             "description_partTwo": "We may also convert each bid's price to the default currency of the Bid Request. We assume that suppliers may use different national currencies from those of the buyers, so then we apply conversion rates.",
             "contentTitle": "Full table of your Buyer Bids",
-            "noElements": "Sorry, no Bids are here."
+            "noElements": "Sorry, no Bid Requests are here."
         },
         "cancelBid": {
             "title": "UNITE - Buyer - Cancel Order",
@@ -221,18 +235,18 @@
             "requestBid": "Request a Bid",
             "supplierDetails": "Supplier Details",
             "viewBids": "View Bids",
-            "multiSupplier": "You can select multiple suppliers for your bid. Please refer to the drop-down below.",
+            "multiSupplier": "You can select multiple suppliers for your bid request. Please refer to the drop-down below.",
             "otherSuppliers": "Other Suppliers"
         },
         "placeBid": {
             "title": "Buyer - Place Bid Request - UNITE",
             "greeting": "Welcome!",
             "invite": "Please make your Bid Request",
-            "info": "You can place a bid request on one or more products, belonging to one or more suppliers.<br>If you choose more suppliers, separate Bid Request objects will be created upon submit, with each one of them being sent to the corresponding supplier.<br>If you choose the same product name from several suppliers, and bids are accepted, you will have to pay each supplier. Please handle these choices carefully.",
+            "info": "You can place a bid request on one or more products, belonging to one or more suppliers.\nIf you choose more suppliers, separate Bid Request objects will be created upon submit, with each one of them being sent to the corresponding supplier.\nIf you choose the same product name from several suppliers, and bids are accepted, you will have to pay each supplier. Please handle these choices carefully.",
             "requirement": "Please fill in all the required (*) fields.",
             "requestName": "Request Name",
             "bidSupplierCompany": "Supplier's Company",
-            "multiSupplierInfo": "This Bid Request is directed to multiple suppliers.<br>For this, when submitting the bid, separate bids will be created for each Supplier and the corresponding products, with the prices accordingly converted to the matching currencies.",
+            "multiSupplierInfo": "This Bid Request is directed to multiple suppliers.\nFor this, when submitting the bid, separate bids will be created for each Supplier and the corresponding products, with the prices accordingly converted to the matching currencies.",
             "suppliersList": "The Suppliers are",
             "supplierData": "Supplier data",
             "bidBuyerName": "Buyer's Organization Name",
@@ -255,7 +269,7 @@
             "bidMentionsBuyer": "Mentions for Buyer",
             "bidMentionsSupplier": "Mentions for Supplier",
             "bidTypeMentions": "Type your mentions below",
-            "bidPaymentNotice": "IMPORTANT NOTICE: UNITE currently uses the Stripe Payment Gateway in TEST MODE.<br>No real charges are done on you. You must use a fictitious card number like 4242 4242 4242 4242, and also to invent the CCV and the expiry date.<br>Do you want to proceed?",
+            "bidPaymentNotice": "IMPORTANT NOTICE: UNITE currently uses the Stripe Payment Gateway in TEST MODE.\nNo real charges are done on you. You must use a fictitious card number like 4242 4242 4242 4242, and also to invent the CCV and the expiry date.\nDo you want to proceed?",
             "bidFundsError": "Your current balance is not enough for completing this purchase. Please add some more funds to your account.",
             "bidUpdateNoBuyerMentions": "Are you sure you want to update Bid Status without any mentions for the Buyer",
             "bidUpdateNoSupplierMentions": "Are you sure you want to update Bid Status without any mentions for the Supplier",
@@ -283,7 +297,7 @@
             "bidPreferredDeliveryDate": "Preferred Delivery Date",
             "currency": "Your currency",
             "close": "Close",
-            "selectProducts": "You can select products from drop-down",
+            "selectProducts": "You can select products from the drop-down",
             "availableProducts": "Available products",
             "noProducts": "No products available",
             "bidExtensionLetter": "Bid extension letter",
@@ -295,10 +309,10 @@
             "totalItems": "Total number of items (Overall Amount)",
             "buyersPriceProduct": "Your price for selected product",
             "buyersOverallPrice": "Your Overall Price",
-            "suppliersPriceProduct": "Supplier's price for selected product",
+            "suppliersPriceProduct": "Supplier's price for the selected product",
             "multiSupplierPriceNotice": "This Bid is intended to be sent to multiple suppliers. The equivalent Supplier prices will be decided separately for each one of them.",
             "suppliersOverallPrice": "Supplier's equivalent total price",
-            "multiSupplierPriceAdapted": "As your Bid is intended to address multiple suppliers, each one of them will have the prices of the corresponding \/ proposed Products converted from your currency to theirs corresponding one.<br>As you add amounts for products, each one of the Suppliers will have here their updated, corresponding price in their currency.",
+            "multiSupplierPriceAdapted": "As your Bid is intended to address multiple suppliers, each one of them will have the prices of the corresponding \/ proposed Products converted from your currency to theirs corresponding one.\nAs you add amounts for products, each one of the Suppliers will have here their updated, corresponding price in their currency.",
             "suppliersPriceRendered": "total price for selected product",
             "bidStatus": "Status",
             "productSuggestionTitle": "People who bought this product also liked...",
@@ -311,7 +325,7 @@
         },
         "profile": {
             "title": "Buyer Profile - UNITE",
-            "terminationText": "Are you sure you want to delete your Buyer account?<br>This will also remove your Bid Requests and the messages you sent in UNITE.<br>If you just want to take a break, you may deactivate your account instead.",
+            "terminationText": "Are you sure you want to delete your Buyer account?\nThis will also remove your Bid Requests and the messages you sent in UNITE.\nIf you just want to take a break, you may deactivate your account instead.",
             "cardGreeting": "Hello!",
             "defaultGreeting": "Hello, {organizationName}!",
             "description": "This is your profile page. Please keep your data accurate, and you will have good luck with finding your needed suppliers!"
@@ -337,8 +351,8 @@
         },
         "viewBid": {
             "title": "UNITE - Buyer - View Bid Request Details",
-            "bidExpirationNoticeNotExtended": "This Bid Request is about to expire. Its limit date is ${0}. <br>Please upload a Bid Extension Letter in order to gain ${1} more validity days.",
-            "bidExpirationNoticeExtended": "This Bid Request is about to expire. Its limit date is ${0}.<br>You have already extended the initial bid validity, so the date above is final.",
+            "bidExpirationNoticeNotExtended": "This Bid Request is about to expire. Its limit date is ${0}. \nPlease upload a Bid Extension Letter in order to gain ${1} more validity days.",
+            "bidExpirationNoticeExtended": "This Bid Request is about to expire. Its limit date is ${0}.\nYou have already extended the initial bid validity, so the date above is final.",
             "pay": "Pay",
             "goToPayment": "Go to Payment",
             "paymentCancelled": "Payment cancelled!",
@@ -412,7 +426,7 @@
         "profile": {
             "title": "Government Supervisor - Profile - UNITE",
             "profileDescription": "This is your Supervisor profile page. Please keep your data accurate, and take care of the honest activity of your mates on UNITE!",
-            "terminationText": "Are you sure you want to delete your Supervisor account?<br>This will also remove:<br><br>Your associated buyers;<br>All their specific data, like orders, messages, tokens;<br>Your own user tokens (if any);<br>Your message history from UNITE.<br><br>Please be very careful with this option!",
+            "terminationText": "Are you sure you want to delete your Supervisor account?\nThis will also remove:\n\nYour associated buyers;\nAll their specific data, like orders, messages, tokens;\nYour own user tokens (if any);\nYour message history from UNITE.\n\nPlease be very careful with this option!",
             "editableUniteID": "Organization UNITE ID (only editable by you)"
         },
         "resend": {
@@ -507,7 +521,7 @@
             "title": "Supplier Dashboard - UNITE",
             "description": "This is your Dashboard page. In order to ensure that you continue to appear in the search results of Buyers, please keep your capabilities and products up-to-date.",
             "balance": "Balance",
-            "balanceDescription": "Your balance is the sum of prices from your <i>accepted Bid Requests,<\/i> whose payments have been made by Buyers.<br>You can manage your balance by going to your Balance page.",
+            "balanceDescription": "Your balance is the sum of prices from your <i>accepted Bid Requests,<\/i> whose payments have been made by Buyers.\nYou can manage your balance by going to your Balance page.",
             "goToBalance": "Go to balance",
             "supplyDescription": "You currently have a number of {productsLength} product types, making a total supply amount of {amount} items, and the overall price of your offered supply is {totalPrice} {currency}.",
             "acceptedBids": "Accepted Bid Requests",
@@ -516,7 +530,7 @@
         },
         "profile": {
             "title": "Supplier Profile - UNITE",
-            "terminationText": "Are you sure you want to delete your Supplier account?<br>This will also remove:<br>Your products\/services;<br>Your capabilities;<br>Your received orders;<br>Your user tokens (if any);<br>Your message history from UNITE.<br><br>If you just want to take a break, you may deactivate your account instead.",
+            "terminationText": "Are you sure you want to delete your Supplier account?\nThis will also remove:\nYour products\/services;\nYour capabilities;\nYour received orders;\nYour user tokens (if any);\nYour message history from UNITE.\n\nIf you just want to take a break, you may deactivate your account instead.",
             "description": "This is your Dashboard page. In order to ensure that you continue to appear in the search results of Buyers, please keep your capabilities and products up-to-date."
         },
         "resend": {
@@ -557,5 +571,118 @@
         "supplierBidsList": "Bid Requests",
         "userProfile": "Profile",
         "logout": "Logout"
+    },
+    "chat": {
+        "title": "Messaging system",
+        "geolocationError": "Geolocation not supported at your endpoint. We are sorry for the inconvenience.",
+        "chatTitle": "UNITE Chat - Talk to your partner instantly!",
+        "pressKeytoSend": "Press Send or Enter to send",
+        "typeMessage": "Type your message here",
+        "sendLocation": "Send Location",
+        "sendLocationTitle": "Send your geographic location",
+        "increment": "Increment",
+        "talkingNow": "is chatting with",
+        "incrementTitle": "Increment Connections Count",
+        "currentLocation": "Current Location",
+        "name": "Name",
+        "userName": "User Name",
+        "countUpdated": "The connections count has been updated! It is",
+        "instantTime": "Just now.",
+        "typingNotice": "is typing"
+    },
+    "gridBuyerHome": {
+        "organizationName": "Organization Name",
+        "organizationUniteID": "Organization UNITE ID",
+        "deptAgencyGroup": "Department \/ Agency \/ Group",
+        "contactName": " Contact Name",
+        "emailAddress": " E-mail Address",
+        "contactMobileNumber": "Contact Mobile Number",
+        "country": "Country",
+        "qualification": "Qualification \/ Experience",
+        "role": "User Role",
+        "isActive": "Is Active?",
+        "ipv4": "IPv4 Address",
+        "deletion": "Delete User",
+        "ban": "Ban User"
+    },
+    "gridSupervisorHome": {
+        "organizationName": "Organization Name",
+        "organizationUniteID": "Organization UNITE ID",
+        "contactName": " Contact Name",
+        "emailAddress": " E-mail Address",
+        "contactMobileNumber": "Contact Mobile Number",
+        "country": "Country",
+        "role": "User Role",
+        "isActive": "Is Active?",
+        "ipv4": "IPv4 Address",
+        "deletion": "Delete User",
+        "ban": "Ban User"
+    },
+    "gridSupplierHome": {
+        "companyName": "Company Name",
+        "directorsName": "Director's Name",
+        "contactName": " Contact Name",
+        "emailAddress": " E-mail Address",
+        "registeredCountry": "Registered Country",
+        "contactMobileNumber": "Contact Mobile Number",
+        "country": "Country",
+        "areaCovered": "Area Covered",
+        "companyAddress": "Company Address",
+        "employeesNumber": "Number of Employees",
+        "industry": "Industry",
+        "capabilityDescription": "Capability Description",
+        "role": "User Role",
+        "isActive": "Is Active?",
+        "ipv4": "IPv4 Address",
+        "deletion": "Delete User",
+        "ban": "Ban User"
+    },
+    "gridProducts": {
+        "name": "Product name",
+        "supplierName": "Supplier name",
+        "price": "Product price",
+        "amount": "Amount \/ Qty",
+        "totalPrice": "Total Price",
+        "productImage": "Product Image",
+        "placeBid": "New Bid Request",
+        "imageWrapper": "Product images",
+        "buttonsWrapper": "Handle the line"
+    },
+    "gridBids": {
+        "bidName": "Bid Request Name",
+        "buyerName": "Bid Request's Buyer Name",
+        "supplierName": "Bid Supplier Name",
+        "buyerPrice": "Buyer's Price",
+        "supplierPrice": "Supplier's Price",
+        "preferredDeliveryDate": "Preferred Delivery Date",
+        "dateCreated": "Creation Date",
+        "expiryDate": "Expiry Date",
+        "isCancelled": "Is Cancelled?",
+        "isExpired": "Is Expired?"
+    },
+    "gridUploadedFiles": {
+        "filename": "File Name",
+        "folder": "File Folder",
+        "length": "Length (bytes)",
+        "image": "Image",
+        "uploadDate": "Date of the upload",
+        "download": "Download File",
+        "deletion": "Delete File"
+    },
+    "gridSupervisorsBuyers": {
+        "deptAgencyGroup": "Department \/ Agency \/ Group",
+        "contactName": "Contact Name",
+        "balance": "Buyer's balance",
+        "isActive": "Is Active?",
+        "totalBids": "Total Bids Count",
+        "totalBidsPrice": "Total Bids Price",
+        "validBids": "Valid Bids Count",
+        "validBidsPrice": "Valid Bids Price",
+        "cancelledBids": "Cancelled Bids Count",
+        "cancelledBidsPrice": "Cancelled Bids Price",
+        "expiredBids": "Expired Bids Count",
+        "expiredBidsPrice": "Expired Bids Price",
+        "removeBuyer": "Remove from UNITE",
+        "chat": "Talk to the Buyer"
     }
 }

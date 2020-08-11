@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Buyer's Balance</title>
+  <title><%= translation.bidsCatalog.title %></title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="A cool thing made with Glitch">
@@ -56,7 +56,7 @@
 
 <body>
   <nav pos="8" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
-    <a class="navbar-brand" href="/">UNITE</a>
+    <a class="navbar-brand" href="/"><%= translation.bidsCatalog.title %></a>
     <input type="hidden" id="userData" isAdmin="<%= isAdmin %>" userRole="<%= role %>">
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,20 +65,20 @@
   </nav>
   <div class="container home">
   <h1>
-    FULL LIST OF BUYER BIDS - UNITE
+   <%= translation.bidsCatalog.secondTitle %>
   </h1>
   <br>
   <div>
     <p class='term'>
-      This is the whole list of bid requests (Tender Requests) that have been placed by all our UNITE Buyers by now. It includes bids of any status (valid, expired, cancelled), and also their prices, given in supplier's agreed currency.
+      <%= translation.bidsCatalog.description_partOne %>
     </p>
     <p class='term'>
-      We may also convert each bid's price to the default currency of the Bid Request. We assume that suppliers may use different national currencies from those of the buyers, so then we apply conversion rates.
+      <%= translation.bidsCatalog.description_partTwo %>
     </p>
   </div>
   <br><br>
   <h3 style="color: teal">
-    Full table of your Buyer Bids
+    <%= translation.bidsCatalog.contentTitle %>
   </h3>
   <br>
 <% if(bids != null && bids.length > 0) { %>
@@ -111,12 +111,11 @@
      <% i++; } %>
     
     initGrid(colModel, data, "#gridBids", '#bidsPager', "bidName", 'Bids List', 1200);
-    //$("#gridBids").jqGrid('addRowData', data.id, data, 'last');
     </script>
         <% } else {%>
         <div>
           <p style="color: green; font-family: arial">
-            Sorry, no buyers here.
+            <%= translation.bidsCatalog.noElements %>
           </p>
         </div>
         <% }%>

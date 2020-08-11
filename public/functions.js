@@ -192,6 +192,18 @@ function expiredBidsPriceFormatter(cellvalue, options, rowObject) {
       { name: 'supplierCurrencyHref', hidden: true }
     ];
 
+  const colModelUploadedFiles = [
+      { name: 'filename', label: 'File Name', align: 'center', search: true, width: 160},
+      { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 160},
+      { name: 'length', label: 'File Length', align: 'center', template: 'number', sorttype: function(cellValue, rowObject) { return parseInt(rowObject.length);}, search: true, width: 160},
+      { name: 'image', label: 'Image', align: 'center', formatter: imageFormatter, sortable: false, search: false, width: 100 },
+      { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 250},
+      { name: 'download', label: 'Download it', align: 'center', formatter: downloadFormatter, search: false, width: 100},
+      { name: 'deletion', label: 'Remove', align: 'center', formatter: fileRemovalFormatter, search: false, width: 100},
+      { name: 'downloadHref', hidden: true },
+      { name: 'downloadName', hidden: true },
+      { name: 'deletionHref', hidden: true }
+    ];
 
 function getCurrenciesList(elem, data, token, defaultBidCurrency, cancelChange) {
   let obj = $("" + elem + "");
@@ -2071,11 +2083,6 @@ $(document).ready(function() {
       }
     );
   }
-/*
-  <a href="?language=en">English</a>&nbsp;
-    <a href="?language=de">Deutsch</a>&nbsp;
-    <a href="?language=it">Italiano</a>&nbsp;
-    <a href="?language=ro">Română</a>*/
   
   let nav = $("body").find("nav");
   let lang, loc = window.location.href;
@@ -2276,8 +2283,8 @@ $(document).ready(function() {
       $(this).removeClass('showLanguages');
     } else {        
       $(this)
-        .append(`<ol style="position: fixed" title='Choose Platform Language' class='languages-bar'><li><a href="${loc}?clang=en"><img class='country-flag' src="https://www.countryflags.io/us/flat/64.png">English</a></li><li><a href="${loc}?clang=de"><img class='country-flag' src="https://www.countryflags.io/de/flat/64.png">Deutsch</a></li><li><a href="${loc}?clang=it"><img class='country-flag' src="https://www.countryflags.io/it/flat/64.png">Italiano</a></li><li><a href="${loc}?clang=ro"><img class='country-flag' src="https://www.countryflags.io/ro/flat/64.png">Română</a></li></ol>`)
-      .addClass('showLanguages');       
+        .append(`<ol style="position: fixed" title='Choose Platform Language' class='languages-bar'><li><a href="${loc}?clang=en"><img class='country-flag' src="https://www.countryflags.io/us/flat/64.png">English</a></li><li><a href="${loc}?clang=de"><img class='country-flag' src="https://www.countryflags.io/de/flat/64.png">Deutsch</a></li><li><a href="${loc}?clang=it"><img class='country-flag' src="https://www.countryflags.io/it/flat/64.png">Italiano</a></li><li><a href="${loc}?clang=fr"><img class='country-flag' src="https://www.countryflags.io/fr/flat/64.png">Français</a></li><li><a href="${loc}?clang=ro"><img class='country-flag' src="https://www.countryflags.io/ro/flat/64.png">Română</a></li></ol>`)
+      .addClass('showLanguages');
 
       $('ol.languages-bar li').off('click').on('click', function() {
         let ref = $(this).find('a').attr('href');

@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Messaging system - UNITE</title>
+  <title><%= translation.chat.title %> - UNITE</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="A cool thing made with Glitch">
@@ -109,7 +109,7 @@
         messages
           .appendChild(span);
           $(span).append("From <b><u>" + data.sender + "</u></b> to <b style='color: purple'><u>" + data.receiver + "</u></b> at: " + (data.time));
-        }     
+        }
                                   
         function addMessages(message) {
            $('#messages1').append('<h4>' + message.sender + '</h4><p>' + message.message + '</p>');
@@ -226,7 +226,7 @@
           return Swal.fire({
             icon: 'error',
             title: 'Error!',
-            text: 'Geolocation not supported at your endpoint. We are sorry for the inconvenience.'
+            text: '<%= translation.chat.geolocationError %>'
           });
         }
         $('#sendLocation').prop('disabled', true);
@@ -239,7 +239,7 @@
             console.log('Location has been shared!');//Callback means feedback.
         });
       });
-    });                         
+    });
       
     //user = addUser({id: sock.id, username: user.username, room: user.room});
     const object = {username: user.username, room: user.room};
@@ -308,7 +308,7 @@
   
 <body>
   <nav user="<%= user.toLowerCase() %>" class="navbar navbar-expand-lg navbar-dark bg-dark" style="position: absolute; width: 100% !important;">
-    <a class="navbar-brand" href="/">UNITE</a>
+    <a class="navbar-brand" href="/"><%= translation.chat.title %> - UNITE</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -326,10 +326,10 @@
     <br>
     <div class="chat_window">
       <div class="title text-center">
-        <span title="Talk" style="font-weight: bold">UNITE Chat - Talk to your partner instantly!</span>
+        <span title="Talk" style="font-weight: bold"><%= translation.chat.chatTitle %></span>
       </div>  
       <div style="position: center; color: green; font-family: arial; font-size: 12pt">
-        <span id="partner1"><b style="color: brown"><u><%= fromName %></u></b> and <b style="color: purple"><u><%= toName %></u></b> are in chat</span>
+        <span id="partner1"><b style="color: brown"><u><%= fromName %></u></b> <%= translation.chat.talkingNow %> - UNITE <b style="color: purple"><u><%= toName %></u></b></span>
       </div>
       <br>
       <ul id="messages" class="messages">
@@ -345,7 +345,7 @@
           <input type="hidden" name="room" id="room" value="<%= room %>"/>
           <input type="hidden" name="toName" id="toName" value="<%= toName %>"/>
           <div class="form-group">
-            <input id="message" name="message" style="width: 100%" class="message_input" title="Press Send or Enter to send" required autocomplete="on" placeholder="Type your message here">
+            <input id="message" name="message" style="width: 100%" class="message_input" title="<%= translation.chat.pressKeytoSend %>" required autocomplete="on" placeholder="<%= translation.chat.typeMessage %>">
           </div>
         </div>
         <div class="form-group">
@@ -353,9 +353,9 @@
           <button id="send" type='submit' class="btn btn-primary send_message">Send</button>
         </div>
         <div class="form-group">
-        <button class="btn btn-secondary" style="float: left" title="Send your geographic location" style="color: blue; cursor: pointer" id="sendLocation">
+        <button class="btn btn-secondary" style="float: left" title="<%= translation.chat.sendLocationTitle %>" style="color: blue; cursor: pointer" id="sendLocation">
           Send Location
-        </button>          
+        </button>
         </div>
       </form>
       <div class="form-group">
@@ -372,7 +372,7 @@
       </div>
       <div class="bottom_wrapper clearfix">
         <br>
-          <input type='hidden' id="name" class="form-control" placeholder=”Name”>
+          <input type='hidden' id="name" class="form-control" placeholder=”<%= translation.chat.name %>”>
         <br>
         <i id="typing"></i>
         </div>      
@@ -388,7 +388,6 @@
         <div id="messages2" class="chat_messages">
         </div>
         <div class="compose">
-  <!-- Moved the form and the Send Location-->
         </div>
     </div>
   </div>
@@ -405,7 +404,7 @@
       <p><span class="messageName">{{username}}</span>
          <span class="messageMeta">{{createdAt}}</span>
       </p>
-      <p><a href="{{url}}" target="_blank">My current location</a></p>
+      <p><a href="{{url}}" target="_blank"><%= translation.chat.currentLocation %></a></p>
     </div>
   </script>
   <script id="sidebar-template" type="text/html">
