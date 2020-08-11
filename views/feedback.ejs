@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>UNITE - Platform Feedback</title>
+  <title>UNITE - <%= translation.feedback.title %></title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="A cool thing made with Glitch">
@@ -89,27 +89,27 @@
     <div class="container home">
        <div class="col-md-12 mt-3">
         
-        <h1>Provide Feedback!</h1>
-         <p>Provide user feedback, suggestions or inquiries - <i>Please fill in the required (*) fields.</i></p>
+        <h1><%= translation.feedback.provideFeedbackShort %></h1>
+         <p><%= translation.feedback.provideFeedbackLong %></p>
          <br>
           <form class="feedbackForm" id="feedbackForm" method="POST">
             <input type="hidden" name="subject">
             <div class="form-group">
-              <label>Your Name*</label>
+              <label><%= translation.feedback.feedbackName %>*</label>
               <input required type="text" class="form-control" id="name" name="name">
             </div>
             <div class="form-group">
-              <label>E-mail address*</label>
+              <label><%= translation.feedback.feedbackEmail %>*</label>
               <input required type="email" id="emailAddress" name="emailAddress" class="form-control">
             </div>
             <div class="form-group">
-              <label>Feedback Details*</label>
+              <label><%= translation.feedback.feedbackDetails %>*</label>
               <textarea required class="form-control" id="details" name="details" rows="10" placeholder="Details..." cols="50"></textarea>
             </div>
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <div class="g-recaptcha" data-sitekey="<%= captchaSiteKey %>"></div>
             <input type="hidden" name="captchaResponse">
-            <button style="float: right" type="submit" id="submitFeedback" title="Send Feedback" class="btn-primary btn">Send your Feedback</button><br>
+            <button style="float: right" type="submit" id="submitFeedback" title="Send Feedback" class="btn-primary btn"><%= translation.feedback.sendFeedback %></button><br>
           </form>
       </div>
     </div>

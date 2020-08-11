@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>UNITE - Remove User as Admin</title>
+  <title><%= translation.deleteUser.title %></title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="A cool thing made with Glitch">
@@ -35,7 +35,7 @@
       $('#mainForm').submit(function(e) {
         let radio = $(this).find('input[type="radio"]:checked');
         radio.attr('name', 'reasonTitle');
-        if(!confirm('You are about to remove all this User data from UNITE. This cannot be undone.\nDeleting a UNITE User is a serious issue and it needs a well-elaborated reason. Please proceed only if you are really sure about it.')) {
+        if(!confirm('<%= translation.deleteUser.confirmation %>')) {
           return false;
         }
       });
@@ -61,7 +61,7 @@
 
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
-    <a class="navbar-brand" href="/">UNITE - Delete User Account - Admin</a>
+    <a class="navbar-brand" href="/"><%= translation.deleteUser.title %></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -70,11 +70,11 @@
     <div class="container home">
        <div class="col-md-12">
         <legend>
-          Delete User Account - Please fill in the required (*) fields
+          <%= translation.deleteUser.secondTitle %>
         </legend>
         <form id="mainForm" method="POST">
           <div class="form-group">
-            <label for="reason">Reason for deleting account*:</label>
+            <label for="reason"><%= translation.deleteUser.reason %>*:</label>
             <textarea required rows="10" cols="50" class="form-control" id="reason" name="reason"></textarea>
           </div>
           <input type="hidden" name="type" value="User Cancellation by Admin">
@@ -82,13 +82,13 @@
           <input type="hidden" name="userType" value="<%= deleteType %>">
           <input type="hidden" name="emailAddress" value="<%= emailAddress %>">
           <div class="form-group">
-            <label for="reason">Name of the User:</label>
+            <label for="reason"><%= translation.deleteUser.userName %>:</label>
             <input disabled type="text" name="name" value="<%= name %>">  
           </div>
           <input type="hidden" name="uniteID" value="<%= uniteID %>">
           <div class="form-group">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button type="submit" id="delete" title="Delete User" class="btn btn-primary btn-block btn-lg">Delete User</button>
+            <button type="submit" id="delete" title="Delete User" class="btn btn-primary btn-block btn-lg"><%= translation.deleteUser.deletion %></button>
           </div>
         </form>
       </div>

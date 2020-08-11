@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>UNITE - View Feedbacks</title>
+  <title><%= translation.viewFeedbacks.title %></title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="A cool thing made with Glitch">
@@ -63,7 +63,7 @@
   
   <body>
     <nav pos="5" class="navbar navbar-expand-lg navbar-dark bg-dark" style="width: 100% !important;">
-      <a class="navbar-brand" href="/">UNITE - View Platform Feedbacks</a>
+      <a class="navbar-brand" href="/"><%= translation.viewFeedbacks.title %></a>
       <input type="hidden" id="userData" isAdmin="<%= isAdmin %>" userRole="<%= role %>">
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,7 +73,7 @@
       <div class="container home">
         <div class="col-md-12">
         <legend style="color: navy">
-          Below we have our Feedbacks, Suggestions, and other Inquiries from our Users.
+          <%= translation.viewFeedbacks.description %>
         </legend>
           <br>
           <div id="main">
