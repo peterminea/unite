@@ -195,7 +195,7 @@ function expiredBidsPriceFormatter(cellvalue, options, rowObject) {
   const colModelUploadedFiles = [
       { name: 'filename', label: 'File Name', align: 'center', search: true, width: 160},
       { name: 'folder', label: 'File Folder', align: 'center', search: true, width: 160},
-      { name: 'length', label: 'File Length', align: 'center', template: 'number', sorttype: function(cellValue, rowObject) { return parseInt(rowObject.length);}, search: true, width: 160},
+      { name: 'length', label: 'File Length', align: 'center', sorttype: function(cellValue, rowObject) { return parseInt(rowObject.length);}, search: true, width: 160},
       { name: 'image', label: 'Image', align: 'center', formatter: imageFormatter, sortable: false, search: false, width: 100 },
       { name: 'uploadDate', label: 'Upload Date', align: 'center', search: true, width: 250},
       { name: 'download', label: 'Download it', align: 'center', formatter: downloadFormatter, search: false, width: 100},
@@ -1875,7 +1875,7 @@ function initGrid(
         $('#bidOnProds').prop('disabled', ids.length? false : true);
       }
     },
-    caption: `The ${theName} grid, which uses predefined formatters and templates:`
+    caption: `${theName}`
   });
 
   $(`${gridId}`).navGrid(pagerId, {
@@ -2275,13 +2275,19 @@ $(document).ready(function() {
         let text = li.find("a").text();
       }
     }
-  }
+  }  
+  
+  
+    $('.container').click(function(e) {
+      $('li.language ol').hide();
+    });
+  
   
    $('li.language').click(function(e) {
     if($(this).hasClass('showLanguages')) {
       $(this).find('ol').remove();
       $(this).removeClass('showLanguages');
-    } else {        
+    } else {
       $(this)
         .append(`<ol style="position: fixed" title='Choose Platform Language' class='languages-bar'><li><a href="${loc}?clang=en"><img class='country-flag' src="https://www.countryflags.io/us/flat/64.png">English</a></li><li><a href="${loc}?clang=de"><img class='country-flag' src="https://www.countryflags.io/de/flat/64.png">Deutsch</a></li><li><a href="${loc}?clang=it"><img class='country-flag' src="https://www.countryflags.io/it/flat/64.png">Italiano</a></li><li><a href="${loc}?clang=fr"><img class='country-flag' src="https://www.countryflags.io/fr/flat/64.png">Français</a></li><li><a href="${loc}?clang=ro"><img class='country-flag' src="https://www.countryflags.io/ro/flat/64.png">Română</a></li></ol>`)
       .addClass('showLanguages');
@@ -2299,7 +2305,7 @@ $(document).ready(function() {
     "background-image":
       "url(https://cdn.glitch.com/e38447e4-c245-416f-8ea1-35b246c6af5d%2FWH.png?v=1592308122673)",
     "background-repeat": "repeat"
-  }); //That white!
+  });
 
   if (nav)
     nav.find("span").attr("title", "Expand/collapse UNITE basic options");

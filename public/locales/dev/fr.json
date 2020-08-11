@@ -1,7 +1,7 @@
 {
     "home": {
         "title": "Plate-forme UNITE pour les marchés publics",
-        "meaning": "Besoins<b> non couverts<\/b> en cas d'urgence",
+        "meaning": "Besoins<b> non couverts</b> en cas d'urgence",
         "description": "Plate-forme sur les marchés publics",
         "whatItDoes": "Créer un monde où les gouvernements et les entreprises innovent ensemble pour surmonter la crise",
         "mottoOne": "SAUVER DES EMPLOIS, SAUVER DES VIES !",
@@ -20,7 +20,7 @@
     },
     "about": {
         "first_paragraph": "UNITE est une plate-forme de marchés publics exclusivement destinée aux marchés publics de commandes spéciales de produits et de services pour la réponse aux crises. \nNous l'appelons \"L'Alibaba des demandes \nurgentes de marchés publics\".\n UNITE est une plateforme à double face, mettant en relation les acheteurs publics avec des entreprises qui ont la capacité et les moyens de recentrer leurs activités sur la fourniture de biens et de services en réponse à la crise COVID-19. Les\n entreprises sont invitées à s'inscrire sur la plateforme, en décrivant leur capacité et leur aptitude à fabriquer des produits dont elles ont un besoin urgent ou à fournir des services à la\n demande. Les\n\n entreprises peuvent également consulter et répondre aux appels d'offres ouverts lancés par des acheteurs\n\n publics.\n   Les acheteurs publics peuvent accéder à la plateforme et créer une demande d'achat. Notre logiciel fait correspondre la demande d'achat avec les fournisseurs potentiels et facilite l'ensemble de la transaction, y compris le contact initial, la négociation, la passation de commande, l'acceptation de livraison et le paiement.",
-        "second_paragraph": "UNITE se différencie des autres solutions en ce qu'il fournit une base de données des entreprises capables de recentrer leurs activités et en ce qu'il automatise le processus. Les autres solutions comprennent l'utilisation de fournisseurs existants et d'un système d'achat\/ERP (non adapté aux besoins anormaux) ; l'engagement sur le marché en contactant les entreprises individuelles par courrier électronique, par téléphone ou en personne (ce qui est lent) ; l'utilisation d'autres plateformes de vente en ligne (aucune visibilité de la capacité des entreprises à recentrer leurs opérations) ; la connaissance propre des acheteurs publics et de leurs liens avec l'industrie (peu partagée - limitée aux individus ou aux équipes locales).",
+        "second_paragraph": "UNITE se différencie des autres solutions en ce qu'il fournit une base de données des entreprises capables de recentrer leurs activités et en ce qu'il automatise le processus. Les autres solutions comprennent l'utilisation de fournisseurs existants et d'un système d'achat/ERP (non adapté aux besoins anormaux) ; l'engagement sur le marché en contactant les entreprises individuelles par courrier électronique, par téléphone ou en personne (ce qui est lent) ; l'utilisation d'autres plateformes de vente en ligne (aucune visibilité de la capacité des entreprises à recentrer leurs opérations) ; la connaissance propre des acheteurs publics et de leurs liens avec l'industrie (peu partagée - limitée aux individus ou aux équipes locales).",
         "title": "Qui sommes-nous",
         "more": "En savoir plus sur nous",
         "europeanCouncilInnovation": "Présence sur la plate-forme COVID du Conseil E.I.",
@@ -29,7 +29,7 @@
     },
     "feedback": {
         "provideFeedbackShort": "Fournissez vos commentaires!",
-        "provideFeedbackLong": "Fournir des commentaires, des suggestions ou des demandes des utilisateurs - <i> Veuillez remplir les champs obligatoires (*). <\/i>",
+        "provideFeedbackLong": "Fournir des commentaires, des suggestions ou des demandes des utilisateurs - <i> Veuillez remplir les champs obligatoires (*). </i>",
         "feedbackName": "Votre nom",
         "feedbackEmail": "Votre adresse électronique",
         "feedbackDetails": "Détails des commentaires",
@@ -49,7 +49,7 @@
         "organizationName": "Nom de l'organisation",
         "organizationUniteID": "L'ID UNITE de l'Organisation",
         "contactName": "Nom du contact",
-        "deptAgencyGroup": "Département \/ Agence \/ Groupe",
+        "deptAgencyGroup": "Département / Agence / Groupe",
         "address": "Adresse",
         "country": "Pays",
         "preferredCurrency": "Devise préférée (par défaut : Euro)",
@@ -62,9 +62,9 @@
         "otherSMEUrl": "Autre profil des médias sociaux",
         "uploadProductList": "Veuillez télécharger votre liste de produits:",
         "uploadProductImage": "Veuillez télécharger une image du produit :",
-        "uploadExcelNotice": "Vous pouvez utiliser un fichier Excel avec la liste des produits, avec chaque ligne comme nom du produit + prix du produit + devise du produit + montant du produit + éventuellement le nom du fournisseur (4 ou 5 cellules\/rangée, la première ligne doit contenir les noms des colonnes). En cliquant sur \"Process\", vos articles sont instantanément ajoutés à la page.",
+        "uploadExcelNotice": "Vous pouvez utiliser un fichier Excel avec la liste des produits, avec chaque ligne comme nom du produit + prix du produit + devise du produit + montant du produit + éventuellement le nom du fournisseur (4 ou 5 cellules/rangée, la première ligne doit contenir les noms des colonnes). En cliquant sur \"Process\", vos articles sont instantanément ajoutés à la page.",
         "uploadExcelList": "Veuillez télécharger votre liste de produits Excel",
-        "productsOffered": "Produits \/ Services offerts:",
+        "productsOffered": "Produits / Services offerts:",
         "userAvatar": "Avatar de l'utilisateur",
         "certificates": "Certificats",
         "antibriberyPolicy": "Politique de lutte contre la corruption",
@@ -84,7 +84,7 @@
         "deleteAccount": "Supprimer le compte"
     },
     "buyerSpecific": {
-        "qualification": "Qualification \/ Expérience",
+        "qualification": "Qualification / Expérience",
         "balanceToInvest": "Solde à investir"
     },
     "supervisorSignUp": {
@@ -254,12 +254,12 @@
             "buyerEmail": "Adresse électronique de l'acheteur",
             "bidBuyerContactName": "Nom du contact de l'acheteur",
             "bidBuyerCurrency": "Devise (original de l'acheteur)",
-            "bidBuyerDeptAgencyGroup": "Département \/ Agence \/ Groupe de l'acheteur",
-            "bidBuyerQualification": "Qualification \/ expérience de l'acheteur",
+            "bidBuyerDeptAgencyGroup": "Département / Agence / Groupe de l'acheteur",
+            "bidBuyerQualification": "Qualification / expérience de l'acheteur",
             "bidBuyerAddress": "Adresse de l'acheteur",
             "bidBuyerCountry": "Pays de l'acheteur",
             "bidProductPricesCurrency": "Les prix des produits sont exprimés dans votre monnaie.",
-            "bidProductsServicesOrdered": "Produits \/ services commandés",
+            "bidProductsServicesOrdered": "Produits / services commandés",
             "bidSupplierEmail": "Adresse électronique du fournisseur",
             "bidSelfPrice": "Prix (votre devise)",
             "bidBuyerPrice": "Prix (monnaie de l'acheteur)",
@@ -286,8 +286,8 @@
             "bidChatSupplier": "Discutez avec votre fournisseur",
             "bidCancelBidBuyer": "Annuler votre commande",
             "bidCancelBidSupplier": "Annuler la commande de l'acheteur",
-            "bidItemDescriptionShort": "Description de l'article <b>(courte<\/b>)",
-            "bidItemDescriptionLong": "Description de l'article <b>(longue<\/b>)",
+            "bidItemDescriptionShort": "Description de l'article <b>(courte</b>)",
+            "bidItemDescriptionLong": "Description de l'article <b>(longue</b>)",
             "bidItemDescriptionURL": "Description de l'article URL",
             "bidDeliveryLocation": "Lieu de livraison",
             "bidDeliveryRequirements": "Exigences de livraison",
@@ -302,7 +302,7 @@
             "noProducts": "Aucun produit disponible",
             "bidExtensionLetter": "Lettre de prolongation de l'enchère",
             "proposedPrice": "Prix proposé (il peut être modifié sur décision du fournisseur)",
-            "requestedList": "Produits \/ services demandés",
+            "requestedList": "Produits / services demandés",
             "requestNewProducts": "Vous pouvez demander des produits qui ne sont actuellement pas en stock chez le fournisseur.",
             "amount": "Montant",
             "productsCount": "Vous disposez d'un certain nombre de {} produits.",
@@ -312,7 +312,7 @@
             "suppliersPriceProduct": "Prix du fournisseur pour le produit sélectionné",
             "multiSupplierPriceNotice": "Cette offre est destinée à être envoyée à plusieurs fournisseurs. Les prix des fournisseurs équivalents seront décidés séparément pour chacun d'entre eux.",
             "suppliersOverallPrice": "Prix total équivalent fournisseur",
-            "multiSupplierPriceAdapted": "Comme votre offre est destinée à plusieurs fournisseurs, chacun d'entre eux fera convertir les prix des produits correspondants \/ proposés de votre devise à la devise correspondante.\n Lorsque vous ajoutez des montants pour des produits, chacun des fournisseurs aura ici son prix correspondant actualisé dans sa devise.",
+            "multiSupplierPriceAdapted": "Comme votre offre est destinée à plusieurs fournisseurs, chacun d'entre eux fera convertir les prix des produits correspondants / proposés de votre devise à la devise correspondante.\n Lorsque vous ajoutez des montants pour des produits, chacun des fournisseurs aura ici son prix correspondant actualisé dans sa devise.",
             "suppliersPriceRendered": "prix total pour le produit sélectionné",
             "bidStatus": "Statut",
             "productSuggestionTitle": "Les personnes qui ont acheté ce produit ont également aimé...",
@@ -397,7 +397,7 @@
             "reason": "Motif de la désactivation du compte",
             "deactivate": "Désactiver le compte",
             "confirm": "Êtes-vous sûr de vouloir désactiver votre compte de superviseur ?\nVous devez vous assurer que vous n'avez pas d'acheteurs actifs associés sur UNITE.\nVous serez automatiquement réactivé lors de la prochaine connexion.\nNous espérons vous revoir bientôt !",
-            "notice": "Si vous choisissez de désactiver temporairement votre compte de superviseur, veuillez vous assurer que vous n'avez pas d'acheteurs actifs sur UNITE. Il n'est pas recommandé de laisser vos acheteurs correspondants sans aucune surveillance\/supervision sur eux. Cela pourrait les encourager à se livrer à des activités illégales, c'est pourquoi nous vous prions d'envisager de prendre cette décision avec beaucoup d'attention."
+            "notice": "Si vous choisissez de désactiver temporairement votre compte de superviseur, veuillez vous assurer que vous n'avez pas d'acheteurs actifs sur UNITE. Il n'est pas recommandé de laisser vos acheteurs correspondants sans aucune surveillance/supervision sur eux. Cela pourrait les encourager à se livrer à des activités illégales, c'est pourquoi nous vous prions d'envisager de prendre cette décision avec beaucoup d'attention."
         },
         "delete": {
             "title": "UNITE - Superviseur - Résiliation de l'utilisateur",
@@ -452,9 +452,9 @@
     "supplierView": {
         "joinChatTitle": "Fournisseur - Connexion au chat pour UNITE",
         "addProduct": {
-            "title": "Fournisseur - Ajouter un produit\/service - UNITE",
-            "legend": "Ajouter un nouveau produit\/service",
-            "productServiceName": "Nom du produit \/ service",
+            "title": "Fournisseur - Ajouter un produit/service - UNITE",
+            "legend": "Ajouter un nouveau produit/service",
+            "productServiceName": "Nom du produit / service",
             "price": "Prix",
             "preferredCurrency": "Monnaie préférée (par défaut : euro)",
             "productImage": "Télécharger une image de produit",
@@ -499,8 +499,8 @@
             "name": "Nom de l’entreprise",
             "reason": "Motif de la désactivation du compte",
             "deactivate": "Désactiver le compte",
-            "confirm": "Voulez-vous vraiment désactiver votre compte fournisseur? \n Cela supprimera les données suivantes: \n\n Vos produits \/ services; \n Vos capacités; \n Vos commandes reçues d'UNITE. \n Vous ne serez pas visible pour les acheteurs à la recherche de fonctionnalités sur le site.",
-            "notice": "Si vous désactivez temporairement votre compte fournisseur, vos capacités, produits et services ne seront plus visibles pour les acheteurs. Lorsque vous réactiverez votre compte à la connexion, vous devrez modifier\/sauvegarder votre profil pour qu'ils puissent retrouver vos offres."
+            "confirm": "Voulez-vous vraiment désactiver votre compte fournisseur? \n Cela supprimera les données suivantes: \n\n Vos produits / services; \n Vos capacités; \n Vos commandes reçues d'UNITE. \n Vous ne serez pas visible pour les acheteurs à la recherche de fonctionnalités sur le site.",
+            "notice": "Si vous désactivez temporairement votre compte fournisseur, vos capacités, produits et services ne seront plus visibles pour les acheteurs. Lorsque vous réactiverez votre compte à la connexion, vous devrez modifier/sauvegarder votre profil pour qu'ils puissent retrouver vos offres."
         },
         "delete": {
             "title": "UNITE - Fournisseur - Résiliation de l'utilisateur",
@@ -521,7 +521,7 @@
             "title": "Tableau de bord du fournisseur - UNITE",
             "description": "Voici votre page Dashboard. Afin de vous assurer que vous continuez à apparaître dans les résultats de recherche des acheteurs, veuillez maintenir vos capacités et vos produits à jour.",
             "balance": "Solde",
-            "balanceDescription": "Votre solde est la somme des prix de vos <i> demandes d’enchères acceptées, <\/i> dont les paiements ont été effectués par les acheteurs. \nVous pouvez gérer votre solde en allant à votre page Solde.",
+            "balanceDescription": "Votre solde est la somme des prix de vos <i> demandes d’enchères acceptées, </i> dont les paiements ont été effectués par les acheteurs. \nVous pouvez gérer votre solde en allant à votre page Solde.",
             "goToBalance": "Aller au solde",
             "supplyDescription": "Vous disposez actuellement d’un certain nombre de types de produits {productsLength}, ce qui fait un montant total d’articles {montant}, et le prix global de votre offre est {totalPrice} {devise}.",
             "acceptedBids": "Demandes d’enchères acceptées",
@@ -530,7 +530,7 @@
         },
         "profile": {
             "title": "Profil du fournisseur - UNITE",
-            "terminationText": "Êtes-vous sûr de vouloir supprimer votre compte fournisseur ? Cela supprimera également\n : vos produits\/services ; vos capacités ;\n vos commandes reçues ; vos\n\n jetons d'utilisateur (le cas échéant) ; l'\n\nhistorique de vos messages sur UNITE.\n Si vous souhaitez simplement faire une pause, vous pouvez désactiver votre compte à la place.\n",
+            "terminationText": "Êtes-vous sûr de vouloir supprimer votre compte fournisseur ? Cela supprimera également\n : vos produits/services ; vos capacités ;\n vos commandes reçues ; vos\n\n jetons d'utilisateur (le cas échéant) ; l'\n\nhistorique de vos messages sur UNITE.\n Si vous souhaitez simplement faire une pause, vous pouvez désactiver votre compte à la place.\n",
             "description": "Voici votre page Dashboard. Afin de vous assurer que vous continuez à apparaître dans les résultats de recherche des acheteurs, veuillez maintenir vos capacités et vos produits à jour."
         },
         "resend": {
@@ -593,17 +593,18 @@
     "gridBuyerHome": {
         "organizationName": "Nom de l'organisation",
         "organizationUniteID": "L'ID UNITE de l'Organisation",
-        "deptAgencyGroup": "Département \/ Agence \/ Groupe",
+        "deptAgencyGroup": "Département / Agence / Groupe",
         "contactName": " Nom du contact",
         "emailAddress": " Adresse de messagerie",
         "contactMobileNumber": "Numéro de portable de contact",
         "country": "Pays",
-        "qualification": "Qualification \/ Expérience",
+        "qualification": "Qualification / Expérience",
         "role": "Rôle de l'utilisateur",
         "isActive": "Est-ce actif?",
         "ipv4": "Adresse IPv4",
         "deletion": "Supprimer l'utilisateur",
-        "ban": "Bannir l’utilisateur"
+        "ban": "Bannir l’utilisateur",
+        "title": "Acheteurs"
     },
     "gridSupervisorHome": {
         "organizationName": "Nom de l'organisation",
@@ -616,7 +617,8 @@
         "isActive": "Est-ce actif?",
         "ipv4": "Adresse IPv4",
         "deletion": "Supprimer l'utilisateur",
-        "ban": "Bannir l’utilisateur"
+        "ban": "Bannir l’utilisateur",
+        "title": "Superviseurs"
     },
     "gridSupplierHome": {
         "companyName": "Nom de l’entreprise",
@@ -635,7 +637,8 @@
         "isActive": "Est-ce actif?",
         "ipv4": "Adresse IPv4",
         "deletion": "Supprimer l'utilisateur",
-        "ban": "Bannir l’utilisateur"
+        "ban": "Bannir l’utilisateur",
+        "title": "Fournisseurs"
     },
     "gridProducts": {
         "name": "Nom du produit",
@@ -646,7 +649,8 @@
         "productImage": "Image du produit",
         "placeBid": "Nouvelle demande d’enchère",
         "imageWrapper": "Images de produits",
-        "buttonsWrapper": "Gérez la ligne"
+        "buttonsWrapper": "Gérez la ligne",
+        "title": "Liste des produits"
     },
     "gridBids": {
         "bidName": "Nom de la demande d’enchère",
@@ -658,7 +662,8 @@
         "dateCreated": "Date de création",
         "expiryDate": "Date d'expiration",
         "isCancelled": "Est annulé?",
-        "isExpired": "Est expiré?"
+        "isExpired": "Est expiré?",
+        "title": "Liste des demandes d’enchère - UNITE"
     },
     "gridUploadedFiles": {
         "filename": "Nom du fichier",
@@ -667,10 +672,13 @@
         "image": "Image",
         "uploadDate": "Date du téléchargement",
         "download": "Télécharger le fichier",
-        "deletion": "Supprimer le fichier"
+        "deletion": "Supprimer le fichier",
+        "avatarTitle": "Fichiers d'avatar",
+        "productImagesTitle": "Fichiers d'images de produits",
+        "uploadedDocsTitle": "Documents téléchargés"
     },
     "gridSupervisorsBuyers": {
-        "deptAgencyGroup": "Département \/ Agence \/ Groupe",
+        "deptAgencyGroup": "Département / Agence / Groupe",
         "contactName": "Nom du contact",
         "balance": "Solde de l'acheteur",
         "isActive": "Est-ce actif?",
@@ -683,6 +691,16 @@
         "expiredBids": "Nombre d'enchères expirées",
         "expiredBidsPrice": "Prix des enchères expirées",
         "removeBuyer": "Supprimer de UNITE",
-        "chat": "Parlez à l’acheteur"
+        "chat": "Parlez à l’acheteur",
+        "title": "Liste des acheteurs du superviseur"
+    },
+    "gridBannedUsers": {
+        "title": "Liste des utilisateurs bannis",
+        "name": "Nom d'utilisateur",
+        "type": "Type d'utilisateur",
+        "email": "Adresse électronique",
+        "ip": "Adresse IP (IPv4)",
+        "banDate": "Date d'interdiction",
+        "banExpiryDate": "Date d'expiration de l'interdiction"
     }
 }

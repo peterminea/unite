@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Government Supervisor Dashboard - UNITE</title>
+  <title><%= translation.supervisorView.index.title %></title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="A cool thing made with Glitch">
@@ -57,7 +57,7 @@
 
 <body>
   <nav pos="1" user="supervisor" class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="/supervisor">Government Supervisor Dashboard - UNITE</a>
+    <a class="navbar-brand" href="/supervisor"><%= translation.supervisorView.index.title %></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -68,17 +68,17 @@
     <br><br>
     <div class="card">
       <div class="card-header">
-        Hello!
+        <%= translation.supervisorView.index.cardGreeting %>
       </div>
       <div class="card-body">
-        <h5 class="card-title">Hello, <%= supervisor.organizationName %>! 
+        <h5 class="card-title"><%= translation.supervisorView.index.defaultGreeting %>, <%= supervisor.organizationName %>! 
           <% if(supervisor.avatar != null && supervisor.avatar.length > 0) { %>
            <img src="<%= supervisor.avatar %>" style="height: 20px; width: 20px" onclick="window.open(this.src)">
           <% } %>
         </h5>        
-        <p style="font-family: verdana; font-size: 11pt; color: green">With your UNITE ID, new buyers can register on the website and start searching for suppliers. If you change the UNITE ID, please announce your members.</p>
+        <p style="font-family: verdana; font-size: 11pt; color: green"><%= translation.supervisorView.index.uniteIDDescription %></p>
         <div class="form-group">
-          <label>Your Unique UNITE ID</label>
+          <label><%= translation.supervisorView.index.uniteID %></label>
           <input type="text" class="form-control" readonly value="<%= supervisor.organizationUniteID %>">
         </div>
       </div>
@@ -95,23 +95,23 @@
     var data = [];
       
     var colModelSupervBuyers = [
-      { name: 'deptAgencyGroup', label: 'Department/Agency Group', align: 'center', search: true, width: 150},
-      { name: 'contactName', label: 'Contact Name', align: 'center', sorttype: 'text', search: true, width: 140},      
-      { name: 'balance', label: 'Buyer\'s Balance', align: 'center', template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(rowObject.balance).toFixed(2);}, search: true, width: 100},
-      { name: 'isActive', label: 'Is Active?', align: 'center', search: true, width: 100 },
-      { name: 'totalBids', label: 'Total Bids Count', align: 'center', template: 'number', sorttype: function(cellValue, rowObject) { return parseInt(rowObject.totalBids);}, search: true, width: 50},
-      { name: 'totalBidsPrice', label: 'Total Bids Price', align: 'center', formatter: totalBidsPriceFormatter, unformat: priceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(parseFloat(rowObject.hiddenTotalBidsPrice).toFixed(2));}, search: true, width: 120},      
-      { name: 'validBids', label: 'Valid Bids Count', align: 'center', template: 'number', sorttype: function(cellValue, rowObject) { return parseInt(rowObject.validBids);}, search: true, width: 50},
-      { name: 'validBidsPrice', label: 'Valid Bids Price', align: 'center', formatter: validBidsPriceFormatter, unformat: priceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(parseFloat(rowObject.hiddenValidBidsPrice).toFixed(2));}, search: true, width: 100 },
-      { name: 'cancelledBids', label: 'Cancelled Bids Count', align: 'center', template: 'number', sorttype: function(cellValue, rowObject) { return parseInt(rowObject.cancelledBids);}, search: true, width: 50},
-      { name: 'cancelledBidsPrice', label: 'Cancelled Bids Price', align: 'center', formatter: cancelledBidsPriceFormatter, unformat: priceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(parseFloat(rowObject.hiddenCancelledBidsPrice).toFixed(2));}, search: true, width: 120},
-      { name: 'expiredBids', label: 'Expired Bids Count', align: 'center', template: 'number', sorttype: function(cellValue, rowObject) { return parseInt(rowObject.expiredBids);}, search: true, width: 50},
-      { name: 'expiredBidsPrice', label: 'Expired Bids Price', align: 'center', formatter: expiredBidsPriceFormatter, unformat: priceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(parseFloat(rowObject.hiddenExpiredBidsPrice).toFixed(2));}, search: true, width: 100 },
-      { name: 'removeBuyer', label: 'Process Removal', align: 'center', formatter: buyerRemovalFormatter, sortable: false, search: false, width: 100 },
-      { name: 'chat', label: 'Chat with Buyer', align: 'center', formatter: chatFormatter, sortable: false, search: false, width: 100 },
+      { name: 'deptAgencyGroup', label: '<%= translation.gridSupervisorsBuyers.deptAgencyGroup %>', align: 'center', search: true, width: 150},
+      { name: 'contactName', label: '<%= translation.gridSupervisorsBuyers.contactName %>', align: 'center', sorttype: 'text', search: true, width: 140},      
+      { name: 'balance', label: '<%= translation.gridSupervisorsBuyers.balance %>', align: 'center', template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(rowObject.balance).toFixed(2);}, search: true, width: 100},
+      { name: 'isActive', label: '<%= translation.gridSupervisorsBuyers.isActive %>', align: 'center', search: true, width: 100 },
+      { name: 'totalBids', label: '<%= translation.gridSupervisorsBuyers.totalBids %>', align: 'center', template: 'number', sorttype: function(cellValue, rowObject) { return parseInt(rowObject.totalBids);}, search: true, width: 50},
+      { name: 'totalBidsPrice', label: '<%= translation.gridSupervisorsBuyers.totalBidsPrice %>', align: 'center', formatter: totalBidsPriceFormatter, unformat: priceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(parseFloat(rowObject.hiddenTotalBidsPrice).toFixed(2));}, search: true, width: 120},      
+      { name: 'validBids', label: '<%= translation.gridSupervisorsBuyers.validBids %>', align: 'center', template: 'number', sorttype: function(cellValue, rowObject) { return parseInt(rowObject.validBids);}, search: true, width: 50},
+      { name: 'validBidsPrice', label: '<%= translation.gridSupervisorsBuyers.validBidsPrice %>', align: 'center', formatter: validBidsPriceFormatter, unformat: priceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(parseFloat(rowObject.hiddenValidBidsPrice).toFixed(2));}, search: true, width: 100 },
+      { name: 'cancelledBids', label: '<%= translation.gridSupervisorsBuyers.cancelledBids %>', align: 'center', template: 'number', sorttype: function(cellValue, rowObject) { return parseInt(rowObject.cancelledBids);}, search: true, width: 50},
+      { name: 'cancelledBidsPrice', label: '<%= translation.gridSupervisorsBuyers.cancelledBidsPrice %>', align: 'center', formatter: cancelledBidsPriceFormatter, unformat: priceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(parseFloat(rowObject.hiddenCancelledBidsPrice).toFixed(2));}, search: true, width: 120},
+      { name: 'expiredBids', label: '<%= translation.gridSupervisorsBuyers.expiredBids %>', align: 'center', template: 'number', sorttype: function(cellValue, rowObject) { return parseInt(rowObject.expiredBids);}, search: true, width: 50},
+      { name: 'expiredBidsPrice', label: '<%= translation.gridSupervisorsBuyers.expiredBidsPrice %>', align: 'center', formatter: expiredBidsPriceFormatter, unformat: priceUnformatter, template: 'number', sorttype: function(cellValue, rowObject) { return parseFloat(parseFloat(rowObject.hiddenExpiredBidsPrice).toFixed(2));}, search: true, width: 100 },
+      { name: 'removeBuyer', label: '<%= translation.gridSupervisorsBuyers.removeBuyer %>', align: 'center', formatter: buyerRemovalFormatter, sortable: false, search: false, width: 100 },
+      { name: 'chat', label: '<%= translation.gridSupervisorsBuyers.chat %>', align: 'center', formatter: chatFormatter, sortable: false, search: false, width: 100 },
       { name: "hiddenCurrency", hidden: true },      
       { name: "hiddenTotalBidsPrice", hidden: true },      
-      { name: "hiddenValidBidsPrice", hidden: true },      
+      { name: "hiddenValidBidsPrice", hidden: true },
       { name: "hiddenCancelledBidsPrice", hidden: true },      
       { name: "hiddenExpiredBidsPrice", hidden: true },
       { name: 'supervisorId', hidden: true },
@@ -160,7 +160,7 @@
         <% } else {%>
         <div>
           <p style="color: green; font-family: arial">
-            Sorry, no Buyers with your Organization UNITE ID are currently available. Please wait for their registration.
+            <%= translation.gridSupervisorsBuyers.noBuyers %>
           </p>
         </div>
         <% }%>

@@ -603,7 +603,8 @@
         "isActive": "Ist aktiv?",
         "ipv4": "IPv4-Adresse",
         "deletion": "Benutzer löschen",
-        "ban": "Benutzer verbieten"
+        "ban": "Benutzer verbieten",
+        "title": "Käufer"
     },
     "gridSupervisorHome": {
         "organizationName": "Organisationsname",
@@ -616,7 +617,8 @@
         "isActive": "Ist aktiv?",
         "ipv4": "IPv4-Adresse",
         "deletion": "Benutzer löschen",
-        "ban": "Benutzer verbieten"
+        "ban": "Benutzer verbieten",
+        "title": "Supervisors"
     },
     "gridSupplierHome": {
         "companyName": "Unternehmensname",
@@ -635,7 +637,8 @@
         "isActive": "Ist aktiv?",
         "ipv4": "IPv4-Adresse",
         "deletion": "Benutzer löschen",
-        "ban": "Benutzer verbieten"
+        "ban": "Benutzer verbieten",
+        "title": "Lieferanten"
     },
     "gridProducts": {
         "name": "Produktname",
@@ -646,7 +649,8 @@
         "productImage": "Produktbild",
         "placeBid": "Neue Gebotsanfrage",
         "imageWrapper": "Produktbilder",
-        "buttonsWrapper": "Die Linie handhaben"
+        "buttonsWrapper": "Die Linie handhaben",
+        "title": "Liste der Produkte"
     },
     "gridBids": {
         "bidName": "Name der Gebotsanfrage",
@@ -658,7 +662,8 @@
         "dateCreated": "Erstellungsdatum",
         "expiryDate": "Verfallsdatum",
         "isCancelled": "Ist storniert?",
-        "isExpired": "Ist abgelaufen?"
+        "isExpired": "Ist abgelaufen?",
+        "title": "UNITE Liste der Gebotsanfragen"
     },
     "gridUploadedFiles": {
         "filename": "Dateiname",
@@ -667,7 +672,10 @@
         "image": "Bild",
         "uploadDate": "Datum des Uploads",
         "download": "Datei herunterladen",
-        "deletion": "Datei löschen"
+        "deletion": "Datei löschen",
+        "avatarTitle": "Avatar-Dateien",
+        "productImagesTitle": "Produkt-Bilddateien",
+        "uploadedDocsTitle": "Hochgeladene Dokumente"
     },
     "gridSupervisorsBuyers": {
         "deptAgencyGroup": "Abteilung \/ Agentur \/ Gruppe",
@@ -683,6 +691,16 @@
         "expiredBids": "Anzahl abgelaufener Gebote",
         "expiredBidsPrice": "Preis für abgelaufene Gebote",
         "removeBuyer": "Aus UNITE entfernen",
-        "chat": "Sprechen Sie mit dem Käufer"
+        "chat": "Sprechen Sie mit dem Käufer",
+        "title": "Liste der Käufer des Supervisors"
+    },
+    "gridBannedUsers": {
+        "title": "Liste der gesperrten Benutzer",
+        "name": "User Name",
+        "type": "Benutzer-Typ",
+        "email": "E-Mail-Adresse",
+        "ip": "IP-Adresse (IPv4)",
+        "banDate": "Sperrdatum",
+        "banExpiryDate": "Ablaufdatum des Verbots"
     }
 }

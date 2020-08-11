@@ -51,15 +51,15 @@
       $('div.bodyBuilder').append(str);
 
       let colModel = [             
-        { name: 'name', label: 'User Name', search: true, width: 140},
-        { name: 'type', label: 'User Type', align: 'center', search: true, width: 140},
-        { name: 'email', label: 'E-mail Address', sorttype: 'text', align: 'center', search: true, width: 140},
-        { name: 'ip', label: 'IPv4 Address', align: 'center', sorttype: 'text', search: true, width: 140 },
-        { name: 'banDate', label: 'Ban Date', align: 'center', formatter: 'date', formatoptions: { srcformat: 'd/m/Y', newformat: 'd/m/Y'}, search: true, width: 90},
-        { name: 'banExpiryDate', label: 'Ban Expiry Date', align: 'center', formatter: 'date', formatoptions: { srcformat: 'd/m/Y', newformat: 'd/m/Y'}, search: true, width: 90}
+        { name: 'name', label: '<%= translation.gridBannedUsers.name %>', search: true, width: 140},
+        { name: 'type', label: '<%= translation.gridBannedUsers.type %>', align: 'center', search: true, width: 140},
+        { name: 'email', label: '<%= translation.gridBannedUsers.email %>', sorttype: 'text', align: 'center', search: true, width: 140},
+        { name: 'ip', label: '<%= translation.gridBannedUsers.ip %>', align: 'center', sorttype: 'text', search: true, width: 140 },
+        { name: 'banDate', label: '<%= translation.gridBannedUsers.banDate %>', align: 'center', formatter: 'date', formatoptions: { srcformat: 'd/m/Y', newformat: 'd/m/Y'}, search: true, width: 90},
+        { name: 'banExpiryDate', label: '<%= translation.gridBannedUsers.banExpiryDate %>', align: 'center', formatter: 'date', formatoptions: { srcformat: 'd/m/Y', newformat: 'd/m/Y'}, search: true, width: 90}
       ];
 
-      initGrid(colModel, banData, "#gridBans", '#banPager', "userName", 'Banned Users List', 1100);
+      initGrid(colModel, banData, "#gridBans", '#banPager', "userName", '<%= translation.gridBannedUsers.title %>', 1100);
       $('#loadBannedUsers').off('click');
 
       $('#mainForm').submit(function(e) {

@@ -46,7 +46,7 @@
       takeAction($(this), token, $(this).parent('td').parent('tr'));
     });
     
-    setTimeout(function() {    
+    setTimeout(function() {
       <% if(keys != null) { %>
       let i = 0, indexes = [];
 
@@ -107,7 +107,14 @@
   </div>
   
   <script type="text/javascript">
-    let data = [];  
+    let data = [];
+    
+    <% if(gridKeys != null) { %>
+    let i = 0;
+    <% for(let k in gridKeys) { %>
+    colModelUploadedFiles[i].label = '<%= eval(gridKeys[k]) %>';
+    i++;
+    <% } } %>
  
     <% i = 0; for (file of files) { %>
     data.push({

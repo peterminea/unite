@@ -40,6 +40,30 @@ const fetch = require('node-fetch');
         "translation.menu.logout"
   ];
 
+const filesGridTranslationKeys = [
+  "translation.gridUploadedFiles.filename",
+  "translation.gridUploadedFiles.folder",
+  "translation.gridUploadedFiles.length",
+  "translation.gridUploadedFiles.image",
+  "translation.gridUploadedFiles.uploadDate",
+  "translation.gridUploadedFiles.download",
+  "translation.gridUploadedFiles.deletion"
+];
+
+const bidsGridTranslationKeys = [
+  "translation.gridBids.bidName",
+  "translation.gridBids.buyerName",
+  "translation.gridBids.supplierName",
+  "translation.gridBids.buyerPrice",
+  "translation.gridBids.supplierPrice",
+  "translation.gridBids.preferredDeliveryDate",
+  "translation.gridBids.dateCreated",
+  "translation.gridBids.expiryDate",
+  "translation.gridBids.isCancelled",
+  "translation.gridBids.isExired"
+];
+
+
 let userData = require('../middleware/userHome');
 
 function checkFile(file) {
@@ -178,6 +202,7 @@ exports.getFilesList = async (req, res) => {
     successMessage: success,
     errorMessage: error,
     keys: homeMenuTranslationKeys,
+    gridKeys: filesGridTranslationKeys,
     isAdmin: obj.role == process.env.USER_ADMIN,
     files: files,
     uploads: uploads,
@@ -277,7 +302,7 @@ exports.getTermsConditions = (req, res) => {
 
 exports.getBidsList = async (req, res) => {  
   let bids = await getDataMongoose('BidRequest');
-
+  
   bids.sort(function(a, b) {
     return a.requestName.localeCompare(b.requestName);
   });
@@ -287,6 +312,7 @@ exports.getBidsList = async (req, res) => {
   res.render('bidsCatalog', {
     role: obj.role,
     keys: homeMenuTranslationKeys,
+    gridKeys: bidsGridTranslationKeys,
     isAdmin: obj.role == process.env.USER_ADMIN,
     userId: obj.userId,
     avatar: checkFile(obj.avatar),

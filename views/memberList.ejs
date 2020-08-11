@@ -93,19 +93,19 @@
   <script type="text/javascript">
     let data = [];
     let colModelBuyer = [
-      { name: 'organizationName', label: 'Organization name', search: true, width: 210},
-      { name: 'organizationUniteID', label: 'Organization UNITE ID', align: 'center', search: true, width: 140},
-      { name: 'deptAgencyGroup', label: 'Dept. Agency Group', align: 'center', search: true, width: 220},
-      { name: 'contactName', label: 'Contact Name', align: 'center', search: true, width: 200},
-      { name: 'emailAddress', label: 'E-mail Address', align: 'center', search: true, width: 160},
-      { name: 'contactMobileNumber', label: 'Contact Mobile Number', align: 'center', search: true, width: 120},
-      { name: 'country', label: 'Country', align: 'center', search: true, width: 105},
-      { name: 'qualification', label: 'Qualification', align: 'center', search: true, width: 200},
-      { name: 'role', label: 'Role', align: 'center', search: true, width: 75},
-      { name: 'isActive', label: 'Is Active?', align: 'center', search: true, width: 60},
-      { name: 'ipv4', label: 'IP Address (v4)', align: 'center', sorttype: "text", search: true, width: 180},
-      { name: 'deletion', label: 'Remove User', align: 'center', formatter: removalFormatter, search: false, width: 100},
-      { name: 'ban', label: 'Ban User', align: 'center', formatter: banFormatter, search: false, width: 100},
+      { name: 'organizationName', label: '<%= translation.gridBuyerHome.organizationName %>', search: true, width: 210},
+      { name: 'organizationUniteID', label: '<%= translation.gridBuyerHome.organizationUniteID %>', align: 'center', search: true, width: 140},
+      { name: 'deptAgencyGroup', label: '<%= translation.gridBuyerHome.deptAgencyGroup %>', align: 'center', search: true, width: 220},
+      { name: 'contactName', label: '<%= translation.gridBuyerHome.contactName %>', align: 'center', search: true, width: 200},
+      { name: 'emailAddress', label: '<%= translation.gridBuyerHome.emailAddress %>', align: 'center', search: true, width: 160},
+      { name: 'contactMobileNumber', label: '<%= translation.gridBuyerHome.contactMobileNumber %>', align: 'center', search: true, width: 120},
+      { name: 'country', label: '<%= translation.gridBuyerHome.country %>', align: 'center', search: true, width: 105},
+      { name: 'qualification', label: '<%= translation.gridBuyerHome.qualification %>', align: 'center', search: true, width: 200},
+      { name: 'role', label: '<%= translation.gridBuyerHome.role %>', align: 'center', search: true, width: 75},
+      { name: 'isActive', label: '<%= translation.gridBuyerHome.isActive %>', align: 'center', search: true, width: 60},
+      { name: 'ipv4', label: '<%= translation.gridBuyerHome.ipv4 %>', align: 'center', sorttype: "text", search: true, width: 180},
+      { name: 'deletion', label: '<%= translation.gridBuyerHome.deletion %>', align: 'center', formatter: removalFormatter, search: false, width: 100},
+      { name: 'ban', label: '<%= translation.gridBuyerHome.ban %>', align: 'center', formatter: banFormatter, search: false, width: 100},
       { name: 'hiddenDeleteHref', hidden: true },
       { name: 'hiddenBanHref', hidden: true }
     ];
@@ -129,7 +129,7 @@
       });
      <% i++; } %>
     
-    initGrid(colModelBuyer, data, "#gridBuyer", '#buyerPager', "organizationName", 'Buyers', 1680);
+    initGrid(colModelBuyer, data, "#gridBuyer", '#buyerPager', "organizationName", '<%= translation.gridBuyerHome.title %>', 1680);
     </script>
         <% } else { %>
         <div>
@@ -159,17 +159,17 @@
   <script type="text/javascript">
     let data0 = [];
     let colModelSupervisor = [
-      { name: 'organizationName', label: 'Organization name', search: true, width: 240},
-      { name: 'organizationUniteID', label: 'Organization UNITE ID', align: 'center', search: true, width: 140},
-      { name: 'contactName', label: 'Contact Name', align: 'center', search: true, width: 200},
-      { name: 'emailAddress', label: 'E-mail Address', align: 'center', search: true, width: 160},
-      { name: 'contactMobileNumber', label: 'Contact Mobile Number', align: 'center', search: true, width: 120},
-      { name: 'country', label: 'Country', align: 'center', search: true, width: 105},
-      { name: 'role', label: 'Role', align: 'center', search: true, width: 75},
-      { name: 'isActive', label: 'Is Active?', align: 'center', search: true, width: 60},
-      { name: 'ipv4', label: 'IP Address (v4)', align: 'center', sorttype: "text", search: true, width: 180},
-      { name: 'deletion', label: 'Removal', align: 'center', formatter: removalFormatter, search: false, width: 100},
-      { name: 'ban', label: 'Ban User', align: 'center', formatter: banFormatter, search: false, width: 100},
+      { name: 'organizationName', label: '<%= translation.gridSupervisorHome.organizationName %>', search: true, width: 240},
+      { name: 'organizationUniteID', label: '<%= translation.gridSupervisorHome.organizationUniteID %>', align: 'center', search: true, width: 140},
+      { name: 'contactName', label: '<%= translation.gridSupervisorHome.contactName %>', align: 'center', search: true, width: 200},
+      { name: 'emailAddress', label: '<%= translation.gridSupervisorHome.emailAddress %>', align: 'center', search: true, width: 160},
+      { name: 'contactMobileNumber', label: '<%= translation.gridSupervisorHome.contactMobileNumber %>', align: 'center', search: true, width: 120},
+      { name: 'country', label: '<%= translation.gridSupervisorHome.country %>', align: 'center', search: true, width: 105},
+      { name: 'role', label: '<%= translation.gridSupervisorHome.role %>', align: 'center', search: true, width: 75},
+      { name: 'isActive', label: '<%= translation.gridSupervisorHome.isActive %>', align: 'center', search: true, width: 60},
+      { name: 'ipv4', label: '<%= translation.gridSupervisorHome.ipv4 %>', align: 'center', sorttype: "text", search: true, width: 180},
+      { name: 'deletion', label: '<%= translation.gridSupervisorHome.deletion %>', align: 'center', formatter: removalFormatter, search: false, width: 100},
+      { name: 'ban', label: '<%= translation.gridSupervisorHome.ban %>', align: 'center', formatter: banFormatter, search: false, width: 100},
       { name: 'hiddenDeleteHref', hidden: true },
       { name: 'hiddenBanHref', hidden: true }
     ];
@@ -191,7 +191,7 @@
       });
      <% i++; } %>
     
-    initGrid(colModelSupervisor, data0, "#gridSupervisor", '#supervPager', "organizationName", 'Supervisors', 1600);
+    initGrid(colModelSupervisor, data0, "#gridSupervisor", '#supervPager', "organizationName", '<%= translation.gridSupervisorHome.title %>', 1600);
     </script>
         <% } else { %>
         <div>
@@ -222,23 +222,23 @@
   <script type="text/javascript">
     let data1 = [];
     let colModelSupplier = [
-      { name: 'companyName', label: 'Company name', search: true, width: 150},
-      { name: 'directorsName', label: 'Director\'s Name', align: 'center', search: true, width: 180},
-      { name: 'contactName', label: 'Contact Name', align: 'center', search: true, width: 225},
-      { name: 'emailAddress', label: 'E-mail Address', align: 'center', search: true, width: 240},
-      { name: 'registeredCountry', label: 'Registered Country', align: 'center', search: true, width: 170},
-      { name: 'contactMobileNumber', label: 'Contact Mobile Number', align: 'center', search: true, width: 150},
-      { name: 'country', label: 'Country', align: 'center', search: true, width: 140},
-      { name: 'areaCovered', label: 'Area Covered', align: 'center', search: true, width: 200},
-      { name: 'companyAddress', label: 'Company Address', align: 'center', search: true, width: 360},
-      { name: 'employeeNumbers', label: 'Employees Number', align: 'center', sorttype: 'number', search: true, width: 140},
-      { name: 'industry', label: 'Industry', align: 'center', search: true, width: 160},
-      { name: 'capabilityDescription', label: 'Capability Description', align: 'center', search: true, width: 210},
-      { name: 'role', label: 'Role', align: 'center', search: true, width: 75},
-      { name: 'isActive', label: 'Is Active?', align: 'center', search: true, width: 60},
-      { name: 'ipv4', label: 'IP Address (v4)', align: 'center', sorttype: "text", search: true, width: 180},
-      { name: 'deletion', label: 'Removal', align: 'center', formatter: removalFormatter, search: false, width: 100},      
-      { name: 'ban', label: 'Ban User', align: 'center', formatter: banFormatter, search: false, width: 100},
+      { name: 'companyName', label: '<%= translation.gridSupplierHome.companyName %>', search: true, width: 150},
+      { name: 'directorsName', label: '<%= translation.gridSupplierHome.directorsName %>', align: 'center', search: true, width: 180},
+      { name: 'contactName', label: '<%= translation.gridSupplierHome.contactName %>', align: 'center', search: true, width: 225},
+      { name: 'emailAddress', label: '<%= translation.gridSupplierHome.emailAddress %>', align: 'center', search: true, width: 240},
+      { name: 'registeredCountry', label: '<%= translation.gridSupplierHome.registeredCountry %>', align: 'center', search: true, width: 170},
+      { name: 'contactMobileNumber', label: '<%= translation.gridSupplierHome.contactMobileNumber %>', align: 'center', search: true, width: 150},
+      { name: 'country', label: '<%= translation.gridSupplierHome.country %>', align: 'center', search: true, width: 140},
+      { name: 'areaCovered', label: '<%= translation.gridSupplierHome.areaCovered %>', align: 'center', search: true, width: 200},
+      { name: 'companyAddress', label: '<%= translation.gridSupplierHome.companyAddress %>', align: 'center', search: true, width: 360},
+      { name: 'employeeNumbers', label: '<%= translation.gridSupplierHome.employeeNumbers %>', align: 'center', sorttype: 'number', search: true, width: 140},
+      { name: 'industry', label: '<%= translation.gridSupplierHome.industry %>', align: 'center', search: true, width: 160},
+      { name: 'capabilityDescription', label: '<%= translation.gridSupplierHome.capabilityDescription %>', align: 'center', search: true, width: 210},
+      { name: 'role', label: '<%= translation.gridSupplierHome.role %>', align: 'center', search: true, width: 75},
+      { name: 'isActive', label: '<%= translation.gridSupplierHome.isActive %>', align: 'center', search: true, width: 60},
+      { name: 'ipv4', label: '<%= translation.gridSupplierHome.ipv4 %>', align: 'center', sorttype: "text", search: true, width: 180},
+      { name: 'deletion', label: '<%= translation.gridSupplierHome.deletion %>', align: 'center', formatter: removalFormatter, search: false, width: 100},      
+      { name: 'ban', label: '<%= translation.gridSupplierHome.ban %>', align: 'center', formatter: banFormatter, search: false, width: 100},
       { name: 'hiddenDeleteHref', hidden: true },
       { name: 'hiddenBanHref', hidden: true }
     ];   
@@ -266,7 +266,7 @@
       });
      <% i++; } %>
     
-    initGrid(colModelSupplier, data1, "#gridSupplier", '#suppPager', "companyName", 'Suppliers', 1600);    
+    initGrid(colModelSupplier, data1, "#gridSupplier", '#suppPager', "companyName", '<%= translation.gridSupplierHome.title %>', 1600);    
     </script>
         <% } else { %>
         <div>
