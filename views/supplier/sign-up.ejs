@@ -28,9 +28,9 @@
   <script type="text/javascript">
     $(document).ready(function () {
       let token = $("input[name='_csrf']").val();
-      getAutocomplete('.country', '/countryAutocomplete', token);
-      getAutocomplete('#industry', '/industryGetAutocomplete', token);
-      getAutocomplete('#capabilityDescription', '/capabilityInputAutocomplete', token);
+      getAutocomplete('.country');
+      getAutocomplete('#industry');
+      getAutocomplete('#capabilityDescription');
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');      
       let defaultCurr = "<%= DEFAULT_CURR %>";
       let data = [];
@@ -163,7 +163,14 @@
         </div>
         <div class="form-group">
           <label>Area Covered</label>
-          <input type="text" class="form-control" name="areaCovered">
+          <input type="text" class="form-control autocomp" name="areaCovered">
+          <input type="hidden" name="saveArea">
+          <select class='autocomp'>
+            <option id="" value=""></option>
+            <% for(area of areas) { %>
+            <option id="<%= area.id %>" value="<%= area.name %>"><%= area.name %></option>
+            <% } %>
+          </select>
         </div>
         <div class="form-group">
           <label>Contact Mobile Number*</label>
@@ -301,13 +308,37 @@
             <input type="number" class="form-control" min='0.01' name="balance" required>
           </div>
         </div>
-        <div class="form-group">
-          <label class="text-muted form-text">
-            <!-- You can upload your files to cloud services (e.g. Google Drive) and add the link to the folder here. -->
-          </label>
+        
+      <div class='totals'>
+          <!-- Social Media section-->
+          <div class="form-group">
+            <label class="text-muted form-text certificates">
+              <span class='file-zone'><strong>WEBSITE AND SOCIAL MEDIA PROFILES</strong></span>
+              <br>
+              <span class='file-zone-required'>You must provide your Website and your LinkedIn URL.</span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label>Website</label>
+            <input type="url" class="form-control" id="website" name="website" value="<%= profile.website %>" required>
+          </div>
+        
+          <div class="form-group">
+            <label>LinkedIn URL</label>
+            <input type="url" class="form-control" id="linkedinURL" name="linkedinURL" value="<%= profile.linkedinURL %>">
+          </div>  
         </div>
         
         <div class='upload-section'>
+           <div class="form-group">
+            <label class="text-muted form-text">
+              <span class='file-zone'><strong>PROFILE IMAGE and CERTIFICATES</strong></span>
+                <br>
+              <span class='file-zone-required'>You must provide your Profile Image and at least one Certificate.</span>
+            </label>
+          </div>
+          
           <div class="form-group">
             <label>User Avatar</label>
             <input type="hidden" class="fileId" name="avatar">

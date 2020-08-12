@@ -1092,6 +1092,20 @@ exports.postSignUp = async (req, res) => {
                       twitterURL: req.body.twitterURL,
                       linkedinURL: req.body.linkedinURL,
                       otherSocialMediaURL: req.body.otherSocialMediaURL,
+                      certificates: req.body.certificatesIds,
+                      antibriberyPolicy: req.body.antibriberyPolicyId,
+                      environmentPolicy: req.body.environmentPolicyId,
+                      qualityManagementPolicy: req.body.qualityManagementPolicyId,
+                      occupationalSafetyAndHealthPolicy: req.body.occupationalSafetyAndHealthPolicyId,
+                      otherRelevantFiles: req.body.otherRelevantFilesIds,
+                      certificatesIds: req.body.certificatesIds,
+                      antibriberyPolicyId: req.body.antibriberyPolicyId,
+                      environmentPolicyId: req.body.environmentPolicyId,
+                      qualityManagementPolicyId: req.body.qualityManagementPolicyId,
+                      occupationalSafetyAndHealthPolicyId: req.body.occupationalSafetyAndHealthPolicyId,
+                      otherRelevantFilesIds: req.body.otherRelevantFilesIds,
+                      UNITETermsAndConditions: true,//We assume that user was required to check them.
+                      antibriberyAgreement: true,
                       createdAt: Date.now(),
                       updatedAt: Date.now(),
                       createdAtFormatted: normalFormat(Date.now()),
@@ -1203,6 +1217,20 @@ exports.postProfile = async (req, res) => {
     doc.twitterURL = req.body.twitterURL;
     doc.linkedinURL = req.body.linkedinURL;
     doc.otherSocialMediaURL = req.body.otherSocialMediaURL;
+    doc.certificates = req.body.certificatesIds;
+    doc.antibriberyPolicy = req.body.antibriberyPolicyId;
+    doc.environmentPolicy = req.body.environmentPolicyId;
+    doc.qualityManagementPolicy = req.body.qualityManagementPolicyId;
+    doc.occupationalSafetyAndHealthPolicy = req.body.occupationalSafetyAndHealthPolicyId;
+    doc.otherRelevantFiles = req.body.otherRelevantFilesIds;
+    doc.certificatesIds = req.body.certificatesIds;
+    doc.antibriberyPolicyId = req.body.antibriberyPolicyId;
+    doc.environmentPolicyId = req.body.environmentPolicyId;
+    doc.qualityManagementPolicyId = req.body.qualityManagementPolicyId;
+    doc.occupationalSafetyAndHealthPolicyId = req.body.occupationalSafetyAndHealthPolicyId;
+    doc.otherRelevantFilesIds = req.body.otherRelevantFilesIds;
+    doc.UNITETermsAndConditions = true;
+    doc.antibriberyAgreement = true;
     doc.createdAt = req.body.createdAt;
     doc.updatedAt = Date.now();
     doc.createdAtFormatted = normalFormat(req.body.createdAt);

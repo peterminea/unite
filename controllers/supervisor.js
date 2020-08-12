@@ -590,6 +590,12 @@ exports.postSignUp = async (req, res) => {
                     contactMobileNumber: req.body.contactMobileNumber,
                     address: req.body.address,
                     country: req.body.country,
+                    website: req.body.website,
+                    facebookURL: req.body.facebookURL,
+                    instagramURL: req.body.instagramURL,
+                    twitterURL: req.body.twitterURL,
+                    linkedinURL: req.body.linkedinURL,
+                    otherSocialMediaURL: req.body.otherSocialMediaURL,
                     certificates: req.body.certificatesIds,
                     antibriberyPolicy: req.body.antibriberyPolicyId,
                     environmentPolicy: req.body.environmentPolicyId,
@@ -689,6 +695,12 @@ exports.postProfile = async (req, res) => {
     doc.contactMobileNumber = req.body.contactMobileNumber;
     doc.address = req.body.address;
     doc.country = req.body.country;
+    doc.website = req.body.website;
+    doc.facebookURL = req.body.facebookURL;
+    doc.instagramURL = req.body.instagramURL;
+    doc.twitterURL = req.body.twitterURL;
+    doc.linkedinURL = req.body.linkedinURL;
+    doc.otherSocialMediaURL = req.body.otherSocialMediaURL;
     doc.certificates = req.body.certificatesIds;
     doc.antibriberyPolicy = req.body.antibriberyPolicyId;
     doc.environmentPolicy = req.body.environmentPolicyId;
