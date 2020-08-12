@@ -27,8 +27,8 @@
   <script type="text/javascript">
       $(document).ready(function() {
         let token = $("input[name='_csrf']").val();
-        getAutocomplete('#organizationUniteID', '/uniteIDAutocomplete', token);
-        getAutocomplete('#country', '/countryAutocomplete', token);
+        getAutocomplete('#organizationUniteID');
+        getAutocomplete('#country');
         errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
         let defaultCurr = "<%= DEFAULT_CURR %>";
         let data = [];
@@ -156,7 +156,8 @@
               <% } %>
             </select>
           </div>
-          <div class="form-group">
+          
+         <div class="form-group">
             <label>Preferred Currency (Default: Euro)*</label>
             <input type="hidden" name="currency" required><br>
             <select class="currency" class="form-control" title="Currency" required></select>
@@ -164,17 +165,123 @@
           <div class="form-group">
             <label>Balance to invest*</label>
             <input type="number" class="form-control" min='0.01' name="balance" required>
+          </div>  
+          
+         <div class='totals'>
+             <!-- Social Media section-->
+            <div class="form-group">
+              <label class="text-muted form-text social-media">
+                <span class='file-zone'><strong>WEBSITE AND SOCIAL MEDIA PROFILES</strong></span>
+                <br>
+                <span class='file-zone-required'>You must provide your Website and at least one Social Media link (LinkedIn is preferrable).</span>
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label>Website</label>
+              <input type="url" class="form-control" id="website" name="website" required>
+            </div>
+       
+           <div class="form-group">
+              <label>LinkedIn URL</label>
+              <input type="url" class="form-control" id="linkedinURL" name="linkedinURL" required>
+            </div>       
+          </div>          
+          
+          <div class='upload-section'>
+            
+            <div class="form-group">
+              <label class="text-muted form-text">
+                <span class='file-zone'><strong>PROFILE IMAGE and CERTIFICATES</strong></span>
+                <br>
+                <span class='file-zone-required'>You must provide your Profile Image and at least one Certificate.</span>
+              </label>
+            </div>
+            
+            <div class="form-group">
+              <label>User Profile Image</label>
+              <input type="hidden" name="avatar" value="<%= profile.avatar %>">
+              <input class="form-control upload avatarupload" type="file" id="avatar" name="avatarImg">
+              <input class="form-control single btn upload-button btn-success mt-2" type="button" disabled value="Upload File">
+            </div>
+
+            <div class="form-group">
+              <label>Certificates</label>
+              <input type="hidden" class="fileId" name="certificatesIds" value="<%= profile.certificatesIds %>">
+              <input class="form-control upload" type="file" id="certificates" name="certificates" multiple value="<%= profile.certificates %>">
+              <input class="form-control multiple btn upload-button btn-dark mt-2" type="button" disabled value="Upload Files" />
+            </div>
+
+            <div class="form-group">
+              <label>Antibribery policy</label>
+              <input type="hidden" class="fileId" name="antibriberyPolicyId" value="<%= profile.antibriberyPolicyId %>">
+              <input class="form-control upload" type="file" id="antibriberyPolicy" name="antibriberyPolicy" value="<%= profile.antibriberyPolicy %>">
+              <input class="form-control single btn upload-button btn-dark mt-2" type="button" disabled value="Upload File" />
+            </div>
+
+            <div class="form-group">
+              <label>Environment policy</label>
+              <input type="hidden" class="fileId" name="environmentPolicyId" value="<%= profile.environmentPolicyId %>">
+              <input class="form-control upload" type="file" id="environmentPolicy" name="environmentPolicy" value="<%= profile.environmentPolicy %>">
+              <input class="form-control single btn upload-button btn-dark mt-2" type="button" disabled value="Upload File" />
+            </div>
+
+            <div class="form-group">
+              <label>Quality management policy</label>
+              <input type="hidden" class="fileId" name="qualityManagementPolicyId" value="<%= profile.qualityManagementPolicyId %>">
+              <input class="form-control upload" type="file" id="qualityManagementPolicy" name="qualityManagementPolicy" value="<%= profile.qualityManagementPolicy %>">
+              <input class="form-control single btn upload-button btn-dark mt-2" type="button" disabled value="Upload File" />
+            </div>
+
+            <div class="form-group">
+              <label>Occupational Safety and Health</label>
+              <input type="hidden" class="fileId" name="occupationalSafetyAndHealthPolicyId" value="<%= profile.occupationalSafetyAndHealthPolicyId %>">
+              <input class="form-control upload" type="file" id="occupationalSafetyAndHealthPolicy" name="occupationalSafetyAndHealthPolicy" value="<%= profile.occupationalSafetyAndHealthPolicy %>">
+              <input class="form-control single btn upload-button btn-dark mt-2" type="button" disabled value="Upload File" />
+            </div>
+
+            <div class="form-group">
+              <label>Other relevant files</label>
+              <input type="hidden" class="fileId" name="otherRelevantFilesIds" value="<%= profile.otherRelevantFilesIds %>">
+              <input class="form-control upload" type="file" id="otherRelevantFiles" name="otherRelevantFiles" multiple value="<%= profile.otherRelevantFiles %>">
+              <input class="form-control multiple btn upload-button btn-dark mt-2" type="button" disabled value="Upload Files" />
+            </div>          
           </div>
-          <div class="form-group">
-            <label>User Avatar</label>
-            <input type="hidden" name="avatar">
-            <input class="form-control upload avatarupload" type="file" id="avatar" name="avatarImg">
-            <input class="form-control single btn upload-button btn-success mt-2" type="button" disabled value="Upload File" />
+          
+        <!--Mandatory check of agreements -->
+          <div class='checkbox-alignment'>
+            <div class="form-group">
+              <div class="form-check">
+                <input class="form-check-input cb" name="UNITETermsAndConditions" id="termscon" type="checkbox" required>
+                <a href="../termsConditions">
+                  <label class="form-check-label cb" for="termscon">
+                    I agree with the UNITE Terms and Conditions
+                  </label>
+                </a>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="form-check">
+                <input class="form-check-input cb" name="antibriberyAgreement" id="antibrib" type="checkbox" required>          
+                <a href="../antibriberyAgreement">
+                  <label class="form-check-label cb" for="antibrib">
+                      I acknowledge the UNITE Antibribery Agreement
+                  </label>
+                </a>
+              </div>
+            </div>
           </div>
+         
           <div class="g-recaptcha" data-sitekey="<%= captchaSiteKey %>"></div>
           <input type="hidden" name="captchaResponse">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
           <button type="submit" id="register" class="btn btn-primary btn-block">Sign Up</button>
+          <div class="form-group">
+            <label class="text-muted form-text conditions">
+              By clicking the "Sign Up" button, you accept <a href="../termsConditions">the UNITE Terms And Conditions</a> and <a href="../antibriberyAgreement">the Antibribery Agreement</a>.
+            </label>
+          </div>
         </div>
       </form>
     </div>  

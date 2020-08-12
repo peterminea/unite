@@ -33,11 +33,11 @@
       <% if(keys != null) { %>
       let i = 0, indexes = [];
 
-      $('a.nav-link').each(function(ind, elem) {      
+      $('a.nav-link').each(function(ind, elem) {   
         indexes.push($(elem).attr('index'));
       });
-
-      <% for(let k in keys) { %>   
+     
+      <% for(let k in keys) { %>
       if(isInArray(i, indexes)) {
         $('a.nav-link span').eq(i).text('<%= eval(keys[k]) %>');
       }
@@ -82,31 +82,24 @@
     </div>
     <br>
     <div style="" title="Welcome to UNITE!" class="customer-form">
-        <p class="term-light text-center">UNITE is a Public Procurement Platform exclusively for governmental procurement of special orders of products and services for crisis response.
-            <br>We call it "The Alibaba of urgent public procurement requests."<br><br>
-            UNITE is a two-sided platform, connecting public buyers with companies that have the capability and capacity to refocus their activities to supplying goods and services in response to the COVID-19 crisis.<br><br>
-            Companies are invited to register on the platform, describing their capability and capacity to manufacture urgently needed products or to supply in-demand services.
-            <br>Companies can also browse and respond to open tender requests placed by public buyers.
-            <br><br>
-            Public buyers can access the platform and create a procurement request. Our software matches the procurement request with potential suppliers and facilitates the complete transaction - including initial contact, negotiation. order placement, delivery acceptance, and payment.
+        <p class="term-light text-center"><%= translation.about.first_paragraph %>
         </p>
-      <p class="term-light text-center">
-        UNITE differentiates itself from other solutions in that it provides a database of companies with capability to refocus operations and in that it automates the process. Other solutions include using existing suppliers and ERP/purchasing system (not suited to abnormal requirements); engagement with the market through contacting individual companies by email, telephone or in person (which is slow); use of other online sales platforms (no visibility of the ability of companies to refocus operations);  own knowledge of public buyers and their connections to industry (not widely shared - limited to individuals or local teams).
+      <p class="term-light text-center"><%= translation.about.second_paragraph %>
       </p>
       <div style='margin-top: 10px;'>
         <div class='about details text-center'>
           <p style='color: yellow'>
-            More About Us:
+           <%= translation.about.more %>
           </p>
-          <span><a href="https://covid-eic.easme-web.eu/solution/unite-public-procurement-platform/about">EIC COVID Platform presence</a></span>
+          <span><a href="https://covid-eic.easme-web.eu/solution/unite-public-procurement-platform/about"><%= translation.about.europeanCouncilInnovation %></a></span>
           &nbsp;
-          <span><a href="https://devpost.com/software/unite-government-procurement-platform">DevPost Details</a></span>
+          <span><a href="https://devpost.com/software/unite-government-procurement-platform"><%= translation.about.devPost %></a></span>
           <br><br>
         </div>
         
         <div class='about social-media text-center'>
           <p style='color: yellow'>
-            Social Media Links:
+            <%= translation.about.socialMedia %>
           </p>
           <a href='https://twitter.com/UNITEteam1'>Twitter</a>
           &nbsp;

@@ -31,9 +31,9 @@
   <script type="text/javascript">
     $(document).ready(function () {
       let token = $("input[name='_csrf']").val();
-      getAutocomplete('.country', '/countryAutocomplete', token);
-      getAutocomplete('#industry', '/industryGetAutocomplete', token);
-      getAutocomplete('#capabilityDescription', '/capabilityInputAutocomplete', token, '<%= profile._id %>');
+      getAutocomplete('.country');
+      getAutocomplete('#industry');
+      getAutocomplete('#capabilityDescription');
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       let defaultCurr = "<%= profile.currency %>";
       let data = [];
@@ -191,7 +191,7 @@
           <input required type="text" class="form-control" id="title" name="title" value="<%= profile.title %>">
         </div>
         <div class="form-group">
-          <label>Companys Registration Number</label>
+          <label>Company's Registration Number</label>
           <input type="text" class="form-control" id="companyRegistrationNo" name="companyRegistrationNo" value="<%= profile.companyRegistrationNo %>" required>
         </div>
         <div class="form-group">
@@ -199,6 +199,7 @@
           <input type="text" class="form-control country autocomp" id="registeredCountry" name="registeredCountry" value="<%= profile.registeredCountry %>" required>
           <input type="hidden" name="saveRegisteredCountry">
           <select class='autocomp'>
+            <option id="" value=""></option>
             <% for(country of countries) { %>
             <option id="<%= country.id %>" value="<%= country.name %>"><%= country.name %></option>
             <% } %>
@@ -210,7 +211,14 @@
         </div>
         <div class="form-group">
           <label>Area Covered*</label>
-          <input required type="text" class="form-control" id="areaCovered" name="areaCovered" value="<%= profile.areaCovered %>">
+          <input required type="text" class="form-control autocomp" id="areaCovered" name="areaCovered" value="<%= profile.areaCovered %>">
+          <input type="hidden" name="saveArea">
+          <select class='autocomp'>
+            <option id="" value=""></option>
+            <% for(area of areas) { %>
+            <option id="<%= area.id %>" value="<%= area.name %>"><%= area.name %></option>
+            <% } %>
+          </select>
         </div>
         <div class="form-group">
           <label>Contact Mobile Number*</label>
@@ -221,6 +229,7 @@
           <input type="text" class="form-control country autocomp" id="country" name="country" value="<%= profile.country %>" required>
           <input type="hidden" name="saveCountry">
           <select class='autocomp'>
+            <option id="" value=""></option>
             <% for(country of countries) { %>
             <option id="<%= country.id %>" value="<%= country.name %>"><%= country.name %></option>
             <% } %>
@@ -231,6 +240,7 @@
           <input type="text" class="form-control autocomp" id="industry" name="industry" value="<%= profile.industry %>" required>
           <input type="hidden" name="saveIndustry">
           <select class='autocomp'>
+            <option id="" value=""></option>
             <% for(industry of industries) { %>
             <option id="<%= industry.id %>" value="<%= industry.name %>"><%= industry.name %></option>
             <% } %>
@@ -243,36 +253,14 @@
         <div class="form-group">
           <label>Last Year Turnover*</label>
           <input type="money" class="form-control number" id="lastYearTurnover" name="lastYearTurnover" value="<%= profile.lastYearTurnover %>" required>
-        </div>
-        <div class="form-group">
-          <label>Website</label>
-          <input type="url" class="form-control" id="website" name="website" value="<%= profile.website %>">
-        </div>
-        <div class="form-group">
-          <label>Facebook URL</label>
-          <input type="url" class="form-control" id="facebookURL" name="facebookURL" value="<%= profile.facebookURL %>">
-        </div>
-        <div class="form-group">
-          <label>Instagram URL</label>
-          <input type="url" class="form-control" id="instagramURL" name="instagramURL" value="<%= profile.instagramURL %>">
-        </div>
-        <div class="form-group">
-          <label>Twitter URL</label>
-          <input type="url" class="form-control" id="twitterURL" name="twitterURL" value="<%= profile.twitterURL %>">
-        </div>
-        <div class="form-group">
-          <label>LinkedIn URL</label>
-          <input type="url" class="form-control" id="linkedinURL" name="linkedinURL" value="<%= profile.linkedinURL %>">
-        </div>
-        <div class="form-group">
-          <label>Other Social Media URL</label>
-          <input type="url" class="form-control" id="otherSocialMediaURL" name="otherSocialMediaURL" value="<%= profile.otherSocialMediaURL %>">
-        </div>
+        </div>       
+
         <div class="form-group">
           <label>Capability Description*</label>
           <input type="text" class="form-control autocomp" id="capabilityDescription" name="capabilityDescription" value="<%= profile.capabilityDescription %>" required>
           <input type="hidden" name="saveCapability">
           <select class='autocomp'>
+            <option id="" value=""></option>
             <% for(cap of capabilities) { %>
             <option id="<%= cap.id %>" value="<%= cap.capabilityDescription %>"><%= cap.capabilityDescription %></option>
             <% } %>
@@ -419,14 +407,52 @@
           $('#totalSupplyPrice').text(parseFloat(totalLoadedPrice).toFixed(2) + ' ' + "<%= profile.currency %>");
         </script>
 
-       <!-- Uploading files field section-->
-        <div class="form-group">
-          <label class="text-muted form-text">
-           <!-- You can upload your files to cloud services (e.g. Google Drive) and add the link to the folder here. -->
-          </label>
+        <div class='totals'>
+          <!-- Social Media section-->
+          <div class="form-group">
+            <label class="text-muted form-text certificates">
+              <span class='file-zone'><strong>WEBSITE AND SOCIAL MEDIA PROFILES</strong></span>
+              <br>
+              <span class='file-zone-required'>You must provide your Website and at least one Social Media link (LinkedIn is preferrable).</span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label>Website</label>
+            <input type="url" class="form-control" id="website" name="website" value="<%= profile.website %>" required>
+          </div>
+          <div class="form-group">
+            <label>Facebook URL</label>
+            <input type="url" class="form-control" id="facebookURL" name="facebookURL" value="<%= profile.facebookURL %>">
+          </div>
+          <div class="form-group">
+            <label>Instagram URL</label>
+            <input type="url" class="form-control" id="instagramURL" name="instagramURL" value="<%= profile.instagramURL %>">
+          </div>
+          <div class="form-group">
+            <label>Twitter URL</label>
+            <input type="url" class="form-control" id="twitterURL" name="twitterURL" value="<%= profile.twitterURL %>">
+          </div>
+          <div class="form-group">
+            <label>LinkedIn URL</label>
+            <input type="url" class="form-control" id="linkedinURL" name="linkedinURL" value="<%= profile.linkedinURL %>">
+          </div>
+          <div class="form-group">
+            <label>Other Social Media URL</label>
+            <input type="url" class="form-control" id="otherSocialMediaURL" name="otherSocialMediaURL" value="<%= profile.otherSocialMediaURL %>">
+          </div>
         </div>
 
         <div class='upload-section'>
+         <!-- Uploading files field section-->
+          <div class="form-group">
+            <label class="text-muted form-text certificates">
+            <span class='file-zone'><strong>PROFILE IMAGE and CERTIFICATES</strong></span>
+            <br>
+            <span class='file-zone-required'>You must provide your profile image and at least one Certificate.</span>
+            </label>
+          </div>
+          
           <div class="form-group">
             <label>User Avatar</label>
             <input type="hidden" class="fileId" name="avatar" value="<%= profile.avatar %>">
@@ -475,7 +501,7 @@
             <input class="form-control upload" type="file" id="otherRelevantFiles" name="otherRelevantFiles" multiple value="<%= profile.otherRelevantFiles %>">
             <input class="form-control multiple btn upload-button btn-dark mt-2" type="button" disabled value="Upload Files" />
           </div>          
-        </div>      
+        </div>
 
         <!--Mandatory check of agreements -->
         <div class='checkbox-alignment'>

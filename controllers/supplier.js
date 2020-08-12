@@ -21,6 +21,9 @@ const treatError = require('../middleware/treatError');
 const search = require('../middleware/searchFlash');
 let Recaptcha = require('express-recaptcha').RecaptchaV2;
 
+const countriesKeys = require('../middleware/countriesKeys');
+const industriesKeys = require('../middleware/industriesKeys');
+
 const supplierMenuTranslationKeys = [
   "translation.menu.languages",
   "translation.menu.home",
@@ -424,6 +427,7 @@ exports.getSignUp = async (req, res) => {
     let industries = await getDataMongoose('Industry');
     let capabilities = await getDataMongoose('Capability');
     let currencies = await getCurrenciesList();
+    let areas = await getDataMongoose('Region');
    
     let success = search(req.session.flash, 'success'), error = search(req.session.flash, 'error');
     req.session.flash = [];
@@ -451,6 +455,9 @@ exports.getSignUp = async (req, res) => {
       countries: countries,
       industries: industries,
       capabilities: capabilities,
+      countriesKeys: countriesKeys,
+      industriesKeys: industriesKeys,
+      areas: areas,
       captchaSiteKey: captchaSiteKey,
       successMessage: success,
       errorMessage: error
@@ -568,7 +575,7 @@ exports.postSignUp = async (req, res) => {
                 otherRelevantFilesIds: req.body.otherRelevantFilesIds,
                 balance: req.body.balance,
                 currency: req.body.currency,
-                UNITETermsAndConditions: true,//We assume that user was constrainted to check them.
+                UNITETermsAndConditions: true,//We assume that user was required to check them.
                 antibriberyAgreement: true,
                 createdAt: Date.now(),
                 updatedAt: Date.now(),
@@ -866,6 +873,7 @@ exports.getProfile = async (req, res) => {
   let countries = await getDataMongoose('Country');
   let industries = await getDataMongoose('Industry');
   let capabilities = await getDataMongoose('Capability', { supplier: supplier._id });
+  let areas = await getDataMongoose('Region');
  
   products.sort(function(a, b) {
     return a.productName.localeCompare(b.productName);
@@ -902,6 +910,9 @@ exports.getProfile = async (req, res) => {
     industries: industries,
     capabilities: capabilities,
     currencies: currencies,
+    countriesKeys: countriesKeys,
+    industriesKeys: industriesKeys,
+    areas: areas,
     keys: supplierMenuTranslationKeys,
     MAX_PROD: process.env.SUPP_MAX_PROD,
     DEFAULT_CURR: process.env.SUPP_DEFAULT_CURR,

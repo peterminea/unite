@@ -19,8 +19,8 @@
         "bigTitle": "UNITE - Unterversorgte Bedürfnisse in Notzeiten - Home Page"
     },
     "about": {
-        "first_paragraph": "UNITE ist eine Plattform für das öffentliche Beschaffungswesen, die ausschließlich für die staatliche Beschaffung von Sonderbestellungen von Produkten und Dienstleistungen für die Krisenreaktion bestimmt ist. \nWir nennen sie \"Die Alibaba dringender öffentlicher Beschaffungsaufträge\".\n UNITE ist eine zweiseitige Plattform, die öffentliche Beschaffer mit Unternehmen verbindet, die die Fähigkeit und Kapazität haben, ihre Aktivitäten als Reaktion auf die COVID-19-Krise auf die\n Lieferung von Waren und Dienstleistungen neu auszurichten. Die\n Unternehmen werden aufgefordert, sich auf der Plattform zu registrieren und dabei ihre Fähigkeit und Kapazität zur Herstellung dringend benötigter Produkte oder zur Bereitstellung nachgefragter Dienstleistungen\n zu beschreiben.\n\n Unternehmen können auch offene Ausschreibungen öffentlicher Auftraggeber einsehen und darauf reagieren.\n   Öffentliche Einkäufer können auf die Plattform zugreifen und eine Beschaffungsanfrage erstellen. Unsere Software gleicht die Beschaffungsanfrage mit potenziellen Lieferanten ab und erleichtert die gesamte Transaktion - einschließlich Erstkontakt, Verhandlung, Auftragserteilung, Lieferannahme und Bezahlung.",
-        "second_paragraph": "UNITE unterscheidet sich von anderen Lösungen dadurch, dass es eine Datenbank von Unternehmen bereitstellt, die in der Lage sind, den Betrieb neu auszurichten, und dass es den Prozess automatisiert. Zu den anderen Lösungen gehören die Nutzung bestehender Lieferanten und des ERP-\/Einkaufssystems (nicht geeignet für ungewöhnliche Anforderungen); Engagement mit dem Markt durch die Kontaktaufnahme mit einzelnen Unternehmen per E-Mail, Telefon oder persönlich (was langsam ist); Nutzung anderer Online-Verkaufsplattformen (keine Sichtbarkeit der Fähigkeit von Unternehmen, den Betrieb neu auszurichten); eigenes Wissen über öffentliche Käufer und ihre Verbindungen zur Industrie (nicht weit verbreitet - beschränkt auf Einzelpersonen oder lokale Teams).",
+        "first_paragraph": "UNITE ist eine Plattform für das öffentliche Beschaffungswesen, die ausschließlich für die staatliche Beschaffung von Sonderbestellungen von Produkten und Dienstleistungen für die Krisenreaktion bestimmt ist. \\nWir nennen sie \"Die Alibaba dringender öffentlicher Beschaffungsaufträge\".\\n UNITE ist eine zweiseitige Plattform, die öffentliche Beschaffer mit Unternehmen verbindet, die die Fähigkeit und Kapazität haben, ihre Aktivitäten als Reaktion auf die COVID-19-Krise auf die\\n Lieferung von Waren und Dienstleistungen neu auszurichten. Die\\n Unternehmen werden aufgefordert, sich auf der Plattform zu registrieren und dabei ihre Fähigkeit und Kapazität zur Herstellung dringend benötigter Produkte oder zur Bereitstellung nachgefragter Dienstleistungen\\n zu beschreiben.\\n\\n Unternehmen können auch offene Ausschreibungen öffentlicher Auftraggeber einsehen und darauf reagieren.\\n   Öffentliche Einkäufer können auf die Plattform zugreifen und eine Beschaffungsanfrage erstellen. Unsere Software gleicht die Beschaffungsanfrage mit potenziellen Lieferanten ab und erleichtert die gesamte Transaktion - einschließlich Erstkontakt, Verhandlung, Auftragserteilung, Lieferannahme und Bezahlung.",
+        "second_paragraph": "UNITE unterscheidet sich von anderen Lösungen dadurch, dass es eine Datenbank von Unternehmen bereitstellt, die in der Lage sind, den Betrieb neu auszurichten, und dass es den Prozess automatisiert. Zu den anderen Lösungen gehören die Nutzung bestehender Lieferanten und des ERP-/Einkaufssystems (nicht geeignet für ungewöhnliche Anforderungen); Engagement mit dem Markt durch die Kontaktaufnahme mit einzelnen Unternehmen per E-Mail, Telefon oder persönlich (was langsam ist); Nutzung anderer Online-Verkaufsplattformen (keine Sichtbarkeit der Fähigkeit von Unternehmen, den Betrieb neu auszurichten); eigenes Wissen über öffentliche Käufer und ihre Verbindungen zur Industrie (nicht weit verbreitet - beschränkt auf Einzelpersonen oder lokale Teams).",
         "title": "Über uns",
         "more": "Mehr über uns",
         "europeanCouncilInnovation": "Präsenz bei EIC COVID-Plattform",
@@ -29,7 +29,7 @@
     },
     "feedback": {
         "provideFeedbackShort": "Geben Sie Feedback!",
-        "provideFeedbackLong": "Geben Sie Benutzer-Feedback, Vorschläge oder Anfragen ein - <i>Bitte füllen Sie die erforderlichen (*) Felder aus.<\/i>",
+        "provideFeedbackLong": "Geben Sie Benutzer-Feedback, Vorschläge oder Anfragen ein - <i>Bitte füllen Sie die erforderlichen (*) Felder aus.</i>",
         "feedbackName": "Ihr Name",
         "feedbackEmail": "Ihre E-Mail-Adresse",
         "feedbackDetails": "Details zur Rückmeldung",
@@ -49,7 +49,7 @@
         "organizationName": "Organisationsname",
         "organizationUniteID": "Organisations UNITE ID",
         "contactName": "Name der Kontaktperson",
-        "deptAgencyGroup": "Abteilung \/ Agentur \/ Gruppe",
+        "deptAgencyGroup": "Abteilung / Agentur / Gruppe",
         "address": "Adresse",
         "country": "Land",
         "preferredCurrency": "Bevorzugte Währung (Standard: Euro)",
@@ -62,9 +62,9 @@
         "otherSMEUrl": "Anderes Social Media-Profil",
         "uploadProductList": "Bitte laden Sie Ihre Produktliste hoch:",
         "uploadProductImage": "Bitte laden Sie ein Bild des Produkts hoch:",
-        "uploadExcelNotice": "Sie können eine Excel-Datei mit der Produktliste verwenden, mit jeder Zeile als Produktname + Produktpreis + Produktwährung + Produktbetrag + optional Lieferantenname (4 oder 5 Zellen\/Zeile, die erste Zeile muss Spaltennamen enthalten). Wenn Sie auf Verarbeiten klicken, werden Ihre Artikel sofort zur Seite hinzugefügt.",
+        "uploadExcelNotice": "Sie können eine Excel-Datei mit der Produktliste verwenden, mit jeder Zeile als Produktname + Produktpreis + Produktwährung + Produktbetrag + optional Lieferantenname (4 oder 5 Zellen/Zeile, die erste Zeile muss Spaltennamen enthalten). Wenn Sie auf Verarbeiten klicken, werden Ihre Artikel sofort zur Seite hinzugefügt.",
         "uploadExcelList": "Bitte laden Sie Ihre Excel-Produktliste hoch",
-        "productsOffered": "Angebotene Produkte \/ Dienstleistungen:",
+        "productsOffered": "Angebotene Produkte / Dienstleistungen:",
         "userAvatar": "Benutzer-Avatar",
         "certificates": "Bescheinigungen",
         "antibriberyPolicy": "Anti-Bestechungspolitik",
@@ -84,7 +84,7 @@
         "deleteAccount": "Konto löschen"
     },
     "buyerSpecific": {
-        "qualification": "Qualifikation \/ Erfahrung",
+        "qualification": "Qualifikation / Erfahrung",
         "balanceToInvest": "Bilanz zu investieren"
     },
     "supervisorSignUp": {
@@ -117,7 +117,7 @@
     },
     "bannedUsers": {
         "banTitle": "UNITE-Benutzerkonto sperren - Administrator reserviert - Bitte füllen Sie die erforderlichen (*) Felder aus:",
-        "banConfirmation": "Sie sind dabei, diesem Benutzer die Verwendung von UNITE zu untersagen. Dies kann zeitlich begrenzt sein.\nDas Verbot eines UNITE-Benutzers ist ein schwerwiegendes Ereignis, es sollte motiviert und der Benutzer über den Grund informiert werden. Bitte geben Sie genaue Informationen darüber an.",
+        "banConfirmation": "Sie sind dabei, diesem Benutzer die Verwendung von UNITE zu untersagen. Dies kann zeitlich begrenzt sein.\\nDas Verbot eines UNITE-Benutzers ist ein schwerwiegendes Ereignis, es sollte motiviert und der Benutzer über den Grund informiert werden. Bitte geben Sie genaue Informationen darüber an.",
         "banReason": "Grund für die Sperrung des Kontos",
         "userName": "Benutzersname",
         "prefEndingBanDate": "Bevorzugtes Datum für das Ende des Verbots:",
@@ -136,7 +136,7 @@
     },
     "deleteUser": {
         "title": "UNITE - Benutzerkonto löschen - Admin",
-        "confirmation": "Sie sind dabei, all diese Benutzerdaten aus UNITE zu entfernen. Dies kann nicht rückgängig gemacht werden.\nDas Löschen eines UNITE-Benutzers ist ein ernstes Problem und bedarf einer gut durchdachten Begründung. Bitte fahren Sie nur fort, wenn Sie sich wirklich sicher sind.",
+        "confirmation": "Sie sind dabei, all diese Benutzerdaten aus UNITE zu entfernen. Dies kann nicht rückgängig gemacht werden.\\nDas Löschen eines UNITE-Benutzers ist ein ernstes Problem und bedarf einer gut durchdachten Begründung. Bitte fahren Sie nur fort, wenn Sie sich wirklich sicher sind.",
         "secondTitle": "Benutzerkonto löschen - Bitte füllen Sie die erforderlichen (*) Felder aus",
         "reason": "Grund für die Löschung des Kontos",
         "userName": "Name des Benutzers:",
@@ -145,7 +145,7 @@
     "fileList": {
         "title": "UNITE - VOLLSTÄNDIGE LISTE DER HOCHGELADENEN DATEIEN",
         "disclaimer": "Haftungsausschluss: Dies ist eine Demoliste von Dateien, die in unsere App-Ordner hochgeladen werden.",
-        "description": "Wir enthalten Avatare und benutzerspezifische Dateien, die hochgeladen werden. Aus praktischen Gründen ziehen wir es vor, Dateien in dedizierte Ordner des Anwendungshosting-Bereichs und nicht in die Datenbank selbst hochzuladen. Derzeit enthält die Datenbank nur wenige hochgeladene Dateien. \n Hinweis: Nur Site-Administratoren können auf diese Listen zugreifen. Also, Leute, was wir hier zu sehen bekommen - es ist nur für uns!",
+        "description": "Wir enthalten Avatare und benutzerspezifische Dateien, die hochgeladen werden. Aus praktischen Gründen ziehen wir es vor, Dateien in dedizierte Ordner des Anwendungshosting-Bereichs und nicht in die Datenbank selbst hochzuladen. Derzeit enthält die Datenbank nur wenige hochgeladene Dateien. \\n Hinweis: Nur Site-Administratoren können auf diese Listen zugreifen. Also, Leute, was wir hier zu sehen bekommen - es ist nur für uns!",
         "productImages": "Liste der UNITE-Produktbilddateien",
         "noProductImages": "Leider keine Product Image-Dateien hier.",
         "uploadedDocuments": "Liste der UNITE-Upload-Dateien",
@@ -204,7 +204,7 @@
             "name": "Organisationsname",
             "reason": "Grund für die Deaktivierung des Kontos",
             "deactivate": "Konto deaktivieren",
-            "confirm": "Möchten Sie Ihr Käuferkonto wirklich deaktivieren? \n Dadurch werden Ihre in UNITE platzierten Gebotsanfragen entfernt. Sie werden beim nächsten Login automatisch reaktiviert. \n Wir hoffen, Sie bald wieder zu sehen!",
+            "confirm": "Möchten Sie Ihr Käuferkonto wirklich deaktivieren? \\n Dadurch werden Ihre in UNITE platzierten Gebotsanfragen entfernt. Sie werden beim nächsten Login automatisch reaktiviert. \\n Wir hoffen, Sie bald wieder zu sehen!",
             "notice": "Wenn Sie Ihr Käuferkonto vorübergehend deaktivieren, müssen Ihre abgegebenen Gebote (Aufträge) storniert werden. Entsprechende Lieferanten werden bei der Angebotsstornierung benachrichtigt. Wenn Sie Ihr Konto beim Login wieder aktivieren, müssen Sie Ihre Bestellungen erneut aufgeben, wenn Sie dies wünschen."
         },
         "delete": {
@@ -242,11 +242,11 @@
             "title": "Käufer - Gebotsanfrage stellen - UNITE",
             "greeting": "Herzlich willkommen!",
             "invite": "Bitte stellen Sie Ihre Gebotsanfrage",
-            "info": "Sie können eine Angebotsanfrage für ein oder mehrere Produkte stellen, die zu einem oder mehreren Lieferanten gehören.\n Wenn Sie mehrere Lieferanten auswählen, werden bei der Angebotsabgabe separate Objekte für die Angebotsanfrage erstellt, von denen jedes einzelne an den entsprechenden Lieferanten\n gesendet wird.\n\n Wenn Sie denselben Produktnamen aus mehreren Lieferanten wählen und Angebote angenommen werden, müssen Sie jeden Lieferanten bezahlen. Bitte behandeln Sie diese Auswahl sorgfältig.",
+            "info": "Sie können eine Angebotsanfrage für ein oder mehrere Produkte stellen, die zu einem oder mehreren Lieferanten gehören.\\n Wenn Sie mehrere Lieferanten auswählen, werden bei der Angebotsabgabe separate Objekte für die Angebotsanfrage erstellt, von denen jedes einzelne an den entsprechenden Lieferanten\\n gesendet wird.\\n\\n Wenn Sie denselben Produktnamen aus mehreren Lieferanten wählen und Angebote angenommen werden, müssen Sie jeden Lieferanten bezahlen. Bitte behandeln Sie diese Auswahl sorgfältig.",
             "requirement": "Bitte füllen Sie alle Pflichtfelder (*) aus.",
             "requestName": "Name der Anfrage",
             "bidSupplierCompany": "Unternehmen des Lieferanten",
-            "multiSupplierInfo": "Diese Angebotsanfrage ist an mehrere Lieferanten gerichtet.\n Zu diesem Zweck werden bei der Angebotsabgabe für jeden Lieferanten und die entsprechenden Produkte separate Angebote erstellt, wobei die Preise entsprechend in die entsprechenden Währungen umgerechnet werden.",
+            "multiSupplierInfo": "Diese Angebotsanfrage ist an mehrere Lieferanten gerichtet.\\n Zu diesem Zweck werden bei der Angebotsabgabe für jeden Lieferanten und die entsprechenden Produkte separate Angebote erstellt, wobei die Preise entsprechend in die entsprechenden Währungen umgerechnet werden.",
             "suppliersList": "Die Lieferanten sind",
             "supplierData": "Lieferantendaten",
             "bidBuyerName": "Organisationsname des Käufers",
@@ -254,12 +254,12 @@
             "buyerEmail": "E-Mail-Adresse des Käufers",
             "bidBuyerContactName": "Kontaktname des Käufers",
             "bidBuyerCurrency": "Währung (Original des Käufers)",
-            "bidBuyerDeptAgencyGroup": "Abteilung \/ Agentur \/ Gruppe des Käufers",
-            "bidBuyerQualification": "Qualifikation \/ Erfahrung des Käufers",
+            "bidBuyerDeptAgencyGroup": "Abteilung / Agentur / Gruppe des Käufers",
+            "bidBuyerQualification": "Qualifikation / Erfahrung des Käufers",
             "bidBuyerAddress": "Adresse des Käufers",
             "bidBuyerCountry": "Land des Käufers",
             "bidProductPricesCurrency": "Die Produktpreise sind in Ihrer Währung angegeben.",
-            "bidProductsServicesOrdered": "Bestellte Produkte \/ Dienstleistungen",
+            "bidProductsServicesOrdered": "Bestellte Produkte / Dienstleistungen",
             "bidSupplierEmail": "E-Mail-Adresse des Lieferanten",
             "bidSelfPrice": "Preis (Ihre Währung)",
             "bidBuyerPrice": "Preis (Währung des Käufers)",
@@ -269,7 +269,7 @@
             "bidMentionsBuyer": "Erwähnungen für Käufer",
             "bidMentionsSupplier": "Erwähnungen für Lieferanten",
             "bidTypeMentions": "Geben Sie Ihre Erwähnungen unten ein",
-            "bidPaymentNotice": "WICHTIGER HINWEIS: UNITE verwendet derzeit den Streifenzahlungs-Gateway im TEST-MODUS.\n Es werden Ihnen keine echten Gebühren berechnet. Sie müssen eine fiktive Kartennummer wie 4242 4242 4242 4242 4242 4242 verwenden und auch das CCV und das Ablaufdatum erfinden.\n\n Wollen Sie fortfahren?",
+            "bidPaymentNotice": "WICHTIGER HINWEIS: UNITE verwendet derzeit den Streifenzahlungs-Gateway im TEST-MODUS.\\n Es werden Ihnen keine echten Gebühren berechnet. Sie müssen eine fiktive Kartennummer wie 4242 4242 4242 4242 4242 4242 verwenden und auch das CCV und das Ablaufdatum erfinden.\\n\\n Wollen Sie fortfahren?",
             "bidFundsError": "Ihr aktuelles Guthaben reicht nicht aus, um diesen Kauf abzuschließen. Bitte fügen Sie Ihrem Konto etwas mehr Geld hinzu.",
             "bidUpdateNoBuyerMentions": "Sind Sie sicher, dass Sie den Angebotsstatus ohne Erwähnungen für den Käufer aktualisieren möchten?",
             "bidUpdateNoSupplierMentions": "Möchten Sie den Gebotsstatus wirklich ohne Nennungen für den Lieferanten aktualisieren?",
@@ -286,8 +286,8 @@
             "bidChatSupplier": "Chatten Sie mit Ihrem Lieferanten",
             "bidCancelBidBuyer": "Stornieren Sie Ihre Bestellung",
             "bidCancelBidSupplier": "Bestellung des Käufers stornieren",
-            "bidItemDescriptionShort": "Artikelbeschreibung <b>(Kurz)<\/b>",
-            "bidItemDescriptionLong": "Artikelbeschreibung <b>(lang)<\/b>",
+            "bidItemDescriptionShort": "Artikelbeschreibung <b>(Kurz)</b>",
+            "bidItemDescriptionLong": "Artikelbeschreibung <b>(lang)</b>",
             "bidItemDescriptionURL": "URL der Artikelbeschreibung",
             "bidDeliveryLocation": "Lieferort",
             "bidDeliveryRequirements": "Anforderungen an die Lieferung",
@@ -302,7 +302,7 @@
             "noProducts": "Keine Produkte verfügbar",
             "bidExtensionLetter": "Schreiben zur Angebotsverlängerung",
             "proposedPrice": "Vorgeschlagener Preis (kann sich auf Beschluss des Lieferanten ändern)",
-            "requestedList": "Angeforderte Produkte \/ Dienstleistungen",
+            "requestedList": "Angeforderte Produkte / Dienstleistungen",
             "requestNewProducts": "Sie können Produkte anfordern, die derzeit nicht auf Lager des Lieferanten sind.",
             "amount": "Menge",
             "productsCount": "Sie haben eine Reihe von {} Produkten.",
@@ -312,7 +312,7 @@
             "suppliersPriceProduct": "Supplier's price for the selected product",
             "multiSupplierPriceNotice": "Dieses Angebot soll an mehrere Lieferanten gesendet werden. Die äquivalenten Lieferantenpreise werden für jeden von ihnen separat festgelegt.",
             "suppliersOverallPrice": "Äquivalenter Gesamtpreis des Lieferanten",
-            "multiSupplierPriceAdapted": "Da sich Ihr Angebot an mehrere Lieferanten richten soll, werden für jeden von ihnen die Preise der entsprechenden\/vorgeschlagenen Produkte aus Ihrer Währung in ihre entsprechende Währung umgerechnet.\n Wenn Sie Beträge für Produkte hinzufügen, wird jeder der Lieferanten hier seinen aktualisierten, entsprechenden Preis in seiner Währung haben.",
+            "multiSupplierPriceAdapted": "Da sich Ihr Angebot an mehrere Lieferanten richten soll, werden für jeden von ihnen die Preise der entsprechenden/vorgeschlagenen Produkte aus Ihrer Währung in ihre entsprechende Währung umgerechnet.\\n Wenn Sie Beträge für Produkte hinzufügen, wird jeder der Lieferanten hier seinen aktualisierten, entsprechenden Preis in seiner Währung haben.",
             "suppliersPriceRendered": "Gesamtpreis für das ausgewählte Produkt",
             "bidStatus": "Status",
             "productSuggestionTitle": "Leute, die dieses Produkt gekauft haben, mochten auch...",
@@ -325,7 +325,7 @@
         },
         "profile": {
             "title": "Käuferprofil - UNITE",
-            "terminationText": "Sind Sie sicher, dass Sie Ihr Käuferkonto löschen möchten?\n Dadurch werden auch Ihre Gebotsanfragen und die Nachrichten, die Sie in UNITE gesendet haben, entfernt.\n\n Wenn Sie nur eine Pause machen möchten, können Sie stattdessen Ihr Konto deaktivieren.",
+            "terminationText": "Sind Sie sicher, dass Sie Ihr Käuferkonto löschen möchten?\\n Dadurch werden auch Ihre Gebotsanfragen und die Nachrichten, die Sie in UNITE gesendet haben, entfernt.\\n\\n Wenn Sie nur eine Pause machen möchten, können Sie stattdessen Ihr Konto deaktivieren.",
             "cardGreeting": "Hallo!",
             "defaultGreeting": "Hallo, {organizationName} !",
             "description": "Dies ist Ihre Profilseite. Bitte halten Sie Ihre Daten korrekt, und Sie werden viel Glück bei der Suche nach Ihren benötigten Lieferanten haben!"
@@ -351,8 +351,8 @@
         },
         "viewBid": {
             "title": "UNITE - Käufer - Details zur Gebotsanfrage anzeigen",
-            "bidExpirationNoticeNotExtended": "Diese Gebotsanfrage läuft bald ab. Das Limitdatum ist $ {0} . \n Bitte laden Sie einen Bid Extension Letter hoch, um $ {1} mehr Gültigkeitstage zu erhalten.",
-            "bidExpirationNoticeExtended": "Diese Gebotsanfrage läuft demnächst aus. Sein Limitdatum ist ${0}.\n Sie haben die Gültigkeit des ursprünglichen Angebots bereits verlängert, so dass das obige Datum endgültig ist.",
+            "bidExpirationNoticeNotExtended": "Diese Gebotsanfrage läuft bald ab. Das Limitdatum ist $ {0} . \\n Bitte laden Sie einen Bid Extension Letter hoch, um $ {1} mehr Gültigkeitstage zu erhalten.",
+            "bidExpirationNoticeExtended": "Diese Gebotsanfrage läuft demnächst aus. Sein Limitdatum ist ${0}.\\n Sie haben die Gültigkeit des ursprünglichen Angebots bereits verlängert, so dass das obige Datum endgültig ist.",
             "pay": "Bezahlen Sie",
             "goToPayment": "Gehen Sie zur Zahlung",
             "paymentCancelled": "Zahlung storniert!",
@@ -396,8 +396,8 @@
             "name": "Organisationsname",
             "reason": "Grund für die Deaktivierung des Kontos",
             "deactivate": "Konto deaktivieren",
-            "confirm": "Möchten Sie Ihr Supervisor-Konto wirklich deaktivieren? \n Sie müssen sicherstellen, dass auf UNITE keine aktiven Käufer zugeordnet sind. \n Sie werden beim nächsten Login automatisch reaktiviert. \n Wir hoffen, Sie bald wieder zu sehen!",
-            "notice": "Wenn Sie sich dafür entscheiden, Ihr Supervisor-Konto vorübergehend zu deaktivieren, stellen Sie bitte sicher, dass Sie keine aktiven Käufer auf UNITE haben. Es wird nicht empfohlen, Ihre entsprechenden Einkäufer ohne jegliche Überwachung\/Aufsicht zu lassen. Wenn Sie dies tun, könnten sie zu ungesetzlichen Aktivitäten ermutigt werden, daher sollten Sie diese Entscheidung sehr sorgfältig treffen."
+            "confirm": "Möchten Sie Ihr Supervisor-Konto wirklich deaktivieren? \\n Sie müssen sicherstellen, dass auf UNITE keine aktiven Käufer zugeordnet sind. \\n Sie werden beim nächsten Login automatisch reaktiviert. \\n Wir hoffen, Sie bald wieder zu sehen!",
+            "notice": "Wenn Sie sich dafür entscheiden, Ihr Supervisor-Konto vorübergehend zu deaktivieren, stellen Sie bitte sicher, dass Sie keine aktiven Käufer auf UNITE haben. Es wird nicht empfohlen, Ihre entsprechenden Einkäufer ohne jegliche Überwachung/Aufsicht zu lassen. Wenn Sie dies tun, könnten sie zu ungesetzlichen Aktivitäten ermutigt werden, daher sollten Sie diese Entscheidung sehr sorgfältig treffen."
         },
         "delete": {
             "title": "UNITE - Supervisor - Benutzerbeendigung",
@@ -426,7 +426,7 @@
         "profile": {
             "title": "Regierungsaufseher - Profil - UNITE",
             "profileDescription": "Dies ist Ihre Supervisor-Profilseite. Bitte halten Sie Ihre Daten korrekt und kümmern Sie sich um die ehrlichen Aktivitäten Ihrer Freunde auf UNITE!",
-            "terminationText": "Sind Sie sicher, dass Sie Ihr Supervisor-Konto löschen möchten? Dies wird auch\n Folgendes entfernen\n: Ihre assoziierten Käufer;\n\n alle ihre spezifischen Daten, wie Bestellungen, Nachrichten, Tokens;\n\n Ihre eigenen Benutzer-Token (falls vorhanden);\n\n Ihre Nachrichtenhistorie von UNITE.\n Bitte gehen Sie mit dieser Option sehr vorsichtig um!",
+            "terminationText": "Sind Sie sicher, dass Sie Ihr Supervisor-Konto löschen möchten? Dies wird auch\\n Folgendes entfernen\\n: Ihre assoziierten Käufer;\\n\\n alle ihre spezifischen Daten, wie Bestellungen, Nachrichten, Tokens;\\n\\n Ihre eigenen Benutzer-Token (falls vorhanden);\\n\\n Ihre Nachrichtenhistorie von UNITE.\\n Bitte gehen Sie mit dieser Option sehr vorsichtig um!",
             "editableUniteID": "Organisation UNITE ID (nur von Ihnen bearbeitbar)"
         },
         "resend": {
@@ -452,9 +452,9 @@
     "supplierView": {
         "joinChatTitle": "Lieferant - Chat Login für UNITE",
         "addProduct": {
-            "title": "Lieferant - Ein Produkt\/eine Dienstleistung hinzufügen - UNITE",
-            "legend": "Neues Produkt \/ neue Dienstleistung hinzufügen",
-            "productServiceName": "Produkt- \/ Dienstleistungsname",
+            "title": "Lieferant - Ein Produkt/eine Dienstleistung hinzufügen - UNITE",
+            "legend": "Neues Produkt / neue Dienstleistung hinzufügen",
+            "productServiceName": "Produkt- / Dienstleistungsname",
             "price": "Preis",
             "preferredCurrency": "Bevorzugte Währung (Standard: Euro)",
             "productImage": "Laden Sie ein Produktbild hoch",
@@ -499,8 +499,8 @@
             "name": "Name des Unternehmens",
             "reason": "Grund für die Deaktivierung des Kontos",
             "deactivate": "Konto deaktivieren",
-            "confirm": "Möchten Sie Ihr Lieferantenkonto wirklich deaktivieren? \n Dadurch werden die folgenden Daten entfernt: \n\n Ihre Produkte \/ Dienstleistungen; \n Ihre Fähigkeiten; \n Ihre erhaltenen Bestellungen von UNITE. \n Sie sind für Käufer, die auf der Website nach Funktionen suchen, nicht sichtbar.",
-            "notice": "Wenn Sie Ihr Lieferantenkonto vorübergehend deaktivieren, sind Ihre Fähigkeiten, Produkte und Dienstleistungen für Einkäufer nicht mehr sichtbar. Wenn Sie Ihr Konto beim Login wieder aktivieren, müssen Sie Ihr Profil bearbeiten\/speichern, damit sie Ihre Angebote wieder finden können."
+            "confirm": "Möchten Sie Ihr Lieferantenkonto wirklich deaktivieren? \\n Dadurch werden die folgenden Daten entfernt: \\n\\n Ihre Produkte / Dienstleistungen; \\n Ihre Fähigkeiten; \\n Ihre erhaltenen Bestellungen von UNITE. \\n Sie sind für Käufer, die auf der Website nach Funktionen suchen, nicht sichtbar.",
+            "notice": "Wenn Sie Ihr Lieferantenkonto vorübergehend deaktivieren, sind Ihre Fähigkeiten, Produkte und Dienstleistungen für Einkäufer nicht mehr sichtbar. Wenn Sie Ihr Konto beim Login wieder aktivieren, müssen Sie Ihr Profil bearbeiten/speichern, damit sie Ihre Angebote wieder finden können."
         },
         "delete": {
             "title": "UNITE - Lieferant - Benutzerbeendigung",
@@ -521,7 +521,7 @@
             "title": "Lieferanten-Dashboard - UNITE",
             "description": "Dies ist Ihre Dashboard-Seite. Um sicherzustellen, dass Sie weiterhin in den Suchergebnissen von Käufern erscheinen, halten Sie bitte Ihre Fähigkeiten und Produkte auf dem neuesten Stand.",
             "balance": "Bilanz",
-            "balanceDescription": "Ihr Guthaben ist die Summe der Preise aus Ihren <i> akzeptierten Gebotsanfragen <\/i> deren Zahlungen von Käufern geleistet wurden. \n Sie können Ihr Guthaben verwalten, indem Sie auf die Seite Guthaben gehen.",
+            "balanceDescription": "Ihr Guthaben ist die Summe der Preise aus Ihren <i> akzeptierten Gebotsanfragen </i> deren Zahlungen von Käufern geleistet wurden. \\n Sie können Ihr Guthaben verwalten, indem Sie auf die Seite Guthaben gehen.",
             "goToBalance": "Zum Bilanz gehen",
             "supplyDescription": "Sie haben derzeit eine Reihe von {productsLength} -Produkttypen, die eine Gesamtliefermenge von {amount} Artikeln ergeben, und der Gesamtpreis Ihrer angebotenen Lieferung beträgt {totalPrice} {currency} .",
             "acceptedBids": "Akzeptierte Gebotsanfragen",
@@ -530,7 +530,7 @@
         },
         "profile": {
             "title": "Lieferantenprofil - UNITE",
-            "terminationText": "Sind Sie sicher, dass Sie Ihr Lieferantenkonto löschen möchten? Dadurch werden auch entfernt\n: Ihre Produkte\/Dienstleistungen; Ihre Fähigkeiten;\n Ihre erhaltenen Bestellungen;\n\n Ihre Benutzer-Token (falls vorhanden);\n\n Ihre Nachrichtenhistorie von UNITE.\n Wenn Sie nur eine Pause machen möchten, können Sie stattdessen Ihr Konto deaktivieren.",
+            "terminationText": "Sind Sie sicher, dass Sie Ihr Lieferantenkonto löschen möchten? Dadurch werden auch entfernt\\n: Ihre Produkte/Dienstleistungen; Ihre Fähigkeiten;\\n Ihre erhaltenen Bestellungen;\\n\\n Ihre Benutzer-Token (falls vorhanden);\\n\\n Ihre Nachrichtenhistorie von UNITE.\\n Wenn Sie nur eine Pause machen möchten, können Sie stattdessen Ihr Konto deaktivieren.",
             "description": "Dies ist Ihre Dashboard-Seite. Um sicherzustellen, dass Sie weiterhin in den Suchergebnissen von Käufern erscheinen, halten Sie bitte Ihre Fähigkeiten und Produkte auf dem neuesten Stand."
         },
         "resend": {
@@ -593,12 +593,12 @@
     "gridBuyerHome": {
         "organizationName": "Organisationsname",
         "organizationUniteID": "Organisations UNITE ID",
-        "deptAgencyGroup": "Abteilung \/ Agentur \/ Gruppe",
+        "deptAgencyGroup": "Abteilung / Agentur / Gruppe",
         "contactName": " Name der Kontaktperson",
         "emailAddress": " E-Mail-Adresse",
         "contactMobileNumber": "Kontakt-Mobilnummer",
         "country": "Land",
-        "qualification": "Qualifikation \/ Erfahrung",
+        "qualification": "Qualifikation / Erfahrung",
         "role": "Benutzer-Rolle",
         "isActive": "Ist aktiv?",
         "ipv4": "IPv4-Adresse",
@@ -678,7 +678,7 @@
         "uploadedDocsTitle": "Hochgeladene Dokumente"
     },
     "gridSupervisorsBuyers": {
-        "deptAgencyGroup": "Abteilung \/ Agentur \/ Gruppe",
+        "deptAgencyGroup": "Abteilung / Agentur / Gruppe",
         "contactName": "Kontaktpersonenname",
         "balance": "Saldo des Käufers",
         "isActive": "Ist aktiv?",

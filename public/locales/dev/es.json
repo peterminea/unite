@@ -1,0 +1,706 @@
+{
+    "home": {
+        "title": "Plataforma de adquisiciones públicas de UNITE",
+        "meaning": "Necesidades no atendidas en tiempos de emergencia",
+        "description": "Plataforma de Compras Públicas",
+        "whatItDoes": "Creando un mundo donde gobiernos y empresas innoven juntos para superar la crisis",
+        "mottoOne": "¡SALVAMOS TRABAJOS, SALVAMOS VIDAS!",
+        "mottoTwo": "¡Estamos conduciendo el nuevo normal!",
+        "signUp": "Inscríbete",
+        "signInBuyer": "Iniciar sesión como comprador",
+        "signInSupervisor": "Iniciar sesión como supervisor",
+        "signInSupplier": "Iniciar sesión como proveedor",
+        "signUpBuyer": "Regístrese como Comprador",
+        "signUpSupervisor": "Regístrese como Supervisor",
+        "signUpSupplier": "Regístrese como proveedor",
+        "captchaProtection": "Este sitio web está protegido por Google reCaptcha V2.",
+        "close": "Cerrar",
+        "whatWeDo": "Creando un mundo donde gobiernos y empresas innoven juntos para superar la crisis",
+        "bigTitle": "UNITE - Necesidades desatendidas en tiempos de emergencia - Página de inicio"
+    },
+    "about": {
+        "first_paragraph": "UNITE es una plataforma de contratación pública exclusivamente para la contratación pública de pedidos especiales de productos y servicios para la respuesta a crisis.  Lo llamamos \"El Alibaba de las solicitudes urgentes de contratación pública\".   UNITE es una plataforma de dos caras que conecta a los compradores públicos con empresas que tienen la capacidad y capacidad para reenfocar sus actividades en el suministro de bienes y servicios en respuesta a la crisis del COVID-19.   Se invita a las empresas a registrarse en la plataforma, describiendo su capacidad y capacidad para fabricar productos que se necesitan con urgencia o para suministrar servicios en demanda.  Las empresas también pueden navegar y responder a solicitudes de licitación abiertas presentadas por compradores públicos.   Los compradores públicos pueden acceder a la plataforma y crear una solicitud de compra. Nuestro software relaciona la solicitud de adquisición con los proveedores potenciales y facilita la transacción completa, incluido el contacto inicial y la negociación. realización de pedidos, aceptación de la entrega y pago.",
+        "second_paragraph": "UNITE se diferencia de otras soluciones en que proporciona una base de datos de empresas con capacidad para reorientar las operaciones y en que automatiza el proceso. Otras soluciones incluyen la utilización de los proveedores existentes y el sistema de planificación de recursos empresariales/compra (que no se adapta a los requisitos anormales); la participación en el mercado mediante el contacto con empresas individuales por correo electrónico, teléfono o en persona (que es lento); la utilización de otras plataformas de venta en línea (no hay visibilidad de la capacidad de las empresas para reorientar las operaciones); el conocimiento propio de los compradores públicos y sus conexiones con la industria (que no se comparte ampliamente, sino que se limita a los individuos o equipos locales).",
+        "title": "Sobre nosotros",
+        "more": "Más sobre nosotros",
+        "europeanCouncilInnovation": "Presencia  en la plataforma COVID del CEI",
+        "devPost": "Detalles de DevPost",
+        "socialMedia": "Enlaces de redes sociales:"
+    },
+    "feedback": {
+        "provideFeedbackShort": "¡Suministre realimentación!",
+        "provideFeedbackLong": "Proporcione comentarios, sugerencias o consultas de los usuarios: <i> Por favor, complete los campos obligatorios (*). </i>",
+        "feedbackName": "Su nombre",
+        "feedbackEmail": "Su dirección de correo electrónico",
+        "feedbackDetails": "Detalles de comentarios",
+        "title": "UNITE - Comentarios sobre la Plataforma",
+        "sendFeedback": "Envíe su opinión",
+        "required": "Por favor, elija un tipo de respuesta de la lista.",
+        "details": "Detalles"
+    },
+    "commonFields": {
+        "dateCreated": "Fecha de creación",
+        "emailAddress": "Dirección de correo electrónico",
+        "password": "Contraseña",
+        "confirmPassword": "Confirmar la contraseña",
+        "rememberUser": "Recuérdame (?)",
+        "submit": "Enviar",
+        "telephone": "Número de móvil de contacto",
+        "organizationName": "Nombre de la Organización",
+        "organizationUniteID": "El ID UNITE de la Organización",
+        "contactName": "Nombre de contacto",
+        "deptAgencyGroup": "Departamento / Agencia / Grupo",
+        "address": "Dirección",
+        "country": "País",
+        "preferredCurrency": "Moneda preferida (predeterminada: Euro)",
+        "mandatoryFill": "Por favor, complete todos los campos obligatorios (*).",
+        "website": "Página web",
+        "facebookURL": "Perfil de Facebook",
+        "instagramURL": "Perfil del Instagram",
+        "twitterURL": "Perfil de Twitter",
+        "linkedinURL": "Perfil de LinkedIn",
+        "otherSMEUrl": "Otro perfil de Social Media",
+        "uploadProductList": "Por favor, sube tu lista de productos:",
+        "uploadProductImage": "Por favor, suba una imagen del producto:",
+        "uploadExcelNotice": "Puede utilizar un archivo de Excel con la lista de productos, con cada fila como nombre del producto + precio del producto + moneda del producto + importe del producto + opcionalmente Nombre del proveedor (4 o 5 celdas/fila, la primera fila debe contener los nombres de las columnas). Al hacer clic en Proceso, sus artículos se añaden instantáneamente a la Página.",
+        "uploadExcelList": "Por favor, suba su lista de productos en Excel",
+        "productsOffered": "Productos / Servicios ofrecidos:",
+        "userAvatar": "Avatar de usuario",
+        "certificates": "Certificados",
+        "antibriberyPolicy": "Política antisoborno",
+        "environmentPolicy": "Política de Medio Ambiente",
+        "qualityMgmtPolicy": "Política de gestión de la calidad",
+        "occupationalSafetyHealth": "Seguridad y salud en el trabajo",
+        "otherRelevantFiles": "Otros archivos relevantes",
+        "checkTerms": "Estoy de acuerdo con los Términos y Condiciones de UNITE",
+        "checkAntibribery": "Reconozco el Acuerdo Antisoborno de la UNITE",
+        "userRole": "El papel del usuario de UNITE",
+        "cardGreeting": "¡Hola!",
+        "defaultGreeting": "¡Hola, {nombre de la organización}!",
+        "defaultGreetingTwo": "¡Hola, nombre de la empresa!",
+        "updateDetails": "Actualiza tus datos",
+        "updateProfile": "Actualizar el perfil",
+        "deactivateAccount": "Desactivar la cuenta",
+        "deleteAccount": "Eliminar cuenta"
+    },
+    "buyerSpecific": {
+        "qualification": "Cualificación / Experiencia",
+        "balanceToInvest": "Saldo para investir"
+    },
+    "supervisorSignUp": {
+        "title": "Inscríbase como Supervisor"
+    },
+    "supplierSpecific": {
+        "balance": "Saldo",
+        "totalSupplyPrice": "Precio total del suministro",
+        "totalSupplyAmount": "Cantidad total del suministro",
+        "employeeNumber": "Número de empleados",
+        "turnover": "La facturación del año pasado",
+        "directorsName": "Nombre del director",
+        "title": "Título",
+        "registrationNumber": "El número de registro de la empresa",
+        "companyName": "Nombre de la empresa",
+        "areaCovered": "Área cubierta",
+        "companyAddress": "Dirección de la empresa",
+        "industry": "Industria",
+        "registeredCountry": "País registrado"
+    },
+    "antibriberyAgreement": {
+        "title": "UNITE - Necesidades desatendidas en tiempos de emergencia - Acuerdo contra el soborno"
+    },
+    "termsConditions": {
+        "title": "UNITE - Necesidades no atendidas en tiempos de emergencia - Términos y condiciones"
+    },
+    "error": {
+        "title": "UNITE - Página de error",
+        "errorText": "404 - ERROR"
+    },
+    "bannedUsers": {
+        "banTitle": "Prohibir la cuenta de usuario de UNITE - Admin reservado - Por favor, rellene los campos obligatorios (*):",
+        "banConfirmation": "Está a punto de prohibir a este usuario el uso de UNITE. Esto puede ser por tiempo limitado.\nProhibir a un usuario de UNITE es un hecho serio, debe ser motivado y el usuario debe ser notificado sobre la razón. Por favor, proporcione información precisa al respecto.",
+        "banReason": "Motivo de la prohibición de la cuenta",
+        "userName": "Nombre del usuario",
+        "prefEndingBanDate": "Fecha preferida para el fin de la prohibición:",
+        "bannedList": "Cargar la lista de usuarios prohibidos",
+        "title": "UNITE - Eliminar cuenta de usuario - Administrador",
+        "banUser": "Prohibir usuario",
+        "loadBannedList": "Cargar la lista de miembros prohibidos",
+        "loadButton": "Proceder"
+    },
+    "bidsCatalog": {
+        "title": "LISTA COMPLETA DE PETICIONES DE OFERTA DE LOS COMPRADORES - UNITE",
+        "listDescription": "Esta es la lista completa de las solicitudes de oferta (Tender Requests) que han sido colocadas por todos nuestros Compradores de UNITE hasta ahora. Incluye ofertas de cualquier estado (válidas, caducadas, canceladas), y también sus precios, dados en la moneda acordada con el proveedor.",
+        "conversionNotice": "También podemos convertir el precio de cada oferta a la moneda predeterminada de la solicitud de oferta. Suponemos que los proveedores pueden utilizar monedas nacionales distintas de las de los compradores, por lo que aplicamos los tipos de conversión.",
+        "noElements": "Lo siento, no hay compradores aquí.",
+        "bidsTable": "UNITE - Tabla completa de nuestras Solicitudes de Oferta de los Compradores"
+    },
+    "deleteUser": {
+        "title": "UNITE - Eliminar cuenta de usuario - Administrador",
+        "confirmation": "Está a punto de eliminar todos estos datos de usuario de UNITE. Esto no se puede deshacer. \n Eliminar un usuario de UNITE es un problema serio y necesita una razón bien elaborada. Continúe solo si está realmente seguro de ello.",
+        "secondTitle": "Eliminar cuenta de usuario: complete los campos obligatorios (*)",
+        "reason": "Motivo para eliminar la cuenta",
+        "userName": "Nombre del usuario:",
+        "deletion": "Eliminar usuario"
+    },
+    "fileList": {
+        "title": "UNITE - LISTA COMPLETA DE ARCHIVOS CARGADOS",
+        "disclaimer": "Descargo de responsabilidad: Esta es una lista demo de archivos que se suben a nuestras carpetas de aplicaciones.",
+        "description": "Incluimos los Avatares y los archivos específicos de usuario que se suben. Por razones prácticas, preferimos subir los archivos a carpetas dedicadas del espacio de alojamiento de la aplicación, y no a la propia base de datos - actualmente la base de datos sólo contiene unos pocos archivos subidos. Nota: Sólo los administradores del sitio pueden acceder a estas listas. Así que, chicos, lo que vemos aquí - ¡es sólo para nosotros!",
+        "productImages": "Lista de archivos de imágenes de productos de UNITE",
+        "noProductImages": "Lo siento, no hay archivos de imágenes de productos aquí.",
+        "uploadedDocuments": "Lista de archivos de carga de UNITE",
+        "noUploadedDocuments": "Lo siento, no hay documentos cargados aquí.",
+        "avatarFiles": "Lista de archivos de avatar de UNITE",
+        "noAvatarFiles": "Lo siento, no hay archivos de Avatar aquí."
+    },
+    "memberList": {
+        "title": "UNITE - LISTA COMPLETA DE MIEMBROS - Compradores, Supervisores, Proveedores",
+        "description_partOne": "Descargo de responsabilidad: Esta es una lista de miembros de la Demo. En este momento no representan entidades económicas reales del mundo. Cualquier parecido con cualquier empresa de la vida real es involuntario. Esta lista se muestra sólo para propósitos de Desarrollo, y sólo es accesible para los Administradores.",
+        "description_partTwo": "Sin embargo, en el futuro próximo UNITE tendrá miembros reales que serán listados. Limitaremos la cantidad de datos específicos que se pondrán a disposición del público en nuestra plataforma, de acuerdo con las leyes y normas de la RPI. También podemos restringir el acceso de visitantes externos a los datos sobre nuestros miembros, lo que significa que tienes que unirte a UNITE (recuerda: de empresa a empresa) para ver dicha información.",
+        "buyersList": "Lista de compradores de UNITE",
+        "noBuyers": "Lo siento, no hay compradores aquí.",
+        "supervisorsList": "Lista de supervisores de la UNITE",
+        "noSupervisors": "Lo siento, no hay supervisores aquí.",
+        "suppliersList": "Lista de proveedores de UNITE",
+        "noSuppliers": "Lo siento, no hay proveedores aquí."
+    },
+    "viewFeedbacks": {
+        "title": "UNITE - Ver comentarios de la plataforma",
+        "description": "A continuación tenemos nuestros comentarios, sugerencias y otras preguntas de nuestros usuarios."
+    },
+    "buyerView": {
+        "joinChatTitle": "Comprador - Chat Entrar en UNITE",
+        "balance": {
+            "title": "Saldo del comprador",
+            "description": "Puede realizar conversiones de divisas aquí, con el fin de ver cuál sería el equivalente de su saldo actual, si se traduce a otras monedas nacionales.",
+            "label": "Saldo actual del comprador",
+            "selectConvert": "Seleccione otra moneda y convierta su saldo:"
+        },
+        "bidsCatalog": {
+            "title": "Catálogo de Ofertas de Compradores",
+            "secondTitle": "LISTA COMPLETA DE SOLICITUDES DE OFERTA DEL COMPRADOR",
+            "description_partOne": "Esta es la lista completa de solicitudes de oferta (Tender Requests) que han sido colocadas por el {nombre del comprador} Comprador de UNITE por ahora. Incluye ofertas de cualquier estado (válidas, caducadas, canceladas), y también sus precios, dados en la moneda acordada con el proveedor.",
+            "description_partTwo": "También podemos convertir el precio de cada oferta a la moneda predeterminada de la solicitud de oferta. Suponemos que los proveedores pueden utilizar monedas nacionales distintas de las de los compradores, por lo que aplicamos los tipos de conversión.",
+            "contentTitle": "Tabla completa de sus ofertas de compra",
+            "noElements": "Lo siento, no hay solicitudes de ofertas aquí."
+        },
+        "cancelBid": {
+            "title": "UNITE - Comprador - Cancelar pedido",
+            "nextTitle": "UNITE - Cancele su pedido",
+            "requiredField": "Cancele su pedido - Por favor, rellene el campo requerido (*)",
+            "details": "Detalles",
+            "detailsPlaceholder": "Los detalles de por qué cancelas"
+        },
+        "confirmation": {
+            "title": "UNITE - Comprador - Confirmación de usuario",
+            "legend": "Confirmar el correo electrónico del comprador",
+            "email": "Correo electrónico",
+            "confirm": "Confirmar correo electrónico y cuenta"
+        },
+        "deactivate": {
+            "title": "UNITE - Desactivar cuenta de comprador",
+            "legend": "Desactivar la cuenta del comprador - Por favor, complete los campos obligatorios (*)",
+            "email": "Correo electrónico",
+            "name": "Nombre de la Organización",
+            "reason": "Motivo para desactivar la cuenta",
+            "deactivate": "Desactivar la cuenta",
+            "confirm": "¿Está seguro de que desea desactivar su cuenta de comprador? \n Esto eliminará sus solicitudes de oferta colocadas en UNITE. Se le reactivará automáticamente en el próximo inicio de sesión. \n Esperamos verte pronto!",
+            "notice": "Si desactiva temporalmente su cuenta de comprador, sus ofertas (pedidos) deben ser canceladas. Los Proveedores correspondientes serán notificados sobre la cancelación de la oferta. Cuando active su cuenta de nuevo al iniciar sesión, tendrá que volver a realizar sus pedidos si así lo desea."
+        },
+        "delete": {
+            "title": "UNITE - Comprador - Terminación del usuario",
+            "confirm": "Está a punto de eliminar todos sus datos de UNITE. Esto no puede deshacerse. Por favor, proceda sólo si está realmente seguro.",
+            "legend": "Eliminar cuenta de comprador: complete los campos obligatorios (*)",
+            "email": "Correo electrónico",
+            "name": "Nombre de la Organización",
+            "reason": "Motivo para eliminar la cuenta",
+            "delete": "Eliminar cuenta"
+        },
+        "forgotPassword": {
+            "title": "UNITE - Comprador - Contraseña olvidada",
+            "confirmEmail": "Confirme el correo electrónico",
+            "email": "Correo electrónico",
+            "reset": "Ir a Reiniciar"
+        },
+        "index": {
+            "title": "Tablero del comprador - UNITE",
+            "greetingOne": "¡Bienvenido!",
+            "greetingTwo": "¡Hola, {nombre}!",
+            "ability": "Puede abrir y enviar solicitudes de licitación a sus proveedores preferidos.",
+            "bidsCount": "Usted ha hecho un total de { ofertasLongitud } ofertas, su precio global (expresado en su moneda) es {precio} {divisa} .",
+            "loadBidTable": "Cargue la tabla completa de ofertas",
+            "noBids": "Hasta ahora no ha hecho ninguna oferta por este proveedor.",
+            "searchSuppliers": "Se buscarán proveedores con las capacidades solicitadas.",
+            "loadCatalog": "Cargar catálogo de productos",
+            "requestBid": "Solicitar una oferta",
+            "supplierDetails": "Detalles del proveedor",
+            "viewBids": "Ver ofertas",
+            "multiSupplier": "Puede seleccionar varios proveedores para su solicitud de licitación. Consulte el menú desplegable que aparece a continuación.",
+            "otherSuppliers": "Otros proveedores"
+        },
+        "placeBid": {
+            "title": "Comprador - Realizar solicitud de oferta - UNITE",
+            "greeting": "¡Bienvenido!",
+            "invite": "Por favor, haga su solicitud de oferta",
+            "info": "Puede hacer una solicitud de oferta sobre uno o más productos, pertenecientes a uno o más proveedores. Si elige más proveedores, se crearán objetos de solicitud de oferta separados al presentarlos, y cada uno de ellos se enviará al proveedor correspondiente. Si elige el mismo nombre de producto de varios proveedores y se aceptan ofertas, tendrá que pagar a cada proveedor. Por favor, maneje estas elecciones con cuidado.",
+            "requirement": "Por favor, complete todos los campos obligatorios (*).",
+            "requestName": "Nombre de la solicitud",
+            "bidSupplierCompany": "Empresa del proveedor",
+            "multiSupplierInfo": "Esta solicitud de licitación está dirigida a múltiples proveedores. Para ello, al presentar la oferta, se crearán ofertas separadas para cada proveedor y los productos correspondientes, y los precios se convertirán en consecuencia a las monedas correspondientes.",
+            "suppliersList": "Los proveedores son",
+            "supplierData": "Datos de los proveedores",
+            "bidBuyerName": "Nombre de la organización del comprador",
+            "bidBuyerUniteID": "El ID UNITE de la organización del comprador",
+            "buyerEmail": "Dirección de correo electrónico del comprador",
+            "bidBuyerContactName": "Nombre de contacto del comprador",
+            "bidBuyerCurrency": "Moneda (original del comprador)",
+            "bidBuyerDeptAgencyGroup": "Departamento de Compras / Agencia / Grupo",
+            "bidBuyerQualification": "Calificación y experiencia del comprador",
+            "bidBuyerAddress": "Dirección del comprador",
+            "bidBuyerCountry": "País del comprador",
+            "bidProductPricesCurrency": "Los precios de los productos se expresan en su moneda.",
+            "bidProductsServicesOrdered": "Productos / Servicios solicitados",
+            "bidSupplierEmail": "Dirección de correo electrónico del proveedor",
+            "bidSelfPrice": "Precio (Su moneda)",
+            "bidBuyerPrice": "Precio (Moneda del comprador)",
+            "bidSupplierPrice": "Precio (moneda del proveedor)",
+            "bidSelfCurrency": "Moneda (la suya)",
+            "bidSupplierCurrency": "Moneda (del proveedor)",
+            "bidMentionsBuyer": "Menciones para el comprador",
+            "bidMentionsSupplier": "Menciones para el proveedor",
+            "bidTypeMentions": "Escriba sus menciones a continuación",
+            "bidPaymentNotice": "AVISO IMPORTANTE: UNITE actualmente utiliza la Pasarela de Pago de Franjas en MODO DE PRUEBA. No se le hace ningún cargo real. Debe utilizar un número de tarjeta ficticio como 4242 4242 4242 4242, y también para inventar el CCV y la fecha de caducidad. ¿Quieres proceder?",
+            "bidFundsError": "Su saldo actual no es suficiente para completar esta compra. Por favor, añada más fondos a su cuenta.",
+            "bidUpdateNoBuyerMentions": "¿Estás seguro de que quieres actualizar el estado de la oferta sin ninguna mención para el comprador",
+            "bidUpdateNoSupplierMentions": "¿Está seguro de que desea actualizar el estado de la oferta sin ninguna mención para el proveedor?",
+            "bidAcceptConfirm": "¿Está seguro de que quiere aceptar esta oferta de",
+            "bidUpdateStatusMentions": "Actualiza el estado y envía menciones",
+            "bidStatusRequested": "El comprador solicitó una oferta al proveedor. Envíe más información al comprador.",
+            "bidStatusWaiting": "Esperando que el Comprador procese la información del pedido.",
+            "bidStatusWanted": "El comprador quiere comprar el producto por el precio total de {$1} {$2}. Por favor, cancele o acepte.",
+            "bidStatusStarted": "El proveedor inició la entrega. Por favor, espere la confirmación del comprador.",
+            "bidStatusPaidDone": "El pago y la entrega se han realizado con éxito.",
+            "bidStatusCancelledSupplier": "El proveedor canceló la solicitud.",
+            "bidStatusCancelledBuyer": "El comprador canceló la solicitud.",
+            "bidChatBuyer": "Chatea con tu comprador",
+            "bidChatSupplier": "Chatea con tu proveedor",
+            "bidCancelBidBuyer": "Cancelar su pedido",
+            "bidCancelBidSupplier": "Cancelar el pedido del comprador",
+            "bidItemDescriptionShort": "Descripción del artículo <b>(breve)</b>",
+            "bidItemDescriptionLong": "Descripción del artículo <b>(largo)</b>",
+            "bidItemDescriptionURL": "URL de la descripción del artículo",
+            "bidDeliveryLocation": "Lugar de entrega",
+            "bidDeliveryRequirements": "Requisitos de entrega",
+            "bidComplianceRequirements": "Requisitos de conformidad",
+            "bidComplianceRequirementsURL": "URL de requisitos de cumplimiento",
+            "bidOtherRequirements": "Otros requisitos",
+            "bidPreferredDeliveryDate": "Fecha de entrega preferida",
+            "currency": "Su moneda",
+            "close": "Cerrar",
+            "selectProducts": "Puede seleccionar productos del menú desplegable",
+            "availableProducts": "Productos disponibles",
+            "noProducts": "No hay productos disponibles",
+            "bidExtensionLetter": "Carta de extensión de la oferta",
+            "proposedPrice": "Precio propuesto (puede cambiar por decisión del proveedor)",
+            "requestedList": "Productos / servicios solicitados",
+            "requestNewProducts": "Puede solicitar productos que actualmente no se encuentran en las existencias del Proveedor.",
+            "amount": "Cantidad",
+            "productsCount": "Tienes un número de {} productos.",
+            "totalItems": "Número total de artículos (Cantidad total)",
+            "buyersPriceProduct": "Su precio para el producto seleccionado",
+            "buyersOverallPrice": "Su precio total",
+            "suppliersPriceProduct": "El precio del proveedor para el producto seleccionado",
+            "multiSupplierPriceNotice": "Esta oferta está destinada a ser enviada a múltiples proveedores. Los precios equivalentes del Proveedor se decidirán por separado para cada uno de ellos.",
+            "suppliersOverallPrice": "Precio total equivalente del proveedor",
+            "multiSupplierPriceAdapted": "Como su oferta está destinada a dirigirse a varios proveedores, cada uno de ellos tendrá los precios de los productos correspondientes/propuestos convertidos de su moneda a la suya correspondiente. A medida que añada cantidades para los productos, cada uno de los Proveedores tendrá aquí su precio correspondiente actualizado en su moneda.",
+            "suppliersPriceRendered": "Precio total del producto seleccionado",
+            "bidStatus": "Estado",
+            "productSuggestionTitle": "A la gente que compró este producto también le gustó...",
+            "cancel": "Cancelar",
+            "sendBid": "Enviar solicitud"
+        },
+        "productsCatalog": {
+            "title": "Catálogo de productos - UNITE",
+            "bidTableProducts": "Oferta por productos seleccionados"
+        },
+        "profile": {
+            "title": "Perfil del comprador - UNITE",
+            "terminationText": "¿Está seguro de que desea eliminar su cuenta de comprador? Esto también eliminará sus solicitudes de oferta y los mensajes que envió en UNITE.  Si solo desea tomarse un descanso, puede desactivar su cuenta.",
+            "cardGreeting": "¡Hola!",
+            "defaultGreeting": "¡Hola, {nombre de la organización}!",
+            "description": "Esta es tu página de perfil. Por favor, mantenga sus datos precisos, y tendrá buena suerte para encontrar a los proveedores que necesita."
+        },
+        "resend": {
+            "title": "UNITE - Comprador - Reenviar token de confirmación",
+            "legend": "Reenviar la confirmación del correo electrónico",
+            "email": "Correo electrónico",
+            "resend": "Reenviar la ficha de confirmación"
+        },
+        "resetPassword": {
+            "title": "UNITE - Comprador - Restablecer contraseña",
+            "legend": "Restablecer la contraseña",
+            "newPassword": "Nueva contraseña",
+            "confirmPassword": "Confirme la contraseña",
+            "resetPassword": "Actualizar la contraseña"
+        },
+        "signIn": {
+            "title": "Inicie sesión como comprador - UNITE"
+        },
+        "signUp": {
+            "title": "Regístrate como comprador - UNITE"
+        },
+        "viewBid": {
+            "title": "UNITE - Comprador - Ver detalles de la solicitud de oferta",
+            "bidExpirationNoticeNotExtended": "Esta solicitud de oferta está a punto de expirar. Su fecha límite es de ${0}. Por favor, suba una carta de extensión de oferta para ganar ${1} más días de validez.",
+            "bidExpirationNoticeExtended": "Esta solicitud de oferta está a punto de expirar. Su fecha límite es de ${0}. Sésunado ya ha ampliado la validez de la oferta inicial, por lo que la fecha anterior es definitiva.",
+            "pay": "Pagar",
+            "goToPayment": "Ir a Pago",
+            "paymentCancelled": "¡Pago cancelado!",
+            "alreadyOrdered": "¡Ya ordenado!"
+        },
+        "viewBids": {
+            "title": "Lista de Solicitudes de Oferta - Comprador - UNITE",
+            "confirmRemoval": "¿Está seguro de que desea eliminar esta oferta de su panel de compradores para siempre?",
+            "totalValidBids": " Actualmente ha hecho un número de {$0} ofertas válidas. Su precio total es de {$1} {$2}.",
+            "validFrom": "De",
+            "bidDetails": "Ver detalles de la oferta",
+            "cancelledBids": "Las siguientes ofertas de ${0} son peticiones de ofertas que fueron canceladas. Le aconsejamos que las elimine. Su precio total es de {$1} {$2}.",
+            "cancellationNoticeBuyer": "La oferta de $0 fue cancelada por decisión del Comprador. Puede eliminar la puja por completo.",
+            "cancellationNoticeSupplier": "La oferta de {$0} se canceló por decisión del Proveedor. Puede eliminar la oferta por completo.",
+            "deleteBid": "Eliminar oferta",
+            "expiredBids": "Las siguientes ofertas de ${0} son solicitudes de ofertas que han expirado. Le aconsejamos que las elimine. Su precio total es de {$1} {$2}.",
+            "expiredBidsNotice": "La solicitud {0} caducó, su fecha límite era {1} . Puede eliminar la solicitud de oferta por completo.",
+            "noBids": "No ha hecho ninguna oferta a este proveedor. Si lo prefiere, puede hacerlo en cualquier momento.",
+            "totalBids": "Usted hizo un total de {0} solicitudes de oferta a este proveedor. Su precio total es de {1} {2}."
+        }
+    },
+    "chatRoom": {
+        "displayName": "Nombre para mostrar",
+        "joinMessage": "Únase a la sala de chat",
+        "chooseName": "Elige un nombre de usuario",
+        "roomName": "Sala de chat",
+        "join": "¡Únase al chat!"
+    },
+    "supervisorView": {
+        "joinChatTitle": "Supervisor - Inicio de sesión de chat para UNITE",
+        "confirmation": {
+            "title": "UNITE - Supervisor - Confirmación de usuario",
+            "legend": "Confirmar el correo electrónico del supervisor",
+            "email": "Correo electrónico",
+            "confirm": "Confirmar correo electrónico y cuenta"
+        },
+        "deactivate": {
+            "title": "UNITE - Desactivar la cuenta del supervisor",
+            "legend": "Desactivar la cuenta del supervisor - Por favor, complete los campos obligatorios (*)",
+            "email": "Correo electrónico",
+            "name": "Nombre de la Organización",
+            "reason": "Motivo para desactivar la cuenta",
+            "deactivate": "Desactivar la cuenta",
+            "confirm": "¿Está seguro de que desea desactivar su cuenta de supervisor? \n Debe asegurarse de no tener compradores activos asociados en UNITE. \n Se le reactivará automáticamente en el próximo inicio de sesión. \n Esperamos verte pronto!",
+            "notice": "Si elige desactivar temporalmente su cuenta de supervisor, asegúrese de que no tiene compradores activos en UNITE. No se recomienda dejar a sus Compradores correspondientes sin ningún tipo de vigilancia / supervisión sobre ellos. Hacerlo puede alentarlos a participar en actividades ilegales, así que considere tomar esta decisión con mucho cuidado."
+        },
+        "delete": {
+            "title": "UNITE - Supervisor - Terminación del usuario",
+            "confirm": "Está a punto de eliminar todos sus datos de UNITE. Esto no puede deshacerse. Por favor, proceda sólo si está realmente seguro.",
+            "legend": "Eliminar cuenta de supervisor: complete los campos obligatorios (*)",
+            "email": "Correo electrónico",
+            "name": "Nombre de la Organización",
+            "reason": "Motivo para eliminar la cuenta",
+            "delete": "Eliminar cuenta"
+        },
+        "forgotPassword": {
+            "title": "UNITE - Comprador - Contraseña olvidada",
+            "confirmEmail": "Confirme el correo electrónico",
+            "email": "Correo electrónico",
+            "reset": "Ir a Reiniciar"
+        },
+        "index": {
+            "title": "Tablero del Supervisor del Gobierno - UNITE",
+            "description": "Con su ID UNITE, los nuevos compradores pueden registrarse en el sitio web y empezar a buscar proveedores. Si cambias el ID de UNITE, por favor anuncia tus miembros.",
+            "cardGreeting": "¡Hola!",
+            "defaultGreeting": "¡Hola, {nombre de la organización}!",
+            "uniteIDDescription": "Con su ID UNITE, los nuevos compradores pueden registrarse en el sitio web y empezar a buscar proveedores. Si cambias el ID de UNITE, por favor anuncia tus miembros.",
+            "uniteID": "Su identificación única UNITE ID",
+            "noBuyers": "Lo siento, no hay compradores con su Organización UNITE ID disponibles actualmente. Por favor, espere a que se registren."
+        },
+        "profile": {
+            "title": "Supervisor del Gobierno - Perfil - UNITE",
+            "profileDescription": "Esta es su página de perfil de supervisor. Por favor, mantén tus datos precisos, y cuida la actividad honesta de tus compañeros en UNITE!",
+            "terminationText": "¿Está seguro de que quiere eliminar su cuenta de Supervisor? Esto también eliminará: sus compradores asociados, todos sus datos específicos, como pedidos, mensajes, fichas, sus propias fichas de usuario (si las hay), su historial de mensajes de UNITE.",
+            "editableUniteID": "El UNITE ID de la Organización (sólo editable por usted)"
+        },
+        "resend": {
+            "title": "UNITE - Comprador - Reenviar token de confirmación",
+            "legend": "Reenviar la confirmación del correo electrónico",
+            "email": "Correo electrónico",
+            "resend": "Reenviar la ficha de confirmación"
+        },
+        "resetPassword": {
+            "title": "UNITE - Comprador - Restablecer contraseña",
+            "legend": "Restablecer la contraseña",
+            "newPassword": "Nueva contraseña",
+            "confirmPassword": "Confirme la contraseña",
+            "resetPassword": "Actualizar la contraseña"
+        },
+        "signIn": {
+            "title": "Iniciar sesión como supervisor - UNITE"
+        },
+        "signUp": {
+            "title": "Inscríbase como Supervisor - UNITE"
+        }
+    },
+    "supplierView": {
+        "joinChatTitle": "Proveedor - Chat Login para UNITE",
+        "addProduct": {
+            "title": "Proveedor - Añadir un producto/servicio - UNITE",
+            "legend": "Añadir nuevo producto/servicio",
+            "productServiceName": "Nombre del producto / servicio",
+            "price": "Precio",
+            "preferredCurrency": "Moneda preferida (predeterminado: Euro)",
+            "productImage": "Subir una imagen del producto",
+            "amount": "Cantidad",
+            "totalPrice": "Precio total",
+            "addButton": "Añadir producto"
+        },
+        "balance": {
+            "title": "Balance del proveedor - UNITE",
+            "notice": "Puede realizar conversiones de divisas aquí, con el fin de ver cuál sería el equivalente de su saldo actual, si se traduce a otras monedas nacionales.",
+            "currentBalance": "Saldo actual del proveedor",
+            "selectConvert": "Seleccione otra moneda y convierta su saldo"
+        },
+        "bid-request": {
+            "title": "Detalles de la solicitud de oferta seleccionada - UNITE"
+        },
+        "bid-requests": {
+            "title": "Lista de solicitudes de oferta - Proveedor - UNITE",
+            "removalConfirm": "¿Está seguro de que quiere eliminar esta oferta de su Tablero de Proveedores para siempre?",
+            "removalDone": "Usted canceló este pedido del Comprador.",
+            "validBidsPlaced": "Actualmente tiene un número de (0) ofertas válidas recibidas. Su precio total es: {0} {1}.",
+            "bidFromBuyer": "Solicitud de oferta del comprador",
+            "cancelledBids": "Actualmente tiene un número de {0} solicitudes de ofertas que fueron canceladas. Le aconsejamos que las elimine. Su precio total es: {1} {2}.",
+            "noBids": "No ha recibido ninguna solicitud de oferta como proveedor. Si lo prefiere, puede actualizar su oferta de productos desde su página de perfil.",
+            "totalBids": "Ha recibido un total de {0} solicitudes de oferta. Su precio total es: {1} {2}."
+        },
+        "cancelBid": {
+            "title": "UNITE - Proveedor - Cancelar el pedido del comprador",
+            "legend": "Cancelar pedido del comprador: por favor, complete el campo requerido (*)",
+            "cancelOrder": "Cancelar el pedido del comprador"
+        },
+        "confirmation": {
+            "title": "UNITE - Proveedor - Confirmación de usuario",
+            "legend": "Confirmar correo electrónico del proveedor",
+            "email": "Correo electrónico",
+            "confirm": "Confirmar correo electrónico y cuenta"
+        },
+        "deactivate": {
+            "title": "UNITE - Desactivar cuenta de proveedor",
+            "legend": "Desactivar la cuenta de proveedor - Por favor, complete los campos obligatorios (*)",
+            "email": "Correo electrónico",
+            "name": "Nombre de la empresa",
+            "reason": "Motivo para desactivar la cuenta",
+            "deactivate": "Desactivar la cuenta",
+            "confirm": "¿Está seguro de que quiere desactivar su cuenta de Proveedor?\nEsto eliminará los siguientes datos:\n\nSus productos/servicios;\nSus capacidades;\nSus órdenes recibidas de UNITE.\nUsted no será visible para los compradores que buscan capacidades en el sitio.",
+            "notice": "Si desactiva temporalmente su Cuenta de Proveedor, su capacidad, productos y servicios ya no serán visibles para los Compradores. Cuando active su cuenta de nuevo al iniciar sesión, tendrá que editar/guardar su perfil para que puedan encontrar sus ofertas de nuevo."
+        },
+        "delete": {
+            "title": "UNITE - Proveedor - Terminación del usuario",
+            "confirm": "Está a punto de eliminar todos sus datos de UNITE. Esto no puede deshacerse. Por favor, proceda sólo si está realmente seguro.",
+            "legend": "Eliminar la cuenta de proveedor - Por favor, rellene los campos obligatorios (*)",
+            "email": "Correo electrónico",
+            "name": "Nombre de la empresa",
+            "reason": "Motivo para eliminar la cuenta",
+            "delete": "Eliminar cuenta"
+        },
+        "forgotPassword": {
+            "title": "UNITE - Comprador - Contraseña olvidada",
+            "confirmEmail": "Confirme el correo electrónico",
+            "email": "Correo electrónico",
+            "reset": "Ir a Reiniciar"
+        },
+        "index": {
+            "title": "Tablero de proveedores - UNITE",
+            "description": "Esta es su página de Panel de control. Para asegurarse de que sigue apareciendo en los resultados de búsqueda de Compradores, mantenga sus capacidades y productos actualizados.",
+            "balance": "Saldo",
+            "balanceDescription": "Su saldo es la suma de los precios de sus <i> Solicitudes de oferta aceptadas </i> cuyos pagos han realizado los Compradores.  Puede administrar su saldo yendo a su página de Saldo.",
+            "goToBalance": "Ir al saldo",
+            "supplyDescription": "Actualmente tiene un número de {productosLongitud} tipos de productos, haciendo una cantidad total de suministro de {cantidad} artículos, y el precio total de su suministro ofrecido es {precio total} {divisa}.",
+            "acceptedBids": "Solicitudes de ofertas aceptadas",
+            "bidDirection": "Si desea aumentar el número de solicitudes de oferta aceptadas, puede editar sus capacidades en su perfil.",
+            "goToProfile": "Ir al perfil"
+        },
+        "profile": {
+            "title": "Perfil del proveedor - UNITE",
+            "terminationText": "¿Está seguro de que desea eliminar su cuenta de proveedor?  Esto también eliminará:  > Sus productos / servicios;  Sus capacidades  Sus pedidos recibidos;  Sus tokens de usuario (si los hay);  Su historial de mensajes de UNITE.   Si solo desea tomarse un descanso, puede desactivar su cuenta.",
+            "description": "Esta es su página de Panel de control. Para asegurarse de que sigue apareciendo en los resultados de búsqueda de Compradores, mantenga sus capacidades y productos actualizados."
+        },
+        "resend": {
+            "title": "UNITE - Comprador - Reenviar token de confirmación",
+            "legend": "Reenviar la confirmación del correo electrónico",
+            "email": "Correo electrónico",
+            "resend": "Reenviar la ficha de confirmación"
+        },
+        "resetPassword": {
+            "title": "UNITE - Comprador - Restablecer contraseña",
+            "legend": "Restablecer la contraseña",
+            "newPassword": "Nueva contraseña",
+            "confirmPassword": "Confirme la contraseña",
+            "resetPassword": "Actualizar la contraseña"
+        },
+        "signIn": {
+            "title": "Iniciar sesión como proveedor - UNITE"
+        },
+        "signUp": {
+            "title": "Regístrese como proveedor - UNITE"
+        }
+    },
+    "menu": {
+        "greeting": "Hola",
+        "languages": "Idiomas",
+        "home": "Inicio",
+        "about": "Sobre nosotros",
+        "terms": "Condiciones",
+        "antibribery": "Antisoborno",
+        "userFeedback": "Comentarios de los usuarios",
+        "adminSection": "Sección de Administración",
+        "viewFeedback": "Ver comentarios",
+        "memberList": "Lista de nuestros miembros",
+        "uploadedFiles": "Ver los archivos cargados",
+        "allBids": "Todas las solicitudes de oferta",
+        "userDashboard": "Tablero",
+        "userBalance": "Saldo",
+        "supplierBidsList": "Solicitudes de oferta",
+        "userProfile": "Perfil",
+        "logout": "Cerrar sesión"
+    },
+    "chat": {
+        "title": "Sistema de mensajería",
+        "geolocationError": "La geolocalización no está soportada en su punto final. Lamentamos las molestias.",
+        "chatTitle": "UNITE Chat - ¡Habla con tu pareja al instante!",
+        "pressKeytoSend": "Pulse Enviar o Intro para enviar",
+        "typeMessage": "Escriba su mensaje aquí",
+        "sendLocation": "Enviar ubicación",
+        "sendLocationTitle": "Envíe su ubicación geográfica",
+        "increment": "Incremento",
+        "talkingNow": "está hablando con",
+        "incrementTitle": "Aumentar el número de conexiones",
+        "currentLocation": "Ubicación actual",
+        "name": "Nombre",
+        "userName": "Nombre de usuario",
+        "countUpdated": "¡El recuento de conexiones se ha actualizado! Es",
+        "instantTime": "Ahora mismo.",
+        "typingNotice": "está escribiendo"
+    },
+    "gridBuyerHome": {
+        "organizationName": "Nombre de la Organización",
+        "organizationUniteID": "El ID UNITE de la Organización",
+        "deptAgencyGroup": "Departamento / Agencia / Grupo",
+        "contactName": " Nombre de contacto",
+        "emailAddress": " Dirección de correo electrónico",
+        "contactMobileNumber": "Número de móvil de contacto",
+        "country": "País",
+        "qualification": "Cualificación / Experiencia",
+        "role": "Rol del usuario",
+        "isActive": "¿Está activo?",
+        "ipv4": "Dirección IPv4",
+        "deletion": "Eliminar usuario",
+        "ban": "Prohibir usuario",
+        "title": "Compradores"
+    },
+    "gridSupervisorHome": {
+        "organizationName": "Nombre de la Organización",
+        "organizationUniteID": "El ID UNITE de la Organización",
+        "contactName": " Nombre de contacto",
+        "emailAddress": " Dirección de correo electrónico",
+        "contactMobileNumber": "Número de móvil de contacto",
+        "country": "País",
+        "role": "Rol del usuario",
+        "isActive": "¿Está activo?",
+        "ipv4": "Dirección IPv4",
+        "deletion": "Eliminar usuario",
+        "ban": "Prohibir usuario",
+        "title": "Supervisores"
+    },
+    "gridSupplierHome": {
+        "companyName": "Nombre de la empresa",
+        "directorsName": "Nombre del Director",
+        "contactName": " Nombre de contacto",
+        "emailAddress": " Dirección de correo electrónico",
+        "registeredCountry": "País registrado",
+        "contactMobileNumber": "Número de móvil de contacto",
+        "country": "País",
+        "areaCovered": "Área cubierta",
+        "companyAddress": "Dirección de la empresa",
+        "employeesNumber": "Número de empleados",
+        "industry": "Industria",
+        "capabilityDescription": "Descripción de la capacidad",
+        "role": "Rol del usuario",
+        "isActive": "¿Está activo?",
+        "ipv4": "Dirección IPv4",
+        "deletion": "Eliminar usuario",
+        "ban": "Prohibir usuario",
+        "title": "Proveedores"
+    },
+    "gridProducts": {
+        "name": "Nombre del producto",
+        "supplierName": "Nombre del proveedor",
+        "price": "Precio del producto",
+        "amount": "Cantidad",
+        "totalPrice": "Precio total",
+        "productImage": "Imagen del producto",
+        "placeBid": "Nueva solicitud de oferta",
+        "imageWrapper": "Imágenes de productos",
+        "buttonsWrapper": "Manejar la línea",
+        "title": "Lista de productos"
+    },
+    "gridBids": {
+        "bidName": "Nombre de la solicitud de oferta",
+        "buyerName": "Nombre del comprador de la solicitud de oferta",
+        "supplierName": "Nombre del proveedor de la oferta",
+        "buyerPrice": "Precio del comprador",
+        "supplierPrice": "Precio del proveedor",
+        "preferredDeliveryDate": "Fecha de entrega preferida",
+        "dateCreated": "Fecha de creación",
+        "expiryDate": "Fecha de caducidad",
+        "isCancelled": "¿Está cancelado?",
+        "isExpired": "¿Está vencido?",
+        "title": "Lista de solicitudes de oferta UNITE"
+    },
+    "gridUploadedFiles": {
+        "filename": "Nombre del archivo",
+        "folder": "Carpeta de archivos",
+        "length": "Longitud (bytes)",
+        "image": "Imagen",
+        "uploadDate": "Fecha de la subida",
+        "download": "Descargar archivo",
+        "deletion": "Eliminar el archivo",
+        "avatarTitle": "Archivos de Avatar",
+        "productImagesTitle": "Archivos de imágenes de productos",
+        "uploadedDocsTitle": "Documentos cargados"
+    },
+    "gridSupervisorsBuyers": {
+        "deptAgencyGroup": "Departamento / Agencia / Grupo",
+        "contactName": "Nombre de contacto",
+        "balance": "Saldo del comprador",
+        "isActive": "¿Está activo?",
+        "totalBids": "Recuento total de ofertas",
+        "totalBidsPrice": "Precio total de las ofertas",
+        "validBids": "Recuento de ofertas válidas",
+        "validBidsPrice": "Precio de las ofertas válidas",
+        "cancelledBids": "Recuento de ofertas canceladas",
+        "cancelledBidsPrice": "Precio de las ofertas canceladas",
+        "expiredBids": "Recuento de ofertas caducadas",
+        "expiredBidsPrice": "Precio de las ofertas caducadas",
+        "removeBuyer": "Eliminar de UNITE",
+        "chat": "Hable con el comprador",
+        "title": "Lista de Compradores del Supervisor"
+    },
+    "gridBannedUsers": {
+        "title": "Lista de usuarios prohibidos",
+        "name": "Nombre de usuario",
+        "type": "Tipo de usuario",
+        "email": "Dirección de correo electrónico",
+        "ip": "Dirección IP (IPv4)",
+        "banDate": "Fecha de prohibición",
+        "banExpiryDate": "Fecha de vencimiento de la prohibición"
+    }
+}

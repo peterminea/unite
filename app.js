@@ -82,7 +82,7 @@ const i18n = require("i18n-express");
 app.use(
   i18n({
     translationsPath: path.join(__dirname, "public/locales/dev"), // <--- use here. Specify translations files path.
-    siteLangs: ["en", "it", "fr", "de", "ro"],
+    siteLangs: ["en", "it", "fr", "es", "pt", "ro", "de"],
     textsVarName: "translation"
   })
 );
@@ -284,6 +284,9 @@ app.post("/exists", function(req, res) {
   return res.json({ exists: exists ? true : false });
 });
 
+
+let Region = require('./models/region');
+
 let db;
 if (1 == 2)
   MongoClient.connect(
@@ -296,6 +299,75 @@ if (1 == 2)
       }
 
       db = client.db(BASE); //Right connection!
+      
+      
+      const regions = [
+        {
+          name: "Europe"
+        },
+        {
+          name: "Asia/Pacific"
+        },
+        {
+          name: "Africa"
+        },
+        {
+          name: "North America"
+        },
+        {
+          name: "Latin America"
+        }
+      ];
+      
+      for(let r of regions) {
+        const reg = new Region({
+          name: r.name
+        });
+        
+        //db.collections('regions').insertOne(r);
+       // reg.save();
+      }
+      
+      const industries = await getDataMongoose('Industry');
+      for(let c of industries) {// str.toLowerCase().split(' ').join('')
+        let str = c.name.toLowerCase().split(' ').join('');
+        console.log(`"${str}": "${c.name}",`);
+        //console.log(`"${str}": "${c.name}"`);
+      }     
+      
+      console.log('\n\n\n');
+      
+      for(let c of industries) {// str.toLowerCase().split(' ').join('')
+        let str = c.name.toLowerCase().split(' ').join('');
+        console.log(`"translation.industries.${str}",`);
+        //console.log(`"${str}": "${c.name}"`);
+      }
+      /*
+      const updateString = { $set: {
+        "environmentPolicy": "https://spreadsheets.google.com/envBase.pdf",
+        "antibriberyPolicy": "https://spreadsheets.google.com/antibribBase.pdf",
+        "qualityManagementPolicy": "https://spreadsheets.google.com/quaManBase.pdf",
+        "occupationalSafetyAndHealthPolicy": "https://spreadsheets.google.com/occSafHthBase.pdf",
+        "certificates": "https://spreadsheets.google.com/certBase.pdf",
+        "otherRelevantFiles": "https://spreadsheets.google.com/otrBase.pdf",
+        "environmentPolicyId": "https://spreadsheets.google.com/envBase.pdf",
+        "antibriberyPolicyId": "https://spreadsheets.google.com/antibribBase.pdf",
+        "qualityManagementPolicyId": "https://spreadsheets.google.com/quaManBase.pdf",
+        "occupationalSafetyAndHealthPolicyId": "https://spreadsheets.google.com/occSafHthBase.pdf",
+        "certificatesIds": "https://spreadsheets.google.com/certBase.pdf",
+        "otherRelevantFilesIds": "https://spreadsheets.google.com/otrBase.pdf",
+        "website": "https://www.rental-government.net",
+        "linkedinURL": "https://www.linkedin.com.strasarius",
+        "facebookURL": "https://www.facebook.com/sechwes",
+        "twitterURL": "https://www.twitter.com/Tiloiver",
+        "instagramURL": "https://www.instagram.com/arubald",
+        "otherSocialMediaURL": "https://www.blogspot.com/Torembeld"
+      } };
+      
+      db.collection("buyers").updateMany( {}, updateString, function(err, obj) {});
+      db.collection("supervisors").updateMany( {}, updateString, function(err, obj) {});
+      db.collection("suppliers").updateMany( {}, updateString, function(err, obj) {});*/
+      
       process.on("uncaughtException", function(err) {
         console.error(err.message);
       });

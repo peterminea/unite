@@ -28,7 +28,7 @@
     $(document).ready(function () {
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       let token = $("input[name='_csrf']").val();
-      getAutocomplete('#country', '/countryAutocomplete', token);
+      getAutocomplete('#country');
 
     $('#register').click(function(e) {
       e.preventDefault();
@@ -40,7 +40,6 @@
       let formData = new FormData(document.getElementById('registration'));
       let captchaResponse = formData.get('g-recaptcha-response');
       $('input[name="captchaResponse"]').val(captchaResponse);
-      
       registrationDialog('Supervisor');
     });
   });
@@ -119,11 +118,42 @@
             </select>
           </div>
         </div>
-        <div class='upload-section'>
+        
+       <div class='totals'>
+           <!-- Social Media section-->
           <div class="form-group">
-            <label>User Avatar</label>
+            <label class="text-muted form-text social-media">
+              <span class='file-zone'><strong>WEBSITE AND SOCIAL MEDIA PROFILES</strong></span>
+              <br>
+              <span class='file-zone-required'>You must provide your Website and at least one Social Media link (LinkedIn is preferrable).</span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label>Website</label>
+            <input type="url" class="form-control" id="website" name="website" required>
+          </div>
+
+         <div class="form-group">
+            <label>LinkedIn URL</label>
+            <input type="url" class="form-control" id="linkedinURL" name="linkedinURL" required>
+          </div>       
+        </div>
+        
+        <div class='upload-section'>
+        <!-- Uploading files field section-->
+          <div class="form-group">
+            <label class="text-muted form-text certificates">
+              <span class='file-zone'><strong>PROFILE IMAGE and CERTIFICATES</strong></span>
+              <br>
+              <span class='file-zone-required'>You must provide your Profile Image and at least one Certificate.</span>
+            </label>
+          </div>
+          
+          <div class="form-group">
+            <label>User Profile Image(*)</label>
             <input type="hidden" name="avatar">
-            <input class="form-control upload avatarupload" type="file" id="avatar" name="avatarImg">
+            <input class="form-control upload avatarupload" type="file" id="avatar" name="avatarImg" required>
             <input class="form-control single btn upload-button btn-dark mt-2" type="button" disabled value="Upload File" />
           </div>
 

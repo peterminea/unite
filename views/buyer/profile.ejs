@@ -25,7 +25,7 @@
   <script type="text/javascript">
     $(document).ready(function() {
       let token = $("input[name='_csrf']").val();
-      getAutocomplete('#country', '/countryAutocomplete', token, '<%= profile._id %>');
+      getAutocomplete('#country');
       errorSuccess(Swal, '<%= errorMessage %>', '<%= successMessage %>');
       let defaultCurr = "<%= profile.currency %>";
       let data = [];
@@ -190,30 +190,103 @@
             <input type="hidden" name="currency" value="<%= profile.currency %>" required><br>
             <select class="currency" class="form-control" title="Currency" value="<%= profile.currency %>" required></select>
           </div>
-          <div class="form-group">
-            <label>Website</label>
-            <input type="url" class="form-control" id="website" name="website" value="<%= profile.website %>">
+          
+          <div class='totals'>
+             <!-- Social Media section-->
+            <div class="form-group">
+              <label class="text-muted form-text social-media">
+                <span class='file-zone'><strong>WEBSITE AND SOCIAL MEDIA PROFILES</strong></span>
+                <br>
+                <span class='file-zone-required'>You must provide your Website and at least one Social Media link (LinkedIn is preferrable).</span>
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label>Website</label>
+              <input type="url" class="form-control" id="website" name="website" value="<%= profile.website %>" required>
+            </div>
+            <div class="form-group">
+            <label>Facebook URL</label>
+            <input type="url" class="form-control" id="facebookURL" name="facebookURL" value="<%= profile.facebookURL %>">
+            </div>
+            <div class="form-group">
+              <label>Instagram URL</label>
+              <input type="url" class="form-control" id="instagramURL" name="instagramURL" value="<%= profile.instagramURL %>">
+            </div>
+            <div class="form-group">
+              <label>Twitter URL</label>
+              <input type="url" class="form-control" id="twitterURL" name="twitterURL" value="<%= profile.twitterURL %>">
+            </div>
+            <div class="form-group">
+              <label>LinkedIn URL</label>
+              <input type="url" class="form-control" id="linkedinURL" name="linkedinURL" value="<%= profile.linkedinURL %>">
+            </div>
+            <div class="form-group">
+              <label>Other Social Media URL</label>
+              <input type="url" class="form-control" id="otherSocialMediaURL" name="otherSocialMediaURL" value="<%= profile.otherSocialMediaURL %>">
+            </div>
           </div>
-          <div class="form-group">
-          <label>Facebook URL</label>
-          <input type="url" class="form-control" id="facebookURL" name="facebookURL" value="<%= profile.facebookURL %>">
-          </div>
-          <div class="form-group">
-            <label>Instagram URL</label>
-            <input type="url" class="form-control" id="instagramURL" name="instagramURL" value="<%= profile.instagramURL %>">
-          </div>
-          <div class="form-group">
-            <label>Twitter URL</label>
-            <input type="url" class="form-control" id="twitterURL" name="twitterURL" value="<%= profile.twitterURL %>">
-          </div>
-          <div class="form-group">
-            <label>LinkedIn URL</label>
-            <input type="url" class="form-control" id="linkedinURL" name="linkedinURL" value="<%= profile.linkedinURL %>">
-          </div>
-          <div class="form-group">
-            <label>Other Social Media URL</label>
-            <input type="url" class="form-control" id="otherSocialMediaURL" name="otherSocialMediaURL" value="<%= profile.otherSocialMediaURL %>">
-          </div>
+          
+          <div class='upload-section'>
+            <!-- Uploading files field section-->
+            <div class="form-group">
+              <label class="text-muted form-text certificates">
+                <span class='file-zone'><strong>PROFILE IMAGE and CERTIFICATES</strong></span>
+                <br>
+                <span class='file-zone-required'>You must provide your Profile Image and at least one Certificate.</span>
+              </label>
+            </div>
+            
+            <div class="form-group">
+              <label>User Profile Image</label>
+              <input type="hidden" name="avatar" value="<%= profile.avatar %>">
+              <input class="form-control upload avatarupload" type="file" id="avatar" name="avatarImg">
+              <input class="form-control single btn upload-button btn-success mt-2" type="button" disabled value="Upload File">
+            </div>
+
+            <div class="form-group">
+              <label>Certificates</label>
+              <input type="hidden" class="fileId" name="certificatesIds" value="<%= profile.certificatesIds %>">
+              <input class="form-control upload" type="file" id="certificates" name="certificates" multiple value="<%= profile.certificates %>">
+              <input class="form-control multiple btn upload-button btn-dark mt-2" type="button" disabled value="Upload Files" />
+            </div>
+
+            <div class="form-group">
+              <label>Antibribery policy</label>
+              <input type="hidden" class="fileId" name="antibriberyPolicyId" value="<%= profile.antibriberyPolicyId %>">
+              <input class="form-control upload" type="file" id="antibriberyPolicy" name="antibriberyPolicy" value="<%= profile.antibriberyPolicy %>">
+              <input class="form-control single btn upload-button btn-dark mt-2" type="button" disabled value="Upload File" />
+            </div>
+
+            <div class="form-group">
+              <label>Environment policy</label>
+              <input type="hidden" class="fileId" name="environmentPolicyId" value="<%= profile.environmentPolicyId %>">
+              <input class="form-control upload" type="file" id="environmentPolicy" name="environmentPolicy" value="<%= profile.environmentPolicy %>">
+              <input class="form-control single btn upload-button btn-dark mt-2" type="button" disabled value="Upload File" />
+            </div>
+
+            <div class="form-group">
+              <label>Quality management policy</label>
+              <input type="hidden" class="fileId" name="qualityManagementPolicyId" value="<%= profile.qualityManagementPolicyId %>">
+              <input class="form-control upload" type="file" id="qualityManagementPolicy" name="qualityManagementPolicy" value="<%= profile.qualityManagementPolicy %>">
+              <input class="form-control single btn upload-button btn-dark mt-2" type="button" disabled value="Upload File" />
+            </div>
+
+            <div class="form-group">
+              <label>Occupational Safety and Health</label>
+              <input type="hidden" class="fileId" name="occupationalSafetyAndHealthPolicyId" value="<%= profile.occupationalSafetyAndHealthPolicyId %>">
+              <input class="form-control upload" type="file" id="occupationalSafetyAndHealthPolicy" name="occupationalSafetyAndHealthPolicy" value="<%= profile.occupationalSafetyAndHealthPolicy %>">
+              <input class="form-control single btn upload-button btn-dark mt-2" type="button" disabled value="Upload File" />
+            </div>
+
+            <div class="form-group">
+              <label>Other relevant files</label>
+              <input type="hidden" class="fileId" name="otherRelevantFilesIds" value="<%= profile.otherRelevantFilesIds %>">
+              <input class="form-control upload" type="file" id="otherRelevantFiles" name="otherRelevantFiles" multiple value="<%= profile.otherRelevantFiles %>">
+              <input class="form-control multiple btn upload-button btn-dark mt-2" type="button" disabled value="Upload Files" />
+            </div>          
+          </div>          
+          
           <div class="form-group">
             <label>Date Created</label>
             <input type="text" readonly class="form-control" id="dateCreated" name="createdAtFormatted" value="<%= profile.createdAtFormatted %>">
@@ -221,13 +294,7 @@
           <div class='formn-group'>
             <label>Balance</label>
             <input type="text" class='form-control' readonly name="balance" id="balance" value="<%= profile.balance %>">
-          </div>
-          <div class="form-group">
-            <label>User Avatar</label>
-            <input type="hidden" name="avatar" value="<%= profile.avatar %>">
-            <input class="form-control upload avatarupload" type="file" id="avatar" name="avatarImg">
-            <input class="form-control single btn upload-button btn-success mt-2" type="button" disabled value="Upload File">
-          </div>
+          </div>          
           <br>
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
           <div class="update-profile">          

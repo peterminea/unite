@@ -340,7 +340,7 @@ function openDropdown(obj) {
 }
 
 
-function getAutocomplete(elem, url, token, isEnter) {
+function getAutocomplete(elem) {
   $("" + elem + "").autocomplete({
     source: function(req, res) {
       let obj = $(this.element);
@@ -1730,16 +1730,18 @@ function registrationDialog(accountType) {
     width: 300,
     height: 450,
     open: function(event, ui) {
-      
       if(!checkMatch()) {
         $("#registration").addClass("error");
         $("#dialog").append("<p><b>Passwords do not match.</b></p>");
+      } else if(!checkDocuments()) {
+        $("#registration").addClass("error");
+        $("#dialog").append("<p><b>Please upload at least one Document in order to proceed.</b></p>");
       } else {
         $("#registration").removeClass("error");
         $("#dialog").append(
-          "<p>Congratulations for choosing to register your " +
+          "<p>Congratulations for choosing to register your account (" +
             accountType +
-            " account on UNITE!<br>Your next step is to verify your e-mail address for the Account Confirmation link.<br>Please confirm your new Account in order to start using our Services.</p>"
+            ") on UNITE!<br>Your next step is to verify your e-mail address for the Account Confirmation link.<br>Please confirm your new Account in order to start using our Services.</p>"
         );
       }
     },
@@ -1915,7 +1917,7 @@ function fileExists(absolutePath, isMulti, ob, theDiv, fileId, i, val, token) {
       Swal.fire({
         title: "Error - Not found!",
         timer: 1500,
-        text: "Your file, " + absolutePath + ", was not found.",
+        text: absolutePath + ", your file, was not found.",
         icon: "error"
       });
     },
@@ -1924,7 +1926,7 @@ function fileExists(absolutePath, isMulti, ob, theDiv, fileId, i, val, token) {
         Swal.fire({
           title: "Not found!",
           timer: 1500,
-          text: "Your file, " + absolutePath + ", was not found. Please upload another valid file.",
+          text: absolutePath + ", your file, was not found. Please upload another valid file.",
           icon: "error"
         });
         return false;
@@ -1945,9 +1947,8 @@ function fileExists(absolutePath, isMulti, ob, theDiv, fileId, i, val, token) {
           token +
           '" file="' +
           fileId +
-          '" class="remFile" onclick="removeFile(this,Swal)" title="Delete the ' +
-          val[i] +
-          ' file">Remove</span></div>';
+          '" class="remFile" onclick="removeFile(this,Swal)" title="'
+          + val[i] + ' - Delete file">Remove</span></div>';
         if (i == val.length - 1) {
           ob += "<br></div>";
           if (ob.contains("href")) $(ob).insertAfter(theDiv);
@@ -2040,6 +2041,19 @@ function hasExtension(file, vec) {
   }
   
   return false;  
+}
+
+
+function checkDocuments() {
+  let atLeastOne = false;
+  
+  $('input.fileId').each(function(index, element) {
+    if($(element).val()) {
+      return atLeastOne = true;
+    }
+  });
+  
+ return atLeastOne; 
 }
 
 
@@ -2289,7 +2303,7 @@ $(document).ready(function() {
       $(this).removeClass('showLanguages');
     } else {
       $(this)
-        .append(`<ol style="position: fixed" title='Choose Platform Language' class='languages-bar'><li><a href="${loc}?clang=en"><img class='country-flag' src="https://www.countryflags.io/us/flat/64.png">English</a></li><li><a href="${loc}?clang=de"><img class='country-flag' src="https://www.countryflags.io/de/flat/64.png">Deutsch</a></li><li><a href="${loc}?clang=it"><img class='country-flag' src="https://www.countryflags.io/it/flat/64.png">Italiano</a></li><li><a href="${loc}?clang=fr"><img class='country-flag' src="https://www.countryflags.io/fr/flat/64.png">Français</a></li><li><a href="${loc}?clang=ro"><img class='country-flag' src="https://www.countryflags.io/ro/flat/64.png">Română</a></li></ol>`)
+        .append(`<ol style="position: fixed" title='Choose Platform Language' class='languages-bar'><li><a href="${loc}?clang=en"><img class='country-flag' src="https://www.countryflags.io/us/flat/64.png">English</a></li><li><a href="${loc}?clang=it"><img class='country-flag' src="https://www.countryflags.io/it/flat/64.png">Italiano</a></li><li><a href="${loc}?clang=fr"><img class='country-flag' src="https://www.countryflags.io/fr/flat/64.png">Français</a></li><li><a href="${loc}?clang=es"><img class='country-flag' src="https://www.countryflags.io/es/flat/64.png">Español</a></li><li><a href="${loc}?clang=pt"><img class='country-flag' src="https://www.countryflags.io/pt/flat/64.png">Português</a></li><li><a href="${loc}?clang=ro"><img class='country-flag' src="https://www.countryflags.io/ro/flat/64.png">Română</a></li><li><a href="${loc}?clang=de"><img class='country-flag' src="https://www.countryflags.io/de/flat/64.png">Deutsch</a></li></ol>`)
       .addClass('showLanguages');
 
       $('ol.languages-bar li').off('click').on('click', function() {
@@ -2788,6 +2802,7 @@ $(document).ready(function() {
         grid.trigger('reloadGrid');
       });
   }
+  
     
   $('input[readonly].textarea[readonly]').css('background-color', 'lightgray');//No names on spans. Also, disabled inputs means no readability for back-end.  
   

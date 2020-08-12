@@ -10,7 +10,7 @@ const supervisorSchema = new Schema({
   },
    avatar: {
     type: String,
-    required: false
+    required: true
   },
   organizationName: {
     type: String,
@@ -82,7 +82,30 @@ const supervisorSchema = new Schema({
     type: String,
     required: true
   },  
-    // URLs will be directing to a download page. Suppliers must upload a file, and it will be converted to an URL.
+  website: {
+    type: String,
+    required: true
+  },
+  facebookURL: {
+    type: String,
+    required: false
+  },
+  instagramURL: {
+    type: String,
+    required: false
+  },
+  twitterURL: {
+    type: String,
+    required: false
+  },
+  linkedinURL: {
+    type: String,
+    required: true
+  },
+  otherSocialMediaURL: {
+    type: String,
+    required: false
+  },
   certificates: {
     type: String,
     required: false

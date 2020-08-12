@@ -10,7 +10,7 @@ const supplierSchema = new Schema({
   },
    avatar: {
     type: String,
-    required: false
+    required: true
   },
   ipv4: {
     type: String,
@@ -135,7 +135,7 @@ const supplierSchema = new Schema({
   },
   website: {
     type: String,
-    required: false
+    required: true
   },
   facebookURL: {
     type: String,
@@ -151,7 +151,7 @@ const supplierSchema = new Schema({
   },
   linkedinURL: {
     type: String,
-    required: false
+    required: true
   },
   otherSocialMediaURL: {
     type: String,

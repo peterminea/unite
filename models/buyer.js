@@ -10,7 +10,7 @@ const buyerSchema = new Schema({
   },
   avatar: {
     type: String,
-    required: false
+    required: true
   },
   organizationName: {
     type: String,
@@ -106,7 +106,7 @@ const buyerSchema = new Schema({
   },
   website: {
     type: String,
-    required: false
+    required: true
   },
   facebookURL: {
     type: String,
@@ -122,11 +122,68 @@ const buyerSchema = new Schema({
   },
   linkedinURL: {
     type: String,
-    required: false
+    required: true
   },
   otherSocialMediaURL: {
     type: String,
     required: false
+  },
+  certificates: {
+    type: String,
+    required: false
+  },
+  antibriberyPolicy: {
+    type: String,
+    required: false
+  },
+  environmentPolicy:{
+    type: String,
+    required: false
+  },
+  qualityManagementPolicy: {
+    type: String,
+    required: false
+  },  
+  occupationalSafetyAndHealthPolicy: {
+    type: String,
+    required: false
+  },
+  otherRelevantFiles: {
+    type: String,
+    required: false
+  },
+  certificatesIds: {
+    type: String,
+    required: false
+  },
+  antibriberyPolicyId: {
+    type: String,
+    required: false
+  },
+  environmentPolicyId:{
+    type: String,
+    required: false
+  },
+  qualityManagementPolicyId: {
+    type: String,
+    required: false
+  },  
+  occupationalSafetyAndHealthPolicyId: {
+    type: String,
+    required: false
+  },
+  otherRelevantFilesIds:  {
+    type: String,
+    required: false
+  },
+   //UNITE Agreements:
+  UNITETermsAndConditions: {
+    type: Boolean, // Force to true with popup
+    required: true
+  },
+  antibriberyAgreement: {
+    type: Boolean, // Force to true with popup
+    required: true
   },
   createdAt: {
     type: Date,
