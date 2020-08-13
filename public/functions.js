@@ -915,7 +915,7 @@ function bindAddBid(obj, suppCurr) {//Add product amount in Bid.
         Swal.fire({
           icon: 'warning',
           title: 'Attention!',
-          text: 'Please enter valid product data (name, price (if required), amount).'
+          text: 'Please enter valid product data - name, price (if required), amount.'
         });
 
         input.addClass('errorField');
@@ -1000,9 +1000,7 @@ function bindHandleProduct(obj, prodServiceInput, isRow, isAdd) {
         icon: "error",
         title: "Error!",
         text:
-          "The maximum stock of the Supplier for the Product " +
-          tr.find(".product").text() +
-          " is " +
+          tr.find(".product").text() + " - The maximum stock of the Supplier for this Product is " +          
           entireAmount +
           "."
       });
@@ -1229,7 +1227,7 @@ function addition(
       icon: "error",
       title: "Error!",
       text:
-        isPresent? "You have already added " + prodVal + " to the list. Please refine your selection." : `${prodVal} is present in the UNITE Catalog of Products. You can only add new Products to the list.`
+        isPresent? prodVal + " - You have already added this product to the list. Please refine your selection." : `${prodVal} is present in the UNITE Catalog of Products. You can only add new Products to the list.`
     });
   } else {
     let fromBid = !($("#hiddenTotalPrice").length);//Not from Supplier.

@@ -19,7 +19,7 @@
         "bigTitle": "UNITE - Underserved Needs in Times of Emergency - Home Page"
     },
     "about": {
-        "first_paragraph": "UNITE is a Public Procurement Platform exclusively for governmental procurement of special orders of products and services for crisis response. \\nWe call it \"The Alibaba of urgent public procurement requests.\"\\n\\n UNITE is a two-sided platform, connecting public buyers with companies that have the capability and capacity to refocus their activities to supplying goods and services in response to the COVID-19 crisis.\\n\\n Companies are invited to register on the platform, describing their capability and capacity to manufacture urgently needed products or to supply in-demand services. \\nCompanies can also browse and respond to open tender requests placed by public buyers. \\n\\n  Public buyers can access the platform and create a procurement request. Our software matches the procurement request with potential suppliers and facilitates the complete transaction - including initial contact, negotiation. order placement, delivery acceptance, and payment.",
+        "first_paragraph": "UNITE is a Public Procurement Platform exclusively for governmental procurement of special orders of products and services for crisis response. We call it \"The Alibaba of urgent public procurement requests.\" UNITE is a two-sided platform, connecting public buyers with companies that have the capability and capacity to refocus their activities to supplying goods and services in response to the COVID-19 crisis. Companies are invited to register on the platform, describing their capability and capacity to manufacture urgently needed products or to supply in-demand services. Companies can also browse and respond to open tender requests placed by public buyers.   Public buyers can access the platform and create a procurement request. Our software matches the procurement request with potential suppliers and facilitates the complete transaction - including initial contact, negotiation. order placement, delivery acceptance, and payment.",
         "second_paragraph": "UNITE differentiates itself from other solutions in that it provides a database of companies with capability to refocus operations and in that it automates the process. Other solutions include using existing suppliers and ERP/purchasing system (not suited to abnormal requirements); engagement with the market through contacting individual companies by email, telephone or in person (which is slow); use of other online sales platforms (no visibility of the ability of companies to refocus operations); own knowledge of public buyers and their connections to industry (not widely shared - limited to individuals or local teams).",
         "title": "About us",
         "more": "More About Us",
@@ -85,9 +85,20 @@
         "passwordMismatch": "Passwords do not match.",
         "documentRequired": "Please upload at least one Document in order to proceed.",
         "finishSignup_partOne": "Congratulations for choosing to register your account",
-        "finishSignup_partTwo": "on UNITE!\\nYour next step is to verify your e-mail address for the Account Confirmation link.\\nPlease confirm your new Account in order to start using our Services.",
+        "finishSignup_partTwo": "on UNITE!Your next step is to verify your e-mail address for the Account Confirmation link.Please confirm your new Account in order to start using our Services.",
         "fileNotFoundOne": ", your file, was not found.",
-        "fileNotFoundTwo": ", your file, was not found. Please upload another valid file."
+        "fileNotFoundTwo": ", your file, was not found. Please upload another valid file.",
+        "productInList": "You have already added this product to the list. Please refine your selection.",
+        "productInCatalog": "is present in the UNITE Catalog of Products. You can only add new Products to the list.",
+        "companyMailsAllowed": "Only company domains are allowed.",
+        "sureDeletionOne": "You will not be able to revert the products deletion!Instead, you will have to re-make your list.Please be certain about the removal.",
+        "sureDeletionAll": "You will not be able to revert the products deletion!You will need to re-build the list.Please be certain about the removal.",
+        "validAddProductData": "Please enter valid product data - name, price (if required), amount.",
+        "maximumStock": "The maximum stock of the Supplier for this Product is",
+        "webAreaTitle": "WEBSITE AND SOCIAL MEDIA PROFILES",
+        "webAreaRequiredNotice": "You must provide your Website and at least one Social Media link (LinkedIn is preferrable).",
+        "docsAreaTitle": "PROFILE IMAGE and CERTIFICATES",
+        "documentRequiredNotice": "You must provide your profile image and at least one Certificate."
     },
     "buyerSpecific": {
         "qualification": "Qualification / Experience",
@@ -151,7 +162,7 @@
     "fileList": {
         "title": "UNITE - FULL LIST OF UPLOADED FILES",
         "disclaimer": "Disclaimer: This is a Demo list of files that are uploaded to our App folders.",
-        "description": "We include Avatars and user-specific files that are uploaded. For practical reasons, we prefer uploading files to dedicated folders of the application hosting space, and not to the DB itself - currently the database only contains a few uploaded files.\\nNote: Only Site Administrators can access these lists. So, guys, what we get to see here - it is only for us!",
+        "description": "We include Avatars and user-specific files that are uploaded. For practical reasons, we prefer uploading files to dedicated folders of the application hosting space, and not to the DB itself - currently the database only contains a few uploaded files.Note: Only Site Administrators can access these lists. So, guys, what we get to see here - it is only for us!",
         "productImages": "List of UNITE Product Image Files",
         "noProductImages": "Sorry, no Product Image files here.",
         "uploadedDocuments": "List of UNITE Upload Files",
@@ -248,11 +259,11 @@
             "title": "Buyer - Place Bid Request - UNITE",
             "greeting": "Welcome!",
             "invite": "Please make your Bid Request",
-            "info": "You can place a bid request on one or more products, belonging to one or more suppliers.\\nIf you choose more suppliers, separate Bid Request objects will be created upon submit, with each one of them being sent to the corresponding supplier.\\nIf you choose the same product name from several suppliers, and bids are accepted, you will have to pay each supplier. Please handle these choices carefully.",
+            "info": "You can place a bid request on one or more products, belonging to one or more suppliers.If you choose more suppliers, separate Bid Request objects will be created upon submit, with each one of them being sent to the corresponding supplier.If you choose the same product name from several suppliers, and bids are accepted, you will have to pay each supplier. Please handle these choices carefully.",
             "requirement": "Please fill in all the required (*) fields.",
             "requestName": "Request Name",
             "bidSupplierCompany": "Supplier's Company",
-            "multiSupplierInfo": "This Bid Request is directed to multiple suppliers.\\nFor this, when submitting the bid, separate bids will be created for each Supplier and the corresponding products, with the prices accordingly converted to the matching currencies.",
+            "multiSupplierInfo": "This Bid Request is directed to multiple suppliers.For this, when submitting the bid, separate bids will be created for each Supplier and the corresponding products, with the prices accordingly converted to the matching currencies.",
             "suppliersList": "The Suppliers are",
             "supplierData": "Supplier data",
             "bidBuyerName": "Buyer's Organization Name",
@@ -275,7 +286,7 @@
             "bidMentionsBuyer": "Mentions for Buyer",
             "bidMentionsSupplier": "Mentions for Supplier",
             "bidTypeMentions": "Type your mentions below",
-            "bidPaymentNotice": "IMPORTANT NOTICE: UNITE currently uses the Stripe Payment Gateway in TEST MODE.\\nNo real charges are done on you. You must use a fictitious card number like 4242 4242 4242 4242, and also to invent the CCV and the expiry date.\\nDo you want to proceed?",
+            "bidPaymentNotice": "IMPORTANT NOTICE: UNITE currently uses the Stripe Payment Gateway in TEST MODE.No real charges are done on you. You must use a fictitious card number like 4242 4242 4242 4242, and also to invent the CCV and the expiry date.Do you want to proceed?",
             "bidFundsError": "Your current balance is not enough for completing this purchase. Please add some more funds to your account.",
             "bidUpdateNoBuyerMentions": "Are you sure you want to update Bid Status without any mentions for the Buyer",
             "bidUpdateNoSupplierMentions": "Are you sure you want to update Bid Status without any mentions for the Supplier",
@@ -318,7 +329,7 @@
             "suppliersPriceProduct": "Supplier's price for the selected product",
             "multiSupplierPriceNotice": "This Bid is intended to be sent to multiple suppliers. The equivalent Supplier prices will be decided separately for each one of them.",
             "suppliersOverallPrice": "Supplier's equivalent total price",
-            "multiSupplierPriceAdapted": "As your Bid is intended to address multiple suppliers, each one of them will have the prices of the corresponding / proposed Products converted from your currency to theirs corresponding one.\\nAs you add amounts for products, each one of the Suppliers will have here their updated, corresponding price in their currency.",
+            "multiSupplierPriceAdapted": "As your Bid is intended to address multiple suppliers, each one of them will have the prices of the corresponding / proposed Products converted from your currency to theirs corresponding one.As you add amounts for products, each one of the Suppliers will have here their updated, corresponding price in their currency.",
             "suppliersPriceRendered": "Total price for selected product",
             "bidStatus": "Status",
             "productSuggestionTitle": "People who bought this product also liked...",
@@ -331,7 +342,7 @@
         },
         "profile": {
             "title": "Buyer Profile - UNITE",
-            "terminationText": "Are you sure you want to delete your Buyer account?\\nThis will also remove your Bid Requests and the messages you sent in UNITE.\\nIf you just want to take a break, you may deactivate your account instead.",
+            "terminationText": "Are you sure you want to delete your Buyer account?This will also remove your Bid Requests and the messages you sent in UNITE.If you just want to take a break, you may deactivate your account instead.",
             "cardGreeting": "Hello!",
             "defaultGreeting": "Hello, {organizationName}!",
             "description": "This is your profile page. Please keep your data accurate, and you will have good luck with finding your needed suppliers!"
@@ -357,8 +368,8 @@
         },
         "viewBid": {
             "title": "UNITE - Buyer - View Bid Request Details",
-            "bidExpirationNoticeNotExtended": "This Bid Request is about to expire. Its limit date is ${0}. \\nPlease upload a Bid Extension Letter in order to gain ${1} more validity days.",
-            "bidExpirationNoticeExtended": "This Bid Request is about to expire. Its limit date is ${0}.\\nYou have already extended the initial bid validity, so the date above is final.",
+            "bidExpirationNoticeNotExtended": "This Bid Request is about to expire. Its limit date is ${0}. Please upload a Bid Extension Letter in order to gain ${1} more validity days.",
+            "bidExpirationNoticeExtended": "This Bid Request is about to expire. Its limit date is ${0}.You have already extended the initial bid validity, so the date above is final.",
             "pay": "Pay",
             "goToPayment": "Go to Payment",
             "paymentCancelled": "Payment cancelled!",
@@ -537,7 +548,7 @@
         "profile": {
             "title": "Supplier Profile - UNITE",
             "terminationText": "Are you sure you want to delete your Supplier account?\\nThis will also remove:\\n>Your products/services;\\nYour capabilities\\nYour received orders;\\nYour user tokens (if any);\\nYour message history from UNITE.\\n\\nIf you just want to take a break, you may deactivate your account instead.",
-            "description": "This is your Dashboard page. In order to ensure that you continue to appear in the search results of Buyers, please keep your capabilities and products up-to-date."
+            "description": "This is your Profile page. In order to ensure that you continue to appear in the search results of Buyers, please keep your capabilities and products up-to-date."
         },
         "resend": {
             "title": "UNITE - Buyer - Resend confirmation token",
