@@ -112,8 +112,8 @@
             <input type="hidden" name="saveCountry">
             <select class='autocomp'>
               <option id="" value=""></option>
-              <% for(country of countries) { %>
-              <option id="<%= country.id %>" value="<%= country.name %>"><%= country.name %></option>
+              <% for(i in countries) { %>
+              <option id="<%= countries[i].id %>" value="<%= eval(countryKeys[i]) %>"><%= eval(countryKeys[i]) %></option>
               <% } %>
             </select>
           </div>

@@ -200,8 +200,8 @@
           <input type="hidden" name="saveRegisteredCountry">
           <select class='autocomp'>
             <option id="" value=""></option>
-            <% for(country of countries) { %>
-            <option id="<%= country.id %>" value="<%= country.name %>"><%= country.name %></option>
+            <% for(i in countries) { %>
+            <option id="<%= countries[i].id %>" value="<%= eval(countryKeys[i]) %>"><%= eval(countryKeys[i]) %></option>
             <% } %>
           </select>
         </div>
@@ -230,8 +230,8 @@
           <input type="hidden" name="saveCountry">
           <select class='autocomp'>
             <option id="" value=""></option>
-            <% for(country of countries) { %>
-            <option id="<%= country.id %>" value="<%= country.name %>"><%= country.name %></option>
+            <% for(i in countries) { %>
+            <option id="<%= countries[i].id %>" value="<%= eval(countryKeys[i]) %>"><%= eval(countryKeys[i]) %></option>
             <% } %>
           </select>
         </div>
@@ -241,8 +241,8 @@
           <input type="hidden" name="saveIndustry">
           <select class='autocomp'>
             <option id="" value=""></option>
-            <% for(industry of industries) { %>
-            <option id="<%= industry.id %>" value="<%= industry.name %>"><%= industry.name %></option>
+            <% for(i in industries) { %>
+            <option id="<%= industries[i].id %>" value="<%= eval(industryKeys[i]) %>"><%= eval(industryKeys[i]) %></option>
             <% } %>
           </select>
         </div>
