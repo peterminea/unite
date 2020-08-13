@@ -13,6 +13,7 @@ const URL = process.env.MONGODB_URI, BASE = process.env.BASE;
 const treatError = require('../middleware/treatError');
 const search = require('../middleware/searchFlash');
 let Recaptcha = require('express-recaptcha').RecaptchaV2;
+const countriesKeys = require('../middleware/countriesKeys');
 
 const supervisorMenuTranslationKeys = [
   "translation.menu.languages",
@@ -515,6 +516,7 @@ exports.getSignUp = async (req, res) => {
     res.render("supervisor/sign-up", {
       captchaSiteKey: captchaSiteKey,
       countries: countries,
+      countriesKeys: countriesKeys,
       FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
       encryptionNotice: encryptionNotice,
       successMessage: success,
@@ -671,6 +673,7 @@ exports.getProfile = async (req, res) => {
     keys: supervisorMenuTranslationKeys,
     FILE_UPLOAD_MAX_SIZE: process.env.FILE_UPLOAD_MAX_SIZE,
     countries: countries,
+    countriesKeys: countriesKeys,
     profile: req.session.supervisor
   });
 }

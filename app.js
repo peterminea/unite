@@ -285,7 +285,10 @@ app.post("/exists", function(req, res) {
 });
 
 
-let Region = require('./models/region');
+//let Region = require('./models/region');
+//let Country = require('./models/country');
+//let Industry = require('./models/industry');
+//const _ = require('underscore');
 
 let db;
 if (1 == 2)
@@ -300,7 +303,7 @@ if (1 == 2)
 
       db = client.db(BASE); //Right connection!
       
-      
+      /*
       const regions = [
         {
           name: "Europe"
@@ -326,9 +329,81 @@ if (1 == 2)
         
         //db.collections('regions').insertOne(r);
        // reg.save();
+      }*/
+      /*
+      const { countriesKeys } = require('./middleware/countriesKeys');
+      const { industriesKeys } = require('./middleware/industriesKeys');
+      
+      console.log(countriesKeys.length);
+      console.log(industriesKeys.length);
+      
+      countriesKeys.sort(function (a, b) {
+      return a.localeCompare(b);
+    });
+      
+      industriesKeys.sort(function (a, b) {
+      return a.localeCompare(b);
+    });
+      
+      let newCountriesKeys = _.uniq(countriesKeys, false, function(item) { return item; });
+      //let newIndustriesKeys = _.uniq(industriesKeys, false, function(item) { return item; });      
+      console.log(countriesKeys.length);
+      console.log(industriesKeys.length);
+      
+      const newIndustries = [];
+      
+      for(let i in industriesKeys) {
+        if(!i || i && industriesKeys[i] !== industriesKeys[i-1]) {
+          newIndustries.push(industriesKeys[i]);
+        }
+        else console.log(industriesKeys[i])
       }
       
+      console.log(newIndustries.length);
+      
+      console.log('[');
+      for(let i in newCountriesKeys) console.log('"' + newCountriesKeys[i] + '"' + ',');
+      console.log(']');
+      */
+      
+      /*
+      const countries = await getDataMongoose('Country');
       const industries = await getDataMongoose('Industry');
+      
+      countries.sort(function (a, b) {
+      return a.name.localeCompare(b.name);
+    });
+      
+      industries.sort(function (a, b) {
+      return a.name.localeCompare(b.name);
+    });
+      
+      let newCountries = _.uniq(countries, false, function(item) { return item.name; });  
+      let newIndustries = _.uniq(industries, false, function(item) { return item.name; }); 
+            
+      console.log(newCountries.length);
+      console.log(newIndustries.length);      
+      
+      db.collection('countries').deleteMany({});
+      db.collection('industries').deleteMany({});
+      
+      for(let c of newCountries) {
+        let n = new Country({
+          name: c.name
+        });
+        
+        await n.save();
+      }
+      
+      for(let c of newIndustries) {
+        let n = new Industry({
+          name: c.name
+        });
+        
+        await n.save();
+      }*/
+      
+      /*
       for(let c of industries) {// str.toLowerCase().split(' ').join('')
         let str = c.name.toLowerCase().split(' ').join('');
         console.log(`"${str}": "${c.name}",`);
@@ -341,7 +416,7 @@ if (1 == 2)
         let str = c.name.toLowerCase().split(' ').join('');
         console.log(`"translation.industries.${str}",`);
         //console.log(`"${str}": "${c.name}"`);
-      }
+      }*/
       /*
       const updateString = { $set: {
         "environmentPolicy": "https://spreadsheets.google.com/envBase.pdf",

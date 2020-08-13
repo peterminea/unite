@@ -14,6 +14,7 @@ const BidRequest = require("../models/bidRequest");
 const ProductService = require("../models/productService");
 const Country = require('../models/country');
 const BidStatus = require("../models/bidStatus");
+const countriesKeys = require('../middleware/countriesKeys');
 
 const {
   basicFormat,
@@ -791,6 +792,7 @@ exports.getSignUp = async (req, res) => {
       uniteIds: uniteIds,
       encryptionNotice: (encryptionNotice),
       countries: countries,
+      countriesKeys: countriesKeys,
       successMessage: success,
       errorMessage: error
     });
@@ -1182,6 +1184,7 @@ exports.getProfile = async (req, res) => {
     currencies: currencies,
     successMessage: success,
     countries: countries,
+    countriesKeys: countriesKeys,
     errorMessage: error,
     profile: req.session.buyer
   });
