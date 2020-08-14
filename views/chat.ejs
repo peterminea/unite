@@ -285,24 +285,22 @@
       autoscroll();
     });
       
-    setTimeout(function() {    
-      <% if(keys != null) { %>
+     <% if(keys != null) { %>
       let i = 0, indexes = [];
-     
+
       $('a.nav-link').each(function(ind, elem) {      
         indexes.push($(elem).attr('index'));
       });
 
+      let iter = 0;
+        
       <% for(let k in keys) { %>   
       if(isInArray(i, indexes)) {
-        $('a.nav-link span').eq(i).text('<%= eval(keys[k]) %>');
+        $('a.nav-link span').eq(iter++).text('<%= eval(keys[k]) %>');
       }
       i++;
-      <% } } %>
-
-      if(1==2) $('span.big-title')[0].innerHTML = ('<%= translation.home.meaning %>');
-    }, 500);
-  });
+      <% } } %>      
+    });
   </script>
 </head>
   

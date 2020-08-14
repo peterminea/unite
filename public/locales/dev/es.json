@@ -548,7 +548,7 @@
         "profile": {
             "title": "Perfil del proveedor - UNITE",
             "terminationText": "¿Está seguro de que desea eliminar su cuenta de proveedor? \\n Esto también eliminará: \\n > Sus productos / servicios; \\n Sus capacidades \\n Sus pedidos recibidos; \\n Sus tokens de usuario (si los hay); \\n Su historial de mensajes de UNITE. \\n \\n Si solo desea tomarse un descanso, puede desactivar su cuenta.",
-            "description": "Esta es su página de Panel de control. Para asegurarse de que sigue apareciendo en los resultados de búsqueda de Compradores, mantenga sus capacidades y productos actualizados."
+            "description": "Esta es su página de Perfil. Para asegurarse de que sigue apareciendo en los resultados de búsqueda de Compradores, mantenga sus capacidades y productos actualizados."
         },
         "resend": {
             "title": "UNITE - Comprador - Reenviar token de confirmación",

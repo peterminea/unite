@@ -334,7 +334,8 @@
             "bidStatus": "Status",
             "productSuggestionTitle": "People who bought this product also liked...",
             "cancel": "Cancel",
-            "sendBid": "Send Request"
+            "sendBid": "Send Request",
+			      "unitPrice": "unit price for selected product"
         },
         "productsCatalog": {
             "title": "Catalog of Products - UNITE",

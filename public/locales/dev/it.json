@@ -442,7 +442,7 @@
         },
         "profile": {
             "title": "Supervisore governativo - Profilo - UNITE",
-            "profileDescription": "Questa è la pagina del profilo del tuo supervisore. Per favore mantieni i tuoi dati accurati e prenditi cura dell'onesta attività dei tuoi amici su UNITE!",
+            "profileDescription": "Questa è la pagina del tuo profilo di Supervisore. Per favore mantieni i tuoi dati accurati e prenditi cura dell'onesta attività dei tuoi amici su UNITE!",
             "terminationText": "Sei sicuro di voler eliminare il tuo account Supervisore? \\n Questo rimuoverà anche: \\n \\n tuoi acquirenti associati; \\n Tutti i loro dati specifici, come ordini, messaggi, token; \\n tuoi token utente (se presenti); \\n cronologia dei tuoi messaggi da UNITE. \\n \\n Fai molta attenzione con questa opzione!",
             "editableUniteID": "ID UNITE dell'organizzazione (modificabile solo da te)"
         },
@@ -548,7 +548,7 @@
         "profile": {
             "title": "Profilo del fornitore - UNITE",
             "terminationText": "Sei sicuro di voler eliminare il tuo account fornitore? \\n Ciò rimuoverà anche: \\n > tuoi prodotti / servizi; \\n tue capacità \\n tuoi ordini ricevuti; \\n tuoi token utente (se presenti); \\n cronologia dei tuoi messaggi da UNITE. \\n \\n Se vuoi solo fare una pausa, puoi invece disattivare il tuo account.",
-            "description": "Questa è la tua pagina cruscotto. Al fine di garantire che continui a comparire nei risultati di ricerca degli Acquirenti, ti preghiamo di mantenere aggiornate le tue capacità e i tuoi prodotti."
+            "description": "Questa è la tua pagina di Profilo. Al fine di garantire che continui a comparire nei risultati di ricerca degli Acquirenti, ti preghiamo di mantenere aggiornate le tue capacità e i tuoi prodotti."
         },
         "resend": {
             "title": "UNITE - Acquirente - Invia nuovamente il token di conferma",

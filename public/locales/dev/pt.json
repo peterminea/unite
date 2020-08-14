@@ -548,7 +548,7 @@
         "profile": {
             "title": "Perfil do Fornecedor - UNITE",
             "terminationText": "Tem a certeza que quer eliminar a sua conta de fornecedor? Isto também irá remover: os seus produtos/serviços; as suas capacidades; as suas encomendas recebidas; as suas fichas de utilizador (se existirem); o seu histórico de mensagens da UNITE.net Se apenas quiser fazer uma pausa, pode desactivar a sua conta.",
-            "description": "Esta é a sua página do Painel de Controle. A fim de garantir que você continue a aparecer nos resultados de busca dos compradores, por favor mantenha suas capacidades e produtos atualizados."
+            "description": "Esta é a sua página do Perfil. A fim de garantir que você continue a aparecer nos resultados de busca dos compradores, por favor mantenha suas capacidades e produtos atualizados."
         },
         "resend": {
             "title": "UNITE - Comprador - Reenviar ficha de confirmação",
