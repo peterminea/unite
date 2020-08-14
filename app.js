@@ -303,6 +303,45 @@ if (1 == 2)
 
       db = client.db(BASE); //Right connection!
       
+      let rawdata = fs.readFileSync('public/locales/dev/en.json');
+      let student = JSON.parse(rawdata);
+      //console.log(student);
+      let vec = [];
+      
+      let objectConstructor = ({}).constructor;
+      
+      const title = 'key,mainLanguage,de';
+      vec.push(title);
+      let p = 2;
+      
+      Object.keys(student).forEach(function(key) {
+        //console.table('Key : ' + key + ', Value : ' + student[key]);
+        Object.keys(student[key]).forEach(function(key2) {          
+          if(student[key][key2].constructor === objectConstructor) {
+            Object.keys(student[key][key2]).forEach(function(key3) {
+              const val = key + '_' + key2 + '_' + key3 + ',"' + student[key][key2][key3] + '",' + `=GOOGLETRANSLATE($B${p++};"en";C$1)`;
+              vec.push(val);
+              //console.log(val);
+            });
+          } else {
+            const val = key + '_' + key2 + ',"' + student[key][key2] + '",' + `=GOOGLETRANSLATE($B${p++};"en";C$1)`;
+            vec.push(val);
+            //console.log(val);
+          }
+          //console.log(student[key][key2])
+          //console.table(key + '-' + key2)
+                                          });
+      })
+      
+      console.log(vec.length);
+      
+      let str = '';
+      for(let v of vec) {
+        str += v + '\n';
+      }
+      
+      console.log(str);
+      fs.writeFileSync('public/locales/dev/de.csv', str);
       /*
       const regions = [
         {

@@ -19,7 +19,7 @@
         "bigTitle": "UNITE - Besoins insuffisamment satisfaits en cas d'urgence - Page d'accueil"
     },
     "about": {
-        "first_paragraph": "UNITE est une plate-forme de marchés publics exclusivement destinée aux marchés publics de commandes spéciales de produits et de services pour la réponse aux crises. <br>Nous l'appelons \"L'Alibaba des</br> demandes <br>urgentes</br> de marchés publics\".<br> UNITE est une plateforme à double face, mettant en relation les acheteurs publics avec des entreprises qui ont la capacité et les moyens de recentrer leurs activités sur la fourniture de biens et de services en réponse</br> à la crise COVID-19. Les<br> entreprises sont invitées à s'inscrire sur la plateforme, en décrivant leur capacité et leur aptitude à fabriquer des produits dont elles ont un besoin urgent ou à fournir</br> des services à la<br> demande</br>. Les<br><br> entreprises peuvent également consulter et répondre aux appels d'offres ouverts lancés par</br></br> des acheteurs<br><br> publics</br></br>.<br>   Les acheteurs publics peuvent accéder à la plateforme et créer une demande d'achat. Notre logiciel fait correspondre la demande d'achat avec les fournisseurs potentiels et facilite l'ensemble de la transaction, y compris le contact initial, la négociation, la passation de commande, l'acceptation de livraison et le paiement.</br>",
+        "first_paragraph": "UNITE est une plate-forme de marchés publics exclusivement destinée aux marchés publics de commandes spéciales de produits et de services pour la réponse aux crises. Nous l'appelons \"L'Alibaba des</br> demandes urgentes</br> de marchés publics\". UNITE est une plateforme à double face, mettant en relation les acheteurs publics avec des entreprises qui ont la capacité et les moyens de recentrer leurs activités sur la fourniture de biens et de services en réponse</br> à la crise COVID-19. Les entreprises sont invitées à s'inscrire sur la plateforme, en décrivant leur capacité et leur aptitude à fabriquer des produits dont elles ont un besoin urgent ou à fournir</br> des services à la demande</br>. Les entreprises peuvent également consulter et répondre aux appels d'offres ouverts lancés par</br></br> des acheteurs publics</br></br>.   Les acheteurs publics peuvent accéder à la plateforme et créer une demande d'achat. Notre logiciel fait correspondre la demande d'achat avec les fournisseurs potentiels et facilite l'ensemble de la transaction, y compris le contact initial, la négociation, la passation de commande, l'acceptation de livraison et le paiement.</br>",
         "second_paragraph": "UNITE se différencie des autres solutions en ce qu'il fournit une base de données des entreprises capables de recentrer leurs activités et en ce qu'il automatise le processus. Les autres solutions comprennent l'utilisation de fournisseurs existants et d'un système d'achat/ERP (non adapté aux besoins anormaux) ; l'engagement sur le marché en contactant les entreprises individuelles par courrier électronique, par téléphone ou en personne (ce qui est lent) ; l'utilisation d'autres plateformes de vente en ligne (aucune visibilité de la capacité des entreprises à recentrer leurs opérations) ; la connaissance propre des acheteurs publics et de leurs liens avec l'industrie (peu partagée - limitée aux individus ou aux équipes locales).",
         "title": "Qui sommes-nous",
         "more": "En savoir plus sur nous",
@@ -85,9 +85,20 @@
         "passwordMismatch": "Les mots de passe ne correspondent pas.",
         "documentRequired": "Veuillez télécharger au moins un document afin de poursuivre.",
         "finishSignup_partOne": "Congratulations for choosing to register your account",
-        "finishSignup_partTwo": "sur UNITE! <br> prochaine étape consiste à vérifier votre adresse e-mail pour le lien de confirmation de compte. <br> Veuillez confirmer votre nouveau compte afin de commencer à utiliser nos services.",
+        "finishSignup_partTwo": "sur UNITE!  prochaine étape consiste à vérifier votre adresse e-mail pour le lien de confirmation de compte.  Veuillez confirmer votre nouveau compte afin de commencer à utiliser nos services.",
         "fileNotFoundOne": ", votre dossier, n’a pas été trouvé.",
-        "fileNotFoundTwo": ", votre fichier, n'a pas été trouvé. Veuillez télécharger un autre fichier valide."
+        "fileNotFoundTwo": ", votre fichier, n'a pas été trouvé. Veuillez télécharger un autre fichier valide.",
+        "productInList": "Vous avez déjà ajouté ce produit à la liste. Veuillez affiner votre sélection.",
+        "productInCatalog": "est présent dans le catalogue de produits UNITE. Vous pouvez seulement ajouter de nouveaux produits à la liste.",
+        "companyMailsAllowed": "Seuls les domaines d'entreprise sont autorisés.",
+        "sureDeletionOne": "Vous ne pourrez pas annuler la suppression des produits ! Au lieu de cela, vous devrez refaire votre</br> liste. Veuillez être certain de la suppression.</br></br>",
+        "sureDeletionAll": "You will not be able to revert the products deletion!You will need to re-build the list.Please be certain about the removal.",
+        "validAddProductData": "Veuillez entrer des données valables sur le produit - nom, prix (si nécessaire), quantité.",
+        "maximumStock": "Le stock maximum du fournisseur pour ce produit est de",
+        "webAreaTitle": "SITE WEB ET PROFILS DE MÉDIAS SOCIAUX",
+        "webAreaRequiredNotice": "Vous devez fournir votre site web et au moins un lien vers un média social (LinkedIn est préférable).",
+        "docsAreaTitle": "IMAGE DE PROFIL et CERTIFICATS",
+        "documentRequiredNotice": "Vous devez fournir votre image de profil et au moins un certificat."
     },
     "buyerSpecific": {
         "qualification": "Qualification / Expérience",
@@ -151,7 +162,7 @@
     "fileList": {
         "title": "UNITE - LISTE COMPLÈTE DES FICHIERS TÉLÉCHARGÉS",
         "disclaimer": "Avertissement : Ceci est une liste de démonstration des fichiers qui sont téléchargés dans nos dossiers App.",
-        "description": "Nous incluons les avatars et les fichiers spécifiques à l'utilisateur qui sont téléchargés. Pour des raisons pratiques, nous préférons télécharger les fichiers dans des dossiers dédiés de l'espace d'hébergement des applications, et non dans la base de données elle-même - actuellement, la base de données ne contient que quelques fichiers téléchargés.<br> Note : Seuls les administrateurs de site peuvent accéder à ces listes. Donc, les gars, ce que nous voyons ici - c'est seulement pour nous !</br>",
+        "description": "Nous incluons les avatars et les fichiers spécifiques à l'utilisateur qui sont téléchargés. Pour des raisons pratiques, nous préférons télécharger les fichiers dans des dossiers dédiés de l'espace d'hébergement des applications, et non dans la base de données elle-même - actuellement, la base de données ne contient que quelques fichiers téléchargés. Note : Seuls les administrateurs de site peuvent accéder à ces listes. Donc, les gars, ce que nous voyons ici - c'est seulement pour nous !</br>",
         "productImages": "Liste des fichiers d'images des produits UNITE",
         "noProductImages": "Désolé, il n'y a pas de fichiers d'images de produits ici.",
         "uploadedDocuments": "Liste des fichiers de téléchargement UNITE",
@@ -248,11 +259,11 @@
             "title": "Acheteur - Placer une demande d'enchère - UNITE",
             "greeting": "Bienvenue!",
             "invite": "Veuillez faire votre demande d’enchère",
-            "info": "Vous pouvez déposer une demande d’enchère sur un ou plusieurs produits appartenant à un ou plusieurs fournisseurs. <br> Si vous choisissez plus de fournisseurs, des objets distincts de demande d’enchère seront créés lors de la soumission, chacun d’eux étant envoyé au fournisseur correspondant. <br> Si vous choisissez le même nom de produit parmi plusieurs fournisseurs, et que les offres sont acceptées, vous devrez payer chaque fournisseur. S’il vous plaît gérer ces choix avec soin.",
+            "info": "Vous pouvez déposer une demande d’enchère sur un ou plusieurs produits appartenant à un ou plusieurs fournisseurs.  Si vous choisissez plus de fournisseurs, des objets distincts de demande d’enchère seront créés lors de la soumission, chacun d’eux étant envoyé au fournisseur correspondant.  Si vous choisissez le même nom de produit parmi plusieurs fournisseurs, et que les offres sont acceptées, vous devrez payer chaque fournisseur. S’il vous plaît gérer ces choix avec soin.",
             "requirement": "Veuillez remplir tous les champs obligatoires (*).",
             "requestName": "Nom de la demande",
             "bidSupplierCompany": "Entreprise du fournisseur",
-            "multiSupplierInfo": "Cette demande d'offre s'adresse à plusieurs fournisseurs.<br> Pour cela, lors de la soumission de l'offre, des offres séparées seront créées pour chaque fournisseur et les produits correspondants, les prix étant convertis en conséquence dans les devises correspondantes.</br>",
+            "multiSupplierInfo": "Cette demande d'offre s'adresse à plusieurs fournisseurs. Pour cela, lors de la soumission de l'offre, des offres séparées seront créées pour chaque fournisseur et les produits correspondants, les prix étant convertis en conséquence dans les devises correspondantes.</br>",
             "suppliersList": "Les fournisseurs sont",
             "supplierData": "Données sur les fournisseurs",
             "bidBuyerName": "Nom de l'organisation de l'acheteur",
@@ -275,7 +286,7 @@
             "bidMentionsBuyer": "Mentions pour l'acheteur",
             "bidMentionsSupplier": "Mentions pour le fournisseur",
             "bidTypeMentions": "Tapez vos mentions ci-dessous",
-            "bidPaymentNotice": "AVIS IMPORTANT: UNITE utilise actuellement la passerelle de paiement Stripe en MODE TEST. <br> Aucun frais réel ne vous est facturé. Vous devez utiliser un numéro de carte fictif comme 4242 4242 4242 4242, et également inventer le CCV et la date d'expiration. <br> Voulez-vous continuer?",
+            "bidPaymentNotice": "AVIS IMPORTANT: UNITE utilise actuellement la passerelle de paiement Stripe en MODE TEST.  Aucun frais réel ne vous est facturé. Vous devez utiliser un numéro de carte fictif comme 4242 4242 4242 4242, et également inventer le CCV et la date d'expiration.  Voulez-vous continuer?",
             "bidFundsError": "Votre solde actuel n'est pas suffisant pour effectuer cet achat. Veuillez ajouter des fonds supplémentaires sur votre compte.",
             "bidUpdateNoBuyerMentions": "Êtes-vous sûr(e)s de vouloir mettre à jour le statut de l'offre sans aucune mention pour l'acheteur",
             "bidUpdateNoSupplierMentions": "Êtes-vous sûr de vouloir mettre à jour le statut de l'offre sans aucune mention pour le fournisseur",
@@ -318,7 +329,7 @@
             "suppliersPriceProduct": "Prix du fournisseur pour le produit sélectionné",
             "multiSupplierPriceNotice": "Cette offre est destinée à être envoyée à plusieurs fournisseurs. Les prix des fournisseurs équivalents seront décidés séparément pour chacun d'entre eux.",
             "suppliersOverallPrice": "Prix total équivalent fournisseur",
-            "multiSupplierPriceAdapted": "Comme votre offre est destinée à plusieurs fournisseurs, chacun d'entre eux fera convertir les prix des produits correspondants / proposés de votre devise à la devise correspondante.<br> Lorsque vous ajoutez des montants pour des produits, chacun des fournisseurs aura ici son prix correspondant actualisé dans sa devise.</br>",
+            "multiSupplierPriceAdapted": "Comme votre offre est destinée à plusieurs fournisseurs, chacun d'entre eux fera convertir les prix des produits correspondants / proposés de votre devise à la devise correspondante. Lorsque vous ajoutez des montants pour des produits, chacun des fournisseurs aura ici son prix correspondant actualisé dans sa devise.</br>",
             "suppliersPriceRendered": "Prix total pour le produit sélectionné",
             "bidStatus": "Statut",
             "productSuggestionTitle": "Les personnes qui ont acheté ce produit ont également aimé...",
@@ -331,7 +342,7 @@
         },
         "profile": {
             "title": "Profil de l'acheteur - UNITE",
-            "terminationText": "Êtes-vous sûr de vouloir supprimer votre compte d'acheteur ?<br> Cela supprimera également vos demandes d'offres et les messages que vous avez envoyés dans UNITE</br>.<br><br> Si vous souhaitez simplement faire une pause, vous pouvez désactiver votre compte à la place.</br></br>",
+            "terminationText": "Êtes-vous sûr de vouloir supprimer votre compte d'acheteur ? Cela supprimera également vos demandes d'offres et les messages que vous avez envoyés dans UNITE</br>. Si vous souhaitez simplement faire une pause, vous pouvez désactiver votre compte à la place.</br></br>",
             "cardGreeting": "Bonjour!",
             "defaultGreeting": "Bonjour, {organizationName}!",
             "description": "Ceci est votre page de profil. Veuillez garder vos données exactes et vous aurez de la chance de trouver les fournisseurs dont vous avez besoin!"
@@ -357,8 +368,8 @@
         },
         "viewBid": {
             "title": "UNITE - Acheteur - Voir les détails de l'appel d'offres",
-            "bidExpirationNoticeNotExtended": "Cette demande d'offre est sur le point d'expirer. Sa date limite est de {0} $. <br> Veuillez téléverser une lettre d'extension d'enchère afin de gagner {1} $ de jours de validité supplémentaires.",
-            "bidExpirationNoticeExtended": "Cette demande d'offre est sur le point d'expirer. Sa date limite est fixée à ${0}.<br> Vous avez déjà prolongé la validité de l'offre initiale, la date ci-dessus est donc définitive.</br>",
+            "bidExpirationNoticeNotExtended": "Cette demande d'offre est sur le point d'expirer. Sa date limite est de {0} $.  Veuillez téléverser une lettre d'extension d'enchère afin de gagner {1} $ de jours de validité supplémentaires.",
+            "bidExpirationNoticeExtended": "Cette demande d'offre est sur le point d'expirer. Sa date limite est fixée à ${0}. Vous avez déjà prolongé la validité de l'offre initiale, la date ci-dessus est donc définitive.</br>",
             "pay": "Payer",
             "goToPayment": "Aller à Paiement",
             "paymentCancelled": "Paiement annulé !",
@@ -537,7 +548,7 @@
         "profile": {
             "title": "Profil du fournisseur - UNITE",
             "terminationText": "Êtes-vous sûr de vouloir supprimer votre compte fournisseur ? Cela supprimera également:\\n vos produits/services ; vos capacités ;\\n vos commandes reçues; \\nvos jetons d'utilisateur (le cas échéant) ; \\nl'historique de vos messages sur UNITE.\\n\\n Si vous souhaitez simplement faire une pause, vous pouvez désactiver votre compte à la place.",
-            "description": "Voici votre page Dashboard. Afin de vous assurer que vous continuez à apparaître dans les résultats de recherche des acheteurs, veuillez maintenir vos capacités et vos produits à jour."
+            "description": "Voici votre page Profil. Afin de vous assurer que vous continuez à apparaître dans les résultats de recherche des acheteurs, veuillez maintenir vos capacités et vos produits à jour."
         },
         "resend": {
             "title": "UNITE - Acheteur - Renvoyer le jeton de confirmation",

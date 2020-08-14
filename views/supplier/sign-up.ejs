@@ -167,8 +167,8 @@
           <input type="hidden" name="saveArea">
           <select class='autocomp'>
             <option id="" value=""></option>
-            <% for(area of areas) { %>
-            <option id="<%= area.id %>" value="<%= area.name %>"><%= area.name %></option>
+            <% for(i in areas) { %>
+            <option id="<%= areas[i].id %>" value="<%= eval(regionKeys[i]) %>"><%= eval(regionKeys[i]) %></option>
             <% } %>
           </select>
         </div>

@@ -145,7 +145,7 @@
       <h5 class="card-header">Welcome!</h5>
       <div class="card-body">
         <h5 class="card-title">Hello, <%= profile.companyName %>!</h5>
-        <p class="card-text">This is your profile page. In order to ensure that you continue to appear in the search results of buyers, please keep your capabilities and products up-to-date.</p>
+        <p class="card-text"><%= translation.supplierView.profile.description %></p>
       </div>
     </div>
     
@@ -215,8 +215,8 @@
           <input type="hidden" name="saveArea">
           <select class='autocomp'>
             <option id="" value=""></option>
-            <% for(area of areas) { %>
-            <option id="<%= area.id %>" value="<%= area.name %>"><%= area.name %></option>
+            <% for(i in areas) { %>
+            <option id="<%= areas[i].id %>" value="<%= eval(regionKeys[i]) %>"><%= eval(regionKeys[i]) %></option>
             <% } %>
           </select>
         </div>
@@ -447,7 +447,7 @@
          <!-- Uploading files field section-->
           <div class="form-group">
             <label class="text-muted form-text certificates">
-            <span class='file-zone'><strong>PROFILE IMAGE and CERTIFICATES</strong></span>
+            <span class='file-zone'><strong>PROFILE IMAGE AND CERTIFICATES</strong></span>
             <br>
             <span class='file-zone-required'>You must provide your profile image and at least one Certificate.</span>
             </label>

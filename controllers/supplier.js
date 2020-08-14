@@ -34,6 +34,14 @@ const supplierMenuTranslationKeys = [
   "translation.menu.logout"
 ];
 
+const regionTranslationKeys = [
+  "translation.region.europe",  
+  "translation.region.asiaPacific",
+  "translation.region.africa",
+  "translation.region.northAmerica",
+  "translation.region.southAmerica"
+]
+
 const {
   fileExists,
   sendConfirmationEmail,
@@ -458,6 +466,7 @@ exports.getSignUp = async (req, res) => {
       countriesKeys: countriesKeys,
       industriesKeys: industriesKeys,
       areas: areas,
+      regionKeys: regionTranslationKeys,
       captchaSiteKey: captchaSiteKey,
       successMessage: success,
       errorMessage: error
@@ -913,6 +922,7 @@ exports.getProfile = async (req, res) => {
     countriesKeys: countriesKeys,
     industriesKeys: industriesKeys,
     areas: areas,
+    regionKeys: regionTranslationKeys,
     keys: supplierMenuTranslationKeys,
     MAX_PROD: process.env.SUPP_MAX_PROD,
     DEFAULT_CURR: process.env.SUPP_DEFAULT_CURR,
