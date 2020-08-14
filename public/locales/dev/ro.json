@@ -548,7 +548,7 @@
         "profile": {
             "title": "Profilul furnizorului - UNITE",
             "terminationText": "Sigur doriți să ștergeți contul dvs. de furnizor? \\n Aceasta va elimina și: \\n > Produsele / serviciile dvs.; \\n Capabilitățile dvs. \\n Comenzile primite; \\n Jetoanele dvs. de utilizator (dacă există); \\n Istoricul mesajelor dvs. de la UNITE. \\n \\n Dacă doriți doar să faceți o pauză, puteți dezactiva contul în schimb.",
-            "description": "Acesta este Tabloul Dvs. de bord. Pentru a vă asigura că veți continua să apară în rezultatele căutării cumpărătorilor, vă rugăm să vă mențineți capacitățile și produsele actualizate."
+            "description": "Aceasta este Pagina Dvs. de Profil. Pentru a vă asigura că veți continua să apară în rezultatele căutării cumpărătorilor, vă rugăm să vă mențineți capacitățile și produsele actualizate."
         },
         "resend": {
             "title": "UNITE - Cumpărător - Retrimitere token de confirmare",

@@ -2103,7 +2103,9 @@ $(document).ready(function() {
   if(str != -1) {
     lang = loc.substring(str);
     loc = loc.substring(0, str);
-  }
+  } else {
+    lang = '';
+  } 
   
   if (nav.length && nav.next("div").hasClass("home")) {
     let $str =
@@ -2241,7 +2243,7 @@ $(document).ready(function() {
             });
           }
         });
-
+alert(9)
       let str =
         '<div class="collapse navbar-collapse" id="navbarSupportedContent">' +
         '<ul class="navbar-nav mr-auto">' +

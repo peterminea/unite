@@ -548,7 +548,7 @@
         "profile": {
             "title": "Lieferantenprofil - UNITE",
             "terminationText": "Sind Sie sicher, dass Sie Ihr Lieferantenkonto löschen möchten?\\n Dadurch werden auch entfernt:\\n>Ihre Produkte/Dienstleistungen;\\nIhre Fähigkeiten;\\Ihre erhaltenen Bestellungen;\\Ihre Benutzer-Token (falls vorhanden);\\Ihr Nachrichtenverlauf aus UNITE.\\n\\Wenn Sie nur eine Pause machen möchten, können Sie stattdessen Ihr Konto deaktivieren.",
-            "description": "Dies ist Ihre Dashboard-Seite. Um sicherzustellen, dass Sie weiterhin in den Suchergebnissen von Käufern erscheinen, halten Sie bitte Ihre Fähigkeiten und Produkte auf dem neuesten Stand."
+            "description": "Dies ist Ihre Profil-Seite. Um sicherzustellen, dass Sie weiterhin in den Suchergebnissen von Käufern erscheinen, halten Sie bitte Ihre Fähigkeiten und Produkte auf dem neuesten Stand."
         },
         "resend": {
             "title": "UNITE - Käufer - Bestätigungs-Token erneut senden",
