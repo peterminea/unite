@@ -41,7 +41,7 @@
     "stripe": "^8.84.0",
     "sweetalert": "^2.1.2",
     "underscore": "^1.10.2",
-    "validator": "^13.1.1"
+    "validator": "^13.7.0"
   },
   "engines": {
     "node": "12.x"
